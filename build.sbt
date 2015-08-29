@@ -1,6 +1,6 @@
 scalariformSettings
 
-name := "pureconf"
+name := "pureconfig"
 
 version := "0.1"
 
