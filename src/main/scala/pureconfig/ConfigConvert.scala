@@ -153,7 +153,7 @@ object ConfigConvert {
   }
 
   // used for products
-  implicit def deriveInstanceWithLabelledGeneric[F, Repr](
+  implicit def deriveInstanceWithLabelledGeneric[F, Repr <: HList](
     implicit gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
@@ -167,7 +167,7 @@ object ConfigConvert {
   }
 
   // used for coproducts
-  implicit def deriveInstanceWithGeneric[F, Repr](implicit gen: Generic.Aux[F, Repr], cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
+  implicit def deriveInstanceWithGeneric[F, Repr <: Coproduct](implicit gen: Generic.Aux[F, Repr], cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
     override def from(config: RawConfig, namespace: String): Try[F] = {
       cc.value.from(config, namespace).map(gen.from)
     }
