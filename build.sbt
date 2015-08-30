@@ -12,7 +12,9 @@ licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozill
 
 scalaVersion := "2.11.7"
 
-scalacOptions ++= Seq("-target:jvm-1.8", "-feature")
+crossScalaVersions := Seq("2.10.5", "2.11.7")
+
+scalacOptions ++= Seq("-feature")
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
@@ -21,6 +23,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % "2.2.5",
+  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full),
   "com.typesafe" % "config" % "1.3.0",
 
   "org.scalatest" %% "scalatest" % "2.2.4" % "test",
