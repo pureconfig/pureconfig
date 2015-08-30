@@ -35,22 +35,24 @@ use scala `2.10` or `2.11`:
 scalaVersion := "2.11.7" // or "2.10.5"
 ```
 
-Add sonatype repositories:
-
-```
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("releases"),
-  Resolver.sonatypeRepo("snapshots")
-)
-```
-
-Add the library
+Add the library. For scala `2.11`
 
 ```scala
 libraryDependencies ++= Seq(
   "com.github.melrief" %% "pureconfig" % "0.1.1"
 )
 ```
+
+For scala `2.10` you need also the scala macro paradise plugin:
+
+```scala
+libraryDependencies ++= Seq(
+  "com.github.melrief" %% "pureconfig" % "0.1.1",
+compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+)
+```
+
+
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/melrief/pureconfig/blob/master/example/build.sbt)
 used for the example.
