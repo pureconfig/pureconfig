@@ -29,10 +29,10 @@ uses the raw configurations to do its magic.
 
 In the sbt configuration file:
 
-use scala `> 2.11`:
+use scala `2.10` or `2.11`:
 
 ```scala
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.7" // or "2.10.5"
 ```
 
 Add sonatype repositories:
