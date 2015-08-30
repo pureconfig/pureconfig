@@ -3,7 +3,7 @@ A boilerplate-free Scala library for loading configuration files
 
 
 ## Why
-Loading configurations has alway been a tedious and error-prone procedure. A common way to do it
+Loading configurations has always been a tedious and error-prone procedure. A common way to do it
 consists in writing code to deserialize each fields of the configuration. The more fields there are,
 the more code must be written (and tested and maintained...) and this must be replicated for each project.
 
