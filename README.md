@@ -1,6 +1,7 @@
 # PureConfig
 A boilerplate-free Scala library for loading configuration files
 
+[![Build Status](https://travis-ci.org/melrief/pureconfig.svg?branch=master)](https://travis-ci.org/melrief/pureconfig)
 
 ## Why
 Loading configurations has always been a tedious and error-prone procedure. A common way to do it
