@@ -58,6 +58,20 @@ class PureconfSuite extends FlatSpec with Matchers {
     }
   }
 
+  // the same configuration but with custom namespace
+  case class Config2(config: Config)
+
+  it should s"be able to save ${classOf[Config2]} and load ${classOf[Config]} when namespace is set to config" in {
+    withTempFile { configFile =>
+      val expectedConfig = Config(new DateTime(1), List(1, 2, 3), Set(4, 5, 6), FlatConfig(false, 1d, 2f, 3, 4l, "5", Option("6")), Coproduct[ConfigCoproduct](false))
+      val configToSave = Config2(expectedConfig)
+      saveConfigAsPropertyFile(configToSave, configFile, overrideOutputPath = true)
+      val config = loadConfig[Config](configFile, "config")
+
+      config should be(Success(expectedConfig))
+    }
+  }
+
   // a realistic example of configuration: common available Spark properties
   case class DriverConf(cores: Int, maxResultSize: String, memory: String)
   case class ExecutorConf(memory: String, extraJavaOptions: String)

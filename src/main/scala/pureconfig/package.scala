@@ -27,6 +27,19 @@ package object pureconfig {
   }
 
   /**
+   * Load a configuration of type [[Config]] from the standard configuration files
+   *
+   * @param namespace the base namespace from which the configuration should be load
+   * @return A [[Success]] with the configuration if it is possible to create an instance of type
+   *         [[Config]] from the configuration files, else a [[Failure]] with details on why it
+   *         isn't possible
+   */
+  def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load())
+    loadConfig[Config](rawConfig, namespace)(conv)
+  }
+
+  /**
    * Load a configuration of type [[Config]] from the given file. Note that standard configuration
    * files are still loaded but can be overridden from the given configuration file
    *
@@ -36,12 +49,31 @@ package object pureconfig {
    */
   def loadConfig[Config](path: Path)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))
-    loadConfig[Config](rawConfig)(conv)
+    loadConfig[Config](rawConfig, "")(conv)
+  }
+
+  /**
+   * Load a configuration of type [[Config]] from the given file. Note that standard configuration
+   * files are still loaded but can be overridden from the given configuration file
+   *
+   * @param namespace the base namespace from which the configuration should be load
+   * @return A [[Success]] with the configuration if it is possible to create an instance of type
+   *         [[Config]] from the configuration files, else a [[Failure]] with details on why it
+   *         isn't possible
+   */
+  def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))
+    loadConfig[Config](rawConfig, namespace)(conv)
   }
 
   /** Load a configuration of type [[Config]] from the given [[RawConfig]] */
   def loadConfig[Config](conf: RawConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    conv.from(conf, "") match {
+    loadConfig[Config](conf, "")
+  }
+
+  /** Load a configuration of type [[Config]] from the given [[RawConfig]] */
+  def loadConfig[Config](conf: RawConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    conv.from(conf, namespace) match {
       case Failure(f) =>
         println(s"Error loading configuration conf:\n  conf: $conf\n  error: $f")
         Failure(f)
