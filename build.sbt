@@ -61,3 +61,7 @@ pomExtra := (
         <url>https://github.com/melrief</url>
       </developer>
     </developers>)
+
+osgiSettings
+
+OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.conf", "pureconfig.conf.namespace")
