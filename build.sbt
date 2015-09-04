@@ -65,3 +65,7 @@ pomExtra := (
 osgiSettings
 
 OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.conf", "pureconfig.conf.namespace")
+
+OsgiKeys.privatePackage := Seq()
+
+OsgiKeys.importPackage := Seq(s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""", "*")
