@@ -113,4 +113,41 @@ class PureconfSuite extends FlatSpec with Matchers {
       config.spark.local.dir should be("/tmp/")
     }
   }
+
+  case class MapConf(conf: Map[String, Int])
+
+  it should s"be able to save and load Map like fields" in {
+    withTempFile { configFile =>
+      val expected = MapConf(Map("a" -> 1, "b" -> 2, "c" -> 3))
+      saveConfigAsPropertyFile(expected, configFile, overrideOutputPath = true)
+      val result = loadConfig[MapConf](configFile)
+
+      result shouldEqual (Success(expected))
+    }
+  }
+
+  it should s"not be able to load invalid Maps" in {
+    // invalid value
+    withTempFile { configFile =>
+      val writer = new PrintWriter(Files.newOutputStream(configFile))
+      writer.println("conf.a=foo")
+      writer.close()
+
+      val result = loadConfig[MapConf](configFile)
+
+      result.isFailure shouldEqual true
+    }
+
+    // invalid key because it contains the namespace separator
+    withTempFile { configFile =>
+      val writer = new PrintWriter(Files.newOutputStream(configFile))
+      writer.println("conf.a.b=1")
+      writer.close()
+
+      val result = loadConfig[MapConf](configFile)
+
+      result.isFailure shouldEqual true
+    }
+  }
+
 }

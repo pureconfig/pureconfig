@@ -152,6 +152,52 @@ object ConfigConvert {
       Map(namespace -> t.mkString(","))
   }
 
+  /**
+   * Extract the key from a fullKey, i.e. a namespace followed by a key. This function
+   * returns an error if the key contains the [[namespaceSep]], else the key found.
+   *
+   * {{{
+   *   scala> getMapKeyFrom("foo.bar", "foo")
+   *   res0: Try[String] = Success("bar")
+   *   scala> getMapKeyFrom("foo.bar.a", "foo")
+   *   res1: Try[String] = Failure(..)
+   * }}}
+   *
+   * @param fullKey The namespace plus key from which we want to extract the key
+   * @param namespace The namespace
+   * @return A [[Success]] with the key if it is possible to extract it, else a [[Failure]] with
+   *         the error
+   */
+  private[this] def getMapKeyFrom(fullKey: String, namespace: String): Try[String] = {
+    val key = fullKey.substring(namespace.length + namespaceSep.length)
+    if (key contains namespaceSep) {
+      Failure(new RuntimeException(s"Invalid Map key found '$key'. Maps keys cannot contain the namespace separator '$namespaceSep'"))
+    } else {
+      Success(key)
+    }
+  }
+
+  implicit def deriveMap[T](implicit stringConvert: Lazy[StringConvert[T]]) = new ConfigConvert[Map[String, T]] {
+
+    override def from(config: RawConfig, namespace: String): Try[Map[String, T]] = {
+      val keysFound = config.keySet.filter(_ startsWith namespace)
+
+      keysFound.foldLeft(Try(Map.empty[String, T])) {
+        case (f @ Failure(_), _) => f
+        case (Success(acc), fullKey) =>
+          for {
+            key <- getMapKeyFrom(fullKey, namespace)
+            rawValue <- Try(config(fullKey))
+            value <- stringConvert.value.from(rawValue)
+          } yield acc + (key -> value)
+      }
+    }
+
+    override def to(keyVals: Map[String, T], namespace: String): RawConfig = {
+      keyVals.map { case (key, value) => makeNamespace(namespace, key) -> stringConvert.value.to(value) }
+    }
+  }
+
   // used for products
   implicit def deriveInstanceWithLabelledGeneric[F, Repr <: HList](
     implicit gen: LabelledGeneric.Aux[F, Repr],

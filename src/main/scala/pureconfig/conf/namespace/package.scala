@@ -8,6 +8,8 @@ package pureconfig.conf
 
 package object namespace {
 
+  val namespaceSep = "."
+
   /**
    * Create a new namepace from the parent namespace and a key
    *
@@ -20,6 +22,6 @@ package object namespace {
    */
   def makeNamespace(namespace: String, key: String): String = namespace match {
     case "" => key
-    case _ => namespace + "." + key
+    case _ => namespace + namespaceSep + key
   }
 }
