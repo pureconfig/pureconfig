@@ -17,16 +17,20 @@ import org.scalatest._
 /**
  * @author Mario Pastorelli
  */
-class PureconfSuite extends FlatSpec with Matchers {
-
-  // a simple "flat" configuration
-  case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
-
+object PureconfSuite {
   def withTempFile(f: Path => Unit): Unit = {
     val configFile = Files.createTempFile("pureconftest", ".property")
     f(configFile)
     Files.delete(configFile)
   }
+}
+
+import PureconfSuite._
+
+class PureconfSuite extends FlatSpec with Matchers {
+
+  // a simple "flat" configuration
+  case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
 
   "pureconfig" should s"be able to save and load ${classOf[FlatConfig]}" in {
     withTempFile { configFile =>
@@ -93,6 +97,8 @@ class PureconfSuite extends FlatSpec with Matchers {
       writer.println("""spark.master="local[*]"""")
       writer.println("""spark.executor.memory="2g"""")
       writer.println("""spark.local.dir="/tmp/"""")
+      // unused configuration
+      writer.println("""akka.loggers = ["akka.event.Logging$DefaultLogger"]""")
       writer.close()
 
       val configOrError = loadConfig[SparkRootConf](configFile)

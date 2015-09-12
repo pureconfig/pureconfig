@@ -6,7 +6,7 @@
  */
 package pureconfig
 
-import com.typesafe.config.{ Config => TypesafeConfig }
+import com.typesafe.config.{ Config => TypesafeConfig, ConfigList }
 import scala.collection.JavaConversions._
 
 package object conf {
@@ -29,7 +29,11 @@ package object conf {
   def typesafeConfigToConfig(conf: TypesafeConfig): RawConfig = {
     conf.entrySet().map { entry =>
       val key = entry.getKey
-      key -> conf.getString(key)
+      val value = entry.getValue match {
+        case list: ConfigList => list.unwrapped().mkString(", ")
+        case _ => conf.getString(key)
+      }
+      key -> value
     }.toMap
   }
 }
