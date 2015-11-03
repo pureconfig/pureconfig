@@ -122,11 +122,6 @@ object ConfigConvert {
     override def to(t: Some[T], namespace: String): RawConfig = fieldConvert.value.to(t.get, namespace)
   }
 
-  implicit val deriveNil = new ConfigConvert[Nil.type] {
-    override def from(config: RawConfig, namespace: String): Try[Nil.type] = Success(Nil)
-    override def to(t: Nil.type, namespace: String): RawConfig = Map(namespace -> "")
-  }
-
   implicit def deriveTraversable[T, F[_] <: TraversableOnce[_]](implicit stringConvert: Lazy[StringConvert[T]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
     override def from(config: RawConfig, namespace: String): Try[F[T]] = {
