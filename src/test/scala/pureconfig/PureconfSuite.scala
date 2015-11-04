@@ -10,6 +10,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import shapeless.{ Coproduct, :+:, CNil }
 
+import scala.collection.immutable._
 import scala.util.{ Failure, Try, Success }
 
 import org.scalatest._
@@ -28,6 +29,14 @@ object PureconfSuite {
 import PureconfSuite._
 
 class PureconfSuite extends FlatSpec with Matchers {
+
+  // checks if saving and loading a configuration from file returns the configuration itself
+  def saveAndLoadIsIdentity[Config](config: Config)(implicit configConvert: ConfigConvert[Config]): Unit = {
+    withTempFile { configFile =>
+      saveConfigAsPropertyFile(config, configFile, overrideOutputPath = true)
+      loadConfig[Config](configFile) shouldEqual Success(config)
+    }
+  }
 
   // a simple "flat" configuration
   case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
@@ -154,6 +163,65 @@ class PureconfSuite extends FlatSpec with Matchers {
 
       result.isFailure shouldEqual true
     }
+  }
+
+  // traversable of complex types
+
+  case class ConfWithListOfPair(list: List[(String, Int)])
+
+  it should s"be able to save and load configurations containing immutable.List" in {
+    saveAndLoadIsIdentity(ConfWithListOfPair(List("foo" -> 1, "bar" -> 2)))
+  }
+
+
+  case class Foo(i: Int)
+  case class ConfWithStreamOfFoo(stream: Stream[Foo])
+
+  it should s"be able to save and load configurations containing immutable.Stream" in {
+    saveAndLoadIsIdentity(ConfWithStreamOfFoo(Stream(Foo(1), Foo(2))))
+  }
+
+
+  case class Bar(foo: Foo)
+  case class ConfWithSetOfBar(set: Set[Bar])
+
+  it should s"be able to save and load configurations containing immutable.Set" in {
+    saveAndLoadIsIdentity(ConfWithSetOfBar(Set(Bar(Foo(1)), Bar(Foo(2)))))
+  }
+
+
+  case class ConfWithQueueOfFoo(queue: Queue[Foo])
+
+  it should s"be able to save and load configurations containing immutable.Queue" in {
+    saveAndLoadIsIdentity(ConfWithQueueOfFoo(Queue(Foo(1), Foo(2))))
+  }
+
+
+  case class ConfWithStackOfFoo(stack: Stack[Foo])
+
+  it should s"be able to save and load configurations containing immutable.Stack" in {
+    saveAndLoadIsIdentity(ConfWithStackOfFoo(Stack(Foo(1))))
+  }
+
+
+  case class ConfWithHashSetOfFoo(hashSet: HashSet[Foo])
+
+  it should s"be able to save and load configurations containing immutable.HashSet" in {
+    saveAndLoadIsIdentity(ConfWithHashSetOfFoo(HashSet(Foo(1))))
+  }
+
+
+  case class ConfWithListSetOfFoo(listSet: ListSet[Foo])
+
+  it should s"be able to save and load configurations containing immutable.ListSet" in {
+    saveAndLoadIsIdentity(ConfWithListSetOfFoo(ListSet(Foo(2))))
+  }
+
+
+  case class ConfWithVectorOfFoo(vector: Vector[Foo])
+
+  it should s"be able to save and load configurations containing immutable.Vector" in {
+    saveAndLoadIsIdentity(ConfWithVectorOfFoo(Vector(Foo(1))))
   }
 
 }

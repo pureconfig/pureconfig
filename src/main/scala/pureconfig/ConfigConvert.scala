@@ -7,14 +7,13 @@
 package pureconfig
 
 import pureconfig.conf._
-import shapeless.labelled._
+import pureconfig.conf.namespace._
 import shapeless._
+import shapeless.labelled._
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.util.{ Failure, Success, Try }
-
-import conf.namespace._
 
 /**
  * Trait for conversion between [[T]] and [[RawConfig]] where [[T]] is a "complex" type. For "simple"
@@ -122,7 +121,8 @@ object ConfigConvert {
     override def to(t: Some[T], namespace: String): RawConfig = fieldConvert.value.to(t.get, namespace)
   }
 
-  implicit def deriveTraversable[T, F[_] <: TraversableOnce[_]](implicit stringConvert: Lazy[StringConvert[T]],
+  // traversable of simple types, that are types with an instance of StringConvert
+  implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](implicit stringConvert: Lazy[StringConvert[T]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
     override def from(config: RawConfig, namespace: String): Try[F[T]] = {
       val value = config(namespace)
@@ -131,7 +131,7 @@ object ConfigConvert {
         // "".split(",") returns Array("") but we want Array()
         Success(cbf().result())
       } else {
-        val tryBuilder = config(namespace).split(",").foldLeft(Try(cbf())) {
+        val tryBuilder = value.split(",").foldLeft(Try(cbf())) {
           case (tryResult, rawValue) =>
             for {
               result <- tryResult
@@ -143,8 +143,41 @@ object ConfigConvert {
       }
     }
 
-    override def to(t: F[T], namespace: String): RawConfig =
-      Map(namespace -> t.mkString(","))
+    override def to(ts: F[T], namespace: String): RawConfig =
+      Map(namespace -> ts.map(stringConvert.value.to).mkString(","))
+  }
+
+  // traversable of complex types, that are types with an instance of ConfigConvert
+  implicit def deriveTraversableOfObjects[T, F[T] <: TraversableOnce[T]](implicit configConvert: Lazy[ConfigConvert[T]],
+    cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
+
+    override def from(config: RawConfig, namespace: String): Try[F[T]] = {
+      val fullKeysFound = config.keys.filter(_ startsWith namespace).toList
+      val keysFound = fullKeysFound.map { key =>
+        val parentNamespaceLength = namespace.length + namespaceSep.length
+        key.substring(0, key.indexOfSlice(namespaceSep, parentNamespaceLength))
+      }.sorted.distinct
+
+      if (keysFound.isEmpty) {
+        Success(cbf().result())
+      } else {
+        val tryBuilder = keysFound.foldLeft(Try(cbf())) {
+          case (tryResult, key) =>
+            for {
+              result <- tryResult
+              value <- configConvert.value.from(config, key)
+            } yield result += value
+        }
+
+        tryBuilder.map(_.result())
+      }
+    }
+
+    override def to(ts: F[T], namespace: String): RawConfig = {
+      val tsWithIndexes = ts.toList.zipWithIndex // give an index/id to each element of the traversable
+      val tsConverted = tsWithIndexes.map { case (t, i) => configConvert.value.to(t, makeNamespace(namespace, i.toString)) }
+      tsConverted.foldLeft(Map.empty[String, String])(_ ++ _)
+    }
   }
 
   /**
