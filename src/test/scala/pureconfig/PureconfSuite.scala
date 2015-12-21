@@ -51,6 +51,22 @@ class PureconfSuite extends FlatSpec with Matchers {
     }
   }
 
+  // load HOCON-style lists
+  case class ConfigWithHoconList(xs: List[Int])
+
+  it should s"be able to load ${classOf[ConfigWithHoconList]}" in {
+    withTempFile { configFile =>
+
+      val writer = new PrintWriter(Files.newOutputStream(configFile))
+      writer.write("xs: [1, 2, 3]")
+      writer.close()
+
+      val config = loadConfig[ConfigWithHoconList](configFile)
+
+      config should be(Success(ConfigWithHoconList(xs = List(1, 2, 3))))
+    }
+  }
+
   // a slightly more complex configuration
   implicit val dateStringConvert = new StringConvert[DateTime] {
 
@@ -173,14 +189,12 @@ class PureconfSuite extends FlatSpec with Matchers {
     saveAndLoadIsIdentity(ConfWithListOfPair(List("foo" -> 1, "bar" -> 2)))
   }
 
-
   case class Foo(i: Int)
   case class ConfWithStreamOfFoo(stream: Stream[Foo])
 
   it should s"be able to save and load configurations containing immutable.Stream" in {
     saveAndLoadIsIdentity(ConfWithStreamOfFoo(Stream(Foo(1), Foo(2))))
   }
-
 
   case class Bar(foo: Foo)
   case class ConfWithSetOfBar(set: Set[Bar])
@@ -189,13 +203,11 @@ class PureconfSuite extends FlatSpec with Matchers {
     saveAndLoadIsIdentity(ConfWithSetOfBar(Set(Bar(Foo(1)), Bar(Foo(2)))))
   }
 
-
   case class ConfWithQueueOfFoo(queue: Queue[Foo])
 
   it should s"be able to save and load configurations containing immutable.Queue" in {
     saveAndLoadIsIdentity(ConfWithQueueOfFoo(Queue(Foo(1), Foo(2))))
   }
-
 
   case class ConfWithStackOfFoo(stack: Stack[Foo])
 
@@ -203,20 +215,17 @@ class PureconfSuite extends FlatSpec with Matchers {
     saveAndLoadIsIdentity(ConfWithStackOfFoo(Stack(Foo(1))))
   }
 
-
   case class ConfWithHashSetOfFoo(hashSet: HashSet[Foo])
 
   it should s"be able to save and load configurations containing immutable.HashSet" in {
     saveAndLoadIsIdentity(ConfWithHashSetOfFoo(HashSet(Foo(1))))
   }
 
-
   case class ConfWithListSetOfFoo(listSet: ListSet[Foo])
 
   it should s"be able to save and load configurations containing immutable.ListSet" in {
     saveAndLoadIsIdentity(ConfWithListSetOfFoo(ListSet(Foo(2))))
   }
-
 
   case class ConfWithVectorOfFoo(vector: Vector[Foo])
 

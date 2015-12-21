@@ -34,7 +34,7 @@ class RawConfigSuite extends FlatSpec with Matchers {
 
       typesafeConfigToConfig(config) shouldEqual Map(
         "number" -> "1",
-        "list" -> "1, 2, 3",
+        "list" -> "1,2,3",
         "string" -> "'foobar'",
         "boolean" -> "true",
         "object.a" -> "43"

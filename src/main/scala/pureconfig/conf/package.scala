@@ -30,7 +30,7 @@ package object conf {
     conf.entrySet().map { entry =>
       val key = entry.getKey
       val value = entry.getValue match {
-        case list: ConfigList => list.unwrapped().mkString(", ")
+        case list: ConfigList => list.unwrapped().mkString(",")
         case _ => conf.getString(key)
       }
       key -> value
