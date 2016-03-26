@@ -4,15 +4,15 @@ name := "pureconfig"
 
 organization := "com.github.melrief"
 
-version := "0.1.5"
+version := "0.1.6"
 
 homepage := Some(url("https://github.com/melrief/pureconfig"))
 
 licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/"))
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.10.5", "2.11.7")
+crossScalaVersions := Seq("2.10.5", "2.11.8")
 
 scalacOptions ++= Seq("-feature")
 
@@ -22,13 +22,13 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.chuusai" %% "shapeless" % "2.2.5",
-  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full),
+  "com.chuusai" %% "shapeless" % "2.3.0",
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   "com.typesafe" % "config" % "1.3.0",
 
-  "org.scalatest" %% "scalatest" % "2.2.4" % "test",
-  "joda-time" % "joda-time" % "2.8.2" % "test",
-  "org.joda" % "joda-convert" % "1.7" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.0-M15" % "test",
+  "joda-time" % "joda-time" % "2.9.2" % "test",
+  "org.joda" % "joda-convert" % "1.8" % "test"
   )
 
 initialize := {

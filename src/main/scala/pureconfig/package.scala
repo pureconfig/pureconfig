@@ -73,12 +73,7 @@ package object pureconfig {
 
   /** Load a configuration of type [[Config]] from the given [[RawConfig]] */
   def loadConfig[Config](conf: RawConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    conv.from(conf, namespace) match {
-      case Failure(f) =>
-        println(s"Error loading configuration conf:\n  conf: $conf\n  error: $f")
-        Failure(f)
-      case Success(config) => Success(config)
-    }
+    conv.from(conf, namespace)
   }
 
   /**

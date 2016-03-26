@@ -39,7 +39,7 @@ Add the library. For scala `2.11`
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.1.5"
+  "com.github.melrief" %% "pureconfig" % "0.1.6"
 )
 ```
 
@@ -47,7 +47,7 @@ For scala `2.10` you need also the scala macro paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.1.5",
+  "com.github.melrief" %% "pureconfig" % "0.1.6",
 compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
 )
 ```
