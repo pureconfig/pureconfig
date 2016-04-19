@@ -79,12 +79,26 @@ dirwatch.email.sender="sender"
 To load it, we define some classes that have proper fields and names
 
 ```scala
+import java.nio.file.Path
+
 case class Config(dirwatch: DirWatchConfig)
 case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
 case class EmailConfig(host: String, port: Int, message: String, recipients: Set[String], sender: String)
 ```
 
-And then we just load the configuration
+The use of `Path` gives us a chance to use a custom converter
+
+```scala
+import java.nio.file.Paths
+import scala.util.Try
+
+implicit val deriveStringConvertForPath = new StringConvert[Path] {
+  override def from(str: String): Try[Path] = Try(Paths.get(str))
+  override def to(path: Path): String = path.toString
+}
+```
+
+And then we load the configuration
 
 ```scala
 val config = loadConfig[Config].get // loadConfig returns a Try
