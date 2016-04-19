@@ -89,6 +89,8 @@ case class EmailConfig(host: String, port: Int, message: String, recipients: Set
 The use of `Path` gives us a chance to use a custom converter
 
 ```scala
+import pureconfig._
+
 import java.nio.file.Paths
 import scala.util.Try
 
