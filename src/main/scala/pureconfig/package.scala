@@ -22,6 +22,7 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
     val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load())
     loadConfig[Config](rawConfig)(conv)
   }
@@ -35,6 +36,7 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
     val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load())
     loadConfig[Config](rawConfig, namespace)(conv)
   }
@@ -48,6 +50,7 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](path: Path)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
     val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))
     loadConfig[Config](rawConfig, "")(conv)
   }
@@ -62,6 +65,7 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
     val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))
     loadConfig[Config](rawConfig, namespace)(conv)
   }
