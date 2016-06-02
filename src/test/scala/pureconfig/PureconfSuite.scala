@@ -28,7 +28,7 @@ object PureconfSuite {
 
 import PureconfSuite._
 
-class PureconfSuite extends FlatSpec with Matchers {
+class PureconfSuite extends FlatSpec with Matchers with OptionValues {
 
   // checks if saving and loading a configuration from file returns the configuration itself
   def saveAndLoadIsIdentity[Config](config: Config)(implicit configConvert: ConfigConvert[Config]): Unit = {
@@ -231,6 +231,31 @@ class PureconfSuite extends FlatSpec with Matchers {
 
   it should s"be able to save and load configurations containing immutable.Vector" in {
     saveAndLoadIsIdentity(ConfWithVectorOfFoo(Vector(Foo(1))))
+  }
+
+  case class ConfWithFoo(foo: Foo)
+
+  it should "be able to use a local StringConvert without getting an ImplicitResolutionFailure error" in {
+    implicit val custom: StringConvert[Foo] = StringConvert.fromUnsafe(s => Foo(s.toInt), _.i.toString)
+    saveAndLoadIsIdentity(ConfWithFoo(Foo(100)))
+  }
+
+  case class ConfWithInt(i: Int)
+
+  it should "be able to use a local StringConvert instead of the ones in StringConvert companion object" in {
+    implicit val readInt = StringConvert.fromUnsafe[Int](_.toInt.abs, _.toString)
+    loadConfig(Map("i" -> "-100"))(ConfigConvert[ConfWithInt]).toOption.value shouldBe ConfWithInt(100)
+  }
+
+  it should "custom ConfigConvert should not cause implicit resolution failure and should be used." in {
+    import conf.RawConfig
+    implicit val custom: ConfigConvert[Foo] = new ConfigConvert[Foo] {
+      def from(config: RawConfig, namespace: String): Try[Foo] = {
+        Try(Foo(config.get(namespace + ".i").get.toInt + 1))
+      }
+      def to(foo: Foo, namespace: String): RawConfig = Map(namespace -> foo.i.toString)
+    }
+    loadConfig(Map("foo.i" -> "-100"))(ConfigConvert[ConfWithFoo]).toOption.value shouldBe ConfWithFoo(Foo(-99))
   }
 
 }
