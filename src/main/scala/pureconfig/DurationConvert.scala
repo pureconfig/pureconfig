@@ -14,9 +14,9 @@ private[pureconfig] object DurationConvert {
    * Typesafe Config has a really nice duration parsing algorithm; unfortunately it's private.
    * We jump through hoops to reuse that for compatibility.
    */
-  def from(stringyDuration: String): Try[Duration] = Try {
+  def from(durationString: String): Try[Duration] = Try {
     val phonyKey = "k"
-    val phonyConfigString = s"$phonyKey: $stringyDuration"
+    val phonyConfigString = s"$phonyKey: $durationString"
     val javaDuration = ConfigFactory.parseString(phonyConfigString).getDuration(phonyKey)
     Duration.fromNanos(javaDuration.toNanos)
   }

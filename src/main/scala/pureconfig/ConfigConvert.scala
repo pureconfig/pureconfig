@@ -259,9 +259,9 @@ trait LowPriorityConfigConvertImplicits {
   import scala.concurrent.duration.Duration
   implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
     override def from(config: RawConfig, namespace: String): Try[Duration] = {
-      config.get(namespace).fold[Try[Duration]](Failure(new Exception(s"Couldn't read config key $namespace."))) { stringyDuration =>
-        DurationConvert.from(stringyDuration).recoverWith {
-          case ex => Failure(new Exception(s"Could not parse a duration from '$stringyDuration' for key $namespace. (try ns, us, ms, s, m, h, d)"))
+      config.get(namespace).fold[Try[Duration]](Failure(new Exception(s"Couldn't read config key $namespace."))) { durationString =>
+        DurationConvert.from(durationString).recoverWith {
+          case ex => Failure(new Exception(s"Could not parse a duration from '$durationString' for key $namespace. (try ns, us, ms, s, m, h, d)"))
         }
       }
     }
