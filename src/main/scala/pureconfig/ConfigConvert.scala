@@ -44,7 +44,7 @@ trait ConfigConvert[T] {
   def to(t: T, namespace: String): RawConfig
 }
 
-object ConfigConvert {
+object ConfigConvert extends LowPriorityConfigConvertImplicits {
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
 
   implicit def hNilConfigConvert = new ConfigConvert[HNil] {
@@ -250,5 +250,23 @@ object ConfigConvert {
       cc.value.to(gen.to(t), namespace)
     }
   }
+}
 
+/**
+ * A ConfigConvert for Duration defined in a trait to give it lower priority.
+ */
+trait LowPriorityConfigConvertImplicits {
+  import scala.concurrent.duration.Duration
+  implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
+    override def from(config: RawConfig, namespace: String): Try[Duration] = {
+      config.get(namespace).fold[Try[Duration]](Failure(new Exception(s"Couldn't read config key $namespace."))) { durationString =>
+        DurationConvert.from(durationString).recoverWith {
+          case ex => Failure(new Exception(s"Could not parse a duration from '$durationString' for key $namespace. (try ns, us, ms, s, m, h, d)"))
+        }
+      }
+    }
+    override def to(t: Duration, namespace: String): RawConfig = {
+      Map(namespace -> DurationConvert.from(t))
+    }
+  }
 }

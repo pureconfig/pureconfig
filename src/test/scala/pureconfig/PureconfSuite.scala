@@ -5,6 +5,7 @@ package pureconfig
 
 import java.io.PrintWriter
 import java.nio.file.{ Path, Files }
+import java.util.concurrent.TimeUnit
 
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -14,6 +15,9 @@ import scala.collection.immutable._
 import scala.util.{ Failure, Try, Success }
 
 import org.scalatest._
+import pureconfig.conf.RawConfig
+
+import scala.concurrent.duration.Duration
 
 /**
  * @author Mario Pastorelli
@@ -106,7 +110,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
   case class ExecutorConf(memory: String, extraJavaOptions: String)
   case class SparkAppConf(name: String)
   case class SparkLocalConf(dir: String)
-  case class SparkConf(master: String, app: SparkAppConf, local: SparkLocalConf, driver: DriverConf, executor: ExecutorConf, extraListeners: Seq[String])
+  case class SparkNetwork(timeout: Duration)
+  case class SparkConf(master: String, app: SparkAppConf, local: SparkLocalConf, driver: DriverConf, executor: ExecutorConf, extraListeners: Seq[String], network: SparkNetwork)
   case class SparkRootConf(spark: SparkConf)
 
   it should s"be able to save and load ${classOf[SparkRootConf]}" in {
@@ -122,6 +127,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
       writer.println("""spark.master="local[*]"""")
       writer.println("""spark.executor.memory="2g"""")
       writer.println("""spark.local.dir="/tmp/"""")
+      writer.println("""spark.network.timeout="45s"""")
       // unused configuration
       writer.println("""akka.loggers = ["akka.event.Logging$DefaultLogger"]""")
       writer.close()
@@ -142,6 +148,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
       config.spark.master should be("local[*]")
       config.spark.executor.memory should be("2g")
       config.spark.local.dir should be("/tmp/")
+      config.spark.network.timeout should be(Duration(45, TimeUnit.SECONDS))
     }
   }
 
@@ -245,6 +252,23 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
   it should "be able to use a local StringConvert instead of the ones in StringConvert companion object" in {
     implicit val readInt = StringConvert.fromUnsafe[Int](_.toInt.abs, _.toString)
     loadConfig(Map("i" -> "-100"))(ConfigConvert[ConfWithInt]).toOption.value shouldBe ConfWithInt(100)
+  }
+
+  case class ConfWithDuration(i: Duration)
+
+  it should "be able to supersede the default Duration ConfigConvert with a locally defined StringConvert" in {
+    val expected = Duration(110, TimeUnit.DAYS)
+    implicit val readDurationBadly = StringConvert.fromUnsafe[Duration](_ => expected, _ => throw new Exception("Not Implemented"))
+    loadConfig(Map("i" -> "23 s"))(ConfigConvert[ConfWithDuration]).toOption.value shouldBe ConfWithDuration(expected)
+  }
+
+  it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
+    val expected = Duration(220, TimeUnit.DAYS)
+    implicit val readDurationBadly = new ConfigConvert[Duration] {
+      override def from(config: RawConfig, namespace: String): Try[Duration] = Success(expected)
+      override def to(t: Duration, namespace: String): RawConfig = throw new Exception("Not Implemented")
+    }
+    loadConfig(Map("i" -> "42 h"))(ConfigConvert[ConfWithDuration]).toOption.value shouldBe ConfWithDuration(expected)
   }
 
   it should "custom ConfigConvert should not cause implicit resolution failure and should be used." in {
