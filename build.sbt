@@ -77,15 +77,17 @@ val allVersionCompilerLintSwitches = Seq(
   "-unchecked",
   "-Xfatal-warnings",
   "-Xlint",
-  "-Yno-adapted-args"
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code"
 )
 
 val newerCompilerLintSwitches = Seq(
+  "-Ywarn-unused-import", // Not available in 2.10
   "-Ywarn-numeric-widen" // In 2.10 this produces a some strange spurious error
 )
 
 scalacOptions ++= allVersionCompilerLintSwitches
 
-scalacOptions ++= scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)){
+scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)){
     case Some((2, scalaMajor)) if scalaMajor >= 11 => newerCompilerLintSwitches
 }.toList.flatten

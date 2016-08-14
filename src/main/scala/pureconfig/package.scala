@@ -10,7 +10,7 @@ import java.nio.file.{ Files, Path }
 import com.typesafe.config.ConfigFactory
 import pureconfig.conf.RawConfig
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.Try
 
 package object pureconfig {
 
