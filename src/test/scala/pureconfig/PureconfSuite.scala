@@ -32,13 +32,13 @@ object PureconfSuite {
 
 import PureconfSuite._
 
-class PureconfSuite extends FlatSpec with Matchers with OptionValues {
+class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryValues {
 
   // checks if saving and loading a configuration from file returns the configuration itself
-  def saveAndLoadIsIdentity[Config](config: Config)(implicit configConvert: ConfigConvert[Config]): Unit = {
+  def saveAndLoadIsIdentity[C](config: C)(implicit configConvert: ConfigConvert[C]): Unit = {
     withTempFile { configFile =>
       saveConfigAsPropertyFile(config, configFile, overrideOutputPath = true)
-      loadConfig[Config](configFile) shouldEqual Success(config)
+      loadConfig[C](configFile) shouldEqual Success(config)
     }
   }
 
@@ -216,10 +216,10 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
     saveAndLoadIsIdentity(ConfWithQueueOfFoo(Queue(Foo(1), Foo(2))))
   }
 
-  case class ConfWithStackOfFoo(stack: Stack[Foo])
+  case class ConfWithStackOfFoo(stack: collection.mutable.Stack[Foo])
 
-  it should s"be able to save and load configurations containing immutable.Stack" in {
-    saveAndLoadIsIdentity(ConfWithStackOfFoo(Stack(Foo(1))))
+  it should s"be able to save and load configurations containing mutable.Stack" in {
+    saveAndLoadIsIdentity(ConfWithStackOfFoo(collection.mutable.Stack(Foo(1))))
   }
 
   case class ConfWithHashSetOfFoo(hashSet: HashSet[Foo])
@@ -251,7 +251,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
 
   it should "be able to use a local StringConvert instead of the ones in StringConvert companion object" in {
     implicit val readInt = StringConvert.fromUnsafe[Int](_.toInt.abs, _.toString)
-    loadConfig(Map("i" -> "-100"))(ConfigConvert[ConfWithInt]).toOption.value shouldBe ConfWithInt(100)
+    loadConfig(Map("i" -> "-100"))(ConfigConvert[ConfWithInt]).success.value shouldBe ConfWithInt(100)
   }
 
   case class ConfWithDuration(i: Duration)
@@ -259,7 +259,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
   it should "be able to supersede the default Duration ConfigConvert with a locally defined StringConvert" in {
     val expected = Duration(110, TimeUnit.DAYS)
     implicit val readDurationBadly = StringConvert.fromUnsafe[Duration](_ => expected, _ => throw new Exception("Not Implemented"))
-    loadConfig(Map("i" -> "23 s"))(ConfigConvert[ConfWithDuration]).toOption.value shouldBe ConfWithDuration(expected)
+    loadConfig(Map("i" -> "23 s"))(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
   }
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
@@ -268,7 +268,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
       override def from(config: RawConfig, namespace: String): Try[Duration] = Success(expected)
       override def to(t: Duration, namespace: String): RawConfig = throw new Exception("Not Implemented")
     }
-    loadConfig(Map("i" -> "42 h"))(ConfigConvert[ConfWithDuration]).toOption.value shouldBe ConfWithDuration(expected)
+    loadConfig(Map("i" -> "42 h"))(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
   }
 
   it should "custom ConfigConvert should not cause implicit resolution failure and should be used." in {
@@ -279,7 +279,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
       }
       def to(foo: Foo, namespace: String): RawConfig = Map(namespace -> foo.i.toString)
     }
-    loadConfig(Map("foo.i" -> "-100"))(ConfigConvert[ConfWithFoo]).toOption.value shouldBe ConfWithFoo(Foo(-99))
+    loadConfig(Map("foo.i" -> "-100"))(ConfigConvert[ConfWithFoo]).success.value shouldBe ConfWithFoo(Foo(-99))
   }
 
 }

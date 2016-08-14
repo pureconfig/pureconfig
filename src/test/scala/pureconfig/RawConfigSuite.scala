@@ -1,11 +1,9 @@
 package pureconfig
 
-import com.typesafe.config.{ Config, ConfigFactory, ConfigValueType }
+import com.typesafe.config.{ ConfigFactory, ConfigValueType }
 import org.scalatest._
 import java.io.PrintWriter
 import java.nio.file.Files
-
-import scala.collection.JavaConversions._
 
 import pureconfig.conf.typesafeConfigToConfig
 

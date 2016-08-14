@@ -9,7 +9,7 @@ import DurationConvert.from
 
 import scala.util.{ Failure, Success }
 
-class DurationConvertTest extends FlatSpec with Matchers {
+class DurationConvertTest extends FlatSpec with Matchers with TryValues {
   "Converting a Duration to a String" should "pick an appropriate unit when dealing with whole units less than the next step up" in {
     from(Duration(14, TimeUnit.DAYS)) shouldBe "14d"
     from(Duration(16, TimeUnit.HOURS)) shouldBe "16h"

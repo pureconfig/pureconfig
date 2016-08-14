@@ -69,3 +69,25 @@ OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.conf", "pureconfig.conf.
 OsgiKeys.privatePackage := Seq()
 
 OsgiKeys.importPackage := Seq(s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""", "*")
+
+val allVersionCompilerLintSwitches = Seq(
+  "-deprecation",
+  "-encoding", "UTF-8", // yes, this is 2 args
+  "-feature",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code"
+)
+
+val newerCompilerLintSwitches = Seq(
+  "-Ywarn-unused-import", // Not available in 2.10
+  "-Ywarn-numeric-widen" // In 2.10 this produces a some strange spurious error
+)
+
+scalacOptions ++= allVersionCompilerLintSwitches
+
+scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)){
+    case Some((2, scalaMajor)) if scalaMajor >= 11 => newerCompilerLintSwitches
+}.toList.flatten
