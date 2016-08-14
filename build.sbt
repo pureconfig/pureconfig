@@ -69,3 +69,7 @@ OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.conf", "pureconfig.conf.
 OsgiKeys.privatePackage := Seq()
 
 OsgiKeys.importPackage := Seq(s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""", "*")
+
+scalacOptions ++= Seq(
+  "-deprecation"
+)

@@ -216,10 +216,10 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues {
     saveAndLoadIsIdentity(ConfWithQueueOfFoo(Queue(Foo(1), Foo(2))))
   }
 
-  case class ConfWithStackOfFoo(stack: Stack[Foo])
+  case class ConfWithStackOfFoo(stack: collection.mutable.Stack[Foo])
 
-  it should s"be able to save and load configurations containing immutable.Stack" in {
-    saveAndLoadIsIdentity(ConfWithStackOfFoo(Stack(Foo(1))))
+  it should s"be able to save and load configurations containing mutable.Stack" in {
+    saveAndLoadIsIdentity(ConfWithStackOfFoo(collection.mutable.Stack(Foo(1))))
   }
 
   case class ConfWithHashSetOfFoo(hashSet: HashSet[Foo])
