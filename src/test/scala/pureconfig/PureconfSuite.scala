@@ -35,10 +35,10 @@ import PureconfSuite._
 class PureconfSuite extends FlatSpec with Matchers with OptionValues {
 
   // checks if saving and loading a configuration from file returns the configuration itself
-  def saveAndLoadIsIdentity[Config](config: Config)(implicit configConvert: ConfigConvert[Config]): Unit = {
+  def saveAndLoadIsIdentity[C](config: C)(implicit configConvert: ConfigConvert[C]): Unit = {
     withTempFile { configFile =>
       saveConfigAsPropertyFile(config, configFile, overrideOutputPath = true)
-      loadConfig[Config](configFile) shouldEqual Success(config)
+      loadConfig[C](configFile) shouldEqual Success(config)
     }
   }
 
