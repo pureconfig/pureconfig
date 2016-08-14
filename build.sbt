@@ -72,5 +72,6 @@ OsgiKeys.importPackage := Seq(s"""scala.*;version="[${scalaBinaryVersion.value}.
 
 scalacOptions ++= Seq(
   "-deprecation",
-  "-encoding", "UTF-8" // yes, this is 2 args
+  "-encoding", "UTF-8", // yes, this is 2 args
+  "-unchecked"
 )
