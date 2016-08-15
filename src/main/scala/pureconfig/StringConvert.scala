@@ -7,6 +7,7 @@
 package pureconfig
 
 import scala.util.Try
+import java.net.URL
 
 /**
  * Conversion between a type [[T]] and [[String]] with error handling for the conversion from [[String]]
@@ -17,7 +18,7 @@ trait StringConvert[T] {
   def to(t: T): String
 }
 
-object StringConvert {
+object StringConvert extends LowPriorityStringConvertImplicits {
   def apply[T](implicit conv: StringConvert[T]): StringConvert[T] = conv
 
   def fromUnsafe[T](fromF: String => T, toF: T => String): StringConvert[T] = new StringConvert[T] {
@@ -32,4 +33,11 @@ object StringConvert {
   implicit val readLong = fromUnsafe[Long](_.toLong, _.toString)
   implicit val readShort = fromUnsafe[Short](_.toShort, _.toString)
   implicit val readString = fromUnsafe[String](identity, identity)
+}
+
+/**
+ * Implicit [[StringConvert]] instances defined such that they can be overriden by library consumer via a locally defined implementation.
+ */
+trait LowPriorityStringConvertImplicits {
+  implicit val readURL = StringConvert.fromUnsafe[URL](new URL(_), _.toString)
 }

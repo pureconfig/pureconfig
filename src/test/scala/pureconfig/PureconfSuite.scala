@@ -4,6 +4,7 @@
 package pureconfig
 
 import java.io.PrintWriter
+import java.net.URL
 import java.nio.file.{ Path, Files }
 import java.util.concurrent.TimeUnit
 
@@ -282,4 +283,22 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig(Map("foo.i" -> "-100"))(ConfigConvert[ConfWithFoo]).success.value shouldBe ConfWithFoo(Foo(-99))
   }
 
+  case class ConfWithURL(url: URL)
+
+  it should "be able to read a config with a URL" in {
+    val expected = "http://host/path?with=query&param"
+    val config = loadConfig[ConfWithURL](Map("url" -> expected))
+    config.toOption.value.url shouldBe new URL(expected)
+  }
+
+  it should "round trip a URL" in {
+    saveAndLoadIsIdentity(ConfWithURL(new URL("https://you/spin?me&right=round")))
+  }
+
+  it should "allow a custom StringConvert[URL] to override our definition" in {
+    val expected = "http://bad/horse/will?make=you&his=mare"
+    implicit val readURLBadly = StringConvert.fromUnsafe[URL](_ => new URL(expected), _ => throw new Exception("Not Implemented"))
+    val config = loadConfig[ConfWithURL](Map("url" -> "https://ignored/url"))
+    config.toOption.value.url shouldBe new URL(expected)
+  }
 }
