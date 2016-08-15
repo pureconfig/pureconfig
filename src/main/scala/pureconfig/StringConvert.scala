@@ -8,6 +8,7 @@ package pureconfig
 
 import scala.util.Try
 import java.net.URL
+import StringConvert.fromUnsafe
 
 /**
  * Conversion between a type [[T]] and [[String]] with error handling for the conversion from [[String]]
@@ -25,19 +26,18 @@ object StringConvert extends LowPriorityStringConvertImplicits {
     override def from(str: String): Try[T] = Try(fromF(str))
     override def to(t: T): String = toF(t)
   }
-
-  implicit val readBoolean = fromUnsafe[Boolean](_.toBoolean, _.toString)
-  implicit val readDouble = fromUnsafe[Double](_.toDouble, _.toString)
-  implicit val readFloat = fromUnsafe[Float](_.toFloat, _.toString)
-  implicit val readInt = fromUnsafe[Int](_.toInt, _.toString)
-  implicit val readLong = fromUnsafe[Long](_.toLong, _.toString)
-  implicit val readShort = fromUnsafe[Short](_.toShort, _.toString)
-  implicit val readString = fromUnsafe[String](identity, identity)
 }
 
 /**
  * Implicit [[StringConvert]] instances defined such that they can be overriden by library consumer via a locally defined implementation.
  */
 trait LowPriorityStringConvertImplicits {
-  implicit val readURL = StringConvert.fromUnsafe[URL](new URL(_), _.toString)
+  implicit val readString = fromUnsafe[String](identity, identity)
+  implicit val readBoolean = fromUnsafe[Boolean](_.toBoolean, _.toString)
+  implicit val readDouble = fromUnsafe[Double](_.toDouble, _.toString)
+  implicit val readFloat = fromUnsafe[Float](_.toFloat, _.toString)
+  implicit val readInt = fromUnsafe[Int](_.toInt, _.toString)
+  implicit val readLong = fromUnsafe[Long](_.toLong, _.toString)
+  implicit val readShort = fromUnsafe[Short](_.toShort, _.toString)
+  implicit val readURL = fromUnsafe[URL](new URL(_), _.toString)
 }

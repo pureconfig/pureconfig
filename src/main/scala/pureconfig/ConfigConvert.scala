@@ -253,7 +253,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 }
 
 /**
- * A ConfigConvert for Duration defined in a trait to give it lower priority.
+ * Implicit [[ConfigConvert]] instances defined such that they can be overriden by library consumer via a locally defined implementation.
  */
 trait LowPriorityConfigConvertImplicits {
   import scala.concurrent.duration.Duration

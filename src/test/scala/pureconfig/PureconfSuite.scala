@@ -56,6 +56,25 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     }
   }
 
+  it should s"be able to override locally all of the StringConvert instances used to parse ${classOf[FlatConfig]}" in {
+    def notImplemented: Any => Nothing = _ => throw new Exception("NotImplemented")
+    implicit val readBoolean = StringConvert.fromUnsafe[Boolean](_ != "0", notImplemented)
+    implicit val readDouble = StringConvert.fromUnsafe[Double](_.toDouble * -1, notImplemented)
+    implicit val readFloat = StringConvert.fromUnsafe[Float](_.toFloat * -1, notImplemented)
+    implicit val readInt = StringConvert.fromUnsafe[Int](_.toInt * -1, notImplemented)
+    implicit val readLong = StringConvert.fromUnsafe[Long](_.toLong * -1, notImplemented)
+    implicit val readString = StringConvert.fromUnsafe[String](_.toUpperCase, notImplemented)
+    val config = loadConfig[FlatConfig](Map(
+      "b" -> "0",
+      "d" -> "234.234",
+      "f" -> "34.34",
+      "i" -> "56",
+      "l" -> "-88",
+      "s" -> "qwerTy"
+    ))
+    config.success.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
+  }
+
   // load HOCON-style lists
   case class ConfigWithHoconList(xs: List[Int])
 
