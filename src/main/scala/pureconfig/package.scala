@@ -111,4 +111,25 @@ package object pureconfig {
     rawConfig foreach { case (key, value) => printOutputStream.println(s"""$key="$value"""") }
     printOutputStream.close()
   }
+
+  /**
+   * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them into a `Config`.
+   *
+   * This is a convenience method which enables having default configuration which backstops local configuration.
+   *
+   * Note: If an element of `files` references a file which doesn't exist or can't be read, it will silently be ignored.
+   *
+   * @param files Files ordered in decreasing priority containing part or all of a `Config`. Must not be empty.
+   */
+  def resolveFiles[Config: ConfigConvert](files: Traversable[java.io.File]): Try[Config] = {
+    if (files.isEmpty) {
+      new scala.util.Failure(new IllegalArgumentException("The config files to resolve must not be empty."))
+    } else {
+      val resolvedTypesafeConfig = files
+        .map(ConfigFactory.parseFile)
+        .reduce(_.withFallback(_))
+        .resolve
+      loadConfig[Config](conf.typesafeConfigToConfig(resolvedTypesafeConfig))
+    }
+  }
 }
