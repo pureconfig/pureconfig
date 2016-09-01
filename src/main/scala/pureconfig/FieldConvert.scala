@@ -12,11 +12,11 @@ import shapeless.Lazy
 import scala.util.{ Failure, Try }
 
 /**
- * Utility trait used as strategy for conversion of a type [[T]] from/to a configuration of type
- * [[RawConfig]]. The main difference between this and [[ConfigConvert]] is that this is used to
+ * Utility trait used as strategy for conversion of a type `T` from/to a configuration of type
+ * `RawConfig`. The main difference between this and [[ConfigConvert]] is that this is used to
  * convert each fields and has only two instances, one for "simple" types, called [[FieldConvert.primitiveFieldConvert]]
  * and one for "complex" (recursive) types, called [[FieldConvert.configFieldConvert]].
- * [[FieldConvert.primitiveFieldConvert]] uses an instance of [[StringConvert)]] while
+ * [[FieldConvert.primitiveFieldConvert]] uses an instance of [[StringConvert]] while
  * [[FieldConvert.configFieldConvert]] uses an instance of [[ConfigConvert]].
  */
 trait FieldConvert[T] {

@@ -11,8 +11,8 @@ import java.net.URL
 import StringConvert.fromUnsafe
 
 /**
- * Conversion between a type [[T]] and [[String]] with error handling for the conversion from [[String]]
- * to [[T]]
+ * Conversion between a type `T` and `String` with error handling for the conversion from `String`
+ * to `T`
  */
 trait StringConvert[T] {
   def from(str: String): Try[T]

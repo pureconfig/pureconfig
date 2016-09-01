@@ -16,30 +16,30 @@ import scala.language.higherKinds
 import scala.util.{ Failure, Success, Try }
 
 /**
- * Trait for conversion between [[T]] and [[RawConfig]] where [[T]] is a "complex" type. For "simple"
+ * Trait for conversion between `T` and `RawConfig` where `T` is a "complex" type. For "simple"
  * types have a look at [[StringConvert]]
  */
 trait ConfigConvert[T] {
   /**
-   * Convert the given configuration into an instance of [[T]] if possible
+   * Convert the given configuration into an instance of `T` if possible
    *
    * @param config The configuration from which load the config
    * @param namespace The base namespace to use for the conversion. This should be used as base
-   *                  for the name of the fields of [[T]]. For instance, given a `case class Foo(i: Int)`
+   *                  for the name of the fields of `T`. For instance, given a `case class Foo(i: Int)`
    *                  and a configuration `conf = Map("foo.i", "1")`, then `from(conf, "foo")` will return
    *                  `Success(Foo(1))` while `from(conf, "")` will return `Failure`
-   * @return [[Success]] of [[T]] if the conversion is possible, [[Failure]] with the problem if the
+   * @return `Success` of `T` if the conversion is possible, `Failure` with the problem if the
    *         conversion is not
    */
   def from(config: RawConfig, namespace: String): Try[T]
 
   /**
-   * Converts a type [[T]] to a [[RawConfig]] using the [[namespace]] as base namespace.
+   * Converts a type `T` to a `RawConfig` using the `namespace` as base namespace.
    *
-   * @param t The instance of [[T]] to convert
+   * @param t The instance of `T` to convert
    * @param namespace The base namespace. For instance, given case `class Foo(i: Int)`, then
    *                  `to(Foo(2), "base.namespace")` will return `Map("base.namespace.i", "2")`
-   * @return The [[RawConfig]] obtained from the [[T]] instance
+   * @return The `RawConfig` obtained from the `T` instance
    */
   def to(t: T, namespace: String): RawConfig
 }
@@ -193,7 +193,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
    *
    * @param fullKey The namespace plus key from which we want to extract the key
    * @param namespace The namespace
-   * @return A [[Success]] with the key if it is possible to extract it, else a [[Failure]] with
+   * @return A [[Success]] with the key if it is possible to extract it, else a `Failure` with
    *         the error
    */
   private[this] def getMapKeyFrom(fullKey: String, namespace: String): Try[String] = {
