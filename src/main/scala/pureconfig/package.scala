@@ -121,9 +121,9 @@ package object pureconfig {
    *
    * @param files Files ordered in decreasing priority containing part or all of a `Config`. Must not be empty.
    */
-  def resolveFiles[Config: ConfigConvert](files: Traversable[java.io.File]): Try[Config] = {
+  def loadConfigFromFiles[Config: ConfigConvert](files: Traversable[java.io.File]): Try[Config] = {
     if (files.isEmpty) {
-      new scala.util.Failure(new IllegalArgumentException("The config files to resolve must not be empty."))
+      new scala.util.Failure(new IllegalArgumentException("The config files to load must not be empty."))
     } else {
       val resolvedTypesafeConfig = files
         .map(ConfigFactory.parseFile)

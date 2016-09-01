@@ -316,19 +316,19 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     Some("thing")
   )
 
-  "resolveFiles" should "load a complete configuration from a single file" in {
+  "loadConfigFromFiles" should "load a complete configuration from a single file" in {
     val files = fileList(
-      "src/test/resources/conf/resolveFiles/priority2.conf"
+      "src/test/resources/conf/loadConfigFromFiles/priority2.conf"
     )
-    resolveFiles[FlatConfig](files).success.get shouldBe expectedValueForResolveFilesPriority2
+    loadConfigFromFiles[FlatConfig](files).success.get shouldBe expectedValueForResolveFilesPriority2
   }
 
   it should "fill in missing values from the lower priority files" in {
     val files = fileList(
-      "src/test/resources/conf/resolveFiles/priority1.conf",
-      "src/test/resources/conf/resolveFiles/priority2.conf"
+      "src/test/resources/conf/loadConfigFromFiles/priority1.conf",
+      "src/test/resources/conf/loadConfigFromFiles/priority2.conf"
     )
-    val actual = resolveFiles[FlatConfig](files)
+    val actual = loadConfigFromFiles[FlatConfig](files)
     actual.success.get shouldBe FlatConfig(
       true,
       0.001d,
@@ -342,22 +342,22 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "complain if the configuration is incomplete" in {
     val files = fileList(
-      "src/test/resources/conf/resolveFiles/priority1.conf"
+      "src/test/resources/conf/loadConfigFromFiles/priority1.conf"
     )
-    val actual = resolveFiles[FlatConfig](files)
+    val actual = loadConfigFromFiles[FlatConfig](files)
     actual.isFailure shouldBe true
   }
 
   it should "silently ignore files which can't be read" in {
     val files = fileList(
-      "src/test/resources/conf/resolveFiles/this.is.not.a.conf",
-      "src/test/resources/conf/resolveFiles/priority2.conf"
+      "src/test/resources/conf/loadConfigFromFiles/this.is.not.a.conf",
+      "src/test/resources/conf/loadConfigFromFiles/priority2.conf"
     )
-    resolveFiles[FlatConfig](files).success.value shouldBe expectedValueForResolveFilesPriority2
+    loadConfigFromFiles[FlatConfig](files).success.value shouldBe expectedValueForResolveFilesPriority2
   }
 
   it should "complain if the list of files is empty" in {
     val files = fileList()
-    resolveFiles[FlatConfig](files).failure.exception.getMessage should include regex "config files.*must not be empty"
+    loadConfigFromFiles[FlatConfig](files).failure.exception.getMessage should include regex "config files.*must not be empty"
   }
 }
