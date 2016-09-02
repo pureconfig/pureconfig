@@ -152,7 +152,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
 
     override def from(config: RawConfig, namespace: String): Try[F[T]] = {
-      val fullKeysFound = config.keys.filter(_ startsWith namespace).toList
+      val fullKeysFound = config.keys.filter(_ startsWith (namespace + namespaceSep)).toList
       val keysFound = fullKeysFound.map { key =>
         val parentNamespaceLength = namespace.length + namespaceSep.length
         key.substring(0, key.indexOfSlice(namespaceSep, parentNamespaceLength))
@@ -208,7 +208,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   implicit def deriveMap[T](implicit stringConvert: Lazy[StringConvert[T]]) = new ConfigConvert[Map[String, T]] {
 
     override def from(config: RawConfig, namespace: String): Try[Map[String, T]] = {
-      val keysFound = config.keySet.filter(_ startsWith namespace)
+      val keysFound = config.keySet.filter(_ startsWith (namespace + namespaceSep))
 
       keysFound.foldLeft(Try(Map.empty[String, T])) {
         case (f @ Failure(_), _) => f
