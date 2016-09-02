@@ -212,6 +212,20 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     }
   }
 
+  it should s"properly load maps from the provided namespace" in {
+    withTempFile { configFile =>
+      val writer = new PrintWriter(Files.newOutputStream(configFile))
+      writer.println("conf.a=1")
+      writer.println("conf1.a=1")
+      writer.close()
+
+      val result = loadConfig[MapConf](configFile)
+      val expected = MapConf(Map("a" -> 1))
+
+      result shouldEqual Success(expected)
+    }
+  }
+
   // traversable of complex types
 
   case class ConfWithListOfPair(list: List[(String, Int)])
@@ -221,6 +235,19 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   case class Foo(i: Int)
+  case class ConfWithListOfFoo(list: List[Foo])
+  case class ConfWithListOfFoo1(list1: List[Foo])
+
+  it should s"be able to properly load complex types from the provided namespace" in {
+    val v1 = ConfWithListOfFoo(List(Foo(1), Foo(2), Foo(3)))
+    val v2 = ConfWithListOfFoo1(List(Foo(4), Foo(5), Foo(6)))
+    val conf =
+      implicitly[ConfigConvert[ConfWithListOfFoo]].to(v1, "") ++
+        implicitly[ConfigConvert[ConfWithListOfFoo1]].to(v2, "")
+    loadConfig[ConfWithListOfFoo](conf) shouldEqual Success(v1)
+    loadConfig[ConfWithListOfFoo1](conf) shouldEqual Success(v2)
+  }
+
   case class ConfWithStreamOfFoo(stream: Stream[Foo])
 
   it should s"be able to save and load configurations containing immutable.Stream" in {
