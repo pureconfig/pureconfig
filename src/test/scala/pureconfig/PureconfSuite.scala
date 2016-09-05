@@ -15,6 +15,7 @@ import shapeless.{ Coproduct, :+:, CNil }
 import scala.collection.immutable._
 import scala.util.{ Failure, Try, Success }
 
+import com.typesafe.config.ConfigFactory
 import org.scalatest._
 import pureconfig.conf.RawConfig
 
@@ -224,6 +225,19 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
       result shouldEqual Success(expected)
     }
+  }
+
+  it should s"properly load maps from the base namespace" in {
+    val cf = ConfigFactory.parseString("""{
+      a = 1
+      b = 2
+      c = 3
+    }""")
+
+    val result = loadConfig[Map[String, Int]](conf.typesafeConfigToConfig(cf))
+    val expected = Map("a" -> 1, "b" -> 2, "c" -> 3)
+
+    result shouldEqual Success(expected)
   }
 
   // traversable of complex types
