@@ -7,7 +7,7 @@
 import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig }
 import pureconfig.conf.RawConfig
 
 import scala.util.Try
@@ -68,6 +68,16 @@ package object pureconfig {
     ConfigFactory.invalidateCaches()
     val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))
     loadConfig[Config](rawConfig, namespace)(conv)
+  }
+
+  /** Load a configuration of type `Config` from the given `Config` */
+  def loadConfig[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    loadConfig[Config](pureconfig.conf.typesafeConfigToConfig(conf))
+  }
+
+  /** Load a configuration of type `Config` from the given `Config` */
+  def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    loadConfig[Config](pureconfig.conf.typesafeConfigToConfig(conf), namespace)
   }
 
   /** Load a configuration of type `Config` from the given `RawConfig` */
