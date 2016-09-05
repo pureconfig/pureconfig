@@ -197,7 +197,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
    *         the error
    */
   private[this] def getMapKeyFrom(fullKey: String, namespace: String): Try[String] = {
-    val key = fullKey.substring(namespace.length + namespaceSep.length)
+    val substrStart = namespace.length + (if (namespace.isEmpty) 0 else namespaceSep.length)
+    val key = fullKey.substring(substrStart)
     if (key contains namespaceSep) {
       Failure(new RuntimeException(s"Invalid Map key found '$key'. Maps keys cannot contain the namespace separator '$namespaceSep'"))
     } else {
@@ -208,7 +209,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   implicit def deriveMap[T](implicit stringConvert: Lazy[StringConvert[T]]) = new ConfigConvert[Map[String, T]] {
 
     override def from(config: RawConfig, namespace: String): Try[Map[String, T]] = {
-      val keysFound = config.keySet.filter(_ startsWith (namespace + namespaceSep))
+      val keysFound = (if (namespace.isEmpty)
+        config.keys
+      else
+        config.keys.filter(_ startsWith (namespace + namespaceSep))).toList
 
       keysFound.foldLeft(Try(Map.empty[String, T])) {
         case (f @ Failure(_), _) => f
