@@ -6,227 +6,199 @@
  */
 package pureconfig
 
-import pureconfig.conf._
-import pureconfig.conf.namespace._
+import com.typesafe.config._
 import shapeless._
 import shapeless.labelled._
 
+import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.util.{ Failure, Success, Try }
 
+import java.net.URL
+import pureconfig.ConfigConvert.{ fromString, stringConvert }
+
 /**
- * Trait for conversion between `T` and `RawConfig` where `T` is a "complex" type. For "simple"
- * types have a look at [[StringConvert]]
+ * Trait for conversion between `T` and `ConfigValue`.
  */
 trait ConfigConvert[T] {
   /**
-   * Convert the given configuration into an instance of `T` if possible
+   * Convert the given configuration into an instance of `T` if possible.
    *
    * @param config The configuration from which load the config
-   * @param namespace The base namespace to use for the conversion. This should be used as base
-   *                  for the name of the fields of `T`. For instance, given a `case class Foo(i: Int)`
-   *                  and a configuration `conf = Map("foo.i", "1")`, then `from(conf, "foo")` will return
-   *                  `Success(Foo(1))` while `from(conf, "")` will return `Failure`
    * @return `Success` of `T` if the conversion is possible, `Failure` with the problem if the
    *         conversion is not
    */
-  def from(config: RawConfig, namespace: String): Try[T]
+  def from(config: ConfigValue): Try[T]
 
   /**
-   * Converts a type `T` to a `RawConfig` using the `namespace` as base namespace.
+   * Converts a type `T` to a `ConfigValue`.
    *
    * @param t The instance of `T` to convert
-   * @param namespace The base namespace. For instance, given case `class Foo(i: Int)`, then
-   *                  `to(Foo(2), "base.namespace")` will return `Map("base.namespace.i", "2")`
-   * @return The `RawConfig` obtained from the `T` instance
+   * @return The `ConfigValue` obtained from the `T` instance
    */
-  def to(t: T, namespace: String): RawConfig
+  def to(t: T): ConfigValue
 }
 
 object ConfigConvert extends LowPriorityConfigConvertImplicits {
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
 
+  private def fromFConvert[T](fromF: String => T): ConfigValue => Try[T] =
+    config => {
+      Try(fromF(config.valueType() match {
+        case ConfigValueType.STRING => config.unwrapped().toString
+        case _ => config.render(ConfigRenderOptions.concise())
+      }))
+    }
+
+  def fromString[T](fromF: String => T): ConfigConvert[T] = new ConfigConvert[T] {
+    override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
+    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
+  }
+
+  def stringConvert[T](fromF: String => T, toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
+    override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
+    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
+  }
+
   implicit def hNilConfigConvert = new ConfigConvert[HNil] {
-    override def from(config: RawConfig, namespace: String): Try[HNil] = Success(HNil)
-    override def to(t: HNil, namespace: String): RawConfig = Map.empty[String, String]
+    override def from(config: ConfigValue): Try[HNil] = Success(HNil)
+    override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
   implicit def hConsConfigConvert[K <: Symbol, V, T <: HList](
     implicit key: Witness.Aux[K],
-    vFieldConvert: Lazy[FieldConvert[V]],
+    vFieldConvert: Lazy[ConfigConvert[V]],
     tConfigConvert: Lazy[ConfigConvert[T]]): ConfigConvert[FieldType[K, V] :: T] = new ConfigConvert[FieldType[K, V]:: T] {
 
-    override def from(config: RawConfig, namespace: String): Try[FieldType[K, V] :: T] = {
-      val keyStr = key.value.toString().tail // remove the ' in front of the symbol
-      val namespaceWithKey = makeNamespace(namespace, keyStr)
-      for {
-        v <- vFieldConvert.value.from(config, namespaceWithKey)
-        tail <- tConfigConvert.value.from(config, namespace)
-      } yield field[K](v) :: tail
+    override def from(config: ConfigValue): Try[FieldType[K, V] :: T] = {
+      config match {
+        case co: ConfigObject =>
+          val keyStr = key.value.toString().tail // remove the ' in front of the symbol
+          for {
+            v <- vFieldConvert.value.from(co.get(keyStr))
+            tail <- tConfigConvert.value.from(config)
+          } yield field[K](v) :: tail
+        case other =>
+          Failure(new Exception(s"Couldn't derive hlist from $other."))
+      }
     }
 
-    override def to(t: FieldType[K, V] :: T, namespace: String): RawConfig = {
-      val keyStr = key.value.toString().tail // remove the ' in front of the symbol
-      val namespaceWithKey = makeNamespace(namespace, keyStr)
-      val fieldEntries = vFieldConvert.value.to(t.head, namespaceWithKey)
-
+    override def to(t: FieldType[K, V] :: T): ConfigValue = {
+      val keyStr = key.value.toString().tail
+      val rem = tConfigConvert.value.to(t.tail)
       // TODO check that all keys are unique
-      tConfigConvert.value.to(t.tail, namespace) ++ fieldEntries
+      vFieldConvert.value match {
+        case f: OptionConfigConvert[_] =>
+          f.toOption(t.head) match {
+            case Some(v) =>
+              rem.asInstanceOf[ConfigObject].withValue(keyStr, v)
+            case None =>
+              rem
+          }
+        case f =>
+          val fieldEntry = f.to(t.head)
+          rem.asInstanceOf[ConfigObject].withValue(keyStr, fieldEntry)
+      }
     }
   }
 
-  case class NoValidCoproductChoiceFound(config: RawConfig, namespace: String)
-    extends RuntimeException(s"No valid coproduct type choice found for $namespace in configuration $config")
+  case class NoValidCoproductChoiceFound(config: ConfigValue)
+    extends RuntimeException(s"No valid coproduct type choice found for configuration $config")
 
   implicit def cNilConfigConvert: ConfigConvert[CNil] = new ConfigConvert[CNil] {
-    override def from(config: RawConfig, namespace: String): Try[CNil] =
-      Failure(NoValidCoproductChoiceFound(config, namespace))
+    override def from(config: ConfigValue): Try[CNil] =
+      Failure(NoValidCoproductChoiceFound(config))
 
-    override def to(t: CNil, namespace: String): RawConfig = Map.empty
+    override def to(t: CNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
   implicit def coproductConfigConvert[V, T <: Coproduct](
-    implicit vFieldConvert: Lazy[FieldConvert[V]],
+    implicit vFieldConvert: Lazy[ConfigConvert[V]],
     tConfigConvert: Lazy[ConfigConvert[T]]): ConfigConvert[V :+: T] =
     new ConfigConvert[V :+: T] {
 
-      override def from(config: RawConfig, namespace: String): Try[V :+: T] = {
-        vFieldConvert.value.from(config, namespace)
+      override def from(config: ConfigValue): Try[V :+: T] = {
+        vFieldConvert.value.from(config)
           .map(s => Inl[V, T](s))
-          .orElse(tConfigConvert.value.from(config, namespace).map(s => Inr[V, T](s)))
+          .orElse(tConfigConvert.value.from(config).map(s => Inr[V, T](s)))
       }
 
-      override def to(t: V :+: T, namespace: String): RawConfig = t match {
-        case Inl(l) => vFieldConvert.value.to(l, namespace)
-        case Inr(r) => tConfigConvert.value.to(r, namespace)
+      override def to(t: V :+: T): ConfigValue = t match {
+        case Inl(l) => vFieldConvert.value.to(l)
+        case Inr(r) => tConfigConvert.value.to(r)
       }
     }
 
   // For Option[T] we use a special config converter
-  implicit val deriveNone = new ConfigConvert[None.type] {
-    override def from(config: RawConfig, namespace: String): Try[None.type] = {
-      if (config contains namespace) Failure(new RuntimeException("None should not be found in config"))
-      else Success(None)
-    }
-    override def to(t: None.type, namespace: String): RawConfig = Map(namespace -> "")
-  }
+  implicit def deriveOption[T](implicit conv: Lazy[ConfigConvert[T]]) = new OptionConfigConvert[T]
 
-  implicit def deriveSome[T](implicit fieldConvert: Lazy[FieldConvert[T]]) = new ConfigConvert[Some[T]] {
-    override def from(config: RawConfig, namespace: String): Try[Some[T]] = {
-      if (config contains namespace) fieldConvert.value.from(config, namespace).map(Some(_))
-      else Failure(new RuntimeException("Some should be found in config"))
-    }
-
-    override def to(t: Some[T], namespace: String): RawConfig = fieldConvert.value.to(t.get, namespace)
-  }
-
-  // traversable of simple types, that are types with an instance of StringConvert
-  implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](implicit stringConvert: Lazy[StringConvert[T]],
-    cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
-    override def from(config: RawConfig, namespace: String): Try[F[T]] = {
-      val value = config(namespace)
-
-      if (value.isEmpty) {
-        // "".split(",") returns Array("") but we want Array()
-        Success(cbf().result())
-      } else {
-        val tryBuilder = value.split(",").foldLeft(Try(cbf())) {
-          case (tryResult, rawValue) =>
-            for {
-              result <- tryResult
-              value <- stringConvert.value.from(rawValue)
-            } yield result += value
-        }
-
-        tryBuilder.map(_.result())
-      }
-    }
-
-    override def to(ts: F[T], namespace: String): RawConfig =
-      Map(namespace -> ts.map(stringConvert.value.to).mkString(","))
-  }
-
-  // traversable of complex types, that are types with an instance of ConfigConvert
-  implicit def deriveTraversableOfObjects[T, F[T] <: TraversableOnce[T]](implicit configConvert: Lazy[ConfigConvert[T]],
-    cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
-
-    override def from(config: RawConfig, namespace: String): Try[F[T]] = {
-      val fullKeysFound = config.keys.filter(_ startsWith (namespace + namespaceSep)).toList
-      val keysFound = fullKeysFound.map { key =>
-        val parentNamespaceLength = namespace.length + namespaceSep.length
-        key.substring(0, key.indexOfSlice(namespaceSep, parentNamespaceLength))
-      }.sorted.distinct
-
-      if (keysFound.isEmpty) {
-        Success(cbf().result())
-      } else {
-        val tryBuilder = keysFound.foldLeft(Try(cbf())) {
-          case (tryResult, key) =>
-            for {
-              result <- tryResult
-              value <- configConvert.value.from(config, key)
-            } yield result += value
-        }
-
-        tryBuilder.map(_.result())
-      }
-    }
-
-    override def to(ts: F[T], namespace: String): RawConfig = {
-      val tsWithIndexes = ts.toList.zipWithIndex // give an index/id to each element of the traversable
-      val tsConverted = tsWithIndexes.map { case (t, i) => configConvert.value.to(t, makeNamespace(namespace, i.toString)) }
-      tsConverted.foldLeft(Map.empty[String, String])(_ ++ _)
-    }
-  }
-
-  /**
-   * Extract the key from a fullKey, i.e. a namespace followed by a key. This function
-   * returns an error if the key contains the [[namespaceSep]], else the key found.
-   *
-   * {{{
-   *   scala> getMapKeyFrom("foo.bar", "foo")
-   *   res0: Try[String] = Success("bar")
-   *   scala> getMapKeyFrom("foo.bar.a", "foo")
-   *   res1: Try[String] = Failure(..)
-   * }}}
-   *
-   * @param fullKey The namespace plus key from which we want to extract the key
-   * @param namespace The namespace
-   * @return A [[Success]] with the key if it is possible to extract it, else a `Failure` with
-   *         the error
-   */
-  private[this] def getMapKeyFrom(fullKey: String, namespace: String): Try[String] = {
-    val substrStart = namespace.length + (if (namespace.isEmpty) 0 else namespaceSep.length)
-    val key = fullKey.substring(substrStart)
-    if (key contains namespaceSep) {
-      Failure(new RuntimeException(s"Invalid Map key found '$key'. Maps keys cannot contain the namespace separator '$namespaceSep'"))
-    } else {
-      Success(key)
-    }
-  }
-
-  implicit def deriveMap[T](implicit stringConvert: Lazy[StringConvert[T]]) = new ConfigConvert[Map[String, T]] {
-
-    override def from(config: RawConfig, namespace: String): Try[Map[String, T]] = {
-      val keysFound = (if (namespace.isEmpty)
-        config.keys
+  class OptionConfigConvert[T](implicit conv: Lazy[ConfigConvert[T]]) extends ConfigConvert[Option[T]] {
+    override def from(config: ConfigValue): Try[Option[T]] = {
+      if (config == null || config.unwrapped() == null)
+        Success(None)
       else
-        config.keys.filter(_ startsWith (namespace + namespaceSep))).toList
+        conv.value.from(config).map(Some(_))
+    }
 
-      keysFound.foldLeft(Try(Map.empty[String, T])) {
-        case (f @ Failure(_), _) => f
-        case (Success(acc), fullKey) =>
-          for {
-            key <- getMapKeyFrom(fullKey, namespace)
-            rawValue <- Try(config(fullKey))
-            value <- stringConvert.value.from(rawValue)
-          } yield acc + (key -> value)
+    override def to(t: Option[T]): ConfigValue = t match {
+      case Some(v) => conv.value.to(v)
+      case None => ConfigValueFactory.fromMap(Map().asJava)
+    }
+
+    def toOption(t: Option[T]): Option[ConfigValue] = t.map(conv.value.to)
+  }
+
+  // traversable of types with an instance of ConfigConvert
+  implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](implicit configConvert: Lazy[ConfigConvert[T]],
+    cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
+
+    override def from(config: ConfigValue): Try[F[T]] = {
+      config match {
+        case co: ConfigList =>
+          val tryBuilder = co.asScala.foldLeft(Try(cbf())) {
+            case (tryResult, v) =>
+              for {
+                result <- tryResult
+                value <- configConvert.value.from(v)
+              } yield result += value
+          }
+
+          tryBuilder.map(_.result())
+        case _ =>
+          Success(cbf().result())
       }
     }
 
-    override def to(keyVals: Map[String, T], namespace: String): RawConfig = {
-      keyVals.map { case (key, value) => makeNamespace(namespace, key) -> stringConvert.value.to(value) }
+    override def to(ts: F[T]): ConfigValue = {
+      val tsList = ts.toList // give an index/id to each element of the traversable
+      val tsConverted = tsList.map(configConvert.value.to)
+      ConfigValueFactory.fromIterable(tsConverted.toIterable.asJava)
+    }
+  }
+
+  implicit def deriveMap[T](implicit configConvert: Lazy[ConfigConvert[T]]) = new ConfigConvert[Map[String, T]] {
+
+    override def from(config: ConfigValue): Try[Map[String, T]] = {
+      config match {
+        case co: ConfigObject =>
+          val keysFound = co.keySet().asScala.toList
+
+          keysFound.foldLeft(Try(Map.empty[String, T])) {
+            case (f @ Failure(_), _) => f
+            case (Success(acc), key) =>
+              for {
+                rawValue <- Try(co.get(key))
+                value <- configConvert.value.from(rawValue)
+              } yield acc + (key -> value)
+          }
+        case other =>
+          Failure(new Exception(s"Couldn't derive map from $other."))
+      }
+    }
+
+    override def to(keyVals: Map[String, T]): ConfigValue = {
+      ConfigValueFactory.fromMap(keyVals.asJava)
     }
   }
 
@@ -235,23 +207,23 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     implicit gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
-    override def from(config: RawConfig, namespace: String): Try[F] = {
-      cc.value.from(config, namespace).map(gen.from)
+    override def from(config: ConfigValue): Try[F] = {
+      cc.value.from(config).map(gen.from)
     }
 
-    override def to(t: F, namespace: String): RawConfig = {
-      cc.value.to(gen.to(t), namespace)
+    override def to(t: F): ConfigValue = {
+      cc.value.to(gen.to(t))
     }
   }
 
   // used for coproducts
   implicit def deriveInstanceWithGeneric[F, Repr <: Coproduct](implicit gen: Generic.Aux[F, Repr], cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
-    override def from(config: RawConfig, namespace: String): Try[F] = {
-      cc.value.from(config, namespace).map(gen.from)
+    override def from(config: ConfigValue): Try[F] = {
+      cc.value.from(config).map(gen.from)
     }
 
-    override def to(t: F, namespace: String): RawConfig = {
-      cc.value.to(gen.to(t), namespace)
+    override def to(t: F): ConfigValue = {
+      cc.value.to(gen.to(t))
     }
   }
 }
@@ -262,15 +234,24 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 trait LowPriorityConfigConvertImplicits {
   import scala.concurrent.duration.Duration
   implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
-    override def from(config: RawConfig, namespace: String): Try[Duration] = {
-      config.get(namespace).fold[Try[Duration]](Failure(new Exception(s"Couldn't read config key $namespace."))) { durationString =>
+    override def from(config: ConfigValue): Try[Duration] = {
+      Some(config.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new Exception(s"Couldn't read duration from $config."))) { durationString =>
         DurationConvert.from(durationString).recoverWith {
-          case ex => Failure(new Exception(s"Could not parse a duration from '$durationString' for key $namespace. (try ns, us, ms, s, m, h, d)"))
+          case ex => Failure(new Exception(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
         }
       }
     }
-    override def to(t: Duration, namespace: String): RawConfig = {
-      Map(namespace -> DurationConvert.from(t))
+    override def to(t: Duration): ConfigValue = {
+      ConfigValueFactory.fromAnyRef(DurationConvert.from(t))
     }
   }
+
+  implicit val readString = fromString[String](identity)
+  implicit val readBoolean = fromString[Boolean](_.toBoolean)
+  implicit val readDouble = fromString[Double](_.toDouble)
+  implicit val readFloat = fromString[Float](_.toFloat)
+  implicit val readInt = fromString[Int](_.toInt)
+  implicit val readLong = fromString[Long](_.toLong)
+  implicit val readShort = fromString[Short](_.toShort)
+  implicit val readURL = stringConvert[URL](new URL(_), _.toString)
 }
