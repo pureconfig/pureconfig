@@ -99,7 +99,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   // a slightly more complex configuration
-  implicit val dateStringConvert = stringConvert[DateTime](
+  implicit val dateConfigConvert = stringConvert[DateTime](
     str => ISODateTimeFormat.dateTime().parseDateTime(str),
     t => ISODateTimeFormat.dateTime().print(t))
 
@@ -355,7 +355,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     saveAndLoadIsIdentity(ConfWithURL(new URL("https://you/spin?me&right=round")))
   }
 
-  it should "allow a custom StringConvert[URL] to override our definition" in {
+  it should "allow a custom ConfigConvert[URL] to override our definition" in {
     val expected = "http://bad/horse/will?make=you&his=mare"
     implicit val readURLBadly = fromString[URL](_ => new URL(expected))
     val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
