@@ -145,7 +145,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       val writer = new PrintWriter(Files.newOutputStream(configFile))
       writer.println("""spark.executor.extraJavaOptions=""""")
       writer.println("""spark.driver.maxResultSize="2g"""")
-      writer.println("""spark.extraListeners=""""")
+      writer.println("""spark.extraListeners=[]""")
       writer.println("""spark.app.name="myApp"""")
       writer.println("""spark.driver.memory="1g"""")
       writer.println("""spark.driver.cores="10"""")

@@ -165,8 +165,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
           }
 
           tryBuilder.map(_.result())
-        case _ =>
-          Success(cbf().result())
+        case other =>
+          Failure(new Exception(s"Couldn't derive traversable from $other."))
       }
     }
 
