@@ -64,6 +64,22 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     }
   }
 
+  it should "be able to serialize a ConfigValue from a type with ConfigConvert using the toConfig method" in {
+    Map("a" -> 1, "b" -> 2).toConfig shouldBe ConfigFactory.parseString("""{ "a": 1, "b": 2 }""").root()
+  }
+
+  it should "be able to load a ConfigValue to a type with ConfigConvert using the to method" in {
+    val conf = ConfigFactory.parseString("""{ "a": [1, 2, 3, 4], "b": { "k1": "v1", "k2": "v2" } }""")
+    conf.getList("a").to[List[Int]] shouldBe Success(List(1, 2, 3, 4))
+    conf.getObject("b").to[Map[String, String]] shouldBe Success(Map("k1" -> "v1", "k2" -> "v2"))
+  }
+
+  it should "be able to load a Config to a type with ConfigConvert using the to method" in {
+    val conf = ConfigFactory.parseString("""{ "a": [1, 2, 3, 4], "b": { "k1": "v1", "k2": "v2" } }""")
+    case class Conf(a: List[Int], b: Map[String, String])
+    conf.to[Conf] shouldBe Success(Conf(List(1, 2, 3, 4), Map("k1" -> "v1", "k2" -> "v2")))
+  }
+
   it should s"be able to override locally all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in {
     implicit val readBoolean = fromString[Boolean](_ != "0")
     implicit val readDouble = fromString[Double](_.toDouble * -1)
