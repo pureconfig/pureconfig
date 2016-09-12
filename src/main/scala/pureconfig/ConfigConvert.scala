@@ -171,9 +171,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     }
 
     override def to(ts: F[T]): ConfigValue = {
-      val tsList = ts.toList // give an index/id to each element of the traversable
-      val tsConverted = tsList.map(configConvert.value.to)
-      ConfigValueFactory.fromIterable(tsConverted.toIterable.asJava)
+      ConfigValueFactory.fromIterable(ts.toList.map(configConvert.value.to).asJava)
     }
   }
 
