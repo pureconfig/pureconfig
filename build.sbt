@@ -88,6 +88,10 @@ val newerCompilerLintSwitches = Seq(
 
 scalacOptions ++= allVersionCompilerLintSwitches
 
+scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains))
+
+scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value
+
 scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)){
     case Some((2, scalaMajor)) if scalaMajor >= 11 => newerCompilerLintSwitches
 }.toList.flatten
