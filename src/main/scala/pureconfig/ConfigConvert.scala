@@ -196,7 +196,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     }
 
     override def to(keyVals: Map[String, T]): ConfigValue = {
-      ConfigValueFactory.fromMap(keyVals.asJava)
+      ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).asJava)
     }
   }
 

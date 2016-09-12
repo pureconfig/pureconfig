@@ -302,6 +302,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     saveAndLoadIsIdentity(ConfWithVectorOfFoo(Vector(Foo(1))))
   }
 
+  // map of complex types
+
+  case class ConfWithMapOfFoo(map: Map[String, Foo])
+
+  it should s"be able to save and load configurations containing map of Foo" in {
+    saveAndLoadIsIdentity(ConfWithMapOfFoo(Map("a" -> Foo(1), "b" -> Foo(2))))
+  }
+
   case class ConfWithFoo(foo: Foo)
 
   it should "be able to use a local ConfigConvert without getting an ImplicitResolutionFailure error" in {
