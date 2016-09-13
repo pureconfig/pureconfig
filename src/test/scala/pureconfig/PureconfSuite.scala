@@ -461,6 +461,52 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     config.toOption.value.url shouldBe new URL(expected)
   }
 
+  case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
+  case class ConfWithCamelCase(camelCaseInt: Int, camelCaseString: String, camelCaseConf: ConfWithCamelCaseInner)
+
+  it should "use the fields as is by default" in {
+    val conf = ConfigFactory.parseString("""{
+      camelCaseInt = 1
+      camelCaseString = "bar"
+      camelCaseConf {
+        thisIsAnInt = 3
+        thisIsAnotherInt = 10
+      }
+    }""")
+
+    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
+  it should "allow customizing the word delimiters" in {
+    implicit def conv[T] = new WordDelimiterConverter[T](CamelCaseWordDelimiter, HyphenWordDelimiter)
+
+    val conf = ConfigFactory.parseString("""{
+      camel-case-int = 1
+      camel-case-string = "bar"
+      camel-case-conf {
+        this-is-an-int = 3
+        this-is-another-int = 10
+      }
+    }""")
+
+    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
+  it should "allow customizing the word delimiters only for specific types" in {
+    implicit val conv = new WordDelimiterConverter[ConfWithCamelCase](CamelCaseWordDelimiter, HyphenWordDelimiter)
+
+    val conf = ConfigFactory.parseString("""{
+      camel-case-int = 1
+      camel-case-string = "bar"
+      camel-case-conf {
+        thisIsAnInt = 3
+        thisIsAnotherInt = 10
+      }
+    }""")
+
+    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
   val expectedValueForResolveFilesPriority2 = FlatConfig(
     false,
     0.001d,

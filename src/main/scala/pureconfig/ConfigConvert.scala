@@ -100,18 +100,19 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   implicit def hConsConfigConvert[Wrapped, K <: Symbol, V, T <: HList](
     implicit key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
-    tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]]): WrappedConfigConvert[Wrapped, FieldType[K, V] :: T] = new WrappedConfigConvert[Wrapped, FieldType[K, V]:: T] {
+    tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]],
+    wDelimConvert: WordDelimiterConverter[Wrapped]): WrappedConfigConvert[Wrapped, FieldType[K, V] :: T] = new WrappedConfigConvert[Wrapped, FieldType[K, V]:: T] {
 
     override def fromConfigObject(co: ConfigObject): Try[FieldType[K, V] :: T] = {
       val keyStr = key.value.toString().tail // remove the ' in front of the symbol
       for {
-        v <- improveFailure(vFieldConvert.value.from(co.get(keyStr)))
+        v <- improveFailure(vFieldConvert.value.from(co.get(wDelimConvert.fromTypeToConfigField(keyStr))))
         tail <- tConfigConvert.value.from(co)
       } yield field[K](v) :: tail
     }
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
-      val keyStr = key.value.toString().tail
+      val keyStr = wDelimConvert.fromTypeToConfigField(key.value.toString().tail)
       val rem = tConfigConvert.value.to(t.tail)
       // TODO check that all keys are unique
       vFieldConvert.value match {
@@ -330,13 +331,4 @@ trait LowPriorityConfigConvertImplicits {
     }
     override def to(t: ConfigList): ConfigValue = t
   }
-}
-
-trait WordDelimiterConverters {
-  class WordDelimiterConverter[T](typeFieldDelimiter: WordDelimiter, configFieldDelimiter: WordDelimiter) {
-    def fromTypeToConfigField(s: String) = (typeFieldDelimiter.toTokens _ andThen configFieldDelimiter.fromTokens _)(s)
-    def fromConfigToTypeField(s: String) = (configFieldDelimiter.toTokens _ andThen typeFieldDelimiter.fromTokens _)(s)
-  }
-
-  implicit def wordDelimiterConverter[T] = new WordDelimiterConverter[T](NoWordDelimiter, NoWordDelimiter)
 }
