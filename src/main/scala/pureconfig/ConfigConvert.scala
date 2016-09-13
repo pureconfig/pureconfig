@@ -75,8 +75,17 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
-  implicit def hNilConfigConvert = new ConfigConvert[HNil] {
-    override def from(config: ConfigValue): Try[HNil] = Success(HNil)
+  abstract class WrappedConfigConvert[Wrapped, SubRepr] {
+    final def from(config: ConfigValue): Try[SubRepr] = config match {
+      case co: ConfigObject => fromConfigObject(co)
+      case other => Failure(new Exception(s"Unexpected $other"))
+    }
+    def fromConfigObject(co: ConfigObject): Try[SubRepr]
+    def to(v: SubRepr): ConfigValue
+  }
+
+  implicit def hNilConfigConvert[Wrapped]: WrappedConfigConvert[Wrapped, HNil] = new WrappedConfigConvert[Wrapped, HNil] {
+    override def fromConfigObject(config: ConfigObject): Try[HNil] = Success(HNil)
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
@@ -88,24 +97,17 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case WrongTypeForKeyException(typ, suffix) => Failure(WrongTypeForKeyException(typ, keyStr + "." + suffix))
     }
 
-  implicit def hConsConfigConvert[K <: Symbol, V, T <: HList](
+  implicit def hConsConfigConvert[Wrapped, K <: Symbol, V, T <: HList](
     implicit key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
-    tConfigConvert: Lazy[ConfigConvert[T]]): ConfigConvert[FieldType[K, V] :: T] = new ConfigConvert[FieldType[K, V]:: T] {
+    tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]]): WrappedConfigConvert[Wrapped, FieldType[K, V] :: T] = new WrappedConfigConvert[Wrapped, FieldType[K, V]:: T] {
 
-    override def from(config: ConfigValue): Try[FieldType[K, V] :: T] = {
-      config match {
-        case co: ConfigObject =>
-          val keyStr = key.value.toString().tail // remove the ' in front of the symbol
-          for {
-            v <- improveFailure(vFieldConvert.value.from(co.get(keyStr)), keyStr)
-            tail <- tConfigConvert.value.from(config)
-          } yield field[K](v) :: tail
-        case null =>
-          Failure(CannotConvertNullException)
-        case other =>
-          Failure(WrongTypeException(config.valueType().toString))
-      }
+    override def fromConfigObject(co: ConfigObject): Try[FieldType[K, V] :: T] = {
+      val keyStr = key.value.toString().tail // remove the ' in front of the symbol
+      for {
+        v <- improveFailure(vFieldConvert.value.from(co.get(keyStr)))
+        tail <- tConfigConvert.value.from(co)
+      } yield field[K](v) :: tail
     }
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
@@ -231,7 +233,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   // used for products
   implicit def deriveInstanceWithLabelledGeneric[F, Repr <: HList](
     implicit gen: LabelledGeneric.Aux[F, Repr],
-    cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
+    cc: Lazy[WrappedConfigConvert[F, Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
     override def from(config: ConfigValue): Try[F] = {
       cc.value.from(config).map(gen.from)
@@ -243,7 +245,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   // used for coproducts
-  implicit def deriveInstanceWithGeneric[F, Repr <: Coproduct](implicit gen: Generic.Aux[F, Repr], cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
+  implicit def deriveInstanceWithGeneric[F, Repr <: Coproduct](
+    implicit gen: Generic.Aux[F, Repr],
+    cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
     override def from(config: ConfigValue): Try[F] = {
       cc.value.from(config).map(gen.from)
     }
@@ -328,3 +332,11 @@ trait LowPriorityConfigConvertImplicits {
   }
 }
 
+trait WordDelimiterConverters {
+  class WordDelimiterConverter[T](typeFieldDelimiter: WordDelimiter, configFieldDelimiter: WordDelimiter) {
+    def fromTypeToConfigField(s: String) = (typeFieldDelimiter.toTokens _ andThen configFieldDelimiter.fromTokens _)(s)
+    def fromConfigToTypeField(s: String) = (configFieldDelimiter.toTokens _ andThen typeFieldDelimiter.fromTokens _)(s)
+  }
+
+  implicit def wordDelimiterConverter[T] = new WordDelimiterConverter[T](NoWordDelimiter, NoWordDelimiter)
+}
