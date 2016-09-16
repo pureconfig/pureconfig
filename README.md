@@ -23,7 +23,7 @@ certain type. In other words, you define **what** to load and PureConfig provide
 ## Not yet another configuration library
 PureConfig is not a configuration library in the sense that it doesn't search for files or parse them.
 It can be seen as a better front-end for the existing libraries.
-It uses [typesafe config](https://github.com/typesafehub/config) library for loading raw configurations and then
+It uses [typesafe config][typesafe-config] library for loading raw configurations and then
 uses the raw configurations to do its magic.
 
 
@@ -34,7 +34,7 @@ In the sbt configuration file:
 use scala `2.10` or `2.11`:
 
 ```scala
-scalaVersion := "2.11.7" // or "2.10.5"
+scalaVersion := "2.11.8" // or "2.10.5"
 ```
 
 Add the library. For scala `2.11`
@@ -65,7 +65,7 @@ used for the example.
 In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
 there is an example of usage of pureconfig. In the example, the idea is to load a configuration for a directory
 watcher service. The configuration file
-(a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.properties))
+(a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.conf))
 for this program will look like
 
 ```
@@ -74,7 +74,7 @@ dirwatch.filter="*"
 dirwatch.email.host=host_of_email_service
 dirwatch.email.port=port_of_email_service
 dirwatch.email.message="Dirwatch new path found report"
-dirwatch.email.recipients="recipient1,recipient2"
+dirwatch.email.recipients=["recipient1,recipient2"]
 dirwatch.email.sender="sender"
 ```
 
@@ -96,10 +96,7 @@ import pureconfig._
 import java.nio.file.Paths
 import scala.util.Try
 
-implicit val deriveStringConvertForPath = new StringConvert[Path] {
-  override def from(str: String): Try[Path] = Try(Paths.get(str))
-  override def to(path: Path): String = path.toString
-}
+implicit val deriveStringConvertForPath = fromString[Path](Paths.get)
 ```
 
 And then we load the configuration
@@ -122,6 +119,17 @@ println("dirwatch.email.recipients: " + config.dirwatch.email.recipients)
 println("dirwatch.email.sender: " + config.dirwatch.email.sender)
 ```
 
+It's also possible to operate directly on `Config` and `ConfigValue` types
+of [typesafe config][typesafe-config] with the implicit helpers provided in the
+`pureconfig.syntax` package:
+
+```scala
+import com.typesafe.config.ConfigFactory
+import pureconfig.syntax._
+
+val config = ConfigFactory.load().to[Config].get
+println("The loaded configuration is: " + config.toString)
+```
 
 ## License
 
@@ -132,3 +140,5 @@ println("dirwatch.email.sender: " + config.dirwatch.email.sender)
 
 To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe config](https://github.com/typesafehub/config)
 developers.
+
+[typesafe-config]: https://github.com/typesafehub/config

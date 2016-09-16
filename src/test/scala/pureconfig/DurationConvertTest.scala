@@ -2,6 +2,7 @@ package pureconfig
 
 import java.util.concurrent.TimeUnit
 
+import com.typesafe.config.ConfigValueFactory
 import org.scalatest.{ FlatSpec, Matchers, TryValues }
 
 import scala.concurrent.duration.Duration
@@ -42,16 +43,13 @@ class DurationConvertTest extends FlatSpec with Matchers with TryValues {
     from("88222ns") shouldBe Success(Duration(88222, TimeUnit.NANOSECONDS))
   }
   it should "report a helpful error message when failing to convert a bad duration" in {
-    val key = "a.long.config.path"
     val badDuration = "10 lordsALeaping"
-    val rawConfig = Map(key -> badDuration)
-    val result = LocalDurationConvert.durationConfigConvert.from(rawConfig, key)
+    val result = LocalDurationConvert.durationConfigConvert.from(ConfigValueFactory.fromAnyRef(badDuration))
     result match {
       case Success(_) => fail("Should be failure")
       case Failure(ex) =>
         val message = ex.getMessage
         println(message)
-        message should include(key)
         message should include(badDuration)
     }
   }

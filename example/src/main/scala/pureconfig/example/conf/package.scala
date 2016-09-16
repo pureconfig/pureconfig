@@ -8,7 +8,7 @@ package pureconfig.example
 
 import java.nio.file.{Path, Paths}
 
-import pureconfig.StringConvert
+import pureconfig.ConfigConvert.fromString
 
 import scala.util.Try
 
@@ -37,8 +37,5 @@ package object conf {
 
 
   // path doesn't have a StringConvert instance, we are going to create it here
-  implicit val deriveStringConvertForPath = new StringConvert[Path] {
-    override def from(str: String): Try[Path] = Try(Paths.get(str))
-    override def to(path: Path): String = path.toString
-  }
+  implicit val deriveStringConvertForPath = fromString[Path](Paths.get(_))
 }
