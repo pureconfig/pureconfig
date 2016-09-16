@@ -64,7 +64,7 @@ pomExtra := (
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.conf", "pureconfig.conf.namespace")
+OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.syntax")
 
 OsgiKeys.privatePackage := Seq()
 
