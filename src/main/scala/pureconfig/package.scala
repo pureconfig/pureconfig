@@ -7,7 +7,7 @@
 import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
-import com.typesafe.config.{ Config => TypesafeConfig, ConfigFactory, ConfigValue }
+import com.typesafe.config.{ Config => TypesafeConfig, ConfigFactory }
 
 import scala.util.Try
 
@@ -126,17 +126,5 @@ package object pureconfig {
         .resolve
       loadConfig[Config](resolvedTypesafeConfig)
     }
-  }
-
-  implicit class PimpedAny[T](val any: T) extends AnyVal {
-    def toConfig(implicit configConvert: ConfigConvert[T]): ConfigValue = configConvert.to(any)
-  }
-
-  implicit class PimpedConfigValue(val conf: ConfigValue) extends AnyVal {
-    def to[T](implicit configConvert: ConfigConvert[T]): Try[T] = configConvert.from(conf)
-  }
-
-  implicit class PimpedConfig(val conf: TypesafeConfig) extends AnyVal {
-    def to[T: ConfigConvert]: Try[T] = conf.root().to[T]
   }
 }
