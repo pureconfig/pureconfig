@@ -65,7 +65,7 @@ used for the example.
 In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
 there is an example of usage of pureconfig. In the example, the idea is to load a configuration for a directory
 watcher service. The configuration file
-(a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.properties))
+(a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.conf))
 for this program will look like
 
 ```
@@ -74,7 +74,7 @@ dirwatch.filter="*"
 dirwatch.email.host=host_of_email_service
 dirwatch.email.port=port_of_email_service
 dirwatch.email.message="Dirwatch new path found report"
-dirwatch.email.recipients="recipient1,recipient2"
+dirwatch.email.recipients=["recipient1,recipient2"]
 dirwatch.email.sender="sender"
 ```
 
@@ -96,10 +96,7 @@ import pureconfig._
 import java.nio.file.Paths
 import scala.util.Try
 
-implicit val deriveStringConvertForPath = new StringConvert[Path] {
-  override def from(str: String): Try[Path] = Try(Paths.get(str))
-  override def to(path: Path): String = path.toString
-}
+implicit val deriveStringConvertForPath = fromString[Path](Paths.get)
 ```
 
 And then we load the configuration
