@@ -4,8 +4,6 @@ import com.typesafe.config.{ Config => TypesafeConfig, ConfigValue }
 import scala.util.Try
 
 package object syntax {
-  import ConfigConvert._
-
   implicit class PimpedAny[T](val any: T) extends AnyVal {
     def toConfig(implicit configConvert: ConfigConvert[T]): ConfigValue = configConvert.to(any)
   }
