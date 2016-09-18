@@ -465,6 +465,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ConfWithCamelCase(camelCaseInt: Int, camelCaseString: String, camelCaseConf: ConfWithCamelCaseInner)
 
   it should "use the fields as is by default" in {
+    import pureconfig.syntax._
+
     val conf = ConfigFactory.parseString("""{
       camelCaseInt = 1
       camelCaseString = "bar"
@@ -478,6 +480,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   it should "allow customizing the word delimiters" in {
+    import pureconfig.syntax._
+
     implicit def conv[T] = new WordDelimiterConverter[T](CamelCaseWordDelimiter, HyphenWordDelimiter)
 
     val conf = ConfigFactory.parseString("""{
@@ -493,6 +497,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   it should "allow customizing the word delimiters only for specific types" in {
+    import pureconfig.syntax._
+
     implicit val conv = new WordDelimiterConverter[ConfWithCamelCase](CamelCaseWordDelimiter, HyphenWordDelimiter)
 
     val conf = ConfigFactory.parseString("""{
