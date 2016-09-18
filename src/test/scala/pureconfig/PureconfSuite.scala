@@ -446,38 +446,4 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val files = fileList()
     loadConfigFromFiles[FlatConfig](files).failure.exception.getMessage should include regex "config files.*must not be empty"
   }
-
-  it should "load configurations which use += to append into a list from multiple files with somewhat surprising results" in {
-    val files = fileList(
-      "src/test/resources/conf/loadConfigFromFiles/appendIntoList.priority1.conf",
-      "src/test/resources/conf/loadConfigFromFiles/appendIntoList.priority2.conf"
-    )
-    val expected = List(
-      98, // These three surprise me; they appear first despite coming from the lower precedence file, rather than at the end of the list.
-      99,
-      100, // 98 and 100 are included via HOCON `include`. Their order within the file is preserved.
-      8, // The next three come in order from the greater precedence file, as I'd expect.
-      9,
-      12,
-      50 // This one is slurped in via a HOCON `include`.
-    ).map(Foo(_))
-    loadConfigFromFiles[ConfWithListOfFoo](files).success.value shouldBe ConfWithListOfFoo(expected)
-  }
-
-  it should "load list from multiple files with expected order of descending precedence using the verbose syntax in reverse order" in {
-    val files = fileList(
-      "src/test/resources/conf/loadConfigFromFiles/appendIntoListVerbosely.priority1.conf",
-      "src/test/resources/conf/loadConfigFromFiles/appendIntoListVerbosely.priority2.conf",
-      "src/test/resources/conf/loadConfigFromFiles/appendIntoListVerbosely.priority3.conf"
-    )
-    val expected = List(
-      1,
-      2,
-      99,
-      100,
-      404,
-      808
-    ).map(Foo(_))
-    loadConfigFromFiles[ConfWithListOfFoo](files).success.value shouldBe ConfWithListOfFoo(expected)
-  }
 }
