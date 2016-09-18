@@ -11,6 +11,10 @@ import com.typesafe.config.ConfigFactory
 import PureconfSuite.fileList
 import ListAppendSuite._
 
+/**
+ * Demonstrate/documention the somewhat surprising behavior of using HOCON's list append functionality
+ * across multiple files.
+ */
 object ListAppendSuite {
   case class IntWrapper(i: Int)
 
