@@ -122,7 +122,7 @@ package object pureconfig {
     } else {
       val resolvedTypesafeConfig = files
         .map(ConfigFactory.parseFile)
-        .reduce(_.withFallback(_))
+        .reduceLeft(_.withFallback(_))
         .resolve
       loadConfig[Config](resolvedTypesafeConfig)
     }
