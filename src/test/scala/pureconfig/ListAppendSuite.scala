@@ -3,15 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
+import org.scalatest._
+import scala.collection.JavaConverters._
 import java.net.URL
 import java.io.File
-
-import org.scalatest._
-
+import com.typesafe.config.ConfigFactory
 import PureconfSuite.fileList
 import ListAppendSuite._
-import scala.collection.JavaConverters._
-import com.typesafe.config.ConfigFactory
 
 object ListAppendSuite {
   case class IntWrapper(i: Int)
