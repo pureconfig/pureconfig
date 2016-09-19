@@ -245,13 +245,31 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val readString = fromString[String](identity)
-  implicit val readBoolean = fromString[Boolean](_.toBoolean)
-  implicit val readDouble = fromString[Double]({
-    v => if (v.last == '%') v.dropRight(1).toDouble / 100.0 else v.toDouble
+  implicit val readBoolean = fromString[Boolean](_ match {
+    case "" => throw new Exception("Cannot read a Boolean from an empty string")
+    case v => v.toBoolean
   })
-  implicit val readFloat = fromString[Float](_.toFloat)
-  implicit val readInt = fromString[Int](_.toInt)
-  implicit val readLong = fromString[Long](_.toLong)
-  implicit val readShort = fromString[Short](_.toShort)
+  implicit val readDouble = fromString[Double](_ match {
+    case "" => throw new Exception("Cannot read a Double from an empty string")
+    case v if v.last == '%' => v.dropRight(1).toDouble / 100d
+    case v => v.toDouble
+  })
+  implicit val readFloat = fromString[Float](_ match {
+    case "" => throw new Exception("Cannot read a Float from an empty string")
+    case v if v.last == '%' => v.dropRight(1).toFloat / 100f
+    case v => v.toFloat
+  })
+  implicit val readInt = fromString[Int](_ match {
+    case "" => throw new Exception("Cannot read an Int from an empty string")
+    case v => v.toInt
+  })
+  implicit val readLong = fromString[Long](_ match {
+    case "" => throw new Exception("Cannot read a Long from an empty string")
+    case v => v.toLong
+  })
+  implicit val readShort = fromString[Short](_ match {
+    case "" => throw new Exception("Cannot read a Short from an empty string")
+    case v => v.toShort
+  })
   implicit val readURL = stringConvert[URL](new URL(_), _.toString)
 }
