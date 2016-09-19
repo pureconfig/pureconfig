@@ -22,7 +22,7 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest._
 import pureconfig.ConfigConvert.{ fromString, stringConvert }
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{ Duration, FiniteDuration }
 
 /**
  * @author Mario Pastorelli
@@ -157,7 +157,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ExecutorConf(memory: String, extraJavaOptions: String)
   case class SparkAppConf(name: String)
   case class SparkLocalConf(dir: String)
-  case class SparkNetwork(timeout: Duration)
+  case class SparkNetwork(timeout: FiniteDuration)
   case class SparkConf(master: String, app: SparkAppConf, local: SparkLocalConf, driver: DriverConf, executor: ExecutorConf, extraListeners: Seq[String], network: SparkNetwork)
   case class SparkRootConf(spark: SparkConf)
 
@@ -174,7 +174,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       writer.println("""spark.master="local[*]"""")
       writer.println("""spark.executor.memory="2g"""")
       writer.println("""spark.local.dir="/tmp/"""")
-      writer.println("""spark.network.timeout="45s"""")
+      writer.println("""spark.network.timeout=45s""")
       // unused configuration
       writer.println("""akka.loggers = ["akka.event.Logging$DefaultLogger"]""")
       writer.close()
@@ -195,7 +195,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       config.spark.master should be("local[*]")
       config.spark.executor.memory should be("2g")
       config.spark.local.dir should be("/tmp/")
-      config.spark.network.timeout should be(Duration(45, TimeUnit.SECONDS))
+      config.spark.network.timeout should be(FiniteDuration(45, TimeUnit.SECONDS))
     }
   }
 
