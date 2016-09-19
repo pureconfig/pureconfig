@@ -246,7 +246,9 @@ trait LowPriorityConfigConvertImplicits {
 
   implicit val readString = fromString[String](identity)
   implicit val readBoolean = fromString[Boolean](_.toBoolean)
-  implicit val readDouble = fromString[Double](_.toDouble)
+  implicit val readDouble = fromString[Double]({
+    v => if (v.last == '%') v.dropRight(1).toDouble / 100.0 else v.toDouble
+  })
   implicit val readFloat = fromString[Float](_.toFloat)
   implicit val readInt = fromString[Int](_.toInt)
   implicit val readLong = fromString[Long](_.toLong)

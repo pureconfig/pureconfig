@@ -104,6 +104,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     config.success.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
   }
 
+  it should "be able to load a Double from a percentage" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ v: 52% }""")
+    case class ConfigWithDouble(v: Double)
+    conf.to[ConfigWithDouble] shouldBe Success(ConfigWithDouble(0.52))
+  }
+
   // load HOCON-style lists
   case class ConfigWithHoconList(xs: List[Int])
 
