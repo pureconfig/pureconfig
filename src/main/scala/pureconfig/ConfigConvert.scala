@@ -57,10 +57,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
-  def fromNonEmptyString[T: ClassTag](fromF: String => T): ConfigConvert[T] = new ConfigConvert[T] {
-    lazy val typeName = implicitly[ClassTag[T]]
+  def fromNonEmptyString[T](fromF: String => T)(implicit ct: ClassTag[T]): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Try[T] = fromFConvert {
-      case "" => throw new IllegalArgumentException(s"Cannot read a $typeName from an empty string.")
+      case "" => throw new IllegalArgumentException(s"Cannot read a $ct from an empty string.")
       case x => fromF(x)
     }(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
