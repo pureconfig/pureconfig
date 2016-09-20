@@ -13,10 +13,11 @@ import shapeless.labelled._
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
+import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
 
 import java.net.URL
-import pureconfig.ConfigConvert.{ fromString, stringConvert }
+import pureconfig.ConfigConvert.{ fromString, fromNonEmptyString, stringConvert }
 
 /**
  * Trait for conversion between `T` and `ConfigValue`.
@@ -53,6 +54,15 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   def fromString[T](fromF: String => T): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
+    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
+  }
+
+  def fromNonEmptyString[T: ClassTag](fromF: String => T): ConfigConvert[T] = new ConfigConvert[T] {
+    lazy val typeName = implicitly[ClassTag[T]]
+    override def from(config: ConfigValue): Try[T] = fromFConvert {
+      case "" => throw new IllegalArgumentException(s"Cannot read a $typeName from an empty string.")
+      case x => fromF(x)
+    }(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
@@ -245,31 +255,17 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val readString = fromString[String](identity)
-  implicit val readBoolean = fromString[Boolean](_ match {
-    case "" => throw new Exception("Cannot read a Boolean from an empty string")
-    case v => v.toBoolean
-  })
-  implicit val readDouble = fromString[Double](_ match {
-    case "" => throw new Exception("Cannot read a Double from an empty string")
+  implicit val readBoolean = fromNonEmptyString[Boolean](_.toBoolean)
+  implicit val readDouble = fromNonEmptyString[Double]({
     case v if v.last == '%' => v.dropRight(1).toDouble / 100d
     case v => v.toDouble
   })
-  implicit val readFloat = fromString[Float](_ match {
-    case "" => throw new Exception("Cannot read a Float from an empty string")
+  implicit val readFloat = fromNonEmptyString[Float]({
     case v if v.last == '%' => v.dropRight(1).toFloat / 100f
     case v => v.toFloat
   })
-  implicit val readInt = fromString[Int](_ match {
-    case "" => throw new Exception("Cannot read an Int from an empty string")
-    case v => v.toInt
-  })
-  implicit val readLong = fromString[Long](_ match {
-    case "" => throw new Exception("Cannot read a Long from an empty string")
-    case v => v.toLong
-  })
-  implicit val readShort = fromString[Short](_ match {
-    case "" => throw new Exception("Cannot read a Short from an empty string")
-    case v => v.toShort
-  })
+  implicit val readInt = fromNonEmptyString[Int](_.toInt)
+  implicit val readLong = fromNonEmptyString[Long](_.toLong)
+  implicit val readShort = fromNonEmptyString[Short](_.toShort)
   implicit val readURL = stringConvert[URL](new URL(_), _.toString)
 }

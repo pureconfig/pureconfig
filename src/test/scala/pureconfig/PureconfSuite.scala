@@ -104,6 +104,18 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     config.success.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
   }
 
+  it should "fail when trying to convert to basic types from an empty string" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ v: "" }""")
+    conf.getValue("v").to[Boolean].isFailure shouldBe true
+    conf.getValue("v").to[Double].isFailure shouldBe true
+    conf.getValue("v").to[Float].isFailure shouldBe true
+    conf.getValue("v").to[Int].isFailure shouldBe true
+    conf.getValue("v").to[Long].isFailure shouldBe true
+    conf.getValue("v").to[Short].isFailure shouldBe true
+  }
+
   it should "be able to load a Double from a percentage" in {
     import pureconfig.syntax._
 
