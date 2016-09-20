@@ -13,10 +13,11 @@ import shapeless.labelled._
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
+import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
 
 import java.net.URL
-import pureconfig.ConfigConvert.{ fromString, stringConvert }
+import pureconfig.ConfigConvert.{ fromString, fromNonEmptyString, stringConvert }
 
 /**
  * Trait for conversion between `T` and `ConfigValue`.
@@ -56,6 +57,14 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
+  def fromNonEmptyString[T](fromF: String => T)(implicit ct: ClassTag[T]): ConfigConvert[T] = new ConfigConvert[T] {
+    override def from(config: ConfigValue): Try[T] = fromFConvert {
+      case "" => throw new IllegalArgumentException(s"Cannot read a $ct from an empty string.")
+      case x => fromF(x)
+    }(config)
+    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
+  }
+
   def stringConvert[T](fromF: String => T, toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
@@ -80,7 +89,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
             tail <- tConfigConvert.value.from(config)
           } yield field[K](v) :: tail
         case other =>
-          Failure(new Exception(s"Couldn't derive hlist from $other."))
+          Failure(new IllegalArgumentException(s"Couldn't derive hlist from $other."))
       }
     }
 
@@ -104,7 +113,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   case class NoValidCoproductChoiceFound(config: ConfigValue)
-    extends RuntimeException(s"No valid coproduct type choice found for configuration $config")
+    extends RuntimeException(s"No valid coproduct type choice found for configuration $config.")
 
   implicit def cNilConfigConvert: ConfigConvert[CNil] = new ConfigConvert[CNil] {
     override def from(config: ConfigValue): Try[CNil] =
@@ -166,7 +175,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
           tryBuilder.map(_.result())
         case other =>
-          Failure(new Exception(s"Couldn't derive traversable from $other."))
+          Failure(new IllegalArgumentException(s"Couldn't derive traversable from $other."))
       }
     }
 
@@ -191,7 +200,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
               } yield acc + (key -> value)
           }
         case other =>
-          Failure(new Exception(s"Couldn't derive map from $other."))
+          Failure(new IllegalArgumentException(s"Couldn't derive map from $other."))
       }
     }
 
@@ -233,9 +242,9 @@ trait LowPriorityConfigConvertImplicits {
   import scala.concurrent.duration.{ Duration, FiniteDuration }
   implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
     override def from(config: ConfigValue): Try[Duration] = {
-      Some(config.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new Exception(s"Couldn't read duration from $config."))) { durationString =>
+      Some(config.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new IllegalArgumentException(s"Couldn't read duration from $config."))) { durationString =>
         DurationConvert.from(durationString).recoverWith {
-          case ex => Failure(new Exception(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
+          case ex => Failure(new IllegalArgumentException(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
         }
       }
     }
@@ -253,11 +262,17 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val readString = fromString[String](identity)
-  implicit val readBoolean = fromString[Boolean](_.toBoolean)
-  implicit val readDouble = fromString[Double](_.toDouble)
-  implicit val readFloat = fromString[Float](_.toFloat)
-  implicit val readInt = fromString[Int](_.toInt)
-  implicit val readLong = fromString[Long](_.toLong)
-  implicit val readShort = fromString[Short](_.toShort)
+  implicit val readBoolean = fromNonEmptyString[Boolean](_.toBoolean)
+  implicit val readDouble = fromNonEmptyString[Double]({
+    case v if v.last == '%' => v.dropRight(1).toDouble / 100d
+    case v => v.toDouble
+  })
+  implicit val readFloat = fromNonEmptyString[Float]({
+    case v if v.last == '%' => v.dropRight(1).toFloat / 100f
+    case v => v.toFloat
+  })
+  implicit val readInt = fromNonEmptyString[Int](_.toInt)
+  implicit val readLong = fromNonEmptyString[Long](_.toLong)
+  implicit val readShort = fromNonEmptyString[Short](_.toShort)
   implicit val readURL = stringConvert[URL](new URL(_), _.toString)
 }
