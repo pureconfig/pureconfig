@@ -90,7 +90,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
             tail <- tConfigConvert.value.from(config)
           } yield field[K](v) :: tail
         case other =>
-          Failure(new Exception(s"Couldn't derive hlist from $other."))
+          Failure(new IllegalArgumentException(s"Couldn't derive hlist from $other."))
       }
     }
 
@@ -114,7 +114,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   case class NoValidCoproductChoiceFound(config: ConfigValue)
-    extends RuntimeException(s"No valid coproduct type choice found for configuration $config")
+    extends RuntimeException(s"No valid coproduct type choice found for configuration $config.")
 
   implicit def cNilConfigConvert: ConfigConvert[CNil] = new ConfigConvert[CNil] {
     override def from(config: ConfigValue): Try[CNil] =
@@ -176,7 +176,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
           tryBuilder.map(_.result())
         case other =>
-          Failure(new Exception(s"Couldn't derive traversable from $other."))
+          Failure(new IllegalArgumentException(s"Couldn't derive traversable from $other."))
       }
     }
 
@@ -201,7 +201,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
               } yield acc + (key -> value)
           }
         case other =>
-          Failure(new Exception(s"Couldn't derive map from $other."))
+          Failure(new IllegalArgumentException(s"Couldn't derive map from $other."))
       }
     }
 
@@ -243,9 +243,9 @@ trait LowPriorityConfigConvertImplicits {
   import scala.concurrent.duration.Duration
   implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
     override def from(config: ConfigValue): Try[Duration] = {
-      Some(config.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new Exception(s"Couldn't read duration from $config."))) { durationString =>
+      Some(config.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new IllegalArgumentException(s"Couldn't read duration from $config."))) { durationString =>
         DurationConvert.from(durationString).recoverWith {
-          case ex => Failure(new Exception(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
+          case ex => Failure(new IllegalArgumentException(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
         }
       }
     }
