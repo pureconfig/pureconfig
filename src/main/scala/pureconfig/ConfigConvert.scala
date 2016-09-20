@@ -15,9 +15,10 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
-
 import java.net.URL
-import pureconfig.ConfigConvert.{ fromString, fromNonEmptyString, stringConvert }
+
+import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, stringConvert }
+import pureconfig.error.{ CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException }
 
 /**
  * Trait for conversion between `T` and `ConfigValue`.
@@ -46,10 +47,14 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   private def fromFConvert[T](fromF: String => T): ConfigValue => Try[T] =
     config => {
-      Try(fromF(config.valueType() match {
-        case ConfigValueType.STRING => config.unwrapped().toString
-        case _ => config.render(ConfigRenderOptions.concise())
-      }))
+      if (config == null) {
+        Failure(CannotConvertNullException)
+      } else {
+        Try(fromF(config.valueType() match {
+          case ConfigValueType.STRING => config.unwrapped().toString
+          case _ => config.render(ConfigRenderOptions.concise())
+        }))
+      }
     }
 
   def fromString[T](fromF: String => T): ConfigConvert[T] = new ConfigConvert[T] {
@@ -75,6 +80,14 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
+  private[pureconfig] def improveFailure[Z](result: Try[Z], keyStr: String): Try[Z] =
+    result recoverWith {
+      case CannotConvertNullException => Failure(KeyNotFoundException(keyStr))
+      case KeyNotFoundException(suffix) => Failure(KeyNotFoundException(keyStr + "." + suffix))
+      case WrongTypeException(typ) => Failure(WrongTypeForKeyException(typ, keyStr))
+      case WrongTypeForKeyException(typ, suffix) => Failure(WrongTypeForKeyException(typ, keyStr + "." + suffix))
+    }
+
   implicit def hConsConfigConvert[K <: Symbol, V, T <: HList](
     implicit key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
@@ -85,11 +98,13 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
         case co: ConfigObject =>
           val keyStr = key.value.toString().tail // remove the ' in front of the symbol
           for {
-            v <- vFieldConvert.value.from(co.get(keyStr))
+            v <- improveFailure(vFieldConvert.value.from(co.get(keyStr)), keyStr)
             tail <- tConfigConvert.value.from(config)
           } yield field[K](v) :: tail
+        case null =>
+          Failure(CannotConvertNullException)
         case other =>
-          Failure(new IllegalArgumentException(s"Couldn't derive hlist from $other."))
+          Failure(WrongTypeException(config.valueType().toString))
       }
     }
 
@@ -308,3 +323,4 @@ trait LowPriorityConfigConvertImplicits {
     override def to(t: ConfigList): ConfigValue = t
   }
 }
+
