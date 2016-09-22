@@ -8,7 +8,7 @@ import java.net.URL
 import java.nio.file.{ Path, Files }
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config._
+import com.typesafe.config.{ Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import shapeless.{ Coproduct, :+:, CNil }
@@ -18,7 +18,6 @@ import scala.collection.immutable._
 import scala.util.Success
 import scala.util.{ Failure, Try, Success }
 
-import com.typesafe.config.ConfigFactory
 import org.scalatest._
 import pureconfig.ConfigConvert.{ fromString, stringConvert }
 
@@ -122,6 +121,56 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val conf = ConfigFactory.parseString("""{ v: 52% }""")
     case class ConfigWithDouble(v: Double)
     conf.to[ConfigWithDouble] shouldBe Success(ConfigWithDouble(0.52))
+  }
+
+  it should "be able to load Typesafe Config types directly" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{
+      list = [1, 2, 3]
+      v1 = 4
+      v2 = "str"
+      m {
+        k1 {
+          v1 = 3
+          v2 = 4
+        }
+        k2 {
+          v1 = 10
+          v3 = "str"
+        }
+        k3 {
+          v1 = 5
+          v4 {
+            v5 = 6
+          }
+        }
+      }
+    }""")
+
+    conf.getValue("list").to[ConfigList] shouldBe Success(ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
+    conf.getValue("list").to[ConfigValue] shouldBe Success(ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
+    conf.getValue("v1").to[ConfigValue] shouldBe Success(ConfigValueFactory.fromAnyRef(4))
+    conf.getValue("v2").to[ConfigValue] shouldBe Success(ConfigValueFactory.fromAnyRef("str"))
+    conf.getValue("m.k1").to[ConfigObject] shouldBe Success(ConfigFactory.parseString("""{
+      v1 = 3
+      v2 = 4
+    }""").root())
+    conf.getConfig("m").to[Map[String, TypesafeConfig]] shouldBe Success(Map(
+      "k1" -> ConfigFactory.parseString("""{
+        v1 = 3
+        v2 = 4
+      }"""),
+      "k2" -> ConfigFactory.parseString("""{
+        v1 = 10
+        v3 = "str"
+      }"""),
+      "k3" -> ConfigFactory.parseString("""{
+        v1 = 5
+        v4 {
+          v5 = 6
+        }
+      }""")))
   }
 
   // load HOCON-style lists

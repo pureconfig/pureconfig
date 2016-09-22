@@ -275,4 +275,36 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readLong = fromNonEmptyString[Long](_.toLong)
   implicit val readShort = fromNonEmptyString[Short](_.toShort)
   implicit val readURL = stringConvert[URL](new URL(_), _.toString)
+
+  implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
+    override def from(config: ConfigValue): Try[Config] = config match {
+      case co: ConfigObject => Success(co.toConfig)
+      case other =>
+        Failure(new IllegalArgumentException(s"Couldn't derive Config from $other"))
+    }
+    override def to(t: Config): ConfigValue = t.root()
+  }
+
+  implicit val readConfigObject: ConfigConvert[ConfigObject] = new ConfigConvert[ConfigObject] {
+    override def from(config: ConfigValue): Try[ConfigObject] = config match {
+      case c: ConfigObject => Success(c)
+      case other =>
+        Failure(new IllegalArgumentException(s"Couldn't derive ConfigObject from $other"))
+    }
+    override def to(t: ConfigObject): ConfigValue = t
+  }
+
+  implicit val readConfigValue: ConfigConvert[ConfigValue] = new ConfigConvert[ConfigValue] {
+    override def from(config: ConfigValue): Try[ConfigValue] = Success(config)
+    override def to(t: ConfigValue): ConfigValue = t
+  }
+
+  implicit val readConfigList: ConfigConvert[ConfigList] = new ConfigConvert[ConfigList] {
+    override def from(config: ConfigValue): Try[ConfigList] = config match {
+      case c: ConfigList => Success(c)
+      case other =>
+        Failure(new IllegalArgumentException(s"Couldn't derive ConfigList from $other"))
+    }
+    override def to(t: ConfigList): ConfigValue = t
+  }
 }
