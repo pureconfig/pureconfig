@@ -478,6 +478,20 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfigFromFiles[FlatConfig](files).success.get shouldBe expectedValueForResolveFilesPriority2
   }
 
+  "loadConfigWithFallBack" should "fallback if no config keys are found" in {
+    val priority1Conf = ConfigFactory.load("conf/loadConfigFromFiles/priority1.conf")
+    val actual = loadConfigWithFallback[FlatConfig](priority1Conf)
+    actual.success.get shouldBe FlatConfig(
+      true,
+      0.0d,
+      0.99f,
+      0,
+      1L,
+      "default",
+      None
+    )
+  }
+
   it should "fill in missing values from the lower priority files" in {
     val files = fileList(
       "src/test/resources/conf/loadConfigFromFiles/priority1.conf",
