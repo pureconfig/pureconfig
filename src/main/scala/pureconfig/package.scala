@@ -76,15 +76,28 @@ package object pureconfig {
   }
 
   /**
-    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
-  def loadConfigWithFallBack[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration
+    *
+    * @param conf Typesafe configuration to load
+    * @return A `Success` with the configuration if it is possible to create an instance of type
+    *         `Config` from the configuration files, else a `Failure` with details on why it
+    *         isn't possible
+    */
+  def loadConfigWithFallback[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
     loadConfig[Config](conf.withFallback(ConfigFactory.load()))
   }
 
   /**
-    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
-  def loadConfigWithFallBack[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration
+    *
+    * @param conf Typesafe configuration to load
+    * @param namespace the base namespace from which the configuration should be load
+    * @return A `Success` with the configuration if it is possible to create an instance of type
+    *         `Config` from the configuration files, else a `Failure` with details on why it
+    *         isn't possible
+    */
+  def loadConfigWithFallback[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
     loadConfig[Config](conf.withFallback(ConfigFactory.load()), namespace)
   }
