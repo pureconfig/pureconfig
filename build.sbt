@@ -4,7 +4,7 @@ name := "pureconfig"
 
 organization := "com.github.melrief"
 
-version := "0.3.0"
+version := "0.3.1"
 
 homepage := Some(url("https://github.com/melrief/pureconfig"))
 
