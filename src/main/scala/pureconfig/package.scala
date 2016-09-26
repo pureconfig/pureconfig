@@ -80,6 +80,24 @@ package object pureconfig {
     loadConfig[Config](pureconfig.conf.typesafeConfigToConfig(conf), namespace)
   }
 
+  /**
+    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
+  def loadConfigWithFallBack[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
+    val fallBackConf = ConfigFactory.load()
+    val fallBackConfig = conf.withFallback(fallBackConf)
+    loadConfig[Config](fallBackConfig)
+  }
+
+  /**
+    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
+  def loadConfigWithFallBack[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
+    val fallBackConf = ConfigFactory.load()
+    val fallBackConfig = conf.withFallback(fallBackConf)
+    loadConfig[Config](fallBackConfig, namespace)
+  }
+
   /** Load a configuration of type `Config` from the given `RawConfig` */
   def loadConfig[Config](conf: RawConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     loadConfig[Config](conf, "")
@@ -100,10 +118,10 @@ package object pureconfig {
   @throws[IllegalArgumentException]
   def saveConfigAsPropertyFile[Config](conf: Config, outputPath: Path, overrideOutputPath: Boolean = false)(implicit conv: ConfigConvert[Config]): Unit = {
     if (!overrideOutputPath && Files.isRegularFile(outputPath)) {
-      throw new IllegalArgumentException(s"Cannot save configuration in file '${outputPath}' because it already exists")
+      throw new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
     }
     if (Files isDirectory outputPath) {
-      throw new IllegalArgumentException(s"Cannot save configuration in file '${outputPath}' because it already exists and is a directory")
+      throw new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists and is a directory")
     }
 
     saveConfigToStream(conf, Files.newOutputStream(outputPath))(conv)
