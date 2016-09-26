@@ -5,21 +5,21 @@ package pureconfig
 
 import java.io.PrintWriter
 import java.net.URL
-import java.nio.file.{ Path, Files }
+import java.nio.file.{ Files, Path }
 import java.util.concurrent.TimeUnit
 
 import com.typesafe.config.{ Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import shapeless.{ Coproduct, :+:, CNil }
+import shapeless.{ :+:, CNil, Coproduct }
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.util.Success
-import scala.util.{ Failure, Try, Success }
-
+import scala.util.{ Failure, Success, Try }
+import com.typesafe.config.ConfigFactory
 import org.scalatest._
 import pureconfig.ConfigConvert.{ fromString, stringConvert }
+import pureconfig.error.{ KeyNotFoundException, WrongTypeForKeyException }
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 
@@ -99,7 +99,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       "i" -> 56,
       "l" -> -88,
       "s" -> "qwerTy").asJava).toConfig)
-
+    
     config.success.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
   }
 
@@ -514,5 +514,17 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "complain if the list of files is empty" in {
     val files = fileList()
     loadConfigFromFiles[FlatConfig](files).failure.exception.getMessage should include regex "config files.*must not be empty"
+  }
+
+  case class FooBar(foo: Foo, bar: Bar)
+
+  it should s"return a ${classOf[KeyNotFoundException]} when a key is not in the configuration" in {
+    loadConfig[Foo](ConfigFactory.empty()).failure.exception shouldEqual KeyNotFoundException("i")
+    val conf = ConfigFactory.parseMap(Map("namespace.foo" -> 1).asJava)
+    loadConfig[Foo](conf, "namespace").failure.exception shouldEqual KeyNotFoundException("namespace.i")
+    val conf2 = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava)
+    loadConfig[FooBar](conf2).failure.exception shouldEqual WrongTypeForKeyException("STRING", "bar.foo")
+    val conf3 = ConfigFactory.parseMap(Map("ns.foo.i" -> 1, "ns.bar.foo" -> "").asJava)
+    loadConfig[FooBar](conf3, "ns").failure.exception shouldEqual WrongTypeForKeyException("STRING", "ns.bar.foo")
   }
 }

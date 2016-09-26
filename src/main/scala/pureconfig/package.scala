@@ -35,7 +35,7 @@ package object pureconfig {
    */
   def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
-    loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv)
+    ConfigConvert.improveFailure(loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv), namespace)
   }
 
   /**
@@ -62,17 +62,17 @@ package object pureconfig {
    */
   def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
-    loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv)
+    ConfigConvert.improveFailure(
+      loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv), namespace)
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
-  def loadConfig[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+  def loadConfig[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] =
     conv.from(conf.root())
-  }
 
   /** Load a configuration of type `Config` from the given `Config` */
   def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    conv.from(conf.getConfig(namespace).root())
+    ConfigConvert.improveFailure(conv.from(conf.getConfig(namespace).root()), namespace)
   }
 
   /**
