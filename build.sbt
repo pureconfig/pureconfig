@@ -4,7 +4,7 @@ name := "pureconfig"
 
 organization := "com.github.melrief"
 
-version := "0.3.1"
+version := "0.3.1.1"
 
 homepage := Some(url("https://github.com/melrief/pureconfig"))
 
@@ -64,7 +64,7 @@ pomExtra := (
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.syntax")
+OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.syntax", "pureconfig.error")
 
 OsgiKeys.privatePackage := Seq()
 
