@@ -8,18 +8,20 @@ import java.net.URL
 import java.nio.file.{ Path, Files }
 import java.util.concurrent.TimeUnit
 
+import com.typesafe.config.{ Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import shapeless.{ Coproduct, :+:, CNil }
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable._
+import scala.util.Success
 import scala.util.{ Failure, Try, Success }
 
-import com.typesafe.config.ConfigFactory
 import org.scalatest._
-import pureconfig.conf.RawConfig
+import pureconfig.ConfigConvert.{ fromString, stringConvert }
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{ Duration, FiniteDuration }
 
 /**
  * @author Mario Pastorelli
@@ -61,23 +63,114 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     }
   }
 
-  it should s"be able to override locally all of the StringConvert instances used to parse ${classOf[FlatConfig]}" in {
-    def notImplemented: Any => Nothing = _ => throw new Exception("NotImplemented")
-    implicit val readBoolean = StringConvert.fromUnsafe[Boolean](_ != "0", notImplemented)
-    implicit val readDouble = StringConvert.fromUnsafe[Double](_.toDouble * -1, notImplemented)
-    implicit val readFloat = StringConvert.fromUnsafe[Float](_.toFloat * -1, notImplemented)
-    implicit val readInt = StringConvert.fromUnsafe[Int](_.toInt * -1, notImplemented)
-    implicit val readLong = StringConvert.fromUnsafe[Long](_.toLong * -1, notImplemented)
-    implicit val readString = StringConvert.fromUnsafe[String](_.toUpperCase, notImplemented)
-    val config = loadConfig[FlatConfig](Map(
-      "b" -> "0",
-      "d" -> "234.234",
-      "f" -> "34.34",
-      "i" -> "56",
-      "l" -> "-88",
-      "s" -> "qwerTy"
-    ))
+  it should "be able to serialize a ConfigValue from a type with ConfigConvert using the toConfig method" in {
+    import pureconfig.syntax._
+
+    Map("a" -> 1, "b" -> 2).toConfig shouldBe ConfigFactory.parseString("""{ "a": 1, "b": 2 }""").root()
+  }
+
+  it should "be able to load a ConfigValue to a type with ConfigConvert using the to method" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ "a": [1, 2, 3, 4], "b": { "k1": "v1", "k2": "v2" } }""")
+    conf.getList("a").to[List[Int]] shouldBe Success(List(1, 2, 3, 4))
+    conf.getObject("b").to[Map[String, String]] shouldBe Success(Map("k1" -> "v1", "k2" -> "v2"))
+  }
+
+  it should "be able to load a Config to a type with ConfigConvert using the to method" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ "a": [1, 2, 3, 4], "b": { "k1": "v1", "k2": "v2" } }""")
+    case class Conf(a: List[Int], b: Map[String, String])
+    conf.to[Conf] shouldBe Success(Conf(List(1, 2, 3, 4), Map("k1" -> "v1", "k2" -> "v2")))
+  }
+
+  it should s"be able to override locally all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in {
+    implicit val readBoolean = fromString[Boolean](_ != "0")
+    implicit val readDouble = fromString[Double](_.toDouble * -1)
+    implicit val readFloat = fromString[Float](_.toFloat * -1)
+    implicit val readInt = fromString[Int](_.toInt * -1)
+    implicit val readLong = fromString[Long](_.toLong * -1)
+    implicit val readString = fromString[String](_.toUpperCase)
+    val config = loadConfig[FlatConfig](ConfigValueFactory.fromMap(Map(
+      "b" -> 0,
+      "d" -> 234.234,
+      "f" -> 34.34,
+      "i" -> 56,
+      "l" -> -88,
+      "s" -> "qwerTy").asJava).toConfig)
+
     config.success.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
+  }
+
+  it should "fail when trying to convert to basic types from an empty string" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ v: "" }""")
+    conf.getValue("v").to[Boolean].isFailure shouldBe true
+    conf.getValue("v").to[Double].isFailure shouldBe true
+    conf.getValue("v").to[Float].isFailure shouldBe true
+    conf.getValue("v").to[Int].isFailure shouldBe true
+    conf.getValue("v").to[Long].isFailure shouldBe true
+    conf.getValue("v").to[Short].isFailure shouldBe true
+  }
+
+  it should "be able to load a Double from a percentage" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ v: 52% }""")
+    case class ConfigWithDouble(v: Double)
+    conf.to[ConfigWithDouble] shouldBe Success(ConfigWithDouble(0.52))
+  }
+
+  it should "be able to load Typesafe Config types directly" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{
+      list = [1, 2, 3]
+      v1 = 4
+      v2 = "str"
+      m {
+        k1 {
+          v1 = 3
+          v2 = 4
+        }
+        k2 {
+          v1 = 10
+          v3 = "str"
+        }
+        k3 {
+          v1 = 5
+          v4 {
+            v5 = 6
+          }
+        }
+      }
+    }""")
+
+    conf.getValue("list").to[ConfigList] shouldBe Success(ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
+    conf.getValue("list").to[ConfigValue] shouldBe Success(ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
+    conf.getValue("v1").to[ConfigValue] shouldBe Success(ConfigValueFactory.fromAnyRef(4))
+    conf.getValue("v2").to[ConfigValue] shouldBe Success(ConfigValueFactory.fromAnyRef("str"))
+    conf.getValue("m.k1").to[ConfigObject] shouldBe Success(ConfigFactory.parseString("""{
+      v1 = 3
+      v2 = 4
+    }""").root())
+    conf.getConfig("m").to[Map[String, TypesafeConfig]] shouldBe Success(Map(
+      "k1" -> ConfigFactory.parseString("""{
+        v1 = 3
+        v2 = 4
+      }"""),
+      "k2" -> ConfigFactory.parseString("""{
+        v1 = 10
+        v3 = "str"
+      }"""),
+      "k3" -> ConfigFactory.parseString("""{
+        v1 = 5
+        v4 {
+          v5 = 6
+        }
+      }""")))
   }
 
   // load HOCON-style lists
@@ -97,11 +190,9 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   // a slightly more complex configuration
-  implicit val dateStringConvert = new StringConvert[DateTime] {
-
-    override def from(str: String): Try[DateTime] = Try(ISODateTimeFormat.dateTime().parseDateTime(str))
-    override def to(t: DateTime): String = ISODateTimeFormat.dateTime().print(t)
-  }
+  implicit val dateConfigConvert = stringConvert[DateTime](
+    str => ISODateTimeFormat.dateTime().parseDateTime(str),
+    t => ISODateTimeFormat.dateTime().print(t))
 
   type ConfigCoproduct = Float :+: Boolean :+: CNil
   case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig, coproduct: ConfigCoproduct)
@@ -135,7 +226,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ExecutorConf(memory: String, extraJavaOptions: String)
   case class SparkAppConf(name: String)
   case class SparkLocalConf(dir: String)
-  case class SparkNetwork(timeout: Duration)
+  case class SparkNetwork(timeout: FiniteDuration)
   case class SparkConf(master: String, app: SparkAppConf, local: SparkLocalConf, driver: DriverConf, executor: ExecutorConf, extraListeners: Seq[String], network: SparkNetwork)
   case class SparkRootConf(spark: SparkConf)
 
@@ -145,14 +236,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       val writer = new PrintWriter(Files.newOutputStream(configFile))
       writer.println("""spark.executor.extraJavaOptions=""""")
       writer.println("""spark.driver.maxResultSize="2g"""")
-      writer.println("""spark.extraListeners=""""")
+      writer.println("""spark.extraListeners=[]""")
       writer.println("""spark.app.name="myApp"""")
       writer.println("""spark.driver.memory="1g"""")
       writer.println("""spark.driver.cores="10"""")
       writer.println("""spark.master="local[*]"""")
       writer.println("""spark.executor.memory="2g"""")
       writer.println("""spark.local.dir="/tmp/"""")
-      writer.println("""spark.network.timeout="45s"""")
+      writer.println("""spark.network.timeout=45s""")
       // unused configuration
       writer.println("""akka.loggers = ["akka.event.Logging$DefaultLogger"]""")
       writer.close()
@@ -173,7 +264,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       config.spark.master should be("local[*]")
       config.spark.executor.memory should be("2g")
       config.spark.local.dir should be("/tmp/")
-      config.spark.network.timeout should be(Duration(45, TimeUnit.SECONDS))
+      config.spark.network.timeout should be(FiniteDuration(45, TimeUnit.SECONDS))
     }
   }
 
@@ -234,7 +325,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       c = 3
     }""")
 
-    val result = loadConfig[Map[String, Int]](conf.typesafeConfigToConfig(cf))
+    val result = loadConfig[Map[String, Int]](cf)
     val expected = Map("a" -> 1, "b" -> 2, "c" -> 3)
 
     result shouldEqual Success(expected)
@@ -242,24 +333,21 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   // traversable of complex types
 
+  case class Foo(i: Int)
   case class ConfWithListOfPair(list: List[(String, Int)])
 
   it should s"be able to save and load configurations containing immutable.List" in {
     saveAndLoadIsIdentity(ConfWithListOfPair(List("foo" -> 1, "bar" -> 2)))
   }
 
-  case class Foo(i: Int)
   case class ConfWithListOfFoo(list: List[Foo])
-  case class ConfWithListOfFoo1(list1: List[Foo])
 
-  it should s"be able to properly load complex types from the provided namespace" in {
-    val v1 = ConfWithListOfFoo(List(Foo(1), Foo(2), Foo(3)))
-    val v2 = ConfWithListOfFoo1(List(Foo(4), Foo(5), Foo(6)))
-    val conf =
-      implicitly[ConfigConvert[ConfWithListOfFoo]].to(v1, "") ++
-        implicitly[ConfigConvert[ConfWithListOfFoo1]].to(v2, "")
-    loadConfig[ConfWithListOfFoo](conf) shouldEqual Success(v1)
-    loadConfig[ConfWithListOfFoo1](conf) shouldEqual Success(v2)
+  it should s"be able to load a list of Foo from a HOCON file" in {
+    val conf = ConfigFactory.parseString("""{
+      list = [{ i = 1 }, { i = 2 }, { i = 3 }]
+    }""")
+    val expected = ConfWithListOfFoo(List(Foo(1), Foo(2), Foo(3)))
+    loadConfig[ConfWithListOfFoo](conf) shouldBe Success(expected)
   }
 
   case class ConfWithStreamOfFoo(stream: Stream[Foo])
@@ -305,53 +393,60 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     saveAndLoadIsIdentity(ConfWithVectorOfFoo(Vector(Foo(1))))
   }
 
+  // map of complex types
+
+  case class ConfWithMapOfFoo(map: Map[String, Foo])
+
+  it should s"be able to save and load configurations containing map of Foo" in {
+    saveAndLoadIsIdentity(ConfWithMapOfFoo(Map("a" -> Foo(1), "b" -> Foo(2))))
+  }
+
   case class ConfWithFoo(foo: Foo)
 
-  it should "be able to use a local StringConvert without getting an ImplicitResolutionFailure error" in {
-    implicit val custom: StringConvert[Foo] = StringConvert.fromUnsafe(s => Foo(s.toInt), _.i.toString)
+  it should "be able to use a local ConfigConvert without getting an ImplicitResolutionFailure error" in {
+    implicit val custom: ConfigConvert[Foo] = stringConvert(s => Foo(s.toInt), _.i.toString)
     saveAndLoadIsIdentity(ConfWithFoo(Foo(100)))
   }
 
   case class ConfWithInt(i: Int)
 
-  it should "be able to use a local StringConvert instead of the ones in StringConvert companion object" in {
-    implicit val readInt = StringConvert.fromUnsafe[Int](_.toInt.abs, _.toString)
-    loadConfig(Map("i" -> "-100"))(ConfigConvert[ConfWithInt]).success.value shouldBe ConfWithInt(100)
+  it should "be able to use a local ConfigConvert instead of the ones in ConfigConvert companion object" in {
+    implicit val readInt = fromString[Int](_.toInt.abs)
+    loadConfig(ConfigValueFactory.fromMap(Map("i" -> "-100").asJava).toConfig)(ConfigConvert[ConfWithInt]).success.value shouldBe ConfWithInt(100)
   }
 
   case class ConfWithDuration(i: Duration)
 
-  it should "be able to supersede the default Duration ConfigConvert with a locally defined StringConvert" in {
+  it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert from fromString" in {
     val expected = Duration(110, TimeUnit.DAYS)
-    implicit val readDurationBadly = StringConvert.fromUnsafe[Duration](_ => expected, _ => throw new Exception("Not Implemented"))
-    loadConfig(Map("i" -> "23 s"))(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
+    implicit val readDurationBadly = fromString[Duration](_ => expected)
+    loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
   }
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
     val expected = Duration(220, TimeUnit.DAYS)
     implicit val readDurationBadly = new ConfigConvert[Duration] {
-      override def from(config: RawConfig, namespace: String): Try[Duration] = Success(expected)
-      override def to(t: Duration, namespace: String): RawConfig = throw new Exception("Not Implemented")
+      override def from(config: ConfigValue): Try[Duration] = Success(expected)
+      override def to(t: Duration): ConfigValue = throw new Exception("Not Implemented")
     }
-    loadConfig(Map("i" -> "42 h"))(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
+    loadConfig(ConfigValueFactory.fromMap(Map("i" -> "42 h").asJava).toConfig)(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
   }
 
-  it should "custom ConfigConvert should not cause implicit resolution failure and should be used." in {
-    import conf.RawConfig
+  it should "custom ConfigConvert should not cause implicit resolution failure and should be used" in {
     implicit val custom: ConfigConvert[Foo] = new ConfigConvert[Foo] {
-      def from(config: RawConfig, namespace: String): Try[Foo] = {
-        Try(Foo(config.get(namespace + ".i").get.toInt + 1))
-      }
-      def to(foo: Foo, namespace: String): RawConfig = Map(namespace -> foo.i.toString)
+      def from(config: ConfigValue): Try[Foo] =
+        Try(Foo(config.asInstanceOf[ConfigObject].get("i").render().toInt + 1))
+      def to(foo: Foo): ConfigValue =
+        ConfigValueFactory.fromMap(Map("i" -> foo.i).asJava)
     }
-    loadConfig(Map("foo.i" -> "-100"))(ConfigConvert[ConfWithFoo]).success.value shouldBe ConfWithFoo(Foo(-99))
+    loadConfig(ConfigFactory.parseString("foo.i = -100"))(ConfigConvert[ConfWithFoo]).success.value shouldBe ConfWithFoo(Foo(-99))
   }
 
   case class ConfWithURL(url: URL)
 
   it should "be able to read a config with a URL" in {
     val expected = "http://host/path?with=query&param"
-    val config = loadConfig[ConfWithURL](Map("url" -> expected))
+    val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> expected).asJava).toConfig)
     config.toOption.value.url shouldBe new URL(expected)
   }
 
@@ -359,10 +454,10 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     saveAndLoadIsIdentity(ConfWithURL(new URL("https://you/spin?me&right=round")))
   }
 
-  it should "allow a custom StringConvert[URL] to override our definition" in {
+  it should "allow a custom ConfigConvert[URL] to override our definition" in {
     val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = StringConvert.fromUnsafe[URL](_ => new URL(expected), _ => throw new Exception("Not Implemented"))
-    val config = loadConfig[ConfWithURL](Map("url" -> "https://ignored/url"))
+    implicit val readURLBadly = fromString[URL](_ => new URL(expected))
+    val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
     config.toOption.value.url shouldBe new URL(expected)
   }
 

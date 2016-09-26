@@ -3,6 +3,7 @@ A boilerplate-free Scala library for loading configuration files
 
 [![Build Status](https://travis-ci.org/melrief/pureconfig.svg?branch=master)](https://travis-ci.org/melrief/pureconfig)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11)
+[![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ![](http://i.imgur.com/S5QUS8c.gif)
 
@@ -23,7 +24,7 @@ certain type. In other words, you define **what** to load and PureConfig provide
 ## Not yet another configuration library
 PureConfig is not a configuration library in the sense that it doesn't search for files or parse them.
 It can be seen as a better front-end for the existing libraries.
-It uses [typesafe config](https://github.com/typesafehub/config) library for loading raw configurations and then
+It uses [typesafe config][typesafe-config] library for loading raw configurations and then
 uses the raw configurations to do its magic.
 
 
@@ -34,14 +35,14 @@ In the sbt configuration file:
 use scala `2.10` or `2.11`:
 
 ```scala
-scalaVersion := "2.11.7" // or "2.10.5"
+scalaVersion := "2.11.8" // or "2.10.5"
 ```
 
 Add the library. For scala `2.11`
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.2.2"
+  "com.github.melrief" %% "pureconfig" % "0.3.0"
 )
 ```
 
@@ -49,7 +50,7 @@ For scala `2.10` you need also the scala macro paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.2.2",
+  "com.github.melrief" %% "pureconfig" % "0.3.0",
 compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
 )
 ```
@@ -65,7 +66,7 @@ used for the example.
 In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
 there is an example of usage of pureconfig. In the example, the idea is to load a configuration for a directory
 watcher service. The configuration file
-(a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.properties))
+(a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.conf))
 for this program will look like
 
 ```
@@ -74,7 +75,7 @@ dirwatch.filter="*"
 dirwatch.email.host=host_of_email_service
 dirwatch.email.port=port_of_email_service
 dirwatch.email.message="Dirwatch new path found report"
-dirwatch.email.recipients="recipient1,recipient2"
+dirwatch.email.recipients=["recipient1,recipient2"]
 dirwatch.email.sender="sender"
 ```
 
@@ -96,10 +97,7 @@ import pureconfig._
 import java.nio.file.Paths
 import scala.util.Try
 
-implicit val deriveStringConvertForPath = new StringConvert[Path] {
-  override def from(str: String): Try[Path] = Try(Paths.get(str))
-  override def to(path: Path): String = path.toString
-}
+implicit val deriveStringConvertForPath = fromString[Path](Paths.get)
 ```
 
 And then we load the configuration
@@ -122,6 +120,41 @@ println("dirwatch.email.recipients: " + config.dirwatch.email.recipients)
 println("dirwatch.email.sender: " + config.dirwatch.email.sender)
 ```
 
+It's also possible to operate directly on `Config` and `ConfigValue` types
+of [typesafe config][typesafe-config] with the implicit helpers provided in the
+`pureconfig.syntax` package:
+
+```scala
+import com.typesafe.config.ConfigFactory
+import pureconfig.syntax._
+
+val config = ConfigFactory.load().to[Config].get
+println("The loaded configuration is: " + config.toString)
+```
+
+## Whence the config files?
+
+By default, PureConfig's `loadConfig()` methods load all resources in the classpath named:
+
+- `application.conf`,
+- `application.json`,
+- `application.properties`, and
+- `reference.conf`.
+
+The various `pureconfig.loadConfig()` methods defer to [typesafe config][typesafe-config]'s
+[`ConfigFactory`](https://typesafehub.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
+select where to load the config files from. Typesafe Config has [well-documented rules for configuration
+loading](https://github.com/typesafehub/config#standard-behavior) which we'll not repeat. Please see Typesafe
+Config's documentation for a full telling of the subtleties.  If you need greater control over how config
+files are loaded, refer to `ConfigFactory`'s options.
+
+Alternatively, PureConfig also provides `pureconfig.loadConfigFromFiles()` which builds a configuration from
+an explicit list of files. Files earlier in the list have greater precedence than later ones. Each file can
+include a partial configuration as long as the whole list produces a complete configuration. For an example,
+see the test of `loadConfigFromFiles()` in
+[`PureconfSuite.scala`](https://github.com/melrief/pureconfig/blob/master/src/test/scala/pureconfig/PureconfSuite.scala).
+
+Because PureConfig uses Typesafe Config to load configuration, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
 ## License
 
@@ -132,3 +165,5 @@ println("dirwatch.email.sender: " + config.dirwatch.email.sender)
 
 To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe config](https://github.com/typesafehub/config)
 developers.
+
+[typesafe-config]: https://github.com/typesafehub/config

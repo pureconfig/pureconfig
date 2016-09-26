@@ -4,7 +4,7 @@ name := "pureconfig"
 
 organization := "com.github.melrief"
 
-version := "0.2.2"
+version := "0.3.0"
 
 homepage := Some(url("https://github.com/melrief/pureconfig"))
 
@@ -64,7 +64,7 @@ pomExtra := (
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.conf", "pureconfig.conf.namespace")
+OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.syntax")
 
 OsgiKeys.privatePackage := Seq()
 
@@ -87,6 +87,10 @@ val newerCompilerLintSwitches = Seq(
 )
 
 scalacOptions ++= allVersionCompilerLintSwitches
+
+scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains))
+
+scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value
 
 scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)){
     case Some((2, scalaMajor)) if scalaMajor >= 11 => newerCompilerLintSwitches

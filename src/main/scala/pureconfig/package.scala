@@ -7,8 +7,7 @@
 import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
-import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig }
-import pureconfig.conf.RawConfig
+import com.typesafe.config.{ Config => TypesafeConfig, ConfigFactory }
 
 import scala.util.Try
 
@@ -23,8 +22,7 @@ package object pureconfig {
    */
   def loadConfig[Config](implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
-    val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load())
-    loadConfig[Config](rawConfig)(conv)
+    loadConfig[Config](ConfigFactory.load())(conv)
   }
 
   /**
@@ -37,8 +35,7 @@ package object pureconfig {
    */
   def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
-    val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load())
-    loadConfig[Config](rawConfig, namespace)(conv)
+    loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv)
   }
 
   /**
@@ -51,8 +48,7 @@ package object pureconfig {
    */
   def loadConfig[Config](path: Path)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
-    val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))
-    loadConfig[Config](rawConfig, "")(conv)
+    loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))(conv)
   }
 
   /**
@@ -66,46 +62,17 @@ package object pureconfig {
    */
   def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
     ConfigFactory.invalidateCaches()
-    val rawConfig = conf.typesafeConfigToConfig(ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))
-    loadConfig[Config](rawConfig, namespace)(conv)
+    loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv)
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
   def loadConfig[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    loadConfig[Config](pureconfig.conf.typesafeConfigToConfig(conf))
+    conv.from(conf.root())
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
   def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    loadConfig[Config](pureconfig.conf.typesafeConfigToConfig(conf), namespace)
-  }
-
-  /**
-    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
-  def loadConfigWithFallBack[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    ConfigFactory.invalidateCaches()
-    val fallBackConf = ConfigFactory.load()
-    val fallBackConfig = conf.withFallback(fallBackConf)
-    loadConfig[Config](fallBackConfig)
-  }
-
-  /**
-    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
-  def loadConfigWithFallBack[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    ConfigFactory.invalidateCaches()
-    val fallBackConf = ConfigFactory.load()
-    val fallBackConfig = conf.withFallback(fallBackConf)
-    loadConfig[Config](fallBackConfig, namespace)
-  }
-
-  /** Load a configuration of type `Config` from the given `RawConfig` */
-  def loadConfig[Config](conf: RawConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    loadConfig[Config](conf, "")
-  }
-
-  /** Load a configuration of type `Config` from the given `RawConfig` */
-  def loadConfig[Config](conf: RawConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
-    conv.from(conf, namespace)
+    conv.from(conf.getConfig(namespace).root())
   }
 
   /**
@@ -135,8 +102,8 @@ package object pureconfig {
    */
   def saveConfigToStream[Config](conf: Config, outputStream: OutputStream)(implicit conv: ConfigConvert[Config]): Unit = {
     val printOutputStream = new PrintStream(outputStream)
-    val rawConfig = conv.to(conf, "")
-    rawConfig foreach { case (key, value) => printOutputStream.println(s"""$key="$value"""") }
+    val rawConf = conv.to(conf)
+    printOutputStream.print(rawConf.render())
     printOutputStream.close()
   }
 
@@ -157,7 +124,7 @@ package object pureconfig {
         .map(ConfigFactory.parseFile)
         .reduce(_.withFallback(_))
         .resolve
-      loadConfig[Config](conf.typesafeConfigToConfig(resolvedTypesafeConfig))
+      loadConfig[Config](resolvedTypesafeConfig)
     }
   }
 }
