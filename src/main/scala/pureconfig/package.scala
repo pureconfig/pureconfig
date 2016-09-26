@@ -76,6 +76,20 @@ package object pureconfig {
   }
 
   /**
+    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
+  def loadConfigWithFallBack[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
+    loadConfig[Config](conf.withFallback(ConfigFactory.load()))
+  }
+
+  /**
+    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration */
+  def loadConfigWithFallBack[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Try[Config] = {
+    ConfigFactory.invalidateCaches()
+    loadConfig[Config](conf.withFallback(ConfigFactory.load()), namespace)
+  }
+
+  /**
    * Save the given configuration into a property file
    *
    * @param conf The configuration to save
