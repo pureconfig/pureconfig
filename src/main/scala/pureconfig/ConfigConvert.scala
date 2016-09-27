@@ -105,10 +105,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     implicit key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
     tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]],
-    wDelimConvert: WordDelimiterConverter[Wrapped]): WrappedConfigConvert[Wrapped, FieldType[K, V] :: T] = new WrappedConfigConvert[Wrapped, FieldType[K, V]:: T] {
+    mapping: ConfigFieldMapping[Wrapped]): WrappedConfigConvert[Wrapped, FieldType[K, V] :: T] = new WrappedConfigConvert[Wrapped, FieldType[K, V]:: T] {
 
     override def fromConfigObject(co: ConfigObject): Try[FieldType[K, V] :: T] = {
-      val keyStr = wDelimConvert.fromTypeToConfigField(key.value.toString().tail)
+      val keyStr = mapping.toConfigField(key.value.toString().tail)
       for {
         v <- improveFailure(vFieldConvert.value.from(co.get(keyStr)), keyStr)
         tail <- tConfigConvert.value.from(co)
@@ -116,7 +116,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     }
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
-      val keyStr = wDelimConvert.fromTypeToConfigField(key.value.toString().tail)
+      val keyStr = mapping.toConfigField(key.value.toString().tail)
       val rem = tConfigConvert.value.to(t.tail)
       // TODO check that all keys are unique
       vFieldConvert.value match {

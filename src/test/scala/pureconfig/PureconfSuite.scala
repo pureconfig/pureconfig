@@ -479,10 +479,26 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
-  it should "allow customizing the word delimiters" in {
+  it should "allow customizing the field mapping" in {
+    val conf = ConfigFactory.parseString("""{
+      A = 2
+      B = "two"
+    }""")
+
+    case class SampleConf(a: Int, b: String)
+    loadConfig[SampleConf](conf).failure.exception shouldEqual KeyNotFoundException("a")
+
+    implicit val mapping = new ConfigFieldMapping[SampleConf] {
+      def toConfigField(fieldName: String) = fieldName.toUpperCase
+    }
+
+    loadConfig[SampleConf](conf) shouldBe Success(SampleConf(2, "two"))
+  }
+
+  it should "allow customizing the field mapping with word delimiters" in {
     import pureconfig.syntax._
 
-    implicit def conv[T] = new WordDelimiterConverter[T](CamelCaseWordDelimiter, HyphenWordDelimiter)
+    implicit def conv[T] = new WordDelimiterConfigFieldMapping[T](CamelCaseWordDelimiter, HyphenWordDelimiter)
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1
@@ -496,10 +512,10 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
-  it should "allow customizing the word delimiters only for specific types" in {
+  it should "allow customizing the field mapping only for specific types" in {
     import pureconfig.syntax._
 
-    implicit val conv = new WordDelimiterConverter[ConfWithCamelCase](CamelCaseWordDelimiter, HyphenWordDelimiter)
+    implicit val conv = new WordDelimiterConfigFieldMapping[ConfWithCamelCase](CamelCaseWordDelimiter, HyphenWordDelimiter)
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1

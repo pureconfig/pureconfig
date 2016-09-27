@@ -35,8 +35,3 @@ class StringWordDelimiter(d: String) extends WordDelimiter {
 object HyphenWordDelimiter extends StringWordDelimiter("-")
 
 object UnderscoreWordDelimiter extends StringWordDelimiter("_")
-
-object NoWordDelimiter extends WordDelimiter {
-  def toTokens(s: String): Seq[String] = Seq(s)
-  def fromTokens(l: Seq[String]): String = l.mkString
-}
