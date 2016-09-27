@@ -77,8 +77,12 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   abstract class WrappedConfigConvert[Wrapped, SubRepr] {
     final def from(config: ConfigValue): Try[SubRepr] = config match {
-      case co: ConfigObject => fromConfigObject(co)
-      case other => Failure(new Exception(s"Unexpected $other"))
+      case co: ConfigObject =>
+        fromConfigObject(co)
+      case null =>
+        Failure(CannotConvertNullException)
+      case other =>
+        Failure(WrongTypeException(config.valueType().toString))
     }
     def fromConfigObject(co: ConfigObject): Try[SubRepr]
     def to(v: SubRepr): ConfigValue
@@ -104,9 +108,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     wDelimConvert: WordDelimiterConverter[Wrapped]): WrappedConfigConvert[Wrapped, FieldType[K, V] :: T] = new WrappedConfigConvert[Wrapped, FieldType[K, V]:: T] {
 
     override def fromConfigObject(co: ConfigObject): Try[FieldType[K, V] :: T] = {
-      val keyStr = key.value.toString().tail // remove the ' in front of the symbol
+      val keyStr = wDelimConvert.fromTypeToConfigField(key.value.toString().tail)
       for {
-        v <- improveFailure(vFieldConvert.value.from(co.get(wDelimConvert.fromTypeToConfigField(keyStr))))
+        v <- improveFailure(vFieldConvert.value.from(co.get(keyStr)), keyStr)
         tail <- tConfigConvert.value.from(co)
       } yield field[K](v) :: tail
     }
