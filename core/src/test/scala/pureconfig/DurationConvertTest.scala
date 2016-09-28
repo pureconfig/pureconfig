@@ -49,7 +49,6 @@ class DurationConvertTest extends FlatSpec with Matchers with TryValues {
       case Success(_) => fail("Should be failure")
       case Failure(ex) =>
         val message = ex.getMessage
-        println(message)
         message should include(badDuration)
     }
   }

@@ -99,7 +99,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       "i" -> 56,
       "l" -> -88,
       "s" -> "qwerTy").asJava).toConfig)
-    
+
     config.success.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
   }
 
@@ -473,7 +473,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   "loadConfigFromFiles" should "load a complete configuration from a single file" in {
     val files = fileList(
-      "src/test/resources/conf/loadConfigFromFiles/priority2.conf"
+      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf"
     )
     loadConfigFromFiles[FlatConfig](files).success.get shouldBe expectedValueForResolveFilesPriority2
   }
@@ -494,8 +494,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "fill in missing values from the lower priority files" in {
     val files = fileList(
-      "src/test/resources/conf/loadConfigFromFiles/priority1.conf",
-      "src/test/resources/conf/loadConfigFromFiles/priority2.conf"
+      "core/src/test/resources/conf/loadConfigFromFiles/priority1.conf",
+      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf"
     )
     val actual = loadConfigFromFiles[FlatConfig](files)
     actual.success.get shouldBe FlatConfig(
@@ -519,8 +519,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "silently ignore files which can't be read" in {
     val files = fileList(
-      "src/test/resources/conf/loadConfigFromFiles/this.is.not.a.conf",
-      "src/test/resources/conf/loadConfigFromFiles/priority2.conf"
+      "core/src/test/resources/conf/loadConfigFromFiles/this.is.not.a.conf",
+      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf"
     )
     loadConfigFromFiles[FlatConfig](files).success.value shouldBe expectedValueForResolveFilesPriority2
   }
