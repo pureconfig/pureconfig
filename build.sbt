@@ -42,7 +42,7 @@ lazy val scalariSettings = scalariformSettings
 lazy val pureconfig =
   project
   .in(file("."))
-  .aggregate(core, examples)
+  .aggregate(core, examples, `pureconfig-argonaut`)
   .settings(noPublishSettings)
 
 lazy val core =
@@ -71,6 +71,17 @@ lazy val examples =
   .settings(moduleName := "pureconfig-examples")
   .settings(allSettings:_*)
   .settings(noPublishSettings)
+
+lazy val `pureconfig-argonaut` =
+  project
+  .in(file("pureconfig-argonaut"))
+  .dependsOn(core)
+  .settings(moduleName := "pureconfig-argonaut")
+  .settings(allSettings:_*)
+  .settings(libraryDependencies ++= Seq(
+    "com.github.alexarchambault" %% "argonaut-shapeless_6.1" % "1.1.1",
+    "org.scalatest" %% "scalatest" % "3.0.0-M15" % "test"
+  ))
 
 lazy val initializeSetting = Seq(
   initialize := {
