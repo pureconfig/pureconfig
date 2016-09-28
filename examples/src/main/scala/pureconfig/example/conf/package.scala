@@ -10,8 +10,6 @@ import java.nio.file.{Path, Paths}
 
 import pureconfig.ConfigConvert.fromString
 
-import scala.util.Try
-
 /*
 This is an example of configuration for our directory watcher. The configuration needs:
 - the path that is the directory to watch
@@ -30,12 +28,6 @@ dirwatch.email.recipients="recipient1,recipient2"
 dirwatch.email.sender="sender"
 */
 package object conf {
-
-  case class Config(dirwatch: DirWatchConfig)
-  case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
-  case class EmailConfig(host: String, port: Int, message: String, recipients: Set[String], sender: String)
-
-
   // path doesn't have a StringConvert instance, we are going to create it here
   implicit val deriveStringConvertForPath = fromString[Path](Paths.get(_))
 }
