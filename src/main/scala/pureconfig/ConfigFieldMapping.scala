@@ -4,7 +4,7 @@ trait ConfigFieldMapping[T] {
   def toConfigField(fieldName: String): String
 }
 
-class NoopConfigFieldMapping[T] extends ConfigFieldMapping[T] {
+class IdentityConfigFieldMapping[T] extends ConfigFieldMapping[T] {
   def toConfigField(fieldName: String): String = fieldName
 }
 
@@ -20,5 +20,5 @@ object ConfigFieldMapping extends LowPriorityConfigFieldMappingImplicits {
 }
 
 trait LowPriorityConfigFieldMappingImplicits {
-  implicit def configFieldMapping[T]: ConfigFieldMapping[T] = new NoopConfigFieldMapping[T]
+  implicit def configFieldMapping[T]: ConfigFieldMapping[T] = new IdentityConfigFieldMapping[T]
 }
