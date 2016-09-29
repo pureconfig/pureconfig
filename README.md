@@ -7,6 +7,22 @@ A boilerplate-free Scala library for loading configuration files
 
 ![](http://i.imgur.com/S5QUS8c.gif)
 
+## Table of Contents
+- [Why](#why)
+- [Not Yet Another Configuration Library](#not-yet-another-configuration-library)
+- [Add PureConfig to your project](#add-pureconfig-to-your-project)
+- [Use PureConfig](#use-pureconfig)
+- [Supported types](#supported-types)
+- [Extends the library to support new types](#extend-the-library-to-support-new-types)
+- [Override behaviour for types](#override-behaviour-for-types)
+- [Example](#example)
+- [Whence the config files](#whence-the-config-files)
+- [Contribute](#contribute)
+- [License](#license)
+- [Special thanks](#special-thanks)
+
+
+<a name="why" />
 ## Why
 Loading configurations has always been a tedious and error-prone procedure. A common way to do it
 consists in writing code to deserialize each fields of the configuration. The more fields there are,
@@ -21,6 +37,7 @@ The goal of this library is to create at compile-time the boilerplate necessary 
 certain type. In other words, you define **what** to load and PureConfig provides **how** to load it.
 
 
+<a name="not-yet-another-configuration-library" />
 ## Not yet another configuration library
 PureConfig is not a configuration library in the sense that it doesn't search for files or parse them.
 It can be seen as a better front-end for the existing libraries.
@@ -28,6 +45,7 @@ It uses [typesafe config][typesafe-config] library for loading raw configuration
 uses the raw configurations to do its magic.
 
 
+<a name="add-pureconfig-to-your-project" />
 ## Add PureConfig to your project
 
 In the sbt configuration file:
@@ -61,6 +79,81 @@ For a full example of `build.sbt` you can have a look at this [build.sbt](https:
 used for the example.
 
 
+<a name="use-pureconfig" />
+## Use PureConfig
+
+Import the library and use one of the `loadConfig` methods:
+
+
+```scala
+import pureconfig._
+
+val config: Try[YourConfClass] = loadConfig[YourConfClass]
+```
+
+
+<a name="supported-types" />
+## Supported Types
+
+Currently supported types for fields are:
+- `String`, `Boolean`, `Double` (standard
+and percentage format ending with `%`), `Float` (also supporting percentage),
+`Int`, `Long`, `Short`, `URL`, `Duration`
+- all collections implementing the `TraversableOnce` trait where the elements type
+is in this list
+- `Option` for optional values, i.e. value that can or cannot be in the configuration
+- `Map` with `String` keys and any value type that is in this list
+- typesafe `ConfigValue`, `ConfigObject` and `ConfigList`.
+
+
+<a name="extend-the-library-to-support-new-types" />
+## Extend the library to support new types
+
+Not all types are supported automatically by `pureconfig`. For instance, classes
+with mutable fields are not supported out-of-the-box:
+
+```scala
+> class Foo(var bar: Int) { override def toString: String = s"Foo(${bar.toString})" }
+> loadConfig[Foo]
+could not find implicit value for parameter conv: pureconfig.ConfigConvert[Foo]
+```
+
+`pureconfig` can be extended to support those types. To do so, an instance for the
+`ConfigConvert` typeclass must be provided implicitly, like
+
+```scala
+> implicit val foocc = ConfigConvert.stringConvert[Foo](x => new Foo(x.toInt), foo => foo.bar.toString)
+> loadConfig[Foo]
+Foo(1)
+```
+
+
+<a name="override-behaviour-for-types" />
+## Override behaviour for types
+
+It is possible to override the behaviour of `pureconfig` for a certain type by
+implementing another instance of the `ConfigConvert` typeclass. For instance,
+the default behaviour of `pureconfig` for `String` is to return the string itself
+in the configuration:
+
+```scala
+> import import com.typesafe.config.ConfigValueFactory
+> ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
+util.Try[String] = Success(FooBar)
+```
+
+Now let's say that we want to override this behaviour such that `String`s are
+always read lower case. We can do:
+
+```scala
+> implicit val overridestrcc = ConfigConvert.fromString(_.toLowerCase)
+> ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
+util.Try[String] = Success(foobar)
+```
+
+
+
+<a name="example" />
 ## Example
 
 In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
@@ -132,6 +225,7 @@ val config = ConfigFactory.load().to[Config].get
 println("The loaded configuration is: " + config.toString)
 ```
 
+<a name="whence-the-config-files" />
 ## Whence the config files?
 
 By default, PureConfig's `loadConfig()` methods load all resources in the classpath named:
@@ -156,11 +250,23 @@ see the test of `loadConfigFromFiles()` in
 
 Because PureConfig uses Typesafe Config to load configuration, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
+
+<a name="contribute" />
+## Contribute
+
+`pureconfig` is a free library developed by several people around the world.
+Contributions are welcomed and encouraged. If you want to contribute, we suggest to have a look at the
+[available issues](https://github.com/melrief/pureconfig/issues) and to talk with
+us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
+
+
+<a name="license" />
 ## License
 
 [Mozilla Public License, version 2.0](https://github.com/melrief/pureconfig/blob/master/LICENSE)
 
 
+<a name="special-thanks" />
 ## Special Thanks
 
 To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe config](https://github.com/typesafehub/config)
