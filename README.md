@@ -22,7 +22,6 @@ A boilerplate-free Scala library for loading configuration files
 - [Special thanks](#special-thanks)
 
 
-<a name="why" />
 ## Why
 Loading configurations has always been a tedious and error-prone procedure. A common way to do it
 consists in writing code to deserialize each fields of the configuration. The more fields there are,
@@ -37,7 +36,6 @@ The goal of this library is to create at compile-time the boilerplate necessary 
 certain type. In other words, you define **what** to load and PureConfig provides **how** to load it.
 
 
-<a name="not-yet-another-configuration-library" />
 ## Not yet another configuration library
 PureConfig is not a configuration library in the sense that it doesn't search for files or parse them.
 It can be seen as a better front-end for the existing libraries.
@@ -45,7 +43,6 @@ It uses [typesafe config][typesafe-config] library for loading raw configuration
 uses the raw configurations to do its magic.
 
 
-<a name="add-pureconfig-to-your-project" />
 ## Add PureConfig to your project
 
 In the sbt configuration file:
@@ -79,7 +76,6 @@ For a full example of `build.sbt` you can have a look at this [build.sbt](https:
 used for the example.
 
 
-<a name="use-pureconfig" />
 ## Use PureConfig
 
 Import the library and use one of the `loadConfig` methods:
@@ -92,25 +88,38 @@ val config: Try[YourConfClass] = loadConfig[YourConfClass]
 ```
 
 
-<a name="supported-types" />
 ## Supported Types
 
 Currently supported types for fields are:
 - `String`, `Boolean`, `Double` (standard
 and percentage format ending with `%`), `Float` (also supporting percentage),
-`Int`, `Long`, `Short`, `URL`, `Duration`
+`Int`, `Long`, `Short`, `URL`, `Duration`, `FiniteDuration`
 - all collections implementing the `TraversableOnce` trait where the elements type
 is in this list
 - `Option` for optional values, i.e. value that can or cannot be in the configuration
 - `Map` with `String` keys and any value type that is in this list
 - typesafe `ConfigValue`, `ConfigObject` and `ConfigList`.
+- case classes
+- sealed families of case classes (ADTs)
 
+An almost comprehensive example is:
 
-<a name="extend-the-library-to-support-new-types" />
+```scala
+> import pureconfig.loadConfig
+> import com.typesafe.config.ConfigFactory.parseString
+> sealed trait MyAdt
+> case class AdtA(a: String) extends MyAdt
+> case class AdtB(b: Int) extends MyAdt
+> case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
+> val conf = parseString("""{ "int": 1, "adt": { "b": 1 }, "list":["1", "20%"], "map": { "key": "value" } }""")
+> loadConfig[MyClass](conf)
+res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+```
+
 ## Extend the library to support new types
 
 Not all types are supported automatically by `pureconfig`. For instance, classes
-with mutable fields are not supported out-of-the-box:
+that are not case classes are not supported out-of-the-box:
 
 ```scala
 > class Foo(var bar: Int) { override def toString: String = s"Foo(${bar.toString})" }
@@ -128,7 +137,6 @@ Foo(1)
 ```
 
 
-<a name="override-behaviour-for-types" />
 ## Override behaviour for types
 
 It is possible to override the behaviour of `pureconfig` for a certain type by
@@ -153,7 +161,6 @@ util.Try[String] = Success(foobar)
 
 
 
-<a name="example" />
 ## Example
 
 In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
@@ -225,7 +232,6 @@ val config = ConfigFactory.load().to[Config].get
 println("The loaded configuration is: " + config.toString)
 ```
 
-<a name="whence-the-config-files" />
 ## Whence the config files?
 
 By default, PureConfig's `loadConfig()` methods load all resources in the classpath named:
@@ -251,7 +257,6 @@ see the test of `loadConfigFromFiles()` in
 Because PureConfig uses Typesafe Config to load configuration, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
 
-<a name="contribute" />
 ## Contribute
 
 `pureconfig` is a free library developed by several people around the world.
@@ -260,13 +265,11 @@ Contributions are welcomed and encouraged. If you want to contribute, we suggest
 us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
 
 
-<a name="license" />
 ## License
 
 [Mozilla Public License, version 2.0](https://github.com/melrief/pureconfig/blob/master/LICENSE)
 
 
-<a name="special-thanks" />
 ## Special Thanks
 
 To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe config](https://github.com/typesafehub/config)
