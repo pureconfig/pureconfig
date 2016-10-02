@@ -98,7 +98,7 @@ and percentage format ending with `%`), `Float` (also supporting percentage),
 is in this list
 - `Option` for optional values, i.e. value that can or cannot be in the configuration
 - `Map` with `String` keys and any value type that is in this list
-- typesafe `ConfigValue`, `ConfigObject` and `ConfigList`.
+- typesafe `ConfigValue`, `ConfigObject` and `ConfigList`
 - case classes
 - sealed families of case classes (ADTs)
 
