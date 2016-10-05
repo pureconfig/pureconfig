@@ -99,7 +99,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       "i" -> 56,
       "l" -> -88,
       "s" -> "qwerTy").asJava).toConfig)
-    
+
     config.success.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
   }
 
@@ -531,14 +531,34 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   case class FooBar(foo: Foo, bar: Bar)
+  case class ConfWithConfigObject(conf: ConfigObject)
+  case class ConfWithConfigList(conf: ConfigList)
 
   it should s"return a ${classOf[KeyNotFoundException]} when a key is not in the configuration" in {
-    loadConfig[Foo](ConfigFactory.empty()).failure.exception shouldEqual KeyNotFoundException("i")
+    val emptyConf = ConfigFactory.empty()
+    loadConfig[Foo](emptyConf).failure.exception shouldEqual KeyNotFoundException("i")
     val conf = ConfigFactory.parseMap(Map("namespace.foo" -> 1).asJava)
     loadConfig[Foo](conf, "namespace").failure.exception shouldEqual KeyNotFoundException("namespace.i")
-    val conf2 = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava)
-    loadConfig[FooBar](conf2).failure.exception shouldEqual WrongTypeForKeyException("STRING", "bar.foo")
-    val conf3 = ConfigFactory.parseMap(Map("ns.foo.i" -> 1, "ns.bar.foo" -> "").asJava)
-    loadConfig[FooBar](conf3, "ns").failure.exception shouldEqual WrongTypeForKeyException("STRING", "ns.bar.foo")
+    loadConfig[ConfWithMapOfFoo](emptyConf).failure.exception shouldEqual KeyNotFoundException("map")
+    loadConfig[ConfWithListOfFoo](emptyConf).failure.exception shouldEqual KeyNotFoundException("list")
+    loadConfig[ConfWithConfigObject](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
+    loadConfig[ConfWithConfigList](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
+  }
+
+  it should s"return a ${classOf[WrongTypeForKeyException]} when a key has a wrong type" in {
+    val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava)
+    loadConfig[FooBar](conf).failure.exception shouldEqual WrongTypeForKeyException("STRING", "bar.foo")
+
+    val conf1 = ConfigFactory.parseMap(Map("ns.foo.i" -> 1, "ns.bar.foo" -> "").asJava)
+    loadConfig[FooBar](conf1, "ns").failure.exception shouldEqual WrongTypeForKeyException("STRING", "ns.bar.foo")
+
+    val conf2 = ConfigFactory.parseString("""{ map: [{ i: 1 }, { i: 2 }, { i: 3 }] }""")
+    loadConfig[ConfWithMapOfFoo](conf2).failure.exception shouldEqual WrongTypeForKeyException("LIST", "map")
+
+    val conf3 = ConfigFactory.parseString("""{ conf: [{ i: 1 }, { i: 2 }, { i: 3 }] }""")
+    loadConfig[ConfWithConfigObject](conf3).failure.exception shouldEqual WrongTypeForKeyException("LIST", "conf")
+
+    val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
+    loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
   }
 }
