@@ -17,11 +17,14 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable._
 import scala.util.{ Failure, Success, Try }
 import com.typesafe.config.ConfigFactory
+import org.scalacheck.{ Arbitrary }
 import org.scalatest._
+import prop.PropertyChecks
 import pureconfig.ConfigConvert.{ fromString, stringConvert }
 import pureconfig.error.{ KeyNotFoundException, WrongTypeForKeyException }
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import org.scalacheck.Shapeless._
 
 /**
  * @author Mario Pastorelli
@@ -40,7 +43,7 @@ object PureconfSuite {
 
 import PureconfSuite._
 
-class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryValues {
+class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryValues with PropertyChecks {
 
   // checks if saving and loading a configuration from file returns the configuration itself
   def saveAndLoadIsIdentity[C](config: C)(implicit configConvert: ConfigConvert[C]): Unit = {
@@ -52,15 +55,16 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   // a simple "flat" configuration
   case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
+  implicitly[Arbitrary[FlatConfig]]
 
-  "pureconfig" should s"be able to save and load ${classOf[FlatConfig]}" in {
-    withTempFile { configFile =>
-      val expectedConfig = FlatConfig(false, 1d, 2f, 3, 4l, "5", Option("6"))
-      saveConfigAsPropertyFile(expectedConfig, configFile, overrideOutputPath = true)
-      val config = loadConfig[FlatConfig](configFile)
+  "pureconfig" should s"be able to save and load ${classOf[FlatConfig]}" in forAll {
+    (expectedConfig: FlatConfig) =>
+      withTempFile { configFile =>
+        saveConfigAsPropertyFile(expectedConfig, configFile, overrideOutputPath = true)
+        val config = loadConfig[FlatConfig](configFile)
 
-      config should be(Success(expectedConfig))
-    }
+        config should be(Success(expectedConfig))
+      }
   }
 
   it should "be able to serialize a ConfigValue from a type with ConfigConvert using the toConfig method" in {
