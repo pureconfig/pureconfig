@@ -561,4 +561,24 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
     loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
   }
+
+  it should "be able to consider default arguments" in {
+    case class InnerConf(e: Int, g: Int)
+    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
+
+    val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
+    loadConfig[Conf](conf1).success.value shouldBe Conf(2, "default", 42, InnerConf(43, 44))
+
+    val conf2 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50).asJava)
+    loadConfig[Conf](conf2).success.value shouldBe Conf(2, "default", 50, InnerConf(43, 44))
+
+    val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava)
+    loadConfig[Conf](conf3).failure.exception shouldEqual KeyNotFoundException("a")
+
+    val conf4 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5).asJava)
+    loadConfig[Conf](conf4).failure.exception shouldEqual KeyNotFoundException("d.g")
+
+    val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava)
+    loadConfig[Conf](conf5).success.value shouldBe Conf(2, "default", 42, InnerConf(5, 6))
+  }
 }
