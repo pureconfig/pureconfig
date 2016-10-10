@@ -75,11 +75,6 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
-  implicit def hNilConfigConvert = new ConfigConvert[HNil] {
-    override def from(config: ConfigValue): Try[HNil] = Success(HNil)
-    override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
-  }
-
   private[pureconfig] def improveFailure[Z](result: Try[Z], keyStr: String): Try[Z] =
     result recoverWith {
       case CannotConvertNullException => Failure(KeyNotFoundException(keyStr))
@@ -87,6 +82,11 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case WrongTypeException(typ) => Failure(WrongTypeForKeyException(typ, keyStr))
       case WrongTypeForKeyException(typ, suffix) => Failure(WrongTypeForKeyException(typ, keyStr + "." + suffix))
     }
+
+  implicit def hNilConfigConvert = new ConfigConvert[HNil] {
+    override def from(config: ConfigValue): Try[HNil] = Success(HNil)
+    override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
+  }
 
   implicit def hConsConfigConvert[K <: Symbol, V, T <: HList](
     implicit key: Witness.Aux[K],
