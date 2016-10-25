@@ -533,6 +533,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class FooBar(foo: Foo, bar: Bar)
   case class ConfWithConfigObject(conf: ConfigObject)
   case class ConfWithConfigList(conf: ConfigList)
+  case class ConfWithString(s: String)
 
   it should s"return a ${classOf[KeyNotFoundException]} when a key is not in the configuration" in {
     val emptyConf = ConfigFactory.empty()
@@ -543,6 +544,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithListOfFoo](emptyConf).failure.exception shouldEqual KeyNotFoundException("list")
     loadConfig[ConfWithConfigObject](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
     loadConfig[ConfWithConfigList](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
+    loadConfig[ConfWithString](ConfigFactory.empty()).failure.exception shouldEqual KeyNotFoundException("s")
+    loadConfig[ConfWithDuration](ConfigFactory.empty()).failure.exception shouldEqual KeyNotFoundException("i")
   }
 
   it should s"return a ${classOf[WrongTypeForKeyException]} when a key has a wrong type" in {
