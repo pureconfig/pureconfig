@@ -28,8 +28,10 @@ libraryDependencies ++= Seq(
 
   "org.scalatest" %% "scalatest" % "3.0.0-M15" % "test",
   "joda-time" % "joda-time" % "2.9.2" % "test",
-  "org.joda" % "joda-convert" % "1.8" % "test"
-  )
+  "org.joda" % "joda-convert" % "1.8" % "test",
+  "org.scalacheck" %%  "scalacheck" % "1.12.5",
+  "com.github.alexarchambault" %% "scalacheck-shapeless_1.12" % "0.3.1"
+)
 
 initialize := {
   val required = "1.8"
