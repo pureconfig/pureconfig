@@ -260,8 +260,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 trait LowPriorityConfigConvertImplicits {
   import scala.concurrent.duration.{ Duration, FiniteDuration }
   implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
-    override def from(config: ConfigValue): Try[Duration] = {
-      Some(config.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new IllegalArgumentException(s"Couldn't read duration from $config."))) { durationString =>
+    override def from(config: ConfigValue): Try[Duration] = config match {
+      case conf @ (_: ConfigObject | _: ConfigList) => Failure(WrongTypeException(conf.valueType().toString))
+      case null => Failure(CannotConvertNullException)
+      case other => Some(other.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new IllegalArgumentException(s"Couldn't read duration from $config."))) { durationString =>
         DurationConvert.from(durationString).recoverWith {
           case ex => Failure(new IllegalArgumentException(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
         }
@@ -274,8 +276,12 @@ trait LowPriorityConfigConvertImplicits {
 
   implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = new ConfigConvert[FiniteDuration] {
     override def from(config: ConfigValue): Try[FiniteDuration] = durationConfigConvert.from(config) match {
-      case Success(v) if v.isFinite() => Success(Duration(v.length, v.unit))
-      case _ => Failure(new Exception(s"Couldn't derive a finite duration from '$config'"))
+      case Success(v) =>
+        if (v.isFinite())
+          Success(Duration(v.length, v.unit))
+        else
+          Failure(new IllegalArgumentException(s"Couldn't parse a finite duration from a duration that is not finite."))
+      case Failure(f) => Failure(f)
     }
     override def to(t: FiniteDuration): ConfigValue = durationConfigConvert.to(t)
   }

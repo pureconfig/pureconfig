@@ -547,6 +547,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithListOfFoo](emptyConf).failure.exception shouldEqual KeyNotFoundException("list")
     loadConfig[ConfWithConfigObject](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
     loadConfig[ConfWithConfigList](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
+    loadConfig[ConfWithDuration](emptyConf).failure.exception shouldEqual KeyNotFoundException("i")
+    loadConfig[SparkNetwork](emptyConf).failure.exception shouldEqual KeyNotFoundException("timeout")
   }
 
   it should s"return a ${classOf[WrongTypeForKeyException]} when a key has a wrong type" in {
@@ -564,5 +566,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
     loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
+
+    val conf5 = ConfigFactory.parseString("""{ i: [1, 2, 3] }""")
+    loadConfig[ConfWithDuration](conf5).failure.exception shouldEqual WrongTypeForKeyException("LIST", "i")
   }
 }
