@@ -17,11 +17,14 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable._
 import scala.util.{ Failure, Success, Try }
 import com.typesafe.config.ConfigFactory
+import org.scalacheck.{ Arbitrary }
 import org.scalatest._
+import prop.PropertyChecks
 import pureconfig.ConfigConvert.{ fromString, stringConvert }
 import pureconfig.error.{ KeyNotFoundException, WrongTypeForKeyException }
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import org.scalacheck.Shapeless._
 
 /**
  * @author Mario Pastorelli
@@ -40,7 +43,7 @@ object PureconfSuite {
 
 import PureconfSuite._
 
-class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryValues {
+class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryValues with PropertyChecks {
 
   // checks if saving and loading a configuration from file returns the configuration itself
   def saveAndLoadIsIdentity[C](config: C)(implicit configConvert: ConfigConvert[C]): Unit = {
@@ -52,15 +55,16 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   // a simple "flat" configuration
   case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
+  implicitly[Arbitrary[FlatConfig]]
 
-  "pureconfig" should s"be able to save and load ${classOf[FlatConfig]}" in {
-    withTempFile { configFile =>
-      val expectedConfig = FlatConfig(false, 1d, 2f, 3, 4l, "5", Option("6"))
-      saveConfigAsPropertyFile(expectedConfig, configFile, overrideOutputPath = true)
-      val config = loadConfig[FlatConfig](configFile)
+  "pureconfig" should s"be able to save and load ${classOf[FlatConfig]}" in forAll {
+    (expectedConfig: FlatConfig) =>
+      withTempFile { configFile =>
+        saveConfigAsPropertyFile(expectedConfig, configFile, overrideOutputPath = true)
+        val config = loadConfig[FlatConfig](configFile)
 
-      config should be(Success(expectedConfig))
-    }
+        config should be(Success(expectedConfig))
+      }
   }
 
   it should "be able to serialize a ConfigValue from a type with ConfigConvert using the toConfig method" in {
@@ -611,6 +615,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithListOfFoo](emptyConf).failure.exception shouldEqual KeyNotFoundException("list")
     loadConfig[ConfWithConfigObject](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
     loadConfig[ConfWithConfigList](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
+    loadConfig[ConfWithDuration](emptyConf).failure.exception shouldEqual KeyNotFoundException("i")
+    loadConfig[SparkNetwork](emptyConf).failure.exception shouldEqual KeyNotFoundException("timeout")
   }
 
   it should s"return a ${classOf[WrongTypeForKeyException]} when a key has a wrong type" in {
@@ -628,5 +634,31 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
     loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
+
+    val conf5 = ConfigFactory.parseString("""{ i: [1, 2, 3] }""")
+    loadConfig[ConfWithDuration](conf5).failure.exception shouldEqual WrongTypeForKeyException("LIST", "i")
+  }
+
+  it should "be able to consider default arguments" in {
+    case class InnerConf(e: Int, g: Int)
+    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
+
+    val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
+    loadConfig[Conf](conf1).success.value shouldBe Conf(2, "default", 42, InnerConf(43, 44))
+
+    val conf2 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50).asJava)
+    loadConfig[Conf](conf2).success.value shouldBe Conf(2, "default", 50, InnerConf(43, 44))
+
+    val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava)
+    loadConfig[Conf](conf3).failure.exception shouldEqual KeyNotFoundException("a")
+
+    val conf4 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5).asJava)
+    loadConfig[Conf](conf4).failure.exception shouldEqual KeyNotFoundException("d.g")
+
+    val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava)
+    loadConfig[Conf](conf5).success.value shouldBe Conf(2, "default", 42, InnerConf(5, 6))
+
+    val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
+    loadConfig[Conf](conf6).failure.exception shouldEqual WrongTypeForKeyException("STRING", "d")
   }
 }

@@ -75,21 +75,24 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
-  abstract class WrappedConfigConvert[Wrapped, SubRepr] {
-    final def from(config: ConfigValue): Try[SubRepr] = config match {
+  private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends ConfigConvert[SubRepr] {
+    final def from(config: ConfigValue): Try[SubRepr] =
+      Failure(
+        new UnsupportedOperationException("Cannot call 'from' on a WrappedDefaultValueConfigConvert."))
+    def fromWithDefault(config: ConfigValue, default: DefaultRepr): Try[SubRepr] = config match {
       case co: ConfigObject =>
-        fromConfigObject(co)
+        fromConfigObject(co, default)
       case null =>
         Failure(CannotConvertNullException)
       case other =>
         Failure(WrongTypeException(config.valueType().toString))
     }
-    def fromConfigObject(co: ConfigObject): Try[SubRepr]
+    def fromConfigObject(co: ConfigObject, default: DefaultRepr): Try[SubRepr]
     def to(v: SubRepr): ConfigValue
   }
 
-  implicit def hNilConfigConvert[Wrapped]: WrappedConfigConvert[Wrapped, HNil] = new WrappedConfigConvert[Wrapped, HNil] {
-    override def fromConfigObject(config: ConfigObject): Try[HNil] = Success(HNil)
+  implicit def hNilConfigConvert[Wrapped]: WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] = new WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] {
+    override def fromConfigObject(config: ConfigObject, default: HNil): Try[HNil] = Success(HNil)
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
@@ -101,17 +104,23 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case WrongTypeForKeyException(typ, suffix) => Failure(WrongTypeForKeyException(typ, keyStr + "." + suffix))
     }
 
-  implicit def hConsConfigConvert[Wrapped, K <: Symbol, V, T <: HList](
+  implicit def hConsConfigConvert[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
-    tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]],
-    mapping: ConfigFieldMapping[Wrapped]): WrappedConfigConvert[Wrapped, FieldType[K, V] :: T] = new WrappedConfigConvert[Wrapped, FieldType[K, V]:: T] {
+    tConfigConvert: Lazy[WrappedDefaultValueConfigConvert[Wrapped, T, U]],
+    mapping: ConfigFieldMapping[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V]:: T, Option[V]:: U] {
 
-    override def fromConfigObject(co: ConfigObject): Try[FieldType[K, V] :: T] = {
+    override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Try[FieldType[K, V] :: T] = {
       val keyStr = mapping.toConfigField(key.value.toString().tail)
       for {
-        v <- improveFailure(vFieldConvert.value.from(co.get(keyStr)), keyStr)
-        tail <- tConfigConvert.value.from(co)
+        v <- improveFailure(
+          vFieldConvert.value.from(co.get(keyStr)) match {
+            case Failure(CannotConvertNullException) =>
+              default.head.fold[Try[V]](Failure(CannotConvertNullException))(Success(_))
+            case other => other
+          },
+          keyStr)
+        tail <- tConfigConvert.value.fromWithDefault(co, default.tail)
       } yield field[K](v) :: tail
     }
 
@@ -236,12 +245,13 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   // used for products
-  implicit def deriveInstanceWithLabelledGeneric[F, Repr <: HList](
+  implicit def deriveInstanceWithLabelledGeneric[F, Repr <: HList, DefaultRepr <: HList](
     implicit gen: LabelledGeneric.Aux[F, Repr],
-    cc: Lazy[WrappedConfigConvert[F, Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
+    default: Default.AsOptions.Aux[F, DefaultRepr],
+    cc: Lazy[WrappedDefaultValueConfigConvert[F, Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
     override def from(config: ConfigValue): Try[F] = {
-      cc.value.from(config).map(gen.from)
+      cc.value.fromWithDefault(config, default()).map(gen.from)
     }
 
     override def to(t: F): ConfigValue = {
@@ -269,8 +279,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 trait LowPriorityConfigConvertImplicits {
   import scala.concurrent.duration.{ Duration, FiniteDuration }
   implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
-    override def from(config: ConfigValue): Try[Duration] = {
-      Some(config.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new IllegalArgumentException(s"Couldn't read duration from $config."))) { durationString =>
+    override def from(config: ConfigValue): Try[Duration] = config match {
+      case conf @ (_: ConfigObject | _: ConfigList) => Failure(WrongTypeException(conf.valueType().toString))
+      case null => Failure(CannotConvertNullException)
+      case other => Some(other.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new IllegalArgumentException(s"Couldn't read duration from $config."))) { durationString =>
         DurationConvert.from(durationString).recoverWith {
           case ex => Failure(new IllegalArgumentException(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
         }
@@ -283,8 +295,12 @@ trait LowPriorityConfigConvertImplicits {
 
   implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = new ConfigConvert[FiniteDuration] {
     override def from(config: ConfigValue): Try[FiniteDuration] = durationConfigConvert.from(config) match {
-      case Success(v) if v.isFinite() => Success(Duration(v.length, v.unit))
-      case _ => Failure(new Exception(s"Couldn't derive a finite duration from '$config'"))
+      case Success(v) =>
+        if (v.isFinite())
+          Success(Duration(v.length, v.unit))
+        else
+          Failure(new IllegalArgumentException(s"Couldn't parse a finite duration from a duration that is not finite."))
+      case Failure(f) => Failure(f)
     }
     override def to(t: FiniteDuration): ConfigValue = durationConfigConvert.to(t)
   }
