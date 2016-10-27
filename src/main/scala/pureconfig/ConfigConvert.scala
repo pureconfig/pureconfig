@@ -87,7 +87,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Try[Repr]
     override def from(config: ConfigValue): Try[Repr] =
       Failure(
-        new UnsupportedOperationException("Cannot call 'from' from a DefaultValueConfigConvert."))
+        new UnsupportedOperationException("Cannot call 'from' on a DefaultValueConfigConvert."))
   }
 
   implicit def hNilConfigConvert = new DefaultValueConfigConvert[HNil, HNil] {
