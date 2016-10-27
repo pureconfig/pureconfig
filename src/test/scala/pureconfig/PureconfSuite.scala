@@ -580,5 +580,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava)
     loadConfig[Conf](conf5).success.value shouldBe Conf(2, "default", 42, InnerConf(5, 6))
+
+    val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
+    loadConfig[Conf](conf6).failure.exception shouldEqual WrongTypeForKeyException("STRING", "d")
   }
 }
