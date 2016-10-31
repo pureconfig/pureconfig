@@ -13,7 +13,7 @@ A boilerplate-free Scala library for loading configuration files
 - [Add PureConfig to your project](#add-pureconfig-to-your-project)
 - [Use PureConfig](#use-pureconfig)
 - [Supported types](#supported-types)
-- [Defining naming conventions](#defining-naming-conventions)
+- [Customizing naming conventions](#customizing-naming-conventions)
 - [Extends the library to support new types](#extend-the-library-to-support-new-types)
 - [Override behaviour for types](#override-behaviour-for-types)
 - [Example](#example)
@@ -117,7 +117,7 @@ An almost comprehensive example is:
 res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
-## Defining naming conventions
+## Customizing naming conventions
 
 In case the naming convention you use in your source configuration files differs
 from the one used in the objects you're loading the configs into, PureConfig
