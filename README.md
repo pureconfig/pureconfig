@@ -119,10 +119,10 @@ res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> va
 
 ## Customizing naming conventions
 
-In case the naming convention you use in your source configuration files differs
-from the one used in the objects you're loading the configs into, PureConfig
-allows you to define proper mappings. That configuration should be done by an
-implicit `ConfigFieldMapping` that should be in scope when loading or writing
+In case the naming convention you use in your configuration files differs from
+the one used in the objects you're loading the configs into, PureConfig allows
+you to define proper mappings. That configuration should be done by an implicit
+`ConfigFieldMapping` that should be in scope when loading or writing
 configurations. The `ConfigFieldMapping` trait has a single `apply` method that
 maps field names in Scala objects to field names in the source configuration
 file. For instance, here's a contrived example where the configuration file has
@@ -146,9 +146,9 @@ loadConfig[SampleConf](conf)
 ```
 
 PureConfig provides a way to create a `ConfigFieldMapping` by defining the
-naming conventions of the fields in the Scala object and in the source
-configuration file. Some of the most used naming conventions are supported
-directly in the library:
+naming conventions of the fields in the Scala object and in the configuration
+file. Some of the most used naming conventions are supported directly in the
+library:
 
 * [`CamelCase`](https://en.wikipedia.org/wiki/Camel_case)
 * [`SnakeCase`](https://en.wikipedia.org/wiki/Snake_case)

@@ -9,11 +9,11 @@ object ConfigFieldMapping extends LowPriorityConfigFieldMappingImplicits {
 
   /**
    * Creates a ConfigFieldMapping from the provided function, mapping names in
-   * the object that will receive config values to names in the source
-   * configuration.
+   * the object that will receive config values to names in the configuration
+   * file.
    *
    * @param f a function that maps names in the object that will receive config
-   *        values to names in the source configuration
+   *        values to names in the configuration file
    * @return a ConfigFieldMapping created from the provided function.
    */
   def apply[T](f: String => String): ConfigFieldMapping[T] = new ConfigFieldMapping[T] {
@@ -22,13 +22,13 @@ object ConfigFieldMapping extends LowPriorityConfigFieldMappingImplicits {
 
   /**
    * Creates a ConfigFieldMapping according to the naming conventions specified
-   * both for the object that will receive config values and for the source
-   * configuration.
+   * both for the object that will receive config values and for the
+   * configuration file.
    *
    * @param typeFieldConvention naming convention used by the fields of the
    *        object which will receive config values
-   * @param configFieldConvention naming convention used in the source
-   *        configuration (e.g. the config file)
+   * @param configFieldConvention naming convention used in the configuration
+   *        file
    * @return a ConfigFieldMapping created according to the provided naming
    *         conventions.
    */
