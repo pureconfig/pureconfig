@@ -6,13 +6,14 @@ trait NamingConvention {
 }
 
 object CamelCase extends NamingConvention {
+  private val wordBreakPattern = String.format(
+    "%s|%s|%s",
+    "(?<=[A-Z])(?=[A-Z][a-z])",
+    "(?<=[^A-Z])(?=[A-Z])",
+    "(?<=[A-Za-z])(?=[^A-Za-z])").r
+
   def toTokens(s: String): Seq[String] = {
-    s.replaceAll(
-      String.format("%s|%s|%s",
-        "(?<=[A-Z])(?=[A-Z][a-z])",
-        "(?<=[^A-Z])(?=[A-Z])",
-        "(?<=[A-Za-z])(?=[^A-Za-z])"),
-      " ").split(" ").map(_.toLowerCase)
+    wordBreakPattern.split(s).map(_.toLowerCase)
   }
 
   def fromTokens(l: Seq[String]): String = {
