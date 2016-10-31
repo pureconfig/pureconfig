@@ -5,8 +5,6 @@ trait ConfigFieldMapping[T] extends (String => String) {
 }
 
 object ConfigFieldMapping extends LowPriorityConfigFieldMappingImplicits {
-  def apply[T](implicit mapping: ConfigFieldMapping[T]): ConfigFieldMapping[T] = mapping
-
   /**
    * Creates a ConfigFieldMapping from the provided function, mapping names in
    * the object that will receive config values to names in the configuration
