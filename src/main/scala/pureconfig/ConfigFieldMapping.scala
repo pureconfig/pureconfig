@@ -1,17 +1,17 @@
 package pureconfig
 
-trait ConfigFieldMapping[T] {
-  def toConfigField(fieldName: String): String
+trait ConfigFieldMapping[T] extends (String => String) {
+  def apply(fieldName: String): String
 }
 
 class IdentityConfigFieldMapping[T] extends ConfigFieldMapping[T] {
-  def toConfigField(fieldName: String): String = fieldName
+  def apply(fieldName: String): String = fieldName
 }
 
 class WordDelimiterConfigFieldMapping[T](
     typeFieldDelimiter: WordDelimiter,
     configFieldDelimiter: WordDelimiter) extends ConfigFieldMapping[T] {
-  def toConfigField(fieldName: String): String =
+  def apply(fieldName: String): String =
     (typeFieldDelimiter.toTokens _ andThen configFieldDelimiter.fromTokens _)(fieldName)
 }
 

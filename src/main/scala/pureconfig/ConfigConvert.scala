@@ -111,7 +111,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     mapping: ConfigFieldMapping[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V]:: T, Option[V]:: U] {
 
     override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Try[FieldType[K, V] :: T] = {
-      val keyStr = mapping.toConfigField(key.value.toString().tail)
+      val keyStr = mapping(key.value.toString().tail)
       for {
         v <- improveFailure(
           vFieldConvert.value.from(co.get(keyStr)) match {
@@ -125,7 +125,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     }
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
-      val keyStr = mapping.toConfigField(key.value.toString().tail)
+      val keyStr = mapping(key.value.toString().tail)
       val rem = tConfigConvert.value.to(t.tail)
       // TODO check that all keys are unique
       vFieldConvert.value match {

@@ -493,7 +493,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[SampleConf](conf).failure.exception shouldEqual KeyNotFoundException("a")
 
     implicit val mapping = new ConfigFieldMapping[SampleConf] {
-      def toConfigField(fieldName: String) = fieldName.toUpperCase
+      def apply(fieldName: String) = fieldName.toUpperCase
     }
 
     loadConfig[SampleConf](conf) shouldBe Success(SampleConf(2, "two"))
