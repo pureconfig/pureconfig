@@ -3,7 +3,7 @@ package pureconfig
 import org.scalatest.{ FlatSpec, Matchers }
 
 class NamingConventionTest extends FlatSpec with Matchers {
-  "A CamelCase" should "properly tokenize words" in {
+  "CamelCase" should "properly tokenize words" in {
     CamelCase.toTokens("lowercase") shouldBe Seq("lowercase")
     CamelCase.toTokens("Class") shouldBe Seq("class")
     CamelCase.toTokens("MyClass") shouldBe Seq("my", "class")
@@ -29,7 +29,7 @@ class NamingConventionTest extends FlatSpec with Matchers {
     CamelCase.fromTokens(Seq("may", "5")) shouldBe "may5"
     CamelCase.fromTokens(Seq("bfg", "9000")) shouldBe "bfg9000"
   }
-  "A PascalCase" should "properly tokenize words" in {
+  "PascalCase" should "properly tokenize words" in {
     PascalCase.toTokens("lowercase") shouldBe Seq("lowercase")
     PascalCase.toTokens("Class") shouldBe Seq("class")
     PascalCase.toTokens("MyClass") shouldBe Seq("my", "class")
@@ -55,7 +55,7 @@ class NamingConventionTest extends FlatSpec with Matchers {
     PascalCase.fromTokens(Seq("may", "5")) shouldBe "May5"
     PascalCase.fromTokens(Seq("bfg", "9000")) shouldBe "Bfg9000"
   }
-  "A KebabCase" should "properly tokenize words" in {
+  "KebabCase" should "properly tokenize words" in {
     KebabCase.toTokens("lowercase") shouldBe Seq("lowercase")
     KebabCase.toTokens("class") shouldBe Seq("class")
     KebabCase.toTokens("my-class") shouldBe Seq("my", "class")
@@ -81,7 +81,7 @@ class NamingConventionTest extends FlatSpec with Matchers {
     KebabCase.fromTokens(Seq("may", "5")) shouldBe "may-5"
     KebabCase.fromTokens(Seq("bfg", "9000")) shouldBe "bfg-9000"
   }
-  "An SnakeCase" should "properly tokenize words" in {
+  "SnakeCase" should "properly tokenize words" in {
     SnakeCase.toTokens("lowercase") shouldBe Seq("lowercase")
     SnakeCase.toTokens("class") shouldBe Seq("class")
     SnakeCase.toTokens("my_class") shouldBe Seq("my", "class")
