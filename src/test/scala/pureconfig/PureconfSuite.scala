@@ -502,7 +502,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "allow customizing the field mapping with word delimiters" in {
     import pureconfig.syntax._
 
-    implicit def conv[T] = new WordDelimiterConfigFieldMapping[T](CamelCaseWordDelimiter, HyphenWordDelimiter)
+    implicit def conv[T] = ConfigFieldMapping.apply[T](CamelCase, KebabCase)
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1
@@ -519,7 +519,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "allow customizing the field mapping only for specific types" in {
     import pureconfig.syntax._
 
-    implicit val conv = new WordDelimiterConfigFieldMapping[ConfWithCamelCase](CamelCaseWordDelimiter, HyphenWordDelimiter)
+    implicit val conv = ConfigFieldMapping.apply[ConfWithCamelCase](CamelCase, KebabCase)
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1

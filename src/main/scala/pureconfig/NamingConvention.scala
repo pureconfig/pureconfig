@@ -1,11 +1,11 @@
 package pureconfig
 
-trait WordDelimiter {
+trait NamingConvention {
   def toTokens(s: String): Seq[String]
   def fromTokens(l: Seq[String]): String
 }
 
-object CamelCaseWordDelimiter extends WordDelimiter {
+object CamelCase extends NamingConvention {
   def toTokens(s: String): Seq[String] = {
     s.replaceAll(
       String.format("%s|%s|%s",
@@ -24,7 +24,7 @@ object CamelCaseWordDelimiter extends WordDelimiter {
   }
 }
 
-class StringWordDelimiter(d: String) extends WordDelimiter {
+class StringDelimitedNamingConvention(d: String) extends NamingConvention {
   def toTokens(s: String): Seq[String] =
     s.split(d).map(_.toLowerCase)
 
@@ -32,6 +32,6 @@ class StringWordDelimiter(d: String) extends WordDelimiter {
     l.map(_.toLowerCase).mkString(d)
 }
 
-object HyphenWordDelimiter extends StringWordDelimiter("-")
+object KebabCase extends StringDelimitedNamingConvention("-")
 
-object UnderscoreWordDelimiter extends StringWordDelimiter("_")
+object SnakeCase extends StringDelimitedNamingConvention("_")
