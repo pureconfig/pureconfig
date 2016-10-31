@@ -29,6 +29,32 @@ class NamingConventionTest extends FlatSpec with Matchers {
     CamelCase.fromTokens(Seq("may", "5")) shouldBe "may5"
     CamelCase.fromTokens(Seq("bfg", "9000")) shouldBe "bfg9000"
   }
+  "A PascalCase" should "properly tokenize words" in {
+    PascalCase.toTokens("lowercase") shouldBe Seq("lowercase")
+    PascalCase.toTokens("Class") shouldBe Seq("class")
+    PascalCase.toTokens("MyClass") shouldBe Seq("my", "class")
+    PascalCase.toTokens("HTML") shouldBe Seq("html")
+    PascalCase.toTokens("PDFLoader") shouldBe Seq("pdf", "loader")
+    PascalCase.toTokens("AString") shouldBe Seq("a", "string")
+    PascalCase.toTokens("SimpleXMLParser") shouldBe Seq("simple", "xml", "parser")
+    PascalCase.toTokens("GL11Version") shouldBe Seq("gl", "11", "version")
+    PascalCase.toTokens("99Bottles") shouldBe Seq("99", "bottles")
+    PascalCase.toTokens("May5") shouldBe Seq("may", "5")
+    PascalCase.toTokens("BFG9000") shouldBe Seq("bfg", "9000")
+  }
+  it should "properly combine tokens" in {
+    PascalCase.fromTokens(Seq("lowercase")) shouldBe "Lowercase"
+    PascalCase.fromTokens(Seq("class")) shouldBe "Class"
+    PascalCase.fromTokens(Seq("my", "class")) shouldBe "MyClass"
+    PascalCase.fromTokens(Seq("html")) shouldBe "Html"
+    PascalCase.fromTokens(Seq("pdf", "loader")) shouldBe "PdfLoader"
+    PascalCase.fromTokens(Seq("a", "string")) shouldBe "AString"
+    PascalCase.fromTokens(Seq("simple", "xml", "parser")) shouldBe "SimpleXmlParser"
+    PascalCase.fromTokens(Seq("gl", "11", "version")) shouldBe "Gl11Version"
+    PascalCase.fromTokens(Seq("99", "bottles")) shouldBe "99Bottles"
+    PascalCase.fromTokens(Seq("may", "5")) shouldBe "May5"
+    PascalCase.fromTokens(Seq("bfg", "9000")) shouldBe "Bfg9000"
+  }
   "A KebabCase" should "properly tokenize words" in {
     KebabCase.toTokens("lowercase") shouldBe Seq("lowercase")
     KebabCase.toTokens("class") shouldBe Seq("class")

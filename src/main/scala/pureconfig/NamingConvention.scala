@@ -5,17 +5,21 @@ trait NamingConvention {
   def fromTokens(l: Seq[String]): String
 }
 
-object CamelCase extends NamingConvention {
+trait CapitalizedWordsNamingConvention extends NamingConvention {
+  def toTokens(s: String): Seq[String] = {
+    CapitalizedWordsNamingConvention.wordBreakPattern.split(s).map(_.toLowerCase)
+  }
+}
+
+object CapitalizedWordsNamingConvention {
   private val wordBreakPattern = String.format(
     "%s|%s|%s",
     "(?<=[A-Z])(?=[A-Z][a-z])",
     "(?<=[^A-Z])(?=[A-Z])",
     "(?<=[A-Za-z])(?=[^A-Za-z])").r
+}
 
-  def toTokens(s: String): Seq[String] = {
-    wordBreakPattern.split(s).map(_.toLowerCase)
-  }
-
+object CamelCase extends CapitalizedWordsNamingConvention {
   def fromTokens(l: Seq[String]): String = {
     l match {
       case Seq() => ""
@@ -23,6 +27,10 @@ object CamelCase extends NamingConvention {
       case h +: t => h.toLowerCase + t.map(_.capitalize).mkString
     }
   }
+}
+
+object PascalCase extends CapitalizedWordsNamingConvention {
+  def fromTokens(l: Seq[String]): String = l.map(_.capitalize).mkString
 }
 
 class StringDelimitedNamingConvention(d: String) extends NamingConvention {
