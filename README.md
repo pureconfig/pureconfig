@@ -13,6 +13,7 @@ A boilerplate-free Scala library for loading configuration files
 - [Add PureConfig to your project](#add-pureconfig-to-your-project)
 - [Use PureConfig](#use-pureconfig)
 - [Supported types](#supported-types)
+- [Defining naming conventions](#defining-naming-conventions)
 - [Extends the library to support new types](#extend-the-library-to-support-new-types)
 - [Override behaviour for types](#override-behaviour-for-types)
 - [Example](#example)
@@ -114,6 +115,55 @@ An almost comprehensive example is:
 > val conf = parseString("""{ "int": 1, "adt": { "b": 1 }, "list":["1", "20%"], "map": { "key": "value" } }""")
 > loadConfig[MyClass](conf)
 res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+```
+
+## Defining naming conventions
+
+In case the naming convention you use in your source configuration files differs
+from the one used in the objects you're loading the configs into, PureConfig
+allows you to define proper mappings. That configuration should be done by an
+implicit `ConfigFieldMapping` that should be in scope when loading or writing
+configurations. The `ConfigFieldMapping` trait has a single `apply` method that
+maps field names in Scala objects to field names in the source configuration
+file. For instance, here's a contrived example where the configuration file has
+all keys in upper case and we're loading it into a type whose fields are all in
+lower case:
+
+```scala
+case class SampleConf(foo: Int, bar: String)
+
+implicit val mapping = new ConfigFieldMapping[SampleConf] {
+  def apply(fieldName: String) = fieldName.toUpperCase
+}
+
+val conf = ConfigFactory.parseString("""{
+  FOO = 2
+  BAR = "two"
+}""")
+
+loadConfig[SampleConf](conf)
+// returns Success(SampleConf(2, "two"))
+```
+
+PureConfig provides a way to create a `ConfigFieldMapping` by defining the
+naming conventions of the fields in the Scala object and in the source
+configuration file. Some of the most used naming conventions are supported
+directly in the library:
+
+* [`CamelCase`](https://en.wikipedia.org/wiki/Camel_case)
+* [`SnakeCase`](https://en.wikipedia.org/wiki/Snake_case)
+* [`KebabCase`](http://wiki.c2.com/?KebabCase)
+* [`PascalCase`](https://en.wikipedia.org/wiki/PascalCase)
+
+You can use the `apply` method of `ConfigFieldMapping` that accepts the two
+naming conventions (for the fields in the Scala object and for the fields in the
+configuration file, respectively). A common use case is to have your field names
+in `camelCase` and your configuration files in `kebab-case`. In order to support
+it, you can make sure the following implicit is in scope before loading or
+writing configuration files:
+
+```scala
+implicit def conv[T] = ConfigFieldMapping.apply[T](CamelCase, KebabCase)
 ```
 
 ## Extend the library to support new types
