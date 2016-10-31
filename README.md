@@ -150,10 +150,10 @@ naming conventions of the fields in the Scala object and in the configuration
 file. Some of the most used naming conventions are supported directly in the
 library:
 
-* [`CamelCase`](https://en.wikipedia.org/wiki/Camel_case)
-* [`SnakeCase`](https://en.wikipedia.org/wiki/Snake_case)
-* [`KebabCase`](http://wiki.c2.com/?KebabCase)
-* [`PascalCase`](https://en.wikipedia.org/wiki/PascalCase)
+* [`CamelCase`](https://en.wikipedia.org/wiki/Camel_case): `camelCase`, `useMorePureconfig`
+* [`SnakeCase`](https://en.wikipedia.org/wiki/Snake_case): `snake_case`, `use_more_pureconfig`
+* [`KebabCase`](http://wiki.c2.com/?KebabCase): `kebab-case`, `use-more-pureconfig`
+* [`PascalCase`](https://en.wikipedia.org/wiki/PascalCase): `PascalCase`, `UseMorePureconfig`
 
 You can use the `apply` method of `ConfigFieldMapping` that accepts the two
 naming conventions (for the fields in the Scala object and for the fields in the
