@@ -465,6 +465,74 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     config.toOption.value.url shouldBe new URL(expected)
   }
 
+  case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
+  case class ConfWithCamelCase(camelCaseInt: Int, camelCaseString: String, camelCaseConf: ConfWithCamelCaseInner)
+
+  it should "use the fields as is by default" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{
+      camelCaseInt = 1
+      camelCaseString = "bar"
+      camelCaseConf {
+        thisIsAnInt = 3
+        thisIsAnotherInt = 10
+      }
+    }""")
+
+    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
+  it should "allow customizing the field mapping" in {
+    val conf = ConfigFactory.parseString("""{
+      A = 2
+      B = "two"
+    }""")
+
+    case class SampleConf(a: Int, b: String)
+    loadConfig[SampleConf](conf).failure.exception shouldEqual KeyNotFoundException("a")
+
+    implicit val mapping = new ConfigFieldMapping[SampleConf] {
+      def apply(fieldName: String) = fieldName.toUpperCase
+    }
+
+    loadConfig[SampleConf](conf) shouldBe Success(SampleConf(2, "two"))
+  }
+
+  it should "allow customizing the field mapping with word delimiters" in {
+    import pureconfig.syntax._
+
+    implicit def conv[T] = ConfigFieldMapping.apply[T](CamelCase, KebabCase)
+
+    val conf = ConfigFactory.parseString("""{
+      camel-case-int = 1
+      camel-case-string = "bar"
+      camel-case-conf {
+        this-is-an-int = 3
+        this-is-another-int = 10
+      }
+    }""")
+
+    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
+  it should "allow customizing the field mapping only for specific types" in {
+    import pureconfig.syntax._
+
+    implicit val conv = ConfigFieldMapping.apply[ConfWithCamelCase](CamelCase, KebabCase)
+
+    val conf = ConfigFactory.parseString("""{
+      camel-case-int = 1
+      camel-case-string = "bar"
+      camel-case-conf {
+        thisIsAnInt = 3
+        thisIsAnotherInt = 10
+      }
+    }""")
+
+    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
   val expectedValueForResolveFilesPriority2 = FlatConfig(
     false,
     0.001d,

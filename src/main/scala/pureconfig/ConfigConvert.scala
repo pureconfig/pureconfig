@@ -75,6 +75,27 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
+  private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends ConfigConvert[SubRepr] {
+    final def from(config: ConfigValue): Try[SubRepr] =
+      Failure(
+        new UnsupportedOperationException("Cannot call 'from' on a WrappedDefaultValueConfigConvert."))
+    def fromWithDefault(config: ConfigValue, default: DefaultRepr): Try[SubRepr] = config match {
+      case co: ConfigObject =>
+        fromConfigObject(co, default)
+      case null =>
+        Failure(CannotConvertNullException)
+      case other =>
+        Failure(WrongTypeException(config.valueType().toString))
+    }
+    def fromConfigObject(co: ConfigObject, default: DefaultRepr): Try[SubRepr]
+    def to(v: SubRepr): ConfigValue
+  }
+
+  implicit def hNilConfigConvert[Wrapped]: WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] = new WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] {
+    override def fromConfigObject(config: ConfigObject, default: HNil): Try[HNil] = Success(HNil)
+    override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
+  }
+
   private[pureconfig] def improveFailure[Z](result: Try[Z], keyStr: String): Try[Z] =
     result recoverWith {
       case CannotConvertNullException => Failure(KeyNotFoundException(keyStr))
@@ -83,46 +104,28 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case WrongTypeForKeyException(typ, suffix) => Failure(WrongTypeForKeyException(typ, keyStr + "." + suffix))
     }
 
-  private[pureconfig] trait DefaultValueConfigConvert[Repr <: HList, DefaultRepr <: HList] extends ConfigConvert[Repr] {
-    def fromWithDefault(config: ConfigValue, default: DefaultRepr): Try[Repr]
-    override def from(config: ConfigValue): Try[Repr] =
-      Failure(
-        new UnsupportedOperationException("Cannot call 'from' on a DefaultValueConfigConvert."))
-  }
-
-  implicit def hNilConfigConvert = new DefaultValueConfigConvert[HNil, HNil] {
-    override def fromWithDefault(config: ConfigValue, default: HNil): Try[HNil] = Success(HNil)
-    override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
-  }
-
-  implicit def hConsConfigConvert[K <: Symbol, V, T <: HList, U <: HList](
+  implicit def hConsConfigConvert[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
-    tConfigConvert: Lazy[DefaultValueConfigConvert[T, U]]): DefaultValueConfigConvert[FieldType[K, V] :: T, Option[V] :: U] = new DefaultValueConfigConvert[FieldType[K, V]:: T, Option[V]:: U] {
+    tConfigConvert: Lazy[WrappedDefaultValueConfigConvert[Wrapped, T, U]],
+    mapping: ConfigFieldMapping[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V]:: T, Option[V]:: U] {
 
-    override def fromWithDefault(config: ConfigValue, default: Option[V] :: U): Try[FieldType[K, V] :: T] = {
-      config match {
-        case co: ConfigObject =>
-          val keyStr = key.value.toString().tail // remove the ' in front of the symbol
-          for {
-            v <- improveFailure(
-              vFieldConvert.value.from(co.get(keyStr)) match {
-                case Failure(CannotConvertNullException) =>
-                  default.head.fold[Try[V]](Failure(CannotConvertNullException))(Success(_))
-                case other => other
-              },
-              keyStr)
-            tail <- tConfigConvert.value.fromWithDefault(config, default.tail)
-          } yield field[K](v) :: tail
-        case null =>
-          Failure(CannotConvertNullException)
-        case other =>
-          Failure(WrongTypeException(config.valueType().toString))
-      }
+    override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Try[FieldType[K, V] :: T] = {
+      val keyStr = mapping(key.value.toString().tail)
+      for {
+        v <- improveFailure(
+          vFieldConvert.value.from(co.get(keyStr)) match {
+            case Failure(CannotConvertNullException) =>
+              default.head.fold[Try[V]](Failure(CannotConvertNullException))(Success(_))
+            case other => other
+          },
+          keyStr)
+        tail <- tConfigConvert.value.fromWithDefault(co, default.tail)
+      } yield field[K](v) :: tail
     }
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
-      val keyStr = key.value.toString().tail
+      val keyStr = mapping(key.value.toString().tail)
       val rem = tConfigConvert.value.to(t.tail)
       // TODO check that all keys are unique
       vFieldConvert.value match {
@@ -245,7 +248,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   implicit def deriveInstanceWithLabelledGeneric[F, Repr <: HList, DefaultRepr <: HList](
     implicit gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
-    cc: Lazy[DefaultValueConfigConvert[Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
+    cc: Lazy[WrappedDefaultValueConfigConvert[F, Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
     override def from(config: ConfigValue): Try[F] = {
       cc.value.fromWithDefault(config, default()).map(gen.from)
@@ -257,7 +260,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   // used for coproducts
-  implicit def deriveInstanceWithGeneric[F, Repr <: Coproduct](implicit gen: Generic.Aux[F, Repr], cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
+  implicit def deriveInstanceWithGeneric[F, Repr <: Coproduct](
+    implicit gen: Generic.Aux[F, Repr],
+    cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
     override def from(config: ConfigValue): Try[F] = {
       cc.value.from(config).map(gen.from)
     }
