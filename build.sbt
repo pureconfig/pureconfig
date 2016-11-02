@@ -24,14 +24,16 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % "2.3.0",
   compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-  "com.typesafe" % "config" % "1.3.0",
+  "com.typesafe" % "config" % "1.3.0"
+) ++ testOnlyDeps
 
-  "org.scalatest" %% "scalatest" % "3.0.0-M15" % "test",
-  "joda-time" % "joda-time" % "2.9.2" % "test",
-  "org.joda" % "joda-convert" % "1.8" % "test",
+val testOnlyDeps = List(
+  "org.scalatest" %% "scalatest" % "3.0.0-M15",
+  "joda-time" % "joda-time" % "2.9.2",
+  "org.joda" % "joda-convert" % "1.8",
   "org.scalacheck" %%  "scalacheck" % "1.12.5",
   "com.github.alexarchambault" %% "scalacheck-shapeless_1.12" % "0.3.1"
-)
+).map(_ % "test")
 
 initialize := {
   val required = "1.8"
