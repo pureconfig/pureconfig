@@ -28,11 +28,11 @@ libraryDependencies ++= Seq(
 ) ++ testOnlyDeps
 
 val testOnlyDeps = List(
-  "org.scalatest" %% "scalatest" % "3.0.0-M15",
-  "joda-time" % "joda-time" % "2.9.2",
-  "org.joda" % "joda-convert" % "1.8",
-  "org.scalacheck" %%  "scalacheck" % "1.12.5",
-  "com.github.alexarchambault" %% "scalacheck-shapeless_1.12" % "0.3.1"
+  "org.scalatest" %% "scalatest" % "3.0.0",
+  "joda-time" % "joda-time" % "2.9.4",
+  "org.joda" % "joda-convert" % "1.8.1",
+  "org.scalacheck" %%  "scalacheck" % "1.13.4",
+  "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.2"
 ).map(_ % "test")
 
 initialize := {
