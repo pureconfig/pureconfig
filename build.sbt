@@ -32,7 +32,7 @@ val testOnlyDeps = List(
   "joda-time" % "joda-time" % "2.9.4",
   "org.joda" % "joda-convert" % "1.8.1",
   "org.scalacheck" %%  "scalacheck" % "1.13.4",
-  "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.2"
+  "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.3"
 ).map(_ % "test")
 
 initialize := {
