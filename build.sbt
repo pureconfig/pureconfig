@@ -12,7 +12,7 @@ licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozill
 
 scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.10.5", "2.11.8")
+crossScalaVersions := Seq("2.10.5", "2.11.8", "2.12.0")
 
 scalacOptions ++= Seq("-feature")
 
