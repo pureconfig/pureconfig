@@ -48,13 +48,13 @@ uses the raw configurations to do its magic.
 
 In the sbt configuration file:
 
-use scala `2.10` or `2.11`:
+use scala `2.10`, `2.11` or `2.12`:
 
 ```scala
 scalaVersion := "2.11.8" // or "2.10.5"
 ```
 
-Add the library. For scala `2.11`
+Add the library. For scala `2.11` and `2.12`
 
 ```scala
 libraryDependencies ++= Seq(
