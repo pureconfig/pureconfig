@@ -22,9 +22,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.chuusai" %% "shapeless" % "2.3.0",
+  "com.chuusai" %% "shapeless" % "2.3.2",
   compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-  "com.typesafe" % "config" % "1.3.0"
+  "com.typesafe" % "config" % "1.3.1"
 ) ++ testOnlyDeps
 
 val testOnlyDeps = List(
