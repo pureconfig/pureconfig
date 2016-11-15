@@ -288,9 +288,13 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = {
-    val fromString: String => FiniteDuration = (s: String) => DurationConvert.fromString(s, implicitly[ClassTag[FiniteDuration]]).get match {
-      case v if v.isFinite() => Duration(v.length, v.unit)
-      case _ => throw new IllegalArgumentException(s"Couldn't parse '$s' into a finite duration because it's infinite.")
+    val fromString: String => FiniteDuration = { (s: String) =>
+      DurationConvert.fromString(s, implicitly[ClassTag[FiniteDuration]])
+        .flatMap {
+          case d: FiniteDuration => Success(d)
+          case _ => Failure(new IllegalArgumentException(s"Couldn't parse '$s' into a FiniteDuration because it's infinite."))
+        }
+        .get
     }
     nonEmptyStringConvert(fromString, DurationConvert.fromDuration)
   }
