@@ -16,8 +16,9 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
 import java.net.URL
+import scala.concurrent.duration.{ Duration, FiniteDuration }
 
-import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, stringConvert }
+import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, stringConvert, nonEmptyStringConvert }
 import pureconfig.error.{ CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException }
 
 /**
@@ -62,17 +63,22 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
-  def fromNonEmptyString[T](fromF: String => T)(implicit ct: ClassTag[T]): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Try[T] = fromFConvert {
-      case "" => throw new IllegalArgumentException(s"Cannot read a $ct from an empty string.")
-      case x => fromF(x)
-    }(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
+  def fromNonEmptyString[T](fromF: String => T)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromString(ensureNonEmpty andThen fromF)
+  }
+
+  private def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => String = {
+    case "" => throw new IllegalArgumentException(s"Cannot read a $ct from an empty string.")
+    case x => x
   }
 
   def stringConvert[T](fromF: String => T, toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
+  }
+
+  def nonEmptyStringConvert[T](fromF: String => T, toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    stringConvert(ensureNonEmpty andThen fromF, toF)
   }
 
   private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends ConfigConvert[SubRepr] {
@@ -277,32 +283,16 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
  * Implicit [[ConfigConvert]] instances defined such that they can be overriden by library consumer via a locally defined implementation.
  */
 trait LowPriorityConfigConvertImplicits {
-  import scala.concurrent.duration.{ Duration, FiniteDuration }
-  implicit val durationConfigConvert: ConfigConvert[Duration] = new ConfigConvert[Duration] {
-    override def from(config: ConfigValue): Try[Duration] = config match {
-      case conf @ (_: ConfigObject | _: ConfigList) => Failure(WrongTypeException(conf.valueType().toString))
-      case null => Failure(CannotConvertNullException)
-      case other => Some(other.render(ConfigRenderOptions.concise())).fold[Try[Duration]](Failure(new IllegalArgumentException(s"Couldn't read duration from $config."))) { durationString =>
-        DurationConvert.from(durationString).recoverWith {
-          case ex => Failure(new IllegalArgumentException(s"Could not parse a duration from '$durationString'. (try ns, us, ms, s, m, h, d)"))
-        }
-      }
-    }
-    override def to(t: Duration): ConfigValue = {
-      ConfigValueFactory.fromAnyRef(DurationConvert.from(t))
-    }
+  implicit val durationConfigConvert: ConfigConvert[Duration] = {
+    nonEmptyStringConvert(s => DurationConvert.fromString(s, implicitly[ClassTag[Duration]]).get, DurationConvert.fromDuration)
   }
 
-  implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = new ConfigConvert[FiniteDuration] {
-    override def from(config: ConfigValue): Try[FiniteDuration] = durationConfigConvert.from(config) match {
-      case Success(v) =>
-        if (v.isFinite())
-          Success(Duration(v.length, v.unit))
-        else
-          Failure(new IllegalArgumentException(s"Couldn't parse a finite duration from a duration that is not finite."))
-      case Failure(f) => Failure(f)
+  implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = {
+    val fromString: String => FiniteDuration = (s: String) => DurationConvert.fromString(s, implicitly[ClassTag[FiniteDuration]]).get match {
+      case v if v.isFinite() => Duration(v.length, v.unit)
+      case _ => throw new IllegalArgumentException(s"Couldn't parse '$s' into a finite duration because it's infinite.")
     }
-    override def to(t: FiniteDuration): ConfigValue = durationConfigConvert.to(t)
+    nonEmptyStringConvert(fromString, DurationConvert.fromDuration)
   }
 
   implicit val readString = fromString[String](identity)

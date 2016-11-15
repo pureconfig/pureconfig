@@ -119,11 +119,12 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     conf.getValue("v").to[Short].isFailure shouldBe true
   }
 
+  case class ConfigWithDouble(v: Double)
+
   it should "be able to load a Double from a percentage" in {
     import pureconfig.syntax._
 
     val conf = ConfigFactory.parseString("""{ v: 52% }""")
-    case class ConfigWithDouble(v: Double)
     conf.to[ConfigWithDouble] shouldBe Success(ConfigWithDouble(0.52))
   }
 
@@ -611,6 +612,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithConfigList](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
     loadConfig[ConfWithDuration](emptyConf).failure.exception shouldEqual KeyNotFoundException("i")
     loadConfig[SparkNetwork](emptyConf).failure.exception shouldEqual KeyNotFoundException("timeout")
+    loadConfig[ConfWithDuration](emptyConf).failure.exception shouldEqual KeyNotFoundException("i")
   }
 
   it should s"return a ${classOf[WrongTypeForKeyException]} when a key has a wrong type" in {
@@ -628,9 +630,6 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
     loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
-
-    val conf5 = ConfigFactory.parseString("""{ i: [1, 2, 3] }""")
-    loadConfig[ConfWithDuration](conf5).failure.exception shouldEqual WrongTypeForKeyException("LIST", "i")
   }
 
   it should "be able to consider default arguments" in {
@@ -654,5 +653,35 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
     loadConfig[Conf](conf6).failure.exception shouldEqual WrongTypeForKeyException("STRING", "d")
+  }
+
+  "Converting from an empty string to a double" should "complain about an empty string" in {
+    val conf = ConfigFactory.parseMap(Map("v" -> "").asJava)
+    loadConfig[ConfigWithDouble](conf).failure.exception.getMessage shouldEqual "Cannot read a Double from an empty string."
+  }
+
+  "Converting from an empty string to a duration" should "complain about an empty string" in {
+    val conf = ConfigFactory.parseMap(Map("i" -> "").asJava)
+    loadConfig[ConfWithDuration](conf).failure.exception.getMessage shouldEqual
+      "Cannot read a scala.concurrent.duration.Duration from an empty string."
+  }
+
+  "Converting from a list to Double" should "give a terrible error message, unfortunately" in {
+    val conf = ConfigFactory.parseString("""{ "v": [1, 2, 3, 4] }""")
+    loadConfig[ConfigWithDouble](conf).failure.exception.getMessage shouldBe """For input string: "[1,2,3,4]""""
+  }
+
+  "Converting from a list to FiniteDuration" should "give an middling error message with poor context, unfortunately" in {
+    val conf = ConfigFactory.parseString("""{ "timeout": [1, 2, 3, 4] }""")
+    loadConfig[SparkNetwork](conf).failure.exception.getMessage shouldBe "Could not parse a FiniteDuration from '[1,2,3,4]'. (try ns, us, ms, s, m, h, d)"
+  }
+
+  "Converting an input of 'Inf'" should "produce an infinite Duration" in {
+    val conf = ConfigFactory.parseString("""{ i: Inf }""")
+    loadConfig[ConfWithDuration](conf).success.value.i.isFinite shouldBe false
+  }
+  it should "fail for a FiniteDuration" in {
+    val conf = ConfigFactory.parseString("""{ timeout: Inf }""")
+    loadConfig[SparkNetwork](conf).failure.exception.getMessage shouldBe "Couldn't parse 'Inf' into a finite duration because it's infinite."
   }
 }
