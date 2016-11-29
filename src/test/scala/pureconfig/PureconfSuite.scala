@@ -197,7 +197,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   // a slightly more complex configuration
   implicit val dateConfigConvert = stringConvert[DateTime](
     str => Try(ISODateTimeFormat.dateTime().parseDateTime(str)),
-    t => Try(ISODateTimeFormat.dateTime().print(t)))
+    t => ISODateTimeFormat.dateTime().print(t)
+  )
 
   type ConfigCoproduct = Float :+: Boolean :+: CNil
   case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig, coproduct: ConfigCoproduct)
@@ -403,7 +404,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ConfWithFoo(foo: Foo)
 
   it should "be able to use a local ConfigConvert without getting an ImplicitResolutionFailure error" in {
-    implicit val custom: ConfigConvert[Foo] = stringConvert(s => Try(Foo(s.toInt)), f => Try(f.i.toString))
+    implicit val custom: ConfigConvert[Foo] = stringConvert(s => Try(Foo(s.toInt)), _.i.toString)
     saveAndLoadIsIdentity(ConfWithFoo(Foo(100)))
   }
 

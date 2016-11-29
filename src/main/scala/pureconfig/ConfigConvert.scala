@@ -77,12 +77,12 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     case x => Success(x)
   }
 
-  def stringConvert[T](fromF: String => Try[T], toF: T => Try[String]): ConfigConvert[T] = new ConfigConvert[T] {
+  def stringConvert[T](fromF: String => Try[T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t).get)
+    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
-  def nonEmptyStringConvert[T](fromF: String => Try[T], toF: T => Try[String])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+  def nonEmptyStringConvert[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
     stringConvert(ensureNonEmpty(ct)(_).flatMap(fromF), toF)
   }
 
@@ -291,7 +291,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val durationConfigConvert: ConfigConvert[Duration] = {
     nonEmptyStringConvert(
       s => DurationConvert.fromString(s, implicitly[ClassTag[Duration]]),
-      d => Try(DurationConvert.fromDuration(d))
+      DurationConvert.fromDuration
     )
   }
 
@@ -303,7 +303,7 @@ trait LowPriorityConfigConvertImplicits {
           case _ => Failure(new IllegalArgumentException(s"Couldn't parse '$s' into a FiniteDuration because it's infinite."))
         }
     }
-    nonEmptyStringConvert(fromString, d => Try(DurationConvert.fromDuration(d)))
+    nonEmptyStringConvert(fromString, DurationConvert.fromDuration)
   }
 
   implicit val readString = fromString[String](Success(_))
@@ -319,7 +319,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readInt = fromNonEmptyString[Int](s => Try(s.toInt))
   implicit val readLong = fromNonEmptyString[Long](s => Try(s.toLong))
   implicit val readShort = fromNonEmptyString[Short](s => Try(s.toShort))
-  implicit val readURL = stringConvert[URL](s => Try(new URL(s)), u => Try(u.toString))
+  implicit val readURL = stringConvert[URL](s => Try(new URL(s)), _.toString)
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Try[Config] = config match {
