@@ -46,39 +46,44 @@ trait ConfigConvert[T] {
 object ConfigConvert extends LowPriorityConfigConvertImplicits {
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
 
-  private def fromFConvert[T](fromF: String => T): ConfigValue => Try[T] =
+  private def fromFConvert[T](fromF: String => Try[T]): ConfigValue => Try[T] =
     config => {
       if (config == null) {
         Failure(CannotConvertNullException)
       } else {
-        Try(fromF(config.valueType() match {
-          case ConfigValueType.STRING => config.unwrapped().toString
-          case _ => config.render(ConfigRenderOptions.concise())
-        }))
+        // Because we can't trust `fromF` or Typesafe Config not to throw, we wrap the
+        // evaluation in one more `Try` to prevent an unintentional exception from escaping.
+        Try {
+          val configValueAsString = config.valueType match {
+            case ConfigValueType.STRING => config.unwrapped.toString
+            case _ => config.render(ConfigRenderOptions.concise)
+          }
+          fromF(configValueAsString)
+        }.flatten
       }
     }
 
-  def fromString[T](fromF: String => T): ConfigConvert[T] = new ConfigConvert[T] {
+  def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
-  def fromNonEmptyString[T](fromF: String => T)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromString(ensureNonEmpty andThen fromF)
+  def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromString(ensureNonEmpty(ct)(_).flatMap(fromF))
   }
 
-  private def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => String = {
-    case "" => throw new IllegalArgumentException(s"Cannot read a $ct from an empty string.")
-    case x => x
+  private def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => Try[String] = {
+    case "" => Failure(new IllegalArgumentException(s"Cannot read a $ct from an empty string."))
+    case x => Success(x)
   }
 
-  def stringConvert[T](fromF: String => T, toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
+  def stringConvert[T](fromF: String => Try[T], toF: T => Try[String]): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Try[T] = fromFConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
+    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t).get)
   }
 
-  def nonEmptyStringConvert[T](fromF: String => T, toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    stringConvert(ensureNonEmpty andThen fromF, toF)
+  def nonEmptyStringConvert[T](fromF: String => Try[T], toF: T => Try[String])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    stringConvert(ensureNonEmpty(ct)(_).flatMap(fromF), toF)
   }
 
   private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends ConfigConvert[SubRepr] {
@@ -284,35 +289,37 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
  */
 trait LowPriorityConfigConvertImplicits {
   implicit val durationConfigConvert: ConfigConvert[Duration] = {
-    nonEmptyStringConvert(s => DurationConvert.fromString(s, implicitly[ClassTag[Duration]]).get, DurationConvert.fromDuration)
+    nonEmptyStringConvert(
+      s => DurationConvert.fromString(s, implicitly[ClassTag[Duration]]),
+      d => Try(DurationConvert.fromDuration(d))
+    )
   }
 
   implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = {
-    val fromString: String => FiniteDuration = { (s: String) =>
+    val fromString: String => Try[FiniteDuration] = { (s: String) =>
       DurationConvert.fromString(s, implicitly[ClassTag[FiniteDuration]])
         .flatMap {
           case d: FiniteDuration => Success(d)
           case _ => Failure(new IllegalArgumentException(s"Couldn't parse '$s' into a FiniteDuration because it's infinite."))
         }
-        .get
     }
-    nonEmptyStringConvert(fromString, DurationConvert.fromDuration)
+    nonEmptyStringConvert(fromString, d => Try(DurationConvert.fromDuration(d)))
   }
 
-  implicit val readString = fromString[String](identity)
-  implicit val readBoolean = fromNonEmptyString[Boolean](_.toBoolean)
+  implicit val readString = fromString[String](Success(_))
+  implicit val readBoolean = fromNonEmptyString[Boolean](s => Try(s.toBoolean))
   implicit val readDouble = fromNonEmptyString[Double]({
-    case v if v.last == '%' => v.dropRight(1).toDouble / 100d
-    case v => v.toDouble
+    case v if v.last == '%' => Try(v.dropRight(1).toDouble / 100d)
+    case v => Try(v.toDouble)
   })
   implicit val readFloat = fromNonEmptyString[Float]({
-    case v if v.last == '%' => v.dropRight(1).toFloat / 100f
-    case v => v.toFloat
+    case v if v.last == '%' => Try(v.dropRight(1).toFloat / 100f)
+    case v => Try(v.toFloat)
   })
-  implicit val readInt = fromNonEmptyString[Int](_.toInt)
-  implicit val readLong = fromNonEmptyString[Long](_.toLong)
-  implicit val readShort = fromNonEmptyString[Short](_.toShort)
-  implicit val readURL = stringConvert[URL](new URL(_), _.toString)
+  implicit val readInt = fromNonEmptyString[Int](s => Try(s.toInt))
+  implicit val readLong = fromNonEmptyString[Long](s => Try(s.toLong))
+  implicit val readShort = fromNonEmptyString[Short](s => Try(s.toShort))
+  implicit val readURL = stringConvert[URL](s => Try(new URL(s)), u => Try(u.toString))
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Try[Config] = config match {

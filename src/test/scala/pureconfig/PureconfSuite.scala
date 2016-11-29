@@ -90,12 +90,12 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   it should s"be able to override locally all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in {
-    implicit val readBoolean = fromString[Boolean](_ != "0")
-    implicit val readDouble = fromString[Double](_.toDouble * -1)
-    implicit val readFloat = fromString[Float](_.toFloat * -1)
-    implicit val readInt = fromString[Int](_.toInt * -1)
-    implicit val readLong = fromString[Long](_.toLong * -1)
-    implicit val readString = fromString[String](_.toUpperCase)
+    implicit val readBoolean = fromString[Boolean](s => Try(s != "0"))
+    implicit val readDouble = fromString[Double](s => Try(s.toDouble * -1))
+    implicit val readFloat = fromString[Float](s => Try(s.toFloat * -1))
+    implicit val readInt = fromString[Int](s => Try(s.toInt * -1))
+    implicit val readLong = fromString[Long](s => Try(s.toLong * -1))
+    implicit val readString = fromString[String](s => Try(s.toUpperCase))
     val config = loadConfig[FlatConfig](ConfigValueFactory.fromMap(Map(
       "b" -> 0,
       "d" -> 234.234,
@@ -196,8 +196,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   // a slightly more complex configuration
   implicit val dateConfigConvert = stringConvert[DateTime](
-    str => ISODateTimeFormat.dateTime().parseDateTime(str),
-    t => ISODateTimeFormat.dateTime().print(t))
+    str => Try(ISODateTimeFormat.dateTime().parseDateTime(str)),
+    t => Try(ISODateTimeFormat.dateTime().print(t)))
 
   type ConfigCoproduct = Float :+: Boolean :+: CNil
   case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig, coproduct: ConfigCoproduct)
@@ -403,14 +403,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ConfWithFoo(foo: Foo)
 
   it should "be able to use a local ConfigConvert without getting an ImplicitResolutionFailure error" in {
-    implicit val custom: ConfigConvert[Foo] = stringConvert(s => Foo(s.toInt), _.i.toString)
+    implicit val custom: ConfigConvert[Foo] = stringConvert(s => Try(Foo(s.toInt)), f => Try(f.i.toString))
     saveAndLoadIsIdentity(ConfWithFoo(Foo(100)))
   }
 
   case class ConfWithInt(i: Int)
 
   it should "be able to use a local ConfigConvert instead of the ones in ConfigConvert companion object" in {
-    implicit val readInt = fromString[Int](_.toInt.abs)
+    implicit val readInt = fromString[Int](s => Try(s.toInt.abs))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "-100").asJava).toConfig)(ConfigConvert[ConfWithInt]).success.value shouldBe ConfWithInt(100)
   }
 
@@ -418,7 +418,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert from fromString" in {
     val expected = Duration(110, TimeUnit.DAYS)
-    implicit val readDurationBadly = fromString[Duration](_ => expected)
+    implicit val readDurationBadly = fromString[Duration](_ => Try(expected))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
   }
 
@@ -455,7 +455,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "allow a custom ConfigConvert[URL] to override our definition" in {
     val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = fromString[URL](_ => new URL(expected))
+    implicit val readURLBadly = fromString[URL](_ => Try(new URL(expected)))
     val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
     config.toOption.value.url shouldBe new URL(expected)
   }
