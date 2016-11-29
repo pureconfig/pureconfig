@@ -53,13 +53,11 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       } else {
         // Because we can't trust `fromF` or Typesafe Config not to throw, we wrap the
         // evaluation in one more `Try` to prevent an unintentional exception from escaping.
-        Try {
-          val configValueAsString = config.valueType match {
-            case ConfigValueType.STRING => config.unwrapped.toString
-            case _ => config.render(ConfigRenderOptions.concise)
-          }
-          fromF(configValueAsString)
-        }.flatten
+        // `Try.flatMap(f)` captures any non-fatal exceptions thrown by `f`.
+        Try(config.valueType match {
+          case ConfigValueType.STRING => config.unwrapped.toString
+          case _ => config.render(ConfigRenderOptions.concise)
+        }).flatMap(fromF)
       }
     }
 
