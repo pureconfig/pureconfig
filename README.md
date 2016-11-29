@@ -181,7 +181,7 @@ could not find implicit value for parameter conv: pureconfig.ConfigConvert[Foo]
 `ConfigConvert` typeclass must be provided implicitly, like
 
 ```scala
-> implicit val foocc = ConfigConvert.stringConvert[Foo](x => new Foo(x.toInt), foo => foo.bar.toString)
+> implicit val foocc = ConfigConvert.stringConvert[Foo](s => Try(new Foo(s.toInt)), foo => foo.bar.toString)
 > loadConfig[Foo]
 Foo(1)
 ```
@@ -204,7 +204,7 @@ Now let's say that we want to override this behaviour such that `String`s are
 always read lower case. We can do:
 
 ```scala
-> implicit val overridestrcc = ConfigConvert.fromString(_.toLowerCase)
+> implicit val overridestrcc = ConfigConvert.fromString(s => Try(s.toLowerCase))
 > ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
 util.Try[String] = Success(foobar)
 ```
@@ -247,7 +247,7 @@ import pureconfig._
 import java.nio.file.Paths
 import scala.util.Try
 
-implicit val deriveStringConvertForPath = fromString[Path](Paths.get)
+implicit val deriveStringConvertForPath = fromString[Path](s => Try(Paths.get(s)))
 ```
 
 And then we load the configuration
