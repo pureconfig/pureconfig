@@ -90,12 +90,12 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   it should s"be able to override locally all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in {
-    implicit val readBoolean = fromString[Boolean](_ != "0")
-    implicit val readDouble = fromString[Double](_.toDouble * -1)
-    implicit val readFloat = fromString[Float](_.toFloat * -1)
-    implicit val readInt = fromString[Int](_.toInt * -1)
-    implicit val readLong = fromString[Long](_.toLong * -1)
-    implicit val readString = fromString[String](_.toUpperCase)
+    implicit val readBoolean = fromString[Boolean](s => Try(s != "0"))
+    implicit val readDouble = fromString[Double](s => Try(s.toDouble * -1))
+    implicit val readFloat = fromString[Float](s => Try(s.toFloat * -1))
+    implicit val readInt = fromString[Int](s => Try(s.toInt * -1))
+    implicit val readLong = fromString[Long](s => Try(s.toLong * -1))
+    implicit val readString = fromString[String](s => Try(s.toUpperCase))
     val config = loadConfig[FlatConfig](ConfigValueFactory.fromMap(Map(
       "b" -> 0,
       "d" -> 234.234,
@@ -119,11 +119,12 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     conf.getValue("v").to[Short].isFailure shouldBe true
   }
 
+  case class ConfigWithDouble(v: Double)
+
   it should "be able to load a Double from a percentage" in {
     import pureconfig.syntax._
 
     val conf = ConfigFactory.parseString("""{ v: 52% }""")
-    case class ConfigWithDouble(v: Double)
     conf.to[ConfigWithDouble] shouldBe Success(ConfigWithDouble(0.52))
   }
 
@@ -195,8 +196,9 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   // a slightly more complex configuration
   implicit val dateConfigConvert = stringConvert[DateTime](
-    str => ISODateTimeFormat.dateTime().parseDateTime(str),
-    t => ISODateTimeFormat.dateTime().print(t))
+    str => Try(ISODateTimeFormat.dateTime().parseDateTime(str)),
+    t => ISODateTimeFormat.dateTime().print(t)
+  )
 
   type ConfigCoproduct = Float :+: Boolean :+: CNil
   case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig, coproduct: ConfigCoproduct)
@@ -402,14 +404,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ConfWithFoo(foo: Foo)
 
   it should "be able to use a local ConfigConvert without getting an ImplicitResolutionFailure error" in {
-    implicit val custom: ConfigConvert[Foo] = stringConvert(s => Foo(s.toInt), _.i.toString)
+    implicit val custom: ConfigConvert[Foo] = stringConvert(s => Try(Foo(s.toInt)), _.i.toString)
     saveAndLoadIsIdentity(ConfWithFoo(Foo(100)))
   }
 
   case class ConfWithInt(i: Int)
 
   it should "be able to use a local ConfigConvert instead of the ones in ConfigConvert companion object" in {
-    implicit val readInt = fromString[Int](_.toInt.abs)
+    implicit val readInt = fromString[Int](s => Try(s.toInt.abs))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "-100").asJava).toConfig)(ConfigConvert[ConfWithInt]).success.value shouldBe ConfWithInt(100)
   }
 
@@ -417,7 +419,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert from fromString" in {
     val expected = Duration(110, TimeUnit.DAYS)
-    implicit val readDurationBadly = fromString[Duration](_ => expected)
+    implicit val readDurationBadly = fromString[Duration](_ => Try(expected))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
   }
 
@@ -454,7 +456,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "allow a custom ConfigConvert[URL] to override our definition" in {
     val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = fromString[URL](_ => new URL(expected))
+    implicit val readURLBadly = fromString[URL](_ => Try(new URL(expected)))
     val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
     config.toOption.value.url shouldBe new URL(expected)
   }
@@ -628,9 +630,6 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
     loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
-
-    val conf5 = ConfigFactory.parseString("""{ i: [1, 2, 3] }""")
-    loadConfig[ConfWithDuration](conf5).failure.exception shouldEqual WrongTypeForKeyException("LIST", "i")
   }
 
   it should "be able to consider default arguments" in {
@@ -654,5 +653,35 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
     loadConfig[Conf](conf6).failure.exception shouldEqual WrongTypeForKeyException("STRING", "d")
+  }
+
+  "Converting from an empty string to a double" should "complain about an empty string" in {
+    val conf = ConfigFactory.parseMap(Map("v" -> "").asJava)
+    loadConfig[ConfigWithDouble](conf).failure.exception.getMessage shouldEqual "Cannot read a Double from an empty string."
+  }
+
+  "Converting from an empty string to a duration" should "complain about an empty string" in {
+    val conf = ConfigFactory.parseMap(Map("i" -> "").asJava)
+    loadConfig[ConfWithDuration](conf).failure.exception.getMessage shouldEqual
+      "Cannot read a scala.concurrent.duration.Duration from an empty string."
+  }
+
+  "Converting from a list to Double" should "give a terrible error message, unfortunately" in {
+    val conf = ConfigFactory.parseString("""{ "v": [1, 2, 3, 4] }""")
+    loadConfig[ConfigWithDouble](conf).failure.exception.getMessage shouldBe """For input string: "[1,2,3,4]""""
+  }
+
+  "Converting from a list to FiniteDuration" should "give an middling error message with poor context, unfortunately" in {
+    val conf = ConfigFactory.parseString("""{ "timeout": [1, 2, 3, 4] }""")
+    loadConfig[SparkNetwork](conf).failure.exception.getMessage shouldBe "Could not parse a FiniteDuration from '[1,2,3,4]'. (try ns, us, ms, s, m, h, d)"
+  }
+
+  "Converting an input of 'Inf'" should "produce an infinite Duration" in {
+    val conf = ConfigFactory.parseString("""{ i: Inf }""")
+    loadConfig[ConfWithDuration](conf).success.value.i.isFinite shouldBe false
+  }
+  it should "fail for a FiniteDuration" in {
+    val conf = ConfigFactory.parseString("""{ timeout: Inf }""")
+    loadConfig[SparkNetwork](conf).failure.exception.getMessage shouldBe "Couldn't parse 'Inf' into a FiniteDuration because it's infinite."
   }
 }
