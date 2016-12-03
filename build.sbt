@@ -17,7 +17,6 @@ val newerCompilerLintSwitches = Seq(
 lazy val settings = Seq(
   scalaVersion := "2.12.0",
   crossScalaVersions := Seq("2.10.5", "2.11.8", "2.12.0"),
-  scalacOptions ++= Seq("-feature"),
   scalacOptions ++= allVersionCompilerLintSwitches,
   scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains)),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
