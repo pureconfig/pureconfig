@@ -1,7 +1,7 @@
 lazy val core = (project in file("core")).
   settings(settings)
 
-val allVersionCompilerLintSwitches = Seq(
+lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
   "-feature",
@@ -12,7 +12,7 @@ val allVersionCompilerLintSwitches = Seq(
   "-Ywarn-dead-code"
 )
 
-val newerCompilerLintSwitches = Seq(
+lazy val newerCompilerLintSwitches = Seq(
   "-Ywarn-unused-import", // Not available in 2.10
   "-Ywarn-numeric-widen" // In 2.10 this produces a some strange spurious error
 )
