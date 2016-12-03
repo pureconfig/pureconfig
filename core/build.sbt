@@ -62,7 +62,7 @@ pomExtra := (
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig", "pureconfig.syntax", "pureconfig.error")
+OsgiKeys.exportPackage := Seq("pureconfig.*")
 
 OsgiKeys.privatePackage := Seq()
 
