@@ -1,3 +1,6 @@
+lazy val core = (project in file("core")).
+  settings(settings)
+
 val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
@@ -29,6 +32,3 @@ lazy val settings = Seq(
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
   }
 )
-
-lazy val core = (project in file("core")).
-  settings(settings)
