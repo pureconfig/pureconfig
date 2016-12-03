@@ -6,8 +6,6 @@ name := "pureconfig"
 
 organization := "com.github.melrief"
 
-version := "0.4.0"
-
 homepage := Some(url("https://github.com/melrief/pureconfig"))
 
 licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/"))
