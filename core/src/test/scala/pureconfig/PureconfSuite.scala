@@ -11,13 +11,12 @@ import java.util.concurrent.TimeUnit
 import com.typesafe.config.{ Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import shapeless.{ :+:, CNil, Coproduct }
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
 import scala.util.{ Failure, Success, Try }
 import com.typesafe.config.ConfigFactory
-import org.scalacheck.{ Arbitrary }
+import org.scalacheck.Arbitrary
 import org.scalatest._
 import prop.PropertyChecks
 import pureconfig.ConfigConvert.{ fromString, stringConvert }
@@ -200,12 +199,11 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     t => ISODateTimeFormat.dateTime().print(t)
   )
 
-  type ConfigCoproduct = Float :+: Boolean :+: CNil
-  case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig, coproduct: ConfigCoproduct)
+  case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig)
 
   it should s"be able to save and load ${classOf[Config]}" in {
     withTempFile { configFile =>
-      val expectedConfig = Config(new DateTime(1), List(1, 2, 3), Set(4, 5, 6), FlatConfig(false, 1d, 2f, 3, 4l, "5", Option("6")), Coproduct[ConfigCoproduct](false))
+      val expectedConfig = Config(new DateTime(1), List(1, 2, 3), Set(4, 5, 6), FlatConfig(false, 1d, 2f, 3, 4l, "5", Option("6")))
       saveConfigAsPropertyFile(expectedConfig, configFile, overrideOutputPath = true)
       val config = loadConfig[Config](configFile)
 
@@ -218,12 +216,57 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should s"be able to save ${classOf[Config2]} and load ${classOf[Config]} when namespace is set to config" in {
     withTempFile { configFile =>
-      val expectedConfig = Config(new DateTime(1), List(1, 2, 3), Set(4, 5, 6), FlatConfig(false, 1d, 2f, 3, 4l, "5", Option("6")), Coproduct[ConfigCoproduct](false))
+      val expectedConfig = Config(new DateTime(1), List(1, 2, 3), Set(4, 5, 6), FlatConfig(false, 1d, 2f, 3, 4l, "5", Option("6")))
       val configToSave = Config2(expectedConfig)
       saveConfigAsPropertyFile(configToSave, configFile, overrideOutputPath = true)
       val config = loadConfig[Config](configFile, "config")
 
       config should be(Success(expectedConfig))
+    }
+  }
+
+  sealed trait AnimalConfig
+  case class DogConfig(age: Int) extends AnimalConfig
+  case class CatConfig(age: Int) extends AnimalConfig
+  case class BirdConfig(canFly: Boolean) extends AnimalConfig
+
+  it should s"be able to save and load ${classOf[AnimalConfig]}" in {
+    List(DogConfig(12), CatConfig(3), BirdConfig(true)).foreach { expectedConfig =>
+      saveAndLoadIsIdentity[AnimalConfig](expectedConfig)
+    }
+  }
+
+  it should s"read and write disambiguation information on sealed families by default" in {
+    withTempFile { configFile =>
+      val conf = ConfigFactory.parseString("{ type = dogconfig, age = 2 }")
+      loadConfig[AnimalConfig](conf) should be(Success(DogConfig(2)))
+
+      saveConfigAsPropertyFile[AnimalConfig](DogConfig(2), configFile, overrideOutputPath = true)
+      loadConfig[TypesafeConfig](configFile).map(_.getString("type")) should be(Success("dogconfig"))
+    }
+  }
+
+  it should s"allow using different strategies for disambiguating between options in a sealed family" in {
+    withTempFile { configFile =>
+      implicit val hint = new FieldCoproductHint[AnimalConfig]("which-animal") {
+        override def fieldValue(name: String) = name.dropRight("Config".length)
+      }
+
+      val conf = ConfigFactory.parseString("{ which-animal = Dog, age = 2 }")
+      loadConfig[AnimalConfig](conf) should be(Success(DogConfig(2)))
+
+      saveConfigAsPropertyFile[AnimalConfig](DogConfig(2), configFile, overrideOutputPath = true)
+      loadConfig[TypesafeConfig](configFile).map(_.getString("which-animal")) should be(Success("Dog"))
+    }
+
+    withTempFile { configFile =>
+      implicit val hint = new FirstSuccessCoproductHint[AnimalConfig]
+
+      val conf = ConfigFactory.parseString("{ canFly = true }")
+      loadConfig[AnimalConfig](conf) should be(Success(BirdConfig(true)))
+
+      saveConfigAsPropertyFile[AnimalConfig](DogConfig(2), configFile, overrideOutputPath = true)
+      loadConfig[TypesafeConfig](configFile).map(_.hasPath("type")) should be(Success(false))
     }
   }
 
