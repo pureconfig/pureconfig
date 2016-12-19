@@ -171,8 +171,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]]): WrappedConfigConvert[Wrapped, FieldType[Name, V] :+: T] =
     new WrappedConfigConvert[Wrapped, FieldType[Name, V]:+: T] {
 
-      override def from(config: ConfigValue): Try[FieldType[Name, V] :+: T] = {
-        coproductHint.from(config, vName.value.name) match {
+      override def from(config: ConfigValue): Try[FieldType[Name, V] :+: T] = config match {
+        case null => Failure(CannotConvertNullException)
+
+        case _ => coproductHint.from(config, vName.value.name) match {
           case Success(Some(hintConfig)) =>
             vFieldConvert.value.from(hintConfig) match {
               case Failure(_) if coproductHint.tryNextOnFail(vName.value.name) =>
