@@ -8,22 +8,20 @@ import java.net.URL
 import java.nio.file.{ Files, Path }
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.{ Config => TypesafeConfig, _ }
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.util.{ Failure, Success, Try }
-import com.typesafe.config.ConfigFactory
-import org.scalacheck.Arbitrary
-import org.scalatest._
-import prop.PropertyChecks
-import pureconfig.ConfigConvert.{ fromString, stringConvert }
-import pureconfig.error.{ KeyNotFoundException, WrongTypeForKeyException }
-
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.util.{ Failure, Success, Try }
+
+import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
+import org.scalacheck.Arbitrary
 import org.scalacheck.Shapeless._
+import org.scalatest._
+import org.scalatest.prop.PropertyChecks
+import pureconfig.ConfigConvert.{ fromString, stringConvert }
+import pureconfig.error.{ CollidingKeysException, KeyNotFoundException, WrongTypeForKeyException }
 
 /**
  * @author Mario Pastorelli
@@ -40,7 +38,7 @@ object PureconfSuite {
   }
 }
 
-import PureconfSuite._
+import pureconfig.PureconfSuite._
 
 class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryValues with PropertyChecks {
 
@@ -268,6 +266,17 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       saveConfigAsPropertyFile[AnimalConfig](DogConfig(2), configFile, overrideOutputPath = true)
       loadConfig[TypesafeConfig](configFile).map(_.hasPath("type")) should be(Success(false))
     }
+  }
+
+  it should "throw an exception if a coproduct option has a field with the same key as the hint field" in {
+    implicit val hint = new FieldCoproductHint[AnimalConfig]("age")
+    val cc = implicitly[ConfigConvert[AnimalConfig]]
+    a[CollidingKeysException] should be thrownBy cc.to(DogConfig(2))
+  }
+
+  it should "return a Failure with a proper exception if the hint field is missing" in {
+    val conf = ConfigFactory.parseString("{ canFly = true }")
+    loadConfig[AnimalConfig](conf) should be(Failure(KeyNotFoundException("type")))
   }
 
   // a realistic example of configuration: common available Spark properties
