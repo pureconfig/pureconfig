@@ -613,6 +613,16 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithConfigList](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
     loadConfig[ConfWithDuration](emptyConf).failure.exception shouldEqual KeyNotFoundException("i")
     loadConfig[SparkNetwork](emptyConf).failure.exception shouldEqual KeyNotFoundException("timeout")
+
+    case class InnerConf(v: Int)
+    case class EnclosingConf(conf: InnerConf)
+
+    implicit val conv = new ConfigConvert[InnerConf] {
+      def from(cv: ConfigValue) = Success(InnerConf(42))
+      def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
+    }
+
+    loadConfig[EnclosingConf](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
   }
 
   it should s"return a ${classOf[WrongTypeForKeyException]} when a key has a wrong type" in {

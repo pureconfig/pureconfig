@@ -48,17 +48,13 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   private def fromFConvert[T](fromF: String => Try[T]): ConfigValue => Try[T] =
     config => {
-      if (config == null) {
-        Failure(CannotConvertNullException)
-      } else {
-        // Because we can't trust `fromF` or Typesafe Config not to throw, we wrap the
-        // evaluation in one more `Try` to prevent an unintentional exception from escaping.
-        // `Try.flatMap(f)` captures any non-fatal exceptions thrown by `f`.
-        Try(config.valueType match {
-          case ConfigValueType.STRING => config.unwrapped.toString
-          case _ => config.render(ConfigRenderOptions.concise)
-        }).flatMap(fromF)
-      }
+      // Because we can't trust `fromF` or Typesafe Config not to throw, we wrap the
+      // evaluation in one more `Try` to prevent an unintentional exception from escaping.
+      // `Try.flatMap(f)` captures any non-fatal exceptions thrown by `f`.
+      Try(config.valueType match {
+        case ConfigValueType.STRING => config.unwrapped.toString
+        case _ => config.render(ConfigRenderOptions.concise)
+      }).flatMap(fromF)
     }
 
   def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
@@ -122,11 +118,14 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Try[FieldType[K, V] :: T] = {
       val keyStr = mapping(key.value.toString().tail)
       for {
-        v <- improveFailure(
-          vFieldConvert.value.from(co.get(keyStr)) match {
-            case Failure(CannotConvertNullException) =>
+        v <- improveFailure[V](
+          (co.get(keyStr), vFieldConvert.value) match {
+            case (null, converter: OptionConfigConvert[_]) =>
+              converter.from(co.get(keyStr))
+            case (null, _) =>
               default.head.fold[Try[V]](Failure(CannotConvertNullException))(Success(_))
-            case other => other
+            case (value, converter) =>
+              converter.from(value)
           },
           keyStr)
         tail <- tConfigConvert.value.fromWithDefault(co, default.tail)
