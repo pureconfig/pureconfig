@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import com.typesafe.config.ConfigValueFactory
 import org.scalatest.{ FlatSpec, Matchers, TryValues }
+import org.scalatest.Inspectors._
 
 import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
@@ -51,6 +52,27 @@ class DurationConvertTest extends FlatSpec with Matchers with TryValues {
     fromS("44999us") shouldBe Success(Duration(44999, TimeUnit.MICROSECONDS))
     fromS("44999µs") shouldBe Success(Duration(44999, TimeUnit.MICROSECONDS))
     fromS("88222ns") shouldBe Success(Duration(88222, TimeUnit.NANOSECONDS))
+  }
+  it should "succeed when loading 0 without units" in {
+    val signs = Set("", "-", "+")
+    val leftSpacing = Set("", " ")
+    val rightSpacing = Set("", " ")
+    val leftSpacingSize = Set((0 to 2): _*)
+    val rightSpacingSize = Set((0 to 2): _*)
+    val zeroRepeatSize = Set((1 to 2): _*)
+    forAll(signs) { sign =>
+      forAll(leftSpacing) { lsc =>
+        forAll(rightSpacing) { rsc =>
+          forAll(leftSpacingSize) { ls =>
+            forAll(rightSpacingSize) { rs =>
+              forAll(zeroRepeatSize) { zr =>
+                fromS(lsc * ls + sign + "0" * zr + rsc * rs) shouldBe Success(Duration(0, TimeUnit.DAYS))
+              }
+            }
+          }
+        }
+      }
+    }
   }
   it should "report a helpful error message when failing to convert a bad duration" in {
     val badDuration = "10 lordsALeaping"
