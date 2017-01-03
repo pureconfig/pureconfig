@@ -112,7 +112,7 @@ An almost comprehensive example is:
 > case class AdtA(a: String) extends MyAdt
 > case class AdtB(b: Int) extends MyAdt
 > case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
-> val conf = parseString("""{ "int": 1, "adt": { "b": 1 }, "list":["1", "20%"], "map": { "key": "value" } }""")
+> val conf = parseString("""{ "int": 1, "adt": { "type": "adtb", "b": 1 }, "list":["1", "20%"], "map": { "key": "value" } }""")
 > loadConfig[MyClass](conf)
 res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
