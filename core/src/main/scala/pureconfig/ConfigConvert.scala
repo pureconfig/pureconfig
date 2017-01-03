@@ -84,7 +84,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     stringConvert(ensureNonEmpty(ct)(_).flatMap(fromF), toF)
   }
 
-  private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends ConfigConvert[SubRepr] {
+  private[pureconfig] trait WrappedConfigConvert[Wrapped, SubRepr] extends ConfigConvert[SubRepr]
+
+  private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends WrappedConfigConvert[Wrapped, SubRepr] {
     final def from(config: ConfigValue): Try[SubRepr] =
       Failure(
         new UnsupportedOperationException("Cannot call 'from' on a WrappedDefaultValueConfigConvert."))
@@ -155,27 +157,44 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   case class NoValidCoproductChoiceFound(config: ConfigValue)
     extends RuntimeException(s"No valid coproduct type choice found for configuration $config.")
 
-  implicit def cNilConfigConvert: ConfigConvert[CNil] = new ConfigConvert[CNil] {
+  implicit def cNilConfigConvert[Wrapped]: WrappedConfigConvert[Wrapped, CNil] = new WrappedConfigConvert[Wrapped, CNil] {
     override def from(config: ConfigValue): Try[CNil] =
       Failure(NoValidCoproductChoiceFound(config))
 
     override def to(t: CNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
-  implicit def coproductConfigConvert[V, T <: Coproduct](
-    implicit vFieldConvert: Lazy[ConfigConvert[V]],
-    tConfigConvert: Lazy[ConfigConvert[T]]): ConfigConvert[V :+: T] =
-    new ConfigConvert[V :+: T] {
+  implicit def coproductConfigConvert[Wrapped, Name <: Symbol, V, T <: Coproduct](
+    implicit coproductHint: CoproductHint[Wrapped],
+    vName: Witness.Aux[Name],
+    vFieldConvert: Lazy[ConfigConvert[V]],
+    tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]]): WrappedConfigConvert[Wrapped, FieldType[Name, V] :+: T] =
+    new WrappedConfigConvert[Wrapped, FieldType[Name, V]:+: T] {
 
-      override def from(config: ConfigValue): Try[V :+: T] = {
-        vFieldConvert.value.from(config)
-          .map(s => Inl[V, T](s))
-          .orElse(tConfigConvert.value.from(config).map(s => Inr[V, T](s)))
+      override def from(config: ConfigValue): Try[FieldType[Name, V] :+: T] = config match {
+        case null => Failure(CannotConvertNullException)
+
+        case _ => coproductHint.from(config, vName.value.name) match {
+          case Success(Some(hintConfig)) =>
+            vFieldConvert.value.from(hintConfig) match {
+              case Failure(_) if coproductHint.tryNextOnFail(vName.value.name) =>
+                tConfigConvert.value.from(config).map(s => Inr(s))
+
+              case vTry => vTry.map(v => Inl(field[Name](v)))
+            }
+
+          case Success(None) => tConfigConvert.value.from(config).map(s => Inr(s))
+          case Failure(ex) => Failure(ex)
+        }
       }
 
-      override def to(t: V :+: T): ConfigValue = t match {
-        case Inl(l) => vFieldConvert.value.to(l)
-        case Inr(r) => tConfigConvert.value.to(r)
+      override def to(t: FieldType[Name, V] :+: T): ConfigValue = t match {
+        case Inl(l) =>
+          // Writing a coproduct to a config can fail. Is it worth it to make `to` return a `Try`?
+          coproductHint.to(vFieldConvert.value.to(l), vName.value.name).get
+
+        case Inr(r) =>
+          tConfigConvert.value.to(r)
       }
     }
 
@@ -254,7 +273,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   // used for products
-  implicit def deriveInstanceWithLabelledGeneric[F, Repr <: HList, DefaultRepr <: HList](
+  implicit def deriveProductInstance[F, Repr <: HList, DefaultRepr <: HList](
     implicit gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cc: Lazy[WrappedDefaultValueConfigConvert[F, Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
@@ -269,9 +288,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   // used for coproducts
-  implicit def deriveInstanceWithGeneric[F, Repr <: Coproduct](
-    implicit gen: Generic.Aux[F, Repr],
-    cc: Lazy[ConfigConvert[Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
+  implicit def deriveCoproductInstance[F, Repr <: Coproduct](
+    implicit gen: LabelledGeneric.Aux[F, Repr],
+    cc: Lazy[WrappedConfigConvert[F, Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
     override def from(config: ConfigValue): Try[F] = {
       cc.value.from(config).map(gen.from)
     }
