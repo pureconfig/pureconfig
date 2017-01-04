@@ -12,7 +12,7 @@ private[pureconfig] object DurationConvert {
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
   def fromString[D](durationString: String, ct: ClassTag[D]): Try[Duration] = {
-    Try { Duration(justAMinute(itsGreekToMe(durationString))) }
+    Try { Duration(addZeroUnit(justAMinute(itsGreekToMe(durationString)))) }
       .recoverWith {
         case ex: NumberFormatException =>
           val err = s"Could not parse a ${ct.runtimeClass.getSimpleName} from '$durationString'. (try ns, us, ms, s, m, h, d)"
@@ -20,8 +20,11 @@ private[pureconfig] object DurationConvert {
       }
   }
 
+  private val zeroRegex = "\\s*[+-]?0+\\s*$".r
   private val fauxMuRegex = "([0-9])(\\s*)us(\\s*)$".r
   private val shortMinuteRegex = "([0-9])(\\s*)m(\\s*)$".r
+
+  private val addZeroUnit = { s: String => if (zeroRegex.unapplySeq(s).isDefined) "0d" else s }
 
   // To maintain compatibility with Typesafe Config, replace "us" with "µs".
   private val itsGreekToMe = fauxMuRegex.replaceSomeIn(_: String, m => Some(s"${m.group(1)}${m.group(2)}µs${m.group(3)}"))

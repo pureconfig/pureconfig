@@ -58,7 +58,7 @@ Add the library. For scala `2.11` and `2.12`
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.4.0"
+  "com.github.melrief" %% "pureconfig" % "0.5.0"
 )
 ```
 
@@ -66,7 +66,7 @@ For scala `2.10` you need also the scala macro paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.4.0",
+  "com.github.melrief" %% "pureconfig" % "0.5.0",
 compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
 )
 ```
@@ -112,7 +112,7 @@ An almost comprehensive example is:
 > case class AdtA(a: String) extends MyAdt
 > case class AdtB(b: Int) extends MyAdt
 > case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
-> val conf = parseString("""{ "int": 1, "adt": { "b": 1 }, "list":["1", "20%"], "map": { "key": "value" } }""")
+> val conf = parseString("""{ "int": 1, "adt": { "type": "adtb", "b": 1 }, "list":["1", "20%"], "map": { "key": "value" } }""")
 > loadConfig[MyClass](conf)
 res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
