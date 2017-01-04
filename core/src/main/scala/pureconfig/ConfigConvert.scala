@@ -43,6 +43,14 @@ trait ConfigConvert[T] {
   def to(t: T): ConfigValue
 }
 
+/**
+ * The default behavior of ConfigConverts that are implicitly derived in PureConfig is to raise a
+ * KeyNotFoundException when a required key is missing. Mixing in this trait to a ConfigConvert
+ * allows customizing this behavior. When a key is missing, but the ConfigConvert of the given
+ * type extends this trait, the `from` method of the ConfigConvert is called with null.
+ */
+trait AllowMissingKey { self: ConfigConvert[_] => }
+
 object ConfigConvert extends LowPriorityConfigConvertImplicits {
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
 
@@ -120,7 +128,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       for {
         v <- improveFailure[V](
           (co.get(keyStr), vFieldConvert.value) match {
-            case (null, converter: OptionConfigConvert[_]) =>
+            case (null, converter: AllowMissingKey) =>
               converter.from(co.get(keyStr))
             case (null, _) =>
               default.head.fold[Try[V]](Failure(CannotConvertNullException))(Success(_))
@@ -168,10 +176,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]]): WrappedConfigConvert[Wrapped, FieldType[Name, V] :+: T] =
     new WrappedConfigConvert[Wrapped, FieldType[Name, V]:+: T] {
 
-      override def from(config: ConfigValue): Try[FieldType[Name, V] :+: T] = config match {
-        case null => Failure(CannotConvertNullException)
-
-        case _ => coproductHint.from(config, vName.value.name) match {
+      override def from(config: ConfigValue): Try[FieldType[Name, V] :+: T] =
+        coproductHint.from(config, vName.value.name) match {
           case Success(Some(hintConfig)) =>
             vFieldConvert.value.from(hintConfig) match {
               case Failure(_) if coproductHint.tryNextOnFail(vName.value.name) =>
@@ -183,7 +189,6 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
           case Success(None) => tConfigConvert.value.from(config).map(s => Inr(s))
           case Failure(ex) => Failure(ex)
         }
-      }
 
       override def to(t: FieldType[Name, V] :+: T): ConfigValue = t match {
         case Inl(l) =>
@@ -198,7 +203,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   // For Option[T] we use a special config converter
   implicit def deriveOption[T](implicit conv: Lazy[ConfigConvert[T]]) = new OptionConfigConvert[T]
 
-  class OptionConfigConvert[T](implicit conv: Lazy[ConfigConvert[T]]) extends ConfigConvert[Option[T]] {
+  class OptionConfigConvert[T](implicit conv: Lazy[ConfigConvert[T]]) extends ConfigConvert[Option[T]] with AllowMissingKey {
     override def from(config: ConfigValue): Try[Option[T]] = {
       if (config == null || config.unwrapped() == null)
         Success(None)

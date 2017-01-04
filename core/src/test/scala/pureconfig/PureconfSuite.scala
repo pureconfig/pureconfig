@@ -682,6 +682,19 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[EnclosingConf](emptyConf).failure.exception shouldEqual KeyNotFoundException("conf")
   }
 
+  it should "allow custom ConfigConverts to handle missing keys" in {
+    case class Conf(a: Int, b: Int)
+    val conf = ConfigFactory.parseString("""{ a: 1 }""")
+    loadConfig[Conf](conf).failure.exception shouldEqual KeyNotFoundException("b")
+
+    implicit val defaultInt = new ConfigConvert[Int] with AllowMissingKey {
+      def from(v: ConfigValue) =
+        if (v == null) Success(42) else Try(v.render(ConfigRenderOptions.concise).toInt)
+      def to(v: Int) = ???
+    }
+    loadConfig[Conf](conf).success.value shouldBe Conf(1, 42)
+  }
+
   it should s"return a ${classOf[WrongTypeForKeyException]} when a key has a wrong type" in {
     val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava)
     loadConfig[FooBar](conf).failure.exception shouldEqual WrongTypeForKeyException("STRING", "bar.foo")
