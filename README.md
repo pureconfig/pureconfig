@@ -211,7 +211,7 @@ util.Try[String] = Success(foobar)
 
 ## Handling missing keys
 
-The default behavior of `ConfigConverts` that are derived in PureConfig is to
+The default behavior of `ConfigConvert`s that are derived in PureConfig is to
 raise a `KeyNotFoundException` when a required key is missing. The only
 exception is the `Option[_]` type, which is read as `None` when a key is
 missing:
@@ -225,8 +225,8 @@ scala.util.Try[Foo] = Failure(pureconfig.error.KeyNotFoundException: Could not f
 scala.util.Try[FooOpt] = Success(FooOpt(None))
 ```
 
-However, if you want to allow your custom `ConfigConverts` to handle missing
-keys, you can extend the `AllowMissingKey` trait. For `ConfigConverts` extending
+However, if you want to allow your custom `ConfigConvert`s to handle missing
+keys, you can extend the `AllowMissingKey` trait. For `ConfigConvert`s extending
 `AllowMissingKey`, a missing key will issue a call to the `from` method of the
 available `ConfigConvert` for that type with a `null` value:
 
