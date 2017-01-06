@@ -16,6 +16,7 @@ A boilerplate-free Scala library for loading configuration files
 - [Customizing naming conventions](#customizing-naming-conventions)
 - [Extends the library to support new types](#extend-the-library-to-support-new-types)
 - [Override behaviour for types](#override-behaviour-for-types)
+- [Override behaviour for sealed families](#override-behaviour-for-sealed-families)
 - [Example](#example)
 - [Whence the config files](#whence-the-config-files)
 - [Contribute](#contribute)
@@ -208,6 +209,8 @@ always read lower case. We can do:
 > ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
 util.Try[String] = Success(foobar)
 ```
+
+## Override behaviour for sealed families
 
 In order for `pureconfig` to disambiguate between different options of a sealed
 family of case classes, it must read and write additional information in
