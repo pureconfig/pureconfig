@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
  * }}}
  *
  * @example we cannot provide a [[ConfigConvert]] for [[java.time.LocalDate]] because traditionally there are many different
- * [[java.time.format.DateTimeFormatter]] to parse a [[java.time.LocalDate]] from a [[java.lang.String]]. This package
+ * [[java.time.format.DateTimeFormatter]]s to parse a [[java.time.LocalDate]] from a [[java.lang.String]]. This package
  * provides a method that takes an input [[java.time.format.DateTimeFormatter]] and returns a [[ConfigConvert]] for
  * [[java.time.LocalDate]] which will use that [[java.time.format.DateTimeFormatter]] to parse a [[java.time.LocalDate]].
  */

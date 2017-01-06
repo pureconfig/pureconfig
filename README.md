@@ -127,7 +127,7 @@ res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> va
 
 For some types, pureconfig cannot automatically derive a converter because there are multiple ways to convert a configuration
 value to them. For instance, for [`LocalDate`](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)
-pureconfig cannot derive a converter because there are multiple [`DateTimeFormatter`](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)
+pureconfig cannot derive a converter because there are multiple [`DateTimeFormatter`](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)s
 that can be used to convert a String into a `LocalDate`. Examples of different format are `yyyy-mm-dd`, e.g. `"2016-01-01"`,
 and `yyyymmdd`, e.g. `"20160101"`. For those types, pureconfig provides a way to create converters from the necessary parameters. These methods can be found under
 the package `pureconfig.configurable`. Once the output of a `pureconfig.configurable` method for a certain type is in scope,
