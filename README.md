@@ -13,6 +13,7 @@ A boilerplate-free Scala library for loading configuration files
 - [Add PureConfig to your project](#add-pureconfig-to-your-project)
 - [Use PureConfig](#use-pureconfig)
 - [Supported types](#supported-types)
+- [Configurable converters](#configurable-converters)
 - [Customizing naming conventions](#customizing-naming-conventions)
 - [Extend the library to support new types](#extend-the-library-to-support-new-types)
 - [Override behaviour for types](#override-behaviour-for-types)
@@ -102,6 +103,7 @@ and percentage format ending with `%`), `Float` (also supporting percentage),
 is in this list
 - `Option` for optional values, i.e. value that can or cannot be in the configuration
 - `Map` with `String` keys and any value type that is in this list
+- `LocalDate`, `LocalTime`, `LocalDatetime` (see [Configurable converters](#configurable-converters))
 - typesafe `ConfigValue`, `ConfigObject` and `ConfigList`
 - case classes
 - sealed families of case classes (ADTs)
@@ -119,6 +121,31 @@ An almost comprehensive example is:
 > loadConfig[MyClass](conf)
 res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
+
+
+## Configurable converters
+
+For some types, pureconfig cannot automatically derive a converter because there are multiple ways to convert a configuration
+value to them. For instance, for [`java.time.LocalDate`](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)
+pureconfig cannot derive a converter because there are multiple [`java.time.format.DateTimeFormatter`](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)
+that can be used to convert a String into a `LocalDate`. Examples of different format are `yyyy-mm-dd`, e.g. `"2016-01-01"`,
+and `yyyymmdd`, e.g. `"20160101"`. For those types, pureconfig provides a way to create converters from the necessary parameters. These methods can be found under
+the package `pureconfig.configurable`. Once the output of a `pureconfig.configurable` method for a certain type is in scope,
+pureconfig can start using that configured converter:
+
+```scala
+import pureconfig.configurable._
+
+case class Conf(date: LocalDate)
+
+implicit val localDateInstance = makeLocalDateConfigConvert(DateTimeFormatter.ISO_DATE)
+
+val conf = ConfigFactory.parseString(s"""{date:"2011-12-03"}""")
+
+loadConfig[Conf](conf)
+// returns Success(Conf(2016-01-01))
+```
+
 
 ## Customizing naming conventions
 
