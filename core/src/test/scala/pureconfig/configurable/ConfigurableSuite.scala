@@ -12,7 +12,7 @@ import ConfigurableSuite._
 
 class ConfigurableSuite extends FlatSpec with Matchers with TryValues with PropertyChecks {
 
-  implicit val localTimeInstance = makeLocalTimeInstance(DateTimeFormatter.ISO_TIME)
+  implicit val localTimeInstance = makeLocalTimeConfigConvert(DateTimeFormatter.ISO_TIME)
 
   "pureconfig" should "parse LocalTime" in forAll {
     (localTime: LocalTime) =>
@@ -21,7 +21,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
       conf.to[Conf].success.value shouldEqual Conf(localTime)
   }
 
-  implicit val localDateInstance = makeLocalDateInstance(DateTimeFormatter.ISO_DATE)
+  implicit val localDateInstance = makeLocalDateConfigConvert(DateTimeFormatter.ISO_DATE)
 
   it should "parse LocalDate" in forAll {
     (localDate: LocalDate) =>
@@ -30,7 +30,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
       conf.to[Conf].success.value shouldEqual Conf(localDate)
   }
 
-  implicit val localDateTimeInstance = makeLocalDateTimeInstance(DateTimeFormatter.ISO_DATE_TIME)
+  implicit val localDateTimeInstance = makeLocalDateTimeConfigConvert(DateTimeFormatter.ISO_DATE_TIME)
 
   it should "parse LocalDateTime" in forAll {
     (localDateTime: LocalDateTime) =>
