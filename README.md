@@ -14,8 +14,9 @@ A boilerplate-free Scala library for loading configuration files
 - [Use PureConfig](#use-pureconfig)
 - [Supported types](#supported-types)
 - [Customizing naming conventions](#customizing-naming-conventions)
-- [Extends the library to support new types](#extend-the-library-to-support-new-types)
+- [Extend the library to support new types](#extend-the-library-to-support-new-types)
 - [Override behaviour for types](#override-behaviour-for-types)
+- [Handling missing keys](#handling-missing-keys)
 - [Example](#example)
 - [Whence the config files](#whence-the-config-files)
 - [Contribute](#contribute)
@@ -186,7 +187,6 @@ could not find implicit value for parameter conv: pureconfig.ConfigConvert[Foo]
 Foo(1)
 ```
 
-
 ## Override behaviour for types
 
 It is possible to override the behaviour of `pureconfig` for a certain type by
@@ -209,7 +209,36 @@ always read lower case. We can do:
 util.Try[String] = Success(foobar)
 ```
 
+## Handling missing keys
 
+The default behavior of `ConfigConvert`s that are derived in PureConfig is to
+raise a `KeyNotFoundException` when a required key is missing. The only
+exception is the `Option[_]` type, which is read as `None` when a key is
+missing:
+
+```scala
+> import pureconfig.syntax._
+> import com.typesafe.config._
+> ConfigFactory.empty.to[Foo]
+scala.util.Try[Foo] = Failure(pureconfig.error.KeyNotFoundException: Could not find the key a)
+> ConfigFactory.empty.to[FooOpt]
+scala.util.Try[FooOpt] = Success(FooOpt(None))
+```
+
+However, if you want to allow your custom `ConfigConvert`s to handle missing
+keys, you can extend the `AllowMissingKey` trait. For `ConfigConvert`s extending
+`AllowMissingKey`, a missing key will issue a call to the `from` method of the
+available `ConfigConvert` for that type with a `null` value:
+
+```scala
+> implicit val cc = new ConfigConvert[Int] with AllowMissingKey {
+|   override def from(config: ConfigValue): Try[Int] =
+|     if (config == null) Success(42) else Try(config.render(ConfigRenderOptions.concise).toInt)
+|   override def to(t: Int): ConfigValue = ConfigValueFactory.fromAnyRef(t)
+| }
+> ConfigFactory.empty.to[Foo]
+scala.util.Try[Foo] = Success(Foo(42))
+```
 
 ## Example
 
