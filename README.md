@@ -138,7 +138,7 @@ import pureconfig.configurable._
 
 case class Conf(date: LocalDate)
 
-implicit val localDateInstance = makeLocalDateConfigConvert(DateTimeFormatter.ISO_DATE)
+implicit val localDateInstance = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
 
 val conf = ConfigFactory.parseString(s"""{date:"2011-12-03"}""")
 

@@ -20,15 +20,15 @@ import java.time.format.DateTimeFormatter
  */
 package object configurable {
 
-  def makeLocalDateConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDate] =
+  def localDateConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDate] =
     ConfigConvert.nonEmptyStringConvert[LocalDate](
       s => Try(LocalDate.parse(s, formatter)), _.format(formatter))
 
-  def makeLocalTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalTime] =
+  def localTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalTime] =
     ConfigConvert.nonEmptyStringConvert[LocalTime](
       s => Try(LocalTime.parse(s, formatter)), _.format(formatter))
 
-  def makeLocalDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
+  def localDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
     ConfigConvert.nonEmptyStringConvert[LocalDateTime](
       s => Try(LocalDateTime.parse(s, formatter)), _.format(formatter))
 }
