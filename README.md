@@ -291,6 +291,7 @@ implicit val seasonHint = new CoproductHint[Season] {
 case class MyConf(list: List[Season])
 loadConfig[MyConf](parseString("""list = [Spring, Summer, Autumn, Winter]"""))
 // returns Success(MyConf(List(Spring, Summer, Autumn, Winter)))
+```
 
 
 ## Handling missing keys
