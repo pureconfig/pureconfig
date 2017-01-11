@@ -413,6 +413,29 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithListOfFoo](conf) shouldBe Success(expected)
   }
 
+  it should "be able to load a set of Ints from the system properties" in {
+    System.setProperty("pure.conf.intSet.0", "1")
+    System.setProperty("pure.conf.intSet.1", "2")
+    val expected = Set(1, 2)
+    loadConfig[Set[Int]]("pure.conf.intSet") shouldBe Success(expected)
+
+    System.clearProperty("pure.conf.intSet.0")
+    System.clearProperty("pure.conf.intSet.1")
+  }
+
+  it should "be able to load a list of Ints from the system properties in correct order" in {
+    System.setProperty("pure.conf.intList.2", "1")
+    System.setProperty("pure.conf.intList.0", "2")
+    System.setProperty("pure.conf.intList.1", "3")
+
+    val expected = List(2, 3, 1)
+    loadConfig[List[Int]]("pure.conf.intList") shouldBe Success(expected)
+
+    System.clearProperty("pure.conf.intList.0")
+    System.clearProperty("pure.conf.intList.1")
+    System.clearProperty("pure.conf.intList.2")
+  }
+
   case class ConfWithStreamOfFoo(stream: Stream[Foo])
 
   it should s"be able to save and load configurations containing immutable.Stream" in {
@@ -738,6 +761,17 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   "Converting from an empty string to a double" should "complain about an empty string" in {
     val conf = ConfigFactory.parseMap(Map("v" -> "").asJava)
     loadConfig[ConfigWithDouble](conf).failure.exception.getMessage shouldEqual "Cannot read a Double from an empty string."
+  }
+
+  "Converting from a wrong system properties list" should "complain about having the wrong sytem properties list syntax" in {
+    System.setProperty("pure.conf.intSet.0", "1")
+    System.setProperty("pure.conf.intSet.a", "2")
+    val expected = Set(1, 2)
+
+    assert(loadConfig[Set[Int]]("pure.conf.intSet").failure.exception.getMessage.contains("Cannot parse this object as list! Expecting syntax like"))
+
+    System.clearProperty("pure.conf.intSet.0")
+    System.clearProperty("pure.conf.intSet.a")
   }
 
   "Converting from an empty string to a duration" should "complain about an empty string" in {

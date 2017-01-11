@@ -235,6 +235,23 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
           }
 
           tryBuilder.map(_.result())
+        case o: ConfigObject =>
+          if (o.keySet().asScala.forall(key => Try(key.toInt).isSuccess)) {
+            val sortedEntryList = o.entrySet().asScala.toList
+              .map(entry => (entry.getKey.toInt, entry.getValue))
+              .sortBy(_._1)
+            val tryBuilder = sortedEntryList.foldLeft(Try(cbf())) {
+              case (tryResult, (_, configValue)) =>
+                for {
+                  result <- tryResult
+                  value <- configConvert.value.from(configValue)
+                } yield result += value
+            }
+
+            tryBuilder.map(_.result())
+          } else {
+            Failure(new IllegalArgumentException("Cannot parse this object as list! Expecting syntax like (a.0=0, a.1=1, ...) when loading 'a'"))
+          }
         case other =>
           Failure(WrongTypeException(other.valueType().toString))
       }
