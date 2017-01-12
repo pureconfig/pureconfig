@@ -414,26 +414,26 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   it should "be able to load a set of Ints from the system properties" in {
-    System.setProperty("pure.conf.intSet.0", "1")
-    System.setProperty("pure.conf.intSet.1", "2")
-    val expected = Set(1, 2)
-    loadConfig[Set[Int]]("pure.conf.intSet") shouldBe Success(expected)
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intSet.0: 1
+      intSet.1: 2
+    }""")
 
-    System.clearProperty("pure.conf.intSet.0")
-    System.clearProperty("pure.conf.intSet.1")
+    val expected = Set(1, 2)
+    loadConfig[Set[Int]](conf, "pure.conf.intSet") shouldBe Success(expected)
   }
 
   it should "be able to load a list of Ints from the system properties in correct order" in {
-    System.setProperty("pure.conf.intList.2", "1")
-    System.setProperty("pure.conf.intList.0", "2")
-    System.setProperty("pure.conf.intList.1", "3")
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intList.2: 1
+      intList.0: 2
+      intList.1: 3
+    }""")
 
     val expected = List(2, 3, 1)
-    loadConfig[List[Int]]("pure.conf.intList") shouldBe Success(expected)
-
-    System.clearProperty("pure.conf.intList.0")
-    System.clearProperty("pure.conf.intList.1")
-    System.clearProperty("pure.conf.intList.2")
+    loadConfig[List[Int]](conf, "pure.conf.intList") shouldBe Success(expected)
   }
 
   case class ConfWithStreamOfFoo(stream: Stream[Foo])
@@ -764,14 +764,13 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   "Converting from a wrong system properties list" should "complain about having the wrong sytem properties list syntax" in {
-    System.setProperty("pure.conf.intSet.0", "1")
-    System.setProperty("pure.conf.intSet.a", "2")
-    val expected = Set(1, 2)
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intSet.0: 1
+      intSet.a: 2
+    }""")
 
-    assert(loadConfig[Set[Int]]("pure.conf.intSet").failure.exception.getMessage.contains("Cannot parse this object as list! Expecting syntax like"))
-
-    System.clearProperty("pure.conf.intSet.0")
-    System.clearProperty("pure.conf.intSet.a")
+    assert(loadConfig[Set[Int]](conf, "pure.conf.intSet").failure.exception.getMessage.contains("Cannot parse this object as list! Expecting syntax like"))
   }
 
   "Converting from an empty string to a duration" should "complain about an empty string" in {
