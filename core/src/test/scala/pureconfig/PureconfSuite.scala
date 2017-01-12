@@ -436,6 +436,17 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[List[Int]](conf, "pure.conf.intList") shouldBe Success(expected)
   }
 
+  it should "be able to load a list of Ints from the system properties in correct order when one element is missing" in {
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intList.2: 3
+      intList.0: 1
+    }""")
+
+    val expected = List(1, 3)
+    loadConfig[List[Int]](conf, "pure.conf.intList") shouldBe Success(expected)
+  }
+
   case class ConfWithStreamOfFoo(stream: Stream[Foo])
 
   it should s"be able to save and load configurations containing immutable.Stream" in {
