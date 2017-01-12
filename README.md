@@ -18,6 +18,7 @@ A boilerplate-free Scala library for loading configuration files
 - [Override behaviour for types](#override-behaviour-for-types)
 - [Override behaviour for sealed families](#override-behaviour-for-sealed-families)
 - [Handling missing keys](#handling-missing-keys)
+- [Default values](#default-values)
 - [Example](#example)
 - [Whence the config files](#whence-the-config-files)
 - [Contribute](#contribute)
@@ -323,6 +324,36 @@ available `ConfigConvert` for that type with a `null` value:
 | }
 > ConfigFactory.empty.to[Foo]
 scala.util.Try[Foo] = Success(Foo(42))
+```
+
+## Default values
+
+Pureconfig supports default values. If a `case class` has a default argument and the underlying configuration is missing a value for that field, then Pureconfig will happily create an instance of the `class`, loading the other values from the configuration.
+
+For exampe: 
+
+```scala
+import pureconfig.loadConfig
+import com.typesafe.config.ConfigFactory.parseString
+import scala.concurrent.duration._
+
+case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
+
+// Defaulting `where`
+loadConfig[Holiday](parseString("""{ howLong: 21 days }"""))
+// scala.util.Try[Holiday] = Success(Holiday(last resort,21 days))
+
+// Defaulting `howLong`
+loadConfig[Holiday](parseString("""{ where: Zürich }"""))
+// scala.util.Try[Holiday] = Success(Holiday(Zürich,7 days))
+
+// Defaulting both arguments 
+loadConfig[Holiday](parseString("""{}"""))
+// scala.util.Try[Holiday] = Success(Holiday(last resort,7 days))
+
+// Specifying both arguments
+loadConfig[Holiday](parseString("""{ where: Texas, howLong: 3 hours }"""))
+// scala.util.Try[Holiday] = Success(Holiday(Texas,3 hours))
 ```
 
 ## Example
