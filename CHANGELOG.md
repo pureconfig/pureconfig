@@ -17,5 +17,7 @@
       `type: "dogconf"` field in the config file;
     - The old behavior can be restored by putting an implicit instance of `FirstSuccessCoproductHint` in scope (the
       migration to the new format is strongly recommended though, as the previous one may lead to ambiguous behavior);
+    - More information about the default representation and on how to customize it can be seen in the
+      [README](https://github.com/melrief/pureconfig#override-behaviour-for-sealed-families).
 - Bug fixes
   - `0` is accepted again as a valid `Duration` in configs.
