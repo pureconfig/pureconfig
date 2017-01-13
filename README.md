@@ -330,7 +330,7 @@ scala.util.Try[Foo] = Success(Foo(42))
 
 Pureconfig supports default values. If a `case class` has a default argument and the underlying configuration is missing a value for that field, then Pureconfig will happily create an instance of the `class`, loading the other values from the configuration.
 
-For exampe: 
+For example: 
 
 ```scala
 import pureconfig.loadConfig
