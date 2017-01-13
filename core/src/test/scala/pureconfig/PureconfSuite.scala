@@ -413,7 +413,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithListOfFoo](conf) shouldBe Success(expected)
   }
 
-  it should "be able to load a set of Ints from the system properties" in {
+  it should "be able to load a set of Ints from an object with numeric keys" in {
     val conf = ConfigFactory.parseString("""
     pure.conf: {
       intSet.0: 1
@@ -424,7 +424,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[Set[Int]](conf, "pure.conf.intSet") shouldBe Success(expected)
   }
 
-  it should "be able to load a list of Ints from the system properties in correct order" in {
+  it should "be able to load a list of Ints from an object with numeric keys (in correct order)" in {
     val conf = ConfigFactory.parseString("""
     pure.conf: {
       intList.2: 1
@@ -436,7 +436,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[List[Int]](conf, "pure.conf.intList") shouldBe Success(expected)
   }
 
-  it should "be able to load a list of Ints from the system properties in correct order when one element is missing" in {
+  it should "be able to load a list of Ints from an object with numeric keys in correct order when one element is missing" in {
     val conf = ConfigFactory.parseString("""
     pure.conf: {
       intList.2: 3
@@ -774,7 +774,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfigWithDouble](conf).failure.exception.getMessage shouldEqual "Cannot read a Double from an empty string."
   }
 
-  "Converting from a wrong system properties list" should "complain about having the wrong sytem properties list syntax" in {
+  "Converting from a wrong list object that has non-numeric keys" should "complain about having the wrong list syntax" in {
     val conf = ConfigFactory.parseString("""
     pure.conf: {
       intSet.0: 1
