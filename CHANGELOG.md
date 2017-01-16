@@ -3,6 +3,9 @@
 - New features
   - More consistent handling of missing keys: if a config key is missing pureconfig always throws a
     `KeyNotFoundException` now, unless the `ConfigConvert` extends the new `AllowMissingKey` trait.
+  - Add support for `LocalDate`, `LocalDateTime` and `LocalTime` from the `java.time` package via
+    configurable instances. See the [README](https://github.com/melrief/pureconfig#configurable-converters)
+    for more details.
 
 ### 0.5.0 (Jan 3, 2017)
 
