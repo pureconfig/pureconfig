@@ -416,7 +416,7 @@ Alternatively, PureConfig also provides `pureconfig.loadConfigFromFiles()` which
 an explicit list of files. Files earlier in the list have greater precedence than later ones. Each file can
 include a partial configuration as long as the whole list produces a complete configuration. For an example,
 see the test of `loadConfigFromFiles()` in
-[`PureconfSuite.scala`](https://github.com/melrief/pureconfig/blob/master/src/test/scala/pureconfig/PureconfSuite.scala).
+[`PureconfSuite.scala`](https://github.com/melrief/pureconfig/blob/master/core/src/test/scala/pureconfig/PureconfSuite.scala).
 
 Because PureConfig uses Typesafe Config to load configuration, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
