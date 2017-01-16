@@ -1,7 +1,7 @@
 package pureconfig
 
 import scala.util.Try
-import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.time.{LocalDate, LocalDateTime, LocalTime, MonthDay}
 import java.time.format.DateTimeFormatter
 
 /**
@@ -31,4 +31,8 @@ package object configurable {
   def localDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
     ConfigConvert.nonEmptyStringConvert[LocalDateTime](
       s => Try(LocalDateTime.parse(s, formatter)), _.format(formatter))
+
+  def monthDayConfigConvert(formatter: DateTimeFormatter): ConfigConvert[MonthDay] =
+    ConfigConvert.nonEmptyStringConvert[MonthDay](
+      s => Try(MonthDay.parse(s, formatter)), _.format(formatter))
 }

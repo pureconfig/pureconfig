@@ -1,13 +1,13 @@
 package pureconfig.configurable
 
 import com.typesafe.config.ConfigFactory
-import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.time.{LocalDate, LocalDateTime, LocalTime, MonthDay}
 import java.time.format.DateTimeFormatter
+
 import org.scalatest._
-import org.scalacheck.{ Arbitrary, Gen }
+import org.scalacheck.{Arbitrary, Gen}
 import prop.PropertyChecks
 import pureconfig.syntax._
-
 import ConfigurableSuite._
 
 class ConfigurableSuite extends FlatSpec with Matchers with TryValues with PropertyChecks {
@@ -37,6 +37,16 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
       val conf = ConfigFactory.parseString(s"""{dateTime:"${localDateTime.format(DateTimeFormatter.ISO_DATE_TIME)}"}""")
       case class Conf(dateTime: LocalDateTime)
       conf.to[Conf].success.value shouldEqual Conf(localDateTime)
+  }
+
+  val monthDayFormat = DateTimeFormatter.ofPattern("MM-dd")
+  implicit val monthDayInstance = monthDayConfigConvert(monthDayFormat)
+
+  it should "parse MonthDay" in forAll {
+    (monthDay: MonthDay) =>
+      val conf = ConfigFactory.parseString(s"""{monthDay:"${monthDay.format(monthDayFormat)}"}""")
+      case class Conf(monthDay: MonthDay)
+      conf.to[Conf].success.value shouldEqual Conf(monthDay)
   }
 }
 
@@ -70,4 +80,8 @@ object ConfigurableSuite {
         date <- localDateArbitrary.arbitrary
         time <- localTimeArbitrary.arbitrary
       } yield date.atTime(time))
+
+  implicit val monthDayArbitrary: Arbitrary[MonthDay] =
+    Arbitrary[MonthDay](
+      localDateArbitrary.arbitrary.map(date => MonthDay.of(date.getMonthValue, date.getDayOfMonth)))
 }
