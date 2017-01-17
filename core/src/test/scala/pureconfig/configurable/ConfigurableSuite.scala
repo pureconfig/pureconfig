@@ -10,6 +10,8 @@ import prop.PropertyChecks
 import pureconfig.syntax._
 import ConfigurableSuite._
 
+import scala.collection.JavaConverters._
+
 class ConfigurableSuite extends FlatSpec with Matchers with TryValues with PropertyChecks {
 
   implicit val localTimeInstance = localTimeConfigConvert(DateTimeFormatter.ISO_TIME)
@@ -76,6 +78,15 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
       case class Conf(yearMonth: YearMonth)
       conf.to[Conf].success.value shouldEqual Conf(yearMonth)
   }
+
+  implicit val zonedDateTimeInstance = zonedDateTimeConfigConvert(DateTimeFormatter.ISO_ZONED_DATE_TIME)
+
+  it should "parse ZonedDateTime" in forAll {
+    (zonedDateTime: ZonedDateTime) =>
+      val conf = ConfigFactory.parseString(s"""{zonedDateTime:"${zonedDateTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}"}""")
+      case class Conf(zonedDateTime: ZonedDateTime)
+      conf.to[Conf].success.value shouldEqual Conf(zonedDateTime)
+  }
 }
 
 object ConfigurableSuite {
@@ -138,4 +149,14 @@ object ConfigurableSuite {
       year <- genYear
       month <- genMonth
     } yield YearMonth.of(year, month))
+
+  implicit val zoneIdArbitrary: Arbitrary[ZoneId] =
+    Arbitrary(Gen.oneOf(ZoneId.getAvailableZoneIds.asScala.toSeq).map(ZoneId.of))
+
+  implicit val zonedDateTimeArbitrary: Arbitrary[ZonedDateTime] =
+    Arbitrary(
+      for {
+        localDateTime <- localDateTimeArbitrary.arbitrary
+        zoneId <- zoneIdArbitrary.arbitrary
+      } yield ZonedDateTime.of(localDateTime, zoneId))
 }

@@ -47,4 +47,8 @@ package object configurable {
   def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
     ConfigConvert.nonEmptyStringConvert[YearMonth](
       s => Try(YearMonth.parse(s, formatter)), _.format(formatter))
+
+  def zonedDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[ZonedDateTime] =
+    ConfigConvert.nonEmptyStringConvert[ZonedDateTime](
+      s => Try(ZonedDateTime.parse(s, formatter)), _.format(formatter))
 }
