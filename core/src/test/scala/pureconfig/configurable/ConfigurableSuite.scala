@@ -1,7 +1,7 @@
 package pureconfig.configurable
 
 import com.typesafe.config.ConfigFactory
-import java.time.{LocalDate, LocalDateTime, LocalTime, MonthDay}
+import java.time._
 import java.time.format.DateTimeFormatter
 
 import org.scalatest._
@@ -48,6 +48,24 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
       case class Conf(monthDay: MonthDay)
       conf.to[Conf].success.value shouldEqual Conf(monthDay)
   }
+
+  implicit val offsetDateTimeInstance = offsetDateTimeConfigConvert(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
+  it should "parse OffsetDateTime" in forAll {
+    (offsetDateTime: OffsetDateTime) =>
+      val conf = ConfigFactory.parseString(s"""{offsetDateTime:"${offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)}"}""")
+      case class Conf(offsetDateTime: OffsetDateTime)
+      conf.to[Conf].success.value shouldEqual Conf(offsetDateTime)
+  }
+
+  implicit val offsetTimeInstance = offsetTimeConfigConvert(DateTimeFormatter.ISO_OFFSET_TIME)
+
+  it should "parse OffsetTime" in forAll {
+    (offsetTime: OffsetTime) =>
+      val conf = ConfigFactory.parseString(s"""{offsetTime:"${offsetTime.format(DateTimeFormatter.ISO_OFFSET_TIME)}"}""")
+      case class Conf(offsetTime: OffsetTime)
+      conf.to[Conf].success.value shouldEqual Conf(offsetTime)
+  }
 }
 
 object ConfigurableSuite {
@@ -84,4 +102,22 @@ object ConfigurableSuite {
   implicit val monthDayArbitrary: Arbitrary[MonthDay] =
     Arbitrary[MonthDay](
       localDateArbitrary.arbitrary.map(date => MonthDay.of(date.getMonthValue, date.getDayOfMonth)))
+
+  implicit val zoneOffsetArbitrary: Arbitrary[ZoneOffset] =
+    Arbitrary(
+      Gen.choose(ZoneOffset.MIN.getTotalSeconds, ZoneOffset.MAX.getTotalSeconds).map(ZoneOffset.ofTotalSeconds))
+
+  implicit val offsetDateTimeArbitrary: Arbitrary[OffsetDateTime] =
+    Arbitrary[OffsetDateTime](
+      for {
+        localDateTime <- localDateTimeArbitrary.arbitrary
+        offset <- zoneOffsetArbitrary.arbitrary
+      } yield OffsetDateTime.of(localDateTime, offset))
+
+  implicit val offsetTimeArbitrary: Arbitrary[OffsetTime] =
+    Arbitrary[OffsetTime](
+      for {
+        localTime <- localTimeArbitrary.arbitrary
+        offset <- zoneOffsetArbitrary.arbitrary
+      } yield OffsetTime.of(localTime, offset))
 }
