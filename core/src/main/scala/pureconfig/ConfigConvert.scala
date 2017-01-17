@@ -14,12 +14,13 @@ import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.reflect.ClassTag
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import java.net.URL
+import java.time.ZoneOffset
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
-import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert }
-import pureconfig.error.{ CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException }
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import pureconfig.ConfigConvert.{fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert}
+import pureconfig.error.{CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException}
 
 import scala.collection.mutable.Builder
 import scala.util.control.NonFatal
@@ -339,6 +340,9 @@ trait LowPriorityConfigConvertImplicits {
     }
     nonEmptyStringConvert(fromString, DurationConvert.fromDuration)
   }
+
+  implicit val zoneOffsetConfigConvert: ConfigConvert[ZoneOffset] =
+    nonEmptyStringConvert[ZoneOffset](s => Try(ZoneOffset.of(s)), _.toString)
 
   implicit val readString = fromString[String](Success(_))
   implicit val readBoolean = fromNonEmptyString[Boolean](s => Try(s.toBoolean))

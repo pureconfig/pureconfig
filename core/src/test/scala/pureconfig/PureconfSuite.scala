@@ -5,22 +5,22 @@ package pureconfig
 
 import java.io.PrintWriter
 import java.net.URL
-import java.nio.file.{ Files, Path }
+import java.nio.file.{Files, Path}
+import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scala.util.{ Failure, Success, Try }
-
-import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.util.{Failure, Success, Try}
+import com.typesafe.config.{ConfigFactory, Config => TypesafeConfig, _}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert.{ fromString, stringConvert }
+import pureconfig.ConfigConvert.{fromString, stringConvert}
 import pureconfig.error._
 
 /**
@@ -512,6 +512,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val expected = Duration(110, TimeUnit.DAYS)
     implicit val readDurationBadly = fromString[Duration](_ => Try(expected))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
+  }
+
+  case class ConfWithZoneOffset(offset: ZoneOffset)
+
+  it should "be able to read a config with a ZoneOffset" in {
+    val expected = ZoneOffset.ofHours(10)
+    val config = ConfigFactory.parseString(s"""{ "offset":"${expected.toString}" }""")
+    loadConfig[ConfWithZoneOffset](config).success.value shouldBe ConfWithZoneOffset(expected)
   }
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
