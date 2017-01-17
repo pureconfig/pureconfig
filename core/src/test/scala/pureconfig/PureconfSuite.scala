@@ -6,7 +6,7 @@ package pureconfig
 import java.io.PrintWriter
 import java.net.URL
 import java.nio.file.{Files, Path}
-import java.time.{Period, Year, ZoneOffset}
+import java.time.{Period, Year, ZoneId, ZoneOffset}
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
@@ -520,6 +520,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val expected = ZoneOffset.ofHours(10)
     val config = ConfigFactory.parseString(s"""{ "offset":"${expected.toString}" }""")
     loadConfig[ConfWithZoneOffset](config).success.value shouldBe ConfWithZoneOffset(expected)
+  }
+
+  case class ConfWithZoneId(zoneId: ZoneId)
+
+  it should "be able to read a config with a ZoneId" in {
+    val expected = ZoneId.systemDefault()
+    val config = ConfigFactory.parseString(s"""{ "zoneId":"${expected.toString}" }""")
+    loadConfig[ConfWithZoneId](config).success.value shouldBe ConfWithZoneId(expected)
   }
 
   case class ConfWithPeriod(period: Period)

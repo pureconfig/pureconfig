@@ -16,7 +16,7 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 import java.net.URL
-import java.time.{Period, Year, ZoneOffset}
+import java.time.{Period, Year, ZoneId, ZoneOffset}
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import pureconfig.ConfigConvert.{fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert}
@@ -343,6 +343,9 @@ trait LowPriorityConfigConvertImplicits {
 
   implicit val zoneOffsetConfigConvert: ConfigConvert[ZoneOffset] =
     nonEmptyStringConvert[ZoneOffset](s => Try(ZoneOffset.of(s)), _.toString)
+
+  implicit val zoneIdConfigConvert: ConfigConvert[ZoneId] =
+    nonEmptyStringConvert[ZoneId](s => Try(ZoneId.of(s)), _.toString)
 
   implicit val periodConfigConvert: ConfigConvert[Period] =
     nonEmptyStringConvert[Period](s => Try(Period.parse(s)), _.toString)
