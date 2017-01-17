@@ -6,7 +6,7 @@ package pureconfig
 import java.io.PrintWriter
 import java.net.URL
 import java.nio.file.{Files, Path}
-import java.time.ZoneOffset
+import java.time.{Period, ZoneOffset}
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
@@ -520,6 +520,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val expected = ZoneOffset.ofHours(10)
     val config = ConfigFactory.parseString(s"""{ "offset":"${expected.toString}" }""")
     loadConfig[ConfWithZoneOffset](config).success.value shouldBe ConfWithZoneOffset(expected)
+  }
+
+  case class ConfWithPeriod(period: Period)
+
+  it should "be able to read a config with a Period" in {
+    val expected = Period.of(2016, 1, 1)
+    val config = ConfigFactory.parseString(s"""{ "period":"${expected.toString}" }""")
+    loadConfig[ConfWithPeriod](config).success.value shouldBe ConfWithPeriod(expected)
   }
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
