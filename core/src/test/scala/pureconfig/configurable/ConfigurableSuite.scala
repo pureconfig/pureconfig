@@ -66,6 +66,16 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
       case class Conf(offsetTime: OffsetTime)
       conf.to[Conf].success.value shouldEqual Conf(offsetTime)
   }
+
+  val yearMonthFormat = DateTimeFormatter.ofPattern("yyyy-MM")
+  implicit val yearMonthInstance = yearMonthConfigConvert(yearMonthFormat)
+
+  it should "parse YearMonth" in forAll {
+    (yearMonth: YearMonth) =>
+      val conf = ConfigFactory.parseString(s"""{yearMonth:"${yearMonth.format(yearMonthFormat)}"}""")
+      case class Conf(yearMonth: YearMonth)
+      conf.to[Conf].success.value shouldEqual Conf(yearMonth)
+  }
 }
 
 object ConfigurableSuite {
@@ -74,6 +84,8 @@ object ConfigurableSuite {
   val genMinute: Gen[Int] = Gen.chooseNum(0, 59)
   val genSecond: Gen[Int] = Gen.chooseNum(0, 59)
   val genNano: Gen[Int] = Gen.chooseNum(0, 999999999)
+  val genYear: Gen[Int] = Gen.chooseNum(1970, 2999)
+  val genMonth: Gen[Int] = Gen.chooseNum(1, 12)
 
   implicit val localTimeArbitrary: Arbitrary[LocalTime] =
     Arbitrary[LocalTime](
@@ -87,8 +99,8 @@ object ConfigurableSuite {
   implicit val localDateArbitrary: Arbitrary[LocalDate] =
     Arbitrary[LocalDate](
       for {
-        year <- Gen.chooseNum(1970, 2999)
-        month <- Gen.chooseNum(1, 12)
+        year <- genYear
+        month <- genMonth
         day <- Gen.chooseNum(1, java.time.YearMonth.of(year, month).lengthOfMonth())
       } yield LocalDate.of(year, month, day))
 
@@ -120,4 +132,10 @@ object ConfigurableSuite {
         localTime <- localTimeArbitrary.arbitrary
         offset <- zoneOffsetArbitrary.arbitrary
       } yield OffsetTime.of(localTime, offset))
+
+  implicit val yearMonthArbitrary: Arbitrary[YearMonth] =
+    Arbitrary(for {
+      year <- genYear
+      month <- genMonth
+    } yield YearMonth.of(year, month))
 }

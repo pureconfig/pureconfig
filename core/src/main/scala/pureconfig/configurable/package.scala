@@ -43,4 +43,8 @@ package object configurable {
   def offsetTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[OffsetTime] =
     ConfigConvert.nonEmptyStringConvert[OffsetTime](
       s => Try(OffsetTime.parse(s, formatter)), _.format(formatter))
+
+  def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
+    ConfigConvert.nonEmptyStringConvert[YearMonth](
+      s => Try(YearMonth.parse(s, formatter)), _.format(formatter))
 }
