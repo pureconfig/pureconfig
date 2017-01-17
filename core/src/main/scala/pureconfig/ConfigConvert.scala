@@ -16,7 +16,7 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 import java.net.URL
-import java.time.{Period, ZoneOffset}
+import java.time.{Period, Year, ZoneOffset}
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import pureconfig.ConfigConvert.{fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert}
@@ -346,6 +346,9 @@ trait LowPriorityConfigConvertImplicits {
 
   implicit val periodConfigConvert: ConfigConvert[Period] =
     nonEmptyStringConvert[Period](s => Try(Period.parse(s)), _.toString)
+
+  implicit val yearConfigConvert: ConfigConvert[Year] =
+    nonEmptyStringConvert[Year](s => Try(Year.parse(s)), _.toString)
 
   implicit val readString = fromString[String](Success(_))
   implicit val readBoolean = fromNonEmptyString[Boolean](s => Try(s.toBoolean))
