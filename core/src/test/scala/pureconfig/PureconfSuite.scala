@@ -6,7 +6,7 @@ package pureconfig
 import java.io.PrintWriter
 import java.net.URL
 import java.nio.file.{Files, Path}
-import java.time.{Period, Year, ZoneId, ZoneOffset}
+import java.time._
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
@@ -512,6 +512,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val expected = Duration(110, TimeUnit.DAYS)
     implicit val readDurationBadly = fromString[Duration](_ => Try(expected))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
+  }
+
+  case class ConfWithInstant(instant: Instant)
+
+  it should "be able to read a config with an Instant" in {
+    val expected = Instant.now()
+    val config = ConfigFactory.parseString(s"""{ "instant":"${expected.toString}" }""")
+    loadConfig[ConfWithInstant](config).success.value shouldEqual ConfWithInstant(expected)
   }
 
   case class ConfWithZoneOffset(offset: ZoneOffset)
