@@ -413,6 +413,40 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithListOfFoo](conf) shouldBe Success(expected)
   }
 
+  it should "be able to load a set of Ints from an object with numeric keys" in {
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intSet.0: 1
+      intSet.1: 2
+    }""")
+
+    val expected = Set(1, 2)
+    loadConfig[Set[Int]](conf, "pure.conf.intSet") shouldBe Success(expected)
+  }
+
+  it should "be able to load a list of Ints from an object with numeric keys (in correct order)" in {
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intList.2: 1
+      intList.0: 2
+      intList.1: 3
+    }""")
+
+    val expected = List(2, 3, 1)
+    loadConfig[List[Int]](conf, "pure.conf.intList") shouldBe Success(expected)
+  }
+
+  it should "be able to load a list of Ints from an object with numeric keys in correct order when one element is missing" in {
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intList.2: 3
+      intList.0: 1
+    }""")
+
+    val expected = List(1, 3)
+    loadConfig[List[Int]](conf, "pure.conf.intList") shouldBe Success(expected)
+  }
+
   case class ConfWithStreamOfFoo(stream: Stream[Foo])
 
   it should s"be able to save and load configurations containing immutable.Stream" in {
@@ -738,6 +772,16 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   "Converting from an empty string to a double" should "complain about an empty string" in {
     val conf = ConfigFactory.parseMap(Map("v" -> "").asJava)
     loadConfig[ConfigWithDouble](conf).failure.exception.getMessage shouldEqual "Cannot read a Double from an empty string."
+  }
+
+  "Converting from a wrong list object that has non-numeric keys" should "complain about having the wrong list syntax" in {
+    val conf = ConfigFactory.parseString("""
+    pure.conf: {
+      intSet.0: 1
+      intSet.a: 2
+    }""")
+
+    assert(loadConfig[Set[Int]](conf, "pure.conf.intSet").failure.exception.getMessage.startsWith("Cannot interpet 'a' as a numeric index"))
   }
 
   "Converting from an empty string to a duration" should "complain about an empty string" in {

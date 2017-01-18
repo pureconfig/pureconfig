@@ -16,10 +16,13 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
 import java.net.URL
-import scala.concurrent.duration.{ Duration, FiniteDuration }
 
-import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, stringConvert, nonEmptyStringConvert }
+import scala.concurrent.duration.{ Duration, FiniteDuration }
+import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert }
 import pureconfig.error.{ CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException }
+
+import scala.collection.mutable.Builder
+import scala.util.control.NonFatal
 
 /**
  * Trait for conversion between `T` and `ConfigValue`.
@@ -226,18 +229,34 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def from(config: ConfigValue): Try[F[T]] = {
       config match {
         case co: ConfigList =>
-          val tryBuilder = co.asScala.foldLeft(Try(cbf())) {
-            case (tryResult, v) =>
-              for {
-                result <- tryResult
-                value <- configConvert.value.from(v)
-              } yield result += value
-          }
-
-          tryBuilder.map(_.result())
+          traverseTry(co.asScala, cbf())(configConvert.value.from)
+        case o: ConfigObject =>
+          for {
+            indexedEntries <- traverseTry(o.asScala, new collection.mutable.ListBuffer[(Int, ConfigValue)]) {
+              case (keyString, value) => Try(keyString.toInt -> value).recoverWith(reportBadIndex(keyString))
+            }
+            sortedValues = indexedEntries.sortBy(_._1).map(_._2)
+            result <- traverseTry(sortedValues, cbf())(configConvert.value.from)
+          } yield result
         case other =>
           Failure(WrongTypeException(other.valueType().toString))
       }
+    }
+
+    // Akin to scalaz's `traverseU` but limited to operating on Try instead of all monads.
+    private def traverseTry[A, B, C](i: TraversableOnce[A], builder: Builder[B, C])(f: A => Try[B]): Try[C] = {
+      i.foldLeft(Try(builder)) {
+        case (builderMaybe, a) => builderMaybe.flatMap { builder =>
+          f(a).map(builder += _)
+        }
+      }.map(_.result)
+    }
+
+    private def reportBadIndex(keyString: String): PartialFunction[Throwable, Failure[Nothing]] = {
+      case NonFatal(e) =>
+        val message = s"Cannot interpet '$keyString' as a numeric index. Tried to read the object as an indexed sequence. " +
+          "Expecting syntax like (a.0=0, a.1=1, ...) when loading a sequence called 'a'"
+        Failure(new IllegalArgumentException(message))
     }
 
     override def to(ts: F[T]): ConfigValue = {

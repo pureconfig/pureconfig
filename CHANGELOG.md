@@ -6,6 +6,9 @@
   - Add support for `LocalDate`, `LocalDateTime` and `LocalTime` from the `java.time` package via
     configurable instances. See the [README](https://github.com/melrief/pureconfig#configurable-converters)
     for more details.
+  - Add support for converting objects with numeric keys into lists. This is a functionallity also supported
+    by typesafe config since version [1.0.1](https://github.com/typesafehub/config/blob/f6680a5dad51d992139d45a84fad734f1778bf50/NEWS.md#101-may-19-2013)
+    and discussed in the following [issue](https://github.com/typesafehub/config/issues/69).
 
 ### 0.5.0 (Jan 3, 2017)
 
