@@ -781,7 +781,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       intSet.a: 2
     }""")
 
-    assert(loadConfig[Set[Int]](conf, "pure.conf.intSet").failure.exception.getMessage.contains("Cannot parse this object as list! Expecting syntax like"))
+    assert(loadConfig[Set[Int]](conf, "pure.conf.intSet").failure.exception.getMessage.startsWith("Cannot interpet a as a numeric index"))
   }
 
   "Converting from an empty string to a duration" should "complain about an empty string" in {
