@@ -254,7 +254,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
     private def reportBadIndex(keyString: String): PartialFunction[Throwable, Failure[Nothing]] = {
       case NonFatal(e) =>
-        val message = s"Cannot interpet $keyString as a numeric index. Tried to read the object as an indexed sequence. " +
+        val message = s"Cannot interpet '$keyString' as a numeric index. Tried to read the object as an indexed sequence. " +
           "Expecting syntax like (a.0=0, a.1=1, ...) when loading a sequence called 'a'"
         Failure(new IllegalArgumentException(message))
     }
