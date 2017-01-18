@@ -13,11 +13,13 @@ A boilerplate-free Scala library for loading configuration files
 - [Add PureConfig to your project](#add-pureconfig-to-your-project)
 - [Use PureConfig](#use-pureconfig)
 - [Supported types](#supported-types)
+- [Configurable converters](#configurable-converters)
 - [Customizing naming conventions](#customizing-naming-conventions)
 - [Extend the library to support new types](#extend-the-library-to-support-new-types)
 - [Override behaviour for types](#override-behaviour-for-types)
 - [Override behaviour for sealed families](#override-behaviour-for-sealed-families)
 - [Handling missing keys](#handling-missing-keys)
+- [Default values](#default-values)
 - [Example](#example)
 - [Whence the config files](#whence-the-config-files)
 - [Contribute](#contribute)
@@ -53,7 +55,7 @@ In the sbt configuration file:
 use scala `2.10`, `2.11` or `2.12`:
 
 ```scala
-scalaVersion := "2.12.0" // or "2.11.8", "2.10.5"
+scalaVersion := "2.12.1" // or "2.11.8", "2.10.5"
 ```
 
 Add the library. For scala `2.11` and `2.12`
@@ -101,6 +103,7 @@ and percentage format ending with `%`), `Float` (also supporting percentage),
 is in this list
 - `Option` for optional values, i.e. value that can or cannot be in the configuration
 - `Map` with `String` keys and any value type that is in this list
+- `LocalDate`, `LocalTime`, `LocalDatetime` (see [Configurable converters](#configurable-converters))
 - typesafe `ConfigValue`, `ConfigObject` and `ConfigList`
 - case classes
 - sealed families of case classes (ADTs)
@@ -118,6 +121,31 @@ An almost comprehensive example is:
 > loadConfig[MyClass](conf)
 res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
+
+
+## Configurable converters
+
+For some types, pureconfig cannot automatically derive a converter because there are multiple ways to convert a configuration
+value to them. For instance, for [`LocalDate`](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)
+pureconfig cannot derive a converter because there are multiple [`DateTimeFormatter`](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)s
+that can be used to convert a String into a `LocalDate`. Examples of different format are `yyyy-mm-dd`, e.g. `"2016-01-01"`,
+and `yyyymmdd`, e.g. `"20160101"`. For those types, pureconfig provides a way to create converters from the necessary parameters. These methods can be found under
+the package `pureconfig.configurable`. Once the output of a `pureconfig.configurable` method for a certain type is in scope,
+pureconfig can start using that configured converter:
+
+```scala
+import pureconfig.configurable._
+
+case class Conf(date: LocalDate)
+
+implicit val localDateInstance = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
+
+val conf = ConfigFactory.parseString(s"""{date:"2011-12-03"}""")
+
+loadConfig[Conf](conf)
+// returns Success(Conf(2016-01-01))
+```
+
 
 ## Customizing naming conventions
 
@@ -325,6 +353,36 @@ available `ConfigConvert` for that type with a `null` value:
 scala.util.Try[Foo] = Success(Foo(42))
 ```
 
+## Default values
+
+Pureconfig supports default values. If a `case class` has a default argument and the underlying configuration is missing a value for that field, then Pureconfig will happily create an instance of the `class`, loading the other values from the configuration.
+
+For example: 
+
+```scala
+import pureconfig.loadConfig
+import com.typesafe.config.ConfigFactory.parseString
+import scala.concurrent.duration._
+
+case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
+
+// Defaulting `where`
+loadConfig[Holiday](parseString("""{ howLong: 21 days }"""))
+// scala.util.Try[Holiday] = Success(Holiday(last resort,21 days))
+
+// Defaulting `howLong`
+loadConfig[Holiday](parseString("""{ where: Zürich }"""))
+// scala.util.Try[Holiday] = Success(Holiday(Zürich,7 days))
+
+// Defaulting both arguments 
+loadConfig[Holiday](parseString("""{}"""))
+// scala.util.Try[Holiday] = Success(Holiday(last resort,7 days))
+
+// Specifying both arguments
+loadConfig[Holiday](parseString("""{ where: Texas, howLong: 3 hours }"""))
+// scala.util.Try[Holiday] = Success(Holiday(Texas,3 hours))
+```
+
 ## Example
 
 In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
@@ -416,7 +474,7 @@ Alternatively, PureConfig also provides `pureconfig.loadConfigFromFiles()` which
 an explicit list of files. Files earlier in the list have greater precedence than later ones. Each file can
 include a partial configuration as long as the whole list produces a complete configuration. For an example,
 see the test of `loadConfigFromFiles()` in
-[`PureconfSuite.scala`](https://github.com/melrief/pureconfig/blob/master/src/test/scala/pureconfig/PureconfSuite.scala).
+[`PureconfSuite.scala`](https://github.com/melrief/pureconfig/blob/master/core/src/test/scala/pureconfig/PureconfSuite.scala).
 
 Because PureConfig uses Typesafe Config to load configuration, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
