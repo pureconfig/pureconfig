@@ -125,10 +125,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     implicit key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
     tConfigConvert: Lazy[WrappedDefaultValueConfigConvert[Wrapped, T, U]],
-    mapping: ConfigFieldMapping[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V]:: T, Option[V]:: U] {
+    hint: ProductHint[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V]:: T, Option[V]:: U] {
 
     override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Try[FieldType[K, V] :: T] = {
-      val keyStr = mapping(key.value.toString().tail)
+      val keyStr = hint.fieldMapping(key.value.toString().tail)
       for {
         v <- improveFailure[V](
           (co.get(keyStr), vFieldConvert.value) match {
@@ -145,7 +145,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     }
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
-      val keyStr = mapping(key.value.toString().tail)
+      val keyStr = hint.fieldMapping(key.value.toString().tail)
       val rem = tConfigConvert.value.to(t.tail)
       // TODO check that all keys are unique
       vFieldConvert.value match {

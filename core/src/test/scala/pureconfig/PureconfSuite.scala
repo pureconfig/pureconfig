@@ -610,7 +610,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
-  it should "allow customizing the field mapping" in {
+  it should "allow customizing the field mapping through a product hint" in {
     val conf = ConfigFactory.parseString("""{
       A = 2
       B = "two"
@@ -619,9 +619,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     case class SampleConf(a: Int, b: String)
     loadConfig[SampleConf](conf).failure.exception shouldEqual KeyNotFoundException("a")
 
-    implicit val mapping = new ConfigFieldMapping[SampleConf] {
-      def apply(fieldName: String) = fieldName.toUpperCase
-    }
+    implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
 
     loadConfig[SampleConf](conf) shouldBe Success(SampleConf(2, "two"))
   }
@@ -629,7 +627,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "allow customizing the field mapping with word delimiters" in {
     import pureconfig.syntax._
 
-    implicit def conv[T] = ConfigFieldMapping.apply[T](CamelCase, KebabCase)
+    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, KebabCase))
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1
@@ -646,7 +644,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "allow customizing the field mapping only for specific types" in {
     import pureconfig.syntax._
 
-    implicit val conv = ConfigFieldMapping.apply[ConfWithCamelCase](CamelCase, KebabCase)
+    implicit val productHint = ProductHint[ConfWithCamelCase](ConfigFieldMapping(CamelCase, KebabCase))
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1

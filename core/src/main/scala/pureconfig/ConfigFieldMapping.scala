@@ -1,10 +1,10 @@
 package pureconfig
 
-trait ConfigFieldMapping[T] extends (String => String) {
+trait ConfigFieldMapping extends (String => String) {
   def apply(fieldName: String): String
 }
 
-object ConfigFieldMapping extends LowPriorityConfigFieldMappingImplicits {
+object ConfigFieldMapping {
   /**
    * Creates a ConfigFieldMapping from the provided function, mapping names in
    * the object that will receive config values to names in the configuration
@@ -14,7 +14,7 @@ object ConfigFieldMapping extends LowPriorityConfigFieldMappingImplicits {
    *        values to names in the configuration file
    * @return a ConfigFieldMapping created from the provided function.
    */
-  def apply[T](f: String => String): ConfigFieldMapping[T] = new ConfigFieldMapping[T] {
+  def apply(f: String => String): ConfigFieldMapping = new ConfigFieldMapping {
     def apply(fieldName: String): String = f(fieldName)
   }
 
@@ -30,17 +30,11 @@ object ConfigFieldMapping extends LowPriorityConfigFieldMappingImplicits {
    * @return a ConfigFieldMapping created according to the provided naming
    *         conventions.
    */
-  def apply[T](typeFieldConvention: NamingConvention, configFieldConvention: NamingConvention): ConfigFieldMapping[T] = {
+  def apply(typeFieldConvention: NamingConvention, configFieldConvention: NamingConvention): ConfigFieldMapping = {
     if (typeFieldConvention == configFieldConvention) {
       apply(identity(_))
     } else {
       apply(typeFieldConvention.toTokens _ andThen configFieldConvention.fromTokens _)
     }
   }
-
-  def default[T]: ConfigFieldMapping[T] = apply(CamelCase, CamelCase)
-}
-
-trait LowPriorityConfigFieldMappingImplicits {
-  implicit def configFieldMapping[T]: ConfigFieldMapping[T] = ConfigFieldMapping.default[T]
 }
