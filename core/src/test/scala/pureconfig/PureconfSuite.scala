@@ -5,22 +5,22 @@ package pureconfig
 
 import java.io.PrintWriter
 import java.net.URL
-import java.nio.file.{ Files, Path }
+import java.nio.file.{Files, Path}
+import java.time._
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scala.util.{ Failure, Success, Try }
-
-import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.util.{Failure, Success, Try}
+import com.typesafe.config.{ConfigFactory, Config => TypesafeConfig, _}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert.{ fromString, stringConvert }
+import pureconfig.ConfigConvert.{fromString, stringConvert}
 import pureconfig.error._
 
 /**
@@ -512,6 +512,46 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     val expected = Duration(110, TimeUnit.DAYS)
     implicit val readDurationBadly = fromString[Duration](_ => Try(expected))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).success.value shouldBe ConfWithDuration(expected)
+  }
+
+  case class ConfWithInstant(instant: Instant)
+
+  it should "be able to read a config with an Instant" in {
+    val expected = Instant.now()
+    val config = ConfigFactory.parseString(s"""{ "instant":"${expected.toString}" }""")
+    loadConfig[ConfWithInstant](config).success.value shouldEqual ConfWithInstant(expected)
+  }
+
+  case class ConfWithZoneOffset(offset: ZoneOffset)
+
+  it should "be able to read a config with a ZoneOffset" in {
+    val expected = ZoneOffset.ofHours(10)
+    val config = ConfigFactory.parseString(s"""{ "offset":"${expected.toString}" }""")
+    loadConfig[ConfWithZoneOffset](config).success.value shouldBe ConfWithZoneOffset(expected)
+  }
+
+  case class ConfWithZoneId(zoneId: ZoneId)
+
+  it should "be able to read a config with a ZoneId" in {
+    val expected = ZoneId.systemDefault()
+    val config = ConfigFactory.parseString(s"""{ "zoneId":"${expected.toString}" }""")
+    loadConfig[ConfWithZoneId](config).success.value shouldBe ConfWithZoneId(expected)
+  }
+
+  case class ConfWithPeriod(period: Period)
+
+  it should "be able to read a config with a Period" in {
+    val expected = Period.of(2016, 1, 1)
+    val config = ConfigFactory.parseString(s"""{ "period":"${expected.toString}" }""")
+    loadConfig[ConfWithPeriod](config).success.value shouldBe ConfWithPeriod(expected)
+  }
+
+  case class ConfWithYear(year: Year)
+
+  it should "be able to read a config with a Year" in {
+    val expected = Year.now()
+    val config = ConfigFactory.parseString(s"""{ "year":"${expected.toString}" }""")
+    loadConfig[ConfWithYear](config).success.value shouldBe ConfWithYear(expected)
   }
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {

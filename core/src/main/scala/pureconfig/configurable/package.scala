@@ -1,7 +1,7 @@
 package pureconfig
 
 import scala.util.Try
-import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.time._
 import java.time.format.DateTimeFormatter
 
 /**
@@ -31,4 +31,24 @@ package object configurable {
   def localDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
     ConfigConvert.nonEmptyStringConvert[LocalDateTime](
       s => Try(LocalDateTime.parse(s, formatter)), _.format(formatter))
+
+  def monthDayConfigConvert(formatter: DateTimeFormatter): ConfigConvert[MonthDay] =
+    ConfigConvert.nonEmptyStringConvert[MonthDay](
+      s => Try(MonthDay.parse(s, formatter)), _.format(formatter))
+
+  def offsetDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[OffsetDateTime] =
+    ConfigConvert.nonEmptyStringConvert[OffsetDateTime](
+      s => Try(OffsetDateTime.parse(s, formatter)), _.format(formatter))
+
+  def offsetTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[OffsetTime] =
+    ConfigConvert.nonEmptyStringConvert[OffsetTime](
+      s => Try(OffsetTime.parse(s, formatter)), _.format(formatter))
+
+  def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
+    ConfigConvert.nonEmptyStringConvert[YearMonth](
+      s => Try(YearMonth.parse(s, formatter)), _.format(formatter))
+
+  def zonedDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[ZonedDateTime] =
+    ConfigConvert.nonEmptyStringConvert[ZonedDateTime](
+      s => Try(ZonedDateTime.parse(s, formatter)), _.format(formatter))
 }

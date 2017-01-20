@@ -103,7 +103,9 @@ and percentage format ending with `%`), `Float` (also supporting percentage),
 is in this list
 - `Option` for optional values, i.e. value that can or cannot be in the configuration
 - `Map` with `String` keys and any value type that is in this list
-- `LocalDate`, `LocalTime`, `LocalDatetime` (see [Configurable converters](#configurable-converters))
+- everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html).
+ Because different formats are supported, converters for types that support multiple formats must be configured
+ before they can be used (see [Configurable converters](#configurable-converters))
 - typesafe `ConfigValue`, `ConfigObject` and `ConfigList`
 - case classes
 - sealed families of case classes (ADTs)
