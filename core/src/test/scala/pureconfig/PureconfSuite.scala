@@ -784,7 +784,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
   }
 
-  it should "be able to consider default arguments" in {
+  it should "consider default arguments by default" in {
     case class InnerConf(e: Int, g: Int)
     case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
 
@@ -805,6 +805,16 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
     loadConfig[Conf](conf6).failure.exception shouldEqual WrongTypeForKeyException("STRING", "d")
+  }
+
+  it should "not use default arguments if specified through a product hint" in {
+    case class InnerConf(e: Int, g: Int)
+    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
+
+    implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
+
+    val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
+    loadConfig[Conf](conf1).failure.exception shouldEqual KeyNotFoundException("b")
   }
 
   "Converting from an empty string to a double" should "complain about an empty string" in {

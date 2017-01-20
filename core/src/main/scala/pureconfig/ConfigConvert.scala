@@ -135,7 +135,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
             case (null, converter: AllowMissingKey) =>
               converter.from(co.get(keyStr))
             case (null, _) =>
-              default.head.fold[Try[V]](Failure(CannotConvertNullException))(Success(_))
+              val defaultValue = if (hint.useDefaultArgs) default.head else None
+              defaultValue.fold[Try[V]](Failure(CannotConvertNullException))(Success(_))
             case (value, converter) =>
               converter.from(value)
           },
