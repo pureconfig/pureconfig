@@ -658,6 +658,25 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
+  it should "disallow unknown keys if specified through a product hint" in {
+    import pureconfig.syntax._
+
+    case class Conf1(a: Int)
+    case class Conf2(a: Int)
+
+    implicit val productHint = ProductHint[Conf2](allowUnknownKeys = false)
+
+    val conf = ConfigFactory.parseString("""{
+      conf {
+        a = 1
+        b = 2
+      }
+    }""")
+
+    conf.getConfig("conf").to[Conf1] shouldBe Success(Conf1(1))
+    conf.getConfig("conf").to[Conf2] shouldBe Failure(UnknownKeyException("b"))
+  }
+
   val expectedValueForResolveFilesPriority2 = FlatConfig(
     false,
     0.001d,

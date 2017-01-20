@@ -20,7 +20,7 @@ import java.time._
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import pureconfig.ConfigConvert.{fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert}
-import pureconfig.error.{CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException}
+import pureconfig.error._
 
 import scala.collection.mutable.Builder
 import scala.util.control.NonFatal
@@ -108,8 +108,14 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     def to(v: SubRepr): ConfigValue
   }
 
-  implicit def hNilConfigConvert[Wrapped]: WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] = new WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] {
-    override def fromConfigObject(config: ConfigObject, default: HNil): Try[HNil] = Success(HNil)
+  implicit def hNilConfigConvert[Wrapped](
+    implicit hint: ProductHint[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] = new WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] {
+
+    override def fromConfigObject(config: ConfigObject, default: HNil): Try[HNil] = {
+      if(!hint.allowUnknownKeys && !config.isEmpty) Failure(UnknownKeyException(config.keySet.iterator.next))
+      else Success(HNil)
+    }
+
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
@@ -141,7 +147,11 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
               converter.from(value)
           },
           keyStr)
-        tail <- tConfigConvert.value.fromWithDefault(co, default.tail)
+
+        // for performance reasons only, we shouldn't clone the config object unless necessary
+        tailCo = if (hint.allowUnknownKeys) co else co.withoutKey(keyStr)
+
+        tail <- tConfigConvert.value.fromWithDefault(tailCo, default.tail)
       } yield field[K](v) :: tail
     }
 
