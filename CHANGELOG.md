@@ -1,4 +1,4 @@
-### 0.5.1 (unreleased)
+### 0.5.1 (Jan 20, 2017)
 
 - New features
   - More consistent handling of missing keys: if a config key is missing pureconfig always throws a
