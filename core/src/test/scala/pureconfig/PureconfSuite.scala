@@ -260,7 +260,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     withTempFile { configFile =>
       implicit val hint = new FirstSuccessCoproductHint[AnimalConfig]
 
-      val conf = ConfigFactory.parseString("{ canFly = true }")
+      val conf = ConfigFactory.parseString("{ can-fly = true }")
       loadConfig[AnimalConfig](conf) should be(Success(BirdConfig(true)))
 
       saveConfigAsPropertyFile[AnimalConfig](DogConfig(2), configFile, overrideOutputPath = true)
@@ -275,7 +275,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   it should "return a Failure with a proper exception if the hint field in a coproduct is missing" in {
-    val conf = ConfigFactory.parseString("{ canFly = true }")
+    val conf = ConfigFactory.parseString("{ can-fly = true }")
     loadConfig[AnimalConfig](conf) should be(Failure(KeyNotFoundException("type")))
   }
 
@@ -311,6 +311,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       writer.println("""akka.loggers = ["akka.event.Logging$DefaultLogger"]""")
       writer.close()
 
+      implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
       val configOrError = loadConfig[SparkRootConf](configFile)
 
       val config = configOrError match {
@@ -534,7 +535,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "be able to read a config with a ZoneId" in {
     val expected = ZoneId.systemDefault()
-    val config = ConfigFactory.parseString(s"""{ "zoneId":"${expected.toString}" }""")
+    val config = ConfigFactory.parseString(s"""{ "zone-id":"${expected.toString}" }""")
     loadConfig[ConfWithZoneId](config).success.value shouldBe ConfWithZoneId(expected)
   }
 
@@ -595,15 +596,15 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
   case class ConfWithCamelCase(camelCaseInt: Int, camelCaseString: String, camelCaseConf: ConfWithCamelCaseInner)
 
-  it should "use the fields as is by default" in {
+  it should "read kebab case config keys to camel case fields by default" in {
     import pureconfig.syntax._
 
     val conf = ConfigFactory.parseString("""{
-      camelCaseInt = 1
-      camelCaseString = "bar"
-      camelCaseConf {
-        thisIsAnInt = 3
-        thisIsAnotherInt = 10
+      camel-case-int = 1
+      camel-case-string = "bar"
+      camel-case-conf {
+        this-is-an-int = 3
+        this-is-another-int = 10
       }
     }""")
 
@@ -627,14 +628,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "allow customizing the field mapping with word delimiters" in {
     import pureconfig.syntax._
 
-    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, KebabCase))
+    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
     val conf = ConfigFactory.parseString("""{
-      camel-case-int = 1
-      camel-case-string = "bar"
-      camel-case-conf {
-        this-is-an-int = 3
-        this-is-another-int = 10
+      camelCaseInt = 1
+      camelCaseString = "bar"
+      camelCaseConf {
+        thisIsAnInt = 3
+        thisIsAnotherInt = 10
       }
     }""")
 
@@ -644,14 +645,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "allow customizing the field mapping only for specific types" in {
     import pureconfig.syntax._
 
-    implicit val productHint = ProductHint[ConfWithCamelCase](ConfigFieldMapping(CamelCase, KebabCase))
+    implicit val productHint = ProductHint[ConfWithCamelCase](ConfigFieldMapping(CamelCase, CamelCase))
 
     val conf = ConfigFactory.parseString("""{
-      camel-case-int = 1
-      camel-case-string = "bar"
-      camel-case-conf {
-        thisIsAnInt = 3
-        thisIsAnotherInt = 10
+      camelCaseInt = 1
+      camelCaseString = "bar"
+      camelCaseConf {
+        this-is-an-int = 3
+        this-is-another-int = 10
       }
     }""")
 

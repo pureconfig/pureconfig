@@ -31,7 +31,7 @@ private[pureconfig] case class ProductHintImpl[T](
 object ProductHint {
 
   def apply[T](
-    fieldMapping: ConfigFieldMapping = ConfigFieldMapping(CamelCase, CamelCase),
+    fieldMapping: ConfigFieldMapping = ConfigFieldMapping(CamelCase, KebabCase),
     useDefaultArgs: Boolean = true,
     allowUnknownKeys: Boolean = true): ProductHint[T] =
     ProductHintImpl[T](fieldMapping, useDefaultArgs, allowUnknownKeys)
