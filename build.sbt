@@ -1,3 +1,6 @@
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import scalariform.formatter.preferences._
+
 lazy val core = (project in file("core")).
   settings(settings)
 
@@ -17,6 +20,14 @@ lazy val newerCompilerLintSwitches = Seq(
   "-Ywarn-numeric-widen" // In 2.10 this produces a some strange spurious error
 )
 
+lazy val formattingPreferences = FormattingPreferences()
+  .setPreference(DanglingCloseParenthesis, Prevent)
+  .setPreference(DoubleIndentClassDeclaration, true)
+
+lazy val formattingSettings = SbtScalariform.scalariformSettings ++ Seq(
+  ScalariformKeys.preferences in Compile := formattingPreferences,
+  ScalariformKeys.preferences in Test := formattingPreferences)
+
 lazy val settings = Seq(
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.10.5", "2.11.8", "2.12.1"),
@@ -30,5 +41,4 @@ lazy val settings = Seq(
     val required = "1.8"
     val current  = sys.props("java.specification.version")
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
-  }
-)
+  }) ++ formattingSettings

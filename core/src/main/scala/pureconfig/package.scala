@@ -4,10 +4,10 @@
 /**
  * @author Mario Pastorelli
  */
-import java.io.{ OutputStream, PrintStream }
-import java.nio.file.{ Files, Path }
+import java.io.{OutputStream, PrintStream}
+import java.nio.file.{Files, Path}
 
-import com.typesafe.config.{ Config => TypesafeConfig, ConfigFactory }
+import com.typesafe.config.{Config => TypesafeConfig, ConfigFactory}
 
 import scala.util.Try
 

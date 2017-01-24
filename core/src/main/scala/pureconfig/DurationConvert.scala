@@ -1,6 +1,6 @@
 package pureconfig
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.util.Try
 import scala.reflect.ClassTag
 
@@ -72,6 +72,5 @@ private[pureconfig] object DurationConvert {
     minuteInNanos -> "m",
     secondInNanos -> "s",
     millisecondInNanos -> "ms",
-    microsecondInNanos -> "us"
-  ).sortBy(_._1)(implicitly[Ordering[Long]].reverse)
+    microsecondInNanos -> "us").sortBy(_._1)(implicitly[Ordering[Long]].reverse)
 }
