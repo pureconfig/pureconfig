@@ -14,13 +14,13 @@ import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 import java.net.URL
 import java.time._
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import pureconfig.ConfigConvert.{fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert}
-import pureconfig.error.{CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException}
+import scala.concurrent.duration.{ Duration, FiniteDuration }
+import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert }
+import pureconfig.error.{ CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException }
 
 import scala.collection.mutable.Builder
 import scala.util.control.NonFatal
@@ -122,10 +122,11 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     }
 
   implicit def hConsConfigConvert[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
-    implicit key: Witness.Aux[K],
+    implicit
+    key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
     tConfigConvert: Lazy[WrappedDefaultValueConfigConvert[Wrapped, T, U]],
-    mapping: ConfigFieldMapping[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V]:: T, Option[V]:: U] {
+    mapping: ConfigFieldMapping[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
     override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Try[FieldType[K, V] :: T] = {
       val keyStr = mapping(key.value.toString().tail)
@@ -174,11 +175,12 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   implicit def coproductConfigConvert[Wrapped, Name <: Symbol, V, T <: Coproduct](
-    implicit coproductHint: CoproductHint[Wrapped],
+    implicit
+    coproductHint: CoproductHint[Wrapped],
     vName: Witness.Aux[Name],
     vFieldConvert: Lazy[ConfigConvert[V]],
     tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]]): WrappedConfigConvert[Wrapped, FieldType[Name, V] :+: T] =
-    new WrappedConfigConvert[Wrapped, FieldType[Name, V]:+: T] {
+    new WrappedConfigConvert[Wrapped, FieldType[Name, V] :+: T] {
 
       override def from(config: ConfigValue): Try[FieldType[Name, V] :+: T] =
         coproductHint.from(config, vName.value.name) match {
@@ -224,7 +226,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   // traversable of types with an instance of ConfigConvert
-  implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](implicit configConvert: Lazy[ConfigConvert[T]],
+  implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](
+    implicit
+    configConvert: Lazy[ConfigConvert[T]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
 
     override def from(config: ConfigValue): Try[F[T]] = {
@@ -292,7 +296,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   // used for products
   implicit def deriveProductInstance[F, Repr <: HList, DefaultRepr <: HList](
-    implicit gen: LabelledGeneric.Aux[F, Repr],
+    implicit
+    gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cc: Lazy[WrappedDefaultValueConfigConvert[F, Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
@@ -307,7 +312,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   // used for coproducts
   implicit def deriveCoproductInstance[F, Repr <: Coproduct](
-    implicit gen: LabelledGeneric.Aux[F, Repr],
+    implicit
+    gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[WrappedConfigConvert[F, Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
     override def from(config: ConfigValue): Try[F] = {
       cc.value.from(config).map(gen.from)
@@ -326,8 +332,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val durationConfigConvert: ConfigConvert[Duration] = {
     nonEmptyStringConvert(
       s => DurationConvert.fromString(s, implicitly[ClassTag[Duration]]),
-      DurationConvert.fromDuration
-    )
+      DurationConvert.fromDuration)
   }
 
   implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = {

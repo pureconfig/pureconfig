@@ -1,7 +1,5 @@
 import Dependencies._
 
-scalariformSettings
-
 name := "pureconfig"
 
 organization := "com.github.melrief"
