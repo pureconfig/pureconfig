@@ -23,6 +23,7 @@ lazy val newerCompilerLintSwitches = Seq(
 lazy val formattingPreferences = FormattingPreferences()
   .setPreference(DanglingCloseParenthesis, Prevent)
   .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(SpacesAroundMultiImports, true)
 
 lazy val formattingSettings = SbtScalariform.scalariformSettings ++ Seq(
   ScalariformKeys.preferences in Compile := formattingPreferences,

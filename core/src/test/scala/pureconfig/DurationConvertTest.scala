@@ -3,16 +3,16 @@ package pureconfig
 import java.util.concurrent.TimeUnit
 
 import com.typesafe.config.ConfigValueFactory
-import org.scalatest.{FlatSpec, Matchers, TryValues}
+import org.scalatest.{ FlatSpec, Matchers, TryValues }
 import org.scalatest.Inspectors._
 
 import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 class DurationConvertTest extends FlatSpec with Matchers with TryValues {
-  import DurationConvert.{fromDuration => fromD}
+  import DurationConvert.{ fromDuration => fromD }
   "Converting a Duration to a String" should "pick an appropriate unit when dealing with whole units less than the next step up" in {
     fromD(Duration(14, TimeUnit.DAYS)) shouldBe "14d"
     fromD(Duration(16, TimeUnit.HOURS)) shouldBe "16h"

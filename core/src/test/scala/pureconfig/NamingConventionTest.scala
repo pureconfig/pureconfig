@@ -1,6 +1,6 @@
 package pureconfig
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 
 class NamingConventionTest extends FlatSpec with Matchers {
   "CamelCase" should "properly tokenize words" in {

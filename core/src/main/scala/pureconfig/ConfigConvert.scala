@@ -14,13 +14,13 @@ import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 import java.net.URL
 import java.time._
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import pureconfig.ConfigConvert.{fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert}
-import pureconfig.error.{CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException}
+import scala.concurrent.duration.{ Duration, FiniteDuration }
+import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert }
+import pureconfig.error.{ CannotConvertNullException, KeyNotFoundException, WrongTypeException, WrongTypeForKeyException }
 
 import scala.collection.mutable.Builder
 import scala.util.control.NonFatal
@@ -226,7 +226,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   // traversable of types with an instance of ConfigConvert
-  implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](implicit
+  implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](
+    implicit
     configConvert: Lazy[ConfigConvert[T]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
 

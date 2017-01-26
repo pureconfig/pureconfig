@@ -1,6 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{Config => TypesafeConfig, ConfigValue}
+import com.typesafe.config.{ Config => TypesafeConfig, ConfigValue }
 import scala.util.Try
 
 package object syntax {

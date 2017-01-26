@@ -1,9 +1,9 @@
 package pureconfig
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
-import com.typesafe.config.{ConfigObject, ConfigValue}
-import pureconfig.error.{CollidingKeysException, KeyNotFoundException, WrongTypeException}
+import com.typesafe.config.{ ConfigObject, ConfigValue }
+import pureconfig.error.{ CollidingKeysException, KeyNotFoundException, WrongTypeException }
 import pureconfig.syntax._
 
 /**

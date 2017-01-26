@@ -5,22 +5,22 @@ package pureconfig
 
 import java.io.PrintWriter
 import java.net.URL
-import java.nio.file.{Files, Path}
+import java.nio.file.{ Files, Path }
 import java.time._
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.util.{Failure, Success, Try}
-import com.typesafe.config.{ConfigFactory, Config => TypesafeConfig, _}
+import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.util.{ Failure, Success, Try }
+import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert.{fromString, stringConvert}
+import pureconfig.ConfigConvert.{ fromString, stringConvert }
 import pureconfig.error._
 
 /**

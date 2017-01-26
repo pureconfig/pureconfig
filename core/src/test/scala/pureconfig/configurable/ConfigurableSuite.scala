@@ -5,7 +5,7 @@ import java.time._
 import java.time.format.DateTimeFormatter
 
 import org.scalatest._
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.{ Arbitrary, Gen }
 import prop.PropertyChecks
 import pureconfig.syntax._
 import ConfigurableSuite._

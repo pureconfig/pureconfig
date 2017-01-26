@@ -1,6 +1,6 @@
 package pureconfig
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration.{ Duration, FiniteDuration }
 import scala.util.Try
 import scala.reflect.ClassTag
 
