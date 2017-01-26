@@ -36,7 +36,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 
   it should "parse LocalDateTime" in forAll {
     (localDateTime: LocalDateTime) =>
-      val conf = ConfigFactory.parseString(s"""{dateTime:"${localDateTime.format(DateTimeFormatter.ISO_DATE_TIME)}"}""")
+      val conf = ConfigFactory.parseString(s"""{date-time:"${localDateTime.format(DateTimeFormatter.ISO_DATE_TIME)}"}""")
       case class Conf(dateTime: LocalDateTime)
       conf.to[Conf].success.value shouldEqual Conf(localDateTime)
   }
@@ -46,7 +46,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 
   it should "parse MonthDay" in forAll {
     (monthDay: MonthDay) =>
-      val conf = ConfigFactory.parseString(s"""{monthDay:"${monthDay.format(monthDayFormat)}"}""")
+      val conf = ConfigFactory.parseString(s"""{month-day:"${monthDay.format(monthDayFormat)}"}""")
       case class Conf(monthDay: MonthDay)
       conf.to[Conf].success.value shouldEqual Conf(monthDay)
   }
@@ -55,7 +55,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 
   it should "parse OffsetDateTime" in forAll {
     (offsetDateTime: OffsetDateTime) =>
-      val conf = ConfigFactory.parseString(s"""{offsetDateTime:"${offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)}"}""")
+      val conf = ConfigFactory.parseString(s"""{offset-date-time:"${offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)}"}""")
       case class Conf(offsetDateTime: OffsetDateTime)
       conf.to[Conf].success.value shouldEqual Conf(offsetDateTime)
   }
@@ -64,7 +64,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 
   it should "parse OffsetTime" in forAll {
     (offsetTime: OffsetTime) =>
-      val conf = ConfigFactory.parseString(s"""{offsetTime:"${offsetTime.format(DateTimeFormatter.ISO_OFFSET_TIME)}"}""")
+      val conf = ConfigFactory.parseString(s"""{offset-time:"${offsetTime.format(DateTimeFormatter.ISO_OFFSET_TIME)}"}""")
       case class Conf(offsetTime: OffsetTime)
       conf.to[Conf].success.value shouldEqual Conf(offsetTime)
   }
@@ -74,7 +74,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 
   it should "parse YearMonth" in forAll {
     (yearMonth: YearMonth) =>
-      val conf = ConfigFactory.parseString(s"""{yearMonth:"${yearMonth.format(yearMonthFormat)}"}""")
+      val conf = ConfigFactory.parseString(s"""{year-month:"${yearMonth.format(yearMonthFormat)}"}""")
       case class Conf(yearMonth: YearMonth)
       conf.to[Conf].success.value shouldEqual Conf(yearMonth)
   }
@@ -83,7 +83,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 
   it should "parse ZonedDateTime" in forAll {
     (zonedDateTime: ZonedDateTime) =>
-      val conf = ConfigFactory.parseString(s"""{zonedDateTime:"${zonedDateTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}"}""")
+      val conf = ConfigFactory.parseString(s"""{zoned-date-time:"${zonedDateTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}"}""")
       case class Conf(zonedDateTime: ZonedDateTime)
       conf.to[Conf].success.value shouldEqual Conf(zonedDateTime)
   }

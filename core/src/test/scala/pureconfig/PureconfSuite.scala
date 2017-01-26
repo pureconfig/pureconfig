@@ -259,7 +259,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     withTempFile { configFile =>
       implicit val hint = new FirstSuccessCoproductHint[AnimalConfig]
 
-      val conf = ConfigFactory.parseString("{ canFly = true }")
+      val conf = ConfigFactory.parseString("{ can-fly = true }")
       loadConfig[AnimalConfig](conf) should be(Success(BirdConfig(true)))
 
       saveConfigAsPropertyFile[AnimalConfig](DogConfig(2), configFile, overrideOutputPath = true)
@@ -274,7 +274,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   }
 
   it should "return a Failure with a proper exception if the hint field in a coproduct is missing" in {
-    val conf = ConfigFactory.parseString("{ canFly = true }")
+    val conf = ConfigFactory.parseString("{ can-fly = true }")
     loadConfig[AnimalConfig](conf) should be(Failure(KeyNotFoundException("type")))
   }
 
@@ -310,6 +310,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       writer.println("""akka.loggers = ["akka.event.Logging$DefaultLogger"]""")
       writer.close()
 
+      implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
       val configOrError = loadConfig[SparkRootConf](configFile)
 
       val config = configOrError match {
@@ -533,7 +534,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "be able to read a config with a ZoneId" in {
     val expected = ZoneId.systemDefault()
-    val config = ConfigFactory.parseString(s"""{ "zoneId":"${expected.toString}" }""")
+    val config = ConfigFactory.parseString(s"""{ "zone-id":"${expected.toString}" }""")
     loadConfig[ConfWithZoneId](config).success.value shouldBe ConfWithZoneId(expected)
   }
 
@@ -594,41 +595,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
   case class ConfWithCamelCase(camelCaseInt: Int, camelCaseString: String, camelCaseConf: ConfWithCamelCaseInner)
 
-  it should "use the fields as is by default" in {
+  it should "read kebab case config keys to camel case fields by default" in {
     import pureconfig.syntax._
-
-    val conf = ConfigFactory.parseString("""{
-      camelCaseInt = 1
-      camelCaseString = "bar"
-      camelCaseConf {
-        thisIsAnInt = 3
-        thisIsAnotherInt = 10
-      }
-    }""")
-
-    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
-  }
-
-  it should "allow customizing the field mapping" in {
-    val conf = ConfigFactory.parseString("""{
-      A = 2
-      B = "two"
-    }""")
-
-    case class SampleConf(a: Int, b: String)
-    loadConfig[SampleConf](conf).failure.exception shouldEqual KeyNotFoundException("a")
-
-    implicit val mapping = new ConfigFieldMapping[SampleConf] {
-      def apply(fieldName: String) = fieldName.toUpperCase
-    }
-
-    loadConfig[SampleConf](conf) shouldBe Success(SampleConf(2, "two"))
-  }
-
-  it should "allow customizing the field mapping with word delimiters" in {
-    import pureconfig.syntax._
-
-    implicit def conv[T] = ConfigFieldMapping.apply[T](CamelCase, KebabCase)
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1
@@ -642,21 +610,89 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
+  it should "allow customizing the field mapping through a product hint" in {
+    val conf = ConfigFactory.parseString("""{
+      A = 2
+      B = "two"
+    }""")
+
+    case class SampleConf(a: Int, b: String)
+    loadConfig[SampleConf](conf).failure.exception shouldEqual KeyNotFoundException("a")
+
+    implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
+
+    loadConfig[SampleConf](conf) shouldBe Success(SampleConf(2, "two"))
+  }
+
+  it should "allow customizing the field mapping with different naming conventions" in {
+    import pureconfig.syntax._
+
+    {
+      implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+
+      val conf = ConfigFactory.parseString("""{
+        camelCaseInt = 1
+        camelCaseString = "bar"
+        camelCaseConf {
+          thisIsAnInt = 3
+          thisIsAnotherInt = 10
+        }
+      }""")
+
+      conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+    }
+
+    {
+      implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, PascalCase))
+
+      val conf = ConfigFactory.parseString(
+        """{
+          CamelCaseInt = 1
+          CamelCaseString = "bar"
+          CamelCaseConf {
+            ThisIsAnInt = 3
+            ThisIsAnotherInt = 10
+          }
+        }""")
+
+      conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+    }
+  }
+
   it should "allow customizing the field mapping only for specific types" in {
     import pureconfig.syntax._
 
-    implicit val conv = ConfigFieldMapping.apply[ConfWithCamelCase](CamelCase, KebabCase)
+    implicit val productHint = ProductHint[ConfWithCamelCase](ConfigFieldMapping(CamelCase, CamelCase))
 
     val conf = ConfigFactory.parseString("""{
-      camel-case-int = 1
-      camel-case-string = "bar"
-      camel-case-conf {
-        thisIsAnInt = 3
-        thisIsAnotherInt = 10
+      camelCaseInt = 1
+      camelCaseString = "bar"
+      camelCaseConf {
+        this-is-an-int = 3
+        this-is-another-int = 10
       }
     }""")
 
     conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
+  it should "disallow unknown keys if specified through a product hint" in {
+    import pureconfig.syntax._
+
+    case class Conf1(a: Int)
+    case class Conf2(a: Int)
+
+    implicit val productHint = ProductHint[Conf2](allowUnknownKeys = false)
+
+    val conf = ConfigFactory.parseString("""{
+      conf {
+        a = 1
+        b = 2
+      }
+    }""")
+
+    conf.getConfig("conf").to[Conf1] shouldBe Success(Conf1(1))
+    conf.getConfig("conf").to[Conf2] shouldBe Failure(UnknownKeyException("b"))
   }
 
   val expectedValueForResolveFilesPriority2 = FlatConfig(
@@ -779,7 +815,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[ConfWithConfigList](conf4).failure.exception shouldEqual WrongTypeForKeyException("OBJECT", "conf")
   }
 
-  it should "be able to consider default arguments" in {
+  it should "consider default arguments by default" in {
     case class InnerConf(e: Int, g: Int)
     case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
 
@@ -800,6 +836,16 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
     loadConfig[Conf](conf6).failure.exception shouldEqual WrongTypeForKeyException("STRING", "d")
+  }
+
+  it should "not use default arguments if specified through a product hint" in {
+    case class InnerConf(e: Int, g: Int)
+    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
+
+    implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
+
+    val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
+    loadConfig[Conf](conf1).failure.exception shouldEqual KeyNotFoundException("b")
   }
 
   "Converting from an empty string to a double" should "complain about an empty string" in {
