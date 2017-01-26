@@ -8,9 +8,12 @@ package pureconfig
 trait ProductHint[T] {
 
   /**
-   * The mapping used to map field names to config keys
+   * Returns the key in the config object associated with a given case class field.
+   *
+   * @param fieldName the case class field
+   * @return the key in the config object associated with the given case class field.
    */
-  def fieldMapping: ConfigFieldMapping
+  def configKey(fieldName: String): String
 
   /**
    * A boolean indicating if the default arguments of the case class should be used when fields are missing
@@ -24,9 +27,12 @@ trait ProductHint[T] {
 }
 
 private[pureconfig] case class ProductHintImpl[T](
-  fieldMapping: ConfigFieldMapping,
-  useDefaultArgs: Boolean,
-  allowUnknownKeys: Boolean) extends ProductHint[T]
+    fieldMapping: ConfigFieldMapping,
+    useDefaultArgs: Boolean,
+    allowUnknownKeys: Boolean) extends ProductHint[T] {
+
+  def configKey(fieldName: String) = fieldMapping(fieldName)
+}
 
 object ProductHint {
 
