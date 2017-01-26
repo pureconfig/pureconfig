@@ -625,21 +625,39 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     loadConfig[SampleConf](conf) shouldBe Success(SampleConf(2, "two"))
   }
 
-  it should "allow customizing the field mapping with word delimiters" in {
+  it should "allow customizing the field mapping with different naming conventions" in {
     import pureconfig.syntax._
 
-    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+    {
+      implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
-    val conf = ConfigFactory.parseString("""{
-      camelCaseInt = 1
-      camelCaseString = "bar"
-      camelCaseConf {
-        thisIsAnInt = 3
-        thisIsAnotherInt = 10
-      }
-    }""")
+      val conf = ConfigFactory.parseString("""{
+        camelCaseInt = 1
+        camelCaseString = "bar"
+        camelCaseConf {
+          thisIsAnInt = 3
+          thisIsAnotherInt = 10
+        }
+      }""")
 
-    conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+      conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+    }
+
+    {
+      implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, PascalCase))
+
+      val conf = ConfigFactory.parseString(
+        """{
+          CamelCaseInt = 1
+          CamelCaseString = "bar"
+          CamelCaseConf {
+            ThisIsAnInt = 3
+            ThisIsAnotherInt = 10
+          }
+        }""")
+
+      conf.to[ConfWithCamelCase] shouldBe Success(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+    }
   }
 
   it should "allow customizing the field mapping only for specific types" in {
