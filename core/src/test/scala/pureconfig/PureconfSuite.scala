@@ -194,8 +194,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   // a slightly more complex configuration
   implicit val dateConfigConvert = stringConvert[DateTime](
     str => Try(ISODateTimeFormat.dateTime().parseDateTime(str)),
-    t => ISODateTimeFormat.dateTime().print(t)
-  )
+    t => ISODateTimeFormat.dateTime().print(t))
 
   case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig)
 
@@ -703,13 +702,11 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     42,
     1234567890123456L,
     "cheese",
-    Some("thing")
-  )
+    Some("thing"))
 
   "loadConfigFromFiles" should "load a complete configuration from a single file" in {
     val files = fileList(
-      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf"
-    )
+      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf")
     loadConfigFromFiles[FlatConfig](files).success.get shouldBe expectedValueForResolveFilesPriority2
   }
 
@@ -723,15 +720,13 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
       0,
       1L,
       "default",
-      None
-    )
+      None)
   }
 
   it should "fill in missing values from the lower priority files" in {
     val files = fileList(
       "core/src/test/resources/conf/loadConfigFromFiles/priority1.conf",
-      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf"
-    )
+      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf")
     val actual = loadConfigFromFiles[FlatConfig](files)
     actual.success.get shouldBe FlatConfig(
       true,
@@ -746,8 +741,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "complain if the configuration is incomplete" in {
     val files = fileList(
-      "core/src/test/resources/conf/loadConfigFromFiles/priority1.conf"
-    )
+      "core/src/test/resources/conf/loadConfigFromFiles/priority1.conf")
     val actual = loadConfigFromFiles[FlatConfig](files)
     actual.isFailure shouldBe true
   }
@@ -755,8 +749,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
   it should "silently ignore files which can't be read" in {
     val files = fileList(
       "core/src/test/resources/conf/loadConfigFromFiles/this.is.not.a.conf",
-      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf"
-    )
+      "core/src/test/resources/conf/loadConfigFromFiles/priority2.conf")
     loadConfigFromFiles[FlatConfig](files).success.value shouldBe expectedValueForResolveFilesPriority2
   }
 
