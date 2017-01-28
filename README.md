@@ -14,12 +14,14 @@ A boilerplate-free Scala library for loading configuration files
 - [Use PureConfig](#use-pureconfig)
 - [Supported types](#supported-types)
 - [Configurable converters](#configurable-converters)
-- [Customizing naming conventions](#customizing-naming-conventions)
 - [Extend the library to support new types](#extend-the-library-to-support-new-types)
 - [Override behaviour for types](#override-behaviour-for-types)
+- [Override behaviour for case classes](#override-behaviour-for-case-classes)
+  - [Field mappings](#field-mappings)
+  - [Default field values](#default-field-values)
+  - [Unknown keys](#unknown-keys)
 - [Override behaviour for sealed families](#override-behaviour-for-sealed-families)
 - [Handling missing keys](#handling-missing-keys)
-- [Default values](#default-values)
 - [Example](#example)
 - [Whence the config files](#whence-the-config-files)
 - [Contribute](#contribute)
@@ -149,55 +151,6 @@ loadConfig[Conf](conf)
 ```
 
 
-## Customizing naming conventions
-
-In case the naming convention you use in your configuration files differs from
-the one used in the objects you're loading the configs into, PureConfig allows
-you to define proper mappings. That configuration should be done by an implicit
-`ConfigFieldMapping` that should be in scope when loading or writing
-configurations. The `ConfigFieldMapping` trait has a single `apply` method that
-maps field names in Scala objects to field names in the source configuration
-file. For instance, here's a contrived example where the configuration file has
-all keys in upper case and we're loading it into a type whose fields are all in
-lower case:
-
-```scala
-case class SampleConf(foo: Int, bar: String)
-
-implicit val mapping = new ConfigFieldMapping[SampleConf] {
-  def apply(fieldName: String) = fieldName.toUpperCase
-}
-
-val conf = ConfigFactory.parseString("""{
-  FOO = 2
-  BAR = "two"
-}""")
-
-loadConfig[SampleConf](conf)
-// returns Success(SampleConf(2, "two"))
-```
-
-PureConfig provides a way to create a `ConfigFieldMapping` by defining the
-naming conventions of the fields in the Scala object and in the configuration
-file. Some of the most used naming conventions are supported directly in the
-library:
-
-* [`CamelCase`](https://en.wikipedia.org/wiki/Camel_case): `camelCase`, `useMorePureconfig`
-* [`SnakeCase`](https://en.wikipedia.org/wiki/Snake_case): `snake_case`, `use_more_pureconfig`
-* [`KebabCase`](http://wiki.c2.com/?KebabCase): `kebab-case`, `use-more-pureconfig`
-* [`PascalCase`](https://en.wikipedia.org/wiki/PascalCase): `PascalCase`, `UseMorePureconfig`
-
-You can use the `apply` method of `ConfigFieldMapping` that accepts the two
-naming conventions (for the fields in the Scala object and for the fields in the
-configuration file, respectively). A common use case is to have your field names
-in `camelCase` and your configuration files in `kebab-case`. In order to support
-it, you can make sure the following implicit is in scope before loading or
-writing configuration files:
-
-```scala
-implicit def conv[T] = ConfigFieldMapping.apply[T](CamelCase, KebabCase)
-```
-
 ## Extend the library to support new types
 
 Not all types are supported automatically by `pureconfig`. For instance, classes
@@ -240,6 +193,134 @@ always read lower case. We can do:
 > ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
 util.Try[String] = Success(foobar)
 ```
+
+
+## Override behaviour for case classes
+
+`pureconfig` has to assume some default conventions and behaviours when
+deriving `ConfigConvert` instances for case classes:
+
+- How do keys in config objects map to field names of the case class?
+- Are unknown keys allowed in the config object?
+- Should default values in case class fields be applied when its respective
+  config key is missing?
+  
+By default, `pureconfig` assumes that config keys are written in kebab case
+(such as `my-field`) and the associated field names are written in camel case
+(such as `myField`). It allows unknown keys and uses the default values when
+a key is missing. All of these assumptions can be overriden by putting an
+implicit `ProductHint` - an object that "hints" `pureconfig` on how to
+best derive converters for products - in scope.
+
+### Field mappings
+
+In case the naming convention you use in your configuration files differs from
+the default one, `pureconfig` allows you to define proper mappings. A mapping
+between different naming conventions is done using a `ConfigFieldMapping`
+object, with which one can construct a `ProductHint`. The `ConfigFieldMapping`
+trait has a single `apply` method that maps field names in Scala objects to
+field names in the source configuration file. For instance, here's a contrived
+example where the configuration file has all keys in upper case and we're
+loading it into a type whose fields are all in lower case:
+
+```scala
+case class SampleConf(foo: Int, bar: String)
+
+implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
+  def apply(fieldName: String) = fieldName.toUpperCase
+})
+
+val conf = ConfigFactory.parseString("""{
+  FOO = 2
+  BAR = "two"
+}""")
+
+loadConfig[SampleConf](conf)
+// returns Success(SampleConf(2, "two"))
+```
+
+PureConfig provides a way to create a `ConfigFieldMapping` by defining the
+naming conventions of the fields in the Scala object and in the configuration
+file. Some of the most used naming conventions are supported directly in the
+library:
+
+* [`CamelCase`](https://en.wikipedia.org/wiki/Camel_case): `camelCase`, `useMorePureconfig`
+* [`SnakeCase`](https://en.wikipedia.org/wiki/Snake_case): `snake_case`, `use_more_pureconfig`
+* [`KebabCase`](http://wiki.c2.com/?KebabCase): `kebab-case`, `use-more-pureconfig`
+* [`PascalCase`](https://en.wikipedia.org/wiki/PascalCase): `PascalCase`, `UseMorePureconfig`
+
+You can use the `apply` method of `ConfigFieldMapping` that accepts the two
+naming conventions (for the fields in the Scala object and for the fields in the
+configuration file, respectively). A common use case is to have both your field
+names and your configuration files in `camelCase`. In order to support it, you
+can make sure the following implicit is in scope before loading or writing
+configuration files:
+
+```scala
+implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+```
+
+### Default field values
+
+If a case class has a default argument and the underlying configuration is
+missing a value for that field, then by default `pureconfig` will happily
+create an instance of the class, loading the other values from the
+configuration:
+
+```scala
+import pureconfig.loadConfig
+import com.typesafe.config.ConfigFactory.parseString
+import scala.concurrent.duration._
+
+case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
+
+// Defaulting `where`
+loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
+// returns Success(Holiday("last resort", 21 days))
+
+// Defaulting `howLong`
+loadConfig[Holiday](parseString("""{ where: Zürich }"""))
+// returns Success(Holiday("Zürich", 7 days))
+
+// Defaulting both arguments 
+loadConfig[Holiday](parseString("""{}"""))
+// returns Success(Holiday("last resort", 7 days))
+
+// Specifying both arguments
+loadConfig[Holiday](parseString("""{ where: Texas, how-long: 3 hours }"""))
+// returns Success(Holiday("Texas", 3 hours))
+```
+
+A `ProductHint` can make the conversion fail if a key is missing from the
+config regardless of whether a default value exists or not:
+
+```scala
+implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
+
+loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
+// returns Failure(KeyNotFoundException("where"))
+```
+
+### Unknown keys
+
+By default, `pureconfig` ignores keys in the config that do not map to any
+case class field, leading to potential bugs due to misspellings:
+
+```scala
+loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
+// returns Success(Holiday("last resort", 21 days))
+```
+
+With a `ProductHint`, one can tell the converter to fail if an unknown key is
+found:
+
+```scala
+implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
+
+loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
+// returns Failure(UnknownKeyException("wher"))
+```
+
 
 ## Override behaviour for sealed families
 
@@ -355,35 +436,6 @@ available `ConfigConvert` for that type with a `null` value:
 scala.util.Try[Foo] = Success(Foo(42))
 ```
 
-## Default values
-
-Pureconfig supports default values. If a `case class` has a default argument and the underlying configuration is missing a value for that field, then Pureconfig will happily create an instance of the `class`, loading the other values from the configuration.
-
-For example: 
-
-```scala
-import pureconfig.loadConfig
-import com.typesafe.config.ConfigFactory.parseString
-import scala.concurrent.duration._
-
-case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
-
-// Defaulting `where`
-loadConfig[Holiday](parseString("""{ howLong: 21 days }"""))
-// scala.util.Try[Holiday] = Success(Holiday(last resort,21 days))
-
-// Defaulting `howLong`
-loadConfig[Holiday](parseString("""{ where: Zürich }"""))
-// scala.util.Try[Holiday] = Success(Holiday(Zürich,7 days))
-
-// Defaulting both arguments 
-loadConfig[Holiday](parseString("""{}"""))
-// scala.util.Try[Holiday] = Success(Holiday(last resort,7 days))
-
-// Specifying both arguments
-loadConfig[Holiday](parseString("""{ where: Texas, howLong: 3 hours }"""))
-// scala.util.Try[Holiday] = Success(Holiday(Texas,3 hours))
-```
 
 ## Example
 
