@@ -197,20 +197,24 @@ util.Try[String] = Success(foobar)
 
 ## Override behaviour for case classes
 
-`pureconfig` has to assume some default conventions and behaviours when
-deriving `ConfigConvert` instances for case classes:
+`pureconfig` has to assume some conventions and behaviours when deriving
+`ConfigConvert` instances for case classes:
 
 - How do keys in config objects map to field names of the case class?
 - Are unknown keys allowed in the config object?
 - Should default values in case class fields be applied when its respective
   config key is missing?
-  
-By default, `pureconfig` assumes that config keys are written in kebab case
-(such as `my-field`) and the associated field names are written in camel case
-(such as `myField`). It allows unknown keys and uses the default values when
-a key is missing. All of these assumptions can be overriden by putting an
-implicit `ProductHint` - an object that "hints" `pureconfig` on how to
-best derive converters for products - in scope.
+
+By default, `pureconfig`:
+
+- expects config keys to be written in kebab case (such as `my-field`) and the
+associated field names are written in camel case (such as `myField`);
+- allows unknown keys;
+- uses the default values when a key is missing.
+
+All of these assumptions can be overriden by putting an implicit
+`ProductHint` - an object that "hints" `pureconfig` on how to best derive
+converters for products in scope.
 
 ### Field mappings
 
