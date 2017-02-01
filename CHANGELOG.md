@@ -9,15 +9,15 @@
     - Whether unknown keys are ignored or cause pureconfig to return a `Failure`
       ([docs](https://github.com/melrief/pureconfig#unknown-keys)).
 - Breaking changes
+  - The default field mapping changed from camel case config keys (e.g. `exampleKey`) to kebab case keys (e.g.
+    `example-key`). Case class fields are still expected to be camel case. The old behavior can be retained by putting
+    in scope an `implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))`;
   - `ConfigFieldMapping` has no type parameters now;
   - `ConfigFieldMapping` was replaced by `ProductHint` as the type of object to put in scope in order to customize
     the derivation of `ConfigConvert` for case class. Old `ConfigFieldMapping` implicit instances in scope have no
     effect now. The migration can be done by replacing code like
     `implicit def mapping: ConfigFieldMapping[T] = <mapping>` with
-    `implicit def productHint: ProductHint[T] = ProductHint(<mapping>)`;
-  - The default field mapping changed from camel case config keys (e.g. `exampleKey`) to kebab case keys (e.g.
-    `example-key`). Case class fields are still expected to be camel case. The old behavior can be retained by putting
-    in scope an `implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))`.
+    `implicit def productHint: ProductHint[T] = ProductHint(<mapping>)`.
 
 ### 0.5.1 (Jan 20, 2017)
 
