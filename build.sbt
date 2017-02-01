@@ -9,8 +9,9 @@ lazy val enumeratum = (project in file("modules/enumeratum")).
   dependsOn(core)
 
 lazy val joda = (project in file("modules/joda")).
-  settings(settings).
-    dependsOn(core)
+  settings(settings)
+    .dependsOn(core)
+    .dependsOn(core % "test->test") // In order to reuse the date/time related scalacheck generators.
 
 lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",

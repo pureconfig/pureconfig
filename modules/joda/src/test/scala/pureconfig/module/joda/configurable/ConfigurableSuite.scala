@@ -77,12 +77,8 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 }
 
 object ConfigurableSuite {
-  val genHour: Gen[Int] = Gen.chooseNum(0, 23)
-  val genMinute: Gen[Int] = Gen.chooseNum(0, 59)
-  val genSecond: Gen[Int] = Gen.chooseNum(0, 59)
+  import pureconfig.configurable.ConfigurableSuite.{ genHour, genMinute, genSecond, genYear, genMonth }
   val genMilli: Gen[Int] = Gen.chooseNum(0, 999)
-  val genYear: Gen[Int] = Gen.chooseNum(1970, 2999)
-  val genMonth: Gen[Int] = Gen.chooseNum(1, 12)
 
   implicit val localTimeArbitrary: Arbitrary[LocalTime] =
     Arbitrary[LocalTime](
