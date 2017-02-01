@@ -7,7 +7,7 @@ object Dependencies {
     val scalaMacrosParadise = "2.1.0"
     val typesafeConfig      = "1.3.1"
     val scalaTest           = "3.0.0"
-    val joda                = "2.9.4"
+    val joda                = "2.9.7"
     val jodaConvert         = "1.8"
     val scalaCheck          = "1.13.4"
     val scalaCheckShapeless = "1.1.3"
