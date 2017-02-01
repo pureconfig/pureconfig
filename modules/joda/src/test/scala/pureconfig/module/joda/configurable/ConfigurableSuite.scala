@@ -2,7 +2,7 @@ package pureconfig.module.joda.configurable
 
 import com.typesafe.config.ConfigFactory
 import org.joda.time._
-import org.joda.time.format.{ DateTimeFormat, ISODateTimeFormat }
+import org.joda.time.format.DateTimeFormat
 
 import org.scalatest._
 import org.scalacheck.{ Arbitrary, Gen }
