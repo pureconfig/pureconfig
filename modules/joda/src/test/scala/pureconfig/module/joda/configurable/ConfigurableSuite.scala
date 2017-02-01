@@ -9,6 +9,7 @@ import org.scalacheck.{ Arbitrary, Gen }
 import prop.PropertyChecks
 import pureconfig.syntax._
 import ConfigurableSuite._
+import pureconfig.configurable.{ ConfigurableSuite => JTime }
 
 import scala.collection.JavaConverters._
 
@@ -77,42 +78,34 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
 }
 
 object ConfigurableSuite {
-  import pureconfig.configurable.ConfigurableSuite.{ genHour, genMinute, genSecond, genYear, genMonth }
-  val genMilli: Gen[Int] = Gen.chooseNum(0, 999)
+  private def nanoToMilli(n: Int): Int = n / 1000000
 
-  implicit val localTimeArbitrary: Arbitrary[LocalTime] =
-    Arbitrary[LocalTime](
-      for {
-        hour <- genHour
-        minute <- genMinute
-        second <- genSecond
-        milli <- genMilli
-      } yield new LocalTime(hour, minute, second, milli))
+  implicit val localTimeArbitrary: Arbitrary[LocalTime] = Arbitrary(
+    JTime.localTimeArbitrary.arbitrary.map { t =>
+      new LocalTime(t.getHour, t.getMinute, t.getSecond, nanoToMilli(t.getNano))
+    })
 
-  implicit val localDateArbitrary: Arbitrary[LocalDate] =
-    Arbitrary[LocalDate](
-      for {
-        year <- genYear
-        month <- genMonth
-        day <- Gen.chooseNum(1, java.time.YearMonth.of(year, month).lengthOfMonth())
-      } yield new LocalDate(year, month, day))
+  implicit val localDateArbitrary: Arbitrary[LocalDate] = Arbitrary(
+    JTime.localDateArbitrary.arbitrary.map { d =>
+      new LocalDate(d.getYear, d.getMonthValue, d.getDayOfMonth)
+    })
 
-  implicit val localDateTimeArbitrary: Arbitrary[LocalDateTime] =
-    Arbitrary[LocalDateTime](
-      for {
-        date <- localDateArbitrary.arbitrary
-        time <- localTimeArbitrary.arbitrary
-      } yield date.toLocalDateTime(time))
+  implicit val localDateTimeArbitrary: Arbitrary[LocalDateTime] = Arbitrary(
+    JTime.localDateTimeArbitrary.arbitrary.map { d =>
+      new LocalDateTime(
+        d.getYear, d.getMonthValue, d.getDayOfMonth,
+        d.getHour, d.getMinute, d.getSecond, nanoToMilli(d.getNano))
+    })
 
-  implicit val monthDayArbitrary: Arbitrary[MonthDay] =
-    Arbitrary[MonthDay](
-      localDateArbitrary.arbitrary.map(date => new MonthDay(date.getMonthOfYear, date.getDayOfMonth)))
+  implicit val monthDayArbitrary: Arbitrary[MonthDay] = Arbitrary(
+    JTime.monthDayArbitrary.arbitrary.map { m =>
+      new MonthDay(m.getMonthValue, m.getDayOfMonth)
+    })
 
-  implicit val yearMonthArbitrary: Arbitrary[YearMonth] =
-    Arbitrary(for {
-      year <- genYear
-      month <- genMonth
-    } yield new YearMonth(year, month))
+  implicit val yearMonthArbitrary: Arbitrary[YearMonth] = Arbitrary(
+    JTime.yearMonthArbitrary.arbitrary.map { y =>
+      new YearMonth(y.getYear, y.getMonthValue)
+    })
 
   implicit val zoneIdArbitrary: Arbitrary[DateTimeZone] =
     Arbitrary(Gen.oneOf(DateTimeZone.getAvailableIDs.asScala.toSeq).map(DateTimeZone.forID))
@@ -122,6 +115,5 @@ object ConfigurableSuite {
       for {
         localDateTime <- localDateTimeArbitrary.arbitrary
         zoneId <- zoneIdArbitrary.arbitrary
-      } yield localDateTime.toDateTime(zoneId) //new DateTime(localDateTime, zoneId))
-    )
+      } yield localDateTime.toDateTime(zoneId))
 }
