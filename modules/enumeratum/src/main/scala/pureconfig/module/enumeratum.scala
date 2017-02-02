@@ -30,7 +30,7 @@ package object enumeratum {
   implicit def enumeratumCharConfigConvert[A <: CharEnumEntry](implicit enum: CharEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
     nonEmptyStringConvert[A](ensureOneChar(_).map(enum.withValue), _.value.toString)
 
-  private def ensureOneChar: Seq[Char] => Try[Char] = {
+  private val ensureOneChar: Seq[Char] => Try[Char] = {
     case Seq(c) => Success(c)
     case s => Failure(new IllegalArgumentException(s"""Cannot read a character value from "$s""""))
   }
