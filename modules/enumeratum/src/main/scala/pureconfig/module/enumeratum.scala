@@ -3,7 +3,7 @@ package pureconfig.module
 import _root_.enumeratum._
 import _root_.enumeratum.values._
 import pureconfig.ConfigConvert
-import pureconfig.ConfigConvert.nonEmptyStringConvert
+import pureconfig.ConfigConvert.{ nonEmptyStringConvert, stringConvert }
 
 import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
@@ -22,7 +22,7 @@ package object enumeratum {
     nonEmptyStringConvert[A](v => Try(enum.withValue(v.toShort)), _.value.toString)
 
   implicit def enumeratumStringConfigConvert[A <: StringEnumEntry](implicit enum: StringEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    nonEmptyStringConvert[A](v => Try(enum.withValue(v)), _.value.toString)
+    stringConvert[A](v => Try(enum.withValue(v)), _.value.toString)
 
   implicit def enumeratumByteConfigConvert[A <: ByteEnumEntry](implicit enum: ByteEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
     nonEmptyStringConvert[A](v => Try(enum.withValue(v.toByte)), _.value.toString)

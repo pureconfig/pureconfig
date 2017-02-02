@@ -84,6 +84,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     case object Movie extends StringLibraryItem(value = "movie", number = 2)
     case object Magazine extends StringLibraryItem("magazine", 3)
     case object CD extends StringLibraryItem("cd", number = 4)
+    case object Empty extends StringLibraryItem("", number = 5)
   }
 
   it should "parse a string value enum" in forAll(StringLibraryItem.values) {
