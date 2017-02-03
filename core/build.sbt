@@ -18,8 +18,8 @@ libraryDependencies ++= Seq(
   scalaMacrosParadise,
   typesafeConfig,
   scalaTest,
-  joda,
-  jodaConvert,
+  joda % "test",
+  jodaConvert % "test",
   scalaCheck,
   scalaCheckShapeless
 )

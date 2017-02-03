@@ -16,11 +16,11 @@ object Dependencies {
   val shapeless = "com.chuusai" %% "shapeless" % Version.shapeless
   val scalaMacrosParadise = compilerPlugin("org.scalamacros" % "paradise" % Version.scalaMacrosParadise cross CrossVersion.full)
   val typesafeConfig = "com.typesafe" % "config" % Version.typesafeConfig
+  val joda = "joda-time" % "joda-time" % Version.joda
+  val jodaConvert = "org.joda" % "joda-convert" % Version.jodaConvert
 
   // testing libraries
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test"
-  val joda = "joda-time" % "joda-time" % Version.joda % "test"
-  val jodaConvert = "org.joda" % "joda-convert" % Version.jodaConvert % "test"
   val scalaCheck = "org.scalacheck" %%  "scalacheck" % Version.scalaCheck % "test"
   val scalaCheckShapeless = "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % Version.scalaCheckShapeless % "test"
 }
