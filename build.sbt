@@ -4,6 +4,10 @@ import scalariform.formatter.preferences._
 lazy val core = (project in file("core")).
   settings(settings)
 
+lazy val enumeratum = (project in file("modules/enumeratum")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
