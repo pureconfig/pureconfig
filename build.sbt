@@ -8,6 +8,11 @@ lazy val enumeratum = (project in file("modules/enumeratum")).
   settings(settings).
   dependsOn(core)
 
+lazy val joda = (project in file("modules/joda")).
+  settings(settings).
+  dependsOn(core).
+  dependsOn(core % "test->test") // In order to reuse the date/time related scalacheck generators.
+
 lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args

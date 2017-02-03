@@ -1,6 +1,4 @@
-import Dependencies._
-
-name := "pureconfig"
+name := "pureconfig-joda"
 
 organization := "com.github.melrief"
 
@@ -14,14 +12,12 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  shapeless,
-  scalaMacrosParadise,
-  typesafeConfig,
-  scalaTest,
-  joda % "test",
-  jodaConvert % "test",
-  scalaCheck,
-  scalaCheckShapeless
+  ("joda-time" % "joda-time" % Dependencies.Version.joda),
+  ("org.joda" % "joda-convert" % Dependencies.Version.jodaConvert),
+  Dependencies.scalaMacrosParadise,
+  Dependencies.scalaTest,
+  Dependencies.scalaCheck,
+  Dependencies.scalaCheckShapeless
 )
 
 publishMavenStyle := true
@@ -52,21 +48,11 @@ pomExtra := (
         <name>Leif Wickland</name>
         <url>https://github.com/leifwickland</url>
       </developer>
-      <developer>
-        <id>jcazevedo</id>
-        <name>Joao Azevedo</name>
-        <url>https://github.com/jcazevedo</url>
-      </developer>
-      <developer>
-        <id>ruippeixotog</id>
-        <name>Rui Gonçalves</name>
-        <url>https://github.com/ruippeixotog</url>
-      </developer>
     </developers>)
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig.*")
+OsgiKeys.exportPackage := Seq("pureconfig.module.joda.*")
 
 OsgiKeys.privatePackage := Seq()
 
