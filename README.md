@@ -544,6 +544,9 @@ Contributions are welcomed and encouraged. If you want to contribute, we suggest
 [available issues](https://github.com/melrief/pureconfig/issues) and to talk with
 us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
 
+`pureconfig` supports the [Typelevel](http://typelevel.org/) [code of conduct](http://typelevel.org/conduct.html) and wants all of its channels (Gitter, GitHub, etc.) to be
+welcoming environments for everyone.
+
 
 ## License
 
