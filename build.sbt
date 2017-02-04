@@ -8,6 +8,10 @@ lazy val enumeratum = (project in file("modules/enumeratum")).
   settings(settings).
   dependsOn(core)
 
+lazy val enum = (project in file("modules/enum")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val joda = (project in file("modules/joda")).
   settings(settings).
   dependsOn(core).
