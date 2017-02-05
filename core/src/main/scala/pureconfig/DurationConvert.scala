@@ -1,8 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
+import pureconfig.error.{ CannotConvert, ConfigReaderFailure }
+
 import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scala.util.Try
 import scala.reflect.ClassTag
+import scala.util.control.NonFatal
 
 /**
  * Utility functions for converting a Duration to a String and vice versa.
@@ -11,13 +16,14 @@ private[pureconfig] object DurationConvert {
   /**
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
-  def fromString[D](durationString: String, ct: ClassTag[D]): Try[Duration] = {
-    Try { Duration(addZeroUnit(justAMinute(itsGreekToMe(durationString)))) }
-      .recoverWith {
-        case ex: NumberFormatException =>
-          val err = s"Could not parse a ${ct.runtimeClass.getSimpleName} from '$durationString'. (try ns, us, ms, s, m, h, d)"
-          new util.Failure(new IllegalArgumentException(err, ex))
-      }
+  def fromString[D](durationString: String, ct: ClassTag[D]): Either[ConfigReaderFailure, Duration] = {
+    try {
+      Right(Duration(addZeroUnit(justAMinute(itsGreekToMe(durationString)))))
+    } catch {
+      case NonFatal(ex) =>
+        val err = s"Could not parse a ${ct.runtimeClass.getSimpleName} from '$durationString'. (try ns, us, ms, s, m, h, d). Error: $ex"
+        Left(CannotConvert(durationString, "Duration", err))
+    }
   }
 
   private val zeroRegex = "\\s*[+-]?0+\\s*$".r

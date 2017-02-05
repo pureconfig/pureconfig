@@ -1,9 +1,7 @@
 package pureconfig
 
-import scala.util.{ Failure, Success, Try }
-
 import com.typesafe.config.{ ConfigObject, ConfigValue }
-import pureconfig.error.{ CollidingKeysException, KeyNotFoundException, WrongTypeException }
+import pureconfig.error._
 import pureconfig.syntax._
 
 /**
@@ -17,16 +15,16 @@ trait CoproductHint[T] {
    * Given a `ConfigValue` for the sealed family, disambiguate and extract the `ConfigValue` associated to the
    * implementation for the given class or coproduct option name.
    *
-   * If `cv` is a config for the given class name, this method returns `Success(Some(v))`, where `v` is the config
+   * If `cv` is a config for the given class name, this method returns `Right(Some(v))`, where `v` is the config
    * related to the specific class (possibly the same as `cv`). If it determines that `cv` is a config for a different
-   * class, it returns `Success(None)`. If `cv` is missing information for disambiguation or has a wrong type, a
-   * `Failure` is returned.
+   * class, it returns `Right(None)`. If `cv` is missing information for disambiguation or has a wrong type, a
+   * `Left` containing a `Failure` is returned.
    *
    * @param cv the `ConfigValue` of the sealed family
    * @param name the name of the class or coproduct option to try
-   * @return a `Try[Option[ConfigValue]]` as defined above.
+   * @return a `Either[ConfigReaderFailure, Option[ConfigValue]]` as defined above.
    */
-  def from(cv: ConfigValue, name: String): Try[Option[ConfigValue]]
+  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailure, Option[ConfigValue]]
 
   /**
    * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
@@ -34,10 +32,10 @@ trait CoproductHint[T] {
    *
    * @param cv the `ConfigValue` of the class or coproduct option
    * @param name the name of the class or coproduct option
-   * @return the config for the sealed family or coproduct wrapped in a `Success`, or a `Failure` if some error
+   * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some error
    *         occurred.
    */
-  def to(cv: ConfigValue, name: String): Try[ConfigValue]
+  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailure, ConfigValue]
 
   /**
    * Defines what to do if `from` returns `Success(Some(_))` for a class or coproduct option, but its `ConfigConvert`
@@ -68,26 +66,26 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cv: ConfigValue, name: String): Try[Option[ConfigValue]] = cv match {
+  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailure, Option[ConfigValue]] = cv match {
     case co: ConfigObject =>
       Option(co.get(key)) match {
         case Some(fv) => fv.unwrapped match {
-          case v: String if v == fieldValue(name) => Success(Some(cv))
-          case _: String => Success(None)
-          case _ => Failure(WrongTypeException(fv.valueType.toString))
+          case v: String if v == fieldValue(name) => Right(Some(cv))
+          case _: String => Right(None)
+          case _ => Left(WrongType(fv.valueType.toString, expectedTyp = "String"))
         }
-        case None => Failure(KeyNotFoundException(key))
+        case None => Left(KeyNotFound(key))
       }
-    case _ => Failure(WrongTypeException(cv.valueType.toString))
+    case _ => Left(WrongType(cv.valueType.toString, expectedTyp = "ConfigObject"))
   }
 
-  def to(cv: ConfigValue, name: String): Try[ConfigValue] = cv match {
+  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailure, ConfigValue] = cv match {
     case co: ConfigObject =>
-      if (co.containsKey(key)) Failure(CollidingKeysException(key, co.get(key).toString))
-      else Success(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
+      if (co.containsKey(key)) Left(CollidingKeys(key, co.get(key).toString))
+      else Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
 
     case _ =>
-      Failure(WrongTypeException(cv.valueType.toString))
+      Left(WrongType(cv.valueType.toString, "ConfigObject"))
   }
 
   def tryNextOnFail(name: String) = false
@@ -98,8 +96,8 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
  * the config without errors, while `to` will write the config as is, with no disambiguation information.
  */
 class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
-  def from(cv: ConfigValue, name: String) = Success(Some(cv))
-  def to(cv: ConfigValue, name: String) = Success(cv)
+  def from(cv: ConfigValue, name: String) = Right(Some(cv))
+  def to(cv: ConfigValue, name: String) = Right(cv)
   def tryNextOnFail(name: String) = true
 }
 

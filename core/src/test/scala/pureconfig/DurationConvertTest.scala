@@ -3,15 +3,14 @@ package pureconfig
 import java.util.concurrent.TimeUnit
 
 import com.typesafe.config.ConfigValueFactory
-import org.scalatest.{ FlatSpec, Matchers, TryValues }
+import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import org.scalatest.Inspectors._
+import pureconfig.error.CannotConvert
 
 import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
 
-import scala.util.{ Failure, Success }
-
-class DurationConvertTest extends FlatSpec with Matchers with TryValues {
+class DurationConvertTest extends FlatSpec with Matchers with EitherValues {
   import DurationConvert.{ fromDuration => fromD }
   "Converting a Duration to a String" should "pick an appropriate unit when dealing with whole units less than the next step up" in {
     fromD(Duration(14, TimeUnit.DAYS)) shouldBe "14d"
@@ -39,19 +38,19 @@ class DurationConvertTest extends FlatSpec with Matchers with TryValues {
   }
   it should "round trip negative infinity" in {
     val expected = Duration.MinusInf
-    fromS(fromD(expected)).success.value shouldBe expected
+    fromS(fromD(expected)).right.value shouldBe expected
   }
 
   val fromS = DurationConvert.fromString(_: String, implicitly[ClassTag[Duration]])
   "Converting a String to a Duration" should "succeed for known units" in {
-    fromS("1d") shouldBe Success(Duration(1, TimeUnit.DAYS))
-    fromS("47h") shouldBe Success(Duration(47, TimeUnit.HOURS))
-    fromS("123m") shouldBe Success(Duration(123, TimeUnit.MINUTES))
-    fromS("489s") shouldBe Success(Duration(489, TimeUnit.SECONDS))
-    fromS("11555ms") shouldBe Success(Duration(11555, TimeUnit.MILLISECONDS))
-    fromS("44999us") shouldBe Success(Duration(44999, TimeUnit.MICROSECONDS))
-    fromS("44999µs") shouldBe Success(Duration(44999, TimeUnit.MICROSECONDS))
-    fromS("88222ns") shouldBe Success(Duration(88222, TimeUnit.NANOSECONDS))
+    fromS("1d") shouldBe Right(Duration(1, TimeUnit.DAYS))
+    fromS("47h") shouldBe Right(Duration(47, TimeUnit.HOURS))
+    fromS("123m") shouldBe Right(Duration(123, TimeUnit.MINUTES))
+    fromS("489s") shouldBe Right(Duration(489, TimeUnit.SECONDS))
+    fromS("11555ms") shouldBe Right(Duration(11555, TimeUnit.MILLISECONDS))
+    fromS("44999us") shouldBe Right(Duration(44999, TimeUnit.MICROSECONDS))
+    fromS("44999µs") shouldBe Right(Duration(44999, TimeUnit.MICROSECONDS))
+    fromS("88222ns") shouldBe Right(Duration(88222, TimeUnit.NANOSECONDS))
   }
   it should "succeed when loading 0 without units" in {
     val signs = Set("", "-", "+")
@@ -66,7 +65,7 @@ class DurationConvertTest extends FlatSpec with Matchers with TryValues {
           forAll(leftSpacingSize) { ls =>
             forAll(rightSpacingSize) { rs =>
               forAll(zeroRepeatSize) { zr =>
-                fromS(lsc * ls + sign + "0" * zr + rsc * rs) shouldBe Success(Duration(0, TimeUnit.DAYS))
+                fromS(lsc * ls + sign + "0" * zr + rsc * rs) shouldBe Right(Duration(0, TimeUnit.DAYS))
               }
             }
           }
@@ -78,11 +77,10 @@ class DurationConvertTest extends FlatSpec with Matchers with TryValues {
     val badDuration = "10 lordsALeaping"
     val result = LocalDurationConvert.durationConfigConvert.from(ConfigValueFactory.fromAnyRef(badDuration))
     result match {
-      case Success(_) => fail("Should be failure")
-      case Failure(ex) =>
-        val message = ex.getMessage
-        println(message)
-        message should include(badDuration)
+      case Right(_) => fail("Should be failure")
+      case Left(ex) =>
+        ex.toSeq should have size 1
+        ex.head shouldBe a[CannotConvert]
     }
   }
   private object LocalDurationConvert extends LowPriorityConfigConvertImplicits
