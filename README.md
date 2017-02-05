@@ -115,6 +115,7 @@ An almost comprehensive example is:
 
 ```scala
 import com.typesafe.config.ConfigFactory.parseString
+import pureconfig.loadConfig
 
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
@@ -139,9 +140,11 @@ the package `pureconfig.configurable`. Once the output of a `pureconfig.configur
 PureConfig can start using that configured converter:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import pureconfig.configurable._
+import pureconfig.loadConfig
 
 case class Conf(date: LocalDate)
 
@@ -160,6 +163,9 @@ Not all types are supported automatically by PureConfig. For instance, classes
 that are not case classes are not supported out-of-the-box:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
+
 class MyInt(var value: Int) {
   override def toString: String = s"MyInt($value)"
 }
@@ -194,6 +200,7 @@ in the configuration:
 
 ```scala
 import com.typesafe.config.ConfigValueFactory
+import pureconfig._
 
 ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
 // returns Success("FooBar")
@@ -203,6 +210,8 @@ Now let's say that we want to override this behaviour such that `String`s are
 always read lower case. We can do:
 
 ```scala
+import scala.util.Try
+
 implicit val overrideStrConvert = ConfigConvert.fromString(s => Try(s.toLowerCase))
 
 ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
@@ -243,6 +252,9 @@ example where the configuration file has all keys in upper case and we're
 loading it into a type whose fields are all in lower case:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
+
 case class SampleConf(foo: Int, bar: String)
 
 implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
@@ -276,6 +288,8 @@ can make sure the following implicit is in scope before loading or writing
 configuration files:
 
 ```scala
+import pureconfig._
+
 implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 ```
 
@@ -287,6 +301,8 @@ create an instance of the class, loading the other values from the
 configuration:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
 import scala.concurrent.duration._
 
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
@@ -347,6 +363,9 @@ configurations. By default it uses the additional field `type`, encoding the
 concrete class represented in the configuration:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
+
 sealed trait AnimalConf
 case class DogConf(age: Int) extends AnimalConf
 case class BirdConf(canFly: Boolean) extends AnimalConf
@@ -374,7 +393,7 @@ way:
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
   override def fieldValue(name: String) = name.dropRight("Conf".length)
 }
-loadConfig[AnimalConf](parseString("""{ type: "Bird", canFly: true }"""))
+loadConfig[AnimalConf](parseString("""{ type: "Bird", can-fly: true }"""))
 // returns Success(BirdConf(true))
 ```
 
@@ -383,7 +402,8 @@ example, if you encode enumerations using sealed traits, you can just write the
 name of the class:
 
 ```scala
-import com.typesafe.config.{ConfigFactory,ConfigValue}
+import com.typesafe.config.{ConfigFactory, ConfigValue}
+import pureconfig._
 import pureconfig.syntax._
 import scala.util.Success
 
@@ -417,7 +437,7 @@ implicit val seasonHint = new CoproductHint[Season] {
 }
 
 case class MyConf(list: List[Season])
-loadConfig[MyConf](parseString("""list = [Spring, Summer, Autumn, Winter]"""))
+loadConfig[MyConf](ConfigFactory.parseString("""list = [Spring, Summer, Autumn, Winter]"""))
 // returns Success(MyConf(List(Spring, Summer, Autumn, Winter)))
 ```
 
@@ -430,6 +450,10 @@ exception is the `Option[_]` type, which is read as `None` when a key is
 missing:
 
 ```scala
+import com.typesafe.config._
+import pureconfig._
+import pureconfig.syntax._
+
 case class Foo(a: Int)
 case class FooOpt(a: Option[Int])
 
@@ -446,7 +470,7 @@ keys, you can extend the `AllowMissingKey` trait. For `ConfigConvert`s extending
 available `ConfigConvert` for that type with a `null` value:
 
 ```scala
-import com.typesafe.config.ConfigRenderOptions
+import scala.util.{Success, Try}
 
 implicit val cc = new ConfigConvert[Int] with AllowMissingKey {
   override def from(config: ConfigValue): Try[Int] =
@@ -496,7 +520,7 @@ import pureconfig._
 import java.nio.file.Paths
 import scala.util.Try
 
-implicit val deriveStringConvertForPath = ConfigConvert.fromString[Path](s => Try(Paths.get(s)))
+implicit val pathConvert = ConfigConvert.fromString[Path](s => Try(Paths.get(s)))
 ```
 
 And then we load the configuration:
