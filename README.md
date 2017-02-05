@@ -1,5 +1,6 @@
 # PureConfig
-A boilerplate-free Scala library for loading configuration files
+
+A boilerplate-free Scala library for loading configuration files.
 
 [![Build Status](https://travis-ci.org/melrief/pureconfig.svg?branch=master)](https://travis-ci.org/melrief/pureconfig)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11)
@@ -7,7 +8,9 @@ A boilerplate-free Scala library for loading configuration files
 
 ![](http://i.imgur.com/S5QUS8c.gif)
 
+
 ## Table of Contents
+
 - [Why](#why)
 - [Not Yet Another Configuration Library](#not-yet-another-configuration-library)
 - [Add PureConfig to your project](#add-pureconfig-to-your-project)
@@ -30,6 +33,7 @@ A boilerplate-free Scala library for loading configuration files
 
 
 ## Why
+
 Loading configurations has always been a tedious and error-prone procedure. A common way to do it
 consists in writing code to deserialize each fields of the configuration. The more fields there are,
 the more code must be written (and tested and maintained...) and this must be replicated for each project.
@@ -44,23 +48,22 @@ certain type. In other words, you define **what** to load and PureConfig provide
 
 
 ## Not yet another configuration library
+
 PureConfig is not a configuration library in the sense that it doesn't search for files or parse them.
 It can be seen as a better front-end for the existing libraries.
-It uses [typesafe config][typesafe-config] library for loading raw configurations and then
+It uses the [Typesafe Config][typesafe-config] library for loading raw configurations and then
 uses the raw configurations to do its magic.
 
 
 ## Add PureConfig to your project
 
-In the sbt configuration file:
-
-use scala `2.10`, `2.11` or `2.12`:
+In the sbt configuration file use Scala `2.10`, `2.11` or `2.12`:
 
 ```scala
 scalaVersion := "2.12.1" // or "2.11.8", "2.10.5"
 ```
 
-Add the library. For scala `2.11` and `2.12`
+Add PureConfig to your library dependencies. For Scala `2.11` and `2.12`:
 
 ```scala
 libraryDependencies ++= Seq(
@@ -68,16 +71,14 @@ libraryDependencies ++= Seq(
 )
 ```
 
-For scala `2.10` you need also the scala macro paradise plugin:
+For Scala `2.10` you need also the Macro Paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
   "com.github.melrief" %% "pureconfig" % "0.5.1",
-compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
 )
 ```
-
-
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/melrief/pureconfig/blob/master/example/build.sbt)
 used for the example.
@@ -85,8 +86,7 @@ used for the example.
 
 ## Use PureConfig
 
-Import the library and use one of the `loadConfig` methods:
-
+Import the library package and use one of the `loadConfig` methods:
 
 ```scala
 import pureconfig._
@@ -99,105 +99,129 @@ val config: Try[YourConfClass] = loadConfig[YourConfClass]
 
 Currently supported types for fields are:
 - `String`, `Boolean`, `Double` (standard
-and percentage format ending with `%`), `Float` (also supporting percentage),
-`Int`, `Long`, `Short`, `URL`, `Duration`, `FiniteDuration`
-- all collections implementing the `TraversableOnce` trait where the elements type
-is in this list
-- `Option` for optional values, i.e. value that can or cannot be in the configuration
-- `Map` with `String` keys and any value type that is in this list
-- everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html).
- Because different formats are supported, converters for types that support multiple formats must be configured
- before they can be used (see [Configurable converters](#configurable-converters))
-- typesafe `ConfigValue`, `ConfigObject` and `ConfigList`
-- case classes
-- sealed families of case classes (ADTs)
+  and percentage format ending with `%`), `Float` (also supporting percentage),
+  `Int`, `Long`, `Short`, `URL`, `Duration`, `FiniteDuration`;
+- all collections implementing the `TraversableOnce` trait where the type of
+  the elements is in this list;
+- `Option` for optional values, i.e. values that can or cannot be in the configuration;
+- `Map` with `String` keys and any value type that is in this list;
+- everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
+  configured first - see [Configurable converters](#configurable-converters));
+- Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
+- case classes;
+- sealed families of case classes (ADTs).
 
 An almost comprehensive example is:
 
 ```scala
-> import pureconfig.loadConfig
-> import com.typesafe.config.ConfigFactory.parseString
-> sealed trait MyAdt
-> case class AdtA(a: String) extends MyAdt
-> case class AdtB(b: Int) extends MyAdt
-> case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
-> val conf = parseString("""{ "int": 1, "adt": { "type": "adtb", "b": 1 }, "list":["1", "20%"], "map": { "key": "value" } }""")
-> loadConfig[MyClass](conf)
-res0: util.Try[MyClass] = Success(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig.loadConfig
+
+sealed trait MyAdt
+case class AdtA(a: String) extends MyAdt
+case class AdtB(b: Int) extends MyAdt
+case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
+
+val conf = parseString("""{ "int": 1, "adt": { "type": "adtb", "b": 1 }, "list": ["1", "20%"], "map": { "key": "value" } }""")
+
+loadConfig[MyClass](conf)
+// returns Success(MyClass(1, AdtB(1), List(1.0, 0.2), Map("key" -> "value"), None))
 ```
 
 
 ## Configurable converters
 
-For some types, pureconfig cannot automatically derive a converter because there are multiple ways to convert a configuration
+For some types, PureConfig cannot automatically derive a converter because there are multiple ways to convert a configuration
 value to them. For instance, for [`LocalDate`](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)
-pureconfig cannot derive a converter because there are multiple [`DateTimeFormatter`](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)s
-that can be used to convert a String into a `LocalDate`. Examples of different format are `yyyy-mm-dd`, e.g. `"2016-01-01"`,
-and `yyyymmdd`, e.g. `"20160101"`. For those types, pureconfig provides a way to create converters from the necessary parameters. These methods can be found under
+PureConfig cannot derive a converter because there are multiple [`DateTimeFormatter`](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)s
+that can be used to convert a String into a `LocalDate`. Examples of different formats are `yyyy-mm-dd`, e.g. `"2016-01-01"`,
+and `yyyymmdd`, e.g. `"20160101"`. For those types, PureConfig provides a way to create converters from the necessary parameters. These methods can be found under
 the package `pureconfig.configurable`. Once the output of a `pureconfig.configurable` method for a certain type is in scope,
-pureconfig can start using that configured converter:
+PureConfig can start using that configured converter:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import pureconfig.configurable._
+import pureconfig.loadConfig
 
 case class Conf(date: LocalDate)
 
 implicit val localDateInstance = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
 
-val conf = ConfigFactory.parseString(s"""{date:"2011-12-03"}""")
+val conf = parseString(s"""{ date: "2011-12-03" }""")
 
 loadConfig[Conf](conf)
-// returns Success(Conf(2016-01-01))
+// returns Success(Conf(LocalDate.parse("2011-12-03", DateTimeFormatter.ISO_DATE)))
 ```
 
 
 ## Extend the library to support new types
 
-Not all types are supported automatically by `pureconfig`. For instance, classes
+Not all types are supported automatically by PureConfig. For instance, classes
 that are not case classes are not supported out-of-the-box:
 
 ```scala
-> class Foo(var bar: Int) { override def toString: String = s"Foo(${bar.toString})" }
-> loadConfig[Foo]
-could not find implicit value for parameter conv: pureconfig.ConfigConvert[Foo]
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
+
+class MyInt(var value: Int) {
+  override def toString: String = s"MyInt($value)"
+}
+
+case class Conf(n: MyInt)
+
+val conf = parseString(s"""{ n: 1 }""")
+
+loadConfig[Conf](conf)
+// doesn't compile - could not find implicit value for parameter conv: pureconfig.ConfigConvert[Conf]
 ```
 
-`pureconfig` can be extended to support those types. To do so, an instance for the
-`ConfigConvert` typeclass must be provided implicitly, like
+PureConfig can be extended to support those types. To do so, an instance for the
+`ConfigConvert` type class must be provided implicitly, like:
 
 ```scala
-> implicit val foocc = ConfigConvert.stringConvert[Foo](s => Try(new Foo(s.toInt)), foo => foo.bar.toString)
-> loadConfig[Foo]
-Foo(1)
+import scala.util.Try
+
+implicit val myIntConvert = ConfigConvert.stringConvert[MyInt](s => Try(new MyInt(s.toInt)), n => n.value.toString)
+
+loadConfig[Conf](conf)
+// returns Success(Conf(new MyInt(1)))
 ```
 
 
 ## Override behaviour for types
 
-It is possible to override the behaviour of `pureconfig` for a certain type by
-implementing another instance of the `ConfigConvert` typeclass. For instance,
-the default behaviour of `pureconfig` for `String` is to return the string itself
+It is possible to override the behaviour of PureConfig for a certain type by
+implementing another instance of the `ConfigConvert` type class. For instance,
+the default behaviour of PureConfig for `String` is to return the string itself
 in the configuration:
 
 ```scala
-> import import com.typesafe.config.ConfigValueFactory
-> ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
-util.Try[String] = Success(FooBar)
+import com.typesafe.config.ConfigValueFactory
+import pureconfig._
+
+ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
+// returns Success("FooBar")
 ```
 
 Now let's say that we want to override this behaviour such that `String`s are
 always read lower case. We can do:
 
 ```scala
-> implicit val overridestrcc = ConfigConvert.fromString(s => Try(s.toLowerCase))
-> ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
-util.Try[String] = Success(foobar)
+import scala.util.Try
+
+implicit val overrideStrConvert = ConfigConvert.fromString(s => Try(s.toLowerCase))
+
+ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
+// returns Success("foobar")
 ```
 
 
 ## Override behaviour for case classes
 
-`pureconfig` has to assume some conventions and behaviours when deriving
+PureConfig has to assume some conventions and behaviours when deriving
 `ConfigConvert` instances for case classes:
 
 - How do keys in config objects map to field names of the case class?
@@ -205,21 +229,21 @@ util.Try[String] = Success(foobar)
 - Should default values in case class fields be applied when its respective
   config key is missing?
 
-By default, `pureconfig`:
+By default, PureConfig:
 
 - expects config keys to be written in kebab case (such as `my-field`) and the
 associated field names are written in camel case (such as `myField`);
 - allows unknown keys;
 - uses the default values when a key is missing.
 
-All of these assumptions can be overriden by putting an implicit
-`ProductHint` - an object that "hints" `pureconfig` on how to best derive
+All of these assumptions can be overridden by putting an implicit
+`ProductHint` - an object that "hints" PureConfig on how to best derive
 converters for products in scope.
 
 ### Field mappings
 
 In case the naming convention you use in your configuration files differs from
-the default one, `pureconfig` allows you to define proper mappings. A mapping
+the default one, PureConfig allows you to define proper mappings. A mapping
 between different naming conventions is done using a `ConfigFieldMapping`
 object, with which one can construct a `ProductHint`. The `ConfigFieldMapping`
 trait has a single `apply` method that maps field names in Scala objects to
@@ -228,13 +252,16 @@ example where the configuration file has all keys in upper case and we're
 loading it into a type whose fields are all in lower case:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
+
 case class SampleConf(foo: Int, bar: String)
 
 implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
   def apply(fieldName: String) = fieldName.toUpperCase
 })
 
-val conf = ConfigFactory.parseString("""{
+val conf = parseString("""{
   FOO = 2
   BAR = "two"
 }""")
@@ -261,19 +288,21 @@ can make sure the following implicit is in scope before loading or writing
 configuration files:
 
 ```scala
+import pureconfig._
+
 implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 ```
 
 ### Default field values
 
 If a case class has a default argument and the underlying configuration is
-missing a value for that field, then by default `pureconfig` will happily
+missing a value for that field, then by default PureConfig will happily
 create an instance of the class, loading the other values from the
 configuration:
 
 ```scala
-import pureconfig.loadConfig
 import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
 import scala.concurrent.duration._
 
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
@@ -286,7 +315,7 @@ loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
 loadConfig[Holiday](parseString("""{ where: Zürich }"""))
 // returns Success(Holiday("Zürich", 7 days))
 
-// Defaulting both arguments 
+// Defaulting both arguments
 loadConfig[Holiday](parseString("""{}"""))
 // returns Success(Holiday("last resort", 7 days))
 
@@ -307,7 +336,7 @@ loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
 
 ### Unknown keys
 
-By default, `pureconfig` ignores keys in the config that do not map to any
+By default, PureConfig ignores keys in the config that do not map to any
 case class field, leading to potential bugs due to misspellings:
 
 ```scala
@@ -328,12 +357,15 @@ loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
 
 ## Override behaviour for sealed families
 
-In order for `pureconfig` to disambiguate between different options of a sealed
+In order for PureConfig to disambiguate between different options of a sealed
 family of case classes, it must read and write additional information in
 configurations. By default it uses the additional field `type`, encoding the
 concrete class represented in the configuration:
 
 ```scala
+import com.typesafe.config.ConfigFactory.parseString
+import pureconfig._
+
 sealed trait AnimalConf
 case class DogConf(age: Int) extends AnimalConf
 case class BirdConf(canFly: Boolean) extends AnimalConf
@@ -342,7 +374,7 @@ loadConfig[AnimalConf](parseString("""{ type: "dogconf", age: 4 }"""))
 // returns Success(DogConf(4))
 ```
 
-For sealed families, `pureconfig` provides a way to customize the conversion
+For sealed families, PureConfig provides a way to customize the conversion
 without replacing the default `ConfigConvert`. By putting in scope an instance
 of `CoproductHint` for that sealed family, we can customize how the
 disambiguation is made. For example, if `type` clashes with one of the fields
@@ -361,7 +393,7 @@ way:
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
   override def fieldValue(name: String) = name.dropRight("Conf".length)
 }
-loadConfig[AnimalConf](parseString("""{ type: "Bird", canFly: true }"""))
+loadConfig[AnimalConf](parseString("""{ type: "Bird", can-fly: true }"""))
 // returns Success(BirdConf(true))
 ```
 
@@ -370,7 +402,8 @@ example, if you encode enumerations using sealed traits, you can just write the
 name of the class:
 
 ```scala
-import com.typesafe.config.{ConfigFactory,ConfigValue}
+import com.typesafe.config.{ConfigFactory, ConfigValue}
+import pureconfig._
 import pureconfig.syntax._
 import scala.util.Success
 
@@ -393,18 +426,18 @@ implicit val seasonHint = new CoproductHint[Season] {
   def from(cv: ConfigValue, name: String) = cv.to[String].map { strConf =>
     if(strConf == name) Some(ConfigFactory.empty.root) else None
   }
-  
+
   // Writes a config for a Season. `cv` is a config for the concrete season
   // `name` (in this case, `cv` is always an empty object).
   def to(cv: ConfigValue, name: String) = Success(name.toConfig)
-  
+
   // If `from` returns a `Failure` for a concrete class, should we try other
   // concrete classes?
   def tryNextOnFail(name: String) = false
 }
 
 case class MyConf(list: List[Season])
-loadConfig[MyConf](parseString("""list = [Spring, Summer, Autumn, Winter]"""))
+loadConfig[MyConf](ConfigFactory.parseString("""list = [Spring, Summer, Autumn, Winter]"""))
 // returns Success(MyConf(List(Spring, Summer, Autumn, Winter)))
 ```
 
@@ -417,12 +450,18 @@ exception is the `Option[_]` type, which is read as `None` when a key is
 missing:
 
 ```scala
-> import pureconfig.syntax._
-> import com.typesafe.config._
-> ConfigFactory.empty.to[Foo]
-scala.util.Try[Foo] = Failure(pureconfig.error.KeyNotFoundException: Could not find the key a)
-> ConfigFactory.empty.to[FooOpt]
-scala.util.Try[FooOpt] = Success(FooOpt(None))
+import com.typesafe.config._
+import pureconfig._
+import pureconfig.syntax._
+
+case class Foo(a: Int)
+case class FooOpt(a: Option[Int])
+
+ConfigFactory.empty.to[Foo]
+// returns Failure(KeyNotFoundException("a"))
+
+ConfigFactory.empty.to[FooOpt]
+// returns Success(FooOpt(None))
 ```
 
 However, if you want to allow your custom `ConfigConvert`s to handle missing
@@ -431,23 +470,27 @@ keys, you can extend the `AllowMissingKey` trait. For `ConfigConvert`s extending
 available `ConfigConvert` for that type with a `null` value:
 
 ```scala
-> implicit val cc = new ConfigConvert[Int] with AllowMissingKey {
-|   override def from(config: ConfigValue): Try[Int] =
-|     if (config == null) Success(42) else Try(config.render(ConfigRenderOptions.concise).toInt)
-|   override def to(t: Int): ConfigValue = ConfigValueFactory.fromAnyRef(t)
-| }
-> ConfigFactory.empty.to[Foo]
-scala.util.Try[Foo] = Success(Foo(42))
+import scala.util.{Success, Try}
+
+implicit val cc = new ConfigConvert[Int] with AllowMissingKey {
+  override def from(config: ConfigValue): Try[Int] =
+    if (config == null) Success(42) else Try(config.render(ConfigRenderOptions.concise).toInt)
+
+  override def to(t: Int): ConfigValue = ConfigValueFactory.fromAnyRef(t)
+}
+
+ConfigFactory.empty.to[Foo]
+// returns Success(Foo(42))
 ```
 
 
 ## Example
 
 In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
-there is an example of usage of pureconfig. In the example, the idea is to load a configuration for a directory
+there is an example of usage of PureConfig. In the example, the idea is to load a configuration for a directory
 watcher service. The configuration file
 (a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.conf))
-for this program will look like
+for this program will look like:
 
 ```
 dirwatch.path="/path/to/observe"
@@ -459,17 +502,17 @@ dirwatch.email.recipients=["recipient1,recipient2"]
 dirwatch.email.sender="sender"
 ```
 
-To load it, we define some classes that have proper fields and names
+To load it, we define some classes that have proper fields and names:
 
 ```scala
 import java.nio.file.Path
 
-case class Config(dirwatch: DirWatchConfig)
-case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
 case class EmailConfig(host: String, port: Int, message: String, recipients: Set[String], sender: String)
+case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
+case class Config(dirwatch: DirWatchConfig)
 ```
 
-The use of `Path` gives us a chance to use a custom converter
+The use of `Path` gives us a chance to use a custom converter:
 
 ```scala
 import pureconfig._
@@ -477,10 +520,10 @@ import pureconfig._
 import java.nio.file.Paths
 import scala.util.Try
 
-implicit val deriveStringConvertForPath = fromString[Path](s => Try(Paths.get(s)))
+implicit val pathConvert = ConfigConvert.fromString[Path](s => Try(Paths.get(s)))
 ```
 
-And then we load the configuration
+And then we load the configuration:
 
 ```scala
 val config = loadConfig[Config].get // loadConfig returns a Try
@@ -501,37 +544,37 @@ println("dirwatch.email.sender: " + config.dirwatch.email.sender)
 ```
 
 It's also possible to operate directly on `Config` and `ConfigValue` types
-of [typesafe config][typesafe-config] with the implicit helpers provided in the
+of [Typesafe Config][typesafe-config] with the implicit helpers provided in the
 `pureconfig.syntax` package:
 
 ```scala
 import com.typesafe.config.ConfigFactory
 import pureconfig.syntax._
 
-val config = ConfigFactory.load().to[Config].get
+val config = ConfigFactory.load.to[Config].get
 println("The loaded configuration is: " + config.toString)
 ```
 
 ## Whence the config files?
 
-By default, PureConfig's `loadConfig()` methods load all resources in the classpath named:
+By default, PureConfig `loadConfig` methods load all resources in the classpath named:
 
 - `application.conf`,
 - `application.json`,
 - `application.properties`, and
 - `reference.conf`.
 
-The various `pureconfig.loadConfig()` methods defer to [typesafe config][typesafe-config]'s
+The various `loadConfig` methods defer to [Typesafe Config][typesafe-config]'s
 [`ConfigFactory`](https://typesafehub.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
 select where to load the config files from. Typesafe Config has [well-documented rules for configuration
 loading](https://github.com/typesafehub/config#standard-behavior) which we'll not repeat. Please see Typesafe
-Config's documentation for a full telling of the subtleties.  If you need greater control over how config
-files are loaded, refer to `ConfigFactory`'s options.
+Config's documentation for a full telling of the subtleties. If you need greater control over how config
+files are loaded, refer to `ConfigFactory` options.
 
-Alternatively, PureConfig also provides `pureconfig.loadConfigFromFiles()` which builds a configuration from
+Alternatively, PureConfig also provides a `loadConfigFromFiles` method, which builds a configuration from
 an explicit list of files. Files earlier in the list have greater precedence than later ones. Each file can
 include a partial configuration as long as the whole list produces a complete configuration. For an example,
-see the test of `loadConfigFromFiles()` in
+see the test of `loadConfigFromFiles` in
 [`PureconfSuite.scala`](https://github.com/melrief/pureconfig/blob/master/core/src/test/scala/pureconfig/PureconfSuite.scala).
 
 Because PureConfig uses Typesafe Config to load configuration, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
@@ -539,12 +582,12 @@ Because PureConfig uses Typesafe Config to load configuration, it supports readi
 
 ## Contribute
 
-`pureconfig` is a free library developed by several people around the world.
+PureConfig is a free library developed by several people around the world.
 Contributions are welcomed and encouraged. If you want to contribute, we suggest to have a look at the
 [available issues](https://github.com/melrief/pureconfig/issues) and to talk with
 us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
 
-`pureconfig` supports the [Typelevel](http://typelevel.org/) [code of conduct](http://typelevel.org/conduct.html) and wants all of its channels (Gitter, GitHub, etc.) to be
+PureConfig supports the [Typelevel](http://typelevel.org/) [code of conduct](http://typelevel.org/conduct.html) and wants all of its channels (Gitter, GitHub, etc.) to be
 welcoming environments for everyone.
 
 
@@ -555,7 +598,7 @@ welcoming environments for everyone.
 
 ## Special Thanks
 
-To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe config](https://github.com/typesafehub/config)
+To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/typesafehub/config)
 developers.
 
 [typesafe-config]: https://github.com/typesafehub/config
