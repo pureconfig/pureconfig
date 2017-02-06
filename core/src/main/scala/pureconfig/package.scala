@@ -9,6 +9,9 @@ import java.nio.file.{ Files, Path }
 
 import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig }
 import pureconfig.ConfigConvert.ConfigReaderResult
+import pureconfig.error.ConfigReaderException
+
+import scala.reflect.ClassTag
 
 package object pureconfig {
 
@@ -152,5 +155,19 @@ package object pureconfig {
         .resolve
       loadConfig[Config](resolvedTypesafeConfig)
     }
+  }
+
+  implicit class RightConfigReaderResult[T](val result: ConfigReaderResult[T])(implicit ct: ClassTag[T]) {
+
+    /**
+     * @return the value inside the result if reading was successful, throws a [[ConfigReaderException]] otherwise
+     */
+    @throws[ConfigReaderException[_]]
+    def get: T = result match {
+      case Right(t) => t
+      case Left(failures) =>
+        throw new ConfigReaderException[T](failures)
+    }
+
   }
 }
