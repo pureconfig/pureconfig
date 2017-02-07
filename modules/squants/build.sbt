@@ -46,6 +46,11 @@ pomExtra := (
         <name>Leif Wickland</name>
         <url>https://github.com/leifwickland</url>
       </developer>
+      <developer>
+        <id>cranst0n</id>
+        <name>Ian McIntosh</name>
+        <url>https://github.com/cranst0n</url>
+      </developer>
     </developers>)
 
 osgiSettings
