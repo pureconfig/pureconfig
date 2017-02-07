@@ -8,7 +8,10 @@ import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
 import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig }
-import pureconfig.error.ConfigReaderFailures
+import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
+import pureconfig.ConfigConvert.improveFailures
+
+import scala.reflect.ClassTag
 
 package object pureconfig {
 
@@ -34,7 +37,7 @@ package object pureconfig {
    */
   def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
-    ConfigConvert.improveFailures[Config](loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv), namespace)
+    improveFailures[Config](loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv), namespace)
   }
 
   /**
@@ -61,7 +64,7 @@ package object pureconfig {
    */
   def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
-    ConfigConvert.improveFailures[Config](
+    improveFailures[Config](
       loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv), namespace)
   }
 
@@ -71,7 +74,7 @@ package object pureconfig {
 
   /** Load a configuration of type `Config` from the given `Config` */
   def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    ConfigConvert.improveFailures[Config](conv.from(conf.getConfig(namespace).root()), namespace)
+    improveFailures[Config](conv.from(conf.getConfig(namespace).root()), namespace)
   }
 
   /**
@@ -99,6 +102,111 @@ package object pureconfig {
   def loadConfigWithFallback[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     loadConfig[Config](conf.withFallback(ConfigFactory.load()), namespace)
+  }
+
+  private def getResultOrThrow[Config](failuresOrResult: Either[ConfigReaderFailures, Config])(implicit ct: ClassTag[Config]): Config = {
+    failuresOrResult match {
+      case Right(config) => config
+      case Left(failures) => throw new ConfigReaderException[Config](failures)
+    }
+  }
+
+  /**
+   * Load a configuration of type `Config` from the standard configuration files
+   *
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigOrThrow[Config](implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    getResultOrThrow[Config](loadConfig[Config](conv))
+  }
+
+  /**
+   * Load a configuration of type `Config` from the standard configuration files
+   *
+   * @param namespace the base namespace from which the configuration should be load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigOrThrow[Config](namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    ConfigFactory.invalidateCaches()
+    val config = ConfigFactory.load().getConfig(namespace)
+    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace))
+  }
+
+  /**
+   * Load a configuration of type `Config` from the given file. Note that standard configuration
+   * files are still loaded but can be overridden from the given configuration file
+   *
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigOrThrow[Config](path: Path)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    ConfigFactory.invalidateCaches()
+    val config = ConfigFactory.load(ConfigFactory.parseFile(path.toFile))
+    getResultOrThrow[Config](loadConfig[Config](config)(conv))
+  }
+
+  /**
+   * Load a configuration of type `Config` from the given file. Note that standard configuration
+   * files are still loaded but can be overridden from the given configuration file
+   *
+   * @param namespace the base namespace from which the configuration should be load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigOrThrow[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    ConfigFactory.invalidateCaches()
+    val config = ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace)
+    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace))
+  }
+
+  /**
+   * Load a configuration of type `Config` from the given `Config`
+   *
+   * @param conf Typesafe configuration to load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigOrThrow[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    getResultOrThrow[Config](conv.from(conf.root()))
+  }
+
+  /**
+   * Load a configuration of type `Config` from the given `Config`
+   *
+   * @param conf Typesafe configuration to load
+   * @param namespace the base namespace from which the configuration should be load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigOrThrow[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    getResultOrThrow[Config](improveFailures[Config](conv.from(conf.getConfig(namespace).root()), namespace))
+  }
+
+  /**
+   * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration
+   *
+   * @param conf Typesafe configuration to load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigWithFallbackOrThrow[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    ConfigFactory.invalidateCaches()
+    getResultOrThrow[Config](loadConfig[Config](conf.withFallback(ConfigFactory.load())))
+  }
+
+  /**
+   * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration
+   *
+   * @param conf Typesafe configuration to load
+   * @param namespace the base namespace from which the configuration should be load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigWithFallbackOrThrow[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
+    ConfigFactory.invalidateCaches()
+    getResultOrThrow[Config](loadConfig[Config](conf.withFallback(ConfigFactory.load()), namespace))
   }
 
   /**
@@ -152,6 +260,15 @@ package object pureconfig {
         .resolve
       loadConfig[Config](resolvedTypesafeConfig)
     }
+  }
+
+  /**
+   * @see [[loadConfigFromFiles]]
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadConfigFromFilesOrThrow[Config: ConfigConvert](files: Traversable[java.io.File])(implicit ct: ClassTag[Config]): Config = {
+    getResultOrThrow[Config](loadConfigFromFiles[Config](files))
   }
 
 }
