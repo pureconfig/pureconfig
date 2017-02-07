@@ -174,9 +174,11 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   private[pureconfig] def improveFailure[Z](failure: ConfigReaderFailure, keyStr: String): ConfigReaderFailure =
     failure match {
       case CannotConvertNull => KeyNotFound(keyStr)
-      case KeyNotFound(suffix) => KeyNotFound(keyStr + "." + suffix)
+      case CollidingKeys(suffix, existingValue) => CollidingKeys(keyStr + "." + suffix, existingValue)
       case WrongType(foundTyp, expectedTyp) => WrongTypeForKey(foundTyp, expectedTyp, keyStr)
       case WrongTypeForKey(foundTyp, expectedTyp, suffix) => WrongTypeForKey(foundTyp, expectedTyp, keyStr + "." + suffix)
+      case UnknownKey(suffix) => UnknownKey(keyStr + "." + suffix)
+      case KeyNotFound(suffix) => KeyNotFound(keyStr + "." + suffix)
       case e: ConfigReaderFailure => e
     }
 
