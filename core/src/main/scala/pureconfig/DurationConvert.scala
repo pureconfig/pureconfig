@@ -3,12 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import pureconfig.error.{ CannotConvert, ConfigReaderFailure }
 import pureconfig.ConfigConvert.catchReadError
+import pureconfig.error.ConfigReaderFailure
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import scala.reflect.ClassTag
-import scala.util.control.NonFatal
 
 /**
  * Utility functions for converting a Duration to a String and vice versa.
