@@ -132,7 +132,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
   it should "not parse a char value enum when given a string with more than one character" in {
     val conf = ConfigFactory.parseString(s"""{item:"string"}""")
     case class Conf(item: CharLibraryItem)
-    val failures = conf.to[Conf].left.value.toSeq
+    val failures = conf.to[Conf].left.value.toList
     failures should have size 1
     failures.head shouldBe a[CannotConvert]
   }

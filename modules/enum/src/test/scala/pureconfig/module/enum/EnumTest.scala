@@ -27,7 +27,7 @@ class EnumTest extends FlatSpec with Matchers with EitherValues {
   it should "politely refuse an invalid member" in {
     val conf = ConfigFactory.parseString(s"""{greeting:"Psych"}""")
     case class Conf(greeting: Greeting)
-    val failures = conf.to[Conf].left.value.toSeq
+    val failures = conf.to[Conf].left.value.toList
     failures should have size 1
     failures.head shouldBe a[CannotConvert]
   }

@@ -3,19 +3,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig.error
 
-case class ConfigReaderFailures(head: ConfigReaderFailure, tail: Seq[ConfigReaderFailure]) {
+/**
+ * A non-empty list of ConfigReader failures
+ */
+case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigReaderFailure]) {
 
-  def toSeq: Seq[ConfigReaderFailure] = head +: tail
+  def toList: List[ConfigReaderFailure] = head +: tail
 
   def +(failure: ConfigReaderFailure): ConfigReaderFailures =
-    new ConfigReaderFailures(failure, this.toSeq)
+    new ConfigReaderFailures(failure, this.toList)
 
   def ++(that: ConfigReaderFailures): ConfigReaderFailures =
-    new ConfigReaderFailures(head, tail ++ that.toSeq)
+    new ConfigReaderFailures(head, tail ++ that.toList)
 }
 
 object ConfigReaderFailures {
 
   def apply(configReaderFailure: ConfigReaderFailure): ConfigReaderFailures =
-    new ConfigReaderFailures(configReaderFailure, Seq.empty[ConfigReaderFailure])
+    new ConfigReaderFailures(configReaderFailure, List.empty[ConfigReaderFailure])
 }

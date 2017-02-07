@@ -276,14 +276,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "return a Failure with a proper exception if the hint field in a coproduct is missing" in {
     val conf = ConfigFactory.parseString("{ can-fly = true }")
-    val failures = loadConfig[AnimalConfig](conf).left.value.toSeq
+    val failures = loadConfig[AnimalConfig](conf).left.value.toList
     failures should have size 1
     failures.head shouldBe a[KeyNotFound]
   }
 
   it should "return a Failure with a proper exception when a coproduct config is missing" in {
     case class AnimalCage(animal: AnimalConfig)
-    val failures = loadConfig[AnimalCage](ConfigFactory.empty()).left.value.toSeq
+    val failures = loadConfig[AnimalCage](ConfigFactory.empty()).left.value.toList
     failures should have size 1
     failures.head shouldBe a[KeyNotFound]
   }
@@ -643,7 +643,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     }""")
 
     case class SampleConf(a: Int, b: String)
-    loadConfig[SampleConf](conf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("a"), KeyNotFound("b"))
+    loadConfig[SampleConf](conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a"), KeyNotFound("b"))
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
 
@@ -718,7 +718,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     }""")
 
     conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
-    val failures = conf.getConfig("conf").to[Conf2].left.value.toSeq
+    val failures = conf.getConfig("conf").to[Conf2].left.value.toList
     failures should have size 1
     failures.head shouldBe a[UnknownKey]
   }
@@ -792,15 +792,15 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should s"return a ${classOf[KeyNotFound]} when a key is not in the configuration" in {
     val emptyConf = ConfigFactory.empty()
-    loadConfig[Foo](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("i"))
+    loadConfig[Foo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("i"))
     val conf = ConfigFactory.parseMap(Map("namespace.foo" -> 1).asJava)
-    loadConfig[Foo](conf, "namespace").left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("namespace.i"))
-    loadConfig[ConfWithMapOfFoo](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("map"))
-    loadConfig[ConfWithListOfFoo](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("list"))
-    loadConfig[ConfWithConfigObject](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("conf"))
-    loadConfig[ConfWithConfigList](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("conf"))
-    loadConfig[ConfWithDuration](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("i"))
-    loadConfig[SparkNetwork](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("timeout"))
+    loadConfig[Foo](conf, "namespace").left.value.toList should contain theSameElementsAs Seq(KeyNotFound("namespace.i"))
+    loadConfig[ConfWithMapOfFoo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("map"))
+    loadConfig[ConfWithListOfFoo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("list"))
+    loadConfig[ConfWithConfigObject](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf"))
+    loadConfig[ConfWithConfigList](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf"))
+    loadConfig[ConfWithDuration](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("i"))
+    loadConfig[SparkNetwork](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("timeout"))
 
     case class InnerConf(v: Int)
     case class EnclosingConf(conf: InnerConf)
@@ -810,13 +810,13 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
       def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
     }
 
-    loadConfig[EnclosingConf](emptyConf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("conf"))
+    loadConfig[EnclosingConf](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf"))
   }
 
   it should "allow custom ConfigConverts to handle missing keys" in {
     case class Conf(a: Int, b: Int)
     val conf = ConfigFactory.parseString("""{ a: 1 }""")
-    loadConfig[Conf](conf).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("b"))
+    loadConfig[Conf](conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b"))
 
     implicit val defaultInt = new ConfigConvert[Int] with AllowMissingKey {
       def from(v: ConfigValue) =
@@ -831,27 +831,27 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should s"return a ${classOf[WrongTypeForKey]} when a key has a wrong type" in {
     val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava)
-    val failures = loadConfig[FooBar](conf).left.value.toSeq
+    val failures = loadConfig[FooBar](conf).left.value.toList
     failures should have size 1
     failures.head shouldBe a[WrongTypeForKey]
 
     val conf1 = ConfigFactory.parseMap(Map("ns.foo.i" -> 1, "ns.bar.foo" -> "").asJava)
-    val failures1 = loadConfig[FooBar](conf1, "ns").left.value.toSeq
+    val failures1 = loadConfig[FooBar](conf1, "ns").left.value.toList
     failures1 should have size 1
     failures1.head shouldBe a[WrongTypeForKey]
 
     val conf2 = ConfigFactory.parseString("""{ map: [{ i: 1 }, { i: 2 }, { i: 3 }] }""")
-    val failures2 = loadConfig[ConfWithMapOfFoo](conf2).left.value.toSeq
+    val failures2 = loadConfig[ConfWithMapOfFoo](conf2).left.value.toList
     failures2 should have size 1
     failures2.head shouldBe a[WrongTypeForKey]
 
     val conf3 = ConfigFactory.parseString("""{ conf: [{ i: 1 }, { i: 2 }, { i: 3 }] }""")
-    val failures3 = loadConfig[ConfWithConfigObject](conf3).left.value.toSeq
+    val failures3 = loadConfig[ConfWithConfigObject](conf3).left.value.toList
     failures3 should have size 1
     failures3.head shouldBe a[WrongTypeForKey]
 
     val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
-    val failures4 = loadConfig[ConfWithConfigList](conf4).left.value.toSeq
+    val failures4 = loadConfig[ConfWithConfigList](conf4).left.value.toList
     failures4 should have size 1
     failures4.head shouldBe a[WrongTypeForKey]
   }
@@ -867,16 +867,16 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     loadConfig[Conf](conf2).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44))
 
     val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava)
-    loadConfig[Conf](conf3).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("a"))
+    loadConfig[Conf](conf3).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a"))
 
     val conf4 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5).asJava)
-    loadConfig[Conf](conf4).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("d.g"))
+    loadConfig[Conf](conf4).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("d.g"))
 
     val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava)
     loadConfig[Conf](conf5).right.value shouldBe Conf(2, "default", 42, InnerConf(5, 6))
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
-    val failures = loadConfig[Conf](conf6).left.value.toSeq
+    val failures = loadConfig[Conf](conf6).left.value.toList
     failures should have size 1
     failures.head shouldBe a[WrongTypeForKey]
   }
@@ -888,7 +888,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
-    loadConfig[Conf](conf1).left.value.toSeq should contain theSameElementsAs Seq(KeyNotFound("b"), KeyNotFound("c"), KeyNotFound("d"))
+    loadConfig[Conf](conf1).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b"), KeyNotFound("c"), KeyNotFound("d"))
   }
 
   "Converting from an empty string to a double" should "complain about an empty string" in {
@@ -902,28 +902,28 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
       intSet.0: 1
       intSet.a: 2
     }""")
-    val failures = loadConfig[Set[Int]](conf, "pure.conf.intSet").left.value.toSeq
+    val failures = loadConfig[Set[Int]](conf, "pure.conf.intSet").left.value.toList
     failures should have size 1
     failures.head shouldBe a[CannotConvert]
   }
 
   "Converting from an empty string to a duration" should "complain about an empty string" in {
     val conf = ConfigFactory.parseMap(Map("i" -> "").asJava)
-    val failures = loadConfig[ConfWithDuration](conf).left.value.toSeq
+    val failures = loadConfig[ConfWithDuration](conf).left.value.toList
     failures should have size 1
     failures.head shouldBe a[EmptyStringFound]
   }
 
   "Converting from a list to Double" should "give a terrible error message, unfortunately" in {
     val conf = ConfigFactory.parseString("""{ "v": [1, 2, 3, 4] }""")
-    val failures = loadConfig[ConfigWithDouble](conf).left.value.toSeq
+    val failures = loadConfig[ConfigWithDouble](conf).left.value.toList
     failures should have size 1
     failures.head shouldBe a[CannotConvert]
   }
 
   "Converting from a list to FiniteDuration" should "give an middling error message with poor context, unfortunately" in {
     val conf = ConfigFactory.parseString("""{ "timeout": [1, 2, 3, 4] }""")
-    val failures = loadConfig[SparkNetwork](conf).left.value.toSeq
+    val failures = loadConfig[SparkNetwork](conf).left.value.toList
     failures should have size 1
     failures.head shouldBe a[CannotConvert]
   }
@@ -934,7 +934,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   }
   it should "fail for a FiniteDuration" in {
     val conf = ConfigFactory.parseString("""{ timeout: Inf }""")
-    val failures = loadConfig[SparkNetwork](conf).left.value.toSeq
+    val failures = loadConfig[SparkNetwork](conf).left.value.toList
     failures should have size 1
     failures.head shouldBe a[CannotConvert]
   }

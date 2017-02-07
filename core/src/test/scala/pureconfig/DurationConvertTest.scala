@@ -79,7 +79,7 @@ class DurationConvertTest extends FlatSpec with Matchers with EitherValues {
     result match {
       case Right(_) => fail("Should be failure")
       case Left(ex) =>
-        ex.toSeq should have size 1
+        ex.toList should have size 1
         ex.head shouldBe a[CannotConvert]
     }
   }

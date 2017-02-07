@@ -13,7 +13,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
     linesBuffer += s"Cannot convert configuration to a value of class ${ct.runtimeClass.getName}. Failures are:"
 
     val (keysNotFound, cannotConvertFound, otherFound) =
-      failures.toSeq.foldLeft((Seq.empty[KeyNotFound], Seq.empty[CannotConvert], Seq.empty[ConfigReaderFailure])) {
+      failures.toList.foldLeft((Seq.empty[KeyNotFound], Seq.empty[CannotConvert], Seq.empty[ConfigReaderFailure])) {
         case ((keysNotFound, cannotConvertFound, otherFound), failure) =>
           failure match {
             case k: KeyNotFound => (keysNotFound :+ k, cannotConvertFound, otherFound)
