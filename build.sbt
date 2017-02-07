@@ -17,6 +17,10 @@ lazy val joda = (project in file("modules/joda")).
   dependsOn(core).
   dependsOn(core % "test->test") // In order to reuse the date/time related scalacheck generators.
 
+lazy val squants = (project in file("modules/squants")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
