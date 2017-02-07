@@ -213,12 +213,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       // for performance reasons only, we shouldn't clone the config object unless necessary
       val tailCo = if (hint.allowUnknownKeys) co else co.withoutKey(keyStr)
       val tailResult = tConfigConvert.value.fromWithDefault(tailCo, default.tail)
-      (headResult, tailResult) match {
-        case (Right(head), Right(tail)) => Right(field[K](head) :: tail)
-        case (Left(headErrs), Left(tailErrs)) => Left(headErrs ++ tailErrs)
-        case (l: Left[_, _], _) => l.asInstanceOf[Either[ConfigReaderFailures, FieldType[K, V] :: T]]
-        case (_, l: Left[_, _]) => l.asInstanceOf[Either[ConfigReaderFailures, FieldType[K, V] :: T]]
-      }
+      combineResults(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
