@@ -163,21 +163,16 @@ package object squants {
 
   // This is temporary until https://github.com/typelevel/squants/pull/183 is released (1.2.0 ???)
   // Without it, ScalaCheck has a pretty easy time breaking the conversion
-  private[this] def parseTemperature(s: String): Try[Temperature] = {
-    val regex = "([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)[ °]*(f|F|c|C|k|K|r|R)".r
+  private[squants] def parseTemperature(s: String): Try[Temperature] = {
+    val regex = "([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)*°? *(.{1})".r
     s match {
-      case regex(value, Fahrenheit.symbol) => Success(Fahrenheit(value.toDouble))
-      case regex(value, "f") => Success(Fahrenheit(value.toDouble))
-      case regex(value, "F") => Success(Fahrenheit(value.toDouble))
-      case regex(value, Celsius.symbol) => Success(Celsius(value.toDouble))
-      case regex(value, "c") => Success(Celsius(value.toDouble))
-      case regex(value, "C") => Success(Celsius(value.toDouble))
-      case regex(value, Kelvin.symbol) => Success(Kelvin(value.toDouble))
-      case regex(value, "k") => Success(Kelvin(value.toDouble))
-      case regex(value, "K") => Success(Kelvin(value.toDouble))
-      case regex(value, Rankine.symbol) => Success(Rankine(value.toDouble))
-      case regex(value, "r") => Success(Rankine(value.toDouble))
-      case regex(value, "R") => Success(Rankine(value.toDouble))
+      case regex(value, unit) => unit match {
+        case Fahrenheit.symbol | "f" | "F" => Success(Fahrenheit(value.toDouble))
+        case Celsius.symbol | "c" | "C" => Success(Celsius(value.toDouble))
+        case Kelvin.symbol | "k" | "K" => Success(Kelvin(value.toDouble))
+        case Rankine.symbol | "r" | "R" => Success(Rankine(value.toDouble))
+        case unknownUnit => Failure(new Exception(s"PureConfig library programmer error: The regex '$regex' found unit '$unknownUnit' which was not defined."))
+      }
       case _ => Failure(QuantityParseException("Unable to parse Temperature", s))
     }
   }
