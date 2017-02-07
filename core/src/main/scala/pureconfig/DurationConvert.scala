@@ -4,6 +4,7 @@
 package pureconfig
 
 import pureconfig.error.{ CannotConvert, ConfigReaderFailure }
+import pureconfig.ConfigConvert.catchReadError
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import scala.reflect.ClassTag
@@ -17,13 +18,7 @@ private[pureconfig] object DurationConvert {
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
   def fromString[D](durationString: String, ct: ClassTag[D]): Either[ConfigReaderFailure, Duration] = {
-    try {
-      Right(Duration(addZeroUnit(justAMinute(itsGreekToMe(durationString)))))
-    } catch {
-      case NonFatal(ex) =>
-        val err = s"Could not parse a ${ct.runtimeClass.getSimpleName} from '$durationString'. (try ns, us, ms, s, m, h, d). Error: $ex"
-        Left(CannotConvert(durationString, "Duration", err))
-    }
+    catchReadError(durationString, string => Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
   }
 
   private val zeroRegex = "\\s*[+-]?0+\\s*$".r
