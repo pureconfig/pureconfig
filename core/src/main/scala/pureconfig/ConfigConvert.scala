@@ -35,7 +35,7 @@ trait ConfigConvert[T] {
    * @return either a list of failures wrapped inside a `ConfigReaderFailures` or an object of type `Right[T]`
    *         representing the successfully converted value
    */
-  def from(config: ConfigValue): ConfigReaderResult[T]
+  def from(config: ConfigValue): Either[ConfigReaderFailures, T]
 
   /**
    * Converts a type `T` to a `ConfigValue`.
@@ -58,9 +58,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
 
-  type ConfigReaderResult[A] = Either[ConfigReaderFailures, A]
-
-  def combineResults[A, B, C](first: ConfigReaderResult[A], second: ConfigReaderResult[B])(f: (A, B) => C): ConfigReaderResult[C] =
+  def combineResults[A, B, C](first: Either[ConfigReaderFailures, A], second: Either[ConfigReaderFailures, B])(f: (A, B) => C): Either[ConfigReaderFailures, C] =
     (first, second) match {
       case (Right(a), Right(b)) => Right(f(a, b))
       case (Left(aFailures), Left(bFailures)) => Left(aFailures ++ bFailures)
@@ -68,13 +66,13 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case (l: Left[_, _], _) => l.asInstanceOf[Left[ConfigReaderFailures, Nothing]]
     }
 
-  def fail[A](failure: ConfigReaderFailure): ConfigReaderResult[A] = Left(ConfigReaderFailures(failure))
+  def fail[A](failure: ConfigReaderFailure): Either[ConfigReaderFailures, A] = Left(ConfigReaderFailures(failure))
 
-  def failWithThrowable[A](throwable: Throwable): ConfigReaderResult[A] = fail[A](ThrowableFailure(throwable))
+  def failWithThrowable[A](throwable: Throwable): Either[ConfigReaderFailures, A] = fail[A](ThrowableFailure(throwable))
 
-  private def eitherToResult[T](either: Either[ConfigReaderFailure, T]): ConfigReaderResult[T] =
+  private def eitherToResult[T](either: Either[ConfigReaderFailure, T]): Either[ConfigReaderFailures, T] =
     either match {
-      case r: Right[_, _] => r.asInstanceOf[ConfigReaderResult[T]]
+      case r: Right[_, _] => r.asInstanceOf[Either[ConfigReaderFailures, T]]
       case Left(failure) => Left(ConfigReaderFailures(failure))
     }
 
@@ -83,10 +81,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     case Failure(e) => Left(ThrowableFailure(e))
   }
 
-  private def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => ConfigReaderResult[T] =
+  private def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => Either[ConfigReaderFailures, T] =
     stringToEitherConvert[T](fromF andThen tryToEither[T])
 
-  private def stringToEitherConvert[T](fromF: String => Either[ConfigReaderFailure, T]): ConfigValue => ConfigReaderResult[T] =
+  private def stringToEitherConvert[T](fromF: String => Either[ConfigReaderFailure, T]): ConfigValue => Either[ConfigReaderFailures, T] =
     config => {
       // Because we can't trust Typesafe Config not to throw, we wrap the
       // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
@@ -108,12 +106,12 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   @deprecated(message = "The usage of Try has been deprecated. Please use fromStringReader instead", since = "0.6.0")
   def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): ConfigReaderResult[T] = stringToTryConvert(fromF)(config)
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToTryConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
   def fromStringReader[T](fromF: String => Either[ConfigReaderFailure, T]): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): ConfigReaderResult[T] = stringToEitherConvert(fromF)(config)
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
@@ -127,7 +125,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   def fromStringConvert[T](fromF: String => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): ConfigReaderResult[T] = stringToEitherConvert(fromF)(config)
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
@@ -151,13 +149,13 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   private[pureconfig] trait WrappedConfigConvert[Wrapped, SubRepr] extends ConfigConvert[SubRepr]
 
   private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends WrappedConfigConvert[Wrapped, SubRepr] {
-    final def from(config: ConfigValue): ConfigReaderResult[SubRepr] =
+    final def from(config: ConfigValue): Either[ConfigReaderFailures, SubRepr] =
       failWithThrowable(new IllegalStateException("Cannot call 'from' on a WrappedDefaultValueConfigConvert."))
-    def fromWithDefault(config: ConfigValue, default: DefaultRepr): ConfigReaderResult[SubRepr] = config match {
+    def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
       case other => fail(WrongType(foundTyp = other.valueType().toString, expectedTyp = "ConfigObject"))
     }
-    def fromConfigObject(co: ConfigObject, default: DefaultRepr): ConfigReaderResult[SubRepr]
+    def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
     def to(v: SubRepr): ConfigValue
   }
 
@@ -165,7 +163,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     implicit
     hint: ProductHint[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] = new WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] {
 
-    override def fromConfigObject(config: ConfigObject, default: HNil): ConfigReaderResult[HNil] = {
+    override def fromConfigObject(config: ConfigObject, default: HNil): Either[ConfigReaderFailures, HNil] = {
       if (!hint.allowUnknownKeys && !config.isEmpty) fail(UnknownKey(config.keySet.iterator.next))
       else Right(HNil)
     }
@@ -182,7 +180,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case e: ConfigReaderFailure => e
     }
 
-  private[pureconfig] def improveFailures[Z](result: ConfigReaderResult[Z], keyStr: String): ConfigReaderResult[Z] =
+  private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String): Either[ConfigReaderFailures, Z] =
     result.left.map {
       case ConfigReaderFailures(head, tail) =>
         val headImproved = improveFailure[Z](head, keyStr)
@@ -197,7 +195,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     tConfigConvert: Lazy[WrappedDefaultValueConfigConvert[Wrapped, T, U]],
     hint: ProductHint[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
-    override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): ConfigReaderResult[FieldType[K, V] :: T] = {
+    override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Either[ConfigReaderFailures, FieldType[K, V] :: T] = {
       val keyStr = hint.configKey(key.value.toString().tail)
       val headResult = improveFailures[V](
         (co.get(keyStr), vFieldConvert.value) match {
@@ -216,8 +214,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       (headResult, tailResult) match {
         case (Right(head), Right(tail)) => Right(field[K](head) :: tail)
         case (Left(headErrs), Left(tailErrs)) => Left(headErrs ++ tailErrs)
-        case (l: Left[_, _], _) => l.asInstanceOf[ConfigReaderResult[FieldType[K, V] :: T]]
-        case (_, l: Left[_, _]) => l.asInstanceOf[ConfigReaderResult[FieldType[K, V] :: T]]
+        case (l: Left[_, _], _) => l.asInstanceOf[Either[ConfigReaderFailures, FieldType[K, V] :: T]]
+        case (_, l: Left[_, _]) => l.asInstanceOf[Either[ConfigReaderFailures, FieldType[K, V] :: T]]
       }
     }
 
@@ -241,7 +239,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   }
 
   implicit def cNilConfigConvert[Wrapped]: WrappedConfigConvert[Wrapped, CNil] = new WrappedConfigConvert[Wrapped, CNil] {
-    override def from(config: ConfigValue): ConfigReaderResult[CNil] =
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, CNil] =
       fail(NoValidCoproductChoiceFound(config))
 
     override def to(t: CNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
@@ -255,7 +253,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     tConfigConvert: Lazy[WrappedConfigConvert[Wrapped, T]]): WrappedConfigConvert[Wrapped, FieldType[Name, V] :+: T] =
     new WrappedConfigConvert[Wrapped, FieldType[Name, V] :+: T] {
 
-      override def from(config: ConfigValue): ConfigReaderResult[FieldType[Name, V] :+: T] =
+      override def from(config: ConfigValue): Either[ConfigReaderFailures, FieldType[Name, V] :+: T] =
         coproductHint.from(config, vName.value.name) match {
           case Right(Some(hintConfig)) =>
             vFieldConvert.value.from(hintConfig) match {
@@ -287,7 +285,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   implicit def deriveOption[T](implicit conv: Lazy[ConfigConvert[T]]) = new OptionConfigConvert[T]
 
   class OptionConfigConvert[T](implicit conv: Lazy[ConfigConvert[T]]) extends ConfigConvert[Option[T]] with AllowMissingKey {
-    override def from(config: ConfigValue): ConfigReaderResult[Option[T]] = {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, Option[T]] = {
       if (config == null || config.unwrapped() == null)
         Right(None)
       else
@@ -308,7 +306,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     configConvert: Lazy[ConfigConvert[T]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigConvert[F[T]] {
 
-    override def from(config: ConfigValue): ConfigReaderResult[F[T]] = {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, F[T]] = {
       config match {
         case co: ConfigList =>
           val z: Either[ConfigReaderFailures, Builder[T, F[T]]] = Right(cbf())
@@ -320,7 +318,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
           }.right.map(_.result())
         case o: ConfigObject =>
           val z: Either[ConfigReaderFailures, List[(Int, T)]] = Right(List.empty[(Int, T)])
-          def keyValueReader(key: String, value: ConfigValue): ConfigReaderResult[(Int, T)] = {
+          def keyValueReader(key: String, value: ConfigValue): Either[ConfigReaderFailures, (Int, T)] = {
             val keyResult = catchReadError(key, _.toInt).left.flatMap(t => fail(CannotConvert(key, "Int",
               s"To convert an object to a collection, it's keys must be read as Int but key $key has value" +
                 s"$value which cannot converted. Error: ${t.because}")))
@@ -349,10 +347,10 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   implicit def deriveMap[T](implicit configConvert: Lazy[ConfigConvert[T]]) = new ConfigConvert[Map[String, T]] {
 
-    override def from(config: ConfigValue): ConfigReaderResult[Map[String, T]] = {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, Map[String, T]] = {
       config match {
         case co: ConfigObject =>
-          val z: ConfigReaderResult[Map[String, T]] = Right(Map.empty[String, T])
+          val z: Either[ConfigReaderFailures, Map[String, T]] = Right(Map.empty[String, T])
 
           co.asScala.foldLeft(z) {
             case (acc, (key, value)) =>
@@ -376,7 +374,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cc: Lazy[WrappedDefaultValueConfigConvert[F, Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
-    override def from(config: ConfigValue): ConfigReaderResult[F] = {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, F] = {
       cc.value.fromWithDefault(config, default()).right.map(gen.from)
     }
 
@@ -390,7 +388,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[WrappedConfigConvert[F, Repr]]): ConfigConvert[F] = new ConfigConvert[F] {
-    override def from(config: ConfigValue): ConfigReaderResult[F] = {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, F] = {
       cc.value.from(config).right.map(gen.from)
     }
 
@@ -452,7 +450,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readUUID = fromNonEmptyStringConvert[UUID](catchReadError(_, s => UUID.fromString(s)), _.toString)
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
-    override def from(config: ConfigValue): ConfigReaderResult[Config] = config match {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {
       case co: ConfigObject => Right(co.toConfig)
       case other => fail(WrongType(other.valueType().toString, "ConfigObject"))
     }
@@ -460,7 +458,7 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val readConfigObject: ConfigConvert[ConfigObject] = new ConfigConvert[ConfigObject] {
-    override def from(config: ConfigValue): ConfigReaderResult[ConfigObject] = config match {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigObject] = config match {
       case c: ConfigObject => Right(c)
       case other => fail(WrongType(other.valueType().toString, "ConfigObject"))
     }
@@ -468,12 +466,12 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val readConfigValue: ConfigConvert[ConfigValue] = new ConfigConvert[ConfigValue] {
-    override def from(config: ConfigValue): ConfigReaderResult[ConfigValue] = Right(config)
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigValue] = Right(config)
     override def to(t: ConfigValue): ConfigValue = t
   }
 
   implicit val readConfigList: ConfigConvert[ConfigList] = new ConfigConvert[ConfigList] {
-    override def from(config: ConfigValue): ConfigReaderResult[ConfigList] = config match {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigList] = config match {
       case c: ConfigList => Right(c)
       case other => fail(WrongType(other.valueType().toString, "ConfigList"))
     }

@@ -8,10 +8,7 @@ import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
 import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig }
-import pureconfig.ConfigConvert.ConfigReaderResult
-import pureconfig.error.ConfigReaderException
-
-import scala.reflect.ClassTag
+import pureconfig.error.ConfigReaderFailures
 
 package object pureconfig {
 
@@ -22,7 +19,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config](implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] = {
+  def loadConfig[Config](implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     loadConfig[Config](ConfigFactory.load())(conv)
   }
@@ -35,7 +32,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] = {
+  def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     ConfigConvert.improveFailures[Config](loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv), namespace)
   }
@@ -48,7 +45,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config](path: Path)(implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] = {
+  def loadConfig[Config](path: Path)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))(conv)
   }
@@ -62,18 +59,18 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] = {
+  def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     ConfigConvert.improveFailures[Config](
       loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv), namespace)
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
-  def loadConfig[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] =
+  def loadConfig[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] =
     conv.from(conf.root())
 
   /** Load a configuration of type `Config` from the given `Config` */
-  def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] = {
+  def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigConvert.improveFailures[Config](conv.from(conf.getConfig(namespace).root()), namespace)
   }
 
@@ -85,7 +82,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfigWithFallback[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] = {
+  def loadConfigWithFallback[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     loadConfig[Config](conf.withFallback(ConfigFactory.load()))
   }
@@ -99,7 +96,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfigWithFallback[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): ConfigReaderResult[Config] = {
+  def loadConfigWithFallback[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     loadConfig[Config](conf.withFallback(ConfigFactory.load()), namespace)
   }
@@ -145,7 +142,7 @@ package object pureconfig {
    *
    * @param files Files ordered in decreasing priority containing part or all of a `Config`. Must not be empty.
    */
-  def loadConfigFromFiles[Config: ConfigConvert](files: Traversable[java.io.File]): ConfigReaderResult[Config] = {
+  def loadConfigFromFiles[Config: ConfigConvert](files: Traversable[java.io.File]): Either[ConfigReaderFailures, Config] = {
     if (files.isEmpty) {
       ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))
     } else {
@@ -157,17 +154,4 @@ package object pureconfig {
     }
   }
 
-  implicit class RightConfigReaderResult[T](val result: ConfigReaderResult[T])(implicit ct: ClassTag[T]) {
-
-    /**
-     * @return the value inside the result if reading was successful, throws a [[ConfigReaderException]] otherwise
-     */
-    @throws[ConfigReaderException[_]]
-    def get: T = result match {
-      case Right(t) => t
-      case Left(failures) =>
-        throw new ConfigReaderException[T](failures)
-    }
-
-  }
 }

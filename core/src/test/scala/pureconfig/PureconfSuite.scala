@@ -21,7 +21,7 @@ import org.scalacheck.Gen.uuid
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert.{ ConfigReaderResult, fromStringReader, fromStringConvert, catchReadError }
+import pureconfig.ConfigConvert.{ fromStringReader, fromStringConvert, catchReadError }
 import pureconfig.error._
 
 /**
@@ -562,7 +562,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
     val expected = Duration(220, TimeUnit.DAYS)
     implicit val readDurationBadly = new ConfigConvert[Duration] {
-      override def from(config: ConfigValue): ConfigReaderResult[Duration] = Right(expected)
+      override def from(config: ConfigValue): Either[ConfigReaderFailures, Duration] = Right(expected)
       override def to(t: Duration): ConfigValue = throw new Exception("Not Implemented")
     }
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "42 h").asJava).toConfig)(ConfigConvert[ConfWithDuration]).right.value shouldBe ConfWithDuration(expected)
@@ -570,7 +570,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "custom ConfigConvert should not cause implicit resolution failure and should be used" in {
     implicit val custom: ConfigConvert[Foo] = new ConfigConvert[Foo] {
-      def from(config: ConfigValue): ConfigReaderResult[Foo] = {
+      def from(config: ConfigValue): Either[ConfigReaderFailures, Foo] = {
         val s = config.asInstanceOf[ConfigObject].get("i").render()
         catchReadError(s, s => Foo(s.toInt + 1)).left.map(ConfigReaderFailures.apply)
       }
