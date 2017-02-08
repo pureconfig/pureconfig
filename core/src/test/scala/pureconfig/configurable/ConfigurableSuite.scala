@@ -157,6 +157,6 @@ object ConfigurableSuite {
     Arbitrary(
       for {
         localDateTime <- localDateTimeArbitrary.arbitrary
-        zoneId <- zoneIdArbitrary.arbitrary
+        zoneId <- zoneIdArbitrary.arbitrary.suchThat(_ != ZoneId.of("GMT0")) // Avoid JDK-8138664
       } yield ZonedDateTime.of(localDateTime, zoneId))
 }
