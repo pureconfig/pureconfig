@@ -19,6 +19,7 @@ import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
+import org.scalacheck.Gen.uuid
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
@@ -602,8 +603,8 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     config.toOption.value.uuid shouldBe UUID.fromString(expected)
   }
 
-  it should "round trip a UUID" in {
-    saveAndLoadIsIdentity(ConfWithUUID(UUID.randomUUID()))
+  it should "round trip a UUID" in forAll(uuid) { (uuid: UUID) =>
+    saveAndLoadIsIdentity(ConfWithUUID(uuid))
   }
 
   it should "allow a custom ConfigConvert[UUID] to override our definition" in {
