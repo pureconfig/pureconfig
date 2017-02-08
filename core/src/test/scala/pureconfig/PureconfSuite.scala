@@ -7,12 +7,14 @@ import java.io.PrintWriter
 import java.net.URL
 import java.nio.file.{ Files, Path }
 import java.time._
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import scala.util.{ Failure, Success, Try }
+
 import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -590,6 +592,25 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     implicit val readURLBadly = fromString[URL](_ => Try(new URL(expected)))
     val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
     config.toOption.value.url shouldBe new URL(expected)
+  }
+
+  case class ConfWithUUID(uuid: UUID)
+
+  it should "be able to read a config with a UUID" in {
+    val expected = "d25aed6a-ef6d-4c10-954c-02edc949aef1"
+    val config = loadConfig[ConfWithUUID](ConfigValueFactory.fromMap(Map("uuid" -> expected).asJava).toConfig)
+    config.toOption.value.uuid shouldBe UUID.fromString(expected)
+  }
+
+  it should "round trip a UUID" in {
+    saveAndLoadIsIdentity(ConfWithUUID(UUID.randomUUID()))
+  }
+
+  it should "allow a custom ConfigConvert[UUID] to override our definition" in {
+    val expected = "bcd787fe-f510-4f84-9e64-f843afd19c60"
+    implicit val readUUIDBadly = fromString[UUID](_ => Try(UUID.fromString(expected)))
+    val config = loadConfig[ConfWithUUID](ConfigValueFactory.fromMap(Map("uuid" -> "ignored").asJava).toConfig)
+    config.toOption.value.uuid shouldBe UUID.fromString(expected)
   }
 
   case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
