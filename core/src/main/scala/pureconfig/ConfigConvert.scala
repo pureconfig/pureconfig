@@ -9,7 +9,6 @@ package pureconfig
 import com.typesafe.config._
 import shapeless._
 import shapeless.labelled._
-
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
@@ -17,11 +16,12 @@ import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
 import java.net.URL
 import java.time._
+import java.util.UUID
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+
 import pureconfig.ConfigConvert.{ fromNonEmptyString, fromString, nonEmptyStringConvert, stringConvert }
 import pureconfig.error._
-
 import scala.collection.mutable.Builder
 import scala.util.control.NonFatal
 
@@ -387,6 +387,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readLong = fromNonEmptyString[Long](s => Try(s.toLong))
   implicit val readShort = fromNonEmptyString[Short](s => Try(s.toShort))
   implicit val readURL = stringConvert[URL](s => Try(new URL(s)), _.toString)
+  implicit val readUUID = stringConvert[UUID](s => Try(UUID.fromString(s)), _.toString)
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Try[Config] = config match {
