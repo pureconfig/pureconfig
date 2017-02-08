@@ -11,6 +11,7 @@ import pureconfig.syntax._
 
 import _root_.squants._
 import _root_.squants.market._
+import _root_.squants.thermal.{ Celsius, Fahrenheit, Rankine }
 
 import com.typesafe.config.ConfigFactory
 
@@ -81,6 +82,39 @@ class SquantsConvertTest extends FlatSpec with Matchers with TryValues with Prop
 
   it should "parse Money" in forAll { (m: Money) =>
     checkConfig(SquantConfig(m))
+  }
+
+  it should "parse temperatures from properly formatted Strings" in {
+    parseTemperature("10.22°F").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22°K").get should be(Kelvin(10.22))
+    parseTemperature("10.22°C").get should be(Celsius(10.22))
+    parseTemperature("10.22°R").get should be(Rankine(10.22))
+    parseTemperature("10.22 F").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22 K").get should be(Kelvin(10.22))
+    parseTemperature("10.22 C").get should be(Celsius(10.22))
+    parseTemperature("10.22 R").get should be(Rankine(10.22))
+    parseTemperature("7.06E123°F").get should be(Fahrenheit(7.06e123))
+    parseTemperature("7.06E123 F").get should be(Fahrenheit(7.06e123))
+    parseTemperature("7.06E123°K").get should be(Kelvin(7.06e123))
+    parseTemperature("7.06E123 K").get should be(Kelvin(7.06e123))
+    parseTemperature("7.06E123°C").get should be(Celsius(7.06e123))
+    parseTemperature("7.06E123 C").get should be(Celsius(7.06e123))
+    parseTemperature("7.06E123°R").get should be(Rankine(7.06e123))
+    parseTemperature("7.06E123 R").get should be(Rankine(7.06e123))
+    parseTemperature("10.22 Z").failed.get should be(QuantityParseException("Unable to parse Temperature", "10.22 Z"))
+    parseTemperature("ZZ F").failed.get should be(QuantityParseException("Unable to parse Temperature", "ZZ F"))
+  }
+
+  it should "be flexible in parsing temperature with regard to degree symbol and whitespace" in {
+    parseTemperature("10.22 f").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22 °f").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22  °f").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22 ° f").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22 °   f").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22  °   f").get should be(Fahrenheit(10.22))
+    parseTemperature("10.22°f").get should be(Fahrenheit(10.22))
+
+    parseTemperature("10.22°°f").failed.get should be(QuantityParseException("Unable to parse Temperature", "10.22°°f"))
   }
 
   case class SquantConfig[T](value: T)
