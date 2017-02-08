@@ -164,14 +164,13 @@ package object squants {
   // This is temporary until https://github.com/typelevel/squants/pull/183 is released (1.2.0 ???)
   // Without it, ScalaCheck has a pretty easy time breaking the conversion
   private[squants] def parseTemperature(s: String): Try[Temperature] = {
-    val regex = "([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)[ °]*(f|F|c|C|k|K|r|R)".r
+    val regex = "([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)* *°? *(f|F|c|C|k|K|r|R)".r
     s match {
       case regex(value, unit) => unit match {
-        case Fahrenheit.symbol | "f" | "F" => Success(Fahrenheit(value.toDouble))
-        case Celsius.symbol | "c" | "C" => Success(Celsius(value.toDouble))
-        case Kelvin.symbol | "k" | "K" => Success(Kelvin(value.toDouble))
-        case Rankine.symbol | "r" | "R" => Success(Rankine(value.toDouble))
-        case unknownUnit => Failure(new Exception(s"PureConfig developer error: Regex '$regex' found unit '$unknownUnit' which was not handled."))
+        case "f" | "F" => Success(Fahrenheit(value.toDouble))
+        case "c" | "C" => Success(Celsius(value.toDouble))
+        case "k" | "K" => Success(Kelvin(value.toDouble))
+        case "r" | "R" => Success(Rankine(value.toDouble))
       }
       case _ => Failure(QuantityParseException("Unable to parse Temperature", s))
     }
