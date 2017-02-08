@@ -83,10 +83,6 @@ class SquantsConvertTest extends FlatSpec with Matchers with TryValues with Prop
     checkConfig(SquantConfig(m))
   }
 
-  it should "give informative message on invalid temperature unit" in {
-    parseTemperature("12.34°Q").failure.exception.getMessage should endWith("found unit 'Q' which was not defined.")
-  }
-
   case class SquantConfig[T](value: T)
 
   def checkDimension[T <: Quantity[T]](dim: Dimension[T])(implicit tag: ClassTag[T], cc: ConfigConvert[T]): Unit = {
