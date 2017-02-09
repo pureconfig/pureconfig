@@ -107,6 +107,7 @@ Currently supported types for fields are:
 - `Map` with `String` keys and any value type that is in this list;
 - everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
   configured first - see [Configurable converters](#configurable-converters));
+- [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - case classes;
 - sealed families of case classes (ADTs).
