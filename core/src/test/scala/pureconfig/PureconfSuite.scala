@@ -604,7 +604,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   it should "be able to read a config with a UUID" in {
     val expected = "d25aed6a-ef6d-4c10-954c-02edc949aef1"
     val config = loadConfig[ConfWithUUID](ConfigValueFactory.fromMap(Map("uuid" -> expected).asJava).toConfig)
-    config.toOption.value.uuid shouldBe UUID.fromString(expected)
+    config.right.value.uuid shouldBe UUID.fromString(expected)
   }
 
   it should "round trip a UUID" in forAll(uuid) { (uuid: UUID) =>
@@ -615,7 +615,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     val expected = "bcd787fe-f510-4f84-9e64-f843afd19c60"
     implicit val readUUIDBadly = fromStringReader[UUID](_ => catchReadError(expected, s => UUID.fromString(s)))
     val config = loadConfig[ConfWithUUID](ConfigValueFactory.fromMap(Map("uuid" -> "ignored").asJava).toConfig)
-    config.toOption.value.uuid shouldBe UUID.fromString(expected)
+    config.right.value.uuid shouldBe UUID.fromString(expected)
   }
 
   case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
