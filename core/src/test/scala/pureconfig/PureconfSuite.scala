@@ -618,7 +618,6 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
 
   it should "be able to read a config with a Path" in {
     val expected = "/tmp/foo.bar"
-    val thing = ConfigValueFactory.fromMap(Map("myPath" -> expected).asJava)
     val config = loadConfig[ConfWithPath](ConfigValueFactory.fromMap(Map("my-path" -> expected).asJava).toConfig)
     config.toOption.value.myPath shouldBe Paths.get(expected)
   }
