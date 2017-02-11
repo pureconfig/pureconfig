@@ -104,6 +104,37 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     case x => Right(x)
   }
 
+  def catchReadError[T](f: String => T)(implicit ct: ClassTag[T]): String => Either[CannotConvert, T] =
+    (s: String) => {
+      try (Right(f(s))) catch {
+        case NonFatal(ex) => Left(CannotConvert(s, ct.toString(), ex.toString))
+      }
+    }
+
+  /**
+   * Convert a `String => Try` into a  `String => Either` such that after application
+   * - `Success(t)` becomes `Right(t)`
+   * - `Failure(e)` becomes `Left(CannotConvert(value, type, e.getMessage)`
+   */
+  def tryF[T](f: String => Try[T])(implicit ct: ClassTag[T]): String => Either[CannotConvert, T] =
+    (s: String) =>
+      f(s) match {
+        case Success(t) => Right(t)
+        case Failure(e) => Left(CannotConvert(s, ct.runtimeClass.getName, e.getLocalizedMessage))
+      }
+
+  /**
+   * Convert a `String => Option` into a `String => Either` such that after application
+   * - `Some(t)` becomes `Right(t)`
+   * - `None` becomes `Left(CannotConvert(value, type, "")`
+   */
+  def optF[T](f: String => Option[T])(implicit ct: ClassTag[T]): String => Either[CannotConvert, T] =
+    (s: String) =>
+      f(s) match {
+        case Some(t) => Right(t)
+        case None => Left(CannotConvert(s, ct.runtimeClass.getName, ""))
+      }
+
   @deprecated(message = "The usage of Try has been deprecated. Please use fromStringReader instead", since = "0.6.0")
   def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToTryConvert(fromF)(config)
@@ -115,6 +146,14 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
+  def fromStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromStringReader[T](tryF(fromF))
+  }
+
+  def fromStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromStringReader[T](optF(fromF))
+  }
+
   @deprecated(message = "The usage of Try has been deprecated. Please use fromNonEmptyStringReader instead", since = "0.6.0")
   def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
     fromNonEmptyStringReader[T](fromF andThen tryToEither[T])
@@ -124,26 +163,45 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     fromStringReader(ensureNonEmpty(ct)(_).right.flatMap(fromF))
   }
 
-  def fromStringConvert[T](fromF: String => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
+  def fromNonEmptyStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromNonEmptyStringReader[T](tryF(fromF))
   }
 
-  def fromNonEmptyStringConvert[T](fromF: String => Either[ConfigReaderFailure, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] =
-    fromStringConvert[T](ensureNonEmpty(ct)(_).right.flatMap(fromF), toF)
+  def fromNonEmptyStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromNonEmptyStringReader[T](optF(fromF))
+  }
 
   @deprecated(message = "The usage of Try has been deprecated. Please use fromStringConvert instead", since = "0.6.0")
   def stringConvert[T](fromF: String => Try[T], toF: T => String): ConfigConvert[T] =
     fromStringConvert[T](fromF andThen tryToEither, toF)
 
+  def fromStringConvert[T](fromF: String => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
+    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
+  }
+
+  def fromStringConvertTry[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromStringConvert[T](tryF(fromF), toF)
+  }
+
+  def fromStringConvertOpt[T](fromF: String => Option[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromStringConvert[T](optF(fromF), toF)
+  }
+
   @deprecated(message = "The usage of Try has been deprecated. Please use fromNonEmptyStringConvert instead", since = "0.6.0")
   def nonEmptyStringConvert[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] =
     fromNonEmptyStringConvert[T](fromF andThen tryToEither[T], toF)
 
-  def catchReadError[T](value: String, f: String => T)(implicit ct: ClassTag[T]): Either[CannotConvert, T] = {
-    try (Right(f(value))) catch {
-      case NonFatal(ex) => Left(CannotConvert(value, ct.toString(), ex.toString))
-    }
+  def fromNonEmptyStringConvert[T](fromF: String => Either[ConfigReaderFailure, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromStringConvert[T](ensureNonEmpty(ct)(_).right.flatMap(fromF), toF)
+  }
+
+  def fromNonEmptyStringConvertTry[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]) = {
+    fromNonEmptyStringConvert[T](tryF(fromF), toF)
+  }
+
+  def fromNonEmptyStringConvertOpt[T](fromF: String => Option[T], toF: T => String)(implicit ct: ClassTag[T]) = {
+    fromNonEmptyStringConvert[T](optF(fromF), toF)
   }
 
   private[pureconfig] trait WrappedConfigConvert[Wrapped, SubRepr] extends ConfigConvert[SubRepr]
@@ -316,7 +374,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
         case o: ConfigObject =>
           val z: Either[ConfigReaderFailures, List[(Int, T)]] = Right(List.empty[(Int, T)])
           def keyValueReader(key: String, value: ConfigValue): Either[ConfigReaderFailures, (Int, T)] = {
-            val keyResult = catchReadError(key, _.toInt).left.flatMap(t => fail(CannotConvert(key, "Int",
+            val keyResult = catchReadError(_.toInt)(implicitly)(key).left.flatMap(t => fail(CannotConvert(key, "Int",
               s"To convert an object to a collection, it's keys must be read as Int but key $key has value" +
                 s"$value which cannot converted. Error: ${t.because}")))
             val valueResult = configConvert.value.from(value)
@@ -400,14 +458,12 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
  */
 trait LowPriorityConfigConvertImplicits {
   implicit val durationConfigConvert: ConfigConvert[Duration] = {
-    fromNonEmptyStringConvert[Duration](
-      s => DurationConvert.fromString(s, implicitly[ClassTag[Duration]]),
-      DurationConvert.fromDuration)
+    fromNonEmptyStringConvert[Duration](DurationConvert.fromString, DurationConvert.fromDuration)
   }
 
   implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = {
     val fromString: String => Either[ConfigReaderFailure, FiniteDuration] = { (s: String) =>
-      DurationConvert.fromString(s, implicitly[ClassTag[FiniteDuration]]).right.flatMap {
+      DurationConvert.fromString(s).right.flatMap {
         case d: FiniteDuration => Right(d)
         case _ => Left(CannotConvert(s, "FiniteDuration", s"Couldn't parse '$s' into a FiniteDuration because it's infinite."))
       }
@@ -416,35 +472,35 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val instantConfigConvert: ConfigConvert[Instant] =
-    fromNonEmptyStringReader[Instant](catchReadError(_, Instant.parse))
+    fromNonEmptyStringReader[Instant](catchReadError(Instant.parse))
 
   implicit val zoneOffsetConfigConvert: ConfigConvert[ZoneOffset] =
-    fromNonEmptyStringReader[ZoneOffset](catchReadError(_, ZoneOffset.of))
+    fromNonEmptyStringReader[ZoneOffset](catchReadError(ZoneOffset.of))
 
   implicit val zoneIdConfigConvert: ConfigConvert[ZoneId] =
-    fromNonEmptyStringReader[ZoneId](catchReadError(_, ZoneId.of))
+    fromNonEmptyStringReader[ZoneId](catchReadError(ZoneId.of))
 
   implicit val periodConfigConvert: ConfigConvert[Period] =
-    fromNonEmptyStringReader[Period](catchReadError(_, Period.parse))
+    fromNonEmptyStringReader[Period](catchReadError(Period.parse))
 
   implicit val yearConfigConvert: ConfigConvert[Year] =
-    fromNonEmptyStringReader[Year](catchReadError(_, Year.parse))
+    fromNonEmptyStringReader[Year](catchReadError(Year.parse))
 
   implicit val readString = fromStringReader[String](Right(_))
-  implicit val readBoolean = fromNonEmptyStringReader[Boolean](catchReadError(_, _.toBoolean))
-  implicit val readDouble = fromNonEmptyStringReader[Double](catchReadError(_, {
+  implicit val readBoolean = fromNonEmptyStringReader[Boolean](catchReadError(_.toBoolean))
+  implicit val readDouble = fromNonEmptyStringReader[Double](catchReadError({
     case v if v.last == '%' => v.dropRight(1).toDouble / 100d
     case v => v.toDouble
   }))
-  implicit val readFloat = fromNonEmptyStringReader[Float](catchReadError(_, {
+  implicit val readFloat = fromNonEmptyStringReader[Float](catchReadError({
     case v if v.last == '%' => v.dropRight(1).toFloat / 100f
     case v => v.toFloat
   }))
-  implicit val readInt = fromNonEmptyStringReader[Int](catchReadError(_, _.toInt))
-  implicit val readLong = fromNonEmptyStringReader[Long](catchReadError(_, _.toLong))
-  implicit val readShort = fromNonEmptyStringReader[Short](catchReadError(_, _.toShort))
-  implicit val readURL = fromNonEmptyStringConvert[URL](catchReadError(_, s => new URL(s)), _.toString)
-  implicit val readUUID = fromNonEmptyStringConvert[UUID](catchReadError(_, s => UUID.fromString(s)), _.toString)
+  implicit val readInt = fromNonEmptyStringReader[Int](catchReadError(_.toInt))
+  implicit val readLong = fromNonEmptyStringReader[Long](catchReadError(_.toLong))
+  implicit val readShort = fromNonEmptyStringReader[Short](catchReadError(_.toShort))
+  implicit val readURL = fromNonEmptyStringConvert[URL](catchReadError(new URL(_)), _.toString)
+  implicit val readUUID = fromNonEmptyStringConvert[UUID](catchReadError(UUID.fromString), _.toString)
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {

@@ -23,33 +23,33 @@ package object configurable {
 
   def localDateConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDate] =
     fromNonEmptyStringConvert[LocalDate](
-      catchReadError(_, LocalDate.parse(_, formatter)), _.format(formatter))
+      catchReadError(LocalDate.parse(_, formatter)), _.format(formatter))
 
   def localTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalTime] =
     fromNonEmptyStringConvert[LocalTime](
-      catchReadError(_, LocalTime.parse(_, formatter)), _.format(formatter))
+      catchReadError(LocalTime.parse(_, formatter)), _.format(formatter))
 
   def localDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
     fromNonEmptyStringConvert[LocalDateTime](
-      catchReadError(_, LocalDateTime.parse(_, formatter)), _.format(formatter))
+      catchReadError(LocalDateTime.parse(_, formatter)), _.format(formatter))
 
   def monthDayConfigConvert(formatter: DateTimeFormatter): ConfigConvert[MonthDay] =
     fromNonEmptyStringConvert[MonthDay](
-      catchReadError(_, MonthDay.parse(_, formatter)), _.format(formatter))
+      catchReadError(MonthDay.parse(_, formatter)), _.format(formatter))
 
   def offsetDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[OffsetDateTime] =
     fromNonEmptyStringConvert[OffsetDateTime](
-      catchReadError(_, OffsetDateTime.parse(_, formatter)), _.format(formatter))
+      catchReadError(OffsetDateTime.parse(_, formatter)), _.format(formatter))
 
   def offsetTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[OffsetTime] =
     fromNonEmptyStringConvert[OffsetTime](
-      catchReadError(_, OffsetTime.parse(_, formatter)), _.format(formatter))
+      catchReadError(OffsetTime.parse(_, formatter)), _.format(formatter))
 
   def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
     fromNonEmptyStringConvert[YearMonth](
-      catchReadError(_, YearMonth.parse(_, formatter)), _.format(formatter))
+      catchReadError(YearMonth.parse(_, formatter)), _.format(formatter))
 
   def zonedDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[ZonedDateTime] =
     fromNonEmptyStringConvert[ZonedDateTime](
-      catchReadError(_, ZonedDateTime.parse(_, formatter)), _.format(formatter))
+      catchReadError(ZonedDateTime.parse(_, formatter)), _.format(formatter))
 }

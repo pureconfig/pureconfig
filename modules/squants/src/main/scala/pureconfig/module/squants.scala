@@ -2,7 +2,7 @@ package pureconfig.module
 
 import scala.util.{ Failure, Success, Try }
 
-import pureconfig.ConfigConvert
+import pureconfig.ConfigConvert._
 
 import _root_.squants.QuantityParseException
 import _root_.squants.electro._
@@ -26,140 +26,140 @@ import _root_.squants.time._
  *
  * {{{
  *   implicit def dimensionConfigConvert[T <: Quantity[T]](dim: Dimension[T])(implicit tag: ClassTag[T]) =
- *     ConfigConvert.nonEmptyStringConvert[T](dim.parse, _.toString)
+ *     fromNonEmptyStringConvertTry[T](dim.parse, _.toString)
  * }}}
  */
 package object squants {
 
   // electro
   implicit val capacitanceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Capacitance](Capacitance.apply, _.toString)
+    fromNonEmptyStringConvertTry[Capacitance](Capacitance.apply, _.toString)
   implicit val conductivityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Conductivity](Conductivity.apply, _.toString)
+    fromNonEmptyStringConvertTry[Conductivity](Conductivity.apply, _.toString)
   implicit val electricChargeConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[ElectricCharge](ElectricCharge.apply, _.toString)
+    fromNonEmptyStringConvertTry[ElectricCharge](ElectricCharge.apply, _.toString)
   implicit val electricCurrentConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[ElectricCurrent](ElectricCurrent.apply, _.toString)
+    fromNonEmptyStringConvertTry[ElectricCurrent](ElectricCurrent.apply, _.toString)
   implicit val electricPotentialConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[ElectricPotential](ElectricPotential.apply, _.toString)
+    fromNonEmptyStringConvertTry[ElectricPotential](ElectricPotential.apply, _.toString)
   implicit val electricalConductanceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[ElectricalConductance](ElectricalConductance.apply, _.toString)
+    fromNonEmptyStringConvertTry[ElectricalConductance](ElectricalConductance.apply, _.toString)
   implicit val electricalResistanceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[ElectricalResistance](ElectricalResistance.apply, _.toString)
+    fromNonEmptyStringConvertTry[ElectricalResistance](ElectricalResistance.apply, _.toString)
   implicit val inductanceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Inductance](Inductance.apply, _.toString)
+    fromNonEmptyStringConvertTry[Inductance](Inductance.apply, _.toString)
   implicit val magneticFluxConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[MagneticFlux](MagneticFlux.apply, _.toString)
+    fromNonEmptyStringConvertTry[MagneticFlux](MagneticFlux.apply, _.toString)
   implicit val magneticFluxDensityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[MagneticFluxDensity](MagneticFluxDensity.apply, _.toString)
+    fromNonEmptyStringConvertTry[MagneticFluxDensity](MagneticFluxDensity.apply, _.toString)
   implicit val resistivityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Resistivity](Resistivity.apply, _.toString)
+    fromNonEmptyStringConvertTry[Resistivity](Resistivity.apply, _.toString)
 
   // energy
   implicit val energyConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Energy](Energy.apply, _.toString)
+    fromNonEmptyStringConvertTry[Energy](Energy.apply, _.toString)
   implicit val energyDensityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[EnergyDensity](EnergyDensity.apply, _.toString)
+    fromNonEmptyStringConvertTry[EnergyDensity](EnergyDensity.apply, _.toString)
   implicit val powerConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Power](Power.apply, _.toString)
+    fromNonEmptyStringConvertTry[Power](Power.apply, _.toString)
   implicit val powerRampConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[PowerRamp](PowerRamp.apply, _.toString)
+    fromNonEmptyStringConvertTry[PowerRamp](PowerRamp.apply, _.toString)
   implicit val SpecificEnergyConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[SpecificEnergy](SpecificEnergy.apply, _.toString)
+    fromNonEmptyStringConvertTry[SpecificEnergy](SpecificEnergy.apply, _.toString)
 
   // information
   implicit val informationConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Information](Information.apply, _.toString)
+    fromNonEmptyStringConvertTry[Information](Information.apply, _.toString)
   implicit val dataRateConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[DataRate](DataRate.apply, _.toString)
+    fromNonEmptyStringConvertTry[DataRate](DataRate.apply, _.toString)
 
   // market
   implicit val moneyDensityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Money](Money.apply, _.toString)
+    fromNonEmptyStringConvertTry[Money](Money.apply, _.toString)
 
   // mass
   implicit val areaDensityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[AreaDensity](AreaDensity.apply, _.toString)
+    fromNonEmptyStringConvertTry[AreaDensity](AreaDensity.apply, _.toString)
   implicit val chemicalAmountConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[ChemicalAmount](ChemicalAmount.apply, _.toString)
+    fromNonEmptyStringConvertTry[ChemicalAmount](ChemicalAmount.apply, _.toString)
   implicit val densityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Density](Density.apply, _.toString)
+    fromNonEmptyStringConvertTry[Density](Density.apply, _.toString)
   implicit val massConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Mass](Mass.apply, _.toString)
+    fromNonEmptyStringConvertTry[Mass](Mass.apply, _.toString)
 
   // motion
   implicit val accelerationConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Acceleration](Acceleration.apply, _.toString)
+    fromNonEmptyStringConvertTry[Acceleration](Acceleration.apply, _.toString)
   implicit val angularVelocityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[AngularVelocity](AngularVelocity.apply, _.toString)
+    fromNonEmptyStringConvertTry[AngularVelocity](AngularVelocity.apply, _.toString)
   implicit val forceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Force](Force.apply, _.toString)
+    fromNonEmptyStringConvertTry[Force](Force.apply, _.toString)
   implicit val jerkConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Jerk](Jerk.apply, _.toString)
+    fromNonEmptyStringConvertTry[Jerk](Jerk.apply, _.toString)
   implicit val massFlowConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[MassFlow](MassFlow.apply, _.toString)
+    fromNonEmptyStringConvertTry[MassFlow](MassFlow.apply, _.toString)
   implicit val momentumConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Momentum](Momentum.apply, _.toString)
+    fromNonEmptyStringConvertTry[Momentum](Momentum.apply, _.toString)
   implicit val pressureConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Pressure](Pressure.apply, _.toString)
+    fromNonEmptyStringConvertTry[Pressure](Pressure.apply, _.toString)
   implicit val pressureChangeConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[PressureChange](PressureChange.apply, _.toString)
+    fromNonEmptyStringConvertTry[PressureChange](PressureChange.apply, _.toString)
   implicit val velocityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Velocity](Velocity.apply, _.toString)
+    fromNonEmptyStringConvertTry[Velocity](Velocity.apply, _.toString)
   implicit val volumeFlowConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[VolumeFlow](VolumeFlow.apply, _.toString)
+    fromNonEmptyStringConvertTry[VolumeFlow](VolumeFlow.apply, _.toString)
   implicit val yankConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Yank](Yank.apply, _.toString)
+    fromNonEmptyStringConvertTry[Yank](Yank.apply, _.toString)
 
   // photo
   implicit val illuminanceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Illuminance](Illuminance.apply, _.toString)
+    fromNonEmptyStringConvertTry[Illuminance](Illuminance.apply, _.toString)
   implicit val luminanceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Luminance](Luminance.apply, _.toString)
+    fromNonEmptyStringConvertTry[Luminance](Luminance.apply, _.toString)
   implicit val luminousEnergyConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[LuminousEnergy](LuminousEnergy.apply, _.toString)
+    fromNonEmptyStringConvertTry[LuminousEnergy](LuminousEnergy.apply, _.toString)
   implicit val luminousExposureConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[LuminousExposure](LuminousExposure.apply, _.toString)
+    fromNonEmptyStringConvertTry[LuminousExposure](LuminousExposure.apply, _.toString)
   implicit val luminousFluxConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[LuminousFlux](LuminousFlux.apply, _.toString)
+    fromNonEmptyStringConvertTry[LuminousFlux](LuminousFlux.apply, _.toString)
   implicit val luminousIntensityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[LuminousIntensity](LuminousIntensity.apply, _.toString)
+    fromNonEmptyStringConvertTry[LuminousIntensity](LuminousIntensity.apply, _.toString)
 
   // radio
   implicit val irradianceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Irradiance](Irradiance.apply, _.toString)
+    fromNonEmptyStringConvertTry[Irradiance](Irradiance.apply, _.toString)
   implicit val radianceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Radiance](Radiance.apply, _.toString)
+    fromNonEmptyStringConvertTry[Radiance](Radiance.apply, _.toString)
   implicit val spectralIntensityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[SpectralIntensity](SpectralIntensity.apply, _.toString)
+    fromNonEmptyStringConvertTry[SpectralIntensity](SpectralIntensity.apply, _.toString)
   implicit val spectralIrradianceConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[SpectralIrradiance](SpectralIrradiance.apply, _.toString)
+    fromNonEmptyStringConvertTry[SpectralIrradiance](SpectralIrradiance.apply, _.toString)
   implicit val spectralPowerConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[SpectralPower](SpectralPower.apply, _.toString)
+    fromNonEmptyStringConvertTry[SpectralPower](SpectralPower.apply, _.toString)
 
   // space
   implicit val angleConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Angle](Angle.apply, _.toString)
+    fromNonEmptyStringConvertTry[Angle](Angle.apply, _.toString)
   implicit val areaConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Area](Area.apply, _.toString)
+    fromNonEmptyStringConvertTry[Area](Area.apply, _.toString)
   implicit val lengthConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Length](Length.apply, _.toString)
+    fromNonEmptyStringConvertTry[Length](Length.apply, _.toString)
   implicit val solidAngleConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[SolidAngle](SolidAngle.apply, _.toString)
+    fromNonEmptyStringConvertTry[SolidAngle](SolidAngle.apply, _.toString)
   implicit val volumeConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Volume](Volume.apply, _.toString)
+    fromNonEmptyStringConvertTry[Volume](Volume.apply, _.toString)
 
   // thermal
   implicit val temperatureConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Temperature](parseTemperature, _.toString)
+    fromNonEmptyStringConvertTry[Temperature](parseTemperature, _.toString)
   implicit val thermalCapacityConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[ThermalCapacity](ThermalCapacity.apply, _.toString)
+    fromNonEmptyStringConvertTry[ThermalCapacity](ThermalCapacity.apply, _.toString)
 
   // time
   implicit val frequencyConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Frequency](Frequency.apply, _.toString)
+    fromNonEmptyStringConvertTry[Frequency](Frequency.apply, _.toString)
   implicit val timeConfigConvert =
-    ConfigConvert.nonEmptyStringConvert[Time](Time.apply, _.toString)
+    fromNonEmptyStringConvertTry[Time](Time.apply, _.toString)
 
   // This is temporary until https://github.com/typelevel/squants/pull/183 is released (1.2.0 ???)
   // Without it, ScalaCheck has a pretty easy time breaking the conversion

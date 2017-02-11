@@ -7,7 +7,6 @@ import pureconfig.ConfigConvert.catchReadError
 import pureconfig.error.ConfigReaderFailure
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scala.reflect.ClassTag
 
 /**
  * Utility functions for converting a Duration to a String and vice versa.
@@ -16,8 +15,8 @@ private[pureconfig] object DurationConvert {
   /**
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
-  def fromString[D](durationString: String, ct: ClassTag[D]): Either[ConfigReaderFailure, Duration] = {
-    catchReadError(durationString, string => Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
+  val fromString: String => Either[ConfigReaderFailure, Duration] = {
+    catchReadError(string => Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
   }
 
   private val zeroRegex = "\\s*[+-]?0+\\s*$".r

@@ -8,7 +8,6 @@ import org.scalatest.Inspectors._
 import pureconfig.error.CannotConvert
 
 import scala.concurrent.duration.Duration
-import scala.reflect.ClassTag
 
 class DurationConvertTest extends FlatSpec with Matchers with EitherValues {
   import DurationConvert.{ fromDuration => fromD }
@@ -41,7 +40,7 @@ class DurationConvertTest extends FlatSpec with Matchers with EitherValues {
     fromS(fromD(expected)).right.value shouldBe expected
   }
 
-  val fromS = DurationConvert.fromString(_: String, implicitly[ClassTag[Duration]])
+  val fromS = DurationConvert.fromString(_: String)
   "Converting a String to a Duration" should "succeed for known units" in {
     fromS("1d") shouldBe Right(Duration(1, TimeUnit.DAYS))
     fromS("47h") shouldBe Right(Duration(47, TimeUnit.HOURS))

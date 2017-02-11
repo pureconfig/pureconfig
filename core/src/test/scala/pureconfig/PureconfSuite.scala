@@ -88,12 +88,12 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   }
 
   it should s"be able to override locally all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in {
-    implicit val readBoolean = fromStringReader[Boolean](catchReadError(_, _ != "0"))
-    implicit val readDouble = fromStringReader[Double](catchReadError(_, _.toDouble * -1))
-    implicit val readFloat = fromStringReader[Float](catchReadError(_, _.toFloat * -1))
-    implicit val readInt = fromStringReader[Int](catchReadError(_, _.toInt * -1))
-    implicit val readLong = fromStringReader[Long](catchReadError(_, _.toLong * -1))
-    implicit val readString = fromStringReader[String](catchReadError(_, _.toUpperCase))
+    implicit val readBoolean = fromStringReader[Boolean](catchReadError(_ != "0"))
+    implicit val readDouble = fromStringReader[Double](catchReadError(_.toDouble * -1))
+    implicit val readFloat = fromStringReader[Float](catchReadError(_.toFloat * -1))
+    implicit val readInt = fromStringReader[Int](catchReadError(_.toInt * -1))
+    implicit val readLong = fromStringReader[Long](catchReadError(_.toLong * -1))
+    implicit val readString = fromStringReader[String](catchReadError(_.toUpperCase))
     val config = loadConfig[FlatConfig](ConfigValueFactory.fromMap(Map(
       "b" -> 0,
       "d" -> 234.234,
@@ -194,7 +194,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   // a slightly more complex configuration
   implicit val dateConfigConvert = fromStringConvert[DateTime](
-    catchReadError(_, ISODateTimeFormat.dateTime().parseDateTime),
+    catchReadError(ISODateTimeFormat.dateTime().parseDateTime),
     t => ISODateTimeFormat.dateTime().print(t))
 
   case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig)
@@ -500,14 +500,14 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   case class ConfWithFoo(foo: Foo)
 
   it should "be able to use a local ConfigConvert without getting an ImplicitResolutionFailure error" in {
-    implicit val custom: ConfigConvert[Foo] = fromStringConvert(catchReadError(_, s => Foo(s.toInt)), _.i.toString)
+    implicit val custom: ConfigConvert[Foo] = fromStringConvert(catchReadError(s => Foo(s.toInt)), _.i.toString)
     saveAndLoadIsIdentity(ConfWithFoo(Foo(100)))
   }
 
   case class ConfWithInt(i: Int)
 
   it should "be able to use a local ConfigConvert instead of the ones in ConfigConvert companion object" in {
-    implicit val readInt = fromStringReader[Int](catchReadError(_, s => (s.toInt.abs)))
+    implicit val readInt = fromStringReader[Int](catchReadError(s => (s.toInt.abs)))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "-100").asJava).toConfig)(ConfigConvert[ConfWithInt]).right.value shouldBe ConfWithInt(100)
   }
 
@@ -515,7 +515,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert from fromString" in {
     val expected = Duration(110, TimeUnit.DAYS)
-    implicit val readDurationBadly = fromStringReader[Duration](catchReadError(_, s => expected))
+    implicit val readDurationBadly = fromStringReader[Duration](catchReadError(_ => expected))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).right.value shouldBe ConfWithDuration(expected)
   }
 
@@ -572,7 +572,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     implicit val custom: ConfigConvert[Foo] = new ConfigConvert[Foo] {
       def from(config: ConfigValue): Either[ConfigReaderFailures, Foo] = {
         val s = config.asInstanceOf[ConfigObject].get("i").render()
-        catchReadError(s, s => Foo(s.toInt + 1)).left.map(ConfigReaderFailures.apply)
+        catchReadError(s => Foo(s.toInt + 1))(implicitly)(s).left.map(ConfigReaderFailures.apply)
       }
       def to(foo: Foo): ConfigValue =
         ConfigValueFactory.fromMap(Map("i" -> foo.i).asJava)
@@ -594,7 +594,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "allow a custom ConfigConvert[URL] to override our definition" in {
     val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = fromStringReader[URL](catchReadError(_, _ => new URL(expected)))
+    implicit val readURLBadly = fromStringReader[URL](catchReadError(_ => new URL(expected)))
     val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
     config.right.value.url shouldBe new URL(expected)
   }
@@ -613,7 +613,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "allow a custom ConfigConvert[UUID] to override our definition" in {
     val expected = "bcd787fe-f510-4f84-9e64-f843afd19c60"
-    implicit val readUUIDBadly = fromStringReader[UUID](_ => catchReadError(expected, s => UUID.fromString(s)))
+    implicit val readUUIDBadly = fromStringReader[UUID](catchReadError(_ => UUID.fromString(expected)))
     val config = loadConfig[ConfWithUUID](ConfigValueFactory.fromMap(Map("uuid" -> "ignored").asJava).toConfig)
     config.right.value.uuid shouldBe UUID.fromString(expected)
   }
@@ -822,7 +822,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
       def from(v: ConfigValue) =
         if (v == null) Right(42) else {
           val s = v.render(ConfigRenderOptions.concise)
-          ConfigConvert.catchReadError(s, _.toInt).left.map(ConfigReaderFailures.apply)
+          catchReadError(_.toInt)(implicitly)(s).left.map(ConfigReaderFailures.apply)
         }
       def to(v: Int) = ???
     }
