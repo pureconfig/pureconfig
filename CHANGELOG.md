@@ -9,6 +9,8 @@
     - Whether unknown keys are ignored or cause pureconfig to return a `Failure`
       ([docs](https://github.com/melrief/pureconfig#unknown-keys)).
   - Support for reading and writing [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html)s;
+  - Support for reading and writing [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
+
 - Breaking changes
   - The default field mapping changed from camel case config keys (e.g. `exampleKey`) to kebab case keys (e.g.
     `example-key`). Case class fields are still expected to be camel case. The old behavior can be retained by putting

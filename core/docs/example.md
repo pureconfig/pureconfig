@@ -13,28 +13,29 @@ dirwatch.email.host=host_of_email_service
 dirwatch.email.port=port_of_email_service
 dirwatch.email.message="Dirwatch new path found report"
 dirwatch.email.recipients=["recipient1,recipient2"]
-dirwatch.email.sender="sender"
+dirwatch.email.sender="sender@domain.realm"
 ```
 
 To load it, we define some classes that have proper fields and names:
 
 ```scala
 import java.nio.file.Path
+import javax.security.auth.kerberos.KerberosPrincipal
 
-case class EmailConfig(host: String, port: Int, message: String, recipients: Set[String], sender: String)
+case class EmailConfig(host: String, port: Int, message: String, recipients: Set[String], sender: KerberosPrincipal)
 case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
 case class Config(dirwatch: DirWatchConfig)
 ```
 
-The use of `Path` gives us a chance to use a custom converter:
+The use of `KerberosPrincipal` gives us a chance to use a custom converter:
 
 ```scala
 import pureconfig._
 
-import java.nio.file.Paths
+import javax.security.auth.kerberos.KerberosPrincipal
 import scala.util.Try
 
-implicit val pathConvert = ConfigConvert.fromString[Path](s => Try(Paths.get(s)))
+implicit val k5PrincipalConvert = ConfigConvert.fromString[KerberosPrincipal](s => Try(new KerberosPrincipal(s)))
 ```
 
 And then we load the configuration:
