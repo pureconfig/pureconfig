@@ -1,5 +1,6 @@
 # Enum module for PureConfig
-Add support for [julienrf's enum](https://github.com/julienrf/enum) library to pureconfig.
+
+Adds support for [julienrf's enum](https://github.com/julienrf/enum) library to PureConfig.
 
 ## Why
 
@@ -40,8 +41,8 @@ val conf = parseString("""{
   start: WhisperHello
   end: ShoutGoodBye
 }""")
-loadConfig(conf)
-// GreetingConf(WhisperHello, ShoutGoodBye)
+loadConfig[GreetingConf](conf)
+// Success(GreetingConf(WhisperHello,ShoutGoodBye))
 ```
 
 ## Can I configure how the elements are read?
