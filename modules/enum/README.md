@@ -37,7 +37,7 @@ import pureconfig.loadConfig
 import pureconfig.module.enum._
 import com.typesafe.config.ConfigFactory.parseString
 
-val conf = parseString("""{ 
+val conf = parseString("""{
   start: WhisperHello
   end: ShoutGoodBye
 }""")

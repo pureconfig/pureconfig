@@ -4,7 +4,7 @@ Adds support for [Joda Time](http://www.joda.org/joda-time/) to PureConfig.
 
 ## Why
 
-Create configurable converters to read [Joda Time](http://www.joda.org/joda-time/) types from from configuration.
+Create configurable converters to read [Joda Time](http://www.joda.org/joda-time/) types from configuration.
 
 The converters need to be provided a `org.joda.time.format.DateTimeFormatter` to know how to read values.
 
@@ -34,7 +34,7 @@ case class GreatDatesConfig(apollo: DateTime, pluto: DateTime)
 // We can read a GreatDatesConfig like:
 import pureconfig.loadConfig
 import com.typesafe.config.ConfigFactory.parseString
-val conf = parseString("""{ 
+val conf = parseString("""{
   apollo: "1969-07-20T20:18:00.000Z"
   pluto: "2021-01-20T06:59:59.999Z"
 }""")

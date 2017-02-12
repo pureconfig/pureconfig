@@ -26,7 +26,7 @@ case class HowConfiguration(far: Length, hot: Temperature)
 import pureconfig.loadConfig
 import pureconfig.module.squants._
 import com.typesafe.config.ConfigFactory.parseString
-val conf = parseString("""{ 
+val conf = parseString("""{
   far: 42.195 km
   hot: 56.7° C
 }""")

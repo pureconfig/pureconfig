@@ -24,7 +24,7 @@ sealed trait Greeting extends EnumEntry with Snakecase
 
 object Greeting {
   val values = findValues
-  case object Hello extends Greeting 
+  case object Hello extends Greeting
   case object GoodBye extends Greeting
   case object ShoutGoodBye extends Greeting with Uppercase
 }
@@ -37,7 +37,7 @@ import pureconfig.loadConfig
 import pureconfig.module.enumeratum._
 import com.typesafe.config.ConfigFactory.parseString
 
-val conf = parseString("""{ 
+val conf = parseString("""{
   start: hello
   end: SHOUT_GOOD_BYE
 }""")
