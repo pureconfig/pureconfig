@@ -8,6 +8,7 @@ package pureconfig.example
 
 import java.nio.file.{Path, Paths}
 
+import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.fromString
 
 import scala.util.Try
@@ -24,18 +25,20 @@ configuration will contain:
 dirwatch.path="/path/to/observe"
 dirwatch.filter="*"
 dirwatch.email.host=host_of_email_service
-dirwatch.email.port=port_of_email_service
+dirwatch.email.port=12345
 dirwatch.email.message="Dirwatch new path found report"
-dirwatch.email.recipients="recipient1,recipient2"
-dirwatch.email.sender="sender"
+dirwatch.email.recipients=["recipient1@domain.tld","recipient2@domain.tld"]
+dirwatch.email.sender="sender@domain.tld"
 */
 package object conf {
 
   case class Config(dirwatch: DirWatchConfig)
   case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
-  case class EmailConfig(host: String, port: Int, message: String, recipients: Set[String], sender: String)
+  case class EmailConfig(host: String, port: Int, message: String, recipients: Set[Email], sender: Email)
 
+  // Email doesn't have a Convert instance, we are going to create it here
+  implicit val emailConvert: ConfigConvert[Email] = fromString[Email](Email.fromString)
 
-  // path doesn't have a StringConvert instance, we are going to create it here
-  implicit val deriveStringConvertForPath = fromString[Path](Paths.get(_))
+  // XXX: Temporary fix until 0.6.0 is published, which has a built-in converter for Path
+  implicit val pathConvert: ConfigConvert[Path] = fromString[Path](s => Try(Paths.get(s)))
 }

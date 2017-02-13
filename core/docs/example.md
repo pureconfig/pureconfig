@@ -12,30 +12,54 @@ dirwatch.filter="*"
 dirwatch.email.host=host_of_email_service
 dirwatch.email.port=port_of_email_service
 dirwatch.email.message="Dirwatch new path found report"
-dirwatch.email.recipients=["recipient1,recipient2"]
+dirwatch.email.recipients=["recipient1@domain.tld","recipient2@domain.tld"]
 dirwatch.email.sender="sender@domain.realm"
 ```
 
-To load it, we define some classes that have proper fields and names:
+
+In this example, we only want to load valid email addresses into our configuration. First, we create a custom 
+class to validate and store email addresses:
+
+```scala
+import scala.util.{Failure, Success, Try}
+
+/**
+  * This is not a production-quality email address validator.
+  * It is provided only for illustration purposes.
+  */
+object Email {
+  private val regex = """^([a-zA-Z0-9!#$%&'.*+/=?^_`{|}~;-]+)@([a-zA-Z0-9.-]+)$""".r
+
+  def fromString(str: String): Try[Email] = str match {
+    case regex(local, domain) => Success(new Email(s"$local@$domain"))
+    case _ => Failure(new IllegalArgumentException(s"$str is not a valid email address"))
+  }
+}
+
+class Email private (address: String) {
+  override def toString: String = address
+}
+```
+
+We can now use the `Email` class in our configuration. To load it, we define some classes that have proper fields and names:
 
 ```scala
 import java.nio.file.Path
-import javax.security.auth.kerberos.KerberosPrincipal
 
-case class EmailConfig(host: String, port: Int, message: String, recipients: Set[String], sender: KerberosPrincipal)
+case class EmailConfig(host: String, port: Int, message: String, recipients: Set[Email], sender: Email)
 case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
 case class Config(dirwatch: DirWatchConfig)
 ```
 
-The use of `KerberosPrincipal` gives us a chance to use a custom converter:
+The use of `Email` gives us a chance to use a custom converter:
 
 ```scala
-import pureconfig._
+import pureconfig.ConfigConvert
+import pureconfig.ConfigConvert.fromString
 
-import javax.security.auth.kerberos.KerberosPrincipal
 import scala.util.Try
 
-implicit val k5PrincipalConvert = ConfigConvert.fromString[KerberosPrincipal](s => Try(new KerberosPrincipal(s)))
+implicit val emailConvert: ConfigConvert[Email] = fromString[Email](Email.fromString)
 ```
 
 And then we load the configuration:
