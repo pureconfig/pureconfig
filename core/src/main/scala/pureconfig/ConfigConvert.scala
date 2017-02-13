@@ -219,8 +219,12 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, HNil, HNil] = new WrappedDefaultValue[Wrapped, HNil, HNil] {
 
     override def fromConfigObject(config: ConfigObject, default: HNil): Either[ConfigReaderFailures, HNil] = {
-      if (!hint.allowUnknownKeys && !config.isEmpty) fail(UnknownKey(config.keySet.iterator.next))
-      else Right(HNil)
+      if (!hint.allowUnknownKeys && !config.isEmpty) {
+        val keys = config.keySet().asScala.toList map UnknownKey.apply
+        Left(new ConfigReaderFailures(keys.head, keys.tail))
+      } else {
+        Right(HNil)
+      }
     }
 
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
