@@ -15,6 +15,7 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
 import java.net.URL
+import java.nio.file.{ Path, Paths }
 import java.time._
 import java.util.UUID
 
@@ -388,6 +389,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readShort = fromNonEmptyString[Short](s => Try(s.toShort))
   implicit val readURL = stringConvert[URL](s => Try(new URL(s)), _.toString)
   implicit val readUUID = stringConvert[UUID](s => Try(UUID.fromString(s)), _.toString)
+  implicit val readPath = stringConvert[Path](s => Try(Paths.get(s)), _.toString)
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Try[Config] = config match {
@@ -409,7 +411,6 @@ trait LowPriorityConfigConvertImplicits {
     override def from(config: ConfigValue): Try[ConfigValue] = Success(config)
     override def to(t: ConfigValue): ConfigValue = t
   }
-
   implicit val readConfigList: ConfigConvert[ConfigList] = new ConfigConvert[ConfigList] {
     override def from(config: ConfigValue): Try[ConfigList] = config match {
       case c: ConfigList => Success(c)
