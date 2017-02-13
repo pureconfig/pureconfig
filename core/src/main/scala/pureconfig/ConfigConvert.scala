@@ -32,8 +32,7 @@ trait ConfigConvert[T] {
    * Convert the given configuration into an instance of `T` if possible.
    *
    * @param config The configuration from which load the config
-   * @return either a list of failures wrapped inside a `ConfigReaderFailures` or an object of type `Right[T]`
-   *         representing the successfully converted value
+   * @return either a list of failures or an object of type `T`
    */
   def from(config: ConfigValue): Either[ConfigReaderFailures, T]
 
