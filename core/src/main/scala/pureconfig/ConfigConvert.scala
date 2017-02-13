@@ -205,9 +205,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   private[pureconfig] trait WrappedConfigConvert[Wrapped, SubRepr] extends ConfigConvert[SubRepr]
 
-  private[pureconfig] trait WrappedDefaultValueConfigConvert[Wrapped, SubRepr <: HList, DefaultRepr <: HList] extends WrappedConfigConvert[Wrapped, SubRepr] {
-    final def from(config: ConfigValue): Either[ConfigReaderFailures, SubRepr] =
-      failWithThrowable(new IllegalStateException("Cannot call 'from' on a WrappedDefaultValueConfigConvert."))
+  private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
       case other => fail(WrongType(foundTyp = other.valueType().toString, expectedTyp = "ConfigObject"))
@@ -218,7 +216,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   implicit def hNilConfigConvert[Wrapped](
     implicit
-    hint: ProductHint[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] = new WrappedDefaultValueConfigConvert[Wrapped, HNil, HNil] {
+    hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, HNil, HNil] = new WrappedDefaultValue[Wrapped, HNil, HNil] {
 
     override def fromConfigObject(config: ConfigObject, default: HNil): Either[ConfigReaderFailures, HNil] = {
       if (!hint.allowUnknownKeys && !config.isEmpty) fail(UnknownKey(config.keySet.iterator.next))
@@ -251,8 +249,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     implicit
     key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigConvert[V]],
-    tConfigConvert: Lazy[WrappedDefaultValueConfigConvert[Wrapped, T, U]],
-    hint: ProductHint[Wrapped]): WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValueConfigConvert[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
+    tConfigConvert: Lazy[WrappedDefaultValue[Wrapped, T, U]],
+    hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
     override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Either[ConfigReaderFailures, FieldType[K, V] :: T] = {
       val keyStr = hint.configKey(key.value.toString().tail)
@@ -426,7 +424,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
-    cc: Lazy[WrappedDefaultValueConfigConvert[F, Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
+    cc: Lazy[WrappedDefaultValue[F, Repr, DefaultRepr]]): ConfigConvert[F] = new ConfigConvert[F] {
 
     override def from(config: ConfigValue): Either[ConfigReaderFailures, F] = {
       cc.value.fromWithDefault(config, default()).right.map(gen.from)
