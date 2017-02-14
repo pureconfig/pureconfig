@@ -9,6 +9,7 @@ import java.nio.file.{ Files, Path, Paths }
 import java.time._
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import javax.security.auth.kerberos.KerberosPrincipal
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
@@ -631,6 +632,25 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with TryVal
     implicit val readPathBadly = fromString[Path](_ => Try(Paths.get(expected)))
     val config = loadConfig[ConfWithPath](ConfigValueFactory.fromMap(Map("my-path" -> "/this/is/ignored").asJava).toConfig)
     config.toOption.value.myPath shouldBe Paths.get(expected)
+  }
+
+  case class ConfWithK5Principal(principal: KerberosPrincipal)
+
+  it should "be able to read a config with a KerberosPrincipal" in {
+    val expected = "sample/principal@pureconfig"
+    val config = loadConfig[ConfWithK5Principal](ConfigValueFactory.fromMap(Map("principal" -> expected).asJava).toConfig)
+    config.toOption.value.principal shouldBe new KerberosPrincipal(expected)
+  }
+
+  it should "round trip a KerberosPrincipal" in {
+    saveAndLoadIsIdentity(ConfWithK5Principal(new KerberosPrincipal("sample/principal@pureconfig")))
+  }
+
+  it should "allow a custom ConfigConvert[KerberosPrincipal] to override our definition" in {
+    val expected = "custom/principal@pureconfig.tests"
+    implicit val readPathBadly = fromString[KerberosPrincipal](_ => Try(new KerberosPrincipal(expected)))
+    val config = loadConfig[ConfWithK5Principal](ConfigValueFactory.fromMap(Map("principal" -> "ignored@pureconfig").asJava).toConfig)
+    config.toOption.value.principal shouldBe new KerberosPrincipal(expected)
   }
 
   case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)

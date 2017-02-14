@@ -18,6 +18,7 @@ import java.net.URL
 import java.nio.file.{ Path, Paths }
 import java.time._
 import java.util.UUID
+import javax.security.auth.kerberos.KerberosPrincipal
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 
@@ -390,6 +391,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readURL = stringConvert[URL](s => Try(new URL(s)), _.toString)
   implicit val readUUID = stringConvert[UUID](s => Try(UUID.fromString(s)), _.toString)
   implicit val readPath = stringConvert[Path](s => Try(Paths.get(s)), _.toString)
+  implicit val readKerberosPrincipal = stringConvert[KerberosPrincipal](s => Try(new KerberosPrincipal(s)), _.toString)
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Try[Config] = config match {

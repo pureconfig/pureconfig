@@ -110,6 +110,7 @@ Currently supported types for fields are:
   configured first - see [Configurable converters](#configurable-converters));
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html)
+- [`javax.security.auth.kerberos`](https://docs.oracle.com/javase/8/docs/api/javax/security/auth/kerberos/KerberosPrincipal.html)
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - case classes;
 - sealed families of case classes (ADTs).
