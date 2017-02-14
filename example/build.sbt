@@ -19,6 +19,7 @@ scalacOptions ++= Seq(
   "-language:experimental.macros",
   "-feature",
   "-unchecked",
+  "-Xfatal-warnings",
   "-Xfuture",
   "-Xlint",
   "-Yno-adapted-args",
