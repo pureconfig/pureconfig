@@ -10,7 +10,7 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
 
   def toList: List[ConfigReaderFailure] = head +: tail
 
-  def +(failure: ConfigReaderFailure): ConfigReaderFailures =
+  def +:(failure: ConfigReaderFailure): ConfigReaderFailures =
     new ConfigReaderFailures(failure, this.toList)
 
   def ++(that: ConfigReaderFailures): ConfigReaderFailures =
