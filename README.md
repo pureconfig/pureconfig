@@ -101,7 +101,7 @@ val config: Try[YourConfClass] = loadConfig[YourConfClass]
 Currently supported types for fields are:
 - `String`, `Boolean`, `Double` (standard
   and percentage format ending with `%`), `Float` (also supporting percentage),
-  `Int`, `Long`, `Short`, `URL`, `Duration`, `FiniteDuration`;
+  `Int`, `Long`, `Short`, `URL`, `URI`, Duration`, `FiniteDuration`;
 - all collections implementing the `TraversableOnce` trait where the type of
   the elements is in this list;
 - `Option` for optional values, i.e. values that can or cannot be in the configuration;
