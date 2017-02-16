@@ -3,35 +3,47 @@ package pureconfig.module
 import _root_.enumeratum._
 import _root_.enumeratum.values._
 import pureconfig.ConfigConvert
-import pureconfig.ConfigConvert.{ nonEmptyStringConvert, stringConvert }
+import pureconfig.ConfigConvert.{ fromNonEmptyStringConvertOpt, fromStringConvertOpt, fromNonEmptyStringConvert }
+import pureconfig.error.{ CannotConvert, ConfigReaderFailure }
 
 import scala.reflect.ClassTag
-import scala.util.{ Failure, Success, Try }
 
 package object enumeratum {
+
+  private[this] def optionToCannotConvert[T](name: String, f: String => Option[T])(implicit ct: ClassTag[T]): Either[ConfigReaderFailure, T] =
+    f(name) match {
+      case None => Left(CannotConvert(name, ct.runtimeClass.getSimpleName, ""))
+      case Some(t) => Right(t)
+    }
+
   implicit def enumeratumConfigConvert[A <: EnumEntry](implicit enum: Enum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    nonEmptyStringConvert[A](name => Try(enum.withName(name)), _.entryName)
+    fromNonEmptyStringConvertOpt[A](enum.withNameOption, _.entryName)
 
   implicit def enumeratumIntConfigConvert[A <: IntEnumEntry](implicit enum: IntEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    nonEmptyStringConvert[A](v => Try(enum.withValue(v.toInt)), _.value.toString)
+    fromNonEmptyStringConvertOpt[A](v => enum.withValueOpt(v.toInt), _.value.toString)
 
   implicit def enumeratumLongConfigConvert[A <: LongEnumEntry](implicit enum: LongEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    nonEmptyStringConvert[A](v => Try(enum.withValue(v.toLong)), _.value.toString)
+    fromNonEmptyStringConvertOpt[A](v => enum.withValueOpt(v.toLong), _.value.toString)
 
   implicit def enumeratumShortConfigConvert[A <: ShortEnumEntry](implicit enum: ShortEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    nonEmptyStringConvert[A](v => Try(enum.withValue(v.toShort)), _.value.toString)
+    fromNonEmptyStringConvertOpt[A](v => enum.withValueOpt(v.toShort), _.value.toString)
 
   implicit def enumeratumStringConfigConvert[A <: StringEnumEntry](implicit enum: StringEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    stringConvert[A](v => Try(enum.withValue(v)), _.value.toString)
+    fromStringConvertOpt[A](v => enum.withValueOpt(v), _.value.toString)
 
   implicit def enumeratumByteConfigConvert[A <: ByteEnumEntry](implicit enum: ByteEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    nonEmptyStringConvert[A](v => Try(enum.withValue(v.toByte)), _.value.toString)
+    fromNonEmptyStringConvertOpt[A](v => enum.withValueOpt(v.toByte), _.value.toString)
 
   implicit def enumeratumCharConfigConvert[A <: CharEnumEntry](implicit enum: CharEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    nonEmptyStringConvert[A](ensureOneChar(_).map(enum.withValue), _.value.toString)
+    fromNonEmptyStringConvert[A](
+      s => ensureOneChar(s) match {
+        case Right(v) => Right(enum.withValue(v))
+        case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg))
+      },
+      _.value.toString)
 
-  private val ensureOneChar: Seq[Char] => Try[Char] = {
-    case Seq(c) => Success(c)
-    case s => Failure(new IllegalArgumentException(s"""Cannot read a character value from "$s""""))
+  private val ensureOneChar: Seq[Char] => Either[String, Char] = {
+    case Seq(c) => Right(c)
+    case s => Left(s"""Cannot read a character value from "$s"""")
   }
 }

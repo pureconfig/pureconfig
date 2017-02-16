@@ -1,7 +1,7 @@
 package pureconfig
 
-import com.typesafe.config.{ Config => TypesafeConfig, ConfigValue }
-import scala.util.Try
+import com.typesafe.config.{ ConfigValue, Config => TypesafeConfig }
+import pureconfig.error.ConfigReaderFailures
 
 package object syntax {
   implicit class PimpedAny[T](val any: T) extends AnyVal {
@@ -9,10 +9,10 @@ package object syntax {
   }
 
   implicit class PimpedConfigValue(val conf: ConfigValue) extends AnyVal {
-    def to[T](implicit configConvert: ConfigConvert[T]): Try[T] = configConvert.from(conf)
+    def to[T](implicit configConvert: ConfigConvert[T]): Either[ConfigReaderFailures, T] = configConvert.from(conf)
   }
 
   implicit class PimpedConfig(val conf: TypesafeConfig) extends AnyVal {
-    def to[T: ConfigConvert]: Try[T] = conf.root().to[T]
+    def to[T: ConfigConvert]: Either[ConfigReaderFailures, T] = conf.root().to[T]
   }
 }

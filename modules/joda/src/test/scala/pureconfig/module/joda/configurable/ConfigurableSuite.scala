@@ -13,7 +13,7 @@ import pureconfig.configurable.{ ConfigurableSuite => JTime }
 
 import scala.collection.JavaConverters._
 
-class ConfigurableSuite extends FlatSpec with Matchers with TryValues with PropertyChecks {
+class ConfigurableSuite extends FlatSpec with Matchers with EitherValues with PropertyChecks {
 
   val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ")
   implicit val dateTimeInstance = dateTimeConfigConvert(isoFormatter)
@@ -22,7 +22,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
     (dateTime: DateTime) =>
       val conf = ConfigFactory.parseString(s"""{date-time:"${isoFormatter.print(dateTime)}"}""")
       case class Conf(dateTime: DateTime)
-      conf.to[Conf].success.value shouldEqual Conf(dateTime)
+      conf.to[Conf].right.value shouldEqual Conf(dateTime)
   }
 
   val timeFormatter = DateTimeFormat.forPattern("HH:mm:ss.SSS")
@@ -32,7 +32,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
     (localTime: LocalTime) =>
       val conf = ConfigFactory.parseString(s"""{time:"${timeFormatter.print(localTime)}"}""")
       case class Conf(time: LocalTime)
-      conf.to[Conf].success.value shouldEqual Conf(localTime)
+      conf.to[Conf].right.value shouldEqual Conf(localTime)
   }
 
   val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -42,7 +42,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
     (localDate: LocalDate) =>
       val conf = ConfigFactory.parseString(s"""{date:"${dateFormatter.print(localDate)}"}""")
       case class Conf(date: LocalDate)
-      conf.to[Conf].success.value shouldEqual Conf(localDate)
+      conf.to[Conf].right.value shouldEqual Conf(localDate)
   }
 
   val dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
@@ -52,8 +52,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
     (localDateTime: LocalDateTime) =>
       val conf = ConfigFactory.parseString(s"""{date-time:"${dateTimeFormatter.print(localDateTime)}"}""")
       case class Conf(dateTime: LocalDateTime)
-      //conf.to[Conf].success.value shouldEqual Conf(localDateTime)
-      conf.to[Conf].get shouldEqual Conf(localDateTime)
+      conf.to[Conf].right.value shouldEqual Conf(localDateTime)
   }
 
   val monthDayFormat = DateTimeFormat.forPattern("MM-dd")
@@ -63,7 +62,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
     (monthDay: MonthDay) =>
       val conf = ConfigFactory.parseString(s"""{month-day:"${monthDayFormat.print(monthDay)}"}""")
       case class Conf(monthDay: MonthDay)
-      conf.to[Conf].success.value shouldEqual Conf(monthDay)
+      conf.to[Conf].right.value shouldEqual Conf(monthDay)
   }
 
   val yearMonthFormat = DateTimeFormat.forPattern("yyyy-MM")
@@ -73,7 +72,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with TryValues with Prope
     (yearMonth: YearMonth) =>
       val conf = ConfigFactory.parseString(s"""{year-month:"${yearMonthFormat.print(yearMonth)}"}""")
       case class Conf(yearMonth: YearMonth)
-      conf.to[Conf].success.value shouldEqual Conf(yearMonth)
+      conf.to[Conf].right.value shouldEqual Conf(yearMonth)
   }
 }
 

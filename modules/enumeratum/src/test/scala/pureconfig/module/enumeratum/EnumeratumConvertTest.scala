@@ -4,11 +4,12 @@ import com.typesafe.config.ConfigFactory
 import enumeratum.EnumEntry.{ Snakecase, Uppercase }
 import enumeratum._
 import enumeratum.values._
-import org.scalatest.{ FlatSpec, Matchers, TryValues }
+import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.syntax._
 import org.scalatest.Inspectors._
+import pureconfig.error.CannotConvert
 
-class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
+class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
   sealed trait Greeting extends EnumEntry with Snakecase
 
   object Greeting extends Enum[Greeting] {
@@ -22,7 +23,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     greeting =>
       val conf = ConfigFactory.parseString(s"""{greeting:"${greeting.entryName}"}""")
       case class Conf(greeting: Greeting)
-      conf.to[Conf].success.value shouldEqual Conf(greeting)
+      conf.to[Conf].right.value shouldEqual Conf(greeting)
   }
 
   sealed abstract class IntLibraryItem(val value: Int, val name: String) extends IntEnumEntry
@@ -39,7 +40,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: IntLibraryItem)
-      conf.to[Conf].success.value shouldEqual Conf(item)
+      conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class LongLibraryItem(val value: Long, val name: String) extends LongEnumEntry
@@ -56,7 +57,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: LongLibraryItem)
-      conf.to[Conf].success.value shouldEqual Conf(item)
+      conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class ShortLibraryItem(val value: Short, val name: String) extends ShortEnumEntry
@@ -73,7 +74,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: ShortLibraryItem)
-      conf.to[Conf].success.value shouldEqual Conf(item)
+      conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class StringLibraryItem(val value: String, val number: Int) extends StringEnumEntry
@@ -91,7 +92,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: StringLibraryItem)
-      conf.to[Conf].success.value shouldEqual Conf(item)
+      conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class ByteLibraryItem(val value: Byte, val name: String) extends ByteEnumEntry
@@ -108,7 +109,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: ByteLibraryItem)
-      conf.to[Conf].success.value shouldEqual Conf(item)
+      conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class CharLibraryItem(val value: Char, val number: Int) extends CharEnumEntry
@@ -125,12 +126,14 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with TryValues {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: CharLibraryItem)
-      conf.to[Conf].success.value shouldEqual Conf(item)
+      conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   it should "not parse a char value enum when given a string with more than one character" in {
     val conf = ConfigFactory.parseString(s"""{item:"string"}""")
     case class Conf(item: CharLibraryItem)
-    conf.to[Conf].failure.exception shouldBe a[IllegalArgumentException]
+    val failures = conf.to[Conf].left.value.toList
+    failures should have size 1
+    failures.head shouldBe a[CannotConvert]
   }
 }

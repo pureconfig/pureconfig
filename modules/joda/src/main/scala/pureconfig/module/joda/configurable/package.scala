@@ -2,8 +2,8 @@ package pureconfig.module.joda
 
 import org.joda.time._
 import org.joda.time.format._
-import pureconfig._
-import scala.util.Try
+import pureconfig.ConfigConvert
+import pureconfig.ConfigConvert._
 
 /**
  * Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
@@ -21,26 +21,26 @@ import scala.util.Try
  */
 package object configurable {
   def dateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[DateTime] =
-    ConfigConvert.nonEmptyStringConvert[DateTime](
-      s => Try(DateTime.parse(s, formatter)), formatter.print)
+    fromNonEmptyStringConvert[DateTime](
+      catchReadError(DateTime.parse(_, formatter)), formatter.print)
 
   def localDateConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDate] =
-    ConfigConvert.nonEmptyStringConvert[LocalDate](
-      s => Try(LocalDate.parse(s, formatter)), formatter.print)
+    fromNonEmptyStringConvert[LocalDate](
+      catchReadError(LocalDate.parse(_, formatter)), formatter.print)
 
   def localTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalTime] =
-    ConfigConvert.nonEmptyStringConvert[LocalTime](
-      s => Try(LocalTime.parse(s, formatter)), formatter.print)
+    fromNonEmptyStringConvert[LocalTime](
+      catchReadError(LocalTime.parse(_, formatter)), formatter.print)
 
   def localDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
-    ConfigConvert.nonEmptyStringConvert[LocalDateTime](
-      s => Try(LocalDateTime.parse(s, formatter)), formatter.print)
+    fromNonEmptyStringConvert[LocalDateTime](
+      catchReadError(LocalDateTime.parse(_, formatter)), formatter.print)
 
   def monthDayConfigConvert(formatter: DateTimeFormatter): ConfigConvert[MonthDay] =
-    ConfigConvert.nonEmptyStringConvert[MonthDay](
-      s => Try(MonthDay.parse(s, formatter)), formatter.print)
+    fromNonEmptyStringConvert[MonthDay](
+      catchReadError(MonthDay.parse(_, formatter)), formatter.print)
 
   def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
-    ConfigConvert.nonEmptyStringConvert[YearMonth](
-      s => Try(YearMonth.parse(s, formatter)), formatter.print)
+    fromNonEmptyStringConvert[YearMonth](
+      catchReadError(YearMonth.parse(_, formatter)), formatter.print)
 }

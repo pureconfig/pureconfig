@@ -1,8 +1,9 @@
 package pureconfig
 
-import scala.util.Try
 import java.time._
 import java.time.format.DateTimeFormatter
+
+import ConfigConvert.{ fromNonEmptyStringConvert, catchReadError }
 
 /**
  * Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
@@ -21,34 +22,34 @@ import java.time.format.DateTimeFormatter
 package object configurable {
 
   def localDateConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDate] =
-    ConfigConvert.nonEmptyStringConvert[LocalDate](
-      s => Try(LocalDate.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[LocalDate](
+      catchReadError(LocalDate.parse(_, formatter)), _.format(formatter))
 
   def localTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalTime] =
-    ConfigConvert.nonEmptyStringConvert[LocalTime](
-      s => Try(LocalTime.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[LocalTime](
+      catchReadError(LocalTime.parse(_, formatter)), _.format(formatter))
 
   def localDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
-    ConfigConvert.nonEmptyStringConvert[LocalDateTime](
-      s => Try(LocalDateTime.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[LocalDateTime](
+      catchReadError(LocalDateTime.parse(_, formatter)), _.format(formatter))
 
   def monthDayConfigConvert(formatter: DateTimeFormatter): ConfigConvert[MonthDay] =
-    ConfigConvert.nonEmptyStringConvert[MonthDay](
-      s => Try(MonthDay.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[MonthDay](
+      catchReadError(MonthDay.parse(_, formatter)), _.format(formatter))
 
   def offsetDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[OffsetDateTime] =
-    ConfigConvert.nonEmptyStringConvert[OffsetDateTime](
-      s => Try(OffsetDateTime.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[OffsetDateTime](
+      catchReadError(OffsetDateTime.parse(_, formatter)), _.format(formatter))
 
   def offsetTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[OffsetTime] =
-    ConfigConvert.nonEmptyStringConvert[OffsetTime](
-      s => Try(OffsetTime.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[OffsetTime](
+      catchReadError(OffsetTime.parse(_, formatter)), _.format(formatter))
 
   def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
-    ConfigConvert.nonEmptyStringConvert[YearMonth](
-      s => Try(YearMonth.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[YearMonth](
+      catchReadError(YearMonth.parse(_, formatter)), _.format(formatter))
 
   def zonedDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[ZonedDateTime] =
-    ConfigConvert.nonEmptyStringConvert[ZonedDateTime](
-      s => Try(ZonedDateTime.parse(s, formatter)), _.format(formatter))
+    fromNonEmptyStringConvert[ZonedDateTime](
+      catchReadError(ZonedDateTime.parse(_, formatter)), _.format(formatter))
 }
