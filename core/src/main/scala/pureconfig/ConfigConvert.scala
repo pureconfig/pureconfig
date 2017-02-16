@@ -14,7 +14,8 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.{ Failure, Success, Try }
-import java.net.URL
+import java.net.{ URI, URL }
+import java.nio.file.{ Path, Paths }
 import java.time._
 import java.util.UUID
 
@@ -502,6 +503,8 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readShort = fromNonEmptyStringReader[Short](catchReadError(_.toShort))
   implicit val readURL = fromNonEmptyStringConvert[URL](catchReadError(new URL(_)), _.toString)
   implicit val readUUID = fromNonEmptyStringConvert[UUID](catchReadError(UUID.fromString), _.toString)
+  implicit val readPath = fromStringConvert[Path](catchReadError(Paths.get(_)), _.toString)
+  implicit val readURI = fromStringConvert[URI](catchReadError(new URI(_)), _.toString)
 
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {
@@ -523,7 +526,6 @@ trait LowPriorityConfigConvertImplicits {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigValue] = Right(config)
     override def to(t: ConfigValue): ConfigValue = t
   }
-
   implicit val readConfigList: ConfigConvert[ConfigList] = new ConfigConvert[ConfigList] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigList] = config match {
       case c: ConfigList => Right(c)
