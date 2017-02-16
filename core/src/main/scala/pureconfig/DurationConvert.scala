@@ -3,8 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import pureconfig.ConfigConvert.catchReadError
-import pureconfig.error.ConfigReaderFailure
+import pureconfig.error.{ CannotConvert, ConfigReaderFailure }
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 
@@ -16,7 +15,14 @@ private[pureconfig] object DurationConvert {
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
   val fromString: String => Either[ConfigReaderFailure, Duration] = {
-    catchReadError(string => Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
+    string =>
+      try {
+        Right(Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
+      } catch {
+        case ex: NumberFormatException =>
+          val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
+          Left(CannotConvert(string, "Duration", err))
+      }
   }
 
   private val zeroRegex = "\\s*[+-]?0+\\s*$".r
