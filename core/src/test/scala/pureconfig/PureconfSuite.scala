@@ -623,7 +623,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   it should "be able to read a config with a Path" in {
     val expected = "/tmp/foo.bar"
     val config = loadConfig[ConfWithPath](ConfigValueFactory.fromMap(Map("my-path" -> expected).asJava).toConfig)
-    config.toOption.value.myPath shouldBe Paths.get(expected)
+    config.right.value.myPath shouldBe Paths.get(expected)
   }
 
   it should "round trip a Path" in {
@@ -632,9 +632,9 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "allow a custom ConfigConvert[Path] to override our definition" in {
     val expected = "c:\\this\\is\\a\\custom\\path"
-    implicit val readPathBadly = fromString[Path](_ => Try(Paths.get(expected)))
+    implicit val readPathBadly = fromStringReader[Path](_ => Right(Paths.get(expected)))
     val config = loadConfig[ConfWithPath](ConfigValueFactory.fromMap(Map("my-path" -> "/this/is/ignored").asJava).toConfig)
-    config.toOption.value.myPath shouldBe Paths.get(expected)
+    config.right.value.myPath shouldBe Paths.get(expected)
   }
 
   case class ConfWithURI(uri: URI)
@@ -642,7 +642,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   it should "be able to read a config with a URI" in {
     val expected = "http://host/path?with=query&param"
     val config = loadConfig[ConfWithURI](ConfigValueFactory.fromMap(Map("uri" -> expected).asJava).toConfig)
-    config.toOption.value.uri shouldBe new URI(expected)
+    config.right.value.uri shouldBe new URI(expected)
   }
 
   it should "round trip a URI" in {
@@ -651,9 +651,9 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "allow a custom ConfigConvert[URI] to override our definition" in {
     val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = fromString[URI](_ => Try(new URI(expected)))
+    implicit val readURLBadly = fromStringReader[URI](_ => Right(new URI(expected)))
     val config = loadConfig[ConfWithURI](ConfigValueFactory.fromMap(Map("uri" -> "https://ignored/url").asJava).toConfig)
-    config.toOption.value.uri shouldBe new URI(expected)
+    config.right.value.uri shouldBe new URI(expected)
   }
 
   case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
