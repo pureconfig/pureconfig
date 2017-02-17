@@ -321,15 +321,14 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
             }
 
           case Right(None) => tConfigConvert.value.from(config).right.map(s => Inr(s))
-          case Left(failure) => fail(failure)
+          case l: Left[_, _] => l.asInstanceOf[Either[ConfigReaderFailures, FieldType[Name, V] :+: T]]
         }
 
       override def to(t: FieldType[Name, V] :+: T): ConfigValue = t match {
         case Inl(l) =>
           // Writing a coproduct to a config can fail. Is it worth it to make `to` return a `Try`?
           coproductHint.to(vFieldConvert.value.to(l), vName.value.name) match {
-            case Left(CollidingKeys(key, existingValue)) => throw new CollidingKeysException(key, existingValue)
-            case Left(e) => throw new IllegalStateException(s"CoproductHint error: $e")
+            case Left(failures) => throw new ConfigReaderException[FieldType[Name, V] :+: T](failures)
             case Right(r) => r
           }
 

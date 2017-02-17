@@ -271,7 +271,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   it should "throw an exception if a coproduct option has a field with the same key as the hint field" in {
     implicit val hint = new FieldCoproductHint[AnimalConfig]("age")
     val cc = implicitly[ConfigConvert[AnimalConfig]]
-    a[CollidingKeysException] should be thrownBy cc.to(DogConfig(2))
+    a[ConfigReaderException[_]] should be thrownBy cc.to(DogConfig(2))
   }
 
   it should "return a Failure with a proper exception if the hint field in a coproduct is missing" in {
