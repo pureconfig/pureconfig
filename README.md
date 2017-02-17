@@ -92,7 +92,7 @@ Import the library package and use one of the `loadConfig` methods:
 ```scala
 import pureconfig._
 
-val config: Try[YourConfClass] = loadConfig[YourConfClass]
+val config: Either[ConfigReaderFailures,YourConfClass] = loadConfig[YourConfClass]
 ```
 
 
@@ -128,7 +128,7 @@ case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, St
 val conf = parseString("""{ "int": 1, "adt": { "type": "adtb", "b": 1 }, "list": ["1", "20%"], "map": { "key": "value" } }""")
 
 loadConfig[MyClass](conf)
-// returns Success(MyClass(1, AdtB(1), List(1.0, 0.2), Map("key" -> "value"), None))
+// returns Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 

@@ -46,7 +46,7 @@ val conf = parseString("""{
 }""")
 
 loadConfig[SampleConf](conf)
-// returns Success(SampleConf(2, "two"))
+// returns Right(SampleConf(2, "two"))
 ```
 
 PureConfig provides a way to create a `ConfigFieldMapping` by defining the
@@ -88,19 +88,19 @@ case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
 
 // Defaulting `where`
 loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
-// returns Success(Holiday("last resort", 21 days))
+// returns Right(Holiday("last resort", 21 days))
 
 // Defaulting `howLong`
 loadConfig[Holiday](parseString("""{ where: Zürich }"""))
-// returns Success(Holiday("Zürich", 7 days))
+// returns Right(Holiday("Zürich", 7 days))
 
 // Defaulting both arguments
 loadConfig[Holiday](parseString("""{}"""))
-// returns Success(Holiday("last resort", 7 days))
+// returns Right(Holiday("last resort", 7 days))
 
 // Specifying both arguments
 loadConfig[Holiday](parseString("""{ where: Texas, how-long: 3 hours }"""))
-// returns Success(Holiday("Texas", 3 hours))
+// returns Right(Holiday("Texas", 3 hours))
 ```
 
 A `ProductHint` can make the conversion fail if a key is missing from the
@@ -110,7 +110,7 @@ config regardless of whether a default value exists or not:
 implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
 
 loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
-// returns Failure(KeyNotFoundException("where"))
+// returns  Left(ConfigReaderFailures(KeyNotFound(where),List()))
 ```
 
 ### Unknown keys
@@ -120,7 +120,7 @@ case class field, leading to potential bugs due to misspellings:
 
 ```scala
 loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
-// returns Success(Holiday("last resort", 21 days))
+// returns Right(Holiday("last resort", 21 days))
 ```
 
 With a `ProductHint`, one can tell the converter to fail if an unknown key is
@@ -130,5 +130,5 @@ found:
 implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
 
 loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
-// returns Failure(UnknownKeyException("wher"))
+// returns Left(ConfigReaderFailures(UnknownKey(wher),List()))
 ```

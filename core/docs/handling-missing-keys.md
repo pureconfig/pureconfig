@@ -14,10 +14,10 @@ case class Foo(a: Int)
 case class FooOpt(a: Option[Int])
 
 ConfigFactory.empty.to[Foo]
-// returns Failure(KeyNotFoundException("a"))
+// returns Left(ConfigReaderFailures(KeyNotFound(a),List()))
 
 ConfigFactory.empty.to[FooOpt]
-// returns Success(FooOpt(None))
+// returns Right(FooOpt(None))
 ```
 
 However, if you want to allow your custom `ConfigConvert`s to handle missing
@@ -26,15 +26,16 @@ keys, you can extend the `AllowMissingKey` trait. For `ConfigConvert`s extending
 available `ConfigConvert` for that type with a `null` value:
 
 ```scala
-import scala.util.{Success, Try}
+import com.typesafe.config._
+import pureconfig.syntax._
 
 implicit val cc = new ConfigConvert[Int] with AllowMissingKey {
-  override def from(config: ConfigValue): Try[Int] =
-    if (config == null) Success(42) else Try(config.render(ConfigRenderOptions.concise).toInt)
+  override def from(config: ConfigValue) =
+    if (config == null) Right(42) else config.to[Int]
 
   override def to(t: Int): ConfigValue = ConfigValueFactory.fromAnyRef(t)
 }
 
 ConfigFactory.empty.to[Foo]
-// returns Success(Foo(42))
+// returns Right(Foo(42))
 ```
