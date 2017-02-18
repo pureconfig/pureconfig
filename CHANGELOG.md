@@ -9,7 +9,8 @@
     - Whether unknown keys are ignored or cause pureconfig to return a `Failure`
       ([docs](https://github.com/melrief/pureconfig#unknown-keys)).
   - Support for reading and writing [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html)s;
-  - Support for reading and writing [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
+  - Support for reading and writing [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html)s;
+  - Support for reading and writing [`java.net.URI`](https://docs.oracle.com/javase/8/docs/api/java/net/URI.html)s;
   - Support multiple failures, e.g. when multiple fields of a class fail to convert;
   - Add `ConfigReaderFailure` ADT to model failures and `ConfigReaderFailures` to represent a non empty list of errors;
   - Add `loadConfigOrThrow` methods to the API;
@@ -22,6 +23,9 @@
 
 - Breaking changes
   - `ConfigConvert.from` now returns a value of type `Either[ConfigReaderFailures, T]` instead of `Try[T]`;
+  - `CoproductHint` has been changed to adapt to the new `ConfigConvert`:
+    - `CoproductHint.from` now returns a value of type `Either[ConfigReaderFailures, Option[ConfigValue]]`
+    - `CoproductHint.to` now returns a value of type `Either[ConfigReaderFailures, Option[ConfigValue]]`
   - The default field mapping changed from camel case config keys (e.g. `exampleKey`) to kebab case keys (e.g.
     `example-key`). Case class fields are still expected to be camel case. The old behavior can be retained by putting
     in scope an `implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))`;
