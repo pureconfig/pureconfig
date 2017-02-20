@@ -6,7 +6,9 @@ package pureconfig.error
 import com.typesafe.config.ConfigValue
 
 /** The physical location of a config value, represented by a file name and a line number */
-case class ConfigValueLocation(filename: String, lineNumber: Int)
+case class ConfigValueLocation(filename: String, lineNumber: Int) {
+  def description: String = s"(file:$filename: $lineNumber)"
+}
 
 object ConfigValueLocation {
   def apply(cv: ConfigValue): Option[ConfigValueLocation] =
