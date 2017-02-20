@@ -232,9 +232,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
-  private[pureconfig] def improveFailure[Z](failure: ConfigReaderFailure, keyStr: String): ConfigReaderFailure =
+  private[pureconfig] def improveFailure[Z](failure: ConfigReaderFailure, keyStr: String, location: Option[ConfigValueLocation]): ConfigReaderFailure =
     failure match {
-      case CannotConvertNull => KeyNotFound(keyStr, None)
+      case CannotConvertNull => KeyNotFound(keyStr, location)
       case CollidingKeys(suffix, existingValue, location) => CollidingKeys(keyStr + "." + suffix, existingValue, location)
       case WrongType(foundTyp, expectedTyp, location) => WrongTypeForKey(foundTyp, expectedTyp, keyStr, location)
       case WrongTypeForKey(foundTyp, expectedTyp, suffix, location) => WrongTypeForKey(foundTyp, expectedTyp, keyStr + "." + suffix, location)
@@ -243,11 +243,11 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case e: ConfigReaderFailure => e
     }
 
-  private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String): Either[ConfigReaderFailures, Z] =
+  private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String, location: Option[ConfigValueLocation]): Either[ConfigReaderFailures, Z] =
     result.left.map {
       case ConfigReaderFailures(head, tail) =>
-        val headImproved = improveFailure[Z](head, keyStr)
-        val tailImproved = tail.map(improveFailure[Z](_, keyStr))
+        val headImproved = improveFailure[Z](head, keyStr, location)
+        val tailImproved = tail.map(improveFailure[Z](_, keyStr, location))
         ConfigReaderFailures(headImproved, tailImproved)
     }
 
@@ -270,7 +270,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
           case (value, converter) =>
             converter.from(value)
         },
-        keyStr)
+        keyStr,
+        ConfigValueLocation(co))
       // for performance reasons only, we shouldn't clone the config object unless necessary
       val tailCo = if (hint.allowUnknownKeys) co else co.withoutKey(keyStr)
       val tailResult = tConfigConvert.value.fromWithDefault(tailCo, default.tail)
