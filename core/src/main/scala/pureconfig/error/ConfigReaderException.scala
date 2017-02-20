@@ -24,14 +24,14 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
 
     if (keysNotFound.nonEmpty) {
       linesBuffer += "  Keys not found:"
-      for (KeyNotFound(key) <- keysNotFound) {
+      for (KeyNotFound(key, _) <- keysNotFound) {
         linesBuffer += s"    - '$key'"
       }
     }
 
     if (cannotConvertFound.nonEmpty) {
       linesBuffer += "  Value conversion failures:"
-      for (CannotConvert(value, toTyp, because) <- cannotConvertFound) {
+      for (CannotConvert(value, toTyp, because, _) <- cannotConvertFound) {
         linesBuffer += s"    - cannot convert '$value' to type '$toTyp' " + (if (because.isEmpty) "" else s"because $because")
       }
     }

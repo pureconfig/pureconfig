@@ -68,7 +68,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   def fail[A](failure: ConfigReaderFailure): Either[ConfigReaderFailures, A] = Left(ConfigReaderFailures(failure))
 
-  def failWithThrowable[A](throwable: Throwable): Either[ConfigReaderFailures, A] = fail[A](ThrowableFailure(throwable))
+  def failWithThrowable[A](throwable: Throwable): Option[ConfigValueLocation] => Either[ConfigReaderFailures, A] = location => fail[A](ThrowableFailure(throwable, location))
 
   private def eitherToResult[T](either: Either[ConfigReaderFailure, T]): Either[ConfigReaderFailures, T] =
     either match {
@@ -76,15 +76,15 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
       case Left(failure) => Left(ConfigReaderFailures(failure))
     }
 
-  private def tryToEither[T](t: Try[T]): Either[ConfigReaderFailure, T] = t match {
-    case Success(t) => Right(t)
-    case Failure(e) => Left(ThrowableFailure(e))
+  private def tryToEither[T](t: Try[T]): Option[ConfigValueLocation] => Either[ConfigReaderFailure, T] = t match {
+    case Success(t) => _ => Right(t)
+    case Failure(e) => location => Left(ThrowableFailure(e, location))
   }
 
   private def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => Either[ConfigReaderFailures, T] =
-    stringToEitherConvert[T](fromF andThen tryToEither[T])
+    stringToEitherConvert[T](string => location => tryToEither(fromF(string))(location))
 
-  private def stringToEitherConvert[T](fromF: String => Either[ConfigReaderFailure, T]): ConfigValue => Either[ConfigReaderFailures, T] =
+  private def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigValue => Either[ConfigReaderFailures, T] =
     config => {
       // Because we can't trust Typesafe Config not to throw, we wrap the
       // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
@@ -93,46 +93,45 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
           case ConfigValueType.STRING => config.unwrapped.toString
           case _ => config.render(ConfigRenderOptions.concise)
         }
-        eitherToResult(fromF(string))
+        eitherToResult(fromF(string)(ConfigValueLocation(config)))
       } catch {
-        case NonFatal(t) => failWithThrowable(t)
+        case NonFatal(t) => failWithThrowable(t)(ConfigValueLocation(config))
       }
     }
 
-  private def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => Either[ConfigReaderFailure, String] = {
-    case "" => Left(EmptyStringFound(ct.toString()))
-    case x => Right(x)
+  private def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, String] = {
+    case "" => location => Left(EmptyStringFound(ct.toString(), location))
+    case x => _ => Right(x)
   }
 
-  def catchReadError[T](f: String => T)(implicit ct: ClassTag[T]): String => Either[CannotConvert, T] =
-    (s: String) => {
-      try (Right(f(s))) catch {
-        case NonFatal(ex) => Left(CannotConvert(s, ct.toString(), ex.toString))
+  def catchReadError[T](f: String => T)(implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[CannotConvert, T] =
+    string => location =>
+      try (Right(f(string))) catch {
+        case NonFatal(ex) => Left(CannotConvert(string, ct.toString(), ex.toString, location))
       }
-    }
 
   /**
-   * Convert a `String => Try` into a  `String => Either` such that after application
-   * - `Success(t)` becomes `Right(t)`
-   * - `Failure(e)` becomes `Left(CannotConvert(value, type, e.getMessage)`
+   * Convert a `String => Try` into a  `String => Option[ConfigValueLocation] => Either` such that after application
+   * - `Success(t)` becomes `_ => Right(t)`
+   * - `Failure(e)` becomes `location => Left(CannotConvert(value, type, e.getMessage, location)`
    */
-  def tryF[T](f: String => Try[T])(implicit ct: ClassTag[T]): String => Either[CannotConvert, T] =
-    (s: String) =>
-      f(s) match {
+  def tryF[T](f: String => Try[T])(implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[CannotConvert, T] =
+    string => location =>
+      f(string) match {
         case Success(t) => Right(t)
-        case Failure(e) => Left(CannotConvert(s, ct.runtimeClass.getName, e.getLocalizedMessage))
+        case Failure(e) => Left(CannotConvert(string, ct.runtimeClass.getName, e.getLocalizedMessage, location))
       }
 
   /**
-   * Convert a `String => Option` into a `String => Either` such that after application
-   * - `Some(t)` becomes `Right(t)`
-   * - `None` becomes `Left(CannotConvert(value, type, "")`
+   * Convert a `String => Option` into a `String => Option[ConfigValueLocation] => Either` such that after application
+   * - `Some(t)` becomes `_ => Right(t)`
+   * - `None` becomes `location => Left(CannotConvert(value, type, "", location)`
    */
-  def optF[T](f: String => Option[T])(implicit ct: ClassTag[T]): String => Either[CannotConvert, T] =
-    (s: String) =>
-      f(s) match {
+  def optF[T](f: String => Option[T])(implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[CannotConvert, T] =
+    string => location =>
+      f(string) match {
         case Some(t) => Right(t)
-        case None => Left(CannotConvert(s, ct.runtimeClass.getName, ""))
+        case None => Left(CannotConvert(string, ct.runtimeClass.getName, "", location))
       }
 
   @deprecated(message = "The usage of Try has been deprecated. Please use fromStringReader instead", since = "0.6.0")
@@ -141,7 +140,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
-  def fromStringReader[T](fromF: String => Either[ConfigReaderFailure, T]): ConfigConvert[T] = new ConfigConvert[T] {
+  def fromStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
@@ -156,11 +155,11 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   @deprecated(message = "The usage of Try has been deprecated. Please use fromNonEmptyStringReader instead", since = "0.6.0")
   def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromNonEmptyStringReader[T](fromF andThen tryToEither[T])
+    fromNonEmptyStringReader[T](fromF andThen tryToEither)
   }
 
-  def fromNonEmptyStringReader[T](fromF: String => Either[ConfigReaderFailure, T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringReader(ensureNonEmpty(ct)(_).right.flatMap(fromF))
+  def fromNonEmptyStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromStringReader(string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)))
   }
 
   def fromNonEmptyStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
@@ -175,7 +174,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   def stringConvert[T](fromF: String => Try[T], toF: T => String): ConfigConvert[T] =
     fromStringConvert[T](fromF andThen tryToEither, toF)
 
-  def fromStringConvert[T](fromF: String => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
+  def fromStringConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
@@ -192,8 +191,8 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   def nonEmptyStringConvert[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] =
     fromNonEmptyStringConvert[T](fromF andThen tryToEither[T], toF)
 
-  def fromNonEmptyStringConvert[T](fromF: String => Either[ConfigReaderFailure, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringConvert[T](ensureNonEmpty(ct)(_).right.flatMap(fromF), toF)
+  def fromNonEmptyStringConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    fromStringConvert[T](string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)), toF)
   }
 
   def fromNonEmptyStringConvertTry[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]) = {
@@ -209,7 +208,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
-      case other => fail(WrongType(foundTyp = other.valueType().toString, expectedTyp = "ConfigObject"))
+      case other => fail(WrongType(foundTyp = other.valueType().toString, expectedTyp = "ConfigObject", ConfigValueLocation(config)))
     }
     def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
     def to(v: SubRepr): ConfigValue
@@ -221,7 +220,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
     override def fromConfigObject(config: ConfigObject, default: HNil): Either[ConfigReaderFailures, HNil] = {
       if (!hint.allowUnknownKeys && !config.isEmpty) {
-        val keys = config.keySet().asScala.toList map UnknownKey.apply
+        val keys = config.keySet().asScala.toList map {
+          k => UnknownKey(k, ConfigValueLocation(config.get(k)))
+        }
         Left(new ConfigReaderFailures(keys.head, keys.tail))
       } else {
         Right(HNil)
@@ -233,12 +234,12 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   private[pureconfig] def improveFailure[Z](failure: ConfigReaderFailure, keyStr: String): ConfigReaderFailure =
     failure match {
-      case CannotConvertNull => KeyNotFound(keyStr)
-      case CollidingKeys(suffix, existingValue) => CollidingKeys(keyStr + "." + suffix, existingValue)
-      case WrongType(foundTyp, expectedTyp) => WrongTypeForKey(foundTyp, expectedTyp, keyStr)
-      case WrongTypeForKey(foundTyp, expectedTyp, suffix) => WrongTypeForKey(foundTyp, expectedTyp, keyStr + "." + suffix)
-      case UnknownKey(suffix) => UnknownKey(keyStr + "." + suffix)
-      case KeyNotFound(suffix) => KeyNotFound(keyStr + "." + suffix)
+      case CannotConvertNull => KeyNotFound(keyStr, None)
+      case CollidingKeys(suffix, existingValue, location) => CollidingKeys(keyStr + "." + suffix, existingValue, location)
+      case WrongType(foundTyp, expectedTyp, location) => WrongTypeForKey(foundTyp, expectedTyp, keyStr, location)
+      case WrongTypeForKey(foundTyp, expectedTyp, suffix, location) => WrongTypeForKey(foundTyp, expectedTyp, keyStr + "." + suffix, location)
+      case UnknownKey(suffix, location) => UnknownKey(keyStr + "." + suffix, location)
+      case KeyNotFound(suffix, location) => KeyNotFound(keyStr + "." + suffix, location)
       case e: ConfigReaderFailure => e
     }
 
@@ -297,7 +298,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
 
   implicit def cNilConfigConvert[Wrapped]: WrappedConfigConvert[Wrapped, CNil] = new WrappedConfigConvert[Wrapped, CNil] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, CNil] =
-      fail(NoValidCoproductChoiceFound(config))
+      fail(NoValidCoproductChoiceFound(config, ConfigValueLocation(config)))
 
     override def to(t: CNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
@@ -375,9 +376,9 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
         case o: ConfigObject =>
           val z: Either[ConfigReaderFailures, List[(Int, T)]] = Right(List.empty[(Int, T)])
           def keyValueReader(key: String, value: ConfigValue): Either[ConfigReaderFailures, (Int, T)] = {
-            val keyResult = catchReadError(_.toInt)(implicitly)(key).left.flatMap(t => fail(CannotConvert(key, "Int",
+            val keyResult = catchReadError(_.toInt)(implicitly)(key)(ConfigValueLocation(value)).left.flatMap(t => fail(CannotConvert(key, "Int",
               s"To convert an object to a collection, it's keys must be read as Int but key $key has value" +
-                s"$value which cannot converted. Error: ${t.because}")))
+                s"$value which cannot converted. Error: ${t.because}", ConfigValueLocation(value))))
             val valueResult = configConvert.value.from(value)
             combineResults(keyResult, valueResult)(_ -> _)
           }
@@ -392,7 +393,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
               r.result()
           }
         case other =>
-          fail(WrongType(other.valueType().toString, "ConfigList or ConfigObject"))
+          fail(WrongType(other.valueType().toString, "ConfigList or ConfigObject", ConfigValueLocation(other)))
       }
     }
 
@@ -414,7 +415,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
           }
 
         case other =>
-          fail(WrongType(other.valueType().toString, "ConfigObject"))
+          fail(WrongType(other.valueType().toString, "ConfigObject", ConfigValueLocation(other)))
       }
     }
 
@@ -463,10 +464,10 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val finiteDurationConfigConvert: ConfigConvert[FiniteDuration] = {
-    val fromString: String => Either[ConfigReaderFailure, FiniteDuration] = { (s: String) =>
-      DurationConvert.fromString(s).right.flatMap {
+    val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, FiniteDuration] = { string => location =>
+      DurationConvert.fromString(string)(location).right.flatMap {
         case d: FiniteDuration => Right(d)
-        case _ => Left(CannotConvert(s, "FiniteDuration", s"Couldn't parse '$s' into a FiniteDuration because it's infinite."))
+        case _ => Left(CannotConvert(string, "FiniteDuration", s"Couldn't parse '$string' into a FiniteDuration because it's infinite.", location))
       }
     }
     fromNonEmptyStringConvert[FiniteDuration](fromString, DurationConvert.fromDuration)
@@ -487,7 +488,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val yearConfigConvert: ConfigConvert[Year] =
     fromNonEmptyStringReader[Year](catchReadError(Year.parse))
 
-  implicit val readString = fromStringReader[String](Right(_))
+  implicit val readString = fromStringReader[String](s => _ => Right(s))
   implicit val readBoolean = fromNonEmptyStringReader[Boolean](catchReadError(_.toBoolean))
   implicit val readDouble = fromNonEmptyStringReader[Double](catchReadError({
     case v if v.last == '%' => v.dropRight(1).toDouble / 100d
@@ -508,7 +509,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readConfig: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {
       case co: ConfigObject => Right(co.toConfig)
-      case other => fail(WrongType(other.valueType().toString, "ConfigObject"))
+      case other => fail(WrongType(other.valueType().toString, "ConfigObject", ConfigValueLocation(config)))
     }
     override def to(t: Config): ConfigValue = t.root()
   }
@@ -516,7 +517,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readConfigObject: ConfigConvert[ConfigObject] = new ConfigConvert[ConfigObject] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigObject] = config match {
       case c: ConfigObject => Right(c)
-      case other => fail(WrongType(other.valueType().toString, "ConfigObject"))
+      case other => fail(WrongType(other.valueType().toString, "ConfigObject", ConfigValueLocation(config)))
     }
     override def to(t: ConfigObject): ConfigValue = t
   }
@@ -528,7 +529,7 @@ trait LowPriorityConfigConvertImplicits {
   implicit val readConfigList: ConfigConvert[ConfigList] = new ConfigConvert[ConfigList] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigList] = config match {
       case c: ConfigList => Right(c)
-      case other => fail(WrongType(other.valueType().toString, "ConfigList"))
+      case other => fail(WrongType(other.valueType().toString, "ConfigList", ConfigValueLocation(config)))
     }
     override def to(t: ConfigList): ConfigValue = t
   }

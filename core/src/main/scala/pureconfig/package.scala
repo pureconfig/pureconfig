@@ -252,7 +252,7 @@ package object pureconfig {
    */
   def loadConfigFromFiles[Config: ConfigConvert](files: Traversable[java.io.File]): Either[ConfigReaderFailures, Config] = {
     if (files.isEmpty) {
-      ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))
+      ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))(None)
     } else {
       val resolvedTypesafeConfig = files
         .map(ConfigFactory.parseFile)
