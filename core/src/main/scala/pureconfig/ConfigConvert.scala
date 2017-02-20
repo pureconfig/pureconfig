@@ -208,7 +208,7 @@ object ConfigConvert extends LowPriorityConfigConvertImplicits {
   private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
-      case other => fail(WrongType(foundTyp = other.valueType().toString, expectedTyp = "ConfigObject", ConfigValueLocation(config)))
+      case other => fail(WrongType(foundTyp = other.valueType().toString, expectedTyp = "ConfigObject", ConfigValueLocation(other)))
     }
     def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
     def to(v: SubRepr): ConfigValue

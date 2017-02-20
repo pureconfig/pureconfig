@@ -976,4 +976,39 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     failures should have size 1
     failures.head shouldBe a[CannotConvert]
   }
+
+  // FIXME: This, and a lot of the tests above should go into separate suites
+  "Loading configuration from files" should "show proper error locations when loading a single file" in {
+    import pureconfig.syntax._
+    case class Conf(a: Int, b: String, c: Int)
+
+    val workingDir = getClass.getResource("/").getFile
+    val file = "conf/error1/a.conf"
+    val conf = ConfigFactory.load(file).root()
+
+    val failures1 = conf.get("conf").to[Conf].left.value.toList
+    failures1 should have size 2
+    failures1 should contain(KeyNotFound("a", Some(ConfigValueLocation(workingDir + file, 0))))
+    failures1 should contain(CannotConvert("hello", "Int", """java.lang.NumberFormatException: For input string: "hello"""", Some(ConfigValueLocation(workingDir + file, 2))))
+
+    val failures2 = conf.get("other-conf").to[Conf].left.value.toList
+    failures2 should have size 3
+    failures2 should contain(KeyNotFound("a", Some(ConfigValueLocation(workingDir + file, 6))))
+    failures2 should contain(KeyNotFound("b", Some(ConfigValueLocation(workingDir + file, 6))))
+    failures2 should contain(CannotConvert("hello", "Int", """java.lang.NumberFormatException: For input string: "hello"""", Some(ConfigValueLocation(workingDir + file, 8))))
+  }
+
+  it should "show proper error location when loading from multiple files" in {
+    import pureconfig.syntax._
+    case class Conf(a: Int, b: String, c: Int)
+
+    val workingDir = getClass.getResource("/").getFile
+    val file1 = "conf/error2/a.conf"
+    val file2 = "conf/error2/b.conf"
+    val conf = ConfigFactory.load(file1).withFallback(ConfigFactory.load(file2)).root()
+
+    val failures = conf.get("conf").to[Conf].left.value.toList
+    failures should have size 1
+    failures should contain(CannotConvert("string", "Int", """java.lang.NumberFormatException: For input string: "string"""", Some(ConfigValueLocation(workingDir + file2, 1))))
+  }
 }
