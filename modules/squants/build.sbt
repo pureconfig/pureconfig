@@ -12,7 +12,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "squants" % "1.1.0",
+  "org.typelevel" %% "squants" % "1.2.0",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest,
   Dependencies.scalaCheck
