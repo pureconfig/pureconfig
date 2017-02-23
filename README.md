@@ -24,6 +24,7 @@ A boilerplate-free Scala library for loading configuration files.
   - [Default field values](core/docs/override-behaviour-for-case-classes.md#default-field-values)
   - [Unknown keys](core/docs/override-behaviour-for-case-classes.md#unknown-keys)
 - [Override behaviour for sealed families](core/docs/override-behaviour-for-sealed-families.md)
+- [Error handling](core/docs/error-handling.md)
 - [Handling missing keys](core/docs/handling-missing-keys.md)
 - [Example](core/docs/example.md)
 - [Whence the config files](core/docs/whence-the-config-files.md)
