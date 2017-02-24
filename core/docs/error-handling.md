@@ -15,7 +15,7 @@ optional location from a `ConfigValue`:
 import com.typesafe.config._
 import pureconfig.error._
 
-val cv = ConfigFactory.load.root().get("file")
+val cv = ConfigFactory.load.root().get("conf")
 // cv: com.typesafe.config.ConfigValue = SimpleConfigObject({"a":1,"b":2})
 
 KeyNotFound("xpto", ConfigValueLocation(cv))
