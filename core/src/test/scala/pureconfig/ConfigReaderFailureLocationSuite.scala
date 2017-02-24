@@ -17,7 +17,7 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
     case class Conf(a: Int, b: String, c: Int)
 
     val workingDir = getClass.getResource("/").getFile
-    val file = "conf/error1/a.conf"
+    val file = "conf/configFailureLocation/single/a.conf"
     val conf = ConfigFactory.load(file).root()
 
     val failures1 = conf.get("conf").to[Conf].left.value.toList
@@ -45,8 +45,8 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
     case class Conf(a: Int, b: String, c: Int)
 
     val workingDir = getClass.getResource("/").getFile
-    val file1 = "conf/error2/a.conf"
-    val file2 = "conf/error2/b.conf"
+    val file1 = "conf/configFailureLocation/multiple/a.conf"
+    val file2 = "conf/configFailureLocation/multiple/b.conf"
     val conf = ConfigFactory.load(file1).withFallback(ConfigFactory.load(file2)).root()
 
     val failures = conf.get("conf").to[Conf].left.value.toList
