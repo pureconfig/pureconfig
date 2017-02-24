@@ -11,7 +11,7 @@ Automatically create a converter to read [Squants](http://www.squants.com/)'s be
 In addition to [core pureconfig](https://github.com/melrief/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.melrief" %% "pureconfig-squants" % "0.5.1"
+libraryDependencies += "com.github.melrief" %% "pureconfig-squants" % "0.6.0"
 ```
 
 ## Example

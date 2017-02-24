@@ -11,7 +11,7 @@ Automatically create a converter to read [enum](https://github.com/julienrf/enum
 In addition to [core pureconfig](https://github.com/melrief/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.melrief" %% "pureconfig-enum" % "0.5.1"
+libraryDependencies += "com.github.melrief" %% "pureconfig-enum" % "0.6.0"
 ```
 
 ## Example
