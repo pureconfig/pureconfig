@@ -1,4 +1,4 @@
-### 0.6.0 (unreleased)
+### 0.6.0 (Feb 14, 2017)
 
 - New features
   - New  `ProductHint` trait allowing customization of the derived `ConfigConvert` for case classes, superseeding
@@ -13,6 +13,7 @@
   - Support for reading and writing [`java.net.URI`](https://docs.oracle.com/javase/8/docs/api/java/net/URI.html)s;
   - Support multiple failures, e.g. when multiple fields of a class fail to convert;
   - Add `ConfigReaderFailure` ADT to model failures and `ConfigReaderFailures` to represent a non empty list of errors;
+  - Add `ConfigValueLocation`, which is the physical location of a ConfigValue represented by a file name and a line number;
   - Add `loadConfigOrThrow` methods to the API;
   - Add helpers to create `ConfigConvert`:
     - `ConfigConvert.fromStringConvert` that requires a function `String => Either[ConfigReaderFailure, T]`
