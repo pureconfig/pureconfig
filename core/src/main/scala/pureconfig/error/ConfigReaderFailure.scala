@@ -15,7 +15,7 @@ import com.typesafe.config.ConfigValue
  *                   ConfigValue definition starts
  */
 case class ConfigValueLocation(filename: String, lineNumber: Int) {
-  def description: String = s"(file:$filename: $lineNumber)"
+  def description: String = s"($filename:$lineNumber)"
 }
 
 object ConfigValueLocation {
