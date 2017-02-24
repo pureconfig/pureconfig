@@ -22,5 +22,5 @@ implicit val localDateInstance = localDateConfigConvert(DateTimeFormatter.ISO_DA
 val conf = parseString(s"""{ date: "2011-12-03" }""")
 
 loadConfig[Conf](conf)
-// returns Success(Conf(LocalDate.parse("2011-12-03", DateTimeFormatter.ISO_DATE)))
+// returns Right(Conf(LocalDate.parse("2011-12-03", DateTimeFormatter.ISO_DATE)))
 ```

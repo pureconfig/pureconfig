@@ -14,7 +14,7 @@ case class DogConf(age: Int) extends AnimalConf
 case class BirdConf(canFly: Boolean) extends AnimalConf
 
 loadConfig[AnimalConf](parseString("""{ type: "dogconf", age: 4 }"""))
-// returns Success(DogConf(4))
+// returns Right(DogConf(4))
 ```
 
 For sealed families, PureConfig provides a way to customize the conversion
@@ -26,7 +26,7 @@ of a case class option, we can use another field:
 ```scala
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
 loadConfig[AnimalConf](parseString("""{ kind: "dogconf", age: 4 }"""))
-// returns Success(DogConf(4))
+// returns Right(DogConf(4))
 ```
 
 `FieldCoproductHint` can also be adapted to write class names in a different
@@ -37,7 +37,7 @@ implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
   override def fieldValue(name: String) = name.dropRight("Conf".length)
 }
 loadConfig[AnimalConf](parseString("""{ type: "Bird", can-fly: true }"""))
-// returns Success(BirdConf(true))
+// returns Right(BirdConf(true))
 ```
 
 With a `CoproductHint` you can even opt not to use any extra field at all. For
@@ -48,7 +48,6 @@ name of the class:
 import com.typesafe.config.{ConfigFactory, ConfigValue}
 import pureconfig._
 import pureconfig.syntax._
-import scala.util.Success
 
 sealed trait Season
 case object Spring extends Season
@@ -66,13 +65,13 @@ implicit val seasonHint = new CoproductHint[Season] {
   //   `Success(None)`.
   // - If `cv` is an invalid config for Season (in this case, if it isn't a
   //   string), returns a `Failure`.
-  def from(cv: ConfigValue, name: String) = cv.to[String].map { strConf =>
+  def from(cv: ConfigValue, name: String) = cv.to[String].right.map { strConf =>
     if(strConf == name) Some(ConfigFactory.empty.root) else None
   }
 
   // Writes a config for a Season. `cv` is a config for the concrete season
   // `name` (in this case, `cv` is always an empty object).
-  def to(cv: ConfigValue, name: String) = Success(name.toConfig)
+  def to(cv: ConfigValue, name: String) = Right(name.toConfig)
 
   // If `from` returns a `Failure` for a concrete class, should we try other
   // concrete classes?
@@ -81,5 +80,5 @@ implicit val seasonHint = new CoproductHint[Season] {
 
 case class MyConf(list: List[Season])
 loadConfig[MyConf](ConfigFactory.parseString("""list = [Spring, Summer, Autumn, Winter]"""))
-// returns Success(MyConf(List(Spring, Summer, Autumn, Winter)))
+// returns Right(MyConf(List(Spring, Summer, Autumn, Winter)))
 ```

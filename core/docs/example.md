@@ -65,7 +65,7 @@ implicit val emailConvert: ConfigConvert[Email] = fromString[Email](Email.fromSt
 And then we load the configuration:
 
 ```scala
-val config = loadConfig[Config].get // loadConfig returns a Try
+val config = loadConfigOrthrow[Config]
 ```
 
 And that's it.
@@ -90,6 +90,6 @@ of [Typesafe Config][typesafe-config] with the implicit helpers provided in the
 import com.typesafe.config.ConfigFactory
 import pureconfig.syntax._
 
-val config = ConfigFactory.load.to[Config].get
+val config = ConfigFactory.load.to[Config]
 println("The loaded configuration is: " + config.toString)
 ```

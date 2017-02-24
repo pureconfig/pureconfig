@@ -6,7 +6,7 @@ A boilerplate-free Scala library for loading configuration files.
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-![](http://i.imgur.com/S5QUS8c.gif)
+![](http://i.imgur.com/613aexN.gif)
 
 
 ## Table of Contents
@@ -93,7 +93,7 @@ Import the library package and use one of the `loadConfig` methods:
 ```scala
 import pureconfig._
 
-val config: Try[YourConfClass] = loadConfig[YourConfClass]
+val config: Either[ConfigReaderFailures,YourConfClass] = loadConfig[YourConfClass]
 ```
 
 
@@ -129,7 +129,7 @@ case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, St
 val conf = parseString("""{ "int": 1, "adt": { "type": "adtb", "b": 1 }, "list": ["1", "20%"], "map": { "key": "value" } }""")
 
 loadConfig[MyClass](conf)
-// returns Success(MyClass(1, AdtB(1), List(1.0, 0.2), Map("key" -> "value"), None))
+// returns Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 

@@ -23,10 +23,10 @@ PureConfig can be extended to support those types. To do so, an instance for the
 `ConfigConvert` type class must be provided implicitly, like:
 
 ```scala
-import scala.util.Try
+import pureconfig.ConfigConvert._
 
-implicit val myIntConvert = ConfigConvert.stringConvert[MyInt](s => Try(new MyInt(s.toInt)), n => n.value.toString)
+implicit val myIntConvert = ConfigConvert.fromStringConvert[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
 
 loadConfig[Conf](conf)
-// returns Success(Conf(new MyInt(1)))
+// returns Right(Conf(new MyInt(1)))
 ```
