@@ -1,4 +1,4 @@
-### 0.6.0 (unreleased)
+### 0.6.0 (Feb 14, 2017)
 
 - New features
   - New  `ProductHint` trait allowing customization of the derived `ConfigConvert` for case classes, superseeding
@@ -9,9 +9,24 @@
     - Whether unknown keys are ignored or cause pureconfig to return a `Failure`
       ([docs](https://github.com/melrief/pureconfig#unknown-keys)).
   - Support for reading and writing [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html)s;
-  - Support for reading and writing [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
+  - Support for reading and writing [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html)s;
+  - Support for reading and writing [`java.net.URI`](https://docs.oracle.com/javase/8/docs/api/java/net/URI.html)s;
+  - Support multiple failures, e.g. when multiple fields of a class fail to convert;
+  - Add `ConfigReaderFailure` ADT to model failures and `ConfigReaderFailures` to represent a non empty list of errors;
+  - Add `ConfigValueLocation`, which is the physical location of a ConfigValue represented by a file name and a line number;
+  - Add `loadConfigOrThrow` methods to the API;
+  - Add helpers to create `ConfigConvert`:
+    - `ConfigConvert.fromStringConvert` that requires a function `String => Either[ConfigReaderFailure, T]`
+    - `ConfigConvert.fromStringConvertTry` that requires a function `String => Try[T]`
+    - `ConfigConvert.fromStringConvertOpt` that requires a function `String => Option[T]`
+  - Add `ConfigConvert.catchReadError` to convert a function that can throw exception into a safe function that returns
+    a `Either[CannotConvert, T]`;
 
 - Breaking changes
+  - `ConfigConvert.from` now returns a value of type `Either[ConfigReaderFailures, T]` instead of `Try[T]`;
+  - `CoproductHint` has been changed to adapt to the new `ConfigConvert`:
+    - `CoproductHint.from` now returns a value of type `Either[ConfigReaderFailures, Option[ConfigValue]]`
+    - `CoproductHint.to` now returns a value of type `Either[ConfigReaderFailures, Option[ConfigValue]]`
   - The default field mapping changed from camel case config keys (e.g. `exampleKey`) to kebab case keys (e.g.
     `example-key`). Case class fields are still expected to be camel case. The old behavior can be retained by putting
     in scope an `implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))`;
@@ -20,7 +35,9 @@
     the derivation of `ConfigConvert` for case class. Old `ConfigFieldMapping` implicit instances in scope have no
     effect now. The migration can be done by replacing code like
     `implicit def mapping: ConfigFieldMapping[T] = <mapping>` with
-    `implicit def productHint: ProductHint[T] = ProductHint(<mapping>)`.
+    `implicit def productHint: ProductHint[T] = ProductHint(<mapping>)`;
+  - `ConfigConvert.fromString`, `ConfigConvert.fromNonEmptyString`, `ConfigConvert.vstringConvert`,
+    `ConfigConvert.nonEmptyStringConvert` are now deprecated and the new helpers should be used instead.
 
 ### 0.5.1 (Jan 20, 2017)
 
