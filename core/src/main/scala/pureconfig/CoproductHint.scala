@@ -24,7 +24,7 @@ trait CoproductHint[T] {
    * @param name the name of the class or coproduct option to try
    * @return a `Either[ConfigReaderFailure, Option[ConfigValue]]` as defined above.
    */
-  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailure, Option[ConfigValue]]
+  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailures, Option[ConfigValue]]
 
   /**
    * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
@@ -35,7 +35,7 @@ trait CoproductHint[T] {
    * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some error
    *         occurred.
    */
-  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailure, ConfigValue]
+  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue]
 
   /**
    * Defines what to do if `from` returns `Success(Some(_))` for a class or coproduct option, but its `ConfigConvert`
@@ -66,26 +66,26 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailure, Option[ConfigValue]] = cv match {
+  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailures, Option[ConfigValue]] = cv match {
     case co: ConfigObject =>
       Option(co.get(key)) match {
         case Some(fv) => fv.unwrapped match {
           case v: String if v == fieldValue(name) => Right(Some(cv))
           case _: String => Right(None)
-          case _ => Left(WrongType(fv.valueType.toString, expectedTyp = "String"))
+          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType.toString, expectedTyp = "String", ConfigValueLocation(fv))))
         }
-        case None => Left(KeyNotFound(key))
+        case None => Left(ConfigReaderFailures(KeyNotFound(key, ConfigValueLocation(co))))
       }
-    case _ => Left(WrongType(cv.valueType.toString, expectedTyp = "ConfigObject"))
+    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType.toString, expectedTyp = "ConfigObject", ConfigValueLocation(cv))))
   }
 
-  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailure, ConfigValue] = cv match {
+  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
     case co: ConfigObject =>
-      if (co.containsKey(key)) Left(CollidingKeys(key, co.get(key).toString))
+      if (co.containsKey(key)) Left(ConfigReaderFailures(CollidingKeys(key, co.get(key).toString, ConfigValueLocation(co))))
       else Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
 
     case _ =>
-      Left(WrongType(cv.valueType.toString, "ConfigObject"))
+      Left(ConfigReaderFailures(WrongType(cv.valueType.toString, "ConfigObject", ConfigValueLocation(cv))))
   }
 
   def tryNextOnFail(name: String) = false

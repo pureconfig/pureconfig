@@ -271,7 +271,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
   it should "throw an exception if a coproduct option has a field with the same key as the hint field" in {
     implicit val hint = new FieldCoproductHint[AnimalConfig]("age")
     val cc = implicitly[ConfigConvert[AnimalConfig]]
-    a[CollidingKeysException] should be thrownBy cc.to(DogConfig(2))
+    a[ConfigReaderException[_]] should be thrownBy cc.to(DogConfig(2))
   }
 
   it should "return a Failure with a proper exception if the hint field in a coproduct is missing" in {
@@ -572,7 +572,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     implicit val custom: ConfigConvert[Foo] = new ConfigConvert[Foo] {
       def from(config: ConfigValue): Either[ConfigReaderFailures, Foo] = {
         val s = config.asInstanceOf[ConfigObject].get("i").render()
-        catchReadError(s => Foo(s.toInt + 1))(implicitly)(s).left.map(ConfigReaderFailures.apply)
+        catchReadError(s => Foo(s.toInt + 1))(implicitly)(s)(None).left.map(ConfigReaderFailures.apply)
       }
       def to(foo: Foo): ConfigValue =
         ConfigValueFactory.fromMap(Map("i" -> foo.i).asJava)
@@ -632,7 +632,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "allow a custom ConfigConvert[Path] to override our definition" in {
     val expected = "c:\\this\\is\\a\\custom\\path"
-    implicit val readPathBadly = fromStringReader[Path](_ => Right(Paths.get(expected)))
+    implicit val readPathBadly = fromStringReader[Path](_ => _ => Right(Paths.get(expected)))
     val config = loadConfig[ConfWithPath](ConfigValueFactory.fromMap(Map("my-path" -> "/this/is/ignored").asJava).toConfig)
     config.right.value.myPath shouldBe Paths.get(expected)
   }
@@ -651,7 +651,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should "allow a custom ConfigConvert[URI] to override our definition" in {
     val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = fromStringReader[URI](_ => Right(new URI(expected)))
+    implicit val readURLBadly = fromStringReader[URI](_ => _ => Right(new URI(expected)))
     val config = loadConfig[ConfWithURI](ConfigValueFactory.fromMap(Map("uri" -> "https://ignored/url").asJava).toConfig)
     config.right.value.uri shouldBe new URI(expected)
   }
@@ -681,7 +681,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     }""")
 
     case class SampleConf(a: Int, b: String)
-    loadConfig[SampleConf](conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a"), KeyNotFound("b"))
+    loadConfig[SampleConf](conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a", None), KeyNotFound("b", None))
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
 
@@ -830,15 +830,15 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
 
   it should s"return a ${classOf[KeyNotFound]} when a key is not in the configuration" in {
     val emptyConf = ConfigFactory.empty()
-    loadConfig[Foo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("i"))
+    loadConfig[Foo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("i", None))
     val conf = ConfigFactory.parseMap(Map("namespace.foo" -> 1).asJava)
-    loadConfig[Foo](conf, "namespace").left.value.toList should contain theSameElementsAs Seq(KeyNotFound("namespace.i"))
-    loadConfig[ConfWithMapOfFoo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("map"))
-    loadConfig[ConfWithListOfFoo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("list"))
-    loadConfig[ConfWithConfigObject](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf"))
-    loadConfig[ConfWithConfigList](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf"))
-    loadConfig[ConfWithDuration](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("i"))
-    loadConfig[SparkNetwork](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("timeout"))
+    loadConfig[Foo](conf, "namespace").left.value.toList should contain theSameElementsAs Seq(KeyNotFound("namespace.i", None))
+    loadConfig[ConfWithMapOfFoo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("map", None))
+    loadConfig[ConfWithListOfFoo](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("list", None))
+    loadConfig[ConfWithConfigObject](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf", None))
+    loadConfig[ConfWithConfigList](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf", None))
+    loadConfig[ConfWithDuration](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("i", None))
+    loadConfig[SparkNetwork](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("timeout", None))
 
     case class InnerConf(v: Int)
     case class EnclosingConf(conf: InnerConf)
@@ -848,19 +848,19 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
       def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
     }
 
-    loadConfig[EnclosingConf](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf"))
+    loadConfig[EnclosingConf](emptyConf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("conf", None))
   }
 
   it should "allow custom ConfigConverts to handle missing keys" in {
     case class Conf(a: Int, b: Int)
     val conf = ConfigFactory.parseString("""{ a: 1 }""")
-    loadConfig[Conf](conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b"))
+    loadConfig[Conf](conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b", None))
 
     implicit val defaultInt = new ConfigConvert[Int] with AllowMissingKey {
       def from(v: ConfigValue) =
         if (v == null) Right(42) else {
           val s = v.render(ConfigRenderOptions.concise)
-          catchReadError(_.toInt)(implicitly)(s).left.map(ConfigReaderFailures.apply)
+          catchReadError(_.toInt)(implicitly)(s)(None).left.map(ConfigReaderFailures.apply)
         }
       def to(v: Int) = ???
     }
@@ -905,10 +905,10 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     loadConfig[Conf](conf2).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44))
 
     val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava)
-    loadConfig[Conf](conf3).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a"))
+    loadConfig[Conf](conf3).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a", None))
 
     val conf4 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5).asJava)
-    loadConfig[Conf](conf4).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("d.g"))
+    loadConfig[Conf](conf4).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("d.g", None))
 
     val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava)
     loadConfig[Conf](conf5).right.value shouldBe Conf(2, "default", 42, InnerConf(5, 6))
@@ -926,7 +926,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
-    loadConfig[Conf](conf1).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b"), KeyNotFound("c"), KeyNotFound("d"))
+    loadConfig[Conf](conf1).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b", None), KeyNotFound("c", None), KeyNotFound("d", None))
   }
 
   "Converting from an empty string to a double" should "complain about an empty string" in {

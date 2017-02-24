@@ -1,10 +1,7 @@
 package pureconfig.module
 
-import scala.util.{ Failure, Success, Try }
-
 import pureconfig.ConfigConvert._
 
-import _root_.squants.QuantityParseException
 import _root_.squants.electro._
 import _root_.squants.energy._
 import _root_.squants.information._
@@ -151,7 +148,7 @@ package object squants {
 
   // thermal
   implicit val temperatureConfigConvert =
-    fromNonEmptyStringConvertTry[Temperature](parseTemperature, _.toString)
+    fromNonEmptyStringConvertTry[Temperature](Temperature.apply, _.toString)
   implicit val thermalCapacityConfigConvert =
     fromNonEmptyStringConvertTry[ThermalCapacity](ThermalCapacity.apply, _.toString)
 
@@ -161,18 +158,4 @@ package object squants {
   implicit val timeConfigConvert =
     fromNonEmptyStringConvertTry[Time](Time.apply, _.toString)
 
-  // This is temporary until https://github.com/typelevel/squants/pull/183 is released (1.2.0 ???)
-  // Without it, ScalaCheck has a pretty easy time breaking the conversion
-  private[squants] def parseTemperature(s: String): Try[Temperature] = {
-    val regex = "([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)* *°? *(f|F|c|C|k|K|r|R)".r
-    s match {
-      case regex(value, unit) => unit match {
-        case "f" | "F" => Success(Fahrenheit(value.toDouble))
-        case "c" | "C" => Success(Celsius(value.toDouble))
-        case "k" | "K" => Success(Kelvin(value.toDouble))
-        case "r" | "R" => Success(Rankine(value.toDouble))
-      }
-      case _ => Failure(QuantityParseException("Unable to parse Temperature", s))
-    }
-  }
 }

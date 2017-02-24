@@ -4,17 +4,11 @@ import _root_.enumeratum._
 import _root_.enumeratum.values._
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.{ fromNonEmptyStringConvertOpt, fromStringConvertOpt, fromNonEmptyStringConvert }
-import pureconfig.error.{ CannotConvert, ConfigReaderFailure }
+import pureconfig.error.CannotConvert
 
 import scala.reflect.ClassTag
 
 package object enumeratum {
-
-  private[this] def optionToCannotConvert[T](name: String, f: String => Option[T])(implicit ct: ClassTag[T]): Either[ConfigReaderFailure, T] =
-    f(name) match {
-      case None => Left(CannotConvert(name, ct.runtimeClass.getSimpleName, ""))
-      case Some(t) => Right(t)
-    }
 
   implicit def enumeratumConfigConvert[A <: EnumEntry](implicit enum: Enum[A], ct: ClassTag[A]): ConfigConvert[A] =
     fromNonEmptyStringConvertOpt[A](enum.withNameOption, _.entryName)
@@ -36,9 +30,9 @@ package object enumeratum {
 
   implicit def enumeratumCharConfigConvert[A <: CharEnumEntry](implicit enum: CharEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
     fromNonEmptyStringConvert[A](
-      s => ensureOneChar(s) match {
+      s => location => ensureOneChar(s) match {
         case Right(v) => Right(enum.withValue(v))
-        case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg))
+        case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg, location))
       },
       _.value.toString)
 
