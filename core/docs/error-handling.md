@@ -1,9 +1,8 @@
 ## Error handling
 
-PureConfig provides some semantically rich case classes to describe failures
-when trying to read from a `ConfigValue` in the package `pureconfig.error`. When
-implementing your own `ConfigConvert`s, you're recommended to use the provided
-case classes.
+The `pureconfig.error` package provides semantically rich case classes to
+describe failures reading from a `ConfigValue`. When implementing your own
+`ConfigConvert`s, you're recommended to use the provided case classes.
 
 The `ConfigReaderFailure` class has an optional location field that can be used
 to point to the physical location of a `ConfigValue` that raised an error. When

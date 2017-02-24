@@ -55,7 +55,7 @@ sealed abstract class ConfigReaderFailure {
 }
 
 /**
- * A failure representing the inability of converting a null value. Since a null
+ * A failure representing the inability to convert a null value. Since a null
  * represents a missing value, the location of this failure is always None.
  */
 final case object CannotConvertNull extends ConfigReaderFailure {
@@ -63,7 +63,7 @@ final case object CannotConvertNull extends ConfigReaderFailure {
 }
 
 /**
- * A failure representing the inability of converting a given value to a desired type.
+ * A failure representing the inability to convert a given value to a desired type.
  *
  * @param value the value that was requested to be converted
  * @param toType the target type that the value was requested to be converted to
