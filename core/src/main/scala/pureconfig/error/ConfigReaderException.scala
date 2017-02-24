@@ -24,22 +24,25 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
 
     if (keysNotFound.nonEmpty) {
       linesBuffer += "  Keys not found:"
-      for (KeyNotFound(key) <- keysNotFound) {
-        linesBuffer += s"    - '$key'"
+      for (KeyNotFound(key, location) <- keysNotFound) {
+        val desc = location.fold("")(_.description)
+        linesBuffer += s"    - $desc '$key'"
       }
     }
 
     if (cannotConvertFound.nonEmpty) {
       linesBuffer += "  Value conversion failures:"
-      for (CannotConvert(value, toTyp, because) <- cannotConvertFound) {
-        linesBuffer += s"    - cannot convert '$value' to type '$toTyp' " + (if (because.isEmpty) "" else s"because $because")
+      for (CannotConvert(value, toTyp, because, location) <- cannotConvertFound) {
+        val desc = location.fold("")(_.description)
+        linesBuffer += s"    - $desc cannot convert '$value' to type '$toTyp' " + (if (because.isEmpty) "" else s"because $because")
       }
     }
 
     if (otherFound.nonEmpty) {
       linesBuffer += "  Other failures:"
       for (failure <- otherFound) {
-        linesBuffer += s"    - $failure"
+        val desc = failure.location.fold("")(_.description)
+        linesBuffer += s"    - $desc $failure"
       }
     }
 

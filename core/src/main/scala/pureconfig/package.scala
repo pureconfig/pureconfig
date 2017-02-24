@@ -8,7 +8,7 @@ import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
 import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig }
-import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
+import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures, ConfigValueLocation }
 import pureconfig.ConfigConvert.improveFailures
 
 import scala.reflect.ClassTag
@@ -37,7 +37,7 @@ package object pureconfig {
    */
   def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
-    improveFailures[Config](loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv), namespace)
+    improveFailures[Config](loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv), namespace, None)
   }
 
   /**
@@ -65,7 +65,7 @@ package object pureconfig {
   def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
     ConfigFactory.invalidateCaches()
     improveFailures[Config](
-      loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv), namespace)
+      loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv), namespace, None)
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
@@ -74,7 +74,8 @@ package object pureconfig {
 
   /** Load a configuration of type `Config` from the given `Config` */
   def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    improveFailures[Config](conv.from(conf.getConfig(namespace).root()), namespace)
+    val cv = conf.getConfig(namespace).root()
+    improveFailures[Config](conv.from(cv), namespace, ConfigValueLocation(cv))
   }
 
   /**
@@ -131,7 +132,7 @@ package object pureconfig {
   def loadConfigOrThrow[Config](namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
     ConfigFactory.invalidateCaches()
     val config = ConfigFactory.load().getConfig(namespace)
-    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace))
+    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace, ConfigValueLocation(config.root())))
   }
 
   /**
@@ -158,7 +159,7 @@ package object pureconfig {
   def loadConfigOrThrow[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
     ConfigFactory.invalidateCaches()
     val config = ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace)
-    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace))
+    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace, ConfigValueLocation(config.root())))
   }
 
   /**
@@ -181,7 +182,8 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigOrThrow[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
-    getResultOrThrow[Config](improveFailures[Config](conv.from(conf.getConfig(namespace).root()), namespace))
+    val cv = conf.getConfig(namespace).root()
+    getResultOrThrow[Config](improveFailures[Config](conv.from(cv), namespace, ConfigValueLocation(cv)))
   }
 
   /**
@@ -252,7 +254,7 @@ package object pureconfig {
    */
   def loadConfigFromFiles[Config: ConfigConvert](files: Traversable[java.io.File]): Either[ConfigReaderFailures, Config] = {
     if (files.isEmpty) {
-      ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))
+      ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))(None)
     } else {
       val resolvedTypesafeConfig = files
         .map(ConfigFactory.parseFile)
