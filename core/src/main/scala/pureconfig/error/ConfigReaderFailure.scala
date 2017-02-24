@@ -35,8 +35,7 @@ object ConfigValueLocation {
     Option(cv).flatMap { v =>
       val origin = v.origin()
       if (origin.filename != null && origin.lineNumber != -1)
-        // I believe lineNumber starts at 1 in ConfigOrigin
-        Some(ConfigValueLocation(origin.filename, origin.lineNumber - 1))
+        Some(ConfigValueLocation(origin.filename, origin.lineNumber))
       else
         None
     }
