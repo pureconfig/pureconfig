@@ -23,7 +23,6 @@ package object syntax {
   }
 
 
-
   implicit class PimpedConfig(val conf: TypesafeConfig) extends AnyVal {
     def to[T: ConfigConvert]: Either[ConfigReaderFailures, T] = conf.root().to[T]
     def toOrThrow[T](implicit configConvert: ConfigConvert[T], cl:ClassTag[T]): T = getResultOrThrow(conf.root().to[T])(cl)
