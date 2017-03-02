@@ -4,16 +4,16 @@
 package pureconfig
 
 import java.io.PrintWriter
-import java.net.{ URI, URL }
-import java.nio.file.{ Files, Path, Paths }
+import java.net.{URI, URL}
+import java.nio.file.{Files, Path, Paths}
 import java.time._
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.concurrent.duration.{ Duration, FiniteDuration }
-import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import com.typesafe.config.{ConfigFactory, Config => TypesafeConfig, _}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
@@ -21,8 +21,8 @@ import org.scalacheck.Gen.uuid
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert.{ fromStringReader, fromStringConvert, catchReadError }
-import pureconfig.error._
+import pureconfig.ConfigConvert.{catchReadError, fromStringConvert, fromStringReader}
+import pureconfig.error.{ConfigReaderException, _}
 
 /**
  * @author Mario Pastorelli
@@ -115,6 +115,34 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     conf.getValue("v").to[Int].isLeft shouldBe true
     conf.getValue("v").to[Long].isLeft shouldBe true
     conf.getValue("v").to[Short].isLeft shouldBe true
+  }
+
+  it should "fail with Exception when trying to convert to basic types from an empty string" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ v: "" }""")
+
+    a[ConfigReaderException[_]] should be thrownBy conf.getValue("v").toOrThrow[Boolean]
+    a[ConfigReaderException[_]] should be thrownBy conf.getValue("v").toOrThrow[Double]
+    a[ConfigReaderException[_]] should be thrownBy conf.getValue("v").toOrThrow[Float]
+    a[ConfigReaderException[_]] should be thrownBy conf.getValue("v").toOrThrow[Int]
+    a[ConfigReaderException[_]] should be thrownBy conf.getValue("v").toOrThrow[Long]
+    a[ConfigReaderException[_]] should be thrownBy conf.getValue("v").toOrThrow[Short]
+  }
+
+  it should "pass when trying to convert to basic types with pureconfig.syntax toOrThrow" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ b: true, d: 2.2, f: 3.3, i: 2, l: 2, s: 2, cs: "Cheese"}""")
+
+    conf.getValue("b").toOrThrow[Boolean] shouldBe true
+    conf.getValue("d").toOrThrow[Double] shouldBe 2.2
+    conf.getValue("f").toOrThrow[Float] shouldBe 3.3f
+    conf.getValue("i").toOrThrow[Int] shouldBe 2
+    conf.getValue("l").toOrThrow[Long] shouldBe 2L
+    conf.getValue("s").toOrThrow[Short] shouldBe 2.toShort
+    conf.getValue("cs").toOrThrow[String] shouldBe "Cheese"
+
   }
 
   case class ConfigWithDouble(v: Double)
