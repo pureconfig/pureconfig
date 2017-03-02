@@ -130,6 +130,21 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     a[ConfigReaderException[_]] should be thrownBy conf.getValue("v").toOrThrow[Short]
   }
 
+  it should "pass when trying to convert to basic types with pureconfig.syntax.toOrThrow" in {
+    import pureconfig.syntax._
+
+    val conf = ConfigFactory.parseString("""{ b: true, d: 2.2, f: 3.3, i: 2, l: 2, s: 2, cs: "Cheese"}""")
+
+    conf.getValue("b").toOrThrow[Boolean] shouldBe true
+    conf.getValue("d").toOrThrow[Double] shouldBe 2.2
+    conf.getValue("f").toOrThrow[Float] shouldBe 3.3f
+    conf.getValue("i").toOrThrow[Int] shouldBe 2
+    conf.getValue("l").toOrThrow[Long] shouldBe 2L
+    conf.getValue("s").toOrThrow[Short] shouldBe 2.toShort
+    conf.getValue("cs").toOrThrow[String] shouldBe "Cheese"
+
+  }
+
   case class ConfigWithDouble(v: Double)
 
   it should "be able to load a Double from a percentage" in {
