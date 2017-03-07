@@ -4,16 +4,16 @@
 package pureconfig
 
 import java.io.PrintWriter
-import java.net.{URI, URL}
-import java.nio.file.{Files, Path, Paths}
+import java.net.{ URI, URL }
+import java.nio.file.{ Files, Path, Paths }
 import java.time._
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import com.typesafe.config.{ConfigFactory, Config => TypesafeConfig, _}
+import scala.concurrent.duration.{ Duration, FiniteDuration }
+import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
@@ -21,8 +21,8 @@ import org.scalacheck.Gen.uuid
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert.{catchReadError, fromStringConvert, fromStringReader}
-import pureconfig.error.{ConfigReaderException, _}
+import pureconfig.ConfigConvert.{ catchReadError, fromStringConvert, fromStringReader }
+import pureconfig.error.{ ConfigReaderException, _ }
 
 /**
  * @author Mario Pastorelli
@@ -895,31 +895,31 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     loadConfig[Conf](conf).right.value shouldBe Conf(1, 42)
   }
 
-  it should s"return a ${classOf[WrongTypeForKey]} when a key has a wrong type" in {
+  it should s"return a ${classOf[WrongType]} when a value has a wrong type" in {
     val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava)
     val failures = loadConfig[FooBar](conf).left.value.toList
     failures should have size 1
-    failures.head shouldBe a[WrongTypeForKey]
+    failures.head shouldBe a[WrongType]
 
     val conf1 = ConfigFactory.parseMap(Map("ns.foo.i" -> 1, "ns.bar.foo" -> "").asJava)
     val failures1 = loadConfig[FooBar](conf1, "ns").left.value.toList
     failures1 should have size 1
-    failures1.head shouldBe a[WrongTypeForKey]
+    failures1.head shouldBe a[WrongType]
 
     val conf2 = ConfigFactory.parseString("""{ map: [{ i: 1 }, { i: 2 }, { i: 3 }] }""")
     val failures2 = loadConfig[ConfWithMapOfFoo](conf2).left.value.toList
     failures2 should have size 1
-    failures2.head shouldBe a[WrongTypeForKey]
+    failures2.head shouldBe a[WrongType]
 
     val conf3 = ConfigFactory.parseString("""{ conf: [{ i: 1 }, { i: 2 }, { i: 3 }] }""")
     val failures3 = loadConfig[ConfWithConfigObject](conf3).left.value.toList
     failures3 should have size 1
-    failures3.head shouldBe a[WrongTypeForKey]
+    failures3.head shouldBe a[WrongType]
 
     val conf4 = ConfigFactory.parseString("""{ conf: { a: 1, b: 2 }}""")
     val failures4 = loadConfig[ConfWithConfigList](conf4).left.value.toList
     failures4 should have size 1
-    failures4.head shouldBe a[WrongTypeForKey]
+    failures4.head shouldBe a[WrongType]
   }
 
   it should "consider default arguments by default" in {
@@ -944,7 +944,7 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava)
     val failures = loadConfig[Conf](conf6).left.value.toList
     failures should have size 1
-    failures.head shouldBe a[WrongTypeForKey]
+    failures.head shouldBe a[WrongType]
   }
 
   it should "not use default arguments if specified through a product hint" in {

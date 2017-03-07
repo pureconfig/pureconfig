@@ -27,7 +27,8 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
       "hello",
       "Int",
       """java.lang.NumberFormatException: For input string: "hello"""",
-      Some(ConfigValueLocation(workingDir + file, 3))))
+      Some(ConfigValueLocation(workingDir + file, 3)),
+      Some("c")))
 
     val failures2 = conf.get("other-conf").to[Conf].left.value.toList
     failures2 should have size 3
@@ -37,7 +38,8 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
       "hello",
       "Int",
       """java.lang.NumberFormatException: For input string: "hello"""",
-      Some(ConfigValueLocation(workingDir + file, 9))))
+      Some(ConfigValueLocation(workingDir + file, 9)),
+      Some("c")))
   }
 
   it should "show proper error location when loading from multiple files" in {
@@ -55,6 +57,7 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
       "string",
       "Int",
       """java.lang.NumberFormatException: For input string: "string"""",
-      Some(ConfigValueLocation(workingDir + file2, 2))))
+      Some(ConfigValueLocation(workingDir + file2, 2)),
+      Some("a")))
   }
 }
