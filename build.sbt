@@ -21,6 +21,10 @@ lazy val squants = (project in file("modules/squants")).
   settings(settings).
   dependsOn(core)
 
+lazy val javax = (project in file("modules/javax")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
