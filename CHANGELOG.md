@@ -1,3 +1,15 @@
+### 0.6.1 (undefined)
+
+- New features
+  - add `ConfigFactoryWrapper` to control exceptions from typesafe `ConfigFactory`
+
+- Breaking changes
+  - `loadConfigFromFiles` works on `Path` instead of `File` for consistency
+
+- Bug fixes
+  - `pureconfig.load*` methods don't throw exceptions on malformed configuration anymore
+     and wrap errors in `ConfigReaderFailures`
+
 ### 0.6.0 (Feb 14, 2017)
 
 - New features
