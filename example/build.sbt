@@ -8,7 +8,7 @@ libraryDependencies ++= Seq(
   "com.github.melrief" %% "pureconfig" % "0.6.0",
 
   // needed for Scala 2.10
-  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch)
 )
 
 crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
