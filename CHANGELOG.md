@@ -8,7 +8,7 @@
 
 - Bug fixes
   - `pureconfig.load*` methods don't throw exceptions on malformed configuration anymore
-     and wrap errors in `ConfigReaderFailures`
+     and wrap errors in `ConfigReaderFailures` [[#148](https://github.com/melrief/pureconfig/issues/148)]
 
 ### 0.6.0 (Feb 14, 2017)
 
