@@ -34,7 +34,7 @@ class ConfigFactoryWrapperSpec extends FlatSpec with Matchers {
   }
 
   it should "not throw exception but return Left when it finds unresolved placeholders" in {
-    val tmpPath = createTempConfPath("parseFileTest", """{ foo1: "bla", foo2: ${charlie}}""")
+    val tmpPath = createTempConfPath("parseFileTest", f"""{ foo1: "bla", foo2: $${charlie}}""")
     intercept[ConfigException](ConfigFactory.load(ConfigFactory.parseFile(tmpPath.toFile)))
     ConfigFactoryWrapper.loadFile(tmpPath) shouldBe a[Left[_, _]]
   }

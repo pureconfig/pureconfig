@@ -268,9 +268,8 @@ package object pureconfig {
           case (c1, c2) =>
             ConfigConvert.combineResults(c1, c2)(_ :+ _)
         }
-        .right
-        .map(_.reduce(_.withFallback(_)).resolve)
-        .flatMap(loadConfig[Config])
+        .right.map(_.reduce(_.withFallback(_)).resolve)
+        .right.flatMap(loadConfig[Config])
     }
   }
 

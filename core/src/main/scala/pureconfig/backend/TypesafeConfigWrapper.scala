@@ -27,7 +27,7 @@ object ConfigFactoryWrapper {
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): Either[ConfigReaderFailures, Config] =
-    parseFile(path).flatMap(rawConfig => unsafeToEither(ConfigFactory.load(rawConfig)))
+    parseFile(path).right.flatMap(rawConfig => unsafeToEither(ConfigFactory.load(rawConfig)))
 
   private def unsafeToEither[A](f: => A): Either[ConfigReaderFailures, A] = {
     try (Right(f)) catch {
