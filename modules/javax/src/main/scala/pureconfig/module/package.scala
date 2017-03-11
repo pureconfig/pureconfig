@@ -3,8 +3,6 @@ package pureconfig.module
 import _root_.javax.security.auth.kerberos.KerberosPrincipal
 import _root_.javax.security.auth.x500.X500Principal
 
-import scala.util.Try
-
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.{ catchReadError, fromStringConvert }
 
