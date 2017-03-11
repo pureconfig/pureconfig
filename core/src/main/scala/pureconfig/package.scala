@@ -166,7 +166,13 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigOrThrow[Config](path: Path)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
-    getResultOrThrow[Config](loadConfig[Config](path)(conv))
+    val errorOrConfig =
+      for {
+        _ <- invalidateCaches().right
+        rawConfig <- loadFile(path).right
+        config <- loadConfig[Config](rawConfig)(conv).right
+      } yield config
+    getResultOrThrow[Config](errorOrConfig)
   }
 
   /**
