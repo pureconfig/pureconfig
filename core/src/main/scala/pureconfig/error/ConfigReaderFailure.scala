@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig.error
 
-import com.typesafe.config.{ConfigOrigin, ConfigValue}
+import com.typesafe.config.{ ConfigOrigin, ConfigValue }
 
 /**
  * The physical location of a ConfigValue, represented by a file name and a line

@@ -2,8 +2,8 @@ package pureconfig.backend
 
 import java.nio.file.Path
 
-import com.typesafe.config.{Config, ConfigException, ConfigFactory}
-import pureconfig.error.{CannotParse, ConfigReaderFailures, ConfigValueLocation, ThrowableFailure}
+import com.typesafe.config.{ Config, ConfigException, ConfigFactory }
+import pureconfig.error.{ CannotParse, ConfigReaderFailures, ConfigValueLocation, ThrowableFailure }
 
 import scala.util.control.NonFatal
 
