@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig.error
 
-import com.typesafe.config.ConfigValue
+import com.typesafe.config.{ConfigOrigin, ConfigValue}
 
 /**
  * The physical location of a ConfigValue, represented by a file name and a line
@@ -32,8 +32,22 @@ object ConfigValueLocation {
    *         ConfigValues that are null.
    */
   def apply(cv: ConfigValue): Option[ConfigValueLocation] =
-    Option(cv).flatMap { v =>
-      val origin = v.origin()
+    Option(cv).flatMap(v => apply(v.origin()))
+
+  /**
+   * Helper method to create an optional ConfigValueLocation from a ConfigOrigin.
+   * Since it might not be possible to derive a ConfigValueLocation from a
+   * ConfigOrigin, this method returns Option.
+   *
+   * @param co the ConfigOrigin to derive the location from
+   *
+   * @return a Some with the location of the ConfigOrigin, or None if it is not
+   *         possible to derive a location. It is not possible to derive
+   *         locations from ConfigOrigin that are not in files or for
+   *         ConfigOrigin that are null.
+   */
+  def apply(co: ConfigOrigin): Option[ConfigValueLocation] =
+    Option(co).flatMap { origin =>
       if (origin.filename != null && origin.lineNumber != -1)
         Some(ConfigValueLocation(origin.filename, origin.lineNumber))
       else
@@ -153,3 +167,12 @@ final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocat
  *                 failure
  */
 final case class NoValidCoproductChoiceFound(value: ConfigValue, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+
+/**
+ * A failure representing the inability to parse the configuration.
+ *
+ * @param msg the error message from the parser
+ * @param location an optional location of the ConfigValue that raised the
+ *                 failure
+ */
+final case class CannotParse(msg: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure

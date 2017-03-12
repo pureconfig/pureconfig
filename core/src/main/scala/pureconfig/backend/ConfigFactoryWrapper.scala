@@ -2,8 +2,8 @@ package pureconfig.backend
 
 import java.nio.file.Path
 
-import com.typesafe.config.{ Config, ConfigFactory }
-import pureconfig.error.{ ConfigReaderFailures, ThrowableFailure }
+import com.typesafe.config.{Config, ConfigException, ConfigFactory}
+import pureconfig.error.{CannotParse, ConfigReaderFailures, ConfigValueLocation, ThrowableFailure}
 
 import scala.util.control.NonFatal
 
@@ -31,6 +31,10 @@ object ConfigFactoryWrapper {
 
   private def unsafeToEither[A](f: => A): Either[ConfigReaderFailures, A] = {
     try (Right(f)) catch {
+      case e: ConfigException.Parse =>
+        Left(ConfigReaderFailures(CannotParse(e.getLocalizedMessage, ConfigValueLocation(e.origin()))))
+      case e: ConfigException =>
+        Left(ConfigReaderFailures(ThrowableFailure(e, ConfigValueLocation(e.origin()))))
       case NonFatal(e) =>
         Left(ConfigReaderFailures(ThrowableFailure(e, None)))
     }
