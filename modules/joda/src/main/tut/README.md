@@ -20,26 +20,26 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-joda" % "0.6.0"
 
 Define a Joda `DateTimeFormatter` for a style of writing dates which looks suspiciously like ISO 8601:
 
-```scala
+```tut:silent
 import org.joda.time.format.DateTimeFormat
 val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 ```
 
 Create a ConfigConvert to read DateTime with that format:
-```scala
+```tut:silent
 import pureconfig.module.joda.configurable._
 implicit val dateTimeConverter = dateTimeConfigConvert(isoFormatter)
 ```
 
 An object to receive our configuration;
-```scala
+```tut:silent
 import org.joda.time.DateTime
 case class GreatDatesConfig(apollo: DateTime, pluto: DateTime)
 ```
 
 We can read a GreatDatesConfig like:
 
-```scala
+```tut:silent
 import pureconfig.loadConfig
 import com.typesafe.config.ConfigFactory.parseString
 val conf = parseString("""{

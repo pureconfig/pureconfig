@@ -18,9 +18,10 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-enumeratum" % "0.6.0"
 
  Given a Greeting ADT which implements one of Enumeratum's `EnumEntry` types:
 
-```scala
+```tut:silent
 import enumeratum._
 import enumeratum.EnumEntry._
+
 sealed trait Greeting extends EnumEntry with Snakecase
 
 object Greeting {
@@ -32,12 +33,12 @@ object Greeting {
 ```
 
 And a class to hold the configuration:
-```scala
+```tut:silent
 case class GreetingConf(start: Greeting, end: Greeting)
 ```
 
 We can read a GreetingConf like:
-```scala
+```tut:silent
 import pureconfig.loadConfig
 import pureconfig.module.enumeratum._
 import com.typesafe.config.ConfigFactory.parseString

@@ -14,7 +14,7 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-javax" % "0.6.0"
 
 Load a KerberosPrincipal into a configuration:
 
-```scala
+```tut:silent
 import javax.security.auth.kerberos.KerberosPrincipal
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._

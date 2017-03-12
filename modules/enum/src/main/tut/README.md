@@ -18,7 +18,7 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-enum" % "0.6.0"
 
 Given a Greeting ADT composed of `case object`s with an `implicit` `Enum` instance:
 
-```scala
+```tut:silent
 import enum.Enum
 
 sealed trait Greeting
@@ -34,12 +34,12 @@ object Greeting {
 ```
 
 And a class to hold the configuration:
-```scala
+```tut:silent
 case class GreetingConf(start: Greeting, end: Greeting)
 ```
 
 We can read a GreetingConf like:
-```scala
+```tut:silent
 import pureconfig.loadConfig
 import pureconfig.module.enum._
 import com.typesafe.config.ConfigFactory.parseString

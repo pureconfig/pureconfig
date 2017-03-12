@@ -2,7 +2,9 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
 
 lazy val core = (project in file("core")).
-  settings(settings)
+  settings(settings,
+    tutTargetDirectory := file(".")
+  )
 
 lazy val enumeratum = (project in file("modules/enumeratum")).
   settings(settings).
@@ -66,4 +68,4 @@ lazy val settings = Seq(
     val required = "1.8"
     val current  = sys.props("java.specification.version")
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
-  }) ++ formattingSettings
+  }) ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)
