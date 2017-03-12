@@ -118,7 +118,9 @@ Currently supported types for fields are:
 - case classes;
 - sealed families of case classes (ADTs).
 
-An almost comprehensive example is:
+# Example
+
+First, import the library, define data types, and a case class to hold the configuration:
 
 ```tut:silent
 import com.typesafe.config.ConfigFactory.parseString
@@ -129,7 +131,10 @@ case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt
 case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
 ```
-```tut
+
+Then, load the configuration (in this case from a hard-coded string):
+
+```tut:book
 val conf = parseString("""{ 
   "int": 1, 
   "adt": { 

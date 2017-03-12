@@ -118,7 +118,9 @@ Currently supported types for fields are:
 - case classes;
 - sealed families of case classes (ADTs).
 
-An almost comprehensive example is:
+# Example
+
+First, import the library, define data types, and a case class to hold the configuration:
 
 ```scala
 import com.typesafe.config.ConfigFactory.parseString
@@ -129,20 +131,23 @@ case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt
 case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
 ```
-```scala
-scala> val conf = parseString("""{ 
-     |   "int": 1, 
-     |   "adt": { 
-     |     "type": "adtb", 
-     |     "b": 1 
-     |   }, 
-     |   "list": ["1", "20%"], 
-     |   "map": { "key": "value" } 
-     | }""")
-conf: com.typesafe.config.Config = Config(SimpleConfigObject({"adt":{"b":1,"type":"adtb"},"int":1,"list":["1","20%"],"map":{"key":"value"}}))
 
-scala> loadConfig[MyClass](conf)
-res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+Then, load the configuration (in this case from a hard-coded string):
+
+```scala
+val conf = parseString("""{ 
+  "int": 1, 
+  "adt": { 
+    "type": "adtb", 
+    "b": 1 
+  }, 
+  "list": ["1", "20%"], 
+  "map": { "key": "value" } 
+}""")
+// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"adt":{"b":1,"type":"adtb"},"int":1,"list":["1","20%"],"map":{"key":"value"}}))
+
+loadConfig[MyClass](conf)
+// res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 

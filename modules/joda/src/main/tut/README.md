@@ -27,7 +27,10 @@ val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
 Create a ConfigConvert to read DateTime with that format:
 ```tut:silent
+import pureconfig.loadConfig
 import pureconfig.module.joda.configurable._
+import com.typesafe.config.ConfigFactory.parseString
+
 implicit val dateTimeConverter = dateTimeConfigConvert(isoFormatter)
 ```
 
@@ -39,9 +42,8 @@ case class GreatDatesConfig(apollo: DateTime, pluto: DateTime)
 
 We can read a GreatDatesConfig like:
 
-```tut:silent
-import pureconfig.loadConfig
-import com.typesafe.config.ConfigFactory.parseString
+```tut:book
+
 val conf = parseString("""{
   apollo: "1969-07-20T20:18:00.000Z"
   pluto: "2021-01-20T06:59:59.999Z"

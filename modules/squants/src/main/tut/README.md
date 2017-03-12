@@ -30,7 +30,7 @@ case class HowConfiguration(far: Length, hot: Temperature)
 
 We can read a HowConfiguration like:
 
-```tut:silent
+```tut:book
 val conf = parseString("""{
   far: 42.195 km
   hot: 56.7° C

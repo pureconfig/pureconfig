@@ -19,6 +19,9 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-enumeratum" % "0.6.0"
  Given a Greeting ADT which implements one of Enumeratum's `EnumEntry` types:
 
 ```tut:silent
+import pureconfig.loadConfig
+import pureconfig.module.enumeratum._
+import com.typesafe.config.ConfigFactory.parseString
 import enumeratum._
 import enumeratum.EnumEntry._
 
@@ -38,11 +41,7 @@ case class GreetingConf(start: Greeting, end: Greeting)
 ```
 
 We can read a GreetingConf like:
-```tut:silent
-import pureconfig.loadConfig
-import pureconfig.module.enumeratum._
-import com.typesafe.config.ConfigFactory.parseString
-
+```tut:book
 val conf = parseString("""{
   start: hello
   end: SHOUT_GOOD_BYE
