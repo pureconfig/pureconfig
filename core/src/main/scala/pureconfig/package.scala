@@ -7,9 +7,10 @@
 import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
-import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig }
+import com.typesafe.config.{ Config => TypesafeConfig }
 import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures, ConfigValueLocation }
 import pureconfig.ConfigConvert.improveFailures
+import pureconfig.backend.ConfigFactoryWrapper.{ invalidateCaches, load, loadFile, parseFile }
 
 import scala.reflect.ClassTag
 
@@ -23,8 +24,11 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    ConfigFactory.invalidateCaches()
-    loadConfig[Config](ConfigFactory.load())(conv)
+    for {
+      _ <- invalidateCaches().right
+      rawConfig <- load().right
+      config <- loadConfig[Config](rawConfig)(conv).right
+    } yield config
   }
 
   /**
@@ -36,8 +40,11 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    ConfigFactory.invalidateCaches()
-    improveFailures[Config](loadConfig[Config](ConfigFactory.load().getConfig(namespace))(conv), namespace, None)
+    for {
+      _ <- invalidateCaches().right
+      rawConfig <- load().right
+      config <- improveFailures[Config](loadConfig[Config](rawConfig.getConfig(namespace))(conv), namespace, None).right
+    } yield config
   }
 
   /**
@@ -49,8 +56,11 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](path: Path)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    ConfigFactory.invalidateCaches()
-    loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)))(conv)
+    for {
+      _ <- invalidateCaches().right
+      rawConfig <- loadFile(path).right
+      config <- loadConfig[Config](rawConfig)(conv).right
+    } yield config
   }
 
   /**
@@ -63,9 +73,11 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfig[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    ConfigFactory.invalidateCaches()
-    improveFailures[Config](
-      loadConfig[Config](ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace))(conv), namespace, None)
+    for {
+      _ <- invalidateCaches().right
+      rawConfig <- loadFile(path).right
+      config <- improveFailures[Config](loadConfig[Config](rawConfig.getConfig(namespace))(conv), namespace, None).right
+    } yield config
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
@@ -87,8 +99,11 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfigWithFallback[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    ConfigFactory.invalidateCaches()
-    loadConfig[Config](conf.withFallback(ConfigFactory.load()))
+    for {
+      _ <- invalidateCaches().right
+      rawConfig <- load().right
+      config <- loadConfig[Config](conf.withFallback(rawConfig)).right
+    } yield config
   }
 
   /**
@@ -101,8 +116,11 @@ package object pureconfig {
    *         isn't possible
    */
   def loadConfigWithFallback[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config]): Either[ConfigReaderFailures, Config] = {
-    ConfigFactory.invalidateCaches()
-    loadConfig[Config](conf.withFallback(ConfigFactory.load()), namespace)
+    for {
+      _ <- invalidateCaches().right
+      rawConfig <- load().right
+      config <- loadConfig[Config](conf.withFallback(rawConfig), namespace).right
+    } yield config
   }
 
   private def getResultOrThrow[Config](failuresOrResult: Either[ConfigReaderFailures, Config])(implicit ct: ClassTag[Config]): Config = {
@@ -130,9 +148,14 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigOrThrow[Config](namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
-    ConfigFactory.invalidateCaches()
-    val config = ConfigFactory.load().getConfig(namespace)
-    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace, ConfigValueLocation(config.root())))
+    val errorOrConfig =
+      for {
+        _ <- invalidateCaches().right
+        rawConfig <- load().right.map(_.getConfig(namespace)).right
+        config <- improveFailures[Config](
+          loadConfig[Config](rawConfig)(conv), namespace, ConfigValueLocation(rawConfig.root())).right
+      } yield config
+    getResultOrThrow[Config](errorOrConfig)
   }
 
   /**
@@ -143,9 +166,13 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigOrThrow[Config](path: Path)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
-    ConfigFactory.invalidateCaches()
-    val config = ConfigFactory.load(ConfigFactory.parseFile(path.toFile))
-    getResultOrThrow[Config](loadConfig[Config](config)(conv))
+    val errorOrConfig =
+      for {
+        _ <- invalidateCaches().right
+        rawConfig <- loadFile(path).right
+        config <- loadConfig[Config](rawConfig)(conv).right
+      } yield config
+    getResultOrThrow[Config](errorOrConfig)
   }
 
   /**
@@ -157,9 +184,14 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigOrThrow[Config](path: Path, namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
-    ConfigFactory.invalidateCaches()
-    val config = ConfigFactory.load(ConfigFactory.parseFile(path.toFile)).getConfig(namespace)
-    getResultOrThrow[Config](improveFailures[Config](loadConfig[Config](config)(conv), namespace, ConfigValueLocation(config.root())))
+    val errorOrConfig =
+      for {
+        _ <- invalidateCaches().right
+        rawConfig <- loadFile(path).right.map(_.getConfig(namespace)).right
+        config <- improveFailures[Config](
+          loadConfig[Config](rawConfig)(conv), namespace, ConfigValueLocation(rawConfig.root())).right
+      } yield config
+    getResultOrThrow[Config](errorOrConfig)
   }
 
   /**
@@ -194,8 +226,13 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigWithFallbackOrThrow[Config](conf: TypesafeConfig)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
-    ConfigFactory.invalidateCaches()
-    getResultOrThrow[Config](loadConfig[Config](conf.withFallback(ConfigFactory.load())))
+    val errorOrConfig =
+      for {
+        _ <- invalidateCaches().right
+        rawConfig <- load().right
+        config <- loadConfig[Config](conf.withFallback(rawConfig)).right
+      } yield config
+    getResultOrThrow[Config](errorOrConfig)
   }
 
   /**
@@ -207,8 +244,13 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigWithFallbackOrThrow[Config](conf: TypesafeConfig, namespace: String)(implicit conv: ConfigConvert[Config], ct: ClassTag[Config]): Config = {
-    ConfigFactory.invalidateCaches()
-    getResultOrThrow[Config](loadConfig[Config](conf.withFallback(ConfigFactory.load()), namespace))
+    val errorOrConfig =
+      for {
+        _ <- invalidateCaches().right
+        rawConfig <- load().right
+        config <- loadConfig[Config](conf.withFallback(rawConfig), namespace).right
+      } yield config
+    getResultOrThrow[Config](errorOrConfig)
   }
 
   /**
@@ -252,15 +294,18 @@ package object pureconfig {
    *
    * @param files Files ordered in decreasing priority containing part or all of a `Config`. Must not be empty.
    */
-  def loadConfigFromFiles[Config: ConfigConvert](files: Traversable[java.io.File]): Either[ConfigReaderFailures, Config] = {
+  def loadConfigFromFiles[Config: ConfigConvert](files: Traversable[Path]): Either[ConfigReaderFailures, Config] = {
     if (files.isEmpty) {
       ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))(None)
     } else {
-      val resolvedTypesafeConfig = files
-        .map(ConfigFactory.parseFile)
-        .reduce(_.withFallback(_))
-        .resolve
-      loadConfig[Config](resolvedTypesafeConfig)
+      files
+        .map(parseFile)
+        .foldLeft[Either[ConfigReaderFailures, Seq[TypesafeConfig]]](Right(Seq())) {
+          case (c1, c2) =>
+            ConfigConvert.combineResults(c1, c2)(_ :+ _)
+        }
+        .right.map(_.reduce(_.withFallback(_)).resolve)
+        .right.flatMap(loadConfig[Config])
     }
   }
 
@@ -269,8 +314,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigFromFilesOrThrow[Config: ConfigConvert](files: Traversable[java.io.File])(implicit ct: ClassTag[Config]): Config = {
+  def loadConfigFromFilesOrThrow[Config: ConfigConvert](files: Traversable[Path])(implicit ct: ClassTag[Config]): Config = {
     getResultOrThrow[Config](loadConfigFromFiles[Config](files))
   }
-
 }
