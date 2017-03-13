@@ -4,16 +4,16 @@
 package pureconfig
 
 import java.io.PrintWriter
-import java.net.{URI, URL}
-import java.nio.file.{Files, Path, Paths}
+import java.net.{ URI, URL }
+import java.nio.file.{ Files, Path, Paths }
 import java.time._
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable._
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import com.typesafe.config.{ConfigFactory, Config => TypesafeConfig, _}
+import scala.concurrent.duration.{ Duration, FiniteDuration }
+import com.typesafe.config.{ ConfigFactory, Config => TypesafeConfig, _ }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
@@ -21,8 +21,8 @@ import org.scalacheck.Gen.uuid
 import org.scalacheck.Shapeless._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert.{catchReadError, fromStringConvert, fromStringReader}
-import pureconfig.error.{ConfigReaderException, _}
+import pureconfig.ConfigConvert.{ catchReadError, fromStringConvert, fromStringReader }
+import pureconfig.error.{ ConfigReaderException, _ }
 
 /**
  * @author Mario Pastorelli
@@ -34,8 +34,8 @@ object PureconfSuite {
     Files.delete(configFile)
   }
 
-  def fileList(names: String*): Seq[java.io.File] = {
-    names.map(new java.io.File(_)).toVector
+  def fileList(names: String*): Seq[Path] = {
+    names.map(Paths.get(_)).toVector
   }
 }
 
