@@ -18,11 +18,11 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-joda" % "0.6.0"
 
 ## Example
 
-Define a Joda `DateTimeFormatter` for a style of writing dates which looks suspiciously like ISO 8601:
+Define a Joda `DateTimeFormatter` for ISO 8601-encoded date/time strings. The formatter converts datetimes into UTC:
 
 ```scala
-import org.joda.time.format.DateTimeFormat
-val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+import org.joda.time.format.ISODateTimeFormat
+val isoFormatter = ISODateTimeFormat.dateTimeParser.withZoneUTC
 ```
 
 Create a ConfigConvert to read DateTime with that format:
@@ -50,7 +50,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"apollo":"1969-07-20T20:18:00.000Z","pluto":"2021-01-20T06:59:59.999Z"}))
 
 loadConfig[GreatDatesConfig](conf)
-// res1: Either[pureconfig.error.ConfigReaderFailures,GreatDatesConfig] = Right(GreatDatesConfig(1969-07-20T16:18:00.000-04:00,2021-01-20T01:59:59.999-05:00))
+// res1: Either[pureconfig.error.ConfigReaderFailures,GreatDatesConfig] = Right(GreatDatesConfig(1969-07-20T20:18:00.000Z,2021-01-20T06:59:59.999Z))
 ```
 
 Note that you'll need to configure a separate converter for each of the Joda Time types that you want to load from your configuration.  For example, call `localDateConfigConvert` to support `LocalDateTime`. Most of the Joda Time types are supported by methods with likewise unsurprising names in the [`joda.configurable` package](src/main/scala/pureconfig/module/joda/configurable/package.scala).

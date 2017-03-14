@@ -18,11 +18,11 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-joda" % "0.6.0"
 
 ## Example
 
-Define a Joda `DateTimeFormatter` for a style of writing dates which looks suspiciously like ISO 8601:
+Define a Joda `DateTimeFormatter` for ISO 8601-encoded date/time strings. The formatter converts datetimes into UTC:
 
 ```tut:silent
-import org.joda.time.format.DateTimeFormat
-val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+import org.joda.time.format.ISODateTimeFormat
+val isoFormatter = ISODateTimeFormat.dateTimeParser.withZoneUTC
 ```
 
 Create a ConfigConvert to read DateTime with that format:
