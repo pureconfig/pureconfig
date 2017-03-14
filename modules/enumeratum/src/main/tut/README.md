@@ -27,7 +27,7 @@ import enumeratum.EnumEntry._
 
 sealed trait Greeting extends EnumEntry with Snakecase
 
-object Greeting {
+object Greeting extends Enum[Greeting] {
   val values = findValues
   case object Hello extends Greeting
   case object GoodBye extends Greeting
