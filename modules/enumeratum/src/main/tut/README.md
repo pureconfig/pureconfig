@@ -16,7 +16,7 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-enumeratum" % "0.6.0"
 
 ## Example
 
- Given a Greeting ADT which implements one of Enumeratum's `EnumEntry` types:
+Given a Greeting ADT which implements one of Enumeratum's `EnumEntry` types:
 
 ```tut:silent
 import pureconfig.loadConfig
@@ -25,14 +25,17 @@ import com.typesafe.config.ConfigFactory.parseString
 import enumeratum._
 import enumeratum.EnumEntry._
 
-sealed trait Greeting extends EnumEntry with Snakecase
+object example {
+  sealed trait Greeting extends EnumEntry with Snakecase
 
-object Greeting extends Enum[Greeting] {
-  val values = findValues
-  case object Hello extends Greeting
-  case object GoodBye extends Greeting
-  case object ShoutGoodBye extends Greeting with Uppercase
+  object Greeting extends Enum[Greeting] {
+    val values = findValues
+    case object Hello extends Greeting
+    case object GoodBye extends Greeting
+    case object ShoutGoodBye extends Greeting with Uppercase
+  }
 }
+import example._
 ```
 
 And a class to hold the configuration:
