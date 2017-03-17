@@ -1,0 +1,42 @@
+package pureconfig.backend
+
+import java.nio.file.Path
+
+import com.typesafe.config.{ Config, ConfigException, ConfigFactory }
+import pureconfig.error.{ CannotParse, ConfigReaderFailures, ConfigValueLocation, ThrowableFailure }
+
+import scala.util.control.NonFatal
+
+/**
+ * A wrapper of [[com.typesafe.config.ConfigFactory]] whose methods return `Either` instead
+ * of throwing exceptions
+ */
+object ConfigFactoryWrapper {
+
+  /** @see [[ConfigFactory.invalidateCaches()]] */
+  def invalidateCaches(): Either[ConfigReaderFailures, Unit] =
+    unsafeToEither(ConfigFactory.invalidateCaches())
+
+  /** @see [[ConfigFactory.load()]] */
+  def load(): Either[ConfigReaderFailures, Config] =
+    unsafeToEither(ConfigFactory.load())
+
+  /** @see [[ConfigFactory.parseFile()]] */
+  def parseFile(path: Path): Either[ConfigReaderFailures, Config] =
+    unsafeToEither(ConfigFactory.parseFile(path.toFile))
+
+  /** Utility methods that parse a file and then calls `ConfigFactory.load` */
+  def loadFile(path: Path): Either[ConfigReaderFailures, Config] =
+    parseFile(path).right.flatMap(rawConfig => unsafeToEither(ConfigFactory.load(rawConfig)))
+
+  private def unsafeToEither[A](f: => A): Either[ConfigReaderFailures, A] = {
+    try (Right(f)) catch {
+      case e: ConfigException.Parse =>
+        Left(ConfigReaderFailures(CannotParse(e.getLocalizedMessage, ConfigValueLocation(e.origin()))))
+      case e: ConfigException =>
+        Left(ConfigReaderFailures(ThrowableFailure(e, ConfigValueLocation(e.origin()), None)))
+      case NonFatal(e) =>
+        Left(ConfigReaderFailures(ThrowableFailure(e, None, None)))
+    }
+  }
+}

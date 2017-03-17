@@ -21,6 +21,10 @@ lazy val squants = (project in file("modules/squants")).
   settings(settings).
   dependsOn(core)
 
+lazy val javax = (project in file("modules/javax")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
@@ -56,7 +60,7 @@ lazy val settings = Seq(
     case Some((2, scalaMajor)) if scalaMajor >= 11 => newerCompilerLintSwitches
   }.toList.flatten,
   // use sbt <module_name>/test:console to run an ammonite console
-  libraryDependencies += "com.lihaoyi" % "ammonite" % "0.8.2" % "test" cross CrossVersion.full,
+  libraryDependencies += "com.lihaoyi" % "ammonite" % "0.8.2" % "test" cross CrossVersion.patch,
   initialCommands in (Test, console) := """ammonite.Main().run()""",
   initialize := {
     val required = "1.8"

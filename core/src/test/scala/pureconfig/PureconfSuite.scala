@@ -34,8 +34,8 @@ object PureconfSuite {
     Files.delete(configFile)
   }
 
-  def fileList(names: String*): Seq[java.io.File] = {
-    names.map(new java.io.File(_)).toVector
+  def fileList(names: String*): Seq[Path] = {
+    names.map(Paths.get(_)).toVector
   }
 }
 
