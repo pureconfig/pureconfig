@@ -36,10 +36,7 @@ object Main extends App {
   case class EmailConfig(host: String, port: Int, message: String, recipients: Set[Email], sender: Email)
 
 
-  val config = loadConfig[Config] match {
-    case Failure(f) => throw f
-    case Success(conf) => conf
-  }
+  val config = loadConfigOrThrow[Config]
 
   println("dirwatch.path: " + config.dirwatch.path)
   println("dirwatch.filter: " + config.dirwatch.filter)
