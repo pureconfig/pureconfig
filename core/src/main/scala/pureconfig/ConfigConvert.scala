@@ -475,19 +475,23 @@ trait LowPriorityConfigConvertImplicits {
   }
 
   implicit val instantConfigConvert: ConfigConvert[Instant] =
-    fromNonEmptyStringReader[Instant](catchReadError(Instant.parse))
+    fromNonEmptyStringConvert[Instant](catchReadError(Instant.parse), _.toString)
 
   implicit val zoneOffsetConfigConvert: ConfigConvert[ZoneOffset] =
-    fromNonEmptyStringReader[ZoneOffset](catchReadError(ZoneOffset.of))
+    fromNonEmptyStringConvert[ZoneOffset](catchReadError(ZoneOffset.of), _.toString)
 
   implicit val zoneIdConfigConvert: ConfigConvert[ZoneId] =
-    fromNonEmptyStringReader[ZoneId](catchReadError(ZoneId.of))
+    fromNonEmptyStringConvert[ZoneId](catchReadError(ZoneId.of), _.toString)
 
   implicit val periodConfigConvert: ConfigConvert[Period] =
-    fromNonEmptyStringReader[Period](catchReadError(Period.parse))
+    fromNonEmptyStringConvert[Period](catchReadError(Period.parse), _.toString)
+
+  // see documentation for [[java.time.Year.parse]]
+  private def yearToString(year: Year): String =
+    if (year.getValue > 9999) "+" + year else year.toString
 
   implicit val yearConfigConvert: ConfigConvert[Year] =
-    fromNonEmptyStringReader[Year](catchReadError(Year.parse))
+    fromNonEmptyStringConvert[Year](catchReadError(Year.parse), yearToString)
 
   implicit val readString = fromStringReader[String](s => _ => Right(s))
   implicit val readBoolean = fromNonEmptyStringReader[Boolean](catchReadError(_.toBoolean))
