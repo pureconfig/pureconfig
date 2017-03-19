@@ -24,6 +24,14 @@ trait ConvertHelpers {
 
   def failWithThrowable[A](throwable: Throwable): Option[ConfigValueLocation] => Either[ConfigReaderFailures, A] = location => fail[A](ThrowableFailure(throwable, location, None))
 
+  private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String, location: Option[ConfigValueLocation]): Either[ConfigReaderFailures, Z] =
+    result.left.map {
+      case ConfigReaderFailures(head, tail) =>
+        val headImproved = head.withImprovedContext(keyStr, location)
+        val tailImproved = tail.map(_.withImprovedContext(keyStr, location))
+        ConfigReaderFailures(headImproved, tailImproved)
+    }
+
   private[this] def eitherToResult[T](either: Either[ConfigReaderFailure, T]): Either[ConfigReaderFailures, T] =
     either match {
       case r: Right[_, _] => r.asInstanceOf[Either[ConfigReaderFailures, T]]
@@ -94,34 +102,66 @@ trait ConvertHelpers {
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
-  def fromStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigConvert[T] = new ConfigConvert[T] {
+  def fromStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigReader[T] = new ConfigReader[T] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
-  def fromStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+  def fromStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
     fromStringReader[T](tryF(fromF))
   }
 
-  def fromStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+  def fromStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
     fromStringReader[T](optF(fromF))
   }
 
   @deprecated(message = "The usage of Try has been deprecated. Please use fromNonEmptyStringReader instead", since = "0.6.0")
-  def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromNonEmptyStringReader[T](fromF andThen tryToEither)
+  def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = new ConfigConvert[T] {
+    def from(config: ConfigValue) = fromNonEmptyStringReader[T](fromF andThen tryToEither).from(config)
+    def to(t: T) = ConfigValueFactory.fromAnyRef(t)
   }
 
-  def fromNonEmptyStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+  def fromNonEmptyStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
     fromStringReader(string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)))
   }
 
-  def fromNonEmptyStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+  def fromNonEmptyStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
     fromNonEmptyStringReader[T](tryF(fromF))
   }
 
-  def fromNonEmptyStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+  def fromNonEmptyStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
     fromNonEmptyStringReader[T](optF(fromF))
+  }
+
+  /**
+   * Returns a `ConfigWriter` for types supported by `ConfigValueFactory.fromAnyRef`. This method should be used
+   * carefully, as a runtime exception is thrown if the type passed as argument is not supported.
+   *
+   * @tparam T the primitive type for which a `ConfigWriter` is to be created
+   * @return a `ConfigWriter` for the type `T`.
+   */
+  def primitiveWriter[T]: ConfigWriter[T] = new ConfigWriter[T] {
+    def to(t: T) = ConfigValueFactory.fromAnyRef(t)
+  }
+
+  /**
+   * Returns a `ConfigWriter` that writes objects of a given type as strings created by `.toString`.
+   *
+   * @tparam T the type for which a `ConfigWriter` is to be created
+   * @return a `ConfigWriter` for the type `T`.
+   */
+  def fromDefaultStringWriter[T]: ConfigWriter[T] = new ConfigWriter[T] {
+    def to(t: T) = ConfigValueFactory.fromAnyRef(t.toString)
+  }
+
+  /**
+   * Returns a `ConfigWriter` that writes objects of a given type as strings created by a function.
+   *
+   * @param toF the function converting an object of type `T` to a string
+   * @tparam T the type for which a `ConfigWriter` is to be created
+   * @return a `ConfigWriter` for the type `T`.
+   */
+  def fromStringWriter[T](toF: T => String): ConfigWriter[T] = new ConfigWriter[T] {
+    def to(t: T) = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
   @deprecated(message = "The usage of Try has been deprecated. Please use fromStringConvert instead", since = "0.6.0")

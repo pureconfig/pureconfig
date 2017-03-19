@@ -10,9 +10,12 @@ import com.typesafe.config.ConfigValue
 import pureconfig.error.ConfigReaderFailures
 
 /**
- * Trait for conversion between `T` and `ConfigValue`.
+ * Trait for objects capable of reading objects of a given type from `ConfigValues`.
+ *
+ * @tparam T the type of objects readable by this `ConfigReader`
  */
-trait ConfigConvert[T] {
+trait ConfigReader[T] {
+
   /**
    * Convert the given configuration into an instance of `T` if possible.
    *
@@ -20,6 +23,18 @@ trait ConfigConvert[T] {
    * @return either a list of failures or an object of type `T`
    */
   def from(config: ConfigValue): Either[ConfigReaderFailures, T]
+}
+
+object ConfigReader extends BasicReaders with DerivedReaders {
+  def apply[T](implicit reader: ConfigReader[T]): ConfigReader[T] = reader
+}
+
+/**
+ * Trait for objects capable of writing objects of a given type to `ConfigValues`.
+ *
+ * @tparam T the type of objects writable by this `ConfigWriter`
+ */
+trait ConfigWriter[T] {
 
   /**
    * Converts a type `T` to a `ConfigValue`.
@@ -30,6 +45,20 @@ trait ConfigConvert[T] {
   def to(t: T): ConfigValue
 }
 
-object ConfigConvert extends BasicConverters with DerivedConverters {
+object ConfigWriter extends BasicWriters with DerivedWriters {
+  def apply[T](implicit writer: ConfigWriter[T]): ConfigWriter[T] = writer
+}
+
+/**
+ * Trait for objects capable of reading and writing objects of a given type from and to `ConfigValues`.
+ */
+trait ConfigConvert[T] extends ConfigReader[T] with ConfigWriter[T]
+
+object ConfigConvert extends ConvertHelpers {
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
+
+  implicit def fromReaderAndWriter[T](implicit reader: ConfigReader[T], writer: ConfigWriter[T]) = new ConfigConvert[T] {
+    def from(config: ConfigValue) = reader.from(config)
+    def to(t: T) = writer.to(t)
+  }
 }
