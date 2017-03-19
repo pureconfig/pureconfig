@@ -25,7 +25,10 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    */
   def checkArbitrary[T](implicit cc: ConfigConvert[T], arb: Arbitrary[T], tag: ClassTag[T]): Unit =
     it should s"read an arbitrary ${tag.runtimeClass.getSimpleName}" in forAll {
-      (t: T) => cc.from(cc.to(t)).right.value shouldEqual t
+      (t: T) =>
+        val result = cc.from(cc.to(t))
+        result shouldBe a[Right[_, _]]
+        result.right.value shouldEqual t
     }
 
   /**
