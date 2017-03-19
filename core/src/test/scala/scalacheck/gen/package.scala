@@ -5,7 +5,7 @@ import java.time._
 import java.util.UUID
 
 import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.data.Percentage
+import pureconfig.data._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -56,4 +56,16 @@ package object gen {
 
   val genPercentage: Gen[Percentage] =
     Gen.choose[Int](0, 100).map(Percentage.apply)
+
+  val genBirdConfig: Gen[BirdConfig] =
+    Arbitrary.arbBool.arbitrary.map(BirdConfig.apply)
+
+  val genCatConfig: Gen[CatConfig] =
+    Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
+
+  val genDogConfig: Gen[DogConfig] =
+    Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
+
+  val genAnimalConfig: Gen[AnimalConfig] =
+    Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
 }
