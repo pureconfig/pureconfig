@@ -16,14 +16,8 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-enum" % "0.6.0"
 
 ## Example
 
-Given a Greeting ADT composed of `case object`s with an `implicit` `Enum` instance:
-
 ```scala
-import pureconfig.loadConfig
-import pureconfig.module.enum._
-import com.typesafe.config.ConfigFactory.parseString
-import enum.Enum
-
+// Given a Greeting ADT composed of `case object`s with an `implicit` `Enum` instance:
 sealed trait Greeting
 
 object Greeting {
@@ -34,23 +28,21 @@ object Greeting {
 
   final implicit val EnumInstance: Enum[Greeting] = Enum.derived[Greeting]
 }
-```
 
-And a class to hold the configuration:
-```scala
+// And a class to hold the configuration:
 case class GreetingConf(start: Greeting, end: Greeting)
-```
 
-We can read a GreetingConf like:
-```scala
+// We can read a GreetingConf like:
+import pureconfig.loadConfig
+import pureconfig.module.enum._
+import com.typesafe.config.ConfigFactory.parseString
+
 val conf = parseString("""{
   start: WhisperHello
   end: ShoutGoodBye
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"ShoutGoodBye","start":"WhisperHello"}))
-
 loadConfig[GreetingConf](conf)
-// res2: Either[pureconfig.error.ConfigReaderFailures,GreetingConf] = Right(GreetingConf(WhisperHello,ShoutGoodBye))
+// Success(GreetingConf(WhisperHello,ShoutGoodBye))
 ```
 
 ## Can I configure how the elements are read?
