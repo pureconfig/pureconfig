@@ -20,7 +20,7 @@ private[pureconfig] object DurationConvert {
     } catch {
       case ex: NumberFormatException =>
         val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
-        Left(CannotConvert(string, "Duration", err, location))
+        Left(CannotConvert(string, "Duration", err, location, None))
     }
   }
 
