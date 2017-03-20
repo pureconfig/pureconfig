@@ -1,10 +1,12 @@
 language: scala
 scala:
-    - 2.11.8
     - 2.10.5
+    - 2.11.8
     - 2.12.1
 jdk:
     - oraclejdk8
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION test
+  - sbt ++$TRAVIS_SCALA_VERSION coverage test
   - (cd example ; sbt ++$TRAVIS_SCALA_VERSION test)
+after_success:
+  - sbt ++$TRAVIS_SCALA_VERSION coverageReport coverageAggregate coveralls
