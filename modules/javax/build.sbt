@@ -1,5 +1,3 @@
-import sbt.IvyConsole.Dependencies
-
 name := "pureconfig-javax"
 
 organization := "com.github.melrief"

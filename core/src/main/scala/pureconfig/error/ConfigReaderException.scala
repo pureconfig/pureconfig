@@ -32,7 +32,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
 
     if (cannotConvertFound.nonEmpty) {
       linesBuffer += "  Value conversion failures:"
-      for (CannotConvert(value, toTyp, because, location) <- cannotConvertFound) {
+      for (CannotConvert(value, toTyp, because, location, _) <- cannotConvertFound) {
         val desc = location.fold("")(_.description)
         linesBuffer += s"    - $desc cannot convert '$value' to type '$toTyp' " + (if (because.isEmpty) "" else s"because $because")
       }

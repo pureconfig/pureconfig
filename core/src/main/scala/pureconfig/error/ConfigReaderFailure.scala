@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig.error
 
-import com.typesafe.config.ConfigValue
+import com.typesafe.config.{ ConfigOrigin, ConfigValue }
 
 /**
  * The physical location of a ConfigValue, represented by a file name and a line
@@ -32,8 +32,22 @@ object ConfigValueLocation {
    *         ConfigValues that are null.
    */
   def apply(cv: ConfigValue): Option[ConfigValueLocation] =
-    Option(cv).flatMap { v =>
-      val origin = v.origin()
+    Option(cv).flatMap(v => apply(v.origin()))
+
+  /**
+   * Helper method to create an optional ConfigValueLocation from a ConfigOrigin.
+   * Since it might not be possible to derive a ConfigValueLocation from a
+   * ConfigOrigin, this method returns Option.
+   *
+   * @param co the ConfigOrigin to derive the location from
+   *
+   * @return a Some with the location of the ConfigOrigin, or None if it is not
+   *         possible to derive a location. It is not possible to derive
+   *         locations from ConfigOrigin that are not in files or for
+   *         ConfigOrigin that are null.
+   */
+  def apply(co: ConfigOrigin): Option[ConfigValueLocation] =
+    Option(co).flatMap { origin =>
       if (origin.filename != null && origin.lineNumber != -1)
         Some(ConfigValueLocation(origin.filename, origin.lineNumber))
       else
@@ -48,9 +62,20 @@ object ConfigValueLocation {
  */
 sealed abstract class ConfigReaderFailure {
   /**
-   * The optional location of the ConfigReaderFailure
+   * The optional location of the ConfigReaderFailure.
    */
   def location: Option[ConfigValueLocation]
+
+  /**
+   * The optional path to the `ConfigValue` that raised the failure.
+   */
+  def path: Option[String]
+
+  /**
+   * Improves the context of this failure with the key to the parent node and
+   * its optional location.
+   */
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]): ConfigReaderFailure
 }
 
 /**
@@ -59,6 +84,10 @@ sealed abstract class ConfigReaderFailure {
  */
 final case object CannotConvertNull extends ConfigReaderFailure {
   val location = None
+  val path = None
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    KeyNotFound(parentKey, parentLocation)
 }
 
 /**
@@ -69,8 +98,12 @@ final case object CannotConvertNull extends ConfigReaderFailure {
  * @param because the reason why the conversion was not possible
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
+ * @param path an optional path to the value that couldn't be converted
  */
-final case class CannotConvert(value: String, toTyp: String, because: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class CannotConvert(value: String, toType: String, because: String, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))
+}
 
 /**
  * A failure representing a collision of keys with different semantics. This
@@ -82,7 +115,12 @@ final case class CannotConvert(value: String, toTyp: String, because: String, lo
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
  */
-final case class CollidingKeys(key: String, existingValue: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class CollidingKeys(key: String, existingValue: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
+  def path = Some(key)
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
+}
 
 /**
  * A failure representing a key missing from a ConfigObject.
@@ -91,7 +129,12 @@ final case class CollidingKeys(key: String, existingValue: String, location: Opt
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
  */
-final case class KeyNotFound(key: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class KeyNotFound(key: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
+  def path = Some(key)
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
+}
 
 /**
  * A failure representing the presence of an unknown key in a ConfigObject. This
@@ -103,29 +146,26 @@ final case class KeyNotFound(key: String, location: Option[ConfigValueLocation])
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
  */
-final case class UnknownKey(key: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class UnknownKey(key: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
+  def path = Some(key)
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
+}
 
 /**
  * A failure representing a wrong type of a given ConfigValue.
  *
- * @param foundTyp the type of the ConfigValue that was found
- * @param expectedTyp the type of ConfigValue that was expected
+ * @param foundType the type of the ConfigValue that was found
+ * @param expectedType the type of ConfigValue that was expected
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
+ * @param path an optional path to the value that had a wrong type
  */
-final case class WrongType(foundTyp: String, expectedTyp: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
-
-/**
- * A failure representing a wrong type of a given ConfigValue. Similar to
- * [[WrongType]] but enriched with the key to the field that raised the error.
- *
- * @param foundTyp the type of the ConfigValue that was found
- * @param expectedTyp the type of ConfigValue that was expected
- * @param key the key to the field that raised the error
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- */
-final case class WrongTypeForKey(foundTyp: String, expectedTyp: String, key: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class WrongType(foundType: String, expectedType: String, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))
+}
 
 /**
  * A failure that resulted in a Throwable being raised.
@@ -133,8 +173,12 @@ final case class WrongTypeForKey(foundTyp: String, expectedTyp: String, key: Str
  * @param throwable the Throwable that was raised
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
+ * @param path an optional path to the value that raised the Throwable
  */
-final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))
+}
 
 /**
  * A failure representing an unexpected empty string
@@ -142,8 +186,12 @@ final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigV
  * @param typ the type that was attempted to be converted to from an empty string
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
+ * @param path an optional path to the value which was an unexpected empty string
  */
-final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))
+}
 
 /**
  * A failure representing the inability to find a valid choice for a given coproduct.
@@ -151,5 +199,25 @@ final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocat
  * @param value the ConfigValue that was unable to be mapped to a coproduct choice
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
+ * @param path an optional path to the value who doesn't have a valid choice for
+ *             a coproduct
  */
-final case class NoValidCoproductChoiceFound(value: ConfigValue, location: Option[ConfigValueLocation]) extends ConfigReaderFailure
+final case class NoValidCoproductChoiceFound(value: ConfigValue, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))
+}
+
+/**
+ * A failure representing the inability to parse the configuration.
+ *
+ * @param msg the error message from the parser
+ * @param location an optional location of the ConfigValue that raised the
+ *                 failure
+ */
+final case class CannotParse(msg: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
+  // Since this failure is raised when trying to parse a configuration, it isn't tied to a specific path
+  val path = None
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation)
+}

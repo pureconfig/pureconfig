@@ -14,7 +14,7 @@ object Dependencies {
   }
 
   val shapeless = "com.chuusai" %% "shapeless" % Version.shapeless
-  val scalaMacrosParadise = compilerPlugin("org.scalamacros" % "paradise" % Version.scalaMacrosParadise cross CrossVersion.full)
+  val scalaMacrosParadise = compilerPlugin("org.scalamacros" % "paradise" % Version.scalaMacrosParadise cross CrossVersion.patch)
   val typesafeConfig = "com.typesafe" % "config" % Version.typesafeConfig
   val joda = "joda-time" % "joda-time" % Version.joda
   val jodaConvert = "org.joda" % "joda-convert" % Version.jodaConvert
