@@ -17,4 +17,5 @@ package object arbitrary {
   implicit val arbPath = Arbitrary(genPath)
   implicit val arbPercentage = Arbitrary(genPercentage)
   implicit val arbAnimalConfig = Arbitrary(genAnimalConfig)
+  implicit val arbJodaDateTime = Arbitrary(genJodaDateTime)
 }

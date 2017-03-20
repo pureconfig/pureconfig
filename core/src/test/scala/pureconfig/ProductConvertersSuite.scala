@@ -1,25 +1,25 @@
 package pureconfig
 
-import com.typesafe.config._
-import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Arbitrary
 import org.scalacheck.Shapeless._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.ConfigConvert.{ catchReadError, fromStringConvert, fromStringReader }
+import pureconfig.arbitrary._
 
-import scala.collection.JavaConverters._
-import scala.collection.immutable.{ Map, Seq }
+import scala.collection.immutable.Seq
 import scala.concurrent.duration.FiniteDuration
 
 class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
 
   behavior of "ConfigConvert"
 
+  /* A configuration with only simple values and `Option` */
   case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
-  //  case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig)
-  //  case class Config2(config: Config)
+
+  /* A configuration with a field of a type that is unknown to `ConfigConvert` */
+  case class ConfigWithUnknownType(d: org.joda.time.DateTime)
 
   // a realistic example of configuration: common available Spark properties
   case class DriverConf(cores: Int, maxResultSize: String, memory: String)
@@ -33,43 +33,28 @@ class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matc
   // arbitrary
 
   implicitly[Arbitrary[FlatConfig]]
-  implicit val dateConfigConvert = fromStringConvert[DateTime](
-    catchReadError(ISODateTimeFormat.dateTime().parseDateTime),
-    t => ISODateTimeFormat.dateTime().print(t))
-  //  implicitly[Arbitrary[Config]]
-  //  implicitly[Arbitrary[Config2]]
+  implicitly[Arbitrary[ConfigWithUnknownType]]
 
   // tests
 
   checkArbitrary[FlatConfig]
-  //  checkArbitrary[Config]
-  //  checkArbitrary[Config2]
 
-  it should s"be able to override locally all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in {
-    implicit val readBoolean = fromStringReader[Boolean](catchReadError(_ != "0"))
-    implicit val readDouble = fromStringReader[Double](catchReadError(_.toDouble * -1))
-    implicit val readFloat = fromStringReader[Float](catchReadError(_.toFloat * -1))
-    implicit val readInt = fromStringReader[Int](catchReadError(_.toInt * -1))
-    implicit val readLong = fromStringReader[Long](catchReadError(_.toLong * -1))
-    implicit val readString = fromStringReader[String](catchReadError(_.toUpperCase))
-    val config = loadConfig[FlatConfig](ConfigValueFactory.fromMap(Map(
-      "b" -> 0,
-      "d" -> 234.234,
-      "f" -> 34.34,
-      "i" -> 56,
-      "l" -> -88,
-      "s" -> "qwerTy").asJava).toConfig)
+  implicit val dateConfigConvert = fromStringConvert[org.joda.time.DateTime](
+    catchReadError(org.joda.time.DateTime.parse), ISODateTimeFormat.dateTime().print)
+  checkArbitrary[ConfigWithUnknownType]
 
-    config.right.value shouldBe FlatConfig(false, -234.234d, -34.34f, -56, 88L, "QWERTY", None)
+  it should s"be able to override all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in forAll {
+    (config: FlatConfig) =>
+      implicit val readBoolean = fromStringReader[Boolean](catchReadError(_ => false))
+      implicit val readDouble = fromStringReader[Double](catchReadError(_ => 1D))
+      implicit val readFloat = fromStringReader[Float](catchReadError(_ => 2F))
+      implicit val readInt = fromStringReader[Int](catchReadError(_ => 3))
+      implicit val readLong = fromStringReader[Long](catchReadError(_ => 4L))
+      implicit val readString = fromStringReader[String](catchReadError(_ => "foobar"))
+      implicit val readOption = fromStringConvert[Option[String]](catchReadError(_ => None), _ => " ")
+      val cc = ConfigConvert[FlatConfig]
+      cc.from(cc.to(config)) shouldBe Right(FlatConfig(false, 1D, 2F, 3, 4L, "foobar", None))
   }
-
-  //  case class ConfWithInt(i: Int)
-  //
-  //  // ** override instance
-  //  it should "be able to use a local ConfigConvert instead of the ones in ConfigConvert companion object" in {
-  //    implicit val readInt = fromStringReader[Int](catchReadError(s => (s.toInt.abs)))
-  //    loadConfig(ConfigValueFactory.fromMap(Map("i" -> "-100").asJava).toConfig)(ConfigConvert[ConfWithInt]).right.value shouldBe ConfWithInt(100)
-  //  }
 
   //  case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
   //  case class ConfWithCamelCase(camelCaseInt: Int, camelCaseString: String, camelCaseConf: ConfWithCamelCaseInner)

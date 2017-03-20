@@ -5,6 +5,7 @@ import java.time._
 import java.util.UUID
 
 import org.scalacheck.{ Arbitrary, Gen }
+import pureconfig.configurable.ConfigurableSuite
 import pureconfig.data._
 
 import scala.collection.JavaConverters._
@@ -68,4 +69,10 @@ package object gen {
 
   val genAnimalConfig: Gen[AnimalConfig] =
     Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
+
+  val genJodaDateTime: Gen[org.joda.time.DateTime] =
+    for {
+      dateTime <- ConfigurableSuite.localDateTimeArbitrary.arbitrary
+    } yield new org.joda.time.DateTime(dateTime.getYear, dateTime.getMonthValue, dateTime.getDayOfMonth,
+      dateTime.getHour, dateTime.getMinute, dateTime.getSecond, org.joda.time.DateTimeZone.UTC)
 }
