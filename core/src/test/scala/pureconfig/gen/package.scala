@@ -58,18 +58,6 @@ package object gen {
   val genPercentage: Gen[Percentage] =
     Gen.choose[Int](0, 100).map(Percentage.apply)
 
-  val genBirdConfig: Gen[BirdConfig] =
-    Arbitrary.arbBool.arbitrary.map(BirdConfig.apply)
-
-  val genCatConfig: Gen[CatConfig] =
-    Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
-
-  val genDogConfig: Gen[DogConfig] =
-    Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
-
-  val genAnimalConfig: Gen[AnimalConfig] =
-    Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
-
   val genJodaDateTime: Gen[org.joda.time.DateTime] =
     for {
       dateTime <- ConfigurableSuite.localDateTimeArbitrary.arbitrary

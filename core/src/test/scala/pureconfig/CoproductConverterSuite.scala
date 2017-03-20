@@ -1,15 +1,25 @@
 package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueFactory }
+import org.scalacheck.{ Arbitrary, Gen }
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
-import pureconfig.arbitrary._
-import pureconfig.data.{ AnimalConfig, BirdConfig, DogConfig }
 import pureconfig.error.{ ConfigReaderException, KeyNotFound }
 
 class CoproductConverterSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
 
   behavior of "ConfigConvert"
+
+  sealed trait AnimalConfig
+  case class DogConfig(age: Int) extends AnimalConfig
+  case class CatConfig(age: Int) extends AnimalConfig
+  case class BirdConfig(canFly: Boolean) extends AnimalConfig
+
+  val genBirdConfig: Gen[BirdConfig] = Arbitrary.arbBool.arbitrary.map(BirdConfig.apply)
+  val genCatConfig: Gen[CatConfig] = Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
+  val genDogConfig: Gen[DogConfig] = Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
+  val genAnimalConfig: Gen[AnimalConfig] = Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
+  implicit val arbAnimalConfig = Arbitrary(genAnimalConfig)
 
   checkArbitrary[AnimalConfig]
 
