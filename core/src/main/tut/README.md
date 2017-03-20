@@ -3,7 +3,6 @@
 A boilerplate-free Scala library for loading configuration files.
 
 [![Build Status](https://travis-ci.org/melrief/pureconfig.svg?branch=master)](https://travis-ci.org/melrief/pureconfig)
-[![Coverage Status](https://coveralls.io/repos/github/melrief/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/melrief/pureconfig?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -91,7 +90,7 @@ used for the example.
 
 Import the library package and use one of the `loadConfig` methods:
 
-```scala
+```tut:silent
 import pureconfig._
 import pureconfig.error.ConfigReaderFailures
 
@@ -123,7 +122,7 @@ Currently supported types for fields are:
 
 First, import the library, define data types, and a case class to hold the configuration:
 
-```scala
+```tut:silent
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig.loadConfig
 
@@ -135,7 +134,7 @@ case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, St
 
 Then, load the configuration (in this case from a hard-coded string):
 
-```scala
+```tut:book
 val conf = parseString("""{ 
   "int": 1, 
   "adt": { 
@@ -145,10 +144,8 @@ val conf = parseString("""{
   "list": ["1", "20%"], 
   "map": { "key": "value" } 
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"adt":{"b":1,"type":"adtb"},"int":1,"list":["1","20%"],"map":{"key":"value"}}))
 
 loadConfig[MyClass](conf)
-// res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 
