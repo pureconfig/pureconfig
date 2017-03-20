@@ -3,10 +3,9 @@ package pureconfig
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueFactory }
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
+import pureconfig.arbitrary._
 import pureconfig.data.{ AnimalConfig, BirdConfig, DogConfig }
 import pureconfig.error.{ ConfigReaderException, KeyNotFound }
-
-import scalacheck.arbitrary.arbAnimalConfig
 
 class CoproductConverterSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
 

@@ -17,8 +17,6 @@ class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matc
 
   behavior of "ConfigConvert"
 
-  // products
-
   case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
   //  case class Config(d: DateTime, l: List[Int], s: Set[Int], subConfig: FlatConfig)
   //  case class Config2(config: Config)

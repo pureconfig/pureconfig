@@ -1,8 +1,8 @@
-package scalacheck
+package pureconfig
 
 import org.scalacheck.Arbitrary
 
-import scalacheck.gen._
+import pureconfig.gen._
 
 package object arbitrary {
 

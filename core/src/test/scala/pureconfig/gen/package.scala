@@ -1,4 +1,4 @@
-package scalacheck
+package pureconfig
 
 import java.nio.file.{ Path, Paths }
 import java.time._

@@ -10,6 +10,7 @@ import com.typesafe.config._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.ConfigConvert.{ catchReadError, fromStringReader }
+import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.data.instances.percentageConfigWriter
 import pureconfig.error.{ CannotConvert, ConfigReaderFailures, EmptyStringFound }
@@ -17,7 +18,6 @@ import pureconfig.error.{ CannotConvert, ConfigReaderFailures, EmptyStringFound 
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scalacheck.arbitrary._
 
 class BasicConvertersSuite extends FlatSpec with ConfigConvertChecks with Matchers with GeneratorDrivenPropertyChecks with EitherValues {
 
