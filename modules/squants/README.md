@@ -16,27 +16,20 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-squants" % "0.6.0"
 
 ## Example
 
-Given a type to hold our configuration:
-
 ```scala
-import com.typesafe.config.ConfigFactory.parseString
-import pureconfig.loadConfig
-import pureconfig.module.squants._
+// Given a type to hold our configuration:
 import squants.thermal._
 import squants.space._
-
 case class HowConfiguration(far: Length, hot: Temperature)
-```
 
-We can read a HowConfiguration like:
-
-```scala
+// We can read a HowConfiguration like:
+import pureconfig.loadConfig
+import pureconfig.module.squants._
+import com.typesafe.config.ConfigFactory.parseString
 val conf = parseString("""{
   far: 42.195 km
   hot: 56.7° C
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"far":"42.195 km","hot":"56.7° C"}))
-
 loadConfig[HowConfiguration](conf)
-// res1: Either[pureconfig.error.ConfigReaderFailures,HowConfiguration] = Right(HowConfiguration(42.195 km,56.7°C))
+// Success(HowConfiguration(42.195 km,56.7°C))
 ```

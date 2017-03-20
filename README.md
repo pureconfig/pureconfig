@@ -93,11 +93,8 @@ Import the library package and use one of the `loadConfig` methods:
 
 ```scala
 import pureconfig._
-import pureconfig.error.ConfigReaderFailures
 
-case class YourConfClass(name: String, quantity: Int)
-
-val config: Either[pureconfig.error.ConfigReaderFailures,YourConfClass] = loadConfig[YourConfClass]
+val config: Either[ConfigReaderFailures,YourConfClass] = loadConfig[YourConfClass]
 ```
 
 
@@ -114,14 +111,12 @@ Currently supported types for fields are:
 - everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
   configured first - see [Configurable converters](#configurable-converters));
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
-- [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
+- [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html)
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - case classes;
 - sealed families of case classes (ADTs).
 
-# Example
-
-First, import the library, define data types, and a case class to hold the configuration:
+An almost comprehensive example is:
 
 ```scala
 import com.typesafe.config.ConfigFactory.parseString
@@ -131,24 +126,11 @@ sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt
 case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
-```
 
-Then, load the configuration (in this case from a hard-coded string):
-
-```scala
-val conf = parseString("""{ 
-  "int": 1, 
-  "adt": { 
-    "type": "adtb", 
-    "b": 1 
-  }, 
-  "list": ["1", "20%"], 
-  "map": { "key": "value" } 
-}""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"adt":{"b":1,"type":"adtb"},"int":1,"list":["1","20%"],"map":{"key":"value"}}))
+val conf = parseString("""{ "int": 1, "adt": { "type": "adtb", "b": 1 }, "list": ["1", "20%"], "map": { "key": "value" } }""")
 
 loadConfig[MyClass](conf)
-// res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+// returns Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 
