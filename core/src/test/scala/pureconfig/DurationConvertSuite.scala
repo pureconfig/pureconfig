@@ -9,7 +9,7 @@ import pureconfig.error.CannotConvert
 
 import scala.concurrent.duration.Duration
 
-class DurationConvertTest extends FlatSpec with Matchers with EitherValues {
+class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
   import DurationConvert.{ fromDuration => fromD }
   "Converting a Duration to a String" should "pick an appropriate unit when dealing with whole units less than the next step up" in {
     fromD(Duration(14, TimeUnit.DAYS)) shouldBe "14d"
