@@ -8,7 +8,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.ConfigConvert.{ catchReadError, fromStringConvert, fromStringReader }
 import pureconfig.arbitrary._
-import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongTypeForKey }
+import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongType }
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Seq
@@ -84,14 +84,14 @@ class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matc
     ConfigConvert[Conf].from(conf).right.value shouldBe Conf(1, 42)
   }
 
-  it should s"return a ${classOf[WrongTypeForKey]} when a key has a wrong type" in {
+  it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {
     case class Foo(i: Int)
     case class Bar(foo: Foo)
     case class FooBar(foo: Foo, bar: Bar)
     val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava).root()
     val failures = ConfigConvert[FooBar].from(conf).left.value.toList
     failures should have size 1
-    failures.head shouldBe a[WrongTypeForKey]
+    failures.head shouldBe a[WrongType]
   }
 
   it should "consider default arguments by default" in {
@@ -116,7 +116,7 @@ class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matc
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava).root()
     val failures = ConfigConvert[Conf].from(conf6).left.value.toList
     failures should have size 1
-    failures.head shouldBe a[WrongTypeForKey]
+    failures.head shouldBe a[WrongType]
   }
 
   it should "not use default arguments if specified through a product hint" in {

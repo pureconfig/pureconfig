@@ -103,7 +103,7 @@ class ApiSuite extends FlatSpec with Matchers with OptionValues with EitherValue
   "loadConfigFromFiles" should "load a complete configuration from a single file" in {
     case class Conf(b: Boolean, d: Double)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf")
-    loadConfigFromFiles[Conf](files.map(_.toFile)) shouldBe Right(Conf(false, 0.001D))
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D))
   }
 
   "loadConfigWithFallBack" should "fallback if no config keys are found" in {
@@ -116,12 +116,12 @@ class ApiSuite extends FlatSpec with Matchers with OptionValues with EitherValue
   it should "fill in missing values from the lower priority files" in {
     case class Conf(f: Float)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority1.conf", "/conf/loadConfigFromFiles/priority2.conf")
-    loadConfigFromFiles[Conf](files.map(_.toFile)) shouldBe Right(Conf(0.99F))
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(0.99F))
   }
 
   it should "complain if the list of files is empty" in {
     case class Conf(f: Float)
     val files = Set.empty[Path]
-    loadConfigFromFiles[Conf](files.map(_.toFile)) shouldBe a[Left[_, _]]
+    loadConfigFromFiles[Conf](files) shouldBe a[Left[_, _]]
   }
 }
