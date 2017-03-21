@@ -11,12 +11,9 @@ import com.typesafe.config._
 import pureconfig.error._
 
 /**
- * Trait containing `ConfigConvert` instances for primitive types and simple classes in Java and Scala standard
- * libraries.
+ * Trait containing `ConfigConvert` instances for primitive types.
  */
-trait BasicConverters extends ConvertHelpers {
-
-  // primitive type converters
+trait PrimitiveConverters extends ConvertHelpers {
 
   implicit val stringConfigConvert = fromStringReader[String](s => _ => Right(s))
   implicit val booleanConfigConvert = fromNonEmptyStringReader[Boolean](catchReadError(_.toBoolean))
@@ -31,15 +28,23 @@ trait BasicConverters extends ConvertHelpers {
   implicit val intConfigConvert = fromNonEmptyStringReader[Int](catchReadError(_.toInt))
   implicit val longConfigConvert = fromNonEmptyStringReader[Long](catchReadError(_.toLong))
   implicit val shortConfigConvert = fromNonEmptyStringReader[Short](catchReadError(_.toShort))
+}
 
-  // URI and file system path converters
+/**
+ * Trait containing `ConfigConvert` instances for classes related to file system paths and URIs.
+ */
+trait UriAndPathConverters extends ConvertHelpers {
 
   implicit val urlConfigConvert = fromNonEmptyStringConvert[URL](catchReadError(new URL(_)), _.toString)
   implicit val uuidConfigConvert = fromNonEmptyStringConvert[UUID](catchReadError(UUID.fromString), _.toString)
   implicit val pathConfigConvert = fromStringConvert[Path](catchReadError(Paths.get(_)), _.toString)
   implicit val uriConfigConvert = fromStringConvert[URI](catchReadError(new URI(_)), _.toString)
+}
 
-  // `java.time` converters
+/**
+ * Trait containing `ConfigConvert` instances for `java.time` classes.
+ */
+trait JavaTimeConverters extends ConvertHelpers {
 
   implicit val instantConfigConvert: ConfigConvert[Instant] =
     fromNonEmptyStringReader[Instant](catchReadError(Instant.parse))
@@ -55,8 +60,12 @@ trait BasicConverters extends ConvertHelpers {
 
   implicit val yearConfigConvert: ConfigConvert[Year] =
     fromNonEmptyStringReader[Year](catchReadError(Year.parse))
+}
 
-  // `scala.concurrent.duration` converters
+/**
+ * Trait containing `ConfigConvert` instances for [[Duration]] and [[FiniteDuration]].
+ */
+trait DurationConverters extends ConvertHelpers {
 
   implicit val durationConfigConvert: ConfigConvert[Duration] = {
     fromNonEmptyStringConvert[Duration](DurationConvert.fromString, DurationConvert.fromDuration)
@@ -71,8 +80,12 @@ trait BasicConverters extends ConvertHelpers {
     }
     fromNonEmptyStringConvert[FiniteDuration](fromString, DurationConvert.fromDuration)
   }
+}
 
-  // `com.typesafe.config` converters
+/**
+ * Trait containing `ConfigConvert` instances for Typesafe config models.
+ */
+trait TypesafeConfigConverters extends ConvertHelpers {
 
   implicit val configConfigConvert: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {
@@ -102,5 +115,16 @@ trait BasicConverters extends ConvertHelpers {
     override def to(t: ConfigList): ConfigValue = t
   }
 }
+
+/**
+ * Trait containing `ConfigConvert` instances for primitive types and simple classes in Java and Scala standard
+ * libraries.
+ */
+trait BasicConverters
+  extends PrimitiveConverters
+  with UriAndPathConverters
+  with JavaTimeConverters
+  with DurationConverters
+  with TypesafeConfigConverters
 
 object BasicConverters extends BasicConverters
