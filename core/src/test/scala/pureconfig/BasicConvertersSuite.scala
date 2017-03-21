@@ -1,19 +1,17 @@
 package pureconfig
 
 import java.net.{ URI, URL }
-import java.nio.file.{ Path, Paths }
+import java.nio.file.Path
 import java.time._
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
 import com.typesafe.config._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
-import pureconfig.ConfigConvert.{ catchReadError, fromStringReader }
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.data.instances.percentageConfigWriter
-import pureconfig.error.{ CannotConvert, ConfigReaderFailures, EmptyStringFound }
+import pureconfig.error.{ CannotConvert, EmptyStringFound }
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable
@@ -113,65 +111,12 @@ class BasicConvertersSuite extends FlatSpec with ConfigConvertChecks with Matche
     ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
 
   {
-    val conf = ConfigFactory.parseString("""{ v1 = 3
-                                            | v2 = 4 }""".stripMargin)
+    val conf = ConfigFactory.parseString("""{ v1 = 3, v2 = 4 }""".stripMargin)
 
     check[ConfigObject](
       ConfigValueFactory.fromMap(Map("v1" -> 3, "v2" -> 4).asJava) -> conf.root().asInstanceOf[ConfigValue])
 
     check[Config](
       conf -> conf.root().asInstanceOf[ConfigValue])
-  }
-
-  // override
-
-  it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert from fromString" in {
-    case class ConfWithDuration(i: Duration)
-    val expected = Duration(110, TimeUnit.DAYS)
-    implicit val readDurationBadly = fromStringReader[Duration](catchReadError(_ => expected))
-    loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).right.value shouldBe ConfWithDuration(expected)
-  }
-
-  it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
-    case class ConfWithDuration(i: Duration)
-    val expected = Duration(220, TimeUnit.DAYS)
-    implicit val readDurationBadly = new ConfigConvert[Duration] {
-      override def from(config: ConfigValue): Either[ConfigReaderFailures, Duration] = Right(expected)
-      override def to(t: Duration): ConfigValue = throw new Exception("Not Implemented")
-    }
-    loadConfig(ConfigValueFactory.fromMap(Map("i" -> "42 h").asJava).toConfig)(ConfigConvert[ConfWithDuration]).right.value shouldBe ConfWithDuration(expected)
-  }
-
-  it should "allow a custom ConfigConvert[URL] to override our definition" in {
-    case class ConfWithURL(url: URL)
-    val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = fromStringReader[URL](catchReadError(_ => new URL(expected)))
-    val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
-    config.right.value.url shouldBe new URL(expected)
-  }
-
-  it should "allow a custom ConfigConvert[UUID] to override our definition" in {
-    case class ConfWithUUID(uuid: UUID)
-    val expected = "bcd787fe-f510-4f84-9e64-f843afd19c60"
-    implicit val readUUIDBadly = fromStringReader[UUID](catchReadError(_ => UUID.fromString(expected)))
-    val config = loadConfig[ConfWithUUID](ConfigValueFactory.fromMap(Map("uuid" -> "ignored").asJava).toConfig)
-    config.right.value.uuid shouldBe UUID.fromString(expected)
-  }
-
-  case class ConfWithPath(myPath: Path)
-
-  it should "allow a custom ConfigConvert[Path] to override our definition" in {
-    val expected = "c:\\this\\is\\a\\custom\\path"
-    implicit val readPathBadly = fromStringReader[Path](_ => _ => Right(Paths.get(expected)))
-    val config = loadConfig[ConfWithPath](ConfigValueFactory.fromMap(Map("my-path" -> "/this/is/ignored").asJava).toConfig)
-    config.right.value.myPath shouldBe Paths.get(expected)
-  }
-
-  it should "allow a custom ConfigConvert[URI] to override our definition" in {
-    case class ConfWithURI(uri: URI)
-    val expected = "http://bad/horse/will?make=you&his=mare"
-    implicit val readURLBadly = fromStringReader[URI](_ => _ => Right(new URI(expected)))
-    val config = loadConfig[ConfWithURI](ConfigValueFactory.fromMap(Map("uri" -> "https://ignored/url").asJava).toConfig)
-    config.right.value.uri shouldBe new URI(expected)
   }
 }
