@@ -59,26 +59,26 @@ class ApiSuite extends FlatSpec with Matchers with OptionValues with EitherValue
     case class SparkNetwork(timeout: FiniteDuration)
     case class SparkConf(master: String, app: SparkAppConf, local: SparkLocalConf, driver: DriverConf, executor: ExecutorConf, extraListeners: Seq[String], network: SparkNetwork)
     case class SparkRootConf(spark: SparkConf)
-    val configFile = createTempFile("""
-                                      |spark {
-                                      |  app.name="myApp"
-                                      |  master="local[*]"
-                                      |  driver {
-                                      |    maxResultSize="2g"
-                                      |    memory="1g"
-                                      |    cores="10"
-                                      |  }
-                                      |  executor {
-                                      |    memory="2g"
-                                      |    extraJavaOptions=""
-                                      |  }
-                                      |  extraListeners=[]
-                                      |  local.dir="/tmp/"
-                                      |  network.timeout=45s
-                                      |}
-                                      |
-                                      |// unused configuration
-                                      |akka.loggers = ["akka.event.Logging$DefaultLogger"]""".stripMargin)
+    val configFile = createTempFile(
+      """spark {
+        |  app.name="myApp"
+        |  master="local[*]"
+        |  driver {
+        |    maxResultSize="2g"
+        |    memory="1g"
+        |    cores="10"
+        |  }
+        |  executor {
+        |    memory="2g"
+        |    extraJavaOptions=""
+        |  }
+        |  extraListeners=[]
+        |  local.dir="/tmp/"
+        |  network.timeout=45s
+        |}
+
+        |// unused configuration
+        |akka.loggers = ["akka.event.Logging$DefaultLogger"]""".stripMargin)
 
     implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
     val configOrError = loadConfig[SparkRootConf](configFile)
