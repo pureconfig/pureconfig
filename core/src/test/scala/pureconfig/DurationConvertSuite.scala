@@ -74,7 +74,7 @@ class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
   }
   it should "report a helpful error message when failing to convert a bad duration" in {
     val badDuration = "10 lordsALeaping"
-    val result = LocalDurationConvert.durationConfigConvert.from(ConfigValueFactory.fromAnyRef(badDuration))
+    val result = BasicConverters.durationConfigConvert.from(ConfigValueFactory.fromAnyRef(badDuration))
     result match {
       case Right(_) => fail("Should be failure")
       case Left(ex) =>
@@ -82,5 +82,4 @@ class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
         ex.head shouldBe a[CannotConvert]
     }
   }
-  private object LocalDurationConvert extends LowPriorityConfigConvertImplicits
 }

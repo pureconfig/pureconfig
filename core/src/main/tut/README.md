@@ -91,7 +91,7 @@ used for the example.
 
 Import the library package and use one of the `loadConfig` methods:
 
-```scala
+```tut:silent
 import pureconfig._
 import pureconfig.error.ConfigReaderFailures
 
@@ -123,7 +123,7 @@ Currently supported types for fields are:
 
 First, import the library, define data types, and a case class to hold the configuration:
 
-```scala
+```tut:silent
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig.loadConfig
 
@@ -135,7 +135,7 @@ case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, St
 
 Then, load the configuration (in this case from a hard-coded string):
 
-```scala
+```tut:book
 val conf = parseString("""{ 
   "int": 1, 
   "adt": { 
@@ -145,10 +145,8 @@ val conf = parseString("""{
   "list": ["1", "20%"], 
   "map": { "key": "value" } 
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"adt":{"b":1,"type":"adtb"},"int":1,"list":["1","20%"],"map":{"key":"value"}}))
 
 loadConfig[MyClass](conf)
-// res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(1,AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 
