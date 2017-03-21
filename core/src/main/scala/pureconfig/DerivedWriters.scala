@@ -71,7 +71,6 @@ trait DerivedWriters extends ConvertHelpers {
       }
     }
 
-  // For Option[T] we use a special config converter
   implicit def deriveOption[T](implicit conv: Lazy[ConfigWriter[T]]) = new OptionConfigWriter[T]
 
   class OptionConfigWriter[T](implicit conv: Lazy[ConfigWriter[T]]) extends ConfigWriter[Option[T]] {
@@ -83,7 +82,6 @@ trait DerivedWriters extends ConvertHelpers {
     def toOption(t: Option[T]): Option[ConfigValue] = t.map(conv.value.to)
   }
 
-  // traversable of types with an instance of ConfigWriter
   implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](
     implicit
     configConvert: Lazy[ConfigWriter[T]],
@@ -100,7 +98,7 @@ trait DerivedWriters extends ConvertHelpers {
     }
   }
 
-  // used for products and coproducts
+  // used for both products and coproducts
   implicit final def deriveGenericInstance[F, Repr](
     implicit
     gen: LabelledGeneric.Aux[F, Repr],

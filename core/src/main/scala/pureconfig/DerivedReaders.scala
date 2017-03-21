@@ -105,7 +105,6 @@ trait DerivedReaders extends ConvertHelpers {
         }
     }
 
-  // For Option[T] we use a special config converter
   implicit def deriveOption[T](implicit conv: Lazy[ConfigReader[T]]) = new OptionConfigReader[T]
 
   class OptionConfigReader[T](implicit conv: Lazy[ConfigReader[T]]) extends ConfigReader[Option[T]] with AllowMissingKey {
@@ -117,7 +116,6 @@ trait DerivedReaders extends ConvertHelpers {
     }
   }
 
-  // traversable of types with an instance of ConfigReader
   implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](
     implicit
     configConvert: Lazy[ConfigReader[T]],
@@ -176,7 +174,6 @@ trait DerivedReaders extends ConvertHelpers {
     }
   }
 
-  // used for products
   implicit final def deriveProductInstance[F, Repr <: HList, DefaultRepr <: HList](
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
@@ -188,7 +185,6 @@ trait DerivedReaders extends ConvertHelpers {
     }
   }
 
-  // used for coproducts
   implicit final def deriveCoproductInstance[F, Repr <: Coproduct](
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
