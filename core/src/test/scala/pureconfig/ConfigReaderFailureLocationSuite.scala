@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import java.nio.file.Paths
+import java.net.URL
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest._
@@ -24,23 +24,23 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
 
     val failures1 = conf.get("conf").to[Conf].left.value.toList
     failures1 should have size 2
-    failures1 should contain(KeyNotFound("a", Some(ConfigValueLocation(Paths.get(workingDir, file), 1))))
+    failures1 should contain(KeyNotFound("a", Some(ConfigValueLocation(new URL("file", "", workingDir + file), 1))))
     failures1 should contain(CannotConvert(
       "hello",
       "Int",
       """java.lang.NumberFormatException: For input string: "hello"""",
-      Some(ConfigValueLocation(Paths.get(workingDir, file), 3)),
+      Some(ConfigValueLocation(new URL("file", "", workingDir + file), 3)),
       Some("c")))
 
     val failures2 = conf.get("other-conf").to[Conf].left.value.toList
     failures2 should have size 3
-    failures2 should contain(KeyNotFound("a", Some(ConfigValueLocation(Paths.get(workingDir, file), 7))))
-    failures2 should contain(KeyNotFound("b", Some(ConfigValueLocation(Paths.get(workingDir, file), 7))))
+    failures2 should contain(KeyNotFound("a", Some(ConfigValueLocation(new URL("file", "", workingDir + file), 7))))
+    failures2 should contain(KeyNotFound("b", Some(ConfigValueLocation(new URL("file", "", workingDir + file), 7))))
     failures2 should contain(CannotConvert(
       "hello",
       "Int",
       """java.lang.NumberFormatException: For input string: "hello"""",
-      Some(ConfigValueLocation(Paths.get(workingDir, file), 9)),
+      Some(ConfigValueLocation(new URL("file", "", workingDir + file), 9)),
       Some("c")))
   }
 
@@ -59,7 +59,7 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
       "string",
       "Int",
       """java.lang.NumberFormatException: For input string: "string"""",
-      Some(ConfigValueLocation(Paths.get(workingDir, file2), 2)),
+      Some(ConfigValueLocation(new URL("file", "", workingDir + file2), 2)),
       Some("a")))
   }
 }
