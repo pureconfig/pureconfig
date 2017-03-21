@@ -12,7 +12,7 @@ optional location from a `ConfigValue`.
 
 Given this setup:
 
-```tut:silent
+```scala
 import com.typesafe.config._
 import pureconfig.error._
 
@@ -20,6 +20,7 @@ val cv = ConfigFactory.load.root().get("conf")
 ```
 
 We can try to load a missing key and get a useful error:
-```tut:book
+```scala
 KeyNotFound("xpto", ConfigValueLocation(cv))
+// res1: pureconfig.error.KeyNotFound = KeyNotFound(xpto,Some(ConfigValueLocation(/Users/dvm105/pureconfig/docs/target/scala-2.12/classes/application.conf,11)))
 ```

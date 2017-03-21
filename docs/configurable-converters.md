@@ -6,7 +6,7 @@ For those types, PureConfig provides a way to create converters from the necessa
 
 Define a case class to hold your configuration, and create a configurable converter:
 
-```tut:silent
+```scala
 import com.typesafe.config.ConfigFactory.parseString
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -21,6 +21,7 @@ val conf = parseString(s"""{ date: "2011-12-03" }""")
 ```
 Then load the configuration:
 
-```tut:book
+```scala
 loadConfig[Conf](conf)
+// res3: Either[pureconfig.error.ConfigReaderFailures,Conf] = Right(Conf(2011-12-03))
 ```

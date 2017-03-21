@@ -33,7 +33,7 @@ example where the configuration file has all keys in upper case and we're
 loading it into a type whose fields are all in lower case. First, define a `ProductHint`
 instance in implict scope:
 
-```tut:silent
+```scala
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 
@@ -45,13 +45,15 @@ implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
 ```
 
 Then load a config:
-```tut:book
+```scala
 val conf = parseString("""{
   FOO = 2
   BAR = "two"
 }""")
+// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"BAR":"two","FOO":2}))
 
 loadConfig[SampleConf](conf)
+// res2: Either[pureconfig.error.ConfigReaderFailures,SampleConf] = Right(SampleConf(2,two))
 ```
 
 PureConfig provides a way to create a `ConfigFieldMapping` by defining the
@@ -71,7 +73,7 @@ names and your configuration files in `camelCase`. In order to support it, you
 can make sure the following implicit is in scope before loading or writing
 configuration files:
 
-```tut:silent
+```scala
 import pureconfig._
 
 implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
@@ -86,7 +88,7 @@ configuration.
 
 For example, with this setup:
 
-```tut:reset:silent
+```scala
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import scala.concurrent.duration._
@@ -95,27 +97,33 @@ case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
 ```
 
 We can load configurations using default values:
-```tut:book
+```scala
 // Defaulting `where`
 loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
+// res2: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(last resort,21 days))
 
 // Defaulting `howLong`
 loadConfig[Holiday](parseString("""{ where: Zürich }"""))
+// res4: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(Zürich,7 days))
 
 // Defaulting both arguments
 loadConfig[Holiday](parseString("""{}"""))
+// res6: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(last resort,7 days))
 
 // Specifying both arguments
 loadConfig[Holiday](parseString("""{ where: Texas, how-long: 3 hours }"""))
+// res8: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(Texas,3 hours))
 ```
 
 A `ProductHint` can make the conversion fail if a key is missing from the
 config regardless of whether a default value exists or not:
 
-```tut:book
+```scala
 implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
+// hint: pureconfig.ProductHint[Holiday] = ProductHintImpl(<function1>,false,true)
 
 loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
+// res9: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(KeyNotFound(where,None),List()))
 ```
 
 ### Unknown keys
@@ -123,24 +131,20 @@ loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
 By default, PureConfig ignores keys in the config that do not map to any
 case class field, leading to potential bugs due to misspellings:
 
-```tut:reset:invisible
-// reset tut's REPL sesstion to remove the implicit ProductHint defined above.
-import pureconfig._
-import com.typesafe.config.ConfigFactory.parseString
-import pureconfig._
-import scala.concurrent.duration._
 
-case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
-```
-```tut:book
+
+```scala
 loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
+// res1: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(last resort,21 days))
 ```
 
 With a `ProductHint`, one can tell the converter to fail if an unknown key is
 found:
 
-```tut:book
+```scala
 implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
+// hint: pureconfig.ProductHint[Holiday] = ProductHintImpl(<function1>,true,false)
 
 loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
+// res2: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(UnknownKey(wher,None),List()))
 ```

@@ -7,7 +7,7 @@ concrete class represented in the configuration.
 
 Given an `AnimalConf` sealed trait:
 
-```tut:silent
+```scala
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 
@@ -17,8 +17,9 @@ case class BirdConf(canFly: Boolean) extends AnimalConf
 ```
 
 This will load a `DogConf` instance:
-```tut:book
+```scala
 loadConfig[AnimalConf](parseString("""{ type: "dogconf", age: 4 }"""))
+// res1: Either[pureconfig.error.ConfigReaderFailures,AnimalConf] = Right(DogConf(4))
 ```
 
 For sealed families, PureConfig provides a way to customize the conversion
@@ -29,32 +30,34 @@ of a case class option, we can use another field.
 
 First, define a `CoproductHint` in implicit scope:
 
-```tut:silent
+```scala
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
 ```
 Then load the config:
-```tut:book
+```scala
 loadConfig[AnimalConf](parseString("""{ kind: "dogconf", age: 4 }"""))
+// res2: Either[pureconfig.error.ConfigReaderFailures,AnimalConf] = Right(DogConf(4))
 ```
 
 `FieldCoproductHint` can also be adapted to write class names in a different
 way. First, define a new `FieldCoproductHint` in implicit scope:
 
-```tut:silent
+```scala
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
   override def fieldValue(name: String) = name.dropRight("Conf".length)
 }
 ```
 Then load the config:
-```tut:book
+```scala
 loadConfig[AnimalConf](parseString("""{ type: "Bird", can-fly: true }"""))
+// res3: Either[pureconfig.error.ConfigReaderFailures,AnimalConf] = Right(BirdConf(true))
 ```
 
 With a `CoproductHint` you can even opt not to use any extra field at all. If you encode enumerations using sealed traits, you can just write the name of the class.
 
 For example, if we create an enumeration for seasons:
 
-```tut:silent
+```scala
 import com.typesafe.config.{ConfigFactory, ConfigValue}
 import pureconfig._
 import pureconfig.syntax._
@@ -93,6 +96,7 @@ case class MyConf(list: List[Season])
 
 We can load seasons by specifying them by class name:
 
-```tut:book
+```scala
 loadConfig[MyConf](ConfigFactory.parseString("""list = [Spring, Summer, Autumn, Winter]"""))
+// res7: Either[pureconfig.error.ConfigReaderFailures,MyConf] = Right(MyConf(List(Spring, Summer, Autumn, Winter)))
 ```

@@ -6,6 +6,10 @@ lazy val core = (project in file("core")).
     tutTargetDirectory := file(".")
   )
 
+lazy val docs = (project in file("docs")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val enumeratum = (project in file("modules/enumeratum")).
   settings(settings).
   dependsOn(core)

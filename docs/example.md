@@ -18,7 +18,7 @@ dirwatch.email.sender="sender@domain.realm"
 
 In this example, we only want to load valid email addresses into our configuration. First, we create a custom class to validate and store email addresses:
 
-```tut:silent
+```scala
 import scala.util.{Failure, Success, Try}
 import pureconfig.loadConfigOrThrow
 
@@ -46,7 +46,7 @@ import Example._
 
 We can now use the `Email` class in our configuration. To load it, we define some classes that have proper fields and names:
 
-```tut:silent
+```scala
 import java.nio.file.Path
 
 case class EmailConfig(host: String, port: Int, message: String, recipients: Set[Email], sender: Email)
@@ -56,7 +56,7 @@ case class Config(dirwatch: DirWatchConfig)
 
 The use of `Email` gives us a chance to use a custom converter:
 
-```tut:silent
+```scala
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.fromStringReaderTry
 
@@ -67,32 +67,52 @@ implicit val emailConvert: ConfigConvert[Email] = fromStringReaderTry[Email](Ema
 
 And then we load the configuration:
 
-```tut:book
+```scala
 val config = loadConfigOrThrow[Config]
+// config: Config = Config(DirWatchConfig(/path/to/observe,*,EmailConfig(localhost,25,Dirwatch new path found report,Set(recipient1@domain.tld, recipient2@domain.tld),sender@domain.realm)))
 ```
 
 And that's it.
 
 You can then use the configuration as you want:
 
-```tut:book
+```scala
 println("dirwatch.path: " + config.dirwatch.path)
+// dirwatch.path: /path/to/observe
+
 println("dirwatch.filter: " + config.dirwatch.filter)
+// dirwatch.filter: *
+
 println("dirwatch.email.host: " + config.dirwatch.email.host)
+// dirwatch.email.host: localhost
+
 println("dirwatch.email.port: " + config.dirwatch.email.port)
+// dirwatch.email.port: 25
+
 println("dirwatch.email.message: " + config.dirwatch.email.message)
+// dirwatch.email.message: Dirwatch new path found report
+
 println("dirwatch.email.recipients: " + config.dirwatch.email.recipients)
+// dirwatch.email.recipients: Set(recipient1@domain.tld, recipient2@domain.tld)
+
 println("dirwatch.email.sender: " + config.dirwatch.email.sender)
+// dirwatch.email.sender: sender@domain.realm
 ```
 
 It's also possible to operate directly on `Config` and `ConfigValue` types
 of [Typesafe Config][typesafe-config] with the implicit helpers provided in the
 `pureconfig.syntax` package:
 
-```tut:book
+```scala
 import com.typesafe.config.ConfigFactory
+// import com.typesafe.config.ConfigFactory
+
 import pureconfig.syntax._
+// import pureconfig.syntax._
 
 val config = ConfigFactory.load.to[Config]
+// config: Either[pureconfig.error.ConfigReaderFailures,Config] = Right(Config(DirWatchConfig(/path/to/observe,*,EmailConfig(localhost,25,Dirwatch new path found report,Set(recipient1@domain.tld, recipient2@domain.tld),sender@domain.realm))))
+
 println("The loaded configuration is: " + config.toString)
+// The loaded configuration is: Right(Config(DirWatchConfig(/path/to/observe,*,EmailConfig(localhost,25,Dirwatch new path found report,Set(recipient1@domain.tld, recipient2@domain.tld),sender@domain.realm))))
 ```

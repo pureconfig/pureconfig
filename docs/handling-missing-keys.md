@@ -7,7 +7,7 @@ missing.
 
 Consider this configuration:
 
-```tut:silent
+```scala
 import com.typesafe.config._
 import pureconfig._
 import pureconfig.syntax._
@@ -18,10 +18,12 @@ case class FooOpt(a: Option[Int])
 
 Loading a `Foo` results in a `Left` because of missing keys, but loading a `FooOpt` produces a `Right`:
 
-```tut:book
+```scala
 ConfigFactory.empty.to[Foo]
+// res1: Either[pureconfig.error.ConfigReaderFailures,Foo] = Left(ConfigReaderFailures(KeyNotFound(a,None),List()))
 
 ConfigFactory.empty.to[FooOpt]
+// res2: Either[pureconfig.error.ConfigReaderFailures,FooOpt] = Right(FooOpt(None))
 ```
 
 However, if you want to allow your custom `ConfigConvert`s to handle missing
@@ -31,7 +33,7 @@ available `ConfigConvert` for that type with a `null` value.
 
 Under this setup:
 
-```tut:silent
+```scala
 import com.typesafe.config._
 import pureconfig.syntax._
 
@@ -45,6 +47,7 @@ implicit val cc = new ConfigConvert[Int] with AllowMissingKey {
 
 You can load an empty configuration and get a `Right`:
 
-```tut:book
+```scala
 ConfigFactory.empty.to[Foo]
+// res4: Either[pureconfig.error.ConfigReaderFailures,Foo] = Right(Foo(42))
 ```

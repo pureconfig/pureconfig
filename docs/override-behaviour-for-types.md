@@ -7,20 +7,21 @@ in the configuration.
 
 When the default type class instances are imported:
 
-```tut:silent
+```scala
 import com.typesafe.config.ConfigValueFactory
 import pureconfig._
 ```
 PureConfig returns the string itself, "FooBar" in this example:
 
-```tut:book
+```scala
 ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
+// res0: Either[pureconfig.error.ConfigReaderFailures,String] = Right(FooBar)
 ```
 
 Now let's say that we want to override this behaviour such that `String`s are
 always read lower case. We can define a custom `ConfigConvert` instance for `String`:
 
-```tut:silent
+```scala
 import com.typesafe.config.ConfigValueFactory
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.{ fromStringReader, catchReadError }
@@ -29,6 +30,7 @@ implicit val overrideStrConvert = fromStringReader(catchReadError(_.toLowerCase)
 ```
 
 PureConfig will now use the custom `overrideStrConvert` instance:
-```tut:book
+```scala
 ConfigConvert[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
+// res2: Either[pureconfig.error.ConfigReaderFailures,String] = Right(foobar)
 ```

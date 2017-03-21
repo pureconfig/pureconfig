@@ -3,7 +3,7 @@
 Not all types are supported automatically by PureConfig. For instance, classes
 that are not case classes are not supported out-of-the-box:
 
-```tut:silent
+```scala
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 
@@ -17,8 +17,11 @@ val conf = parseString(s"""{ n: 1 }""")
 ```
 
 This won't compile because there's no `ConfigConvert` instance for `MyInt`:
-```tut:book:fail
+```scala
 loadConfig[Conf](conf)
+// <console>:20: error: could not find implicit value for parameter conv: pureconfig.ConfigConvert[Conf]
+//        loadConfig[Conf](conf)
+//                        ^
 ```
 
 PureConfig can be extended to support those types. To do so, an instance for the
@@ -26,13 +29,14 @@ PureConfig can be extended to support those types. To do so, an instance for the
 
 First, define a `ConfigConvert` instance in implicit scope:
 
-```tut:silent
+```scala
 import pureconfig.ConfigConvert._
 
 implicit val myIntConvert = ConfigConvert.fromStringConvert[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
 ```
 
 Then load the config:
-```tut:book
+```scala
 loadConfig[Conf](conf)
+// res5: Either[pureconfig.error.ConfigReaderFailures,Conf] = Right(Conf(MyInt(1)))
 ```
