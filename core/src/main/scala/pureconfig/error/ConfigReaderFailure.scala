@@ -4,6 +4,7 @@
 package pureconfig.error
 
 import com.typesafe.config.{ ConfigOrigin, ConfigValue }
+import java.nio.file.{ Path, Paths }
 
 /**
  * The physical location of a ConfigValue, represented by a file name and a line
@@ -14,8 +15,8 @@ import com.typesafe.config.{ ConfigOrigin, ConfigValue }
  * @param lineNumber the line number (starting at 0), where the given
  *                   ConfigValue definition starts
  */
-case class ConfigValueLocation(filename: String, lineNumber: Int) {
-  def description: String = s"($filename:$lineNumber)"
+case class ConfigValueLocation(path: Path, lineNumber: Int) {
+  def description: String = s"($path:$lineNumber)"
 }
 
 object ConfigValueLocation {
@@ -49,7 +50,7 @@ object ConfigValueLocation {
   def apply(co: ConfigOrigin): Option[ConfigValueLocation] =
     Option(co).flatMap { origin =>
       if (origin.filename != null && origin.lineNumber != -1)
-        Some(ConfigValueLocation(origin.filename, origin.lineNumber))
+        Some(ConfigValueLocation(Paths.get(origin.filename), origin.lineNumber))
       else
         None
     }
