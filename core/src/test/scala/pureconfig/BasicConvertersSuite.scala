@@ -125,22 +125,15 @@ class BasicConvertersSuite extends FlatSpec with ConfigConvertChecks with Matche
 
   // override
 
-  case class ConfWithInstant(instant: Instant)
-  case class ConfWithZoneOffset(offset: ZoneOffset)
-  case class ConfWithZoneId(zoneId: ZoneId)
-  case class ConfWithPeriod(period: Period)
-  case class ConfWithYear(year: Year)
-  case class ConfWithDuration(i: Duration)
-
-  // ** override instance
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert from fromString" in {
+    case class ConfWithDuration(i: Duration)
     val expected = Duration(110, TimeUnit.DAYS)
     implicit val readDurationBadly = fromStringReader[Duration](catchReadError(_ => expected))
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "23 s").asJava).toConfig)(ConfigConvert[ConfWithDuration]).right.value shouldBe ConfWithDuration(expected)
   }
 
-  // ** override instance
   it should "be able to supersede the default Duration ConfigConvert with a locally defined ConfigConvert" in {
+    case class ConfWithDuration(i: Duration)
     val expected = Duration(220, TimeUnit.DAYS)
     implicit val readDurationBadly = new ConfigConvert[Duration] {
       override def from(config: ConfigValue): Either[ConfigReaderFailures, Duration] = Right(expected)
@@ -149,33 +142,16 @@ class BasicConvertersSuite extends FlatSpec with ConfigConvertChecks with Matche
     loadConfig(ConfigValueFactory.fromMap(Map("i" -> "42 h").asJava).toConfig)(ConfigConvert[ConfWithDuration]).right.value shouldBe ConfWithDuration(expected)
   }
 
-  // ** override instance
-  //  it should "custom ConfigConvert should not cause implicit resolution failure and should be used" in {
-  //    implicit val custom: ConfigConvert[Foo] = new ConfigConvert[Foo] {
-  //      def from(config: ConfigValue): Either[ConfigReaderFailures, Foo] = {
-  //        val s = config.asInstanceOf[ConfigObject].get("i").render()
-  //        catchReadError(s => Foo(s.toInt + 1))(implicitly)(s)(None).left.map(ConfigReaderFailures.apply)
-  //      }
-  //      def to(foo: Foo): ConfigValue =
-  //        ConfigValueFactory.fromMap(Map("i" -> foo.i).asJava)
-  //    }
-  //    loadConfig(ConfigFactory.parseString("foo.i = -100"))(ConfigConvert[ConfWithFoo]).right.value shouldBe ConfWithFoo(Foo(-99))
-  //  }
-
-  case class ConfWithURL(url: URL)
-
-  // override instance
   it should "allow a custom ConfigConvert[URL] to override our definition" in {
+    case class ConfWithURL(url: URL)
     val expected = "http://bad/horse/will?make=you&his=mare"
     implicit val readURLBadly = fromStringReader[URL](catchReadError(_ => new URL(expected)))
     val config = loadConfig[ConfWithURL](ConfigValueFactory.fromMap(Map("url" -> "https://ignored/url").asJava).toConfig)
     config.right.value.url shouldBe new URL(expected)
   }
 
-  case class ConfWithUUID(uuid: UUID)
-
-  // override instance
   it should "allow a custom ConfigConvert[UUID] to override our definition" in {
+    case class ConfWithUUID(uuid: UUID)
     val expected = "bcd787fe-f510-4f84-9e64-f843afd19c60"
     implicit val readUUIDBadly = fromStringReader[UUID](catchReadError(_ => UUID.fromString(expected)))
     val config = loadConfig[ConfWithUUID](ConfigValueFactory.fromMap(Map("uuid" -> "ignored").asJava).toConfig)
@@ -184,7 +160,6 @@ class BasicConvertersSuite extends FlatSpec with ConfigConvertChecks with Matche
 
   case class ConfWithPath(myPath: Path)
 
-  // override instance
   it should "allow a custom ConfigConvert[Path] to override our definition" in {
     val expected = "c:\\this\\is\\a\\custom\\path"
     implicit val readPathBadly = fromStringReader[Path](_ => _ => Right(Paths.get(expected)))
@@ -192,10 +167,8 @@ class BasicConvertersSuite extends FlatSpec with ConfigConvertChecks with Matche
     config.right.value.myPath shouldBe Paths.get(expected)
   }
 
-  case class ConfWithURI(uri: URI)
-
-  // override instance
   it should "allow a custom ConfigConvert[URI] to override our definition" in {
+    case class ConfWithURI(uri: URI)
     val expected = "http://bad/horse/will?make=you&his=mare"
     implicit val readURLBadly = fromStringReader[URI](_ => _ => Right(new URI(expected)))
     val config = loadConfig[ConfWithURI](ConfigValueFactory.fromMap(Map("uri" -> "https://ignored/url").asJava).toConfig)
