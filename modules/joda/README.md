@@ -18,39 +18,28 @@ libraryDependencies += "com.github.melrief" %% "pureconfig-joda" % "0.6.0"
 
 ## Example
 
-Define a Joda `DateTimeFormatter` for ISO 8601-encoded date/time strings. The formatter converts datetimes into UTC:
-
 ```scala
-import org.joda.time.format.ISODateTimeFormat
-val isoFormatter = ISODateTimeFormat.dateTimeParser.withZoneUTC
-```
+// Define a Joda `DateTimeFormatter` for a style of writing dates which looks suspiciously like ISO 8601.
+import org.joda.time.format.DateTimeFormat
+val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
-Create a ConfigConvert to read DateTime with that format:
-```scala
-import pureconfig.loadConfig
+// Create a ConfigConvert to read DateTime with that format.
 import pureconfig.module.joda.configurable._
-import com.typesafe.config.ConfigFactory.parseString
-
 implicit val dateTimeConverter = dateTimeConfigConvert(isoFormatter)
-```
 
-An object to receive our configuration;
-```scala
+// An object to receive our configuration
 import org.joda.time.DateTime
 case class GreatDatesConfig(apollo: DateTime, pluto: DateTime)
-```
 
-We can read a GreatDatesConfig like:
-
-```scala
+// We can read a GreatDatesConfig like:
+import pureconfig.loadConfig
+import com.typesafe.config.ConfigFactory.parseString
 val conf = parseString("""{
   apollo: "1969-07-20T20:18:00.000Z"
   pluto: "2021-01-20T06:59:59.999Z"
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"apollo":"1969-07-20T20:18:00.000Z","pluto":"2021-01-20T06:59:59.999Z"}))
-
 loadConfig[GreatDatesConfig](conf)
-// res1: Either[pureconfig.error.ConfigReaderFailures,GreatDatesConfig] = Right(GreatDatesConfig(1969-07-20T20:18:00.000Z,2021-01-20T06:59:59.999Z))
+// Success(GreatDatesConfig(1969-07-20T14:18:00.000-06:00,2021-01-19T23:59:59.999-07:00))
 ```
 
 Note that you'll need to configure a separate converter for each of the Joda Time types that you want to load from your configuration.  For example, call `localDateConfigConvert` to support `LocalDateTime`. Most of the Joda Time types are supported by methods with likewise unsurprising names in the [`joda.configurable` package](src/main/scala/pureconfig/module/joda/configurable/package.scala).
