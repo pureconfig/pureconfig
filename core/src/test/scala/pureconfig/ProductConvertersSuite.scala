@@ -112,14 +112,4 @@ class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matc
     failures should have size 1
     failures.head shouldBe a[WrongType]
   }
-
-  it should "not use default arguments if specified through a product hint" in {
-    case class InnerConf(e: Int, g: Int)
-    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
-
-    implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
-
-    val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
-    loadConfig[Conf](conf1).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b", None), KeyNotFound("c", None), KeyNotFound("d", None))
-  }
 }
