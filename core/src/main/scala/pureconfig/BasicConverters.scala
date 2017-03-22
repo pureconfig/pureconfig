@@ -90,7 +90,7 @@ trait TypesafeConfigConverters extends ConvertHelpers {
   implicit val configConfigConvert: ConfigConvert[Config] = new ConfigConvert[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {
       case co: ConfigObject => Right(co.toConfig)
-      case other => fail(WrongType(s"${other.valueType}", s"${ConfigValueType.OBJECT}", ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType.toString, ConfigValueType.OBJECT.toString, ConfigValueLocation(config), None))
     }
     override def to(t: Config): ConfigValue = t.root()
   }
@@ -98,7 +98,7 @@ trait TypesafeConfigConverters extends ConvertHelpers {
   implicit val configObjectConfigConvert: ConfigConvert[ConfigObject] = new ConfigConvert[ConfigObject] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigObject] = config match {
       case c: ConfigObject => Right(c)
-      case other => fail(WrongType(s"${other.valueType}", s"${ConfigValueType.OBJECT}", ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType.toString, ConfigValueType.OBJECT.toString, ConfigValueLocation(config), None))
     }
     override def to(t: ConfigObject): ConfigValue = t
   }
@@ -110,7 +110,7 @@ trait TypesafeConfigConverters extends ConvertHelpers {
   implicit val configListConfigConvert: ConfigConvert[ConfigList] = new ConfigConvert[ConfigList] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigList] = config match {
       case c: ConfigList => Right(c)
-      case other => fail(WrongType(s"${other.valueType}", s"${ConfigValueType.LIST}", ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType.toString, ConfigValueType.LIST.toString, ConfigValueLocation(config), None))
     }
     override def to(t: ConfigList): ConfigValue = t
   }
