@@ -25,7 +25,7 @@ class ApiSuite extends BaseSuite {
     loadConfig[Conf](namespace = "foo") shouldBe Right(Conf(3.0F))
   }
 
-  it should "loadConfig from a typelevel Config" in {
+  it should "loadConfig from a Typesafe Config" in {
     case class Conf(d: Double, i: Int)
     val conf = ConfigFactory.parseString("{ d: 0.5, i: 10 }")
     loadConfig[Conf](conf = conf) shouldBe Right(Conf(0.5D, 10))
