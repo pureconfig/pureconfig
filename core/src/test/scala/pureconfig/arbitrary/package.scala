@@ -1,7 +1,6 @@
 package pureconfig
 
-import org.scalacheck.Arbitrary
-
+import org.scalacheck.{ Arbitrary, Gen }
 import pureconfig.gen._
 
 package object arbitrary {
@@ -13,7 +12,7 @@ package object arbitrary {
   implicit val arbZoneOffset = Arbitrary(genZoneOffset)
   implicit val arbPeriod = Arbitrary(genPeriod)
   implicit val arbYear = Arbitrary(genYear)
-  implicit val arbUUID = Arbitrary(genUUID)
+  implicit val arbUUID = Arbitrary(Gen.uuid)
   implicit val arbPath = Arbitrary(genPath)
   implicit val arbPercentage = Arbitrary(genPercentage)
   implicit val arbJodaDateTime = Arbitrary(genJodaDateTime)

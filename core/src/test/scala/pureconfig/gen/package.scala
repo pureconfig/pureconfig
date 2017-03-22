@@ -2,7 +2,6 @@ package pureconfig
 
 import java.nio.file.{ Path, Paths }
 import java.time._
-import java.util.UUID
 
 import org.scalacheck.{ Arbitrary, Gen }
 import pureconfig.configurable.ConfigurableSuite
@@ -45,12 +44,6 @@ package object gen {
 
   val genPort: Gen[Int] =
     Gen.chooseNum(0, 65535)
-
-  val genUUID: Gen[UUID] =
-    for {
-      mostSigBits <- Arbitrary.arbLong.arbitrary
-      leastSigBits <- Arbitrary.arbLong.arbitrary
-    } yield new UUID(mostSigBits, leastSigBits)
 
   val genPath: Gen[Path] =
     Gen.nonEmptyListOf(Gen.alphaNumStr).map(parts => parts.map(str => Paths.get(str)).reduce(_ resolve _))
