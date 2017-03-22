@@ -39,12 +39,6 @@ package object gen {
   val genYear: Gen[Year] =
     Gen.choose(Year.MIN_VALUE, Year.MAX_VALUE).map(Year.of)
 
-  val genHost: Gen[String] =
-    Gen.alphaNumStr
-
-  val genPort: Gen[Int] =
-    Gen.chooseNum(0, 65535)
-
   val genPath: Gen[Path] =
     Gen.nonEmptyListOf(Gen.alphaNumStr).map(parts => parts.map(str => Paths.get(str)).reduce(_ resolve _))
 
