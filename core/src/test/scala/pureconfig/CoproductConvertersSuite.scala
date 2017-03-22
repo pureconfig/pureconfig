@@ -6,7 +6,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.error.{ ConfigReaderException, KeyNotFound }
 
-class CoproductConverterSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
+class CoproductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
 
   behavior of "ConfigConvert"
 
