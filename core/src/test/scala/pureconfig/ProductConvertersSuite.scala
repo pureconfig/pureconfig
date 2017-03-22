@@ -2,7 +2,6 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions, ConfigValue }
 import org.joda.time.format.ISODateTimeFormat
-import org.scalacheck.Arbitrary
 import org.scalacheck.Shapeless._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
@@ -22,11 +21,6 @@ class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matc
 
   /* A configuration with a field of a type that is unknown to `ConfigConvert` */
   case class ConfigWithUnknownType(d: org.joda.time.DateTime)
-
-  // arbitrary
-
-  implicitly[Arbitrary[FlatConfig]]
-  implicitly[Arbitrary[ConfigWithUnknownType]]
 
   // tests
 
