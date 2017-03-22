@@ -51,7 +51,7 @@ class ApiSuite extends FlatSpec with Matchers with OptionValues with EitherValue
     loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true))
   }
 
-  it should s"be able to load a realistic configuration file" in {
+  it should "be able to load a realistic configuration file" in {
     case class DriverConf(cores: Int, maxResultSize: String, memory: String)
     case class ExecutorConf(memory: String, extraJavaOptions: String)
     case class SparkAppConf(name: String)
