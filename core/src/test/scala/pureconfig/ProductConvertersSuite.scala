@@ -3,8 +3,6 @@ package pureconfig
 import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions, ConfigValue }
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Shapeless._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.ConfigConvert.{ catchReadError, fromStringConvert, fromStringReader }
 import pureconfig.arbitrary._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongType }
@@ -12,7 +10,7 @@ import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongType }
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Seq
 
-class ProductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
+class ProductConvertersSuite extends BaseSuite {
 
   behavior of "ConfigConvert"
 

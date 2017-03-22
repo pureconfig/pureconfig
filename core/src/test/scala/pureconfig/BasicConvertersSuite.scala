@@ -6,8 +6,6 @@ import java.time._
 import java.util.UUID
 
 import com.typesafe.config._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.data.instances.percentageConfigWriter
@@ -17,7 +15,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 
-class BasicConvertersSuite extends FlatSpec with ConfigConvertChecks with Matchers with GeneratorDrivenPropertyChecks with EitherValues {
+class BasicConvertersSuite extends BaseSuite {
 
   behavior of "ConfigConvert"
 

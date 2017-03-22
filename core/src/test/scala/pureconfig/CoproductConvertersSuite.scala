@@ -2,11 +2,9 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.error.KeyNotFound
 
-class CoproductConvertersSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
+class CoproductConvertersSuite extends BaseSuite {
 
   behavior of "ConfigConvert"
 

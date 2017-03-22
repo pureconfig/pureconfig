@@ -7,13 +7,11 @@ import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest._
-import org.scalatest.prop.PropertyChecks
 import pureconfig.PathUtils._
 
 import scala.concurrent.duration.FiniteDuration
 
-class ApiSuite extends FlatSpec with Matchers with OptionValues with EitherValues with PropertyChecks {
+class ApiSuite extends BaseSuite {
 
   behavior of "pureconfig"
 

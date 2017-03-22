@@ -1,11 +1,9 @@
 package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueFactory }
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.error.ConfigReaderException
 
-class CoproductHintSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
+class CoproductHintSuite extends BaseSuite {
 
   behavior of "CoproductHint"
 

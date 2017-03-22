@@ -1,15 +1,13 @@
 package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject }
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.error.{ KeyNotFound, UnknownKey }
 import pureconfig.syntax._
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
-class ProductHintSuite extends FlatSpec with ConfigConvertChecks with Matchers with EitherValues with GeneratorDrivenPropertyChecks {
+class ProductHintSuite extends BaseSuite {
 
   behavior of "ProductHint"
 
