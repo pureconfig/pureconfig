@@ -106,7 +106,7 @@ class ApiSuite extends FlatSpec with Matchers with OptionValues with EitherValue
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D))
   }
 
-  "loadConfigWithFallBack" should "fallback if no config keys are found" in {
+  "loadConfigWithFallback" should "fallback if no config keys are found" in {
     case class Conf(f: Float, o: Option[Int], d: Double)
     val priority1Conf = ConfigFactory.load("conf/loadConfigFromFiles/priority1.conf")
     // first wo are in priority1.conf, the d is in reference.conf
