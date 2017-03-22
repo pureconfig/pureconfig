@@ -25,7 +25,7 @@ package object gen {
     Gen.choose(Instant.MIN.getEpochSecond, Instant.MAX.getEpochSecond).map(Instant.ofEpochSecond)
 
   val genZoneId: Gen[ZoneId] =
-    Gen.oneOf(ZoneId.SHORT_IDS.values().asScala.toSeq.distinct).map(ZoneId.of)
+    Gen.oneOf(ZoneId.getAvailableZoneIds.asScala.toSeq).map(ZoneId.of)
 
   val genZoneOffset: Gen[ZoneOffset] =
     Gen.choose(ZoneOffset.MIN.getTotalSeconds, ZoneOffset.MAX.getTotalSeconds).map(ZoneOffset.ofTotalSeconds)
