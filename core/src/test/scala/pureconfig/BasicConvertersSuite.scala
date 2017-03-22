@@ -8,7 +8,6 @@ import java.util.UUID
 import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
-import pureconfig.data.instances.percentageConfigWriter
 import pureconfig.error.{ CannotConvert, EmptyStringFound }
 
 import scala.collection.JavaConverters._
