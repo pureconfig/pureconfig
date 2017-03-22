@@ -12,42 +12,30 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
     val linesBuffer = mutable.Buffer.empty[String]
     linesBuffer += s"Cannot convert configuration to a value of class ${ct.runtimeClass.getName}. Failures are:"
 
-    val (keysNotFound, cannotConvertFound, otherFound) =
-      failures.toList.foldLeft((Seq.empty[KeyNotFound], Seq.empty[CannotConvert], Seq.empty[ConfigReaderFailure])) {
-        case ((keysNotFound, cannotConvertFound, otherFound), failure) =>
-          failure match {
-            case k: KeyNotFound => (keysNotFound :+ k, cannotConvertFound, otherFound)
-            case c: CannotConvert => (keysNotFound, cannotConvertFound :+ c, otherFound)
-            case o: ConfigReaderFailure => (keysNotFound, cannotConvertFound, otherFound :+ o)
-          }
-      }
+    val failuresByPath = failures.toList.groupBy(_.path)
+    val failuresWithPath = (failuresByPath - None).map({ case (k, v) => k.get -> v }).toList.sortBy(_._1)
+    val failuresWithoutPath = failuresByPath.getOrElse(None, Nil)
 
-    if (keysNotFound.nonEmpty) {
-      linesBuffer += "  Keys not found:"
-      for (KeyNotFound(key, location) <- keysNotFound) {
-        val desc = location.fold("")(_.description)
-        linesBuffer += s"    - $desc '$key'"
-      }
+    if (failuresWithoutPath.nonEmpty)
+      linesBuffer += "  in the configuration:"
+
+    failuresWithoutPath.foreach { failure =>
+      linesBuffer += s"    - ${failure.descriptionWithLocation}"
     }
 
-    if (cannotConvertFound.nonEmpty) {
-      linesBuffer += "  Value conversion failures:"
-      for (CannotConvert(value, toTyp, because, location, _) <- cannotConvertFound) {
-        val desc = location.fold("")(_.description)
-        linesBuffer += s"    - $desc cannot convert '$value' to type '$toTyp' " + (if (because.isEmpty) "" else s"because $because")
-      }
+    if (failuresWithPath.nonEmpty && failuresWithoutPath.nonEmpty) {
+      linesBuffer += ""
     }
 
-    if (otherFound.nonEmpty) {
-      linesBuffer += "  Other failures:"
-      for (failure <- otherFound) {
-        val desc = failure.location.fold("")(_.description)
-        linesBuffer += s"    - $desc $failure"
-      }
+    failuresWithPath.foreach {
+      case (p, failures) =>
+        linesBuffer += s"  with '$p':"
+        failures.foreach { failure =>
+          linesBuffer += s"    - ${failure.descriptionWithLocation}"
+        }
     }
 
     linesBuffer += ""
-
     linesBuffer.mkString(System.lineSeparator())
   }
 
