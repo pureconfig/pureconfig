@@ -133,7 +133,7 @@ final case class CannotConvert(value: String, toType: String, because: String, l
 final case class CollidingKeys(key: String, existingValue: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
   def path = Some(key)
 
-  def description = s"Key with value $existingValue collides with a key necessary to disambiguate a coproduct."
+  def description = s"Key with value '$existingValue' collides with a key necessary to disambiguate a coproduct."
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
     this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
