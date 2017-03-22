@@ -51,6 +51,11 @@ class PureconfSuite extends FlatSpec with Matchers with OptionValues with Either
     }
   }
 
+  "ConfigConvert" should s"be able to convert from and to None" in {
+    val cc = ConfigConvert[Option[Int]]
+    cc.from(cc.to(None)) shouldBe Right(None)
+  }
+
   // a simple "flat" configuration
   case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
   implicitly[Arbitrary[FlatConfig]]
