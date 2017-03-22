@@ -4,7 +4,6 @@ import com.typesafe.config.{ ConfigFactory, ConfigObject }
 import pureconfig.error.{ KeyNotFound, UnknownKey }
 import pureconfig.syntax._
 
-import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 class ProductHintSuite extends BaseSuite {
@@ -18,23 +17,7 @@ class ProductHintSuite extends BaseSuite {
 
   /** return all the keys in a `ConfigObject` */
   def allKeys(configObject: ConfigObject): Set[String] = {
-    @tailrec
-    def helper(configObjects: List[ConfigObject], buffer: Set[String]): Set[String] = {
-      if (configObjects.isEmpty) {
-        buffer
-      } else {
-        val newBuffer = buffer ++ configObjects.flatMap(_.keySet().asScala)
-        val newConfigObjects =
-          for {
-            configObject <- configObjects
-            key <- configObject.keySet().asScala
-            configValue = configObject.get(key)
-            if (configValue.isInstanceOf[ConfigObject])
-          } yield configValue.asInstanceOf[ConfigObject]
-        helper(newConfigObjects, newBuffer)
-      }
-    }
-    helper(List(configObject), Set.empty[String])
+    configObject.toConfig().entrySet().asScala.flatMap(_.getKey.split('.')).toSet
   }
 
   it should "read kebab case config keys to camel case fields by default" in {
