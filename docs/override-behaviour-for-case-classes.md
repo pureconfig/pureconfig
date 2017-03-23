@@ -26,9 +26,12 @@ the default one, PureConfig allows you to define proper mappings. A mapping
 between different naming conventions is done using a `ConfigFieldMapping`
 object, with which one can construct a `ProductHint`. The `ConfigFieldMapping`
 trait has a single `apply` method that maps field names in Scala objects to
-field names in the source configuration file. For instance, here's a contrived
+field names in the source configuration file. 
+
+For instance, here's a contrived
 example where the configuration file has all keys in upper case and we're
-loading it into a type whose fields are all in lower case:
+loading it into a type whose fields are all in lower case. First, define a `ProductHint`
+instance in implict scope:
 
 ```scala
 import com.typesafe.config.ConfigFactory.parseString
@@ -39,14 +42,18 @@ case class SampleConf(foo: Int, bar: String)
 implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
   def apply(fieldName: String) = fieldName.toUpperCase
 })
+```
 
+Then load a config:
+```scala
 val conf = parseString("""{
   FOO = 2
   BAR = "two"
 }""")
+// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"BAR":"two","FOO":2}))
 
 loadConfig[SampleConf](conf)
-// returns Right(SampleConf(2, "two"))
+// res2: Either[pureconfig.error.ConfigReaderFailures,SampleConf] = Right(SampleConf(2,two))
 ```
 
 PureConfig provides a way to create a `ConfigFieldMapping` by defining the
@@ -77,7 +84,9 @@ implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 If a case class has a default argument and the underlying configuration is
 missing a value for that field, then by default PureConfig will happily
 create an instance of the class, loading the other values from the
-configuration:
+configuration.
+
+For example, with this setup:
 
 ```scala
 import com.typesafe.config.ConfigFactory.parseString
@@ -85,22 +94,25 @@ import pureconfig._
 import scala.concurrent.duration._
 
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
+```
 
+We can load configurations using default values:
+```scala
 // Defaulting `where`
 loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
-// returns Right(Holiday("last resort", 21 days))
+// res2: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(last resort,21 days))
 
 // Defaulting `howLong`
 loadConfig[Holiday](parseString("""{ where: Zürich }"""))
-// returns Right(Holiday("Zürich", 7 days))
+// res4: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(Zürich,7 days))
 
 // Defaulting both arguments
 loadConfig[Holiday](parseString("""{}"""))
-// returns Right(Holiday("last resort", 7 days))
+// res6: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(last resort,7 days))
 
 // Specifying both arguments
 loadConfig[Holiday](parseString("""{ where: Texas, how-long: 3 hours }"""))
-// returns Right(Holiday("Texas", 3 hours))
+// res8: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(Texas,3 hours))
 ```
 
 A `ProductHint` can make the conversion fail if a key is missing from the
@@ -108,9 +120,10 @@ config regardless of whether a default value exists or not:
 
 ```scala
 implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
+// hint: pureconfig.ProductHint[Holiday] = ProductHintImpl(<function1>,false,true)
 
 loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
-// returns  Left(ConfigReaderFailures(KeyNotFound(where),List()))
+// res9: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(KeyNotFound(where,None),List()))
 ```
 
 ### Unknown keys
@@ -118,9 +131,11 @@ loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
 By default, PureConfig ignores keys in the config that do not map to any
 case class field, leading to potential bugs due to misspellings:
 
+
+
 ```scala
 loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
-// returns Right(Holiday("last resort", 21 days))
+// res1: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Right(Holiday(last resort,21 days))
 ```
 
 With a `ProductHint`, one can tell the converter to fail if an unknown key is
@@ -128,7 +143,8 @@ found:
 
 ```scala
 implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
+// hint: pureconfig.ProductHint[Holiday] = ProductHintImpl(<function1>,true,false)
 
 loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
-// returns Left(ConfigReaderFailures(UnknownKey(wher),List()))
+// res2: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(UnknownKey(wher,None),List()))
 ```

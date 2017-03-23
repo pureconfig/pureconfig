@@ -14,19 +14,29 @@ class MyInt(var value: Int) {
 case class Conf(n: MyInt)
 
 val conf = parseString(s"""{ n: 1 }""")
+```
 
+This won't compile because there's no `ConfigConvert` instance for `MyInt`:
+```scala
 loadConfig[Conf](conf)
-// doesn't compile - could not find implicit value for parameter conv: pureconfig.ConfigConvert[Conf]
+// <console>:20: error: could not find implicit value for parameter conv: pureconfig.ConfigConvert[Conf]
+//        loadConfig[Conf](conf)
+//                        ^
 ```
 
 PureConfig can be extended to support those types. To do so, an instance for the
-`ConfigConvert` type class must be provided implicitly, like:
+`ConfigConvert` type class must be provided.
+
+First, define a `ConfigConvert` instance in implicit scope:
 
 ```scala
 import pureconfig.ConfigConvert._
 
 implicit val myIntConvert = ConfigConvert.fromStringConvert[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
+```
 
+Then load the config:
+```scala
 loadConfig[Conf](conf)
-// returns Right(Conf(new MyInt(1)))
+// res5: Either[pureconfig.error.ConfigReaderFailures,Conf] = Right(Conf(MyInt(1)))
 ```
