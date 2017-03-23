@@ -15,11 +15,17 @@ Given this setup:
 ```tut:silent
 import com.typesafe.config._
 import pureconfig.error._
+import java.nio.file.{ Path, Paths }
 
 val cv = ConfigFactory.load.root().get("conf")
 ```
 
 We can try to load a missing key and get a useful error:
 ```tut:book
-KeyNotFound("xpto", ConfigValueLocation(cv))
+val notFound = KeyNotFound("xpto", ConfigValueLocation(cv)).location.get
+
+// print the filename as a relative path
+Paths.get(System.getProperty("user.dir")).relativize(Paths.get(notFound.url.toURI))
+
+notFound.lineNumber
 ```

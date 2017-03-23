@@ -15,12 +15,20 @@ Given this setup:
 ```scala
 import com.typesafe.config._
 import pureconfig.error._
+import java.nio.file.{ Path, Paths }
 
 val cv = ConfigFactory.load.root().get("conf")
 ```
 
 We can try to load a missing key and get a useful error:
 ```scala
-KeyNotFound("xpto", ConfigValueLocation(cv))
-// res1: pureconfig.error.KeyNotFound = KeyNotFound(xpto,Some(ConfigValueLocation(/Users/dvm105/pureconfig/docs/target/scala-2.12/classes/application.conf,11)))
+val notFound = KeyNotFound("xpto", ConfigValueLocation(cv)).location.get
+// notFound: pureconfig.error.ConfigValueLocation = ConfigValueLocation(file:/home/derek/pureconfig/docs/target/scala-2.12/classes/application.conf,11)
+
+// print the filename as a relative path
+Paths.get(System.getProperty("user.dir")).relativize(Paths.get(notFound.url.toURI))
+// res2: java.nio.file.Path = docs/target/scala-2.12/classes/application.conf
+
+notFound.lineNumber
+// res3: Int = 11
 ```
