@@ -10,7 +10,7 @@ using the `ConfigReaderFailure` sealed family of case classes, you can use the
 `ConfigValueLocation.apply(cv: ConfigValue)` method to automatically create an
 optional location from a `ConfigValue`.
 
-Given this setup:
+If we load a config and try to load a missing key:
 
 ```scala
 import com.typesafe.config._
@@ -18,13 +18,11 @@ import pureconfig.error._
 import java.nio.file.{ Path, Paths }
 
 val cv = ConfigFactory.load.root().get("conf")
+val notFound = KeyNotFound("xpto", ConfigValueLocation(cv)).location.get
 ```
 
-We can try to load a missing key and get a useful error:
+We can extract useful error data:
 ```scala
-val notFound = KeyNotFound("xpto", ConfigValueLocation(cv)).location.get
-// notFound: pureconfig.error.ConfigValueLocation = ConfigValueLocation(file:/home/derek/pureconfig/docs/target/scala-2.12/classes/application.conf,11)
-
 // print the filename as a relative path
 Paths.get(System.getProperty("user.dir")).relativize(Paths.get(notFound.url.toURI))
 // res2: java.nio.file.Path = docs/target/scala-2.12/classes/application.conf
