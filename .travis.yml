@@ -6,7 +6,7 @@ scala:
 jdk:
     - oraclejdk8
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION coverage test
+  - sbt ++$TRAVIS_SCALA_VERSION coverage test tut
   - (cd example ; sbt ++$TRAVIS_SCALA_VERSION test)
 after_success:
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport coverageAggregate coveralls
