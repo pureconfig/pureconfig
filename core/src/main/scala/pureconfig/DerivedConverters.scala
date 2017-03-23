@@ -161,7 +161,7 @@ trait DerivedConverters extends ConvertHelpers {
 
     override def to(t: Option[T]): ConfigValue = t match {
       case Some(v) => conv.value.to(v)
-      case None => ConfigValueFactory.fromMap(Map().asJava)
+      case None => ConfigValueFactory.fromAnyRef(null)
     }
 
     def toOption(t: Option[T]): Option[ConfigValue] = t.map(conv.value.to)
