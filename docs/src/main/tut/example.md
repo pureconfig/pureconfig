@@ -58,11 +58,11 @@ The use of `Email` gives us a chance to use a custom converter:
 
 ```tut:silent
 import pureconfig.ConfigConvert
-import pureconfig.ConfigConvert.fromStringReaderTry
+import pureconfig.ConfigConvert.viaStringTry
 
 import scala.util.Try
 
-implicit val emailConvert: ConfigConvert[Email] = fromStringReaderTry[Email](Email.fromString)
+implicit val emailConvert: ConfigConvert[Email] = viaStringTry[Email](Email.fromString, _.toString)
 ```
 
 And then we load the configuration:

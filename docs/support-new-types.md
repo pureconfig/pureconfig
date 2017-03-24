@@ -19,7 +19,7 @@ val conf = parseString(s"""{ n: 1 }""")
 This won't compile because there's no `ConfigConvert` instance for `MyInt`:
 ```scala
 loadConfig[Conf](conf)
-// <console>:20: error: could not find implicit value for parameter conv: pureconfig.ConfigConvert[Conf]
+// <console>:20: error: could not find implicit value for parameter conv: pureconfig.ConfigReader[Conf]
 //        loadConfig[Conf](conf)
 //                        ^
 ```
@@ -32,7 +32,7 @@ First, define a `ConfigConvert` instance in implicit scope:
 ```scala
 import pureconfig.ConfigConvert._
 
-implicit val myIntConvert = ConfigConvert.fromStringConvert[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
+implicit val myIntConvert = ConfigConvert.viaString[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
 ```
 
 Then load the config:
