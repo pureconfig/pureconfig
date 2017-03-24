@@ -8,67 +8,68 @@ import java.util.UUID
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 
 import com.typesafe.config._
+import pureconfig.ConvertHelpers._
 import pureconfig.error._
 
 /**
  * Trait containing `ConfigReader` instances for primitive types.
  */
-trait PrimitiveReaders extends ConvertHelpers {
+trait PrimitiveReaders {
 
-  implicit val stringConfigReader = fromStringReader[String](s => _ => Right(s))
-  implicit val booleanConfigReader = fromNonEmptyStringReader[Boolean](catchReadError(_.toBoolean))
-  implicit val doubleConfigReader = fromNonEmptyStringReader[Double](catchReadError({
+  implicit val stringConfigReader = ConfigReader.fromString[String](s => _ => Right(s))
+  implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError(_.toBoolean))
+  implicit val doubleConfigReader = ConfigReader.fromNonEmptyString[Double](catchReadError({
     case v if v.last == '%' => v.dropRight(1).toDouble / 100d
     case v => v.toDouble
   }))
-  implicit val floatConfigReader = fromNonEmptyStringReader[Float](catchReadError({
+  implicit val floatConfigReader = ConfigReader.fromNonEmptyString[Float](catchReadError({
     case v if v.last == '%' => v.dropRight(1).toFloat / 100f
     case v => v.toFloat
   }))
-  implicit val intConfigReader = fromNonEmptyStringReader[Int](catchReadError(_.toInt))
-  implicit val longConfigReader = fromNonEmptyStringReader[Long](catchReadError(_.toLong))
-  implicit val shortConfigReader = fromNonEmptyStringReader[Short](catchReadError(_.toShort))
+  implicit val intConfigReader = ConfigReader.fromNonEmptyString[Int](catchReadError(_.toInt))
+  implicit val longConfigReader = ConfigReader.fromNonEmptyString[Long](catchReadError(_.toLong))
+  implicit val shortConfigReader = ConfigReader.fromNonEmptyString[Short](catchReadError(_.toShort))
 }
 
 /**
  * Trait containing `ConfigReader` instances for classes related to file system paths and URIs.
  */
-trait UriAndPathReaders extends ConvertHelpers {
+trait UriAndPathReaders {
 
-  implicit val urlConfigReader = fromNonEmptyStringReader[URL](catchReadError(new URL(_)))
-  implicit val uuidConfigReader = fromNonEmptyStringReader[UUID](catchReadError(UUID.fromString))
-  implicit val pathConfigReader = fromStringReader[Path](catchReadError(Paths.get(_)))
-  implicit val uriConfigReader = fromStringReader[URI](catchReadError(new URI(_)))
+  implicit val urlConfigReader = ConfigReader.fromNonEmptyString[URL](catchReadError(new URL(_)))
+  implicit val uuidConfigReader = ConfigReader.fromNonEmptyString[UUID](catchReadError(UUID.fromString))
+  implicit val pathConfigReader = ConfigReader.fromString[Path](catchReadError(Paths.get(_)))
+  implicit val uriConfigReader = ConfigReader.fromString[URI](catchReadError(new URI(_)))
 }
 
 /**
  * Trait containing `ConfigReader` instances for `java.time` classes.
  */
-trait JavaTimeReaders extends ConvertHelpers {
+trait JavaTimeReaders {
 
   implicit val instantConfigReader: ConfigReader[Instant] =
-    fromNonEmptyStringReader[Instant](catchReadError(Instant.parse))
+    ConfigReader.fromNonEmptyString[Instant](catchReadError(Instant.parse))
 
   implicit val zoneOffsetConfigReader: ConfigReader[ZoneOffset] =
-    fromNonEmptyStringReader[ZoneOffset](catchReadError(ZoneOffset.of))
+    ConfigReader.fromNonEmptyString[ZoneOffset](catchReadError(ZoneOffset.of))
 
   implicit val zoneIdConfigReader: ConfigReader[ZoneId] =
-    fromNonEmptyStringReader[ZoneId](catchReadError(ZoneId.of))
+    ConfigReader.fromNonEmptyString[ZoneId](catchReadError(ZoneId.of))
 
   implicit val periodConfigReader: ConfigReader[Period] =
-    fromNonEmptyStringReader[Period](catchReadError(Period.parse))
+    ConfigReader.fromNonEmptyString[Period](catchReadError(Period.parse))
 
   implicit val yearConfigReader: ConfigReader[Year] =
-    fromNonEmptyStringReader[Year](catchReadError(Year.parse))
+    ConfigReader.fromNonEmptyString[Year](catchReadError(Year.parse))
 }
 
 /**
  * Trait containing `ConfigReader` instances for [[Duration]] and [[FiniteDuration]].
  */
-trait DurationReaders extends ConvertHelpers {
+trait DurationReaders {
 
   implicit val durationConfigReader: ConfigReader[Duration] =
-    fromNonEmptyStringReader[Duration](DurationConvert.fromString)
+    ConfigReader.fromNonEmptyString[Duration](DurationConvert.fromString)
 
   implicit val finiteDurationConfigReader: ConfigReader[FiniteDuration] = {
     val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, FiniteDuration] = { string => location =>
@@ -77,14 +78,14 @@ trait DurationReaders extends ConvertHelpers {
         case _ => Left(CannotConvert(string, "FiniteDuration", s"Couldn't parse '$string' into a FiniteDuration because it's infinite.", location, None))
       }
     }
-    fromNonEmptyStringReader[FiniteDuration](fromString)
+    ConfigReader.fromNonEmptyString[FiniteDuration](fromString)
   }
 }
 
 /**
  * Trait containing `ConfigReader` instances for Typesafe config models.
  */
-trait TypesafeConfigReaders extends ConvertHelpers {
+trait TypesafeConfigReaders {
 
   implicit val configConfigReader: ConfigReader[Config] = new ConfigReader[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {

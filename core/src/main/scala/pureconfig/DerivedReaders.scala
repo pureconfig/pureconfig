@@ -6,6 +6,7 @@ import scala.collection.mutable.Builder
 import scala.language.higherKinds
 
 import com.typesafe.config._
+import pureconfig.ConvertHelpers._
 import pureconfig.error._
 import shapeless._
 import shapeless.labelled._
@@ -21,7 +22,7 @@ trait AllowMissingKey { self: ConfigReader[_] => }
 /**
  * Trait containing `ConfigReader` instances for collection, product and coproduct types.
  */
-trait DerivedReaders extends ConvertHelpers {
+trait DerivedReaders {
 
   private[pureconfig] trait WrappedConfigReader[Wrapped, SubRepr] extends ConfigReader[SubRepr]
 

@@ -12,7 +12,7 @@ import shapeless.labelled._
 /**
  * Trait containing `ConfigWriter` instances for collection, product and coproduct types.
  */
-trait DerivedWriters extends ConvertHelpers {
+trait DerivedWriters {
 
   private[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] extends ConfigWriter[SubRepr]
 
