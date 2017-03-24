@@ -83,7 +83,7 @@ object ConfigConvert extends ConvertHelpers {
   def fromNonEmptyStringConvertOpt[T: ClassTag](fromF: String => Option[T], toF: T => String): ConfigConvert[T] =
     viaNonEmptyStringOpt(fromF, toF)
 
-  @deprecated(message = "The usage of Try has been deprecated. Please use fromStringReader instead", since = "0.6.0")
+  @deprecated(message = "The usage of Try has been deprecated. Please use ConfigReader.fromString instead", since = "0.6.0")
   def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToTryConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
@@ -101,7 +101,7 @@ object ConfigConvert extends ConvertHelpers {
   def fromStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigReader[T] =
     ConfigReader.fromStringOpt(fromF)
 
-  @deprecated(message = "The usage of Try has been deprecated. Please use fromNonEmptyStringReader instead", since = "0.6.0")
+  @deprecated(message = "The usage of Try has been deprecated. Please use ConfigReader.fromNonEmptyString instead", since = "0.6.0")
   def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = new ConfigConvert[T] {
     def from(config: ConfigValue) = ConfigReader.fromNonEmptyString[T](fromF andThen tryToEither).from(config)
     def to(t: T) = ConfigValueFactory.fromAnyRef(t)
