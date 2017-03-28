@@ -1,14 +1,14 @@
 package pureconfig
 
+import scala.collection.JavaConverters._
+import scala.collection.immutable.Seq
+
 import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions, ConfigValue }
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.Shapeless._
-import pureconfig.ConfigConvert.{ catchReadError, fromStringConvert, fromStringReader }
+import pureconfig.ConfigConvert.catchReadError
 import pureconfig.arbitrary._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongType }
-
-import scala.collection.JavaConverters._
-import scala.collection.immutable.Seq
 
 class ProductConvertersSuite extends BaseSuite {
 
@@ -24,19 +24,19 @@ class ProductConvertersSuite extends BaseSuite {
 
   checkArbitrary[FlatConfig]
 
-  implicit val dateConfigConvert = fromStringConvert[org.joda.time.DateTime](
+  implicit val dateConfigConvert = ConfigConvert.viaString[org.joda.time.DateTime](
     catchReadError(org.joda.time.DateTime.parse), ISODateTimeFormat.dateTime().print)
   checkArbitrary[ConfigWithUnknownType]
 
   it should s"be able to override all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in forAll {
     (config: FlatConfig) =>
-      implicit val readBoolean = fromStringReader[Boolean](catchReadError(_ => false))
-      implicit val readDouble = fromStringReader[Double](catchReadError(_ => 1D))
-      implicit val readFloat = fromStringReader[Float](catchReadError(_ => 2F))
-      implicit val readInt = fromStringReader[Int](catchReadError(_ => 3))
-      implicit val readLong = fromStringReader[Long](catchReadError(_ => 4L))
-      implicit val readString = fromStringReader[String](catchReadError(_ => "foobar"))
-      implicit val readOption = fromStringConvert[Option[String]](catchReadError(_ => None), _ => " ")
+      implicit val readBoolean = ConfigReader.fromString[Boolean](catchReadError(_ => false))
+      implicit val readDouble = ConfigReader.fromString[Double](catchReadError(_ => 1D))
+      implicit val readFloat = ConfigReader.fromString[Float](catchReadError(_ => 2F))
+      implicit val readInt = ConfigReader.fromString[Int](catchReadError(_ => 3))
+      implicit val readLong = ConfigReader.fromString[Long](catchReadError(_ => 4L))
+      implicit val readString = ConfigReader.fromString[String](catchReadError(_ => "foobar"))
+      implicit val readOption = ConfigConvert.viaString[Option[String]](catchReadError(_ => None), _ => " ")
       val cc = ConfigConvert[FlatConfig]
       cc.from(cc.to(config)) shouldBe Right(FlatConfig(false, 1D, 2F, 3, 4L, "foobar", None))
   }

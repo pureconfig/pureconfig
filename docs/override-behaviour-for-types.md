@@ -24,9 +24,9 @@ always read lower case. We can define a custom `ConfigConvert` instance for `Str
 ```scala
 import com.typesafe.config.ConfigValueFactory
 import pureconfig.ConfigConvert
-import pureconfig.ConfigConvert.{ fromStringReader, catchReadError }
+import pureconfig.ConfigConvert.{ catchReadError, viaString }
 
-implicit val overrideStrConvert = fromStringReader(catchReadError(_.toLowerCase))
+implicit val overrideStrConvert = viaString[String](catchReadError(_.toLowerCase), identity)
 ```
 
 PureConfig will now use the custom `overrideStrConvert` instance:
