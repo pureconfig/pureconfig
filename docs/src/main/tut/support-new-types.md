@@ -29,7 +29,7 @@ First, define a `ConfigConvert` instance in implicit scope:
 ```tut:silent
 import pureconfig.ConfigConvert._
 
-implicit val myIntConvert = ConfigConvert.fromStringConvert[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
+implicit val myIntConvert = ConfigConvert.viaString[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
 ```
 
 Then load the config:
