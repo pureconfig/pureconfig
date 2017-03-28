@@ -18,6 +18,9 @@ trait ConfigWriter[T] {
   def to(t: T): ConfigValue
 }
 
+/**
+ * Provides methods to create [[ConfigWriter]] instances.
+ */
 object ConfigWriter extends BasicWriters with DerivedWriters {
 
   def apply[T](implicit writer: ConfigWriter[T]): ConfigWriter[T] = writer

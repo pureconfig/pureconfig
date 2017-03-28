@@ -23,6 +23,9 @@ trait ConfigReader[T] {
   def from(config: ConfigValue): Either[ConfigReaderFailures, T]
 }
 
+/**
+ * Provides methods to create [[ConfigReader]] instances.
+ */
 object ConfigReader extends BasicReaders with DerivedReaders {
 
   def apply[T](implicit reader: ConfigReader[T]): ConfigReader[T] = reader

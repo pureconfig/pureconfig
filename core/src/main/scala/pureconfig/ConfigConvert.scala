@@ -17,6 +17,9 @@ import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, ConfigValue
  */
 trait ConfigConvert[T] extends ConfigReader[T] with ConfigWriter[T]
 
+/**
+ * Provides methods to create [[ConfigConvert]] instances.
+ */
 object ConfigConvert extends ConvertHelpers {
 
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
