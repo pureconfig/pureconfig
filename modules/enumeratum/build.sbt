@@ -1,8 +1,8 @@
 name := "pureconfig-enumeratum"
 
-organization := "com.github.melrief"
+organization := "com.github.pureconfig"
 
-homepage := Some(url("https://github.com/melrief/pureconfig"))
+homepage := Some(url("https://github.com/pureconfig/pureconfig"))
 
 licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/"))
 
@@ -31,8 +31,8 @@ publishArtifact in Test := false
 
 pomExtra :=
   <scm>
-    <url>git@github.com:melrief/pureconfig.git</url>
-    <connection>scm:git:git@github.com:melrief/pureconfig.git</connection>
+    <url>git@github.com:pureconfig/pureconfig.git</url>
+    <connection>scm:git:git@github.com:pureconfig/pureconfig.git</connection>
   </scm>
   <developers>
     <developer>
