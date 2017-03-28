@@ -31,6 +31,12 @@ lazy val javax = (project in file("modules/javax")).
   settings(settings).
   dependsOn(core)
 
+// akka 2.4 isn't published for Scala 2.10
+lazy val akka = (project in file("modules/akka")).
+  settings(settings).
+  settings(crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }).
+  dependsOn(core)
+
 lazy val allVersionCompilerLintSwitches = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
