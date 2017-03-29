@@ -29,7 +29,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
 
     failuresWithPath.foreach {
       case (p, failures) =>
-        linesBuffer += s"  with '$p':"
+        linesBuffer += s"  at '$p':"
         failures.foreach { failure =>
           linesBuffer += s"    - ${failure.descriptionWithLocation}"
         }

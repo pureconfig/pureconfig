@@ -27,12 +27,12 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     }
 
     exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  with 'a':
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
+          |  at 'a':
           |    - Cannot convert 'string' to Int: java.lang.NumberFormatException: For input string: "string".
-          |  with 'b':
+          |  at 'b':
           |    - Key not found.
-          |  with 'c':
+          |  at 'c':
           |    - Key not found.
           |""".stripMargin
   }
@@ -51,7 +51,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     }
 
     exception1.getMessage shouldBe
-      s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
           |  in the configuration:
           |    - Expected type OBJECT. Found NUMBER instead.
           |""".stripMargin
@@ -61,8 +61,8 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     }
 
     exception2.getMessage shouldBe
-      s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$ParentConf. Failures are:
-          |  with 'conf':
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$ParentConf. Failures are:
+          |  at 'conf':
           |    - Expected type OBJECT. Found NUMBER instead.
           |""".stripMargin
   }
@@ -91,10 +91,10 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     }
 
     exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$MapConf. Failures are:
-          |  with 'values.a.values.c':
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$MapConf. Failures are:
+          |  at 'values.a.values.c':
           |    - Expected type OBJECT. Found NUMBER instead.
-          |  with 'values.b':
+          |  at 'values.b':
           |    - Expected type OBJECT. Found STRING instead.
           |""".stripMargin
   }
@@ -128,10 +128,10 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     }
 
     exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$EnclosingA. Failures are:
-          |  with 'values.v1':
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingA. Failures are:
+          |  at 'values.v1':
           |    - No valid coproduct choice found for '{"a":2,"type":"unexpected"}'.
-          |  with 'values.v3.type':
+          |  at 'values.v3.type':
           |    - Key not found.
           |""".stripMargin
   }
@@ -146,10 +146,10 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     }
 
     exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  with 'a':
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
+          |  at 'a':
           |    - (file:${workingDir}${file}:1) Key not found.
-          |  with 'c':
+          |  at 'c':
           |    - (file:${workingDir}${file}:3) Cannot convert 'hello' to Int: java.lang.NumberFormatException: For input string: "hello".
           |""".stripMargin
   }
@@ -163,7 +163,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     }
 
     exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
           |  in the configuration:
           |    - (file:${workingDir}${file}:2) Unable to parse the configuration.
           |""".stripMargin
