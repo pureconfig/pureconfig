@@ -3,7 +3,7 @@
 Not all types are supported automatically by PureConfig. For instance, classes
 that are not case classes are not supported out-of-the-box:
 
-```scala
+```tut:silent
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 
@@ -14,19 +14,25 @@ class MyInt(var value: Int) {
 case class Conf(n: MyInt)
 
 val conf = parseString(s"""{ n: 1 }""")
+```
 
+This won't compile because there's no `ConfigConvert` instance for `MyInt`:
+```tut:book:fail
 loadConfig[Conf](conf)
-// doesn't compile - could not find implicit value for parameter conv: pureconfig.ConfigConvert[Conf]
 ```
 
 PureConfig can be extended to support those types. To do so, an instance for the
-`ConfigConvert` type class must be provided implicitly, like:
+`ConfigConvert` type class must be provided.
 
-```scala
+First, define a `ConfigConvert` instance in implicit scope:
+
+```tut:silent
 import pureconfig.ConfigConvert._
 
-implicit val myIntConvert = ConfigConvert.fromStringConvert[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
+implicit val myIntConvert = ConfigConvert.viaString[MyInt](catchReadError(s => new MyInt(s.toInt)), n => n.value.toString)
+```
 
+Then load the config:
+```tut:book
 loadConfig[Conf](conf)
-// returns Right(Conf(new MyInt(1)))
 ```

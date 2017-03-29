@@ -8,15 +8,23 @@ The `ConfigReaderFailure` class has an optional location field that can be used
 to point to the physical location of a `ConfigValue` that raised an error. When
 using the `ConfigReaderFailure` sealed family of case classes, you can use the
 `ConfigValueLocation.apply(cv: ConfigValue)` method to automatically create an
-optional location from a `ConfigValue`:
+optional location from a `ConfigValue`.
 
-```scala
+If we load a config and try to load a missing key:
+
+```tut:silent
 import com.typesafe.config._
 import pureconfig.error._
+import java.nio.file.{ Path, Paths }
 
 val cv = ConfigFactory.load.root().get("conf")
-// cv: com.typesafe.config.ConfigValue = SimpleConfigObject({"a":1,"b":2})
+val notFound = KeyNotFound("xpto", ConfigValueLocation(cv)).location.get
+```
 
-KeyNotFound("xpto", ConfigValueLocation(cv))
-// returns KeyNotFound(xpto,Some(ConfigValueLocation(/work/pureconfig/core/target/scala-2.12/classes/application.conf,0)))
+We can extract useful error data:
+```tut:book
+// print the filename as a relative path
+Paths.get(System.getProperty("user.dir")).relativize(Paths.get(notFound.url.toURI))
+
+notFound.lineNumber
 ```

@@ -21,26 +21,26 @@ import pureconfig.ConfigConvert._
  */
 package object configurable {
   def dateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[DateTime] =
-    fromNonEmptyStringConvert[DateTime](
+    viaNonEmptyString[DateTime](
       catchReadError(DateTime.parse(_, formatter)), formatter.print)
 
   def localDateConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDate] =
-    fromNonEmptyStringConvert[LocalDate](
+    viaNonEmptyString[LocalDate](
       catchReadError(LocalDate.parse(_, formatter)), formatter.print)
 
   def localTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalTime] =
-    fromNonEmptyStringConvert[LocalTime](
+    viaNonEmptyString[LocalTime](
       catchReadError(LocalTime.parse(_, formatter)), formatter.print)
 
   def localDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[LocalDateTime] =
-    fromNonEmptyStringConvert[LocalDateTime](
+    viaNonEmptyString[LocalDateTime](
       catchReadError(LocalDateTime.parse(_, formatter)), formatter.print)
 
   def monthDayConfigConvert(formatter: DateTimeFormatter): ConfigConvert[MonthDay] =
-    fromNonEmptyStringConvert[MonthDay](
+    viaNonEmptyString[MonthDay](
       catchReadError(MonthDay.parse(_, formatter)), formatter.print)
 
   def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
-    fromNonEmptyStringConvert[YearMonth](
+    viaNonEmptyString[YearMonth](
       catchReadError(YearMonth.parse(_, formatter)), formatter.print)
 }

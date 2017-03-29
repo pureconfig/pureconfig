@@ -3,19 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig.error
 
+import java.net.URL
+
 import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigValue }
 
 /**
- * The physical location of a ConfigValue, represented by a file name and a line
+ * The physical location of a ConfigValue, represented by a url and a line
  * number
  *
- * @param filename the complete pathname to the file that contains a given
- *                 ConfigValue
+ * @param url the URL describing the origin of the ConfigValue
  * @param lineNumber the line number (starting at 0), where the given
  *                   ConfigValue definition starts
  */
-case class ConfigValueLocation(filename: String, lineNumber: Int) {
-  def description: String = s"($filename:$lineNumber)"
+case class ConfigValueLocation(url: URL, lineNumber: Int) {
+  def description: String = s"($url:$lineNumber)"
 }
 
 object ConfigValueLocation {
@@ -48,8 +49,8 @@ object ConfigValueLocation {
    */
   def apply(co: ConfigOrigin): Option[ConfigValueLocation] =
     Option(co).flatMap { origin =>
-      if (origin.filename != null && origin.lineNumber != -1)
-        Some(ConfigValueLocation(origin.filename, origin.lineNumber))
+      if (origin.url != null && origin.lineNumber != -1)
+        Some(ConfigValueLocation(origin.url, origin.lineNumber))
       else
         None
     }

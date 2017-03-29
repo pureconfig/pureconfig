@@ -24,21 +24,29 @@ trait ConvertHelpers {
 
   def failWithThrowable[A](throwable: Throwable): Option[ConfigValueLocation] => Either[ConfigReaderFailures, A] = location => fail[A](ThrowableFailure(throwable, location, None))
 
-  private[this] def eitherToResult[T](either: Either[ConfigReaderFailure, T]): Either[ConfigReaderFailures, T] =
+  private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String, location: Option[ConfigValueLocation]): Either[ConfigReaderFailures, Z] =
+    result.left.map {
+      case ConfigReaderFailures(head, tail) =>
+        val headImproved = head.withImprovedContext(keyStr, location)
+        val tailImproved = tail.map(_.withImprovedContext(keyStr, location))
+        ConfigReaderFailures(headImproved, tailImproved)
+    }
+
+  private[pureconfig] def eitherToResult[T](either: Either[ConfigReaderFailure, T]): Either[ConfigReaderFailures, T] =
     either match {
       case r: Right[_, _] => r.asInstanceOf[Either[ConfigReaderFailures, T]]
       case Left(failure) => Left(ConfigReaderFailures(failure))
     }
 
-  private[this] def tryToEither[T](t: Try[T]): Option[ConfigValueLocation] => Either[ConfigReaderFailure, T] = t match {
+  private[pureconfig] def tryToEither[T](t: Try[T]): Option[ConfigValueLocation] => Either[ConfigReaderFailure, T] = t match {
     case Success(v) => _ => Right(v)
     case Failure(e) => location => Left(ThrowableFailure(e, location, None))
   }
 
-  private[this] def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => Either[ConfigReaderFailures, T] =
+  private[pureconfig] def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => Either[ConfigReaderFailures, T] =
     stringToEitherConvert[T](string => location => tryToEither(fromF(string))(location))
 
-  private[this] def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigValue => Either[ConfigReaderFailures, T] =
+  private[pureconfig] def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigValue => Either[ConfigReaderFailures, T] =
     config => {
       // Because we can't trust Typesafe Config not to throw, we wrap the
       // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
@@ -53,7 +61,7 @@ trait ConvertHelpers {
       }
     }
 
-  private[this] def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, String] = {
+  private[pureconfig] def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, String] = {
     case "" => location => Left(EmptyStringFound(ct.toString(), location, None))
     case x => _ => Right(x)
   }
@@ -87,75 +95,6 @@ trait ConvertHelpers {
         case Some(t) => Right(t)
         case None => Left(CannotConvert(string, ct.runtimeClass.getName, "", location, None))
       }
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use fromStringReader instead", since = "0.6.0")
-  def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToTryConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
-  }
-
-  def fromStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
-  }
-
-  def fromStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringReader[T](tryF(fromF))
-  }
-
-  def fromStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringReader[T](optF(fromF))
-  }
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use fromNonEmptyStringReader instead", since = "0.6.0")
-  def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromNonEmptyStringReader[T](fromF andThen tryToEither)
-  }
-
-  def fromNonEmptyStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringReader(string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)))
-  }
-
-  def fromNonEmptyStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromNonEmptyStringReader[T](tryF(fromF))
-  }
-
-  def fromNonEmptyStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromNonEmptyStringReader[T](optF(fromF))
-  }
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use fromStringConvert instead", since = "0.6.0")
-  def stringConvert[T](fromF: String => Try[T], toF: T => String): ConfigConvert[T] =
-    fromStringConvert[T](fromF andThen tryToEither, toF)
-
-  def fromStringConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
-  }
-
-  def fromStringConvertTry[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringConvert[T](tryF(fromF), toF)
-  }
-
-  def fromStringConvertOpt[T](fromF: String => Option[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringConvert[T](optF(fromF), toF)
-  }
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use fromNonEmptyStringConvert instead", since = "0.6.0")
-  def nonEmptyStringConvert[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] =
-    fromNonEmptyStringConvert[T](fromF andThen tryToEither[T], toF)
-
-  def fromNonEmptyStringConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    fromStringConvert[T](string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)), toF)
-  }
-
-  def fromNonEmptyStringConvertTry[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]) = {
-    fromNonEmptyStringConvert[T](tryF(fromF), toF)
-  }
-
-  def fromNonEmptyStringConvertOpt[T](fromF: String => Option[T], toF: T => String)(implicit ct: ClassTag[T]) = {
-    fromNonEmptyStringConvert[T](optF(fromF), toF)
-  }
 }
 
 object ConvertHelpers extends ConvertHelpers
