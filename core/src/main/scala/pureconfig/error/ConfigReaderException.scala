@@ -20,7 +20,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
       linesBuffer += "  in the configuration:"
 
     failuresWithoutPath.foreach { failure =>
-      linesBuffer += s"    - ${failure.descriptionWithLocation}"
+      linesBuffer += s"    - ${ConfigReaderException.descriptionWithLocation(failure)}"
     }
 
     if (failuresWithPath.nonEmpty && failuresWithoutPath.nonEmpty) {
@@ -31,7 +31,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
       case (p, failures) =>
         linesBuffer += s"  at '$p':"
         failures.foreach { failure =>
-          linesBuffer += s"    - ${failure.descriptionWithLocation}"
+          linesBuffer += s"    - ${ConfigReaderException.descriptionWithLocation(failure)}"
         }
     }
 
@@ -39,4 +39,9 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
     linesBuffer.mkString(System.lineSeparator())
   }
 
+}
+
+object ConfigReaderException {
+  private[ConfigReaderException] def descriptionWithLocation(failure: ConfigReaderFailure): String =
+    failure.location.fold(failure.description)(_.description + " " + failure.description)
 }

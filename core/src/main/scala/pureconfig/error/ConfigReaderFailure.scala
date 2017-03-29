@@ -78,11 +78,6 @@ sealed abstract class ConfigReaderFailure {
   def description: String
 
   /**
-   * A human-readable description of the failure, along with its location.
-   */
-  def descriptionWithLocation: String = location.fold(description)(_.description + " " + description)
-
-  /**
    * Improves the context of this failure with the key to the parent node and
    * its optional location.
    */
