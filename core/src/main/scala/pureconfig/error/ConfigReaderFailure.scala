@@ -5,7 +5,7 @@ package pureconfig.error
 
 import java.net.URL
 
-import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigValue }
+import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigValue, ConfigValueType }
 
 /**
  * The physical location of a ConfigValue, represented by a url and a line
@@ -178,14 +178,14 @@ final case class UnknownKey(key: String, location: Option[ConfigValueLocation]) 
 /**
  * A failure representing a wrong type of a given ConfigValue.
  *
- * @param foundType the type of the ConfigValue that was found
- * @param expectedType the type of ConfigValue that was expected
+ * @param foundType the ConfigValueType that was found
+ * @param expectedTypes the ConfigValueTypes that were expected
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
  * @param path an optional path to the value that had a wrong type
  */
-final case class WrongType(foundType: String, expectedType: String, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
-  def description = s"Expected type $expectedType. Found $foundType instead."
+final case class WrongType(foundType: ConfigValueType, expectedTypes: Set[ConfigValueType], location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def description = s"""Expected type ${expectedTypes.mkString(" or ")}. Found $foundType instead."""
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
     this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))

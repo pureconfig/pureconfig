@@ -72,11 +72,11 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
         case Some(fv) => fv.unwrapped match {
           case v: String if v == fieldValue(name) => Right(Some(cv))
           case _: String => Right(None)
-          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType.toString, ConfigValueType.STRING.toString, ConfigValueLocation(fv), Some(key))))
+          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType, Set(ConfigValueType.STRING), ConfigValueLocation(fv), Some(key))))
         }
         case None => Left(ConfigReaderFailures(KeyNotFound(key, ConfigValueLocation(co))))
       }
-    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType.toString, ConfigValueType.OBJECT.toString, ConfigValueLocation(cv), None)))
+    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
   }
 
   def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
@@ -85,7 +85,7 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
       else Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
 
     case _ =>
-      Left(ConfigReaderFailures(WrongType(cv.valueType.toString, ConfigValueType.OBJECT.toString, ConfigValueLocation(cv), None)))
+      Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
   }
 
   def tryNextOnFail(name: String) = false

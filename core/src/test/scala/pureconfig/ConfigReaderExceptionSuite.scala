@@ -148,9 +148,9 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
           |  with 'a':
-          |    - (${workingDir}${file}:1) Key not found.
+          |    - (file:${workingDir}${file}:1) Key not found.
           |  with 'c':
-          |    - (${workingDir}${file}:3) Cannot convert 'hello' to Int: java.lang.NumberFormatException: For input string: "hello".
+          |    - (file:${workingDir}${file}:3) Cannot convert 'hello' to Int: java.lang.NumberFormatException: For input string: "hello".
           |""".stripMargin
   }
 
@@ -165,7 +165,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a value of class pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
           |  in the configuration:
-          |    - (${workingDir}${file}:2) Unable to parse the configuration.
+          |    - (file:${workingDir}${file}:2) Unable to parse the configuration.
           |""".stripMargin
   }
 }

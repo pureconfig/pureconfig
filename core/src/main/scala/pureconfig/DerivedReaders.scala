@@ -29,7 +29,7 @@ trait DerivedReaders {
   private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
-      case other => fail(WrongType(other.valueType.toString, ConfigValueType.OBJECT.toString, ConfigValueLocation(other), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), None))
     }
     def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
   }
@@ -152,7 +152,7 @@ trait DerivedReaders {
               r.result()
           }
         case other =>
-          fail(WrongType(other.valueType.toString, s"${ConfigValueType.LIST} or ${ConfigValueType.OBJECT}", ConfigValueLocation(other), None))
+          fail(WrongType(other.valueType, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(other), None))
       }
     }
   }
@@ -174,7 +174,7 @@ trait DerivedReaders {
           }
 
         case other =>
-          fail(WrongType(other.valueType.toString, ConfigValueType.OBJECT.toString, ConfigValueLocation(other), None))
+          fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), None))
       }
     }
   }
