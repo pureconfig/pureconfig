@@ -10,7 +10,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
 
   override def getMessage: String = {
     val linesBuffer = mutable.Buffer.empty[String]
-    linesBuffer += s"Cannot convert configuration to a value of class ${ct.runtimeClass.getName}. Failures are:"
+    linesBuffer += s"Cannot convert configuration to a ${ct.runtimeClass.getName}. Failures are:"
 
     val failuresByPath = failures.toList.groupBy(_.path)
     val failuresWithPath = (failuresByPath - None).map({ case (k, v) => k.get -> v }).toList.sortBy(_._1)
