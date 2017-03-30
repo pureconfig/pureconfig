@@ -1,10 +1,13 @@
-### 0.6.1 (undefined)
+### 0.7.0 (undefined)
 
 - New features
-  - add `ConfigFactoryWrapper` to control exceptions from typesafe `ConfigFactory`
+  - Add `ConfigFactoryWrapper` to control exceptions from typesafe `ConfigFactory`
+  - Modify the message of `ConfigReaderException` to group errors by keys in the configuration, instead of by type of error
+  - Add a path (`Option[String]`) to `ConfigReaderFailure`, in order to expose more information (if available) about the key in the configuration whose value raised the failure
 
 - Breaking changes
   - `loadConfigFromFiles` works on `Path` instead of `File` for consistency
+  - `ConfigValueLocation` now uses `URL` instead of `Path` to encode locations of `ConfigValue`s
 
 - Bug fixes
   - `pureconfig.load*` methods don't throw exceptions on malformed configuration anymore
