@@ -70,7 +70,7 @@ Add PureConfig to your library dependencies. For Scala `2.11` and `2.12`:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.6.0"
+  "com.github.melrief" %% "pureconfig" % "0.7.0"
 )
 ```
 
@@ -78,7 +78,7 @@ For Scala `2.10` you need also the Macro Paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.6.0",
+  "com.github.melrief" %% "pureconfig" % "0.7.0",
   compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch)
 )
 ```
