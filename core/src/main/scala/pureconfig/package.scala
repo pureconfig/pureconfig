@@ -171,7 +171,7 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigOrThrow[Config](path: Path, namespace: String)(implicit reader: ConfigReader[Config], ct: ClassTag[Config]): Config = {
-    getResultOrThrow[Config](loadConfig(path, namespace))
+    getResultOrThrow[Config](loadConfig[Config](path, namespace))
   }
 
   /**
