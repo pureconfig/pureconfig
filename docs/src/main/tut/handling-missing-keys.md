@@ -1,6 +1,6 @@
 ## Handling missing keys
 
-The default behavior of `ConfigConvert`s that are derived in PureConfig is to
+The default behavior of `ConfigReader`s that are derived in PureConfig is to
 raise a `KeyNotFoundException` when a required key is missing. The only
 exception is the `Option[_]` type, which is read as `None` when a key is
 missing.
@@ -24,10 +24,10 @@ ConfigFactory.empty.to[Foo]
 ConfigFactory.empty.to[FooOpt]
 ```
 
-However, if you want to allow your custom `ConfigConvert`s to handle missing
-keys, you can extend the `AllowMissingKey` trait. For `ConfigConvert`s extending
+However, if you want to allow your custom `ConfigReader`s to handle missing
+keys, you can extend the `AllowMissingKey` trait. For `ConfigReader`s extending
 `AllowMissingKey`, a missing key will issue a call to the `from` method of the
-available `ConfigConvert` for that type with a `null` value.
+available `ConfigReader` for that type with a `null` value.
 
 Under this setup:
 
@@ -35,11 +35,9 @@ Under this setup:
 import com.typesafe.config._
 import pureconfig.syntax._
 
-implicit val cc = new ConfigConvert[Int] with AllowMissingKey {
+implicit val cc = new ConfigReader[Int] with AllowMissingKey {
   override def from(config: ConfigValue) =
     if (config == null) Right(42) else config.to[Int]
-
-  override def to(t: Int): ConfigValue = ConfigValueFactory.fromAnyRef(t)
 }
 ```
 

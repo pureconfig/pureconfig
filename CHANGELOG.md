@@ -1,14 +1,27 @@
-### 0.6.1 (undefined)
+### 0.7.0 (undefined)
 
 - New features
-  - add `ConfigFactoryWrapper` to control exceptions from typesafe `ConfigFactory`
+  - `ConfigConvert` is now a union of two new traits - `ConfigReader` for reading configs and `ConfigWriter` for writing
+    them:
+    - Having an implicit `ConfigReader` in scope is enough to read a config to a instance of a given type;
+    - Having a `ConfigWriter` is enough for writing instances to configs;
+    - `ConfigConvert` can still be used everywhere it was before and is advisable when both operations are needed.
+  - Many constructors for `ConfigConvert` instances were deprecated, while new ones were added in the companion objects
+    of `ConfigReader`, `ConfigWriter` and `ConfigConvert`. The deprecation message of each one indicates the new method
+    to use;
+  - Add `ConfigFactoryWrapper` to control exceptions from typesafe `ConfigFactory`;
+  - Modify the message of `ConfigReaderException` to group errors by keys in the configuration, instead of by type of
+    error;
+  - Add a path (`Option[String]`) to `ConfigReaderFailure`, in order to expose more information (if available) about the
+    key in the configuration whose value raised the failure.
 
 - Breaking changes
-  - `loadConfigFromFiles` works on `Path` instead of `File` for consistency
+  - `loadConfigFromFiles` works on `Path` instead of `File` for consistency;
+  - `ConfigValueLocation` now uses `URL` instead of `Path` to encode locations of `ConfigValue`s.
 
 - Bug fixes
   - `pureconfig.load*` methods don't throw exceptions on malformed configuration anymore
-     and wrap errors in `ConfigReaderFailures` [[#148](https://github.com/melrief/pureconfig/issues/148)]
+     and wrap errors in `ConfigReaderFailures` [[#148](https://github.com/melrief/pureconfig/issues/148)].
 
 ### 0.6.0 (Feb 14, 2017)
 

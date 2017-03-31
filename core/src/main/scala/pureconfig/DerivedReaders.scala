@@ -29,7 +29,7 @@ trait DerivedReaders {
   private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
-      case other => fail(WrongType(foundType = other.valueType().toString, expectedType = "ConfigObject", ConfigValueLocation(other), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), None))
     }
     def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
   }
@@ -136,7 +136,7 @@ trait DerivedReaders {
           val z: Either[ConfigReaderFailures, List[(Int, T)]] = Right(List.empty[(Int, T)])
           def keyValueReader(key: String, value: ConfigValue): Either[ConfigReaderFailures, (Int, T)] = {
             val keyResult = catchReadError(_.toInt)(implicitly)(key)(ConfigValueLocation(value)).left.flatMap(t => fail(CannotConvert(key, "Int",
-              s"To convert an object to a collection, it's keys must be read as Int but key $key has value" +
+              s"To convert an object to a collection, its keys must be read as Int but key $key has value" +
                 s"$value which cannot converted. Error: ${t.because}", ConfigValueLocation(value), Some(key))))
             val valueResult = configConvert.value.from(value)
             combineResults(keyResult, valueResult)(_ -> _)
@@ -152,7 +152,7 @@ trait DerivedReaders {
               r.result()
           }
         case other =>
-          fail(WrongType(other.valueType().toString, "ConfigList or ConfigObject", ConfigValueLocation(other), None))
+          fail(WrongType(other.valueType, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(other), None))
       }
     }
   }
@@ -166,11 +166,15 @@ trait DerivedReaders {
 
           co.asScala.foldLeft(z) {
             case (acc, (key, value)) =>
-              combineResults(acc, configConvert.value.from(value))((map, valueConverted) => map + (key -> valueConverted))
+              combineResults(
+                acc,
+                improveFailures(configConvert.value.from(value), key, ConfigValueLocation(value))) {
+                  (map, valueConverted) => map + (key -> valueConverted)
+                }
           }
 
         case other =>
-          fail(WrongType(other.valueType().toString, "ConfigObject", ConfigValueLocation(other), None))
+          fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), None))
       }
     }
   }
