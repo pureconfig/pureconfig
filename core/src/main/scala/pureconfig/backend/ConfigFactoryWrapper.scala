@@ -8,20 +8,20 @@ import pureconfig.error.{ CannotParse, ConfigReaderFailures, ConfigValueLocation
 import scala.util.control.NonFatal
 
 /**
- * A wrapper of [[com.typesafe.config.ConfigFactory]] whose methods return `Either` instead
+ * A wrapper of `com.typesafe.config.ConfigFactory` whose methods return [[scala.Either]] instead
  * of throwing exceptions
  */
 object ConfigFactoryWrapper {
 
-  /** @see [[ConfigFactory.invalidateCaches()]] */
+  /** @see `com.typesafe.config.ConfigFactory.invalidateCaches()` */
   def invalidateCaches(): Either[ConfigReaderFailures, Unit] =
     unsafeToEither(ConfigFactory.invalidateCaches())
 
-  /** @see [[ConfigFactory.load()]] */
+  /** @see `com.typesafe.config.ConfigFactory.load()` */
   def load(): Either[ConfigReaderFailures, Config] =
     unsafeToEither(ConfigFactory.load())
 
-  /** @see [[ConfigFactory.parseFile()]] */
+  /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): Either[ConfigReaderFailures, Config] =
     unsafeToEither(ConfigFactory.parseFile(path.toFile))
 
