@@ -4,7 +4,7 @@ A boilerplate-free Scala library for loading configuration files.
 
 [![Build Status](https://travis-ci.org/pureconfig/pureconfig.svg?branch=master)](https://travis-ci.org/pureconfig/pureconfig)
 [![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ![](http://i.imgur.com/613aexN.gif)
@@ -70,7 +70,7 @@ Add PureConfig to your library dependencies. For Scala `2.11` and `2.12`:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.7.0"
+  "com.github.pureconfig" %% "pureconfig" % "0.7.0"
 )
 ```
 
@@ -78,7 +78,7 @@ For Scala `2.10` you need also the Macro Paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.7.0",
+  "com.github.pureconfig" %% "pureconfig" % "0.7.0",
   compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch)
 )
 ```
