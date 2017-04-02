@@ -64,7 +64,8 @@ trait JavaTimeReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instances for [[Duration]] and [[FiniteDuration]].
+ * Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
+ * [[scala.concurrent.duration.FiniteDuration]].
  */
 trait DurationReaders {
 

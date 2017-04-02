@@ -72,4 +72,5 @@ lazy val settings = Seq(
     val required = "1.8"
     val current  = sys.props("java.specification.version")
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
-  }) ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)
+  },
+  autoAPIMappings := true) ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)

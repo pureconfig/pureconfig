@@ -52,7 +52,8 @@ trait JavaTimeWriters {
 }
 
 /**
- * Trait containing `ConfigWriter` instances for [[Duration]] and [[FiniteDuration]].
+ * Trait containing `ConfigWriter` instances for [[scala.concurrent.duration.Duration]] and
+ * [[scala.concurrent.duration.FiniteDuration]].
  */
 trait DurationWriters {
 
