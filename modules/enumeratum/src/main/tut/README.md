@@ -11,7 +11,7 @@ Automatically create a converters to read [Enumeratum](https://github.com/lloydm
 In addition to [core pureconfig](https://github.com/melrief/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.melrief" %% "pureconfig-enumeratum" % "0.7.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.7.0"
 ```
 
 ## Example
