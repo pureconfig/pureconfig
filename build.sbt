@@ -7,7 +7,7 @@ lazy val core = (project in file("core")).
   )
 
 lazy val docs = (project in file("docs")).
-  settings(settings).
+  settings(settings, publishArtifact := false).
   dependsOn(core)
 
 lazy val enumeratum = (project in file("modules/enumeratum")).
