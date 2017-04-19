@@ -10,17 +10,17 @@ import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, ConfigValue
 /**
  * Trait for objects capable of reading objects of a given type from `ConfigValues`.
  *
- * @tparam T the type of objects readable by this `ConfigReader`
+ * @tparam A the type of objects readable by this `ConfigReader`
  */
-trait ConfigReader[T] {
+trait ConfigReader[A] {
 
   /**
-   * Convert the given configuration into an instance of `T` if possible.
+   * Convert the given configuration into an instance of `A` if possible.
    *
    * @param config The configuration from which load the config
-   * @return either a list of failures or an object of type `T`
+   * @return either a list of failures or an object of type `A`
    */
-  def from(config: ConfigValue): Either[ConfigReaderFailures, T]
+  def from(config: ConfigValue): Either[ConfigReaderFailures, A]
 }
 
 /**
@@ -28,29 +28,29 @@ trait ConfigReader[T] {
  */
 object ConfigReader extends BasicReaders with DerivedReaders {
 
-  def apply[T](implicit reader: ConfigReader[T]): ConfigReader[T] = reader
+  def apply[A](implicit reader: ConfigReader[A]): ConfigReader[A] = reader
 
-  def fromString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigReader[T] = new ConfigReader[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
+  def fromString[A](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, A]): ConfigReader[A] = new ConfigReader[A] {
+    override def from(config: ConfigValue): Either[ConfigReaderFailures, A] = stringToEitherConvert(fromF)(config)
   }
 
-  def fromStringTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
-    fromString[T](tryF(fromF))
+  def fromStringTry[A](fromF: String => Try[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
+    fromString[A](tryF(fromF))
   }
 
-  def fromStringOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
-    fromString[T](optF(fromF))
+  def fromStringOpt[A](fromF: String => Option[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
+    fromString[A](optF(fromF))
   }
 
-  def fromNonEmptyString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
+  def fromNonEmptyString[A](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
     fromString(string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)))
   }
 
-  def fromNonEmptyStringTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
-    fromNonEmptyString[T](tryF(fromF))
+  def fromNonEmptyStringTry[A](fromF: String => Try[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
+    fromNonEmptyString[A](tryF(fromF))
   }
 
-  def fromNonEmptyStringOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigReader[T] = {
-    fromNonEmptyString[T](optF(fromF))
+  def fromNonEmptyStringOpt[A](fromF: String => Option[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
+    fromNonEmptyString[A](optF(fromF))
   }
 }

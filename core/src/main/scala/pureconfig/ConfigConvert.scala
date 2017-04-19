@@ -15,7 +15,7 @@ import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, ConfigValue
 /**
  * Trait for objects capable of reading and writing objects of a given type from and to `ConfigValues`.
  */
-trait ConfigConvert[T] extends ConfigReader[T] with ConfigWriter[T]
+trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A]
 
 /**
  * Provides methods to create [[ConfigConvert]] instances.
