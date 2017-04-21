@@ -217,6 +217,20 @@ final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocat
 }
 
 /**
+ * A failure representing an unexpected non-empty object when using `EnumCoproductHint` to write a config.
+ *
+ * @param typ the type for which a non-empty object was attempted to be written
+ * @param location an optional location of the ConfigValue that raised the failure
+ * @param path an optional path to the value which was an unexpected empty string
+ */
+final case class NonEmptyObjectFound(typ: String, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))
+}
+
+/**
  * A failure representing the inability to find a valid choice for a given coproduct.
  *
  * @param value the ConfigValue that was unable to be mapped to a coproduct choice
