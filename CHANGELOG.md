@@ -1,4 +1,10 @@
-### 0.7.0 (undefined)
+### 0.7.1 (unreleased)
+
+- New features
+  - `ConfigReader`, `ConfigWriter` and `ConfigConvert` now have combinators such as `map`, `flatMap` and `contramap`,
+    making them easier to compose.
+
+### 0.7.0 (Apr 2, 2017)
 
 - New features
   - `ConfigConvert` is now a union of two new traits - `ConfigReader` for reading configs and `ConfigWriter` for writing

@@ -15,7 +15,22 @@ import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, ConfigValue
 /**
  * Trait for objects capable of reading and writing objects of a given type from and to `ConfigValues`.
  */
-trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A]
+trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
+
+  /**
+   * Transforms the values read and written by this `ConfigConvert` using two functions.
+   *
+   * @param f the function applied to values after they are read
+   * @param g the function applied to values before they are written
+   * @tparam B the type of the returned `ConfigConvert`
+   * @return a `ConfigConvert` that reads and writes values of type `B` by applying `f` and `g` on read and write,
+   *         respectively.
+   */
+  def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
+    def from(config: ConfigValue) = outer.from(config).right.map(f)
+    def to(a: B) = outer.to(g(a))
+  }
+}
 
 /**
  * Provides methods to create [[ConfigConvert]] instances.

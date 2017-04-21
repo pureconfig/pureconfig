@@ -1,6 +1,7 @@
 package pureconfig
 
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
+import pureconfig.ConfigWriter._
 
 /**
  * Trait for objects capable of writing objects of a given type to `ConfigValues`.
@@ -16,6 +17,25 @@ trait ConfigWriter[A] {
    * @return The `ConfigValue` obtained from the `A` instance
    */
   def to(a: A): ConfigValue
+
+  /**
+   * Applies a function to values before passing them to this writer.
+   *
+   * @param f the function to apply to input values
+   * @tparam B the input type of the function
+   * @return a `ConfigWriter` that writes the results of this writer when the input values are mapped using `f`.
+   */
+  def contramap[B](f: B => A): ConfigWriter[B] =
+    fromFunction[B] { a => to(f(a)) }
+
+  /**
+   * Maps a function over the results of this writer.
+   *
+   * @param f the function to map over this writer
+   * @return a `ConfigWriter` returning the results of this writer mapped by `f`.
+   */
+  def mapConfig(f: ConfigValue => ConfigValue): ConfigWriter[A] =
+    fromFunction[A] { a => f(to(a)) }
 }
 
 /**
@@ -24,6 +44,17 @@ trait ConfigWriter[A] {
 object ConfigWriter extends BasicWriters with DerivedWriters {
 
   def apply[A](implicit writer: ConfigWriter[A]): ConfigWriter[A] = writer
+
+  /**
+   * Creates a `ConfigWriter` from a function.
+   *
+   * @param toF the function used to write values to configs
+   * @tparam A the type of the objects writable by the returned writer
+   * @return a `ConfigWriter` for writing objects of type `A` using `toF`.
+   */
+  def fromFunction[A](toF: A => ConfigValue) = new ConfigWriter[A] {
+    def to(a: A) = toF(a)
+  }
 
   /**
    * Returns a `ConfigWriter` for types supported by `ConfigValueFactory.fromAnyRef`. This method should be used
