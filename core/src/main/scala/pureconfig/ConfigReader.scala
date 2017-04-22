@@ -62,7 +62,14 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of both readers as a pair.
    */
   def zip[B](reader: ConfigReader[B]): ConfigReader[(A, B)] =
-    for (a <- this; b <- reader) yield (a, b)
+    fromFunction[(A, B)] { cv: ConfigValue =>
+      (from(cv), reader.from(cv)) match {
+        case (Right(a), Right(b)) => Right((a, b))
+        case (Left(fa), Right(_)) => Left(fa)
+        case (Right(_), Left(fb)) => Left(fb)
+        case (Left(fa), Left(fb)) => Left(fa ++ fb)
+      }
+    }
 
   /**
    * Combines this reader with another, returning the result of the first one that succeeds.

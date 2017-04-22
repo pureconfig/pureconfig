@@ -42,8 +42,9 @@ class ConfigReaderSuite extends BaseSuite {
     def zip[A, B](r1: ConfigReader[A], r2: ConfigReader[B]): Either[ConfigReaderFailures, (A, B)] = {
       (r1.from(conf), r2.from(conf)) match {
         case (Right(a), Right(b)) => Right((a, b))
-        case (Left(fa), _) => Left(fa)
-        case (_, Left(fb)) => Left(fb)
+        case (Left(fa), Right(_)) => Left(fa)
+        case (Right(_), Left(fb)) => Left(fb)
+        case (Left(fa), Left(fb)) => Left(fa ++ fb)
       }
     }
 
