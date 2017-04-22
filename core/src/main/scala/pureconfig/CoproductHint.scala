@@ -92,8 +92,8 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
 }
 
 /**
- * Hint applicable to sealed families of case objects where objects are written and read as strings. Trying to read or
- * write values that are not case objects results in failure.
+ * Hint applicable to sealed families of case objects where objects are written and read as strings with their type
+ * names. Trying to read or write values that are not case objects results in failure.
  *
  * @tparam T the type of the coproduct or sealed family for which this hint applies
  */
