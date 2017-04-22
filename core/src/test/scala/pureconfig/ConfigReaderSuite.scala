@@ -1,10 +1,12 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigFactory, ConfigValue, ConfigValueFactory }
+import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
 import pureconfig.error.{ CannotConvertNull, ConfigReaderFailures }
 
 class ConfigReaderSuite extends BaseSuite {
+  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+
   val intReader = ConfigReader[Int]
   val strReader = ConfigReader[String]
 
@@ -14,7 +16,7 @@ class ConfigReaderSuite extends BaseSuite {
 
   // generate configs that always read correctly as strings, but not always as integers
   val genConfig: Gen[ConfigValue] =
-    Gen.frequency(95 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 5 -> Gen.alphaStr)
+    Gen.frequency(80 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 20 -> Gen.alphaStr)
       .map(ConfigValueFactory.fromAnyRef)
 
   val genReaderFailure: Gen[ConfigReaderFailures] =
@@ -26,16 +28,16 @@ class ConfigReaderSuite extends BaseSuite {
   behavior of "ConfigReader"
 
   it should "have a correct map method" in forAll { (conf: ConfigValue, f: Int => String) =>
-    intReader.map(f).from(conf) === intReader.from(conf).right.map(f)
+    intReader.map(f).from(conf) shouldEqual intReader.from(conf).right.map(f)
   }
 
   it should "have a correct emap method" in forAll { (conf: ConfigValue, f: Int => Either[ConfigReaderFailures, String]) =>
-    intReader.emap(f).from(conf) === intReader.from(conf).right.flatMap(f)
+    intReader.emap(f).from(conf) shouldEqual intReader.from(conf).right.flatMap(f)
   }
 
   it should "have a correct flatMap method" in forAll { conf: ConfigValue =>
     val g = { n: Int => intSummedReader(n) }
-    intReader.flatMap(g).from(conf) === intReader.from(conf).right.flatMap(g(_).from(conf))
+    intReader.flatMap(g).from(conf) shouldEqual intReader.from(conf).right.flatMap(g(_).from(conf))
   }
 
   it should "have a correct zip method" in forAll { conf: ConfigValue =>
@@ -48,10 +50,10 @@ class ConfigReaderSuite extends BaseSuite {
       }
     }
 
-    intReader.zip(strReader).from(conf) === zip(intReader, strReader)
-    strReader.zip(intReader).from(conf) === zip(strReader, intReader)
-    intReader.zip(intReader).from(conf) === zip(intReader, intReader)
-    strReader.zip(strReader).from(conf) === zip(strReader, strReader)
+    intReader.zip(strReader).from(conf) shouldEqual zip(intReader, strReader)
+    strReader.zip(intReader).from(conf) shouldEqual zip(strReader, intReader)
+    intReader.zip(intReader).from(conf) shouldEqual zip(intReader, intReader)
+    strReader.zip(strReader).from(conf) shouldEqual zip(strReader, strReader)
   }
 
   it should "have a correct orElse method" in forAll { conf: ConfigValue =>
@@ -64,16 +66,16 @@ class ConfigReaderSuite extends BaseSuite {
     }
 
     // results are explicitly typed so that we also test the resulting type of `orElse`
-    intReader.orElse(strReader).from(conf) === orElse[Any, Int, String](intReader, strReader)
-    strReader.orElse(intReader).from(conf) === orElse[Any, String, Int](strReader, intReader)
-    intReader.orElse(intReader).from(conf) === orElse[Int, Int, Int](intReader, intReader)
-    strReader.orElse(strReader).from(conf) === orElse[String, String, String](strReader, strReader)
+    intReader.orElse(strReader).from(conf) shouldEqual orElse[Any, Int, String](intReader, strReader)
+    strReader.orElse(intReader).from(conf) shouldEqual orElse[Any, String, Int](strReader, intReader)
+    intReader.orElse(intReader).from(conf) shouldEqual orElse[Int, Int, Int](intReader, intReader)
+    strReader.orElse(strReader).from(conf) shouldEqual orElse[String, String, String](strReader, strReader)
   }
 
   it should "have a correct contramapConfig method" in forAll { conf: ConfigValue =>
     val wrappedConf = ConfigFactory.parseString(s"{ value: ${conf.render} }").root()
-    val unwrap = { cv: ConfigValue => cv.atKey("value").root() }
+    val unwrap = { cv: ConfigValue => cv.asInstanceOf[ConfigObject].get("value") }
 
-    intReader.contramapConfig(unwrap).from(wrappedConf) === intReader.from(conf)
+    intReader.contramapConfig(unwrap).from(wrappedConf) shouldEqual intReader.from(conf)
   }
 }
