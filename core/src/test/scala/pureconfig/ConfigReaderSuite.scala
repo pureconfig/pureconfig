@@ -2,7 +2,7 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigValue, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.error.ConfigReaderFailures
+import pureconfig.error.{ CannotConvertNull, ConfigReaderFailures }
 
 class ConfigReaderSuite extends BaseSuite {
   val intReader = ConfigReader[Int]
@@ -17,12 +17,20 @@ class ConfigReaderSuite extends BaseSuite {
     Gen.frequency(95 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 5 -> Gen.alphaStr)
       .map(ConfigValueFactory.fromAnyRef)
 
+  val genReaderFailure: Gen[ConfigReaderFailures] =
+    Gen.const(ConfigReaderFailures(CannotConvertNull))
+
   implicit val arbConfig = Arbitrary(genConfig)
+  implicit val arbReaderFailure = Arbitrary(genReaderFailure)
 
   behavior of "ConfigReader"
 
   it should "have a correct map method" in forAll { (conf: ConfigValue, f: Int => String) =>
     intReader.map(f).from(conf) === intReader.from(conf).right.map(f)
+  }
+
+  it should "have a correct emap method" in forAll { (conf: ConfigValue, f: Int => Either[ConfigReaderFailures, String]) =>
+    intReader.emap(f).from(conf) === intReader.from(conf).right.flatMap(f)
   }
 
   it should "have a correct flatMap method" in forAll { conf: ConfigValue =>

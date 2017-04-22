@@ -34,6 +34,17 @@ trait ConfigReader[A] {
     fromFunction[B](from(_).right.map(f))
 
   /**
+   * Maps a function that can possibly fail over the results of this reader.
+   *
+   * @param f the function to map over this reader
+   * @tparam B the value read by the function in case of success
+   * @return a `ConfigReader` returning the results of this reader mapped by `f`, with the resulting `Either` flattened
+   *         as a success or failure.
+   */
+  def emap[B](f: A => Either[ConfigReaderFailures, B]): ConfigReader[B] =
+    fromFunction[B] { cv: ConfigValue => from(cv).right.flatMap(f) }
+
+  /**
    * Monadically bind a function over the results of this reader.
    *
    * @param f the function to bind over this reader
