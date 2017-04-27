@@ -15,7 +15,8 @@ private[pureconfig] object DurationConvert {
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
   val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, Duration] = { string => location =>
-    try {
+    if (string == Duration.Undefined.toString) Right(Duration.Undefined)
+    else try {
       Right(Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
     } catch {
       case ex: NumberFormatException =>
@@ -42,9 +43,11 @@ private[pureconfig] object DurationConvert {
    */
   def fromDuration(d: Duration): String = {
     d match {
+      case f: FiniteDuration => fromFiniteDuration(f)
+      // We must do an `eq` instead of `==` comparison because Undefined is intentionally != itself.
+      case i: Duration.Infinite if i eq Duration.Undefined => Duration.Undefined.toString
       case i: Duration.Infinite if i == Duration.MinusInf => "MinusInf"
       case i: Duration.Infinite => "Inf"
-      case f: FiniteDuration => fromFiniteDuration(f)
     }
   }
 

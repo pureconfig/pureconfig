@@ -82,4 +82,7 @@ class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
         ex.head shouldBe a[CannotConvert]
     }
   }
+  it should "fromS(fromD(Duration.Undefined)) == Duration.Undefined" in {
+    fromS(fromD(Duration.Undefined)) shouldEqual Right(Duration.Undefined)
+  }
 }
