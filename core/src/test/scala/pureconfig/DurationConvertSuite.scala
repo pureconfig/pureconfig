@@ -82,4 +82,13 @@ class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
         ex.head shouldBe a[CannotConvert]
     }
   }
+  it should "correctly round trip when converting Duration.Undefined" in {
+    fromS(fromD(Duration.Undefined)) shouldEqual Right(Duration.Undefined)
+  }
+  it should "correctly round trip when converting Duration.MinusInf" in {
+    fromS(fromD(Duration.MinusInf)) shouldEqual Right(Duration.MinusInf)
+  }
+  it should "correctly round trip when converting Duration.Inf" in {
+    fromS(fromD(Duration.Inf)) shouldEqual Right(Duration.Inf)
+  }
 }
