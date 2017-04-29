@@ -29,6 +29,7 @@ A boilerplate-free Scala library for loading configuration files.
 - [Handling missing keys](docs/handling-missing-keys.md)
 - [Example](docs/example.md)
 - [Whence the config files](docs/whence-the-config-files.md)
+- [Support for Duration](docs/support-for-duration.md)
 - [Integrating with other libraries](#integrating-with-other-libraries)
 - [Contribute](#contribute)
 - [License](#license)
