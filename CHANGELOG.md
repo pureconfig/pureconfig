@@ -4,7 +4,7 @@
   - `ConfigReader`, `ConfigWriter` and `ConfigConvert` now have combinators such as `map`, `flatMap` and `contramap`,
     making them easier to compose.
 - Bug fixes
-  - `Duration.Undefined` is correctly handled when reading an writing configurations. [[#184](https://github.com/melrief/pureconfig/issues/184)].
+  - `Duration.Undefined` is correctly handled when reading and writing configurations. [[#184](https://github.com/melrief/pureconfig/issues/184)]
 
 ### 0.7.0 (Apr 2, 2017)
 
