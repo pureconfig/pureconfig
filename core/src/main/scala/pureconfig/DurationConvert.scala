@@ -15,7 +15,7 @@ private[pureconfig] object DurationConvert {
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
   val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, Duration] = { string => location =>
-    if (string == Duration.Undefined.toString) Right(Duration.Undefined)
+    if (string == UndefinedDuration) Right(Duration.Undefined)
     else try {
       Right(Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
     } catch {
@@ -44,12 +44,16 @@ private[pureconfig] object DurationConvert {
   def fromDuration(d: Duration): String = {
     d match {
       case f: FiniteDuration => fromFiniteDuration(f)
-      // We must do an `eq` instead of `==` comparison because Undefined is intentionally != itself.
-      case i: Duration.Infinite if i eq Duration.Undefined => Duration.Undefined.toString
-      case i: Duration.Infinite if i == Duration.MinusInf => "MinusInf"
-      case i: Duration.Infinite => "Inf"
+      case Duration.Inf => "Inf"
+      case Duration.MinusInf => "MinusInf"
+      // We must do an `eq` instead of `==` comparison because `Undefined` is intentionally != itself.
+      case d if d eq Duration.Undefined => UndefinedDuration
     }
   }
+
+  /// We need our own constant for `Duration.Undefined` because that value's `toString` is `Duration.Undefined`
+  /// which is inconsistent with the `Inf` and `Minus` `toString` provided by other special `Duration`s.
+  private final val UndefinedDuration = "Undefined"
 
   /**
    * Format a FiniteDuration as a string with a suitable time unit using units TypesafeConfig understands.
