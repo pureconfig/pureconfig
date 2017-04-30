@@ -113,7 +113,7 @@ Currently supported types for fields are:
 - `Option` for optional values, i.e. values that can or cannot be in the configuration;
 - `Map` with `String` keys and any value type that is in this list;
 - everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
-  configured first - see [Configurable converters](#configurable-converters));
+  configured first - see [Configurable converters](docs/configurable-converters.md));
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
