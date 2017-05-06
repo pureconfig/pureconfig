@@ -6,7 +6,7 @@ too old to be used by PureConfig, making your Spark project fail when using
 `spark-submit`.
 
 If you are using the [sbt-assembly](https://github.com/sbt/sbt-assembly) plugin
-to create our JARs you
+to create your JARs you
 can [shade this dependency](https://github.com/sbt/sbt-assembly#shading) by
 adding
 
