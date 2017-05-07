@@ -15,3 +15,7 @@ script:
       fi
 after_success:
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport coverageAggregate coveralls
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
