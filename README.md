@@ -29,11 +29,10 @@ A boilerplate-free Scala library for loading configuration files.
 - [Handling missing keys](docs/handling-missing-keys.md)
 - [Example](docs/example.md)
 - [Whence the config files](docs/whence-the-config-files.md)
-- [Playing nice with Spark's Shapeless](docs/playing-nice-with-sparks-shapeless.md)
 - [Support for Duration](docs/support-for-duration.md)
 - [Integrating with other libraries](#integrating-with-other-libraries)
-- [FAQ](#faq)
 - [Contribute](#contribute)
+- [FAQ](#faq)
 - [License](#license)
 - [Special thanks](#special-thanks)
 
