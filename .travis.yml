@@ -8,5 +8,10 @@ jdk:
 script:
   - sbt ++$TRAVIS_SCALA_VERSION coverage test tut
   - (cd example ; sbt ++$TRAVIS_SCALA_VERSION test)
+
+  # check if there are no changes after `tut` runs
+  - if [[ $TRAVIS_SCALA_VERSION =~ '^2\.12.*' ]]; then
+      git diff --exit-code;
+      fi
 after_success:
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport coverageAggregate coveralls
