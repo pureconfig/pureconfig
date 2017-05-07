@@ -20,7 +20,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * Note that this method doesn't check all the values but only the values that can be created by `Arbitrary[T]` and
    * only the `ConfigValue` created by `ConfigConvert[T].to`. While `Arbitrary[T]` is usually comprehensive,
    * `ConfigConvert[T].from` could support different kind of values that `ConfigConvert[T].to` doesn't produce
-   * because, for instance, multiple representation of `t: T` are possible. Use [[check()]] for those
+   * because, for instance, multiple representation of `t: T` are possible. Use [[checkRead()]] for those
    * representations.
    */
   def checkArbitrary[T](implicit cc: ConfigConvert[T], arb: Arbitrary[T], tag: ClassTag[T]): Unit =
@@ -55,20 +55,32 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
     }
 
   /**
-   * For each pair of value of type `T` and `ConfigValue`, check that `ConfigConvert[T].from`
+   * For each pair of value of type `T` and `ConfigValue`, check that `ConfigReader[T].from`
    * successfully converts the latter into to former. Useful to test specific values
    */
-  def check[T](valuesToReprs: (T, ConfigValue)*)(implicit cc: ConfigConvert[T], tag: ClassTag[T]): Unit =
+  def checkRead[T](valuesToReprs: (T, ConfigValue)*)(implicit cr: ConfigReader[T], tag: ClassTag[T]): Unit =
     for ((value, repr) <- valuesToReprs) {
       it should s"read the value $value of type ${tag.runtimeClass.getSimpleName} " +
         s"from ${repr.render(ConfigRenderOptions.concise())}" in {
-          cc.from(repr).right.value shouldEqual value
+          cr.from(repr) shouldEqual Right(value)
         }
     }
 
-  /** Similar to [[check()]] but work on ConfigValues of type String */
-  def checkString[T](valuesToStr: (T, String)*)(implicit cc: ConfigConvert[T], tag: ClassTag[T]): Unit =
-    check[T](valuesToStr.map { case (t, s) => t -> ConfigValueFactory.fromAnyRef(s) }: _*)(cc, tag)
+  /** Similar to [[checkRead()]] but work on ConfigValues of type String */
+  def checkReadString[T](valuesToStr: (T, String)*)(implicit cr: ConfigReader[T], tag: ClassTag[T]): Unit =
+    checkRead[T](valuesToStr.map { case (t, s) => t -> ConfigValueFactory.fromAnyRef(s) }: _*)(cr, tag)
+
+  /**
+   * For each pair of value of type `T` and `ConfigValue`, check that `ConfigWriter[T].to`
+   * successfully converts the former into the latter. Useful to test specific values
+   */
+  def checkWrite[T](valuesToReprs: (T, ConfigValue)*)(implicit cw: ConfigWriter[T], tag: ClassTag[T]): Unit =
+    for ((value, repr) <- valuesToReprs) {
+      it should s"write the value $value of type ${tag.runtimeClass.getSimpleName} " +
+        s"to ${repr.render(ConfigRenderOptions.concise())}" in {
+          cw.to(value) shouldEqual repr
+        }
+    }
 
   /**
    * Check that `cc` returns error of type `E` wwhen trying to read each value passed with `values`
@@ -76,7 +88,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * @param values the values that should not be conver
    * @param cr the [[ConfigConvert]] to test
    */
-  def checkFailure[T, E <: ConfigReaderFailure](values: ConfigValue*)(implicit cr: ConfigConvert[T], tag: ClassTag[T], eTag: ClassTag[E]): Unit =
+  def checkFailure[T, E <: ConfigReaderFailure](values: ConfigValue*)(implicit cr: ConfigReader[T], tag: ClassTag[T], eTag: ClassTag[E]): Unit =
     for (value <- values) {
       it should s"fail when it tries to read a value of type ${tag.runtimeClass.getSimpleName} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
