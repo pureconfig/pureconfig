@@ -32,7 +32,7 @@ A boilerplate-free Scala library for loading configuration files.
 - [Playing nice with Spark's Shapeless](docs/playing-nice-with-sparks-shapeless.md)
 - [Support for Duration](docs/support-for-duration.md)
 - [Integrating with other libraries](#integrating-with-other-libraries)
-- [FAQ](#FAQ)
+- [FAQ](#faq)
 - [Contribute](#contribute)
 - [License](#license)
 - [Special thanks](#special-thanks)
