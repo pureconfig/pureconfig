@@ -25,7 +25,7 @@ package object gen {
 
   val genDuration: Gen[Duration] =
     Gen.frequency(
-      1 -> Gen.oneOf(Duration.Inf, Duration.MinusInf /*, Duration.Undefined // doesn't work, see #184 */ ),
+      1 -> Gen.oneOf(Duration.Inf, Duration.MinusInf, Duration.Undefined),
       99 -> genFiniteDuration)
 
   val genInstant: Gen[Instant] =
