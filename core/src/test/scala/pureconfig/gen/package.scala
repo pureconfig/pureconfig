@@ -2,6 +2,7 @@ package pureconfig
 
 import java.nio.file.{ Path, Paths }
 import java.time._
+import java.time.{ Duration => JavaDuration }
 
 import org.scalacheck.{ Arbitrary, Gen }
 import pureconfig.configurable.ConfigurableSuite
@@ -16,6 +17,10 @@ package object gen {
     Gen.choose(Long.MinValue + 1, Long.MaxValue)
       .suchThat(_ != 8092048641075763L) // doesn't work, see #182
       .map(Duration.fromNanos)
+
+  val genJavaDuration: Gen[JavaDuration] =
+    Gen.choose(Long.MinValue + 1, Long.MaxValue)
+      .map(JavaDuration.ofNanos)
 
   val genDuration: Gen[Duration] =
     Gen.frequency(

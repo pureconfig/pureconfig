@@ -3,6 +3,7 @@ package pureconfig
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
+import java.time.{ Duration => JavaDuration }
 import java.util.UUID
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -49,6 +50,7 @@ trait JavaTimeWriters {
     if (year.getValue > 9999) "+" + year else year.toString
 
   implicit val yearConfigWriter = ConfigWriter.toString[Year](yearToString)
+  implicit val javaDurationConfigWriter = ConfigWriter.toDefaultString[JavaDuration]
 }
 
 /**
