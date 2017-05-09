@@ -6,6 +6,7 @@ import pureconfig.gen._
 package object arbitrary {
 
   implicit val arbDuration = Arbitrary(genDuration)
+  implicit val arbJavaDuration = Arbitrary(genJavaDuration)
   implicit val arbFiniteDuration = Arbitrary(genFiniteDuration)
   implicit val arbInstant = Arbitrary(genInstant)
   implicit val arbZoneId = Arbitrary(genZoneId)
