@@ -12,15 +12,16 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 
 package object gen {
-
   val genFiniteDuration: Gen[FiniteDuration] =
     Gen.choose(Long.MinValue + 1, Long.MaxValue)
       .suchThat(_ != 8092048641075763L) // doesn't work, see #182
       .map(Duration.fromNanos)
 
-  val genJavaDuration: Gen[JavaDuration] =
-    Gen.choose(Long.MinValue + 1, Long.MaxValue)
-      .map(JavaDuration.ofNanos)
+  val MaximumNanoseconds = 999999999L
+  val genJavaDuration: Gen[JavaDuration] = for {
+    seconds <- Gen.choose(Long.MinValue + 1, Long.MaxValue)
+    nanoseconds <- Gen.choose(0L, MaximumNanoseconds)
+  } yield JavaDuration.ofSeconds(seconds, nanoseconds)
 
   val genDuration: Gen[Duration] =
     Gen.frequency(
