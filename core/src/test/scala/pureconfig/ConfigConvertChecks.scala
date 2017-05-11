@@ -24,7 +24,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * representations.
    */
   def checkArbitrary[T](implicit cc: ConfigConvert[T], arb: Arbitrary[T], tag: ClassTag[T]): Unit =
-    it should s"read an arbitrary ${tag.runtimeClass.getSimpleName}" in forAll {
+    it should s"read an arbitrary ${tag.runtimeClass.getCanonicalName}" in forAll {
       (t: T) =>
         val result = cc.from(cc.to(t))
         result shouldBe a[Right[_, _]]
@@ -90,7 +90,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    */
   def checkFailure[T, E <: ConfigReaderFailure](values: ConfigValue*)(implicit cr: ConfigReader[T], tag: ClassTag[T], eTag: ClassTag[E]): Unit =
     for (value <- values) {
-      it should s"fail when it tries to read a value of type ${tag.runtimeClass.getSimpleName} " +
+      it should s"fail when it tries to read a value of type ${tag.runtimeClass.getCanonicalName} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
           val result = cr.from(value)
           result shouldBe a[Left[_, _]]

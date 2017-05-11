@@ -3,6 +3,7 @@ package pureconfig
 import java.net.{ URI, URL }
 import java.nio.file.{ Path, Paths }
 import java.time._
+import java.time.{ Duration => JavaDuration }
 import java.util.UUID
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -58,6 +59,9 @@ trait JavaTimeReaders {
 
   implicit val periodConfigReader: ConfigReader[Period] =
     ConfigReader.fromNonEmptyString[Period](catchReadError(Period.parse))
+
+  implicit val javaDurationConfigReader: ConfigReader[JavaDuration] =
+    ConfigReader.fromNonEmptyString[JavaDuration](catchReadError(JavaDuration.parse))
 
   implicit val yearConfigReader: ConfigReader[Year] =
     ConfigReader.fromNonEmptyString[Year](catchReadError(Year.parse))

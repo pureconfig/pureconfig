@@ -3,6 +3,7 @@ package pureconfig
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
+import java.time.{ Duration => JavaDuration }
 import java.util.UUID
 
 import com.typesafe.config._
@@ -21,6 +22,10 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[Duration]
   checkFailure[Duration, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
   checkFailure[Duration, CannotConvert](ConfigValueFactory.fromIterable(List(1).asJava))
+
+  checkArbitrary[JavaDuration]
+  checkFailure[JavaDuration, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
+  checkFailure[JavaDuration, CannotConvert](ConfigValueFactory.fromIterable(List(1).asJava))
 
   checkArbitrary[FiniteDuration]
   checkFailure[FiniteDuration, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
