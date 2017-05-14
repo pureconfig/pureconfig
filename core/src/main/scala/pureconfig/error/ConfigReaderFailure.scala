@@ -217,6 +217,21 @@ final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocat
 }
 
 /**
+ * A failure representing an unexpected empty traversable
+ *
+ * @param typ the type that was attempted to be converted to from an empty string
+ * @param location an optional location of the ConfigValue that raised the
+ *                 failure
+ * @param path an optional path to the value which was an unexpected empty string
+ */
+final case class EmptyTraversableFound(typ: String, location: Option[ConfigValueLocation], path: Option[String]) extends ConfigReaderFailure {
+  def description = s"Empty collection found when trying to convert to $typ."
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = path.map(parentKey + "." + _) orElse Some(parentKey))
+}
+
+/**
  * A failure representing an unexpected non-empty object when using `EnumCoproductHint` to write a config.
  *
  * @param typ the type for which a non-empty object was attempted to be written

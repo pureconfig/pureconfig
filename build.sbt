@@ -10,6 +10,10 @@ lazy val docs = (project in file("docs")).
   settings(settings, publishArtifact := false).
   dependsOn(core)
 
+lazy val cats = (project in file("modules/cats")).
+  settings(settings, publishArtifact := false).
+  dependsOn(core)
+
 lazy val enumeratum = (project in file("modules/enumeratum")).
   settings(settings).
   dependsOn(core)
