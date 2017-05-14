@@ -8,7 +8,8 @@ import com.typesafe.config.ConfigValue
 import pureconfig.{ ConfigReader, ConfigWriter }
 import pureconfig.ConfigReader.{ fromFunction => fromFunctionReader }
 import pureconfig.ConfigWriter.{ fromFunction => fromFunctionWriter }
-import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation, EmptyTraversableFound }
+import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation }
+import pureconfig.module.Cats.EmptyTraversableFound
 
 /**
  * [[ConfigReader]] and [[ConfigWriter]] instances for cats data structures.
