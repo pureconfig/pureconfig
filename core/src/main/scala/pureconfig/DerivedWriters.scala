@@ -9,10 +9,21 @@ import pureconfig.error._
 import shapeless._
 import shapeless.labelled._
 
+trait DerivedWriters extends DerivedWriters1 {
+  implicit def deriveAnyVal[T, U](
+    implicit
+    ev: T <:< AnyVal,
+    unwrapped: Unwrapped.Aux[T, U],
+    writer: ConfigWriter[U]): ConfigWriter[T] =
+    new ConfigWriter[T] {
+      override def to(t: T): ConfigValue = writer.to(unwrapped.unwrap(t))
+    }
+}
+
 /**
  * Trait containing `ConfigWriter` instances for collection, product and coproduct types.
  */
-trait DerivedWriters {
+trait DerivedWriters1 {
 
   private[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] extends ConfigWriter[SubRepr]
 
