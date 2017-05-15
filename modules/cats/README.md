@@ -1,10 +1,10 @@
 # Cats module for PureConfig
 
-Adds support for selected cats classes to PureConfig.
+Adds support for selected [cats](http://typelevel.org/cats/) classes to PureConfig.
 
 ## Add pureconfig-cats to your project
 
-In addition to [core pureconfig](https://github.com/melrief/pureconfig), you'll need:
+In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.7.1"
