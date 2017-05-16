@@ -3,10 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import pureconfig.error.{CannotConvert, ConfigReaderFailure, ConfigValueLocation}
+import pureconfig.error.{ CannotConvert, ConfigReaderFailure, ConfigValueLocation }
 
-import scala.concurrent.duration.Duration.{Inf, MinusInf, Undefined}
-import scala.concurrent.duration.{DAYS, Duration, FiniteDuration, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, SECONDS, TimeUnit}
+import scala.concurrent.duration.Duration.{ Inf, MinusInf }
+import scala.concurrent.duration.{ DAYS, Duration, FiniteDuration, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, SECONDS, TimeUnit }
+import scala.util.Try
 
 /**
  * Utility functions for converting a Duration to a String and vice versa.
@@ -30,8 +31,6 @@ private[pureconfig] object DurationConvert {
   // This is a copy of Duration(str: String) that fixes the bug on precision
   //
 
-  private[this] final val maxPreciseDouble = 4.503599627370495E15
-
   // "ms milli millisecond" -> List("ms", "milli", "millis", "millisecond", "milliseconds")
   private[this] def words(s: String) = (s.trim split "\\s+").toList
   private[this] def expandLabels(labels: String): List[String] = {
@@ -40,46 +39,37 @@ private[pureconfig] object DurationConvert {
   }
 
   private[this] val timeUnitLabels = List(
-    DAYS         -> "d day",
-    HOURS        -> "h hour",
-    MINUTES      -> "min minute",
-    SECONDS      -> "s sec second",
+    DAYS -> "d day",
+    HOURS -> "h hour",
+    MINUTES -> "min minute",
+    SECONDS -> "s sec second",
     MILLISECONDS -> "ms milli millisecond",
     MICROSECONDS -> "µs micro microsecond",
-    NANOSECONDS  -> "ns nano nanosecond"
-  )
+    NANOSECONDS -> "ns nano nanosecond")
 
   // Label => TimeUnit
   protected[pureconfig] val timeUnit: Map[String, TimeUnit] =
-    timeUnitLabels.flatMap{ case (unit, names) => expandLabels(names) map (_ -> unit) }.toMap
+    timeUnitLabels.flatMap { case (unit, names) => expandLabels(names) map (_ -> unit) }.toMap
 
   private[pureconfig] def parseDuration(s: String): Duration = {
     val s1: String = s filterNot (_.isWhitespace)
     s1 match {
       case "Inf" | "PlusInf" | "+Inf" => Inf
-      case "MinusInf" | "-Inf"        => MinusInf
-      case _                          =>
+      case "MinusInf" | "-Inf" => MinusInf
+      case _ =>
         val unitName = s1.reverse.takeWhile(_.isLetter).reverse
         timeUnit get unitName match {
           case Some(unit) =>
             val valueStr = s1 dropRight unitName.length
-            val valueD = java.lang.Double.parseDouble(valueStr)
-            if (valueD >= -maxPreciseDouble && valueD <= maxPreciseDouble) fromNanos(unit.toNanos(1) * valueD)
-            else Duration(java.lang.Long.parseLong(valueStr), unit)
-          case _          => throw new NumberFormatException("format error " + s)
+            // Reading Long first avoids losing precision unnecessarily
+            Try(Duration(java.lang.Long.parseLong(valueStr), unit)).getOrElse {
+              // But if the value is a fractional number, then we have to parse it 
+              // as a Double, which will lose precision and possibly change the units. 
+              Duration(java.lang.Double.parseDouble(valueStr), unit)
+            }
+          case _ => throw new NumberFormatException("format error " + s)
         }
     }
-  }
-
-  def fromNanos(nanos: Double): Duration = {
-    if (nanos.isInfinite)
-      if (nanos > 0) Inf else MinusInf
-    else if (java.lang.Double.isNaN(nanos))
-      Undefined
-    else if (nanos > Long.MaxValue || nanos < Long.MinValue)
-      throw new IllegalArgumentException("trying to construct too large duration with " + nanos + "ns")
-    else
-      new FiniteDuration(nanos.toLong, NANOSECONDS)
   }
 
   ////////////////////////////////////
