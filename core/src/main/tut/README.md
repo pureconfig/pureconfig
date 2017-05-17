@@ -118,6 +118,7 @@ Currently supported types for fields are:
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
+- value classes for which readers and writers of the inner type are used;
 - case classes;
 - sealed families of case classes (ADTs).
 
@@ -132,14 +133,22 @@ import pureconfig.loadConfig
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt
-case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
+final case class Port(value: Int) extends AnyVal
+case class MyClass(
+  boolean: Boolean,
+  port: Port,
+  adt: MyAdt,
+  list: List[Double],
+  map: Map[String, String],
+  option: Option[String])
 ```
 
 Then, load the configuration (in this case from a hard-coded string):
 
 ```tut:book
 val conf = parseString("""{ 
-  "int": 1, 
+  "boolean": true,
+  "port": 8080, 
   "adt": { 
     "type": "adtb", 
     "b": 1 
