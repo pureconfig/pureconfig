@@ -117,6 +117,7 @@ Currently supported types for fields are:
   configured first - see [Configurable converters](docs/configurable-converters.md));
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
+- [`java.util.regex.Pattern`](https://docs.oracle.com/javase/8/docs/api/index.html?java/util/regex/Pattern.html) and [`scala.util.matching.Regex`](https://www.scala-lang.org/files/archive/api/current/scala/util/matching/Regex.html);
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - value classes for which readers and writers of the inner type are used;
 - case classes;

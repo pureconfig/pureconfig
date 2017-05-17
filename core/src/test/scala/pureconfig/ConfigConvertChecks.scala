@@ -5,7 +5,6 @@ import org.scalacheck.Arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.error.ConfigReaderFailure
-
 import scala.reflect.ClassTag
 
 /**
@@ -59,10 +58,20 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * successfully converts the latter into to former. Useful to test specific values
    */
   def checkRead[T](valuesToReprs: (T, ConfigValue)*)(implicit cr: ConfigReader[T], tag: ClassTag[T]): Unit =
+    checkReadF[T, T](valuesToReprs: _*)(identity)(cr, tag)
+
+  /**
+   * For each pair of value of type `T` and `ConfigValue`, check that `ConfigReader[T].from`
+   * successfully converts the latter into to former. Useful to test specific values.
+   * This is similar to `checkRead`, but useful for classes which do not implement structural equality.
+   *
+   * @param f A mapping function applied to the read and passed in values.
+   */
+  def checkReadF[T, U](valuesToReprs: (T, ConfigValue)*)(f: T => U)(implicit cr: ConfigReader[T], tag: ClassTag[T]): Unit =
     for ((value, repr) <- valuesToReprs) {
       it should s"read the value $value of type ${tag.runtimeClass.getSimpleName} " +
         s"from ${repr.render(ConfigRenderOptions.concise())}" in {
-          cr.from(repr) shouldEqual Right(value)
+          cr.from(repr).right.map(f) shouldEqual Right(f(value))
         }
     }
 
