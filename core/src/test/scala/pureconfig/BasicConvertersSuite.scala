@@ -10,6 +10,7 @@ import java.util.regex.Pattern
 import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
+import pureconfig.equality._
 import pureconfig.error.{ CannotConvert, EmptyStringFound }
 import scala.collection.JavaConverters._
 import scala.collection.immutable
@@ -98,9 +99,9 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Option[Int]]
 
-  checkReadF[Pattern, String](Pattern.compile("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))(_.pattern)
+  checkRead[Pattern](Pattern.compile("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
 
-  checkReadF[Regex, String](new Regex("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))(_.pattern.pattern)
+  checkRead[Regex](new Regex("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
 
   checkFailure[Pattern, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
   checkFailure[Regex, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
