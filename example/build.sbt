@@ -5,13 +5,13 @@ version := "1.0"
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.6.0",
+  "com.github.pureconfig" %% "pureconfig" % "0.7.0",
 
   // needed for Scala 2.10
   compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch)
 )
 
-crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
+crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2")
 
 scalacOptions ++= Seq(
   "-deprecation",
