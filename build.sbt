@@ -61,8 +61,8 @@ lazy val formattingSettings = SbtScalariform.scalariformSettings ++ Seq(
   ScalariformKeys.preferences in Test := formattingPreferences)
 
 lazy val settings = Seq(
-  scalaVersion := "2.12.1",
-  crossScalaVersions := Seq("2.10.5", "2.11.8", "2.12.1"),
+  scalaVersion := "2.12.2",
+  crossScalaVersions := Seq("2.10.5", "2.11.11", "2.12.2"),
   scalacOptions ++= allVersionCompilerLintSwitches,
   scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains)),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
