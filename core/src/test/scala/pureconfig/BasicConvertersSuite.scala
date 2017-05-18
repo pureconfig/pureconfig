@@ -71,7 +71,7 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[immutable.HashSet[String]]
 
   checkArbitrary[immutable.List[Float]]
-  check[immutable.List[Int]](
+  checkRead[immutable.List[Int]](
     // order of keys maintained
     (List(2, 3, 1), ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava)),
     (List(4, 2), ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava)))
@@ -88,7 +88,7 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[immutable.Queue[Boolean]]
 
   checkArbitrary[immutable.Set[Double]]
-  check[immutable.Set[Int]](
+  checkRead[immutable.Set[Int]](
     (Set(4, 5, 6), ConfigValueFactory.fromMap(Map("1" -> 4, "2" -> 5, "3" -> 6).asJava)))
 
   checkArbitrary[immutable.Stream[String]]
@@ -99,17 +99,17 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Option[Int]]
 
-  check[URL](
+  checkRead[URL](
     new URL("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
 
-  check[URI](
+  checkRead[URI](
     new URI("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
 
-  check[ConfigList](
+  checkRead[ConfigList](
     ConfigValueFactory.fromIterable(List().asJava) -> ConfigValueFactory.fromIterable(List().asJava),
     ConfigValueFactory.fromIterable(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
 
-  check[ConfigValue](
+  checkRead[ConfigValue](
     ConfigValueFactory.fromAnyRef(4) -> ConfigValueFactory.fromAnyRef(4),
     ConfigValueFactory.fromAnyRef("str") -> ConfigValueFactory.fromAnyRef("str"),
     ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
@@ -117,10 +117,10 @@ class BasicConvertersSuite extends BaseSuite {
   {
     val conf = ConfigFactory.parseString("""{ v1 = 3, v2 = 4 }""".stripMargin)
 
-    check[ConfigObject](
+    checkRead[ConfigObject](
       ConfigValueFactory.fromMap(Map("v1" -> 3, "v2" -> 4).asJava) -> conf.root().asInstanceOf[ConfigValue])
 
-    check[Config](
+    checkRead[Config](
       conf -> conf.root().asInstanceOf[ConfigValue])
   }
 }
