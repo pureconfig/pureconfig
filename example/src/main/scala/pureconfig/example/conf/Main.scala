@@ -10,7 +10,6 @@ import java.nio.file.Path
 
 import pureconfig._
 import pureconfig.example.conf._
-import scala.util.{Failure, Success}
 
 /*
 This is an example of configuration for our directory watcher. The configuration needs:
