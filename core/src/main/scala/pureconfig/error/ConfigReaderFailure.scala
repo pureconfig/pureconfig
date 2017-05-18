@@ -61,7 +61,7 @@ object ConfigValueLocation {
  * ConfigValue. The failure contains an optional location of the ConfigValue
  * that raised the error.
  */
-sealed abstract class ConfigReaderFailure {
+abstract class ConfigReaderFailure {
   /**
    * The optional location of the ConfigReaderFailure.
    */
