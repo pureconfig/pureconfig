@@ -2,6 +2,7 @@ package pureconfig
 
 import java.nio.file.{ Path, Paths }
 import java.time._
+import java.time.{ Duration => JavaDuration }
 
 import org.scalacheck.{ Arbitrary, Gen }
 import pureconfig.configurable.ConfigurableSuite
@@ -11,15 +12,25 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 
 package object gen {
-
   val genFiniteDuration: Gen[FiniteDuration] =
     Gen.choose(Long.MinValue + 1, Long.MaxValue)
       .suchThat(_ != 8092048641075763L) // doesn't work, see #182
       .map(Duration.fromNanos)
 
+  val MaximumNanoseconds = 999999999L
+  val genJavaDuration: Gen[JavaDuration] = for {
+    seconds <- Gen.choose(Long.MinValue + 1, Long.MaxValue)
+    nanoseconds <- Gen.choose(0L, MaximumNanoseconds)
+    // JDK Bug: when seconds % 60 == -1 and nanoseconds > 0, Duration.toString produces
+    // a strange value for the seconds with is -0. followed by 1000_000_000 - nanoseconds
+    // e.g. Duration.ofSeconds(-1, 1).toString returns PT-0.999999999S
+    // Duration.parse loads this value as PT0.999999999S instead of the original value
+    if nanoseconds == 0 || seconds % 60 != -1
+  } yield JavaDuration.ofSeconds(seconds, nanoseconds)
+
   val genDuration: Gen[Duration] =
     Gen.frequency(
-      1 -> Gen.oneOf(Duration.Inf, Duration.MinusInf /*, Duration.Undefined // doesn't work, see #184 */ ),
+      1 -> Gen.oneOf(Duration.Inf, Duration.MinusInf, Duration.Undefined),
       99 -> genFiniteDuration)
 
   val genInstant: Gen[Instant] =

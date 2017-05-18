@@ -2,9 +2,9 @@
 
 A boilerplate-free Scala library for loading configuration files.
 
-[![Build Status](https://travis-ci.org/melrief/pureconfig.svg?branch=master)](https://travis-ci.org/melrief/pureconfig)
-[![Coverage Status](https://coveralls.io/repos/github/melrief/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/melrief/pureconfig?branch=master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.melrief/pureconfig_2.11)
+[![Build Status](https://travis-ci.org/pureconfig/pureconfig.svg?branch=master)](https://travis-ci.org/pureconfig/pureconfig)
+[![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ![](http://i.imgur.com/613aexN.gif)
@@ -29,8 +29,10 @@ A boilerplate-free Scala library for loading configuration files.
 - [Handling missing keys](docs/handling-missing-keys.md)
 - [Example](docs/example.md)
 - [Whence the config files](docs/whence-the-config-files.md)
+- [Support for Duration](docs/support-for-duration.md)
 - [Integrating with other libraries](#integrating-with-other-libraries)
 - [Contribute](#contribute)
+- [FAQ](#faq)
 - [License](#license)
 - [Special thanks](#special-thanks)
 
@@ -70,7 +72,7 @@ Add PureConfig to your library dependencies. For Scala `2.11` and `2.12`:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.6.0"
+  "com.github.pureconfig" %% "pureconfig" % "0.7.0"
 )
 ```
 
@@ -78,7 +80,7 @@ For Scala `2.10` you need also the Macro Paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.melrief" %% "pureconfig" % "0.6.0",
+  "com.github.pureconfig" %% "pureconfig" % "0.7.0",
   compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch)
 )
 ```
@@ -112,10 +114,11 @@ Currently supported types for fields are:
 - `Option` for optional values, i.e. values that can or cannot be in the configuration;
 - `Map` with `String` keys and any value type that is in this list;
 - everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
-  configured first - see [Configurable converters](#configurable-converters));
+  configured first - see [Configurable converters](docs/configurable-converters.md));
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
+- value classes for which readers and writers of the inner type are used;
 - case classes;
 - sealed families of case classes (ADTs).
 
@@ -130,14 +133,22 @@ import pureconfig.loadConfig
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt
-case class MyClass(int: Int, adt: MyAdt, list: List[Double], map: Map[String, String], option: Option[String])
+final case class Port(value: Int) extends AnyVal
+case class MyClass(
+  boolean: Boolean,
+  port: Port,
+  adt: MyAdt,
+  list: List[Double],
+  map: Map[String, String],
+  option: Option[String])
 ```
 
 Then, load the configuration (in this case from a hard-coded string):
 
 ```tut:book
 val conf = parseString("""{ 
-  "int": 1, 
+  "boolean": true,
+  "port": 8080, 
   "adt": { 
     "type": "adtb", 
     "b": 1 
@@ -168,6 +179,25 @@ A non-comprehensive list of other libraries which have integrated with PureConfi
 
 - `refined-pureconfig` allows PureConfig to play nicely with [`refined`](https://github.com/fthomas/refined/)'s type refinements. Viktor Lövgren's blog post gleefully explains how [PureConfig and refined work together](https://blog.vlovgr.se/posts/2016-12-24-refined-configuration.html).
 
+## FAQ
+
+### How can I use PureConfig with Spark 2.1.0 (problematic Shapeless dependency)?
+
+Apache Spark (specifically version 2.1.0) has a transitive dependency
+on [Shapeless](https://github.com/milessabin/shapeless) 2.0.0. This version is
+too old to be used by PureConfig, making your Spark project fail when using
+`spark-submit`.
+
+If you are using the [sbt-assembly](https://github.com/sbt/sbt-assembly) plugin
+to create your JARs you
+can [shade this dependency](https://github.com/sbt/sbt-assembly#shading) by
+adding
+
+```scala
+assemblyShadeRules in assembly := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
+```
+
+to your `assembly.sbt` file.
 
 ## Contribute
 

@@ -3,6 +3,7 @@ package pureconfig
 import java.net.{ URI, URL }
 import java.nio.file.{ Path, Paths }
 import java.time._
+import java.time.{ Duration => JavaDuration }
 import java.util.UUID
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -59,12 +60,16 @@ trait JavaTimeReaders {
   implicit val periodConfigReader: ConfigReader[Period] =
     ConfigReader.fromNonEmptyString[Period](catchReadError(Period.parse))
 
+  implicit val javaDurationConfigReader: ConfigReader[JavaDuration] =
+    ConfigReader.fromNonEmptyString[JavaDuration](catchReadError(JavaDuration.parse))
+
   implicit val yearConfigReader: ConfigReader[Year] =
     ConfigReader.fromNonEmptyString[Year](catchReadError(Year.parse))
 }
 
 /**
- * Trait containing `ConfigReader` instances for [[Duration]] and [[FiniteDuration]].
+ * Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
+ * [[scala.concurrent.duration.FiniteDuration]].
  */
 trait DurationReaders {
 
@@ -90,14 +95,14 @@ trait TypesafeConfigReaders {
   implicit val configConfigReader: ConfigReader[Config] = new ConfigReader[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {
       case co: ConfigObject => Right(co.toConfig)
-      case other => fail(WrongType(other.valueType().toString, "ConfigObject", ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(config), None))
     }
   }
 
   implicit val configObjectConfigReader: ConfigReader[ConfigObject] = new ConfigReader[ConfigObject] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigObject] = config match {
       case c: ConfigObject => Right(c)
-      case other => fail(WrongType(other.valueType().toString, "ConfigObject", ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(config), None))
     }
   }
 
@@ -108,7 +113,7 @@ trait TypesafeConfigReaders {
   implicit val configListConfigReader: ConfigReader[ConfigList] = new ConfigReader[ConfigList] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigList] = config match {
       case c: ConfigList => Right(c)
-      case other => fail(WrongType(other.valueType().toString, "ConfigList", ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(config), None))
     }
   }
 }

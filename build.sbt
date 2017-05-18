@@ -7,6 +7,10 @@ lazy val core = (project in file("core")).
   )
 
 lazy val docs = (project in file("docs")).
+  settings(settings, publishArtifact := false).
+  dependsOn(core)
+
+lazy val cats = (project in file("modules/cats")).
   settings(settings).
   dependsOn(core)
 
@@ -78,4 +82,5 @@ lazy val settings = Seq(
     val required = "1.8"
     val current  = sys.props("java.specification.version")
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
-  }) ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)
+  },
+  autoAPIMappings := true) ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)

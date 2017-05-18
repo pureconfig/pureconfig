@@ -1,6 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigObject, ConfigValue }
+import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig.error._
 import pureconfig.syntax._
 
@@ -59,7 +59,7 @@ trait CoproductHint[T] {
 class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
 
   /**
-   * Returns the field name for a class or coproduct option name.
+   * Returns the field value for a class or coproduct option name.
    *
    * @param name the name of the class or coproduct option
    * @return the field value associated with the given class or coproduct option name.
@@ -72,11 +72,11 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
         case Some(fv) => fv.unwrapped match {
           case v: String if v == fieldValue(name) => Right(Some(cv))
           case _: String => Right(None)
-          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType.toString, expectedType = "String", ConfigValueLocation(fv), Some(key))))
+          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType, Set(ConfigValueType.STRING), ConfigValueLocation(fv), Some(key))))
         }
         case None => Left(ConfigReaderFailures(KeyNotFound(key, ConfigValueLocation(co))))
       }
-    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType.toString, expectedType = "ConfigObject", ConfigValueLocation(cv), None)))
+    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
   }
 
   def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
@@ -85,7 +85,38 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
       else Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
 
     case _ =>
-      Left(ConfigReaderFailures(WrongType(cv.valueType.toString, "ConfigObject", ConfigValueLocation(cv), None)))
+      Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
+  }
+
+  def tryNextOnFail(name: String) = false
+}
+
+/**
+ * Hint applicable to sealed families of case objects where objects are written and read as strings with their type
+ * names. Trying to read or write values that are not case objects results in failure.
+ *
+ * @tparam T the type of the coproduct or sealed family for which this hint applies
+ */
+class EnumCoproductHint[T] extends CoproductHint[T] {
+
+  /**
+   * Returns the field value for a class or coproduct option name.
+   *
+   * @param name the name of the class or coproduct option
+   * @return the field value associated with the given class or coproduct option name.
+   */
+  protected def fieldValue(name: String): String = name.toLowerCase
+
+  def from(cv: ConfigValue, name: String) = cv.valueType match {
+    case ConfigValueType.STRING if cv.unwrapped.toString == fieldValue(name) => Right(Some(Map.empty[String, String].toConfig))
+    case ConfigValueType.STRING => Right(None)
+    case typ => Left(ConfigReaderFailures(WrongType(typ, Set(ConfigValueType.STRING), ConfigValueLocation(cv), None)))
+  }
+
+  def to(cv: ConfigValue, name: String) = cv match {
+    case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
+    case _: ConfigObject => Left(ConfigReaderFailures(NonEmptyObjectFound(name, ConfigValueLocation(cv), None)))
+    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
   }
 
   def tryNextOnFail(name: String) = false
