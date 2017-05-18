@@ -21,6 +21,11 @@ package object gen {
   val genJavaDuration: Gen[JavaDuration] = for {
     seconds <- Gen.choose(Long.MinValue + 1, Long.MaxValue)
     nanoseconds <- Gen.choose(0L, MaximumNanoseconds)
+    // JDK Bug: when seconds % 60 == -1 and nanoseconds > 0, Duration.toString produces
+    // a strange value for the seconds with is -0. followed by 1000_000_000 - nanoseconds
+    // e.g. Duration.ofSeconds(-1, 1).toString returns PT-0.999999999S
+    // Duration.parse loads this value as PT0.999999999S instead of the original value
+    if nanoseconds == 0 || seconds % 60 != -1
   } yield JavaDuration.ofSeconds(seconds, nanoseconds)
 
   val genDuration: Gen[Duration] =
