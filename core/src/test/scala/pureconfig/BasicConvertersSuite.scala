@@ -19,6 +19,8 @@ import scala.util.matching.Regex
 
 class BasicConvertersSuite extends BaseSuite {
 
+  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+
   behavior of "ConfigConvert"
 
   checkArbitrary[Duration]
