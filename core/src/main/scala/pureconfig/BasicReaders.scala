@@ -106,7 +106,7 @@ trait DurationReaders {
     val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, FiniteDuration] = { string => location =>
       DurationConvert.fromString(string)(location).right.flatMap {
         case d: FiniteDuration => Right(d)
-        case _ => Left(CannotConvert(string, "FiniteDuration", s"Couldn't parse '$string' into a FiniteDuration because it's infinite.", location, None))
+        case _ => Left(CannotConvert(string, "FiniteDuration", s"Couldn't parse '$string' into a FiniteDuration because it's infinite.", location, ""))
       }
     }
     ConfigReader.fromNonEmptyString[FiniteDuration](fromString)
@@ -121,14 +121,14 @@ trait TypesafeConfigReaders {
   implicit val configConfigReader: ConfigReader[Config] = new ConfigReader[Config] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Config] = config match {
       case co: ConfigObject => Right(co.toConfig)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(config), ""))
     }
   }
 
   implicit val configObjectConfigReader: ConfigReader[ConfigObject] = new ConfigReader[ConfigObject] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigObject] = config match {
       case c: ConfigObject => Right(c)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(config), ""))
     }
   }
 
@@ -139,7 +139,7 @@ trait TypesafeConfigReaders {
   implicit val configListConfigReader: ConfigReader[ConfigList] = new ConfigReader[ConfigList] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, ConfigList] = config match {
       case c: ConfigList => Right(c)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(config), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(config), ""))
     }
   }
 }

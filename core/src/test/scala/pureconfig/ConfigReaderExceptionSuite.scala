@@ -52,7 +52,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception1.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  in the configuration:
+          |  at the root:
           |    - Expected type OBJECT. Found NUMBER instead.
           |""".stripMargin
 
@@ -164,8 +164,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  in the configuration:
-          |    - (file:${workingDir}${file}:2) Unable to parse the configuration.
+          |  - (file:${workingDir}${file}:2) Unable to parse the configuration.
           |""".stripMargin
   }
 }

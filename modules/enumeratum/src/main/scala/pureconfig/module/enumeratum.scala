@@ -32,7 +32,7 @@ package object enumeratum {
     viaNonEmptyString[A](
       s => location => ensureOneChar(s) match {
         case Right(v) => Right(enum.withValue(v))
-        case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg, location, None))
+        case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg, location, ""))
       },
       _.value.toString)
 

@@ -26,7 +26,7 @@ class CoproductHintSuite extends BaseSuite {
     it should "fail to read values that are not objects when using a FieldCoproductHint" in {
       val conf = ConfigValueFactory.fromAnyRef("Dog")
       ConfigConvert[AnimalConfig].from(conf) shouldEqual Left(ConfigReaderFailures(
-        WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT), None, None)))
+        WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT), None, "")))
     }
 
     it should "throw an exception when the hint field conflicts with a field of an option when using a FieldCoproductHint" in {
@@ -66,12 +66,12 @@ class CoproductHintSuite extends BaseSuite {
     it should "fail to read values that are not case objects when using an EnumCoproductHint" in {
       val conf = ConfigFactory.parseString("{ which-animal = Dog, age = 2 }")
       ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Left(ConfigReaderFailures(
-        WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING), None, None)))
+        WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING), None, "")))
     }
 
     it should "fail to write values that are not case objects when using an EnumCoproductHint" in {
       val ex = the[ConfigReaderException[_]] thrownBy ConfigConvert[AnimalConfig].to(DogConfig(2))
-      ex.failures.toList shouldEqual List(NonEmptyObjectFound("DogConfig", None, None))
+      ex.failures.toList shouldEqual List(NonEmptyObjectFound("DogConfig", None, ""))
     }
   }
 
