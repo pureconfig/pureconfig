@@ -5,7 +5,9 @@ package pureconfig
 
 import pureconfig.error.{ CannotConvert, ConfigReaderFailure, ConfigValueLocation }
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.Duration.{ Inf, MinusInf }
+import scala.concurrent.duration.{ DAYS, Duration, FiniteDuration, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, SECONDS, TimeUnit }
+import scala.util.Try
 
 /**
  * Utility functions for converting a Duration to a String and vice versa.
@@ -17,13 +19,60 @@ private[pureconfig] object DurationConvert {
   val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, Duration] = { string => location =>
     if (string == UndefinedDuration) Right(Duration.Undefined)
     else try {
-      Right(Duration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
+      Right(parseDuration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
     } catch {
       case ex: NumberFormatException =>
         val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
         Left(CannotConvert(string, "Duration", err, location, None))
     }
   }
+
+  ////////////////////////////////////
+  // This is a copy of Duration(str: String) that fixes the bug on precision
+  //
+
+  // "ms milli millisecond" -> List("ms", "milli", "millis", "millisecond", "milliseconds")
+  private[this] def words(s: String) = (s.trim split "\\s+").toList
+  private[this] def expandLabels(labels: String): List[String] = {
+    val hd :: rest = words(labels)
+    hd :: rest.flatMap(s => List(s, s + "s"))
+  }
+
+  private[this] val timeUnitLabels = List(
+    DAYS -> "d day",
+    HOURS -> "h hour",
+    MINUTES -> "min minute",
+    SECONDS -> "s sec second",
+    MILLISECONDS -> "ms milli millisecond",
+    MICROSECONDS -> "µs micro microsecond",
+    NANOSECONDS -> "ns nano nanosecond")
+
+  // Label => TimeUnit
+  protected[pureconfig] val timeUnit: Map[String, TimeUnit] =
+    timeUnitLabels.flatMap { case (unit, names) => expandLabels(names) map (_ -> unit) }.toMap
+
+  private[pureconfig] def parseDuration(s: String): Duration = {
+    val s1: String = s filterNot (_.isWhitespace)
+    s1 match {
+      case "Inf" | "PlusInf" | "+Inf" => Inf
+      case "MinusInf" | "-Inf" => MinusInf
+      case _ =>
+        val unitName = s1.reverse.takeWhile(_.isLetter).reverse
+        timeUnit get unitName match {
+          case Some(unit) =>
+            val valueStr = s1 dropRight unitName.length
+            // Reading Long first avoids losing precision unnecessarily
+            Try(Duration(java.lang.Long.parseLong(valueStr), unit)).getOrElse {
+              // But if the value is a fractional number, then we have to parse it 
+              // as a Double, which will lose precision and possibly change the units. 
+              Duration(java.lang.Double.parseDouble(valueStr), unit)
+            }
+          case _ => throw new NumberFormatException("format error " + s)
+        }
+    }
+  }
+
+  ////////////////////////////////////
 
   private val zeroRegex = "\\s*[+-]?0+\\s*$".r
   private val fauxMuRegex = "([0-9])(\\s*)us(\\s*)$".r
