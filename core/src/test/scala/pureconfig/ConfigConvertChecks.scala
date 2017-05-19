@@ -27,7 +27,6 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
     it should s"read an arbitrary ${tag.runtimeClass.getCanonicalName}" in forAll {
       (t: T) =>
         val result = cc.from(cc.to(t))
-        result shouldBe a[Right[_, _]]
         result.right.value shouldEqual t
     }
 
@@ -93,9 +92,8 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
       it should s"fail when it tries to read a value of type ${tag.runtimeClass.getCanonicalName} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
           val result = cr.from(value)
-          result shouldBe a[Left[_, _]]
-          result.left.get.toList should have size 1
-          result.left.get.head shouldBe a[E]
+          result.left.value.toList should have size 1
+          result.left.value.head shouldBe a[E]
         }
     }
 }
