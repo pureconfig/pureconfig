@@ -50,8 +50,8 @@ trait UriAndPathReaders {
  */
 trait RegexReaders {
 
-  implicit val patternReader = ConfigReader.fromNonEmptyString[Pattern](catchReadError(Pattern.compile))
-  implicit val regexReader = ConfigReader.fromNonEmptyString[Regex](catchReadError(new Regex(_)))
+  implicit val patternReader = ConfigReader.fromString[Pattern](catchReadError(Pattern.compile))
+  implicit val regexReader = ConfigReader.fromString[Regex](catchReadError(new Regex(_)))
 }
 
 /**
