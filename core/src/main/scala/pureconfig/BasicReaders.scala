@@ -1,12 +1,15 @@
 package pureconfig
 
+import java.io.File
 import java.net.{ URI, URL }
 import java.nio.file.{ Path, Paths }
 import java.time._
 import java.time.{ Duration => JavaDuration }
 import java.util.UUID
+import java.util.regex.Pattern
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.util.matching.Regex
 
 import com.typesafe.config._
 import pureconfig.ConvertHelpers._
@@ -40,7 +43,17 @@ trait UriAndPathReaders {
   implicit val urlConfigReader = ConfigReader.fromNonEmptyString[URL](catchReadError(new URL(_)))
   implicit val uuidConfigReader = ConfigReader.fromNonEmptyString[UUID](catchReadError(UUID.fromString))
   implicit val pathConfigReader = ConfigReader.fromString[Path](catchReadError(Paths.get(_)))
+  implicit val fileConfigReader = ConfigReader.fromString[File](catchReadError(new File(_)))
   implicit val uriConfigReader = ConfigReader.fromString[URI](catchReadError(new URI(_)))
+}
+
+/**
+ * Trait containing `ConfigReader` instances for classes related to regular expressions.
+ */
+trait RegexReaders {
+
+  implicit val patternReader = ConfigReader.fromString[Pattern](catchReadError(Pattern.compile))
+  implicit val regexReader = ConfigReader.fromString[Regex](catchReadError(new Regex(_)))
 }
 
 /**
@@ -125,6 +138,7 @@ trait TypesafeConfigReaders {
 trait BasicReaders
   extends PrimitiveReaders
   with UriAndPathReaders
+  with RegexReaders
   with JavaTimeReaders
   with DurationReaders
   with TypesafeConfigReaders
