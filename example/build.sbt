@@ -2,7 +2,7 @@ name := "example"
 
 version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.2"
 
 libraryDependencies ++= Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.7.0",
