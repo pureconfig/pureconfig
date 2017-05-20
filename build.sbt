@@ -1,6 +1,8 @@
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
 
+enablePlugins(CrossPerProjectPlugin)
+
 lazy val core = (project in file("core")).
   settings(settings,
     tutTargetDirectory := file(".")
@@ -33,6 +35,12 @@ lazy val squants = (project in file("modules/squants")).
 
 lazy val javax = (project in file("modules/javax")).
   settings(settings).
+  dependsOn(core)
+
+// akka 2.4 isn't published for Scala 2.10
+lazy val akka = (project in file("modules/akka")).
+  settings(settings).
+  settings(crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }).
   dependsOn(core)
 
 lazy val allVersionCompilerLintSwitches = Seq(
