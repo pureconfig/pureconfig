@@ -1,6 +1,8 @@
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
 
+enablePlugins(CrossPerProjectPlugin)
+
 lazy val core = (project in file("core")).
   settings(settings,
     tutTargetDirectory := file(".")
