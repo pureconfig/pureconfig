@@ -2,10 +2,10 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigRenderOptions, ConfigValue, ConfigValueFactory }
 import org.scalacheck.Arbitrary
+import org.scalactic.Equality
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import pureconfig.error.ConfigReaderFailure
-
 import scala.reflect.ClassTag
 
 /**
@@ -23,11 +23,10 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * because, for instance, multiple representation of `t: T` are possible. Use [[checkRead()]] for those
    * representations.
    */
-  def checkArbitrary[T](implicit cc: ConfigConvert[T], arb: Arbitrary[T], tag: ClassTag[T]): Unit =
+  def checkArbitrary[T](implicit cc: ConfigConvert[T], arb: Arbitrary[T], tag: ClassTag[T], equality: Equality[T]): Unit =
     it should s"read an arbitrary ${tag.runtimeClass.getCanonicalName}" in forAll {
       (t: T) =>
         val result = cc.from(cc.to(t))
-        result shouldBe a[Right[_, _]]
         result.right.value shouldEqual t
     }
 
@@ -49,7 +48,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * @param cw the `ConfigConvert` used to write a value to a `ConfigValue`. This is the dummy instance used to test `cr`
    * @param arb the `Arbitrary` used to generate values to write a `ConfigValue` via `cw`
    */
-  def checkArbitrary2[T1, T2](f: T2 => T1)(implicit cr: ConfigConvert[T1], cw: ConfigConvert[T2], arb: Arbitrary[T2], tag1: ClassTag[T1], tag2: ClassTag[T2]): Unit =
+  def checkArbitrary2[T1, T2](f: T2 => T1)(implicit cr: ConfigConvert[T1], cw: ConfigConvert[T2], arb: Arbitrary[T2], tag1: ClassTag[T1], tag2: ClassTag[T2], equality: Equality[T1]): Unit =
     it should s"read a ${tag1.runtimeClass.getSimpleName} from an arbitrary ${tag2.runtimeClass.getSimpleName}" in forAll {
       (t2: T2) => cr.from(cw.to(t2)).right.value shouldEqual f(t2)
     }
@@ -58,23 +57,23 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * For each pair of value of type `T` and `ConfigValue`, check that `ConfigReader[T].from`
    * successfully converts the latter into to former. Useful to test specific values
    */
-  def checkRead[T](valuesToReprs: (T, ConfigValue)*)(implicit cr: ConfigReader[T], tag: ClassTag[T]): Unit =
+  def checkRead[T](valuesToReprs: (T, ConfigValue)*)(implicit cr: ConfigReader[T], tag: ClassTag[T], equality: Equality[T]): Unit =
     for ((value, repr) <- valuesToReprs) {
       it should s"read the value $value of type ${tag.runtimeClass.getSimpleName} " +
         s"from ${repr.render(ConfigRenderOptions.concise())}" in {
-          cr.from(repr) shouldEqual Right(value)
+          cr.from(repr).right.value shouldEqual value
         }
     }
 
   /** Similar to [[checkRead()]] but work on ConfigValues of type String */
-  def checkReadString[T](valuesToStr: (T, String)*)(implicit cr: ConfigReader[T], tag: ClassTag[T]): Unit =
-    checkRead[T](valuesToStr.map { case (t, s) => t -> ConfigValueFactory.fromAnyRef(s) }: _*)(cr, tag)
+  def checkReadString[T](valuesToStr: (T, String)*)(implicit cr: ConfigReader[T], tag: ClassTag[T], equality: Equality[T]): Unit =
+    checkRead[T](valuesToStr.map { case (t, s) => t -> ConfigValueFactory.fromAnyRef(s) }: _*)(cr, tag, equality)
 
   /**
    * For each pair of value of type `T` and `ConfigValue`, check that `ConfigWriter[T].to`
    * successfully converts the former into the latter. Useful to test specific values
    */
-  def checkWrite[T](valuesToReprs: (T, ConfigValue)*)(implicit cw: ConfigWriter[T], tag: ClassTag[T]): Unit =
+  def checkWrite[T](valuesToReprs: (T, ConfigValue)*)(implicit cw: ConfigWriter[T], tag: ClassTag[T], equality: Equality[T]): Unit =
     for ((value, repr) <- valuesToReprs) {
       it should s"write the value $value of type ${tag.runtimeClass.getSimpleName} " +
         s"to ${repr.render(ConfigRenderOptions.concise())}" in {
@@ -93,9 +92,8 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
       it should s"fail when it tries to read a value of type ${tag.runtimeClass.getCanonicalName} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
           val result = cr.from(value)
-          result shouldBe a[Left[_, _]]
-          result.left.get.toList should have size 1
-          result.left.get.head shouldBe a[E]
+          result.left.value.toList should have size 1
+          result.left.value.head shouldBe a[E]
         }
     }
 }

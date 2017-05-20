@@ -6,14 +6,17 @@ import java.nio.file.Path
 import java.time._
 import java.time.{ Duration => JavaDuration }
 import java.util.UUID
+import java.util.regex.Pattern
 
 import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
+import pureconfig.equality._
 import pureconfig.error.{ CannotConvert, EmptyStringFound }
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.util.matching.Regex
 
 class BasicConvertersSuite extends BaseSuite {
 
@@ -100,6 +103,13 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[immutable.Vector[Short]]
 
   checkArbitrary[Option[Int]]
+
+  checkRead[Pattern](Pattern.compile("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
+
+  checkRead[Regex](new Regex("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
+
+  checkFailure[Pattern, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
+  checkFailure[Regex, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
 
   checkRead[URL](
     new URL("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
