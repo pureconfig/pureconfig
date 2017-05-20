@@ -6,8 +6,10 @@ import java.nio.file.Path
 import java.time._
 import java.time.{ Duration => JavaDuration }
 import java.util.UUID
+import java.util.regex.Pattern
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.util.matching.Regex
 
 import com.typesafe.config._
 
@@ -35,6 +37,15 @@ trait UriAndPathWriters {
   implicit val pathConfigWriter = ConfigWriter.toDefaultString[Path]
   implicit val fileConfigWriter = ConfigWriter.toDefaultString[File]
   implicit val uriConfigWriter = ConfigWriter.toDefaultString[URI]
+}
+
+/**
+ * Trait containing `ConfigWriter` instances for classes related to regular expressions.
+ */
+trait RegexWriters {
+
+  implicit val patternWriter = ConfigWriter.toString[Pattern](_.pattern)
+  implicit val regexWriter = ConfigWriter.toString[Regex](_.pattern.pattern) // Regex.regex isn't supported until 2.11
 }
 
 /**
@@ -94,6 +105,7 @@ trait TypesafeConfigWriters {
 trait BasicWriters
   extends PrimitiveWriters
   with UriAndPathWriters
+  with RegexWriters
   with JavaTimeWriters
   with DurationWriters
   with TypesafeConfigWriters
