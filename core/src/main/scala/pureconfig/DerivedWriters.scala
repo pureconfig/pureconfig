@@ -1,7 +1,6 @@
 package pureconfig
 
 import scala.collection.JavaConverters._
-import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 import com.typesafe.config._
@@ -95,8 +94,7 @@ trait DerivedWriters1 {
 
   implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](
     implicit
-    configConvert: Lazy[ConfigWriter[T]],
-    cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigWriter[F[T]] {
+    configConvert: Lazy[ConfigWriter[T]]) = new ConfigWriter[F[T]] {
 
     override def to(ts: F[T]): ConfigValue = {
       ConfigValueFactory.fromIterable(ts.toList.map(configConvert.value.to).asJava)

@@ -6,16 +6,11 @@
  */
 package pureconfig.example
 
-import java.nio.file.{Path, Paths}
-
 import pureconfig.ConfigConvert
-import pureconfig.ConfigConvert.fromStringReaderTry
-
-import scala.util.Try
-
+import pureconfig.ConfigConvert.viaStringTry
 
 package object conf {
 
   // Email doesn't have a Convert instance, we are going to create it here
-  implicit val emailConvert: ConfigConvert[Email] = fromStringReaderTry[Email](Email.fromString)
+  implicit val emailConvert: ConfigConvert[Email] = viaStringTry[Email](Email.fromString, _.toString)
 }

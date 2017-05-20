@@ -49,14 +49,28 @@ lazy val allVersionCompilerLintSwitches = Seq(
   "-feature",
   "-unchecked",
   "-Xfatal-warnings",
-  "-Xlint",
   "-Yno-adapted-args",
   "-Ywarn-dead-code"
 )
 
-lazy val newerCompilerLintSwitches = Seq(
+lazy val scala211Flags = Seq(
   "-Ywarn-unused-import", // Not available in 2.10
-  "-Ywarn-numeric-widen" // In 2.10 this produces a some strange spurious error
+  "-Ywarn-numeric-widen" // In 2.10 this produces a strange spurious error
+)
+
+// Scala 2.12.2 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
+lazy val scala212Flags = Seq(
+  "-Xlint:-unused,_",
+  "-Ywarn-unused:-params"
+)
+
+lazy val xlint = Seq(
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 12)) => scala212Flags
+      case _ => Seq("-Xlint")
+    }
+  }
 )
 
 lazy val formattingPreferences = FormattingPreferences()
@@ -69,20 +83,20 @@ lazy val formattingSettings = SbtScalariform.scalariformSettings ++ Seq(
   ScalariformKeys.preferences in Test := formattingPreferences)
 
 lazy val settings = Seq(
-  scalaVersion := "2.12.1",
-  crossScalaVersions := Seq("2.10.5", "2.11.8", "2.12.1"),
+  scalaVersion := "2.12.2",
+  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2"),
   scalacOptions ++= allVersionCompilerLintSwitches,
   scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains)),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)){
-    case Some((2, scalaMajor)) if scalaMajor >= 11 => newerCompilerLintSwitches
+    case Some((2, scalaMajor)) if scalaMajor >= 11 => scala211Flags
   }.toList.flatten,
   // use sbt <module_name>/test:console to run an ammonite console
-  libraryDependencies += "com.lihaoyi" % "ammonite" % "0.8.2" % "test" cross CrossVersion.patch,
+  libraryDependencies += "com.lihaoyi" % "ammonite" % "0.8.5" % "test" cross CrossVersion.patch,
   initialCommands in (Test, console) := """ammonite.Main().run()""",
   initialize := {
     val required = "1.8"
     val current  = sys.props("java.specification.version")
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
   },
-  autoAPIMappings := true) ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)
+  autoAPIMappings := true) ++ xlint ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)
