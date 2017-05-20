@@ -6,6 +6,7 @@
   - New mechanism to read and write [value classes](http://docs.scala-lang.org/overviews/core/value-classes.html).
     The readers and writers of the inner type are used instead of the ones for products.
   - `ConfigReader` and `ConfigWriter` instances for `Pattern` and `Regex`.
+  - `ConfigReader` and `ConfigWriter` for `java.io.File`
 - Bug fixes
   - `Duration.Undefined` is correctly handled when reading and writing configurations. [[#184](https://github.com/melrief/pureconfig/issues/184)]
 

@@ -1,5 +1,6 @@
 package pureconfig
 
+import java.io.File
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
@@ -69,6 +70,8 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[UUID]
 
   checkArbitrary[Path]
+
+  checkArbitrary[File]
 
   checkArbitrary[immutable.HashSet[String]]
 
