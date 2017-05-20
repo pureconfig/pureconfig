@@ -50,7 +50,7 @@ lazy val scala211Flags = Seq(
   "-Ywarn-numeric-widen" // In 2.10 this produces a strange spurious error
 )
 
-// Scala 2.12.2 has excessive warnings about unused implicits
+// Scala 2.12.2 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
 lazy val scala212Flags = Seq(
   "-Xlint:-unused,_",
   "-Ywarn-unused:-params"
