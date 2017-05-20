@@ -73,6 +73,12 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[File]
 
+  checkRead[DayOfWeek]((DayOfWeek.MONDAY, ConfigValueFactory.fromAnyRef("MONDAY")))
+  checkRead[Month]((Month.JULY, ConfigValueFactory.fromAnyRef("JULY")))
+  checkFailure[DayOfWeek, CannotConvert](
+    ConfigValueFactory.fromAnyRef("thursday"), // lowercase string vs upper case enum
+    ConfigValueFactory.fromAnyRef("this is not a day")) // no such value
+
   checkArbitrary[immutable.HashSet[String]]
 
   checkArbitrary[immutable.List[Float]]
