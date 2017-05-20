@@ -1,5 +1,6 @@
 package pureconfig
 
+import java.io.File
 import java.net.{ URI, URL }
 import java.nio.file.{ Path, Paths }
 import java.time._
@@ -40,6 +41,7 @@ trait UriAndPathReaders {
   implicit val urlConfigReader = ConfigReader.fromNonEmptyString[URL](catchReadError(new URL(_)))
   implicit val uuidConfigReader = ConfigReader.fromNonEmptyString[UUID](catchReadError(UUID.fromString))
   implicit val pathConfigReader = ConfigReader.fromString[Path](catchReadError(Paths.get(_)))
+  implicit val fileConfigReader = ConfigReader.fromString[File](catchReadError(new File(_)))
   implicit val uriConfigReader = ConfigReader.fromString[URI](catchReadError(new URI(_)))
 }
 
