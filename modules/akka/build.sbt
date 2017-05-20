@@ -12,7 +12,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.17",
+  "com.typesafe.akka" %% "akka-actor" % "2.4.18",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest
 )
