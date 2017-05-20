@@ -1,5 +1,6 @@
 package pureconfig
 
+import java.io.File
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
@@ -10,7 +11,6 @@ import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.error.{ CannotConvert, EmptyStringFound }
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -67,6 +67,8 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[UUID]
 
   checkArbitrary[Path]
+
+  checkArbitrary[File]
 
   checkArbitrary[immutable.HashSet[String]]
 

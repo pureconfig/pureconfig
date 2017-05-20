@@ -1,5 +1,6 @@
 package pureconfig
 
+import java.io.File
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
@@ -32,6 +33,7 @@ trait UriAndPathWriters {
   implicit val urlConfigWriter = ConfigWriter.toDefaultString[URL]
   implicit val uuidConfigWriter = ConfigWriter.toDefaultString[UUID]
   implicit val pathConfigWriter = ConfigWriter.toDefaultString[Path]
+  implicit val fileConfigWriter = ConfigWriter.toDefaultString[File]
   implicit val uriConfigWriter = ConfigWriter.toDefaultString[URI]
 }
 
