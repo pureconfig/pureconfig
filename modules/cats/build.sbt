@@ -13,6 +13,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "0.9.0",
+  "org.typelevel" %% "cats-laws" % "0.9.0" % "test",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest,
   Dependencies.scalaCheck
