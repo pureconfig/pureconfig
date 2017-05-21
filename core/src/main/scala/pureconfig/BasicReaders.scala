@@ -9,6 +9,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.reflect.ClassTag
 import scala.util.matching.Regex
 
 import com.typesafe.config._
@@ -33,6 +34,18 @@ trait PrimitiveReaders {
   implicit val intConfigReader = ConfigReader.fromNonEmptyString[Int](catchReadError(_.toInt))
   implicit val longConfigReader = ConfigReader.fromNonEmptyString[Long](catchReadError(_.toLong))
   implicit val shortConfigReader = ConfigReader.fromNonEmptyString[Short](catchReadError(_.toShort))
+}
+
+/**
+ * Trait containing `ConfigReader` instance for Java Enums.
+ */
+trait JavaEnumReader {
+
+  implicit def javaEnumReader[T <: Enum[T]](implicit tag: ClassTag[T]): ConfigReader[T] =
+    ConfigReader.fromString(catchReadError(s => {
+      val enumClass = tag.runtimeClass.asInstanceOf[Class[T]]
+      Enum.valueOf(enumClass, s)
+    }))
 }
 
 /**
@@ -137,6 +150,7 @@ trait TypesafeConfigReaders {
  */
 trait BasicReaders
   extends PrimitiveReaders
+  with JavaEnumReader
   with UriAndPathReaders
   with RegexReaders
   with JavaTimeReaders
