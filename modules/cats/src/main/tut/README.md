@@ -13,6 +13,8 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.7.1"
 
 ## Example
 
+### Reading cats data structures from a config
+
 To load a `NonEmptyList[Int]` into a configuration, we need a class to hold our configuration:
 
 ```tut:silent
@@ -40,6 +42,8 @@ then load the config:
 ```tut:book
 loadConfig[MyVecConfig](conf)
 ```
+
+### Using cats type class instances for readers and writers
 
 In order to to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
 operations provided by `cats`, we need some extra imports:
