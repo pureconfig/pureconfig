@@ -35,6 +35,10 @@ lazy val play = (project in file("modules/play")).
   settings(crossScalaVersions ~= { oldVersions => oldVersions.filter(_.startsWith("2.11")) }).
   dependsOn(core)
 
+lazy val scalaxml = (project in file("modules/scala-xml")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val squants = (project in file("modules/squants")).
   settings(settings).
   dependsOn(core)
