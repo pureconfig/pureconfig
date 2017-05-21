@@ -1,6 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigObject, ConfigRenderOptions, ConfigValue, ConfigValueType }
+import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig.error._
 import pureconfig.syntax._
 
@@ -81,7 +81,7 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
 
   def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
     case co: ConfigObject =>
-      if (co.containsKey(key)) Left(ConfigReaderFailures(CollidingKeys(key, co.get(key).render(ConfigRenderOptions.concise()), ConfigValueLocation(co))))
+      if (co.containsKey(key)) Left(ConfigReaderFailures(CollidingKeys(key, co.get(key), ConfigValueLocation(co))))
       else Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
 
     case _ =>

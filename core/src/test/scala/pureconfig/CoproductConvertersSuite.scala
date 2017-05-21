@@ -40,14 +40,4 @@ class CoproductConvertersSuite extends BaseSuite {
     failures should have size 1
     failures.head shouldBe a[KeyNotFound]
   }
-
-  it should "return a proper ConfigReaderFailure if the hint field clashes with a field of a coproduct option" in {
-    sealed trait Foo
-    case class Bar(`type`: String) extends Foo
-    val exception = intercept[ConfigReaderException[_]] {
-      ConfigWriter[Foo].to(Bar("bar"))
-    }
-    exception.failures.toList should have size 1
-    exception.failures.head shouldEqual CollidingKeys("type", """"bar"""", None)
-  }
 }

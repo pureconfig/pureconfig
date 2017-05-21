@@ -34,7 +34,7 @@ class CoproductHintSuite extends BaseSuite {
       val cc = implicitly[ConfigConvert[AnimalConfig]]
 
       val ex = the[ConfigReaderException[_]] thrownBy cc.to(DogConfig(2))
-      ex.failures.toList shouldEqual List(CollidingKeys("age", "ConfigInt(2)", None))
+      ex.failures.toList shouldEqual List(CollidingKeys("age", ConfigValueFactory.fromAnyRef(2), None))
     }
   }
 

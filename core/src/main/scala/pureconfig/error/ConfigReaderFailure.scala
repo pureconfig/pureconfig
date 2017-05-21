@@ -134,10 +134,10 @@ final case class CannotConvert(value: String, toType: String, because: String, l
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
  */
-final case class CollidingKeys(key: String, existingValue: String, location: Option[ConfigValueLocation]) extends ConvertFailure {
+final case class CollidingKeys(key: String, existingValue: ConfigValue, location: Option[ConfigValueLocation]) extends ConvertFailure {
   def path = key
 
-  def description = s"Key with value '$existingValue' collides with a key necessary to disambiguate a coproduct."
+  def description = s"Key with value '{$existingValue.render(ConfigRenderOptions.concise)}' collides with a key necessary to disambiguate a coproduct."
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
     this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
