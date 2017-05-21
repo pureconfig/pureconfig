@@ -50,9 +50,8 @@ operations provided by `cats`, we need some extra imports:
 
 ```tut:silent
 import cats._
-import cats.implicits._
+import cats.syntax.all._
 import pureconfig.module.cats.instances._
-import pureconfig.syntax._
 ```
 
 We are now ready to use the new syntax:
@@ -75,5 +74,5 @@ constIntReader.from(conf.root())
 
 safeIntReader.from(conf.root())
 
-Some("abc").toConfig
+someWriter[String].to(Some("abc"))
 ```

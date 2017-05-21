@@ -54,9 +54,8 @@ operations provided by `cats`, we need some extra imports:
 
 ```scala
 import cats._
-import cats.implicits._
+import cats.syntax.all._
 import pureconfig.module.cats.instances._
-import pureconfig.syntax._
 ```
 
 We are now ready to use the new syntax:
@@ -81,6 +80,6 @@ constIntReader.from(conf.root())
 safeIntReader.from(conf.root())
 // res9: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(-1)
 
-Some("abc").toConfig
+someWriter[String].to(Some("abc"))
 // res10: com.typesafe.config.ConfigValue = Quoted("abc")
 ```
