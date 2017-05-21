@@ -2,7 +2,7 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.error.KeyNotFound
+import pureconfig.error._
 
 class CoproductConvertersSuite extends BaseSuite {
 
@@ -27,17 +27,27 @@ class CoproductConvertersSuite extends BaseSuite {
     conf.asInstanceOf[ConfigObject].get("type") shouldEqual ConfigValueFactory.fromAnyRef("dogconfig")
   }
 
-  it should "return a Failure with a proper exception if the hint field in a coproduct is missing" in {
+  it should "return a proper ConfigReaderFailure if the hint field in a coproduct is missing" in {
     val conf = ConfigFactory.parseString("{ can-fly = true }")
     val failures = ConfigConvert[AnimalConfig].from(conf.root()).left.value.toList
     failures should have size 1
     failures.head shouldBe a[KeyNotFound]
   }
 
-  it should "return a Failure with a proper exception when a coproduct config is missing" in {
+  it should "return a proper ConfigReaderFailure when a coproduct config is missing" in {
     case class AnimalCage(animal: AnimalConfig)
     val failures = ConfigConvert[AnimalCage].from(ConfigFactory.empty().root()).left.value.toList
     failures should have size 1
     failures.head shouldBe a[KeyNotFound]
+  }
+
+  it should "return a proper ConfigReaderFailure if the hint field clashes with a field of a coproduct option" in {
+    sealed trait Foo
+    case class Bar(`type`: String) extends Foo
+    val exception = intercept[ConfigReaderException[_]] {
+      ConfigWriter[Foo].to(Bar("bar"))
+    }
+    exception.failures.toList should have size 1
+    exception.failures.head shouldEqual CollidingKeys("type", """"bar"""", None)
   }
 }

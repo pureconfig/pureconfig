@@ -93,7 +93,8 @@ abstract class ConvertFailure extends ConfigReaderFailure {
 
 /**
  * A failure representing the inability to convert a null value. Since a null
- * represents a missing value, the location of this failure is always None.
+ * represents a missing value, the location of this failure is always at the
+ * root (i.e. an empty string).
  */
 final case object CannotConvertNull extends ConvertFailure {
   val location = None
