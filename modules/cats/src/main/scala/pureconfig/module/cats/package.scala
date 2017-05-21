@@ -11,8 +11,8 @@ import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation }
 import pureconfig.{ ConfigReader, ConfigWriter }
 
 /**
- * [[ConfigReader]] and [[ConfigWriter]] instances for cats data structures.
- */
+  * `ConfigReader` and `ConfigWriter` instances for cats data structures.
+  */
 package object cats {
 
   private[pureconfig] def fromNonEmpty[F[_], G[_], T](fromFT: F[T] => Option[G[T]])(configValue: ConfigValue)(implicit ct: ClassTag[F[T]], fReader: ConfigReader[F[T]]): Either[ConfigReaderFailures, G[T]] =
