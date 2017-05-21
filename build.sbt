@@ -29,6 +29,10 @@ lazy val joda = (project in file("modules/joda")).
   dependsOn(core).
   dependsOn(core % "test->test") // In order to reuse the date/time related scalacheck generators.
 
+lazy val scalaxml = (project in file("modules/scala-xml")).
+  settings(settings).
+  dependsOn(core)
+
 lazy val squants = (project in file("modules/squants")).
   settings(settings).
   dependsOn(core)
