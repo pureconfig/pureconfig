@@ -39,7 +39,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
   case class ParentConf(conf: Conf)
 
-  it should "have a message displaying errors not associated with a given path" in {
+  it should "have a message displaying errors that occur at the root of the configuration" in {
     val conf = ConfigFactory.parseString("""
       {
         conf = 2
