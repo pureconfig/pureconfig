@@ -20,7 +20,7 @@ class ConfigReaderSuite extends BaseSuite {
       .map(ConfigValueFactory.fromAnyRef)
 
   val genReaderFailure: Gen[ConfigReaderFailures] =
-    Gen.const(ConfigReaderFailures(CannotConvertNull))
+    Gen.const(ConfigReaderFailures(CannotConvertNull()))
 
   implicit val arbConfig = Arbitrary(genConfig)
   implicit val arbReaderFailure = Arbitrary(genReaderFailure)

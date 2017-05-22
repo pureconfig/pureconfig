@@ -5,7 +5,11 @@ package pureconfig.error
 
 import java.net.URL
 
-import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigValue, ConfigValueType }
+import scala.annotation.tailrec
+import scala.collection.mutable
+import scala.collection.JavaConverters._
+
+import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigObject, ConfigValue, ConfigValueType }
 
 /**
  * The physical location of a ConfigValue, represented by a url and a line
@@ -87,15 +91,39 @@ abstract class ConfigReaderFailure {
 /**
  * A failure representing the inability to convert a null value. Since a null
  * represents a missing value, the location of this failure is always None.
+ *
+ * @param candidates a set of candidate keys that might map to the desired value
+ *                   in case of a misconfigured ProductHint
  */
-final case object CannotConvertNull extends ConfigReaderFailure {
+final case class CannotConvertNull(candidates: Set[String] = Set()) extends ConfigReaderFailure {
   val location = None
   val path = None
 
   def description = "Cannot convert a null value."
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    KeyNotFound(parentKey, parentLocation)
+    KeyNotFound(parentKey, parentLocation, candidates)
+}
+
+object CannotConvertNull {
+  @tailrec
+  private[this] def isSubsequence(s1: String, s2: String): Boolean = {
+    if (s1.isEmpty())
+      true
+    else if (s2.isEmpty())
+      false
+    else if (s1.head == s2.head)
+      isSubsequence(s1.tail, s2.tail)
+    else
+      isSubsequence(s1, s2.tail)
+  }
+
+  def apply(fieldName: String, confObj: ConfigObject): CannotConvertNull = {
+    val lcField = fieldName.toLowerCase.filter(c => c.isDigit || c.isLetter)
+    val objectKeys = confObj.keySet.asScala.map(f => (f, f.toLowerCase))
+    val candidateKeys = objectKeys.filter(k => isSubsequence(lcField, k._2)).map(_._1).toSet
+    CannotConvertNull(candidateKeys)
+  }
 }
 
 /**
@@ -141,14 +169,30 @@ final case class CollidingKeys(key: String, existingValue: String, location: Opt
  * @param key the key that is missing
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
+ * @param candidates a set of candidate keys that might correspond to the
+ *                   desired key in case of a misconfigured ProductHint
  */
-final case class KeyNotFound(key: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
+final case class KeyNotFound(key: String, location: Option[ConfigValueLocation], candidates: Set[String] = Set()) extends ConfigReaderFailure {
   def path = Some(key)
 
-  def description = s"Key not found."
+  def description = {
+    if (candidates.nonEmpty) {
+      val descLines = mutable.ListBuffer[String]()
+      descLines += "Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:"
+      candidates.foreach { candidate =>
+        descLines += (s" - '$candidate'")
+      }
+      descLines.mkString("\n")
+    } else {
+      "Key not found."
+    }
+  }
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
+    this.copy(
+      key = if (key.isEmpty) parentKey else parentKey + "." + key,
+      location = location orElse parentLocation,
+      candidates.map(parentKey + "." + _))
 }
 
 /**
