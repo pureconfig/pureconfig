@@ -8,7 +8,7 @@ import java.net.URL
 import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigValue, ConfigValueType }
 
 /**
- * The physical location of a ConfigValue, represented by a url and a line
+ * The file system location of a ConfigValue, represented by a url and a line
  * number
  *
  * @param url the URL describing the origin of the ConfigValue
@@ -58,7 +58,7 @@ object ConfigValueLocation {
 
 /**
  * A representation of a failure that might be raised from reading a
- * ConfigValue. The failure contains an optional physical location of the
+ * ConfigValue. The failure contains an optional file system location of the
  * configuration that raised the failure.
  */
 abstract class ConfigReaderFailure {

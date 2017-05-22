@@ -136,7 +136,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |""".stripMargin
   }
 
-  it should "have a message displaying the proper physical location of the values that raised errors, if available" in {
+  it should "have a message displaying the proper file system location of the values that raised errors, if available" in {
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/configFailureLocation/single/a.conf"
     val conf = ConfigFactory.load(file).root()
