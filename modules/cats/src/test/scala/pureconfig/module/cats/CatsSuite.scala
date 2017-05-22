@@ -4,7 +4,6 @@ import cats.data.{ NonEmptyList, NonEmptyVector }
 import com.typesafe.config.ConfigFactory.parseString
 import org.scalatest._
 import pureconfig.error.ConfigReaderFailures
-import pureconfig.module.Cats.EmptyTraversableFound
 import pureconfig.syntax._
 
 class CatsSuite extends FlatSpec with Matchers with EitherValues {

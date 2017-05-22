@@ -5,14 +5,13 @@ import scala.reflect.ClassTag
 
 import _root_.cats.data.{ NonEmptyList, NonEmptyVector }
 import com.typesafe.config.ConfigValue
-import pureconfig.{ ConfigReader, ConfigWriter }
 import pureconfig.ConfigReader.{ fromFunction => fromFunctionReader }
 import pureconfig.ConfigWriter.{ fromFunction => fromFunctionWriter }
 import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation }
-import pureconfig.module.Cats.EmptyTraversableFound
+import pureconfig.{ ConfigReader, ConfigWriter }
 
 /**
- * [[ConfigReader]] and [[ConfigWriter]] instances for cats data structures.
+ * `ConfigReader` and `ConfigWriter` instances for cats data structures.
  */
 package object cats {
 

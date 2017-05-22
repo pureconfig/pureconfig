@@ -13,6 +13,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "0.9.0",
+  "org.typelevel" %% "cats-laws" % "0.9.0" % "test",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest,
   Dependencies.scalaCheck
@@ -40,6 +41,11 @@ pomExtra := (
         <id>derekmorr</id>
         <name>Derek Morr</name>
         <url>https://github.com/derekmorr</url>
+      </developer>
+      <developer>
+        <id>ruippeixotog</id>
+        <name>Rui Gonçalves</name>
+        <url>https://github.com/ruippeixotog</url>
       </developer>
     </developers>)
 
