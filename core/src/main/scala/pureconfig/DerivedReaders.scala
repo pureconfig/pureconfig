@@ -83,7 +83,7 @@ trait DerivedReaders1 {
             converter.from(co.get(keyStr))
           case (null, _) =>
             val defaultValue = if (hint.useDefaultArgs) default.head else None
-            defaultValue.fold(fail[V](CannotConvertNull(fieldName, co)))(Right[Nothing, V](_))
+            defaultValue.fold(fail[V](CannotConvertNull(fieldName, co.keySet.asScala)))(Right[Nothing, V](_))
           case (value, converter) =>
             converter.from(value)
         },

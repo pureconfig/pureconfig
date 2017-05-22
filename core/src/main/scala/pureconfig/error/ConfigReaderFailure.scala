@@ -7,9 +7,8 @@ import java.net.URL
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.collection.JavaConverters._
 
-import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigObject, ConfigValue, ConfigValueType }
+import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigValue, ConfigValueType }
 
 /**
  * The physical location of a ConfigValue, represented by a url and a line
@@ -118,9 +117,9 @@ object CannotConvertNull {
       isSubsequence(s1, s2.tail)
   }
 
-  def apply(fieldName: String, confObj: ConfigObject): CannotConvertNull = {
+  def apply(fieldName: String, keys: Iterable[String]): CannotConvertNull = {
     val lcField = fieldName.toLowerCase.filter(c => c.isDigit || c.isLetter)
-    val objectKeys = confObj.keySet.asScala.map(f => (f, f.toLowerCase))
+    val objectKeys = keys.map(f => (f, f.toLowerCase))
     val candidateKeys = objectKeys.filter(k => isSubsequence(lcField, k._2)).map(_._1).toSet
     CannotConvertNull(candidateKeys)
   }
