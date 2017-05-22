@@ -20,7 +20,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
       linesBuffer += "  in the configuration:"
 
     failuresWithoutPath.foreach { failure =>
-      linesBuffer += s"    - ${ConfigReaderException.descriptionWithLocation(failure)}"
+      linesBuffer += s"${ConfigReaderException.descriptionWithLocation(failure)}"
     }
 
     if (failuresWithPath.nonEmpty && failuresWithoutPath.nonEmpty) {
@@ -31,7 +31,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
       case (p, failures) =>
         linesBuffer += s"  at '$p':"
         failures.foreach { failure =>
-          linesBuffer += s"    - ${ConfigReaderException.descriptionWithLocation(failure)}"
+          linesBuffer += s"${ConfigReaderException.descriptionWithLocation(failure)}"
         }
     }
 
@@ -42,6 +42,9 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
 }
 
 object ConfigReaderException {
-  private[ConfigReaderException] def descriptionWithLocation(failure: ConfigReaderFailure): String =
-    failure.location.fold(failure.description)(_.description + " " + failure.description)
+  private[ConfigReaderException] def descriptionWithLocation(failure: ConfigReaderFailure): String = {
+    val failureLines = failure.description.split("\n")
+    (failure.location.fold("    - " + failureLines.head)("    - " + _.description + " " + failureLines.head) ::
+      failureLines.tail.map("      " + _).toList).mkString("\n")
+  }
 }
