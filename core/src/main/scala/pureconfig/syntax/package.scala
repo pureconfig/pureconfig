@@ -10,7 +10,7 @@ package object syntax {
     def toConfig(implicit writer: ConfigWriter[T]): ConfigValue = writer.to(any)
   }
 
-  private def getResultOrThrow[Config](failuresOrResult: Either[ConfigReaderFailures, Config])(implicit ct: ClassTag[Config]): Config = {
+  private[pureconfig] def getResultOrThrow[Config](failuresOrResult: Either[ConfigReaderFailures, Config])(implicit ct: ClassTag[Config]): Config = {
     failuresOrResult match {
       case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[Config](failures)

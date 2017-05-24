@@ -29,6 +29,12 @@ lazy val joda = (project in file("modules/joda")).
   dependsOn(core).
   dependsOn(core % "test->test") // In order to reuse the date/time related scalacheck generators.
 
+// play 2.5 is only published for Scala 2.11
+lazy val play = (project in file("modules/play")).
+  settings(settings).
+  settings(crossScalaVersions ~= { oldVersions => oldVersions.filter(_.startsWith("2.11")) }).
+  dependsOn(core)
+
 lazy val squants = (project in file("modules/squants")).
   settings(settings).
   dependsOn(core)
