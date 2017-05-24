@@ -51,7 +51,7 @@ class ProductHintSuite extends BaseSuite {
       }""").root()
 
     case class SampleConf(a: Int, b: String)
-    ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a", None), KeyNotFound("b", None))
+    ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a", None, Set("A")), KeyNotFound("b", None, Set("B")))
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
     ConfigConvert[SampleConf].from(conf) shouldBe Right(SampleConf(2, "two"))
@@ -146,7 +146,7 @@ class ProductHintSuite extends BaseSuite {
     conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
     val failures = conf.getConfig("conf").to[Conf2].left.value.toList
     failures should have size 1
-    failures.head shouldBe a[UnknownKey]
+    failures.head shouldEqual UnknownKey("b", None)
   }
 
   it should "not use default arguments if specified through a product hint" in {

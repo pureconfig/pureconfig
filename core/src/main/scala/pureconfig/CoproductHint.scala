@@ -72,20 +72,20 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
         case Some(fv) => fv.unwrapped match {
           case v: String if v == fieldValue(name) => Right(Some(cv))
           case _: String => Right(None)
-          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType, Set(ConfigValueType.STRING), ConfigValueLocation(fv), Some(key))))
+          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType, Set(ConfigValueType.STRING), ConfigValueLocation(fv), key)))
         }
         case None => Left(ConfigReaderFailures(KeyNotFound(key, ConfigValueLocation(co))))
       }
-    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
+    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), "")))
   }
 
   def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
     case co: ConfigObject =>
-      if (co.containsKey(key)) Left(ConfigReaderFailures(CollidingKeys(key, co.get(key).toString, ConfigValueLocation(co))))
+      if (co.containsKey(key)) Left(ConfigReaderFailures(CollidingKeys(key, co.get(key), ConfigValueLocation(co))))
       else Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
 
     case _ =>
-      Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
+      Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), "")))
   }
 
   def tryNextOnFail(name: String) = false
@@ -110,13 +110,13 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
   def from(cv: ConfigValue, name: String) = cv.valueType match {
     case ConfigValueType.STRING if cv.unwrapped.toString == fieldValue(name) => Right(Some(Map.empty[String, String].toConfig))
     case ConfigValueType.STRING => Right(None)
-    case typ => Left(ConfigReaderFailures(WrongType(typ, Set(ConfigValueType.STRING), ConfigValueLocation(cv), None)))
+    case typ => Left(ConfigReaderFailures(WrongType(typ, Set(ConfigValueType.STRING), ConfigValueLocation(cv), "")))
   }
 
   def to(cv: ConfigValue, name: String) = cv match {
     case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
-    case _: ConfigObject => Left(ConfigReaderFailures(NonEmptyObjectFound(name, ConfigValueLocation(cv), None)))
-    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), None)))
+    case _: ConfigObject => Left(ConfigReaderFailures(NonEmptyObjectFound(name, ConfigValueLocation(cv), "")))
+    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), "")))
   }
 
   def tryNextOnFail(name: String) = false

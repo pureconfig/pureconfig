@@ -46,7 +46,7 @@ trait DerivedReaders1 {
   private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), None))
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
     }
     def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
   }
@@ -75,14 +75,15 @@ trait DerivedReaders1 {
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
     override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Either[ConfigReaderFailures, FieldType[K, V] :: T] = {
-      val keyStr = hint.configKey(key.value.toString().tail)
+      val fieldName = key.value.name
+      val keyStr = hint.configKey(fieldName)
       val headResult = improveFailures[V](
         (co.get(keyStr), vFieldConvert.value) match {
           case (null, converter: AllowMissingKey) =>
             converter.from(co.get(keyStr))
           case (null, _) =>
             val defaultValue = if (hint.useDefaultArgs) default.head else None
-            defaultValue.fold(fail[V](CannotConvertNull))(Right[Nothing, V](_))
+            defaultValue.fold(fail[V](CannotConvertNull(fieldName, co.keySet.asScala)))(Right[Nothing, V](_))
           case (value, converter) =>
             converter.from(value)
         },
@@ -97,7 +98,7 @@ trait DerivedReaders1 {
 
   implicit final def cNilConfigReader[Wrapped]: WrappedConfigReader[Wrapped, CNil] = new WrappedConfigReader[Wrapped, CNil] {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, CNil] =
-      fail(NoValidCoproductChoiceFound(config, ConfigValueLocation(config), None))
+      fail(NoValidCoproductChoiceFound(config, ConfigValueLocation(config), ""))
   }
 
   implicit final def coproductConfigReader[Wrapped, Name <: Symbol, V, T <: Coproduct](
@@ -154,7 +155,7 @@ trait DerivedReaders1 {
           def keyValueReader(key: String, value: ConfigValue): Either[ConfigReaderFailures, (Int, T)] = {
             val keyResult = catchReadError(_.toInt)(implicitly)(key)(ConfigValueLocation(value)).left.flatMap(t => fail(CannotConvert(key, "Int",
               s"To convert an object to a collection, its keys must be read as Int but key $key has value" +
-                s"$value which cannot converted. Error: ${t.because}", ConfigValueLocation(value), Some(key))))
+                s"$value which cannot converted. Error: ${t.because}", ConfigValueLocation(value), key)))
             val valueResult = configConvert.value.from(value)
             combineResults(keyResult, valueResult)(_ -> _)
           }
@@ -169,7 +170,7 @@ trait DerivedReaders1 {
               r.result()
           }
         case other =>
-          fail(WrongType(other.valueType, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(other), None))
+          fail(WrongType(other.valueType, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
       }
     }
   }
@@ -191,7 +192,7 @@ trait DerivedReaders1 {
           }
 
         case other =>
-          fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), None))
+          fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
       }
     }
   }

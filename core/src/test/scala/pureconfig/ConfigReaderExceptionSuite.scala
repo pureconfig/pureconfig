@@ -39,7 +39,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
   case class ParentConf(conf: Conf)
 
-  it should "have a message displaying errors not associated with a given path" in {
+  it should "have a message displaying errors that occur at the root of the configuration" in {
     val conf = ConfigFactory.parseString("""
       {
         conf = 2
@@ -52,7 +52,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception1.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  in the configuration:
+          |  at the root:
           |    - Expected type OBJECT. Found NUMBER instead.
           |""".stripMargin
 
@@ -136,7 +136,52 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |""".stripMargin
   }
 
-  it should "have a message displaying the proper physical location of the values that raised errors, if available" in {
+  case class CamelCaseConf(camelCaseInt: Int, camelCaseString: String)
+  case class KebabCaseConf(kebabCaseInt: Int, kebabCaseString: String)
+  case class SnakeCaseConf(snakeCaseInt: Int, snakeCaseString: String)
+  case class EnclosingConf(
+    camelCaseConf: CamelCaseConf,
+    kebabCaseConf: KebabCaseConf,
+    snakeCaseConf: SnakeCaseConf)
+
+  it should "have a message displaying candidate keys in case of a suspected misconfigured ProductHint" in {
+    val conf = ConfigFactory.parseString("""{
+      camel-case-conf {
+        camelCaseInt = 2
+        camelCaseString = "str"
+      }
+      kebab-case-conf {
+        kebab-case-int = 2
+        kebab-case-string = "str"
+      }
+      snake-case-conf {
+        snake_case_int = 2
+        snake_case_string = "str"
+      }
+    }""")
+
+    val exception = intercept[ConfigReaderException[_]] {
+      conf.root().toOrThrow[EnclosingConf]
+    }
+
+    exception.getMessage shouldBe
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingConf. Failures are:
+          |  at 'camel-case-conf.camel-case-int':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'camel-case-conf.camelCaseInt'
+          |  at 'camel-case-conf.camel-case-string':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'camel-case-conf.camelCaseString'
+          |  at 'snake-case-conf.snake-case-int':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'snake-case-conf.snake_case_int'
+          |  at 'snake-case-conf.snake-case-string':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'snake-case-conf.snake_case_string'
+          |""".stripMargin
+  }
+
+  it should "have a message displaying the proper file system location of the values that raised errors, if available" in {
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/configFailureLocation/single/a.conf"
     val conf = ConfigFactory.load(file).root()
@@ -164,8 +209,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  in the configuration:
-          |    - (file:${workingDir}${file}:2) Unable to parse the configuration.
+          |  - (file:${workingDir}${file}:2) Unable to parse the configuration.
           |""".stripMargin
   }
 }

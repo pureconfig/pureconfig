@@ -5,21 +5,20 @@ import scala.reflect.ClassTag
 
 import _root_.cats.data.{ NonEmptyList, NonEmptyVector }
 import com.typesafe.config.ConfigValue
-import pureconfig.{ ConfigReader, ConfigWriter }
 import pureconfig.ConfigReader.{ fromFunction => fromFunctionReader }
 import pureconfig.ConfigWriter.{ fromFunction => fromFunctionWriter }
 import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation }
-import pureconfig.module.Cats.EmptyTraversableFound
+import pureconfig.{ ConfigReader, ConfigWriter }
 
 /**
- * [[ConfigReader]] and [[ConfigWriter]] instances for cats data structures.
+ * `ConfigReader` and `ConfigWriter` instances for cats data structures.
  */
 package object cats {
 
   private[pureconfig] def fromNonEmpty[F[_], G[_], T](fromFT: F[T] => Option[G[T]])(configValue: ConfigValue)(implicit ct: ClassTag[F[T]], fReader: ConfigReader[F[T]]): Either[ConfigReaderFailures, G[T]] =
     fReader.from(configValue).right.flatMap { ft =>
       fromFT(ft) match {
-        case None => Left(ConfigReaderFailures(EmptyTraversableFound(ct.toString, ConfigValueLocation(configValue), None)))
+        case None => Left(ConfigReaderFailures(EmptyTraversableFound(ct.toString, ConfigValueLocation(configValue), "")))
         case Some(nonEmpty) => Right(nonEmpty)
       }
     }
