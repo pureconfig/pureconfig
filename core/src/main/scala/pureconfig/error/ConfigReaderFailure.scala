@@ -141,7 +141,7 @@ object CannotConvertNull {
  * @param because the reason why the conversion was not possible
  * @param location an optional location of the ConfigValue that raised the
  *                 failure
- * @param path thet path to the value that couldn't be converted
+ * @param path the path to the value that couldn't be converted
  */
 final case class CannotConvert(value: String, toType: String, because: String, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
 
