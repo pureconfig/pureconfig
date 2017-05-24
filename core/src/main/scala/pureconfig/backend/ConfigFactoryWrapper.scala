@@ -34,9 +34,9 @@ object ConfigFactoryWrapper {
       case e: ConfigException.Parse =>
         Left(ConfigReaderFailures(CannotParse(e.getLocalizedMessage, ConfigValueLocation(e.origin()))))
       case e: ConfigException =>
-        Left(ConfigReaderFailures(ThrowableFailure(e, ConfigValueLocation(e.origin()), None)))
+        Left(ConfigReaderFailures(ThrowableFailure(e, ConfigValueLocation(e.origin()), "")))
       case NonFatal(e) =>
-        Left(ConfigReaderFailures(ThrowableFailure(e, None, None)))
+        Left(ConfigReaderFailures(ThrowableFailure(e, None, "")))
     }
   }
 }

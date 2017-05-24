@@ -11,7 +11,7 @@ final case class Percentage(value: Int) {
 object Percentage {
   private val failConfigReadPercentage =
     (s: String) => (l: Option[ConfigValueLocation]) =>
-      Left(CannotConvert(s, "Percentage", "Percentage is a dummy type, you should not read it", l, None))
+      Left(CannotConvert(s, "Percentage", "Percentage is a dummy type, you should not read it", l, ""))
 
   implicit val percentageConfigWriter =
     ConfigConvert.viaNonEmptyString[Percentage](failConfigReadPercentage, percentage => s"${percentage.value} %")

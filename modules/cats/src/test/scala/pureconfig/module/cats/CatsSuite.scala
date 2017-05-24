@@ -18,7 +18,7 @@ class CatsSuite extends FlatSpec with Matchers with EitherValues {
   it should "return an EmptyTraversableFound when reading empty lists into NonEmptyList" in {
     val config = parseString("{ numbers: [] }")
     config.to[Numbers] shouldEqual
-      Left(ConfigReaderFailures(EmptyTraversableFound("scala.collection.immutable.List", None, Some("numbers")), Nil))
+      Left(ConfigReaderFailures(EmptyTraversableFound("scala.collection.immutable.List", None, "numbers"), Nil))
   }
 
   case class NumVec(numbers: NonEmptyVector[Int])
@@ -31,6 +31,6 @@ class CatsSuite extends FlatSpec with Matchers with EitherValues {
   it should "return an EmptyTraversableFound when reading empty lists into NonEmptyVector" in {
     val config = parseString("{ numbers: [] }")
     config.to[NumVec] shouldEqual
-      Left(ConfigReaderFailures(EmptyTraversableFound("scala.collection.immutable.Vector", None, Some("numbers")), Nil))
+      Left(ConfigReaderFailures(EmptyTraversableFound("scala.collection.immutable.Vector", None, "numbers"), Nil))
   }
 }

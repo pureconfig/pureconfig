@@ -42,7 +42,7 @@ package object arbitrary {
     Cogen[String].contramap[ConfigValue](_.render)
 
   implicit val arbConfigReaderFailures: Arbitrary[ConfigReaderFailures] = Arbitrary {
-    Gen.const(ConfigReaderFailures(EmptyTraversableFound("List", None, None)))
+    Gen.const(ConfigReaderFailures(EmptyTraversableFound("List", None, "")))
   }
 
   implicit val cogenConfigReaderFailures: Cogen[ConfigReaderFailures] =

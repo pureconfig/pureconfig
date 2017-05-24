@@ -5,10 +5,10 @@ describe failures reading from a `ConfigValue`. When implementing your own
 `ConfigConvert`s, you're recommended to use the provided case classes.
 
 The `ConfigReaderFailure` class has an optional location field that can be used
-to point to the physical location of a `ConfigValue` that raised an error. When
-using the `ConfigReaderFailure` sealed family of case classes, you can use the
-`ConfigValueLocation.apply(cv: ConfigValue)` method to automatically create an
-optional location from a `ConfigValue`.
+to point to the file system location of a `ConfigValue` that raised an error.
+When using the `ConfigReaderFailure` sealed family of case classes, you can use
+the `ConfigValueLocation.apply(cv: ConfigValue)` method to automatically create
+an optional location from a `ConfigValue`.
 
 If we load a config and try to load a missing key:
 

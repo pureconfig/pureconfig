@@ -22,7 +22,7 @@ trait ConvertHelpers {
 
   def fail[A](failure: ConfigReaderFailure): Either[ConfigReaderFailures, A] = Left(ConfigReaderFailures(failure))
 
-  def failWithThrowable[A](throwable: Throwable): Option[ConfigValueLocation] => Either[ConfigReaderFailures, A] = location => fail[A](ThrowableFailure(throwable, location, None))
+  def failWithThrowable[A](throwable: Throwable): Option[ConfigValueLocation] => Either[ConfigReaderFailures, A] = location => fail[A](ThrowableFailure(throwable, location, ""))
 
   private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String, location: Option[ConfigValueLocation]): Either[ConfigReaderFailures, Z] =
     result.left.map {
@@ -40,7 +40,7 @@ trait ConvertHelpers {
 
   private[pureconfig] def tryToEither[T](t: Try[T]): Option[ConfigValueLocation] => Either[ConfigReaderFailure, T] = t match {
     case Success(v) => _ => Right(v)
-    case Failure(e) => location => Left(ThrowableFailure(e, location, None))
+    case Failure(e) => location => Left(ThrowableFailure(e, location, ""))
   }
 
   private[pureconfig] def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => Either[ConfigReaderFailures, T] =
@@ -62,14 +62,14 @@ trait ConvertHelpers {
     }
 
   private[pureconfig] def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, String] = {
-    case "" => location => Left(EmptyStringFound(ct.toString(), location, None))
+    case "" => location => Left(EmptyStringFound(ct.toString(), location, ""))
     case x => _ => Right(x)
   }
 
   def catchReadError[T](f: String => T)(implicit ct: ClassTag[T]): String => Option[ConfigValueLocation] => Either[CannotConvert, T] =
     string => location =>
       try Right(f(string)) catch {
-        case NonFatal(ex) => Left(CannotConvert(string, ct.toString(), ex.toString, location, None))
+        case NonFatal(ex) => Left(CannotConvert(string, ct.toString(), ex.toString, location, ""))
       }
 
   /**
@@ -81,7 +81,7 @@ trait ConvertHelpers {
     string => location =>
       f(string) match {
         case Success(t) => Right(t)
-        case Failure(e) => Left(CannotConvert(string, ct.runtimeClass.getName, e.getLocalizedMessage, location, None))
+        case Failure(e) => Left(CannotConvert(string, ct.runtimeClass.getName, e.getLocalizedMessage, location, ""))
       }
 
   /**
@@ -93,7 +93,7 @@ trait ConvertHelpers {
     string => location =>
       f(string) match {
         case Some(t) => Right(t)
-        case None => Left(CannotConvert(string, ct.runtimeClass.getName, "", location, None))
+        case None => Left(CannotConvert(string, ct.runtimeClass.getName, "", location, ""))
       }
 }
 

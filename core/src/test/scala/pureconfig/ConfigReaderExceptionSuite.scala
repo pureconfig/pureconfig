@@ -39,7 +39,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
   case class ParentConf(conf: Conf)
 
-  it should "have a message displaying errors not associated with a given path" in {
+  it should "have a message displaying errors that occur at the root of the configuration" in {
     val conf = ConfigFactory.parseString("""
       {
         conf = 2
@@ -52,7 +52,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception1.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  in the configuration:
+          |  at the root:
           |    - Expected type OBJECT. Found NUMBER instead.
           |""".stripMargin
 
@@ -181,7 +181,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |""".stripMargin
   }
 
-  it should "have a message displaying the proper physical location of the values that raised errors, if available" in {
+  it should "have a message displaying the proper file system location of the values that raised errors, if available" in {
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/configFailureLocation/single/a.conf"
     val conf = ConfigFactory.load(file).root()
@@ -209,8 +209,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  in the configuration:
-          |    - (file:${workingDir}${file}:2) Unable to parse the configuration.
+          |  - (file:${workingDir}${file}:2) Unable to parse the configuration.
           |""".stripMargin
   }
 }
