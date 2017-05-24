@@ -136,6 +136,51 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |""".stripMargin
   }
 
+  case class CamelCaseConf(camelCaseInt: Int, camelCaseString: String)
+  case class KebabCaseConf(kebabCaseInt: Int, kebabCaseString: String)
+  case class SnakeCaseConf(snakeCaseInt: Int, snakeCaseString: String)
+  case class EnclosingConf(
+    camelCaseConf: CamelCaseConf,
+    kebabCaseConf: KebabCaseConf,
+    snakeCaseConf: SnakeCaseConf)
+
+  it should "have a message displaying candidate keys in case of a suspected misconfigured ProductHint" in {
+    val conf = ConfigFactory.parseString("""{
+      camel-case-conf {
+        camelCaseInt = 2
+        camelCaseString = "str"
+      }
+      kebab-case-conf {
+        kebab-case-int = 2
+        kebab-case-string = "str"
+      }
+      snake-case-conf {
+        snake_case_int = 2
+        snake_case_string = "str"
+      }
+    }""")
+
+    val exception = intercept[ConfigReaderException[_]] {
+      conf.root().toOrThrow[EnclosingConf]
+    }
+
+    exception.getMessage shouldBe
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingConf. Failures are:
+          |  at 'camel-case-conf.camel-case-int':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'camel-case-conf.camelCaseInt'
+          |  at 'camel-case-conf.camel-case-string':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'camel-case-conf.camelCaseString'
+          |  at 'snake-case-conf.snake-case-int':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'snake-case-conf.snake_case_int'
+          |  at 'snake-case-conf.snake-case-string':
+          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'snake-case-conf.snake_case_string'
+          |""".stripMargin
+  }
+
   it should "have a message displaying the proper file system location of the values that raised errors, if available" in {
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/configFailureLocation/single/a.conf"

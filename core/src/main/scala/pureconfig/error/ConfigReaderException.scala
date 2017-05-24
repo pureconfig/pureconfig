@@ -19,7 +19,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
     val failuresByPath = convertFailures.toList.groupBy(_.path).toList.sortBy(_._1)
 
     parseFailures.foreach { failure =>
-      linesBuffer += s"  - ${ConfigReaderException.descriptionWithLocation(failure)}"
+      linesBuffer += s"${ConfigReaderException.descriptionWithLocation(failure, "  ")}"
     }
 
     if (parseFailures.nonEmpty && convertFailures.nonEmpty) {
@@ -30,7 +30,7 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
       case (p, failures) =>
         linesBuffer += (if (p.isEmpty) s"  at the root:" else s"  at '$p':")
         failures.foreach { failure =>
-          linesBuffer += s"    - ${ConfigReaderException.descriptionWithLocation(failure)}"
+          linesBuffer += s"${ConfigReaderException.descriptionWithLocation(failure, "    ")}"
         }
     }
 
@@ -41,6 +41,9 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
 }
 
 object ConfigReaderException {
-  private[ConfigReaderException] def descriptionWithLocation(failure: ConfigReaderFailure): String =
-    failure.location.fold(failure.description)(_.description + " " + failure.description)
+  private[ConfigReaderException] def descriptionWithLocation(failure: ConfigReaderFailure, prefix: String): String = {
+    val failureLines = failure.description.split("\n")
+    (failure.location.fold(s"${prefix}- ${failureLines.head}")(f => s"${prefix}- ${f.description} ${failureLines.head}") ::
+      failureLines.tail.map(l => s"$prefix  $l").toList).mkString("\n")
+  }
 }

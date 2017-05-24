@@ -75,14 +75,15 @@ trait DerivedReaders1 {
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
     override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Either[ConfigReaderFailures, FieldType[K, V] :: T] = {
-      val keyStr = hint.configKey(key.value.toString().tail)
+      val fieldName = key.value.name
+      val keyStr = hint.configKey(fieldName)
       val headResult = improveFailures[V](
         (co.get(keyStr), vFieldConvert.value) match {
           case (null, converter: AllowMissingKey) =>
             converter.from(co.get(keyStr))
           case (null, _) =>
             val defaultValue = if (hint.useDefaultArgs) default.head else None
-            defaultValue.fold(fail[V](CannotConvertNull))(Right[Nothing, V](_))
+            defaultValue.fold(fail[V](CannotConvertNull(fieldName, co.keySet.asScala)))(Right[Nothing, V](_))
           case (value, converter) =>
             converter.from(value)
         },
