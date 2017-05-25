@@ -83,10 +83,14 @@ package object squants {
     viaNonEmptyStringTry[Density](Density.apply, _.toString)
   implicit val massConfigConvert =
     viaNonEmptyStringTry[Mass](Mass.apply, _.toString)
+  implicit val momentOfInertiaConfigConvert =
+    viaNonEmptyStringTry[MomentOfInertia](MomentOfInertia.apply, _.toString)
 
   // motion
   implicit val accelerationConfigConvert =
     viaNonEmptyStringTry[Acceleration](Acceleration.apply, _.toString)
+  implicit val angularAccelerationConfigConvert =
+    viaNonEmptyStringTry[AngularAcceleration](AngularAcceleration.apply, _.toString)
   implicit val angularVelocityConfigConvert =
     viaNonEmptyStringTry[AngularVelocity](AngularVelocity.apply, _.toString)
   implicit val forceConfigConvert =
@@ -101,6 +105,8 @@ package object squants {
     viaNonEmptyStringTry[Pressure](Pressure.apply, _.toString)
   implicit val pressureChangeConfigConvert =
     viaNonEmptyStringTry[PressureChange](PressureChange.apply, _.toString)
+  implicit val torqueConfigConvert =
+    viaNonEmptyStringTry[Torque](Torque.apply, _.toString)
   implicit val velocityConfigConvert =
     viaNonEmptyStringTry[Velocity](Velocity.apply, _.toString)
   implicit val volumeFlowConfigConvert =
