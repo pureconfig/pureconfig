@@ -37,8 +37,10 @@ class SquantsConvertTest extends FlatSpec with Matchers with EitherValues with P
   checkDimension(mass.ChemicalAmount)
   checkDimension(mass.Density)
   checkDimension(mass.Mass)
+  checkDimension(mass.MomentOfInertia)
 
   checkDimension(motion.Acceleration)
+  checkDimension(motion.AngularAcceleration)
   checkDimension(motion.AngularVelocity)
   checkDimension(motion.Force)
   checkDimension(motion.Jerk)
@@ -46,6 +48,7 @@ class SquantsConvertTest extends FlatSpec with Matchers with EitherValues with P
   checkDimension(motion.Momentum)
   checkDimension(motion.Pressure)
   checkDimension(motion.PressureChange)
+  checkDimension(motion.Torque)
   checkDimension(motion.Velocity)
   checkDimension(motion.VolumeFlow)
   checkDimension(motion.Yank)
