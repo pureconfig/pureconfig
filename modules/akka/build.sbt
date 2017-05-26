@@ -49,7 +49,7 @@ pomExtra := (
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig.module.javax.*")
+OsgiKeys.exportPackage := Seq("pureconfig.module.akka.*")
 
 OsgiKeys.privatePackage := Seq()
 
