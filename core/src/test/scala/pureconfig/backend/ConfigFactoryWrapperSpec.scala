@@ -1,42 +1,41 @@
 package pureconfig.backend
 
-import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, Path }
-
 import com.typesafe.config.{ ConfigException, ConfigFactory }
-import org.scalatest.{ FlatSpec, Matchers }
+import pureconfig.BaseSuite
+import pureconfig.PathUtils._
+import pureconfig.error.{ CannotParse, CannotReadFile }
 
-class ConfigFactoryWrapperSpec extends FlatSpec with Matchers {
-
-  def createTempConfPath(prefix: String, content: String): Path = {
-    val tmpPath = Files.createTempFile(prefix, ".conf")
-    tmpPath.toFile.deleteOnExit()
-    val buffer = Files.newBufferedWriter(tmpPath, StandardCharsets.UTF_8)
-    buffer.write(content)
-    buffer.close()
-    tmpPath
-  }
+class ConfigFactoryWrapperSpec extends BaseSuite {
 
   behavior of "ConfigFactoryWrapper.parseFile"
 
-  it should "not throw exception but return Left on error" in {
-    val tmpPath = createTempConfPath("parseFile", "{foo:")
+  it should "return a Left when a file does not exist" in {
+    ConfigFactory.parseFile(nonExistingPath.toFile) shouldEqual ConfigFactory.empty
+    ConfigFactoryWrapper.parseFile(nonExistingPath) should failWith(CannotReadFile(nonExistingPath))
+  }
+
+  it should "return a Left when a file exists but cannot be parsed" in {
+    val tmpPath = createTempFile("{foo:")
     intercept[ConfigException](ConfigFactory.parseFile(tmpPath.toFile))
-    ConfigFactoryWrapper.parseFile(tmpPath) shouldBe a[Left[_, _]]
+    ConfigFactoryWrapper.parseFile(tmpPath) should failWithType[CannotParse]
   }
 
   behavior of "ConfigFactoryWrapper.loadFile"
 
-  it should "not throw exception but return Left on error" in {
-    val tmpPath = createTempConfPath("parseFile", "{foo:")
-    intercept[ConfigException](ConfigFactory.load(ConfigFactory.parseFile(tmpPath.toFile)))
-    ConfigFactoryWrapper.parseFile(tmpPath) shouldBe a[Left[_, _]]
+  it should "return a Left when a file does not exist" in {
+    ConfigFactory.load(ConfigFactory.parseFile(nonExistingPath.toFile)) shouldEqual ConfigFactory.load
+    ConfigFactoryWrapper.loadFile(nonExistingPath) should failWith(CannotReadFile(nonExistingPath))
   }
 
-  it should "not throw exception but return Left when it finds unresolved placeholders" in {
-    val tmpPath = createTempConfPath("parseFileTest", f"""{ foo1: "bla", foo2: $${charlie}}""")
+  it should "return a Left when a file exists but cannot be parsed" in {
+    val tmpPath = createTempFile("{foo:")
     intercept[ConfigException](ConfigFactory.load(ConfigFactory.parseFile(tmpPath.toFile)))
-    ConfigFactoryWrapper.loadFile(tmpPath) shouldBe a[Left[_, _]]
+    ConfigFactoryWrapper.loadFile(tmpPath) should failWithType[CannotParse]
   }
 
+  it should "return a Left when it finds unresolved placeholders" in {
+    val tmpPath = createTempFile(f"""{ foo1: "bla", foo2: $${charlie}}""")
+    intercept[ConfigException](ConfigFactory.load(ConfigFactory.parseFile(tmpPath.toFile)))
+    ConfigFactoryWrapper.loadFile(tmpPath) should failWithType[CannotParse]
+  }
 }

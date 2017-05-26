@@ -14,6 +14,12 @@ object PathUtils {
     path
   }
 
+  lazy val nonExistingPath: Path = {
+    val path = Files.createTempFile("pureconfig", "conf")
+    path.toFile.delete()
+    path
+  }
+
   def resourceFromName(name: String): Path = {
     Paths.get(getClass.getResource(name).getPath)
   }
