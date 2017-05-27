@@ -1,6 +1,6 @@
 package pureconfig.backend
 
-import java.nio.file.Path
+import java.nio.file.{ Files, Path }
 
 import scala.util.control.NonFatal
 
@@ -23,7 +23,7 @@ object ConfigFactoryWrapper {
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): Either[ConfigReaderFailures, Config] = {
-    if (!path.toFile.isFile || !path.toFile.canRead) Left(ConfigReaderFailures(CannotReadFile(path)))
+    if (!Files.isRegularFile(path) || !Files.isReadable(path)) Left(ConfigReaderFailures(CannotReadFile(path)))
     else unsafeToEither(ConfigFactory.parseFile(path.toFile))
   }
 

@@ -16,7 +16,7 @@ object PathUtils {
 
   lazy val nonExistingPath: Path = {
     val path = Files.createTempFile("pureconfig", "conf")
-    path.toFile.delete()
+    Files.delete(path)
     path
   }
 
