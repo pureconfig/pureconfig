@@ -46,4 +46,5 @@ loadConfig[Config](conf)
 
 All XML values are deserialized into `Elem`. 
 
-In HOCON files, if the XML contains quotes, you will need to wrap the XML in triple-quotes, as in the example above.
+In HOCON files, if the XML contains quotes, you will need to either wrap the XML in triple-quotes or escape the 
+embedded quotes.

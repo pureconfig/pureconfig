@@ -20,7 +20,7 @@ Loading a `Foo` results in a `Left` because of missing keys, but loading a `FooO
 
 ```scala
 ConfigFactory.empty.to[Foo]
-// res1: Either[pureconfig.error.ConfigReaderFailures,Foo] = Left(ConfigReaderFailures(KeyNotFound(a,None),List()))
+// res1: Either[pureconfig.error.ConfigReaderFailures,Foo] = Left(ConfigReaderFailures(KeyNotFound(a,None,Set()),List()))
 
 ConfigFactory.empty.to[FooOpt]
 // res2: Either[pureconfig.error.ConfigReaderFailures,FooOpt] = Right(FooOpt(None))
