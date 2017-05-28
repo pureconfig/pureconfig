@@ -2,14 +2,20 @@
 
 - New features
   - `ConfigReader`, `ConfigWriter` and `ConfigConvert` now have combinators such as `map`, `flatMap` and `contramap`,
-    making them easier to compose.
+    making them easier to compose;
   - New mechanism to read and write [value classes](http://docs.scala-lang.org/overviews/core/value-classes.html).
-    The readers and writers of the inner type are used instead of the ones for products.
-  - `ConfigReader` and `ConfigWriter` instances for `Pattern` and `Regex`.
-  - `ConfigReader` and `ConfigWriter` for `java.io.File`
-  - `ConfigReader` and `ConfigWriter` for arbitrary Java Enums
+    The readers and writers of the inner type are used instead of the ones for products;
+  - New `EnumCoproductHint` for sealed families of case objects where objects are written and read as strings with their
+    type names;
+  - `ConfigReader` and `ConfigWriter` instances for `Pattern` and `Regex`;
+  - `ConfigReader` and `ConfigWriter` instances for `java.time.Duration`;
+  - `ConfigReader` and `ConfigWriter` for `java.io.File`;
+  - `ConfigReader` and `ConfigWriter` for arbitrary Java `enum`s;
+  - Improved error messages when a failure occurs reading a config;
 - Bug fixes
-  - `Duration.Undefined` is correctly handled when reading and writing configurations. [[#184](https://github.com/melrief/pureconfig/issues/184)]
+  - `Duration.Undefined` is correctly handled when reading and writing configurations [[#184](https://github.com/melrief/pureconfig/issues/184)];
+  - `loadConfig` method now handles properly cases where a requested config file cannot be read and when a provided
+    namespace doesn't exist.
 
 ### 0.7.0 (Apr 2, 2017)
 
