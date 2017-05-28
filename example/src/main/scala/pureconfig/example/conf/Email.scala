@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig.example
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 /**
-  * This is not a production-quality email address validator.
-  * It is provided only for illustration purposes.
-  */
+ * This is not a production-quality email address validator.
+ * It is provided only for illustration purposes.
+ */
 object Email {
   private val regex = """^([a-zA-Z0-9!#$%&'.*+/=?^_`{|}~;-]+)@([a-zA-Z0-9.-]+)$""".r
 
