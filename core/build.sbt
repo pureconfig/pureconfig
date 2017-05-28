@@ -2,7 +2,7 @@ import Dependencies._
 
 name := "pureconfig"
 
-organization := "com.github.pureconfig"
+organization := "net.ruippeixotog"
 
 homepage := Some(url("https://github.com/pureconfig/pureconfig"))
 

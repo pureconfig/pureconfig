@@ -1,6 +1,6 @@
 name := "pureconfig-joda"
 
-organization := "com.github.pureconfig"
+organization := "net.ruippeixotog"
 
 homepage := Some(url("https://github.com/pureconfig/pureconfig"))
 
