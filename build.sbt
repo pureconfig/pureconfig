@@ -17,17 +17,14 @@ def module(proj: Project) = proj.
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
 
+lazy val akka = module(project) in file("modules/akka")
 lazy val cats = module(project) in file("modules/cats")
-lazy val enumeratum = module(project) in file("modules/enumeratum")
 lazy val enum = module(project) in file("modules/enum")
+lazy val enumeratum = module(project) in file("modules/enumeratum")
+lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")
 lazy val scalaxml = module(project) in file("modules/scala-xml")
 lazy val squants = module(project) in file("modules/squants")
-lazy val javax = module(project) in file("modules/javax")
-
-// akka 2.4 isn't published for Scala 2.10
-lazy val akka = (module(project) in file("modules/akka")).
-  settings(crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) })
 
 lazy val commonSettings = tutSettings ++ Seq(
   organization := "com.github.pureconfig",
