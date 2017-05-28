@@ -1,5 +1,6 @@
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
+import ReleaseTransformations._
 
 enablePlugins(CrossPerProjectPlugin)
 
@@ -104,3 +105,21 @@ lazy val settings = Seq(
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
   },
   autoAPIMappings := true) ++ xlint ++ formattingSettings ++ tutSettings ++ Seq(tutTargetDirectory := baseDirectory.value)
+
+releaseTagComment := s"Release ${(version in ThisBuild).value}"
+releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"
+
+// redefine the release process so that we use sbt-doge cross building operator (+)
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  releaseStepCommandAndRemaining("+test"),
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("+publishSigned"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges,
+  releaseStepCommandAndRemaining("sonatypeReleaseAll"))
