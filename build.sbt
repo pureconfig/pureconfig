@@ -4,15 +4,16 @@ import ReleaseTransformations._
 enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
-  settings(commonSettings,
-    tutTargetDirectory := file(".")
-  )
+  enablePlugins(TutPlugin).
+  settings(commonSettings, tutTargetDirectory := file("."))
 
 lazy val docs = (project in file("docs")).
+  enablePlugins(TutPlugin).
   settings(commonSettings, publishArtifact := false).
   dependsOn(core)
 
 def module(proj: Project) = proj.
+  enablePlugins(TutPlugin).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
@@ -26,7 +27,7 @@ lazy val joda = module(project) in file("modules/joda")
 lazy val scalaxml = module(project) in file("modules/scala-xml")
 lazy val squants = module(project) in file("modules/squants")
 
-lazy val commonSettings = tutSettings ++ Seq(
+lazy val commonSettings = Seq(
   organization := "com.github.pureconfig",
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
@@ -63,6 +64,7 @@ lazy val commonSettings = tutSettings ++ Seq(
   },
 
   tutTargetDirectory := baseDirectory.value,
+  scalacOptions in Tut := (scalacOptions in Tut).value.filterNot(Set("-Ywarn-unused-import")),
   autoAPIMappings := true,
 
   publishMavenStyle := true,
