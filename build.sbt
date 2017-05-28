@@ -30,8 +30,16 @@ lazy val akka = (module(project) in file("modules/akka")).
   settings(crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) })
 
 lazy val commonSettings = tutSettings ++ Seq(
+  organization := "com.github.pureconfig",
+  homepage := Some(url("https://github.com/pureconfig/pureconfig")),
+  licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
+
   scalaVersion := "2.12.2",
   crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2"),
+
+  resolvers ++= Seq(
+    Resolver.sonatypeRepo("releases"),
+    Resolver.sonatypeRepo("snapshots")),
 
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) => scala212LintFlags
@@ -58,7 +66,15 @@ lazy val commonSettings = tutSettings ++ Seq(
   },
 
   tutTargetDirectory := baseDirectory.value,
-  autoAPIMappings := true)
+  autoAPIMappings := true,
+
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+  })
 
 lazy val allVersionLintFlags = Seq(
   "-deprecation",
