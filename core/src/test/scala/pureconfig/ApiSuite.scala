@@ -8,8 +8,9 @@ import java.util.concurrent.TimeUnit
 
 import com.typesafe.config.ConfigFactory
 import pureconfig.PathUtils._
-
 import scala.concurrent.duration.FiniteDuration
+
+import pureconfig.error._
 
 class ApiSuite extends BaseSuite {
 
@@ -35,18 +36,22 @@ class ApiSuite extends BaseSuite {
     case class Conf(f: Float)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
     loadConfig[Conf](conf = conf, namespace = "foo.bar") shouldBe Right(Conf(1.0F))
+    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar.foo", None, Set.empty))
   }
 
   it should "loadConfig from a configuration file" in {
     case class Conf(s: String, b: Boolean)
     val path = createTempFile("""{ b: true, s: "str" }""")
     loadConfig[Conf](path = path) shouldBe Right(Conf("str", true))
+    loadConfig[Conf](path = nonExistingPath) should failWithType[CannotReadFile]
   }
 
   it should "loadConfig from a configuration file with a namespace" in {
     case class Conf(s: String, b: Boolean)
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
     loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true))
+    loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failWithType[CannotReadFile]
+    loadConfig[Conf](path = path, namespace = "bar.foo") should failWith(KeyNotFound("bar.foo", None, Set.empty))
   }
 
   it should "be able to load a realistic configuration file" in {
@@ -117,9 +122,15 @@ class ApiSuite extends BaseSuite {
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(0.99F))
   }
 
-  it should "complain if the list of files is empty" in {
+  it should "fail if the list of files is empty" in {
     case class Conf(f: Float)
     val files = Set.empty[Path]
-    loadConfigFromFiles[Conf](files) shouldBe a[Left[_, _]]
+    loadConfigFromFiles[Conf](files) should failWithType[ThrowableFailure]
+  }
+
+  it should "fail if any of the files does not exist" in {
+    case class Conf(f: Float)
+    val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority1.conf") :+ nonExistingPath
+    loadConfigFromFiles[Conf](files) should failWithType[CannotReadFile]
   }
 }
