@@ -1,4 +1,4 @@
-### 0.7.1 (unreleased)
+### 0.7.1 (May 28, 2017)
 
 - New features
   - `ConfigReader`, `ConfigWriter` and `ConfigConvert` now have combinators such as `map`, `flatMap` and `contramap`,
