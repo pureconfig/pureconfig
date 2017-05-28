@@ -7,5 +7,6 @@ class BaseSuite
   extends FlatSpec
   with ConfigConvertChecks
   with Matchers
+  with ConfigReaderMatchers
   with EitherValues
   with GeneratorDrivenPropertyChecks

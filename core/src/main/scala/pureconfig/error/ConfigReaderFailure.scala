@@ -4,6 +4,7 @@
 package pureconfig.error
 
 import java.net.URL
+import java.nio.file.Path
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -295,6 +296,16 @@ final case class NoValidCoproductChoiceFound(value: ConfigValue, location: Optio
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
     this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
+}
+
+/**
+ * A failure representing the inability to read a requested file.
+ */
+final case class CannotReadFile(path: Path) extends ConfigReaderFailure {
+  val location = None
+
+  def description = s"Unable to read file: ${path.toString}"
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) = this
 }
 
 /**
