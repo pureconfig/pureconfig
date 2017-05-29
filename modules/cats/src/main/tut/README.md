@@ -8,7 +8,7 @@ Adds support for selected [cats](http://typelevel.org/cats/) data structures to 
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.7.1"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.7.2"
 ```
 
 ## Example
