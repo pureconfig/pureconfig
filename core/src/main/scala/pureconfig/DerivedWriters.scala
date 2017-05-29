@@ -12,6 +12,7 @@ trait DerivedWriters extends DerivedWriters1 {
   implicit def deriveAnyVal[T, U](
     implicit
     ev: T <:< AnyVal,
+    generic: Generic[T],
     unwrapped: Unwrapped.Aux[T, U],
     writer: ConfigWriter[U]): ConfigWriter[T] =
     new ConfigWriter[T] {
