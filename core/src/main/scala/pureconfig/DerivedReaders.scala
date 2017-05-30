@@ -28,6 +28,7 @@ trait DerivedReaders extends DerivedReaders1 {
   implicit def deriveAnyVal[T, U](
     implicit
     ev: T <:< AnyVal,
+    generic: Generic[T],
     unwrapped: Unwrapped.Aux[T, U],
     reader: ConfigReader[U]): ConfigReader[T] =
     new ConfigReader[T] {
