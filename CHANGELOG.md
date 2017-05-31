@@ -1,3 +1,8 @@
+### 0.7.2 (May 29, 2017)
+
+- Bug fixes
+  - Fix value class `ConfigReader` and `ConfigWriter` derivation [[#253](https://github.com/pureconfig/pureconfig/pull/253)].
+
 ### 0.7.1 (May 28, 2017)
 
 - New features
