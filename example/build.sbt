@@ -8,8 +8,7 @@ libraryDependencies ++= Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.7.2",
 
   // needed for Scala 2.10
-  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch)
-)
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
 
 crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2")
 
@@ -24,5 +23,4 @@ scalacOptions ++= Seq(
   "-Xlint",
   "-Yno-adapted-args",
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard"
-)
+  "-Ywarn-value-discard")

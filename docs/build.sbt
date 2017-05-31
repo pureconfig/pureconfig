@@ -1,3 +1,2 @@
 libraryDependencies ++= Seq(
-  Dependencies.scalaMacrosParadise
-)
+  Dependencies.scalaMacrosParadise)
