@@ -1,3 +1,9 @@
+### 0.7.3 (unreleased)
+
+- New features
+  - `ConfigFieldMapping` now has a `withExceptions` method that allows users to easily define exceptions to an existing
+    mapping.
+
 ### 0.7.2 (May 29, 2017)
 
 - Bug fixes
