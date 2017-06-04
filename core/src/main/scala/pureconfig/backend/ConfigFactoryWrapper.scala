@@ -1,10 +1,11 @@
 package pureconfig.backend
 
-import java.nio.file.{ Files, Path }
+import java.nio.file.Path
 
 import scala.util.control.NonFatal
 
-import com.typesafe.config.{ Config, ConfigException, ConfigFactory }
+import com.typesafe.config._
+import pureconfig.ConvertHelpers._
 import pureconfig.error._
 
 /**
@@ -12,6 +13,7 @@ import pureconfig.error._
  * of throwing exceptions
  */
 object ConfigFactoryWrapper {
+  private[this] val strictSettings = ConfigParseOptions.defaults.setAllowMissing(false)
 
   /** @see `com.typesafe.config.ConfigFactory.invalidateCaches()` */
   def invalidateCaches(): Either[ConfigReaderFailures, Unit] =
@@ -22,23 +24,19 @@ object ConfigFactoryWrapper {
     unsafeToEither(ConfigFactory.load())
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
-  def parseFile(path: Path): Either[ConfigReaderFailures, Config] = {
-    if (!Files.isRegularFile(path) || !Files.isReadable(path)) Left(ConfigReaderFailures(CannotReadFile(path)))
-    else unsafeToEither(ConfigFactory.parseFile(path.toFile))
-  }
+  def parseFile(path: Path): Either[ConfigReaderFailures, Config] =
+    unsafeToEither(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): Either[ConfigReaderFailures, Config] =
     parseFile(path).right.flatMap(rawConfig => unsafeToEither(ConfigFactory.load(rawConfig)))
 
-  private def unsafeToEither[A](f: => A): Either[ConfigReaderFailures, A] = {
+  private def unsafeToEither[A](f: => A, path: Option[Path] = None): Either[ConfigReaderFailures, A] = {
     try Right(f) catch {
-      case e: ConfigException.Parse =>
-        Left(ConfigReaderFailures(CannotParse(e.getLocalizedMessage, ConfigValueLocation(e.origin()))))
-      case e: ConfigException =>
-        Left(ConfigReaderFailures(ThrowableFailure(e, ConfigValueLocation(e.origin()), "")))
-      case NonFatal(e) =>
-        Left(ConfigReaderFailures(ThrowableFailure(e, None, "")))
+      case e: ConfigException.IO if path.nonEmpty => fail(CannotReadFile(path.get, Option(e.getCause)))
+      case e: ConfigException.Parse => fail(CannotParse(e.getLocalizedMessage, ConfigValueLocation(e.origin())))
+      case e: ConfigException => failWithThrowable(e)(ConfigValueLocation(e.origin()))
+      case NonFatal(e) => failWithThrowable(e)(None)
     }
   }
 }
