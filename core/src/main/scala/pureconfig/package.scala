@@ -8,7 +8,7 @@ import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
 import com.typesafe.config.{ ConfigException, Config => TypesafeConfig }
-import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures, ConfigValueLocation, KeyNotFound }
+import pureconfig.error._
 import pureconfig.ConfigConvert.improveFailures
 import pureconfig.backend.ConfigFactoryWrapper.{ invalidateCaches, load, loadFile, parseFile }
 import scala.reflect.ClassTag
@@ -278,8 +278,8 @@ package object pureconfig {
       files
         .map(parseFile)
         .foldLeft[Either[ConfigReaderFailures, Seq[TypesafeConfig]]](Right(Seq())) {
-          case (c1, c2) =>
-            ConfigConvert.combineResults(c1, c2)(_ :+ _)
+          case (c1, Left(ConfigReaderFailures(_: CannotReadFile, Nil))) => c1
+          case (c1, c2) => ConfigConvert.combineResults(c1, c2)(_ :+ _)
         }
         .right.map(_.reduce(_.withFallback(_)).resolve)
         .right.flatMap(loadConfig[Config])
