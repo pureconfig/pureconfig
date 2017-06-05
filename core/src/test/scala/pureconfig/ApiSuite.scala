@@ -121,7 +121,7 @@ class ApiSuite extends BaseSuite {
     loadConfigFromFiles[Conf](files) should failWithType[ThrowableFailure]
   }
 
-  it should "ignore files that doesn't exist" in {
+  it should "ignore files that don't exist" in {
     case class Conf(b: Boolean, d: Double)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf") :+ nonExistingPath
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D))
@@ -130,7 +130,7 @@ class ApiSuite extends BaseSuite {
   "loadConfigWithFallback" should "fallback if no config keys are found" in {
     case class Conf(f: Float, o: Option[Int], d: Double)
     val priority1Conf = ConfigFactory.load("conf/loadConfigFromFiles/priority1.conf")
-    // first wo are in priority1.conf, the d is in reference.conf
+    // `f` and `o` are defined in priority1.conf, `d` is defined in reference.conf
     loadConfigWithFallback[Conf](priority1Conf) shouldBe Right(Conf(0.99F, None, 0.0))
   }
 }
