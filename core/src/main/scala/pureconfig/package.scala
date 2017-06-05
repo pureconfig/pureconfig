@@ -278,7 +278,7 @@ package object pureconfig {
       files
         .map(parseFile)
         .foldLeft[Either[ConfigReaderFailures, Seq[TypesafeConfig]]](Right(Seq())) {
-          case (c1, Left(ConfigReaderFailures(_: CannotReadFile, Nil))) => c1
+          case (c1, Left(failures)) if failures.toList.exists(_.isInstanceOf[CannotReadFile]) => c1
           case (c1, c2) => ConfigConvert.combineResults(c1, c2)(_ :+ _)
         }
         .right.map(_.reduce(_.withFallback(_)).resolve)
