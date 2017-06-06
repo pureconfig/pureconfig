@@ -14,10 +14,8 @@ trait ConfigFieldMapping extends (String => String) {
    * @return a `ConfigFieldMapping` that maps fields using `exceptions` if the field is present there and otherwise
    *         uses this mapping.
    */
-  def withExceptions(exceptions: (String, String)*) = {
-    val map = exceptions.toMap
-    ConfigFieldMapping { field => map.getOrElse(field, this.apply(field)) }
-  }
+  def withExceptions(exceptions: (String, String)*) =
+    ConfigFieldMapping(exceptions.toMap.withDefault(apply))
 }
 
 object ConfigFieldMapping {
