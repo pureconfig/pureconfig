@@ -1,6 +1,7 @@
 package pureconfig
 
 import java.io.File
+import java.math.{ BigDecimal => JavaBigDecimal, BigInteger }
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
@@ -66,6 +67,11 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[Long]
 
   checkArbitrary[Short]
+
+  checkArbitrary[BigInt]
+  checkArbitrary[BigDecimal]
+  checkArbitrary[BigInteger]
+  checkArbitrary[JavaBigDecimal]
 
   checkArbitrary[UUID]
 
