@@ -13,16 +13,15 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
     linesBuffer += s"Cannot convert configuration to a ${ct.runtimeClass.getName}. Failures are:"
 
     val failuresList = failures.toList
-    val parseFailures = failuresList.collect { case f: CannotParse => f }
-    val convertFailures = failuresList.collect { case f: ConvertFailure => f }
+    val (convertFailures, otherFailures) = failuresList.partition(_.isInstanceOf[ConvertFailure])
 
-    val failuresByPath = convertFailures.toList.groupBy(_.path).toList.sortBy(_._1)
+    val failuresByPath = convertFailures.asInstanceOf[List[ConvertFailure]].groupBy(_.path).toList.sortBy(_._1)
 
-    parseFailures.foreach { failure =>
+    otherFailures.foreach { failure =>
       linesBuffer += s"${ConfigReaderException.descriptionWithLocation(failure, "  ")}"
     }
 
-    if (parseFailures.nonEmpty && convertFailures.nonEmpty) {
+    if (otherFailures.nonEmpty && convertFailures.nonEmpty) {
       linesBuffer += ""
     }
 
