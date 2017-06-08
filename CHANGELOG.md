@@ -1,3 +1,8 @@
+### 0.7.3 (unreleased)
+
+- Bug fixes
+  - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted.
+
 ### 0.7.2 (May 29, 2017)
 
 - Bug fixes
