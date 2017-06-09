@@ -1,8 +1,8 @@
 ### 0.7.3 (unreleased)
 
 - New features
-  - `ConfigFieldMapping` now has a `withExceptions` method that allows users to easily define exceptions to an existing
-    mapping;
+  - `ConfigFieldMapping` now has a `withOverrides` method that allows users to easily define exceptional cases to an
+    existing mapping;
 - Bug fixes
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted.
 
