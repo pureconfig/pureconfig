@@ -112,5 +112,8 @@ class ProductConvertersSuite extends BaseSuite {
 
     val conf7 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> 1).asJava).root()
     ConfigConvert[Conf].from(conf7).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(1))
+
+    val conf8 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> null).asJava).root()
+    ConfigConvert[Conf].from(conf8).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), None)
   }
 }
