@@ -88,13 +88,13 @@ class ProductConvertersSuite extends BaseSuite {
 
   it should "consider default arguments by default" in {
     case class InnerConf(e: Int, g: Int)
-    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
+    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44), e: Option[Int] = Some(45))
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava).root()
-    ConfigConvert[Conf].from(conf1).right.value shouldBe Conf(2, "default", 42, InnerConf(43, 44))
+    ConfigConvert[Conf].from(conf1).right.value shouldBe Conf(2, "default", 42, InnerConf(43, 44), Some(45))
 
     val conf2 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50).asJava).root()
-    ConfigConvert[Conf].from(conf2).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44))
+    ConfigConvert[Conf].from(conf2).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(45))
 
     val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava).root()
     ConfigConvert[Conf].from(conf3).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a", None))
@@ -103,11 +103,17 @@ class ProductConvertersSuite extends BaseSuite {
     ConfigConvert[Conf].from(conf4).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("d.g", None))
 
     val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava).root()
-    ConfigConvert[Conf].from(conf5).right.value shouldBe Conf(2, "default", 42, InnerConf(5, 6))
+    ConfigConvert[Conf].from(conf5).right.value shouldBe Conf(2, "default", 42, InnerConf(5, 6), Some(45))
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava).root()
     val failures = ConfigConvert[Conf].from(conf6).left.value.toList
     failures should have size 1
     failures.head shouldBe a[WrongType]
+
+    val conf7 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> 1).asJava).root()
+    ConfigConvert[Conf].from(conf7).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(1))
+
+    val conf8 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> null).asJava).root()
+    ConfigConvert[Conf].from(conf8).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), None)
   }
 }

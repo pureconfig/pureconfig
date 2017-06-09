@@ -151,7 +151,7 @@ class ProductHintSuite extends BaseSuite {
 
   it should "not use default arguments if specified through a product hint" in {
     case class InnerConf(e: Int, g: Int)
-    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44))
+    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44), e: Option[Int] = Some(45))
 
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
