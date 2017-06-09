@@ -18,8 +18,8 @@ class ConfigFieldMappingSuite extends FlatSpec with Matchers {
     mapping("theUglyFld") === "the_ugly_fld"
   }
 
-  it should "allow defining mappings with some exceptions" in {
-    val mapping = ConfigFieldMapping(CamelCase, SnakeCase).withExceptions(
+  it should "allow defining mappings with some overrides" in {
+    val mapping = ConfigFieldMapping(CamelCase, SnakeCase).withOverrides(
       "theUglyFld" -> "the_ugly_field")
 
     mapping("theBeautifulField") === "the_beautiful_field"

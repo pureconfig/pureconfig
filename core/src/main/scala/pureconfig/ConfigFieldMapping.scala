@@ -8,14 +8,14 @@ trait ConfigFieldMapping extends (String => String) {
   def apply(fieldName: String): String
 
   /**
-   * Returns a `ConfigFieldMapping` that uses this mapping with some exceptions.
+   * Returns a `ConfigFieldMapping` that uses this mapping with some overrides.
    *
-   * @param exceptions the exceptions for this mapping as pairs (field, configKey)
-   * @return a `ConfigFieldMapping` that maps fields using `exceptions` if the field is present there and otherwise
+   * @param overrides the overrides for this mapping as pairs (field, configKey)
+   * @return a `ConfigFieldMapping` that maps fields using `overrides` if the field is present there and otherwise
    *         uses this mapping.
    */
-  def withExceptions(exceptions: (String, String)*) =
-    ConfigFieldMapping(exceptions.toMap.withDefault(apply))
+  def withOverrides(overrides: (String, String)*) =
+    ConfigFieldMapping(overrides.toMap.withDefault(apply))
 }
 
 object ConfigFieldMapping {
