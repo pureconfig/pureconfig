@@ -71,7 +71,7 @@ trait DerivedReaders1 {
   implicit final def hConsConfigReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit
     key: Witness.Aux[K],
-    vFieldConvert: Lazy[ConfigReader[V]],
+    vFieldReader: Lazy[ConfigReader[V]],
     tConfigReader: Lazy[WrappedDefaultValue[Wrapped, T, U]],
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
@@ -79,14 +79,14 @@ trait DerivedReaders1 {
       val fieldName = key.value.name
       val keyStr = hint.configKey(fieldName)
       val headResult = improveFailures[V](
-        (co.get(keyStr), vFieldConvert.value) match {
-          case (null, converter: AllowMissingKey) =>
-            converter.from(co.get(keyStr))
-          case (null, _) =>
-            val defaultValue = if (hint.useDefaultArgs) default.head else None
-            defaultValue.fold(fail[V](CannotConvertNull(fieldName, co.keySet.asScala)))(Right[Nothing, V](_))
-          case (value, converter) =>
-            converter.from(value)
+        (co.get(keyStr), vFieldReader.value) match {
+          case (null, reader) =>
+            default.head match {
+              case Some(defaultValue) if hint.useDefaultArgs => Right[Nothing, V](defaultValue)
+              case _ if reader.isInstanceOf[AllowMissingKey] => reader.from(null)
+              case _ => fail[V](CannotConvertNull(fieldName, co.keySet.asScala))
+            }
+          case (value, reader) => reader.from(value)
         },
         keyStr,
         ConfigValueLocation(co))
