@@ -212,4 +212,18 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |  - (file:${workingDir}${file}:2) Unable to parse the configuration.
           |""".stripMargin
   }
+
+  it should "have a message indicating that a given file does not exist" in {
+    val workingDir = getClass.getResource("/").getFile
+    val file = "conf/nonexisting"
+
+    val exception = intercept[ConfigReaderException[_]] {
+      loadConfigOrThrow[Conf](Paths.get(workingDir, file))
+    }
+
+    exception.getMessage shouldBe
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
+          |  - Unable to read file ${workingDir}${file} (No such file or directory).
+          |""".stripMargin
+  }
 }

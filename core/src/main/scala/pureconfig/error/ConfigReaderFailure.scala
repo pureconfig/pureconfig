@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig.error
 
+import java.io.FileNotFoundException
 import java.net.URL
 import java.nio.file.Path
 
@@ -301,10 +302,15 @@ final case class NoValidCoproductChoiceFound(value: ConfigValue, location: Optio
 /**
  * A failure representing the inability to read a requested file.
  */
-final case class CannotReadFile(path: Path) extends ConfigReaderFailure {
+final case class CannotReadFile(path: Path, reason: Option[Throwable]) extends ConfigReaderFailure {
   val location = None
 
-  def description = s"Unable to read file: ${path.toString}"
+  def description = reason match {
+    case Some(ex: FileNotFoundException) => s"Unable to read file ${ex.getMessage}." // a FileNotFoundException already includes the path
+    case Some(ex) => s"Unable to read file $path (${ex.getMessage})."
+    case None => s"Unable to read file $path."
+  }
+
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) = this
 }
 

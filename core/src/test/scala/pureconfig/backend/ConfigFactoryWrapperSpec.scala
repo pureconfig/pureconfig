@@ -1,5 +1,7 @@
 package pureconfig.backend
 
+import java.io.FileNotFoundException
+
 import com.typesafe.config.{ ConfigException, ConfigFactory }
 import pureconfig.BaseSuite
 import pureconfig.PathUtils._
@@ -11,7 +13,9 @@ class ConfigFactoryWrapperSpec extends BaseSuite {
 
   it should "return a Left when a file does not exist" in {
     ConfigFactory.parseFile(nonExistingPath.toFile) shouldEqual ConfigFactory.empty
-    ConfigFactoryWrapper.parseFile(nonExistingPath) should failWith(CannotReadFile(nonExistingPath))
+    ConfigFactoryWrapper.parseFile(nonExistingPath) should failLike {
+      case CannotReadFile(`nonExistingPath`, Some(reason)) => be(a[FileNotFoundException])(reason)
+    }
   }
 
   it should "return a Left when a file exists but cannot be parsed" in {
@@ -24,7 +28,9 @@ class ConfigFactoryWrapperSpec extends BaseSuite {
 
   it should "return a Left when a file does not exist" in {
     ConfigFactory.load(ConfigFactory.parseFile(nonExistingPath.toFile)) shouldEqual ConfigFactory.load
-    ConfigFactoryWrapper.loadFile(nonExistingPath) should failWith(CannotReadFile(nonExistingPath))
+    ConfigFactoryWrapper.loadFile(nonExistingPath) should failLike {
+      case CannotReadFile(`nonExistingPath`, Some(reason)) => be(a[FileNotFoundException])(reason)
+    }
   }
 
   it should "return a Left when a file exists but cannot be parsed" in {
