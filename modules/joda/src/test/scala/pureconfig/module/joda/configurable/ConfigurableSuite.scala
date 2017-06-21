@@ -1,19 +1,18 @@
 package pureconfig.module.joda.configurable
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ ConfigFactory, ConfigValueFactory }
 import org.joda.time._
-import org.joda.time.format.DateTimeFormat
-
-import org.scalatest._
+import org.joda.time.format.{ DateTimeFormat, DateTimeFormatter, ISOPeriodFormat, PeriodFormatter }
 import org.scalacheck.{ Arbitrary, Gen }
-import prop.PropertyChecks
 import pureconfig.syntax._
 import ConfigurableSuite._
+import pureconfig.module.joda._
 import pureconfig.configurable.{ ConfigurableSuite => JTime }
-
 import scala.collection.JavaConverters._
 
-class ConfigurableSuite extends FlatSpec with Matchers with EitherValues with PropertyChecks {
+import pureconfig.BaseSuite
+
+class ConfigurableSuite extends BaseSuite {
 
   val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ")
   implicit val dateTimeInstance = dateTimeConfigConvert(isoFormatter)
@@ -28,7 +27,7 @@ class ConfigurableSuite extends FlatSpec with Matchers with EitherValues with Pr
   val timeFormatter = DateTimeFormat.forPattern("HH:mm:ss.SSS")
   implicit val localTimeInstance = localTimeConfigConvert(timeFormatter)
 
-  "pureconfig" should "parse LocalTime" in forAll {
+  it should "parse LocalTime" in forAll {
     (localTime: LocalTime) =>
       val conf = ConfigFactory.parseString(s"""{time:"${timeFormatter.print(localTime)}"}""")
       case class Conf(time: LocalTime)
@@ -74,6 +73,48 @@ class ConfigurableSuite extends FlatSpec with Matchers with EitherValues with Pr
       case class Conf(yearMonth: YearMonth)
       conf.to[Conf].right.value shouldEqual Conf(yearMonth)
   }
+
+  it should "parse Instant" in forAll {
+    (instant: Instant) =>
+      val conf = ConfigFactory.parseString(s"""{instant:${instant.getMillis}}""")
+      case class Conf(instant: Instant)
+      conf.to[Conf].right.value shouldEqual Conf(instant)
+  }
+
+  it should "parse Interval" in forAll {
+    (interval: Interval) =>
+      val conf = ConfigFactory.parseString(s"""{interval:"${interval.toString}"}""")
+      case class Conf(interval: Interval)
+      conf.to[Conf].right.value shouldEqual Conf(interval)
+  }
+
+  it should "parse Duration" in forAll {
+    (duration: Duration) =>
+      val conf = ConfigFactory.parseString(s"""{duration:"${duration.toString}"}""")
+      case class Conf(duration: Duration)
+      conf.to[Conf].right.value shouldEqual Conf(duration)
+  }
+
+  it should "parse DateTimeZone" in forAll {
+    (dateTimeZone: DateTimeZone) =>
+      val conf = ConfigFactory.parseString(s"""{date-time-zone:"${dateTimeZone.getID}"}""")
+      case class Conf(dateTimeZone: DateTimeZone)
+      conf.to[Conf].right.value shouldEqual Conf(dateTimeZone)
+  }
+
+  val periodFormatter: PeriodFormatter = ISOPeriodFormat.standard()
+  implicit val periodInstance = periodConfigConvert(periodFormatter)
+
+  it should "parse Period" in forAll {
+    (period: Period) =>
+      val conf = ConfigFactory.parseString(s"""{period:"${periodFormatter.print(period)}"}""")
+      case class Conf(period: Period)
+      conf.to[Conf].right.value.period.toStandardDuration shouldEqual Conf(period).period.toStandardDuration
+  }
+
+  checkRead[DateTimeFormatter](
+    DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ") ->
+      ConfigValueFactory.fromAnyRef("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ"))
 }
 
 object ConfigurableSuite {
@@ -115,4 +156,30 @@ object ConfigurableSuite {
         localDateTime <- localDateTimeArbitrary.arbitrary
         zoneId <- zoneIdArbitrary.arbitrary
       } yield localDateTime.toDateTime(zoneId))
+
+  implicit val instantArbitrary: Arbitrary[Instant] =
+    Arbitrary(Arbitrary.arbitrary[Long].map(new Instant(_)))
+
+  implicit val intervalArbitrary: Arbitrary[Interval] =
+    Arbitrary(Arbitrary.arbitrary[(DateTime, DateTime)]
+      .filter(i => i._1.isBefore(i._2))
+      .map { i =>
+        // Comparing new Interval(foo) with Interval.parseWithOffset(foo) will return false
+        // See http://www.joda.org/joda-time/apidocs/org/joda/time/Interval.html#parseWithOffset-java.lang.String-
+        Interval.parseWithOffset(new Interval(i._1, i._2).toString)
+      })
+
+  implicit val durationArbitrary: Arbitrary[Duration] =
+    Arbitrary(Arbitrary.arbitrary[Long].map(new Duration(_)))
+
+  implicit val periodArbitrary: Arbitrary[Period] = {
+    Arbitrary(
+      for {
+        // Marshelling and unmarshalling fails with big values
+        i1 <- Gen.choose(-50, 50)
+        i2 <- Gen.choose(-50, 50)
+        i3 <- Gen.choose(-50, 50)
+        i4 <- Gen.choose(-50, 50)
+      } yield new Period(i1, i2, i3, i4))
+  }
 }
