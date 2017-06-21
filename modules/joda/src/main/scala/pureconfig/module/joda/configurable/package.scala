@@ -43,4 +43,8 @@ package object configurable {
   def yearMonthConfigConvert(formatter: DateTimeFormatter): ConfigConvert[YearMonth] =
     viaNonEmptyString[YearMonth](
       catchReadError(YearMonth.parse(_, formatter)), formatter.print)
+
+  def periodConfigConvert(formatter: PeriodFormatter): ConfigConvert[Period] =
+    viaNonEmptyString[Period](
+      catchReadError(Period.parse(_, formatter)), formatter.print)
 }
