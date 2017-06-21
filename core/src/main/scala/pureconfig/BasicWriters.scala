@@ -1,6 +1,7 @@
 package pureconfig
 
 import java.io.File
+import java.math.{ BigDecimal => JavaBigDecimal, BigInteger }
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
@@ -9,6 +10,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.math.{ BigDecimal, BigInt }
 import scala.util.matching.Regex
 
 import com.typesafe.config._
@@ -85,6 +87,17 @@ trait DurationWriters {
 }
 
 /**
+ * Trait containing `ConfigWriter` instances for Java and Scala arbitrary-precision numeric types.
+ */
+trait NumericWriters {
+
+  implicit val javaBigDecimalWriter: ConfigWriter[JavaBigDecimal] = ConfigWriter.toDefaultString[JavaBigDecimal]
+  implicit val bigIntegerWriter: ConfigWriter[BigInteger] = ConfigWriter.toDefaultString[BigInteger]
+  implicit val scalaBigDecimalWriter: ConfigWriter[BigDecimal] = ConfigWriter.toDefaultString[BigDecimal]
+  implicit val scalaBigIntWriter: ConfigWriter[BigInt] = ConfigWriter.toDefaultString[BigInt]
+}
+
+/**
  * Trait containing `ConfigWriter` instances for Typesafe config models.
  */
 trait TypesafeConfigWriters {
@@ -117,6 +130,7 @@ trait BasicWriters
   with RegexWriters
   with JavaTimeWriters
   with DurationWriters
+  with NumericWriters
   with TypesafeConfigWriters
 
 object BasicWriters extends BasicWriters

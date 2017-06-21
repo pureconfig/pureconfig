@@ -120,6 +120,8 @@ Currently supported types for fields are:
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
 - [`java.util.regex.Pattern`](https://docs.oracle.com/javase/8/docs/api/index.html?java/util/regex/Pattern.html) and [`scala.util.matching.Regex`](https://www.scala-lang.org/files/archive/api/current/scala/util/matching/Regex.html);
+- [`java.math.BigDecimal`](https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html), [`java.math.BigInteger`](https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html),
+  [`scala.math.BigDecimal`](https://www.scala-lang.org/api/2.12.2/index.html#scala.math.BigDecimal), and [`scala.math.BigInt'](https://www.scala-lang.org/api/2.12.2/index.html#scala.math.BigInt);
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - value classes for which readers and writers of the inner type are used;
 - case classes;
