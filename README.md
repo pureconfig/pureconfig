@@ -186,12 +186,12 @@ A non-comprehensive list of other libraries which have integrated with PureConfi
 
 ## FAQ
 
-### How can I use PureConfig with Spark 2.1.0 (problematic shapeless dependency)?
+### How can I use PureConfig with Spark 2.1.0 (problematic Shapeless dependency)?
 
 Apache Spark (specifically version 2.1.0) has a transitive dependency
-on [shapeless](https://github.com/milessabin/shapeless) 2.0.0. This version is
+on [Shapeless](https://github.com/milessabin/shapeless) 2.0.0. This version is
 too old to be used by PureConfig, making your Spark project fail when using
-`spark-submit`. The solution is to shade, i.e. rename, the version of shapeless
+`spark-submit`. The solution is to shade, i.e. rename, the version of Shapeless
 used by PureConfig.
 
 #### SBT
@@ -210,7 +210,7 @@ to your `assembly.sbt` file.
 #### Maven
 
 The [maven-shade-plugin](https://maven.apache.org/plugins/maven-shade-plugin/)
-can shade shapeless by adding
+can shade shapeless by addings
 
 ```xml
 <plugin>
@@ -268,7 +268,7 @@ welcoming environments for everyone.
 
 ## Special Thanks
 
-To the [shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/typesafehub/config)
+To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/typesafehub/config)
 developers.
 
 [typesafe-config]: https://github.com/typesafehub/config
