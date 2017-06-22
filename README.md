@@ -32,7 +32,7 @@ A boilerplate-free Scala library for loading configuration files.
 - [Support for Duration](docs/support-for-duration.md)
 - [Integrating with other libraries](#integrating-with-other-libraries)
 - [Contribute](#contribute)
-- [FAQ](#docs/faq)
+- [FAQ](#docs/faq.md)
 - [License](#license)
 - [Special thanks](#special-thanks)
 
