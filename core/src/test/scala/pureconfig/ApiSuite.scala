@@ -26,17 +26,29 @@ class ApiSuite extends BaseSuite {
     loadConfig[Conf](namespace = "foo") shouldBe Right(Conf(3.0F))
   }
 
-  it should "loadConfig from a Typesafe Config" in {
+  it should "loadConfig config objects from a Typesafe Config" in {
     case class Conf(d: Double, i: Int)
     val conf = ConfigFactory.parseString("{ d: 0.5, i: 10 }")
     loadConfig[Conf](conf = conf) shouldBe Right(Conf(0.5D, 10))
   }
 
-  it should "loadConfig from a Typesafe Config with a namespace" in {
+  it should "loadConfig config objects from a Typesafe Config with a namespace" in {
     case class Conf(f: Float)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
     loadConfig[Conf](conf = conf, namespace = "foo.bar") shouldBe Right(Conf(1.0F))
-    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar.foo", None, Set.empty))
+    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar", None, Set.empty))
+  }
+
+  it should "loadConfig other values from a Typesafe Config with a namespace" in {
+    val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
+    loadConfig[Float](conf = conf, namespace = "foo.bar.f") shouldBe Right(1.0F)
+    loadConfig[Float](conf = conf, namespace = "foo.bar.g") should failWith(KeyNotFound("foo.bar.g", None, Set.empty))
+    loadConfig[Float](conf = conf, namespace = "foo.baz.f") should failWith(KeyNotFound("foo.baz", None, Set.empty))
+    loadConfig[Float](conf = conf, namespace = "bar.foo.f") should failWith(KeyNotFound("bar", None, Set.empty))
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0F))
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.g") shouldBe Right(None)
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(KeyNotFound("foo.baz", None, Set.empty))
+    loadConfig[Option[Float]](conf = conf, namespace = "bar.foo.f") should failWith(KeyNotFound("bar", None, Set.empty))
   }
 
   it should "loadConfig from a configuration file" in {
@@ -51,7 +63,7 @@ class ApiSuite extends BaseSuite {
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
     loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true))
     loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failWithType[CannotReadFile]
-    loadConfig[Conf](path = path, namespace = "bar.foo") should failWith(KeyNotFound("bar.foo", None, Set.empty))
+    loadConfig[Conf](path = path, namespace = "bar.foo") should failWith(KeyNotFound("bar", None, Set.empty))
   }
 
   it should "be able to load a realistic configuration file" in {
