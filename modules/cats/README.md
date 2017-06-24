@@ -1,7 +1,8 @@
 # Cats module for PureConfig
 
-Adds support for selected [cats](http://typelevel.org/cats/) data structures to PureConfig and provides instances of
-`cats` type classes for `ConfigReader`,  `ConfigWriter` and `ConfigConvert`.
+Adds support for selected [cats](http://typelevel.org/cats/) data structures to PureConfig, provides instances of
+`cats` type classes for `ConfigReader`,  `ConfigWriter` and `ConfigConvert` and some syntatic sugar for pureconfig
+classes.
 
 ## Add pureconfig-cats to your project
 
@@ -82,4 +83,38 @@ safeIntReader.from(conf.root())
 
 someWriter[String].to(Some("abc"))
 // res10: com.typesafe.config.ConfigValue = Quoted("abc")
+```
+
+### Extra syntatic sugar
+
+We can provide some useful extension methods by importing:
+
+```scala
+import pureconfig.module.cats.syntax._
+```
+
+For example, you can easily convert a `ConfigReaderFailures` to a `NonEmptyList[ConfigReaderFailure]`:
+
+```scala
+case class MyConfig2(a: Int, b: String)
+// defined class MyConfig2
+
+val conf = parseString("{}")
+// conf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
+
+val res = loadConfig[MyConfig2](conf).left.map(_.toNonEmptyList)
+// res: scala.util.Either[cats.data.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig2] = Left(NonEmptyList(KeyNotFound(a,None,Set()), KeyNotFound(b,None,Set())))
+```
+
+This allows cats users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
+
+```scala
+import cats.data.{ Validated, ValidatedNel }
+import pureconfig.error.ConfigReaderFailure
+```
+
+```scala
+val catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] =
+  Validated.fromEither(res)
+// catsRes: cats.data.ValidatedNel[pureconfig.error.ConfigReaderFailure,MyConfig2] = Invalid(NonEmptyList(KeyNotFound(a,None,Set()), KeyNotFound(b,None,Set())))
 ```
