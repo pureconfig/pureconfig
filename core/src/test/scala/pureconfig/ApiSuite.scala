@@ -6,7 +6,7 @@ package pureconfig
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ ConfigFactory, ConfigValueType }
 import pureconfig.PathUtils._
 import scala.concurrent.duration.FiniteDuration
 
@@ -40,15 +40,28 @@ class ApiSuite extends BaseSuite {
   }
 
   it should "loadConfig other values from a Typesafe Config with a namespace" in {
-    val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
+    val conf = ConfigFactory.parseString("foo { bar { f: 1.0 }, baz: 3.4 }")
+
     loadConfig[Float](conf = conf, namespace = "foo.bar.f") shouldBe Right(1.0F)
-    loadConfig[Float](conf = conf, namespace = "foo.bar.g") should failWith(KeyNotFound("foo.bar.g", None, Set.empty))
-    loadConfig[Float](conf = conf, namespace = "foo.baz.f") should failWith(KeyNotFound("foo.baz", None, Set.empty))
-    loadConfig[Float](conf = conf, namespace = "bar.foo.f") should failWith(KeyNotFound("bar", None, Set.empty))
+
+    loadConfig[Float](conf = conf, namespace = "foo.bar.h") should failWith(
+      KeyNotFound("foo.bar.h", None, Set.empty))
+
+    loadConfig[Float](conf = conf, namespace = "foo.baz.f") should failWith(
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT), None, "foo.baz"))
+
+    loadConfig[Float](conf = conf, namespace = "bar.foo.f") should failWith(
+      KeyNotFound("bar", None, Set.empty))
+
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0F))
-    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.g") shouldBe Right(None)
-    loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(KeyNotFound("foo.baz", None, Set.empty))
-    loadConfig[Option[Float]](conf = conf, namespace = "bar.foo.f") should failWith(KeyNotFound("bar", None, Set.empty))
+
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
+
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT), None, "foo.baz"))
+
+    loadConfig[Option[Float]](conf = conf, namespace = "bar.foo.f") should failWith(
+      KeyNotFound("bar", None, Set.empty))
   }
 
   it should "loadConfig from a configuration file" in {
