@@ -64,6 +64,21 @@ class ApiSuite extends BaseSuite {
       KeyNotFound("bar", None, Set.empty))
   }
 
+  it should "handle correctly namespaces with special chars" in {
+    val conf = ConfigFactory.parseString(""" "fo.o" { "ba r" { f: 1.0 }, "ba z": 3.4 }""")
+
+    loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".f") shouldBe Right(1.0F)
+
+    loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".h") should failWith(
+      KeyNotFound("\"fo.o\".\"ba r\".h", None, Set.empty))
+
+    loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba z\".h") should failWith(
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT), None, "\"fo.o\".\"ba z\""))
+
+    loadConfig[Float](conf = conf, namespace = "\"b.a.r\".foo.f") should failWith(
+      KeyNotFound("\"b.a.r\"", None, Set.empty))
+  }
+
   it should "loadConfig from a configuration file" in {
     case class Conf(s: String, b: Boolean)
     val path = createTempFile("""{ b: true, s: "str" }""")
