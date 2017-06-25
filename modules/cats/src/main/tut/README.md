@@ -1,7 +1,8 @@
 # Cats module for PureConfig
 
-Adds support for selected [cats](http://typelevel.org/cats/) data structures to PureConfig and provides instances of
-`cats` type classes for `ConfigReader`,  `ConfigWriter` and `ConfigConvert`.
+Adds support for selected [cats](http://typelevel.org/cats/) data structures to PureConfig, provides instances of
+`cats` type classes for `ConfigReader`,  `ConfigWriter` and `ConfigConvert` and some syntatic sugar for pureconfig
+classes.
 
 ## Add pureconfig-cats to your project
 
@@ -75,4 +76,33 @@ constIntReader.from(conf.root())
 safeIntReader.from(conf.root())
 
 someWriter[String].to(Some("abc"))
+```
+
+### Extra syntatic sugar
+
+We can provide some useful extension methods by importing:
+
+```tut:silent
+import pureconfig.module.cats.syntax._
+```
+
+For example, you can easily convert a `ConfigReaderFailures` to a `NonEmptyList[ConfigReaderFailure]`:
+
+```tut:book
+case class MyConfig2(a: Int, b: String)
+
+val conf = parseString("{}")
+val res = loadConfig[MyConfig2](conf).left.map(_.toNonEmptyList)
+```
+
+This allows cats users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
+
+```tut:silent
+import cats.data.{ Validated, ValidatedNel }
+import pureconfig.error.ConfigReaderFailure
+```
+
+```tut:book
+val catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] =
+  Validated.fromEither(res)
 ```
