@@ -32,7 +32,7 @@ A boilerplate-free Scala library for loading configuration files.
 - [Support for Duration](docs/support-for-duration.md)
 - [Integrating with other libraries](#integrating-with-other-libraries)
 - [Contribute](#contribute)
-- [FAQ](#faq)
+- [FAQ](docs/faq.md)
 - [License](#license)
 - [Special thanks](#special-thanks)
 
@@ -185,26 +185,6 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 A non-comprehensive list of other libraries which have integrated with PureConfig to provide a richer experience include:
 
 - `refined-pureconfig` allows PureConfig to play nicely with [`refined`](https://github.com/fthomas/refined/)'s type refinements. Viktor Lövgren's blog post gleefully explains how [PureConfig and refined work together](https://blog.vlovgr.se/posts/2016-12-24-refined-configuration.html).
-
-## FAQ
-
-### How can I use PureConfig with Spark 2.1.0 (problematic Shapeless dependency)?
-
-Apache Spark (specifically version 2.1.0) has a transitive dependency
-on [Shapeless](https://github.com/milessabin/shapeless) 2.0.0. This version is
-too old to be used by PureConfig, making your Spark project fail when using
-`spark-submit`.
-
-If you are using the [sbt-assembly](https://github.com/sbt/sbt-assembly) plugin
-to create your JARs you
-can [shade this dependency](https://github.com/sbt/sbt-assembly#shading) by
-adding
-
-```scala
-assemblyShadeRules in assembly := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
-```
-
-to your `assembly.sbt` file.
 
 ## Contribute
 
