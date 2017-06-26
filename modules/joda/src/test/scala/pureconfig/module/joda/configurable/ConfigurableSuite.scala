@@ -1,10 +1,8 @@
 package pureconfig.module.joda.configurable
 
-import com.typesafe.config.ConfigFactory
 import org.joda.time._
 import org.joda.time.format.{ DateTimeFormat, ISOPeriodFormat, PeriodFormatter }
 import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.syntax._
 import ConfigurableSuite._
 import pureconfig.configurable.{ ConfigurableSuite => JTime }
 import scala.collection.JavaConverters._
@@ -15,73 +13,31 @@ class ConfigurableSuite extends BaseSuite {
 
   val isoFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ")
   implicit val dateTimeInstance = dateTimeConfigConvert(isoFormatter)
-
-  it should "parse DateTime" in forAll {
-    (dateTime: DateTime) =>
-      val conf = ConfigFactory.parseString(s"""{date-time:"${isoFormatter.print(dateTime)}"}""")
-      case class Conf(dateTime: DateTime)
-      conf.to[Conf].right.value shouldEqual Conf(dateTime)
-  }
+  checkArbitrary[DateTime]
 
   val timeFormatter = DateTimeFormat.forPattern("HH:mm:ss.SSS")
   implicit val localTimeInstance = localTimeConfigConvert(timeFormatter)
-
-  it should "parse LocalTime" in forAll {
-    (localTime: LocalTime) =>
-      val conf = ConfigFactory.parseString(s"""{time:"${timeFormatter.print(localTime)}"}""")
-      case class Conf(time: LocalTime)
-      conf.to[Conf].right.value shouldEqual Conf(localTime)
-  }
+  checkArbitrary[LocalTime]
 
   val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
   implicit val localDateInstance = localDateConfigConvert(dateFormatter)
-
-  it should "parse LocalDate" in forAll {
-    (localDate: LocalDate) =>
-      val conf = ConfigFactory.parseString(s"""{date:"${dateFormatter.print(localDate)}"}""")
-      case class Conf(date: LocalDate)
-      conf.to[Conf].right.value shouldEqual Conf(localDate)
-  }
+  checkArbitrary[LocalDate]
 
   val dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
   implicit val localDateTimeInstance = localDateTimeConfigConvert(dateTimeFormatter)
-
-  it should "parse LocalDateTime" in forAll {
-    (localDateTime: LocalDateTime) =>
-      val conf = ConfigFactory.parseString(s"""{date-time:"${dateTimeFormatter.print(localDateTime)}"}""")
-      case class Conf(dateTime: LocalDateTime)
-      conf.to[Conf].right.value shouldEqual Conf(localDateTime)
-  }
+  checkArbitrary[LocalDateTime]
 
   val monthDayFormat = DateTimeFormat.forPattern("MM-dd")
   implicit val monthDayInstance = monthDayConfigConvert(monthDayFormat)
-
-  it should "parse MonthDay" in forAll {
-    (monthDay: MonthDay) =>
-      val conf = ConfigFactory.parseString(s"""{month-day:"${monthDayFormat.print(monthDay)}"}""")
-      case class Conf(monthDay: MonthDay)
-      conf.to[Conf].right.value shouldEqual Conf(monthDay)
-  }
+  checkArbitrary[MonthDay]
 
   val yearMonthFormat = DateTimeFormat.forPattern("yyyy-MM")
   implicit val yearMonthInstance = yearMonthConfigConvert(yearMonthFormat)
-
-  it should "parse YearMonth" in forAll {
-    (yearMonth: YearMonth) =>
-      val conf = ConfigFactory.parseString(s"""{year-month:"${yearMonthFormat.print(yearMonth)}"}""")
-      case class Conf(yearMonth: YearMonth)
-      conf.to[Conf].right.value shouldEqual Conf(yearMonth)
-  }
+  checkArbitrary[YearMonth]
 
   val periodFormatter: PeriodFormatter = ISOPeriodFormat.standard()
   implicit val periodInstance = periodConfigConvert(periodFormatter)
-
-  it should "parse Period" in forAll {
-    (period: Period) =>
-      val conf = ConfigFactory.parseString(s"""{period:"${periodFormatter.print(period)}"}""")
-      case class Conf(period: Period)
-      conf.to[Conf].right.value.period.toStandardDuration shouldEqual Conf(period).period.toStandardDuration
-  }
+  checkArbitrary[Period]
 }
 
 object ConfigurableSuite {
