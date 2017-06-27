@@ -15,6 +15,7 @@ lazy val docs = (project in file("docs")).
   dependsOn(core)
 
 lazy val macros = (project in file("macros")).
+  enablePlugins(TutPlugin).
   settings(commonSettings)
 
 def module(proj: Project) = proj.

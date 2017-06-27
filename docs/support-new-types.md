@@ -22,7 +22,10 @@ of `ConfigReader[T]` for that type. This won't compile because there's no `Confi
 
 ```scala
 loadConfig[Conf](conf)
-// <console>:23: error: could not find implicit value for parameter reader: pureconfig.ConfigReader[Conf]
+// <console>:23: error: 
+// Could not find a ConfigReader instance for type Conf
+// 
+// 
 //        loadConfig[Conf](conf)
 //                        ^
 ```
