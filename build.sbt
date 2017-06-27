@@ -5,12 +5,17 @@ enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
   enablePlugins(TutPlugin).
-  settings(commonSettings, tutTargetDirectory := file("."))
+  settings(commonSettings, tutTargetDirectory := file(".")).
+  dependsOn(macros).
+  dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
 lazy val docs = (project in file("docs")).
   enablePlugins(TutPlugin).
   settings(commonSettings, publishArtifact := false).
   dependsOn(core)
+
+lazy val macros = (project in file("macros")).
+  settings(commonSettings)
 
 def module(proj: Project) = proj.
   enablePlugins(TutPlugin).
