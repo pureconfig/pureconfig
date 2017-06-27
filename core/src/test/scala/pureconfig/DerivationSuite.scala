@@ -45,18 +45,18 @@ class DerivationSuite extends BaseSuite {
   it should "fail with a message indicating the root reason when an implicit cannot be found" in {
     illTyped(
       "implicitly[Derivation[ConfigReader[Custom]]]",
-      "Could not find a ConfigReader instance for type Custom")
+      "could not find a ConfigReader instance for type Custom")
 
     illTyped(
       "implicitly[Derivation[ConfigReader[ConfC]]]",
-      "Could not derive a ConfigReader instance for type ConfC, because:",
+      "could not derive a ConfigReader instance for type ConfC, because:",
       "  - missing a ConfigReader instance for type Option\\[Custom\\], because:",
       "    - missing a ConfigReader instance for type Custom",
       "  - missing a ConfigReader instance for type Custom2")
 
     illTyped(
       "implicitly[Derivation[ConfigReader[Conf]]]",
-      "Could not derive a ConfigReader instance for type Conf, because:",
+      "could not derive a ConfigReader instance for type Conf, because:",
       "  - missing a ConfigReader instance for type ConfC, because:",
       "    - missing a ConfigReader instance for type Option\\[Custom\\], because:",
       "      - missing a ConfigReader instance for type Custom",
@@ -64,13 +64,13 @@ class DerivationSuite extends BaseSuite {
 
     illTyped(
       "implicitly[Derivation[ConfigReader[RecFailConf1]]]",
-      "Could not derive a ConfigReader instance for type RecFailConf1, because:",
+      "could not derive a ConfigReader instance for type RecFailConf1, because:",
       "  - missing a ConfigReader instance for type RecFailConf2, because:",
       "    - missing a ConfigReader instance for type Custom")
 
     illTyped(
       "implicitly[Derivation[ConfigReader[RecFailConf2]]]",
-      "Could not derive a ConfigReader instance for type RecFailConf2, because:",
+      "could not derive a ConfigReader instance for type RecFailConf2, because:",
       "  - missing a ConfigReader instance for type Custom")
   }
 }

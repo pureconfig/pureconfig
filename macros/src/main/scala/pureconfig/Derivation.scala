@@ -112,11 +112,11 @@ class DerivationMacros(val c: whitebox.Context) {
 
   // Prepares and sets the message to be printed for the given failed derivations.
   private[this] def setImplicitNotFound[A: WeakTypeTag](failedDerivations: List[List[Type]]): Unit = {
-    val builder = new StringBuilder("\n")
+    val builder = new StringBuilder()
 
     failedDerivations match {
-      case Nil => builder ++= s"Could not find ${prettyPrintType(weakTypeOf[A])}\n"
-      case _ => builder ++= s"Could not derive ${prettyPrintType(weakTypeOf[A])}, because:\n"
+      case Nil => builder ++= s"could not find ${prettyPrintType(weakTypeOf[A])}\n"
+      case _ => builder ++= s"could not derive ${prettyPrintType(weakTypeOf[A])}, because:\n"
     }
 
     def buildMessage(scopedFailedDerivations: List[List[Type]], depth: Int): Unit = {
@@ -143,8 +143,6 @@ class DerivationMacros(val c: whitebox.Context) {
     }
 
     buildMessage(failedDerivations.map(_.reverse).reverse.distinct, 1)
-
-    builder += '\n'
     setImplicitNotFound(builder.toString)
   }
 
