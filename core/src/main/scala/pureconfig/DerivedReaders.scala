@@ -61,7 +61,7 @@ trait DerivedReaders1 extends DerivedReaders2 {
   implicit final def hConsConfigReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit
     key: Witness.Aux[K],
-    vFieldReader: Lazy[ConfigReader[V]],
+    vFieldReader: Derivation[Lazy[ConfigReader[V]]],
     tConfigReader: Lazy[WrappedDefaultValue[Wrapped, T, U]],
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
@@ -69,7 +69,7 @@ trait DerivedReaders1 extends DerivedReaders2 {
       val fieldName = key.value.name
       val keyStr = hint.configKey(fieldName)
       val headResult = improveFailures[V](
-        (co.get(keyStr), vFieldReader.value) match {
+        (co.get(keyStr), vFieldReader.value.value) match {
           case (null, reader) =>
             default.head match {
               case Some(defaultValue) if hint.useDefaultArgs => Right[Nothing, V](defaultValue)
@@ -96,14 +96,14 @@ trait DerivedReaders1 extends DerivedReaders2 {
     implicit
     coproductHint: CoproductHint[Wrapped],
     vName: Witness.Aux[Name],
-    vFieldConvert: Lazy[ConfigReader[V]],
+    vFieldConvert: Derivation[Lazy[ConfigReader[V]]],
     tConfigReader: Lazy[WrappedConfigReader[Wrapped, T]]): WrappedConfigReader[Wrapped, FieldType[Name, V] :+: T] =
     new WrappedConfigReader[Wrapped, FieldType[Name, V] :+: T] {
 
       override def from(config: ConfigValue): Either[ConfigReaderFailures, FieldType[Name, V] :+: T] =
         coproductHint.from(config, vName.value.name) match {
           case Right(Some(hintConfig)) =>
-            vFieldConvert.value.from(hintConfig) match {
+            vFieldConvert.value.value.from(hintConfig) match {
               case Left(_) if coproductHint.tryNextOnFail(vName.value.name) =>
                 tConfigReader.value.from(config).right.map(s => Inr(s))
 
@@ -115,20 +115,20 @@ trait DerivedReaders1 extends DerivedReaders2 {
         }
     }
 
-  implicit def deriveOption[T](implicit conv: Lazy[ConfigReader[T]]) = new OptionConfigReader[T]
+  implicit def deriveOption[T](implicit conv: Derivation[Lazy[ConfigReader[T]]]) = new OptionConfigReader[T]
 
-  class OptionConfigReader[T](implicit conv: Lazy[ConfigReader[T]]) extends ConfigReader[Option[T]] with AllowMissingKey {
+  class OptionConfigReader[T](implicit conv: Derivation[Lazy[ConfigReader[T]]]) extends ConfigReader[Option[T]] with AllowMissingKey {
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Option[T]] = {
       if (config == null || config.unwrapped() == null)
         Right(None)
       else
-        conv.value.from(config).right.map(Some(_))
+        conv.value.value.from(config).right.map(Some(_))
     }
   }
 
   implicit def deriveTraversable[T, F[T] <: TraversableOnce[T]](
     implicit
-    configConvert: Lazy[ConfigReader[T]],
+    configConvert: Derivation[Lazy[ConfigReader[T]]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigReader[F[T]] {
 
     override def from(config: ConfigValue): Either[ConfigReaderFailures, F[T]] = {
@@ -139,7 +139,7 @@ trait DerivedReaders1 extends DerivedReaders2 {
           // we called all the failures in the list
           co.asScala.foldLeft(z) {
             case (acc, value) =>
-              combineResults(acc, configConvert.value.from(value))(_ += _)
+              combineResults(acc, configConvert.value.value.from(value))(_ += _)
           }.right.map(_.result())
         case o: ConfigObject =>
           val z: Either[ConfigReaderFailures, List[(Int, T)]] = Right(List.empty[(Int, T)])
@@ -147,7 +147,7 @@ trait DerivedReaders1 extends DerivedReaders2 {
             val keyResult = catchReadError(_.toInt)(implicitly)(key)(ConfigValueLocation(value)).left.flatMap(t => fail(CannotConvert(key, "Int",
               s"To convert an object to a collection, its keys must be read as Int but key $key has value" +
                 s"$value which cannot converted. Error: ${t.because}", ConfigValueLocation(value), key)))
-            val valueResult = configConvert.value.from(value)
+            val valueResult = configConvert.value.value.from(value)
             combineResults(keyResult, valueResult)(_ -> _)
           }
 
@@ -166,7 +166,7 @@ trait DerivedReaders1 extends DerivedReaders2 {
     }
   }
 
-  implicit def deriveMap[T](implicit configConvert: Lazy[ConfigReader[T]]) = new ConfigReader[Map[String, T]] {
+  implicit def deriveMap[T](implicit configConvert: Derivation[Lazy[ConfigReader[T]]]) = new ConfigReader[Map[String, T]] {
 
     override def from(config: ConfigValue): Either[ConfigReaderFailures, Map[String, T]] = {
       config match {
@@ -177,7 +177,7 @@ trait DerivedReaders1 extends DerivedReaders2 {
             case (acc, (key, value)) =>
               combineResults(
                 acc,
-                improveFailures(configConvert.value.from(value), key, ConfigValueLocation(value))) {
+                improveFailures(configConvert.value.value.from(value), key, ConfigValueLocation(value))) {
                   (map, valueConverted) => map + (key -> valueConverted)
                 }
           }
