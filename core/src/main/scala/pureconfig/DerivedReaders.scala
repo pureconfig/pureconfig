@@ -40,17 +40,7 @@ trait DerivedReaders extends DerivedReaders1 {
 /**
  * Trait containing `ConfigReader` instances for collection, product and coproduct types.
  */
-trait DerivedReaders1 {
-
-  private[pureconfig] trait WrappedConfigReader[Wrapped, SubRepr] extends ConfigReader[SubRepr]
-
-  private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
-    def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
-      case co: ConfigObject => fromConfigObject(co, default)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
-    }
-    def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
-  }
+trait DerivedReaders1 extends DerivedReaders2 {
 
   implicit final def hNilConfigReader[Wrapped](
     implicit
@@ -197,6 +187,19 @@ trait DerivedReaders1 {
       }
     }
   }
+}
+
+trait DerivedReaders2 {
+
+  protected[pureconfig] trait WrappedConfigReader[Wrapped, SubRepr] extends ConfigReader[SubRepr]
+
+  protected[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
+    def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
+      case co: ConfigObject => fromConfigObject(co, default)
+      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
+    }
+    def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
+  }
 
   implicit final def deriveProductInstance[F, Repr <: HList, DefaultRepr <: HList](
     implicit
@@ -217,7 +220,6 @@ trait DerivedReaders1 {
       cc.value.from(config).right.map(gen.from)
     }
   }
-
 }
 
 object DerivedReaders extends DerivedReaders
