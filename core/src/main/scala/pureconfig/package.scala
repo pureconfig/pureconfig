@@ -10,11 +10,11 @@ import java.nio.file.{ Files, Path }
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
-import com.typesafe.config.impl.Namespace
-import com.typesafe.config.{ ConfigException, ConfigObject, ConfigValue, ConfigValueType, Config => TypesafeConfig }
+import com.typesafe.config.{ Config => TypesafeConfig, _ }
 import pureconfig.ConfigConvert.improveFailures
 import pureconfig.ConvertHelpers._
-import pureconfig.backend.ConfigFactoryWrapper.{ invalidateCaches, load, loadFile, parseFile }
+import pureconfig.backend.ConfigFactoryWrapper._
+import pureconfig.backend.PathUtil._
 import pureconfig.error._
 
 package object pureconfig {
@@ -30,18 +30,18 @@ package object pureconfig {
         case (co: ConfigObject, key :: remaining) =>
           co.get(key) match {
             case null if remaining.nonEmpty || !allowNullLeaf =>
-              fail(KeyNotFound(Namespace.toString((key :: curr).reverse), ConfigValueLocation(cv.origin()), Set.empty))
+              fail(KeyNotFound(joinPath((key :: curr).reverse), ConfigValueLocation(cv.origin()), Set.empty))
             case childCv =>
               getValue(childCv, remaining, key :: curr)
           }
 
         case _ => fail(WrongType(
-          cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv.origin()), Namespace.toString(curr.reverse)))
+          cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv.origin()), joinPath(curr.reverse)))
       }
     }
 
     // we're not expecting any exception here, this `try` is just for extra safety
-    try getValue(conf.root(), Namespace.parse(namespace), Nil) catch {
+    try getValue(conf.root(), splitPath(namespace), Nil) catch {
       case ex: ConfigException => fail(ThrowableFailure(ex, ConfigValueLocation(ex.origin()), ""))
     }
   }
