@@ -209,7 +209,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  - (file:${workingDir}${file}:2) Unable to parse the configuration.
+          |  - (file:${workingDir}${file}:2) Unable to parse the configuration: Expecting close brace } or a comma, got end of file.
           |""".stripMargin
   }
 
