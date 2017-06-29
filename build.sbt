@@ -80,7 +80,6 @@ lazy val allVersionLintFlags = Seq(
   "-encoding", "UTF-8", // yes, this is 2 args
   "-feature",
   "-unchecked",
-  "-Xfatal-warnings",
   "-Yno-adapted-args",
   "-Ywarn-dead-code")
 
