@@ -1,11 +1,15 @@
 ### 0.7.3 (unreleased)
 
 - New features
+  - `loadConfig` methods now allow loading any type from a config when using a namespace, and not only types represented
+    by config objects;
   - `ConfigFieldMapping` now has a `withOverrides` method that allows users to easily define exceptional cases to an
     existing mapping;
-  - `ConfigReader` and `ConfigWriter` for `java.math.BigDecimal`, `java.math.BigInteger`, 
+  - `ConfigReader` and `ConfigWriter` for `java.math.BigDecimal` and `java.math.BigInteger`.
 - Bug fixes
-  - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted.
+  - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
+  - `loadConfig` methods no longer throw an exception when passed a namespace where one of the keys is not a config
+    object.
 
 ### 0.7.2 (May 29, 2017)
 
