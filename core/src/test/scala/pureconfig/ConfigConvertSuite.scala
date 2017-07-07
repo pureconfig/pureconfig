@@ -3,6 +3,8 @@ package pureconfig
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
 
+import pureconfig.error.{ CannotConvert, ConfigReaderFailures, ThrowableFailure }
+
 class ConfigConvertSuite extends BaseSuite {
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
 
@@ -20,5 +22,14 @@ class ConfigConvertSuite extends BaseSuite {
   it should "have a correct xmap method" in forAll { (f: Int => String, g: String => Int) =>
     forAll { str: String => intConvert.xmap(f, g).to(str) shouldEqual intConvert.to(g(str)) }
     forAll { conf: ConfigValue => intConvert.xmap(f, g).from(conf) shouldEqual intConvert.from(conf).right.map(f) }
+  }
+
+  it should "have a xmap method that wraps exceptions in a ConfigReaderFailure" in {
+    val throwable = new Exception("Exception message.")
+    val cc = ConfigConvert[Int].xmap[String]({ _ => throw throwable }, { _: String => 42 })
+    cc.from(ConfigValueFactory.fromAnyRef(1)) shouldEqual Left(ConfigReaderFailures(
+      ThrowableFailure(throwable, None, "")))
+    cc.from(ConfigValueFactory.fromAnyRef("test")) shouldEqual Left(ConfigReaderFailures(
+      CannotConvert("test", "Int", """java.lang.NumberFormatException: For input string: "test"""", None, "")))
   }
 }

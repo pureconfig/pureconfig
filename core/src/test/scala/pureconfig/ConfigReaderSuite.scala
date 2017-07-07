@@ -2,7 +2,7 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.error.{ CannotConvertNull, ConfigReaderFailures }
+import pureconfig.error.{ CannotConvertNull, ConfigReaderFailures, ThrowableFailure }
 
 class ConfigReaderSuite extends BaseSuite {
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
@@ -29,6 +29,13 @@ class ConfigReaderSuite extends BaseSuite {
 
   it should "have a correct map method" in forAll { (conf: ConfigValue, f: Int => String) =>
     intReader.map(f).from(conf) shouldEqual intReader.from(conf).right.map(f)
+  }
+
+  it should "have a map method that wraps exceptions in a ConfigReaderFailure" in {
+    val throwable = new Exception("Exception message.")
+    val cr = ConfigReader[Int].map({ _ => throw throwable })
+    cr.from(ConfigValueFactory.fromAnyRef(1)) shouldEqual Left(ConfigReaderFailures(
+      ThrowableFailure(throwable, None, "")))
   }
 
   it should "have a correct emap method" in forAll { (conf: ConfigValue, f: Int => Either[ConfigReaderFailures, String]) =>
