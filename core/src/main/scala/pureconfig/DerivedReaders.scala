@@ -183,12 +183,12 @@ trait DerivedReaders1 {
         case co: ConfigObject =>
           val z: Either[ConfigReaderFailures, Map[String, T]] = Right(Map.empty[String, T])
 
-          co.asScala.foldLeft(z) {
-            case (acc, (key, value)) =>
+          co.toConfig.entrySet.asScala.foldLeft(z) {
+            (acc, entry) =>
               combineResults(
                 acc,
-                improveFailures(configConvert.value.from(value), key, ConfigValueLocation(value))) {
-                  (map, valueConverted) => map + (key -> valueConverted)
+                improveFailures(configConvert.value.from(entry.getValue), entry.getKey, ConfigValueLocation(entry.getValue))) {
+                  (map, valueConverted) => map + (entry.getKey -> valueConverted)
                 }
           }
 
