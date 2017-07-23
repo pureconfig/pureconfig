@@ -10,6 +10,8 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
+
+import pureconfig.ConvertHelpers._
 import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, ConfigValueLocation }
 
 /**
@@ -27,7 +29,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
    *         respectively.
    */
   def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
-    def from(config: ConfigValue) = outer.from(config).right.map(f)
+    def from(config: ConfigValue) = outer.from(config).right.flatMap(toResult(f)(_)(ConfigValueLocation(config)))
     def to(a: B) = outer.to(g(a))
   }
 }

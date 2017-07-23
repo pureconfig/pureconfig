@@ -9,7 +9,8 @@
 - Bug fixes
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
   - `loadConfig` methods no longer throw an exception when passed a namespace where one of the keys is not a config
-    object.
+    object;
+  - The `xmap` of `ConfigConvert` and the `map` method of `ConfigReader` now wrap exceptions that the functions used to map might throw in a `ConfigReaderFailure`.
 
 ### 0.7.2 (May 29, 2017)
 

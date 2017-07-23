@@ -32,6 +32,9 @@ trait ConvertHelpers {
         ConfigReaderFailures(headImproved, tailImproved)
     }
 
+  private[pureconfig] def toResult[A, B](f: A => B): A => Option[ConfigValueLocation] => Either[ConfigReaderFailures, B] =
+    v => l => eitherToResult(tryToEither(Try(f(v)))(l))
+
   private[pureconfig] def eitherToResult[T](either: Either[ConfigReaderFailure, T]): Either[ConfigReaderFailures, T] =
     either match {
       case r: Right[_, _] => r.asInstanceOf[Either[ConfigReaderFailures, T]]
