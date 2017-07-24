@@ -51,6 +51,8 @@ lazy val commonSettings = Seq(
     case _ => allVersionLintFlags
   }),
 
+  scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
+
   scalacOptions in (Compile, console) ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import").contains),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
