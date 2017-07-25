@@ -45,6 +45,9 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots")),
 
+  crossVersionSharedSources(unmanagedSourceDirectories in Compile),
+  crossVersionSharedSources(unmanagedSourceDirectories in Test),
+
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) => scala212LintFlags
     case Some((2, 11)) => scala211LintFlags
@@ -82,6 +85,15 @@ lazy val commonSettings = Seq(
     if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   })
+
+// add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
+// "scala-2.10" are natively supported by SBT)
+def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
+  unmanagedSrcs ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, y)) if y >= 11 => unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.11+") }
+    case _ => Nil
+  })
+}
 
 lazy val allVersionLintFlags = Seq(
   "-deprecation",

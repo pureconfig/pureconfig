@@ -1,7 +1,7 @@
 package pureconfig
 
 import scala.language.experimental.macros
-import scala.reflect.macros.{ TypecheckException, Universe, whitebox }
+import scala.reflect.macros.{ Universe, whitebox }
 
 sealed trait Derivation[A] {
   def value: A
@@ -59,7 +59,7 @@ class DerivationMacros(val c: whitebox.Context) {
   private[this] def materializeInnerDerivation[A: WeakTypeTag]: Tree = {
     currentPath ::= weakTypeOf[A]
 
-    val res = inferImplicitValue[A] match {
+    val res = DerivationMacroCompat.inferImplicitValue[A](c) match {
       case EmptyTree =>
         failedDerivations ::= currentPath
         q"_root_.pureconfig.Derivation.Failed[${weakTypeOf[A]}]()"
@@ -78,7 +78,7 @@ class DerivationMacros(val c: whitebox.Context) {
   // check if some inner derivations materialized a `Derivation.failed`. If that's the case, it collects those failures
   // and prints a nice message.
   private[this] def materializeRootDerivation[A: WeakTypeTag]: Tree = {
-    inferImplicitValue[A] match {
+    DerivationMacroCompat.inferImplicitValue[A](c) match {
       case EmptyTree =>
         // failed to find an implicit at the root level of the derivation; set a generic implicitNotFound message
         // without further information
@@ -103,19 +103,6 @@ class DerivationMacros(val c: whitebox.Context) {
           c.abort(c.enclosingPosition, "")
         }
     }
-  }
-
-  // This should be simply defined as `c.inferImplicitValue(c.weakTypeOf[A])`, but divergent implicits are wrongly
-  // being reported. See https://github.com/scala/scala-dev/issues/398 for more information.
-  private[this] def inferImplicitValue[A: WeakTypeTag]: Tree = {
-    val cc = c.asInstanceOf[scala.reflect.macros.contexts.Context]
-    val enclosingTree = cc.openImplicits.head.tree.asInstanceOf[cc.universe.analyzer.global.Tree]
-
-    val res: cc.Tree = cc.universe.analyzer.inferImplicit(
-      enclosingTree, cc.weakTypeOf[A], false, cc.callsiteTyper.context, true, false, cc.enclosingPosition,
-      (pos, msg) => throw TypecheckException(pos, msg))
-
-    res.asInstanceOf[Tree]
   }
 
   // Prepares and sets the message to be printed for the given failed derivations.
@@ -151,16 +138,7 @@ class DerivationMacros(val c: whitebox.Context) {
     }
 
     buildMessage(failedDerivations.map(_.reverse).reverse.distinct, 1)
-    setImplicitNotFound(builder.toString)
-  }
-
-  // since we are inside a whitebox implicit macro, error messages from `c.abort` as not printed. A trick must be used
-  // to make the compiler print our custom message. That's done by setting a @implicitNotFound annotation on our
-  // `Derivation` class (idea taken from shapeless `Lazy`).
-  private[this] def setImplicitNotFound(msg: String): Unit = {
-    import c.internal.decorators._
-    val infTree = c.typecheck(q"""new _root_.scala.annotation.implicitNotFound($msg)""", silent = false)
-    typeOf[Derivation[_]].typeSymbol.setAnnotations(Annotation(infTree))
+    DerivationMacroCompat.setImplicitNotFound(c)(builder.toString)
   }
 
   private[this] def prettyPrintType(typ: Type): String =
