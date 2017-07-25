@@ -31,7 +31,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader mapped by `f`.
    */
   def map[B](f: A => B): ConfigReader[B] =
-    fromFunction[B](from(_).right.map(f))
+    fromFunction[B](v => from(v).right.flatMap(toResult(f)(_)(ConfigValueLocation(v))))
 
   /**
    * Maps a function that can possibly fail over the results of this reader.
