@@ -40,6 +40,9 @@ class DerivationSuite extends BaseSuite {
       implicitly[Derivation[ConfigReader[ConfC]]]
       implicitly[Derivation[ConfigReader[Conf]]]
     }
+
+    implicitly[Derivation[ConfigWriter[ConfA]]]
+    implicitly[Derivation[ConfigWriter[ConfB]]]
   }
 
   it should "fail with a message indicating the root reason when an implicit cannot be found" in {
@@ -72,5 +75,29 @@ class DerivationSuite extends BaseSuite {
       "implicitly[Derivation[ConfigReader[RecFailConf2]]]",
       "could not derive a ConfigReader instance for type RecFailConf2, because:",
       "  - missing a ConfigReader instance for type Custom")
+
+    // ---
+
+    illTyped(
+      "implicitly[Derivation[ConfigWriter[Custom]]]",
+      "could not find a ConfigWriter instance for type Custom")
+
+    illTyped(
+      "implicitly[Derivation[ConfigWriter[ConfC]]]",
+      "could not derive a ConfigWriter instance for type ConfC, because:",
+      "  - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
+      "    - missing a ConfigWriter instance for type Custom",
+      "  - missing a ConfigWriter instance for type Custom2")
+
+    // FIXME this is not the expected output. Investigate the issue and find some way to show only the implicit with most priority
+    illTyped(
+      "implicitly[Derivation[ConfigWriter[Conf]]]",
+      "could not derive a ConfigWriter instance for type Conf, because:",
+      "  - missing a ConfigWriter instance for type ConfC, because:",
+      "    - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
+      "      - missing a ConfigWriter instance for type Some\\[Custom\\], because:", // shouldn't appear
+      "        - missing a ConfigWriter instance for type Custom", // shouldn't appear
+      "      - missing a ConfigWriter instance for type Custom",
+      "    - missing a ConfigWriter instance for type Custom2")
   }
 }
