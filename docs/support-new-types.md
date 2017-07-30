@@ -30,50 +30,12 @@ loadConfig[Conf](conf)
 PureConfig can be extended to support those types. To do so, an instance for the `ConfigReader` type class must be
 provided.
 
-First, define a `ConfigReader` instance in implicit scope:
+We can split the types that can be supported in two big groups, depending on what part of the configuration
+is needed to read them:
 
-```scala
-import pureconfig.ConvertHelpers._
-
-implicit val myIntReader = ConfigReader.fromString[MyInt](catchReadError(s => new MyInt(s.toInt)))
-```
-
-Then load the config:
-
-```scala
-loadConfig[Conf](conf)
-// res5: Either[pureconfig.error.ConfigReaderFailures,Conf] = Right(Conf(MyInt(1)))
-```
-
-In some situations, you may want to write an object to a config. For unsupported types, you'll see the following error:
-
-```scala
-Conf(new MyInt(3)).toConfig
-// <console>:27: error: could not find implicit value for parameter writer: pureconfig.ConfigWriter[Conf]
-//        Conf(new MyInt(3)).toConfig
-//                           ^
-```
-
-Just as with reading, you'll have to provide an instance of `ConfigWriter` for the type of the object you want to write:
-
-```scala
-implicit val myIntWriter = ConfigWriter.toString[MyInt](n => n.value.toString)
-```
-
-And then:
-
-```scala
-Conf(new MyInt(3)).toConfig
-// res7: com.typesafe.config.ConfigValue = SimpleConfigObject({"n":"3"})
-```
-
-If you want to define both operations, the easier way to add full support for a class is by creating a `ConfigConvert`:
-
-```scala
-implicit val myIntConvert = ConfigConvert.viaString[MyInt](
-  catchReadError(s => new MyInt(s.toInt)),
-  n => n.value.toString)
-```
-
-A `ConfigConvert` is both an instance of `ConfigReader` and an instance of `ConfigWriter`, so it can be used everywhere
-one of them is required.
+1. **Simple types** whose values can be converter from a **single value** in the configuration. A good
+example is `Int`, which has a `ConfigReader` instance that just convert a string value into a `Int`
+when possible. See [Add support for simple types](add-support-for-simple-types.md) for this group.
+2. **Complex types** that require access to an entire **sub-tree of the configuration** to be read.
+An example of this group are case classes. See [Add support for complex types](add-support-for-complex-types.md)
+for this group.
