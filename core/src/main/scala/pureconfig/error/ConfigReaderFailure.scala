@@ -322,7 +322,7 @@ final case class CannotReadFile(path: Path, reason: Option[Throwable]) extends C
  *                 failure
  */
 final case class CannotParse(msg: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
-  def description = "Unable to parse the configuration."
+  def description = s"Unable to parse the configuration: $msg."
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
     this.copy(location = location orElse parentLocation)
