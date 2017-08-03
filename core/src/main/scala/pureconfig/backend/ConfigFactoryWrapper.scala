@@ -34,7 +34,13 @@ object ConfigFactoryWrapper {
   private def unsafeToEither[A](f: => A, path: Option[Path] = None): Either[ConfigReaderFailures, A] = {
     try Right(f) catch {
       case e: ConfigException.IO if path.nonEmpty => fail(CannotReadFile(path.get, Option(e.getCause)))
-      case e: ConfigException.Parse => fail(CannotParse(e.getLocalizedMessage, ConfigValueLocation(e.origin())))
+      case e: ConfigException.Parse =>
+        val msg = (if (e.origin != null)
+          // Removing the error origin from the exception message since origin is stored and used separately:
+          e.getMessage.stripPrefix(s"${e.origin.description}: ")
+        else
+          e.getMessage).stripSuffix(".")
+        fail(CannotParse(msg, ConfigValueLocation(e.origin())))
       case e: ConfigException => failWithThrowable(e)(ConfigValueLocation(e.origin()))
       case NonFatal(e) => failWithThrowable(e)(None)
     }
