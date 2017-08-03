@@ -96,5 +96,27 @@ class DerivationSuite extends BaseSuite {
       "    - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
       "      - missing a ConfigWriter instance for type Custom",
       "    - missing a ConfigWriter instance for type Custom2")
+
+    // ---
+
+    illTyped(
+      "implicitly[Derivation[ConfigConvert[Custom]]]",
+      "could not derive a ConfigConvert instance for type Custom, because:",
+      "  - missing a ConfigReader instance for type Custom",
+      "  - missing a ConfigWriter instance for type Custom")
+
+    illTyped(
+      "implicitly[Derivation[ConfigConvert[Option[Custom]]]]",
+      "could not derive a ConfigConvert instance for type Option\\[Custom\\], because:",
+      "  - missing a ConfigReader instance for type Option\\[Custom\\], because:",
+      "    - missing a ConfigReader instance for type Custom",
+      "  - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
+      "    - missing a ConfigWriter instance for type Custom")
+
+    illTyped(
+      "implicit val cr = customReader; implicitly[Derivation[ConfigConvert[Option[Custom]]]]",
+      "could not derive a ConfigConvert instance for type Option\\[Custom\\], because:",
+      "  - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
+      "    - missing a ConfigWriter instance for type Custom")
   }
 }
