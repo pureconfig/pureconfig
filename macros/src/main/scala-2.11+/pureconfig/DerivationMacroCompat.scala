@@ -21,12 +21,12 @@ object DerivationMacroCompat {
 
   // This should be simply defined as `c.inferImplicitValue(c.weakTypeOf[A])`, but divergent implicits are wrongly
   // reported up to Scala 2.12.2. See https://github.com/scala/scala-dev/issues/398 for more information.
-  def inferImplicitValue[A](c: whitebox.Context)(implicit tt: c.WeakTypeTag[A]): c.Tree = {
+  def inferImplicitValue(c: whitebox.Context)(typ: c.Type): c.Tree = {
     val cc = c.asInstanceOf[scala.reflect.macros.contexts.Context]
     val enclosingTree = cc.openImplicits.head.tree.asInstanceOf[cc.universe.analyzer.global.Tree]
 
     val res: cc.Tree = cc.universe.analyzer.inferImplicit(
-      enclosingTree, cc.weakTypeOf[A], false, cc.callsiteTyper.context, true, false, cc.enclosingPosition,
+      enclosingTree, typ.asInstanceOf[cc.Type], false, cc.callsiteTyper.context, true, false, cc.enclosingPosition,
       (pos, msg) => throw TypecheckException(pos, msg))
 
     res.asInstanceOf[c.Tree]

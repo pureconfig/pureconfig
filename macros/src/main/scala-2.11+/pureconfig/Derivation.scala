@@ -1,7 +1,8 @@
 package pureconfig
 
+import scala.collection.mutable
 import scala.language.experimental.macros
-import scala.reflect.macros.{ Universe, whitebox }
+import scala.reflect.macros.whitebox
 
 sealed trait Derivation[A] {
   def value: A
@@ -23,14 +24,17 @@ object Derivation {
 }
 
 @macrocompat.bundle
-class DerivationMacros(val c: whitebox.Context) {
-  import DerivationMacros._
+class DerivationMacros(val c: whitebox.Context) extends LazyContextParser {
   import c.universe._
 
   private[this] implicit class RichType(val t: Type) {
     def toTree: Tree =
       if (t.typeArgs.isEmpty) tq"${t.typeSymbol}"
       else tq"${t.typeConstructor.toTree}[..${t.typeArgs.map(_.toTree)}]"
+  }
+
+  private[this] implicit class RichTree(val t: Tree) {
+    def toType: Type = c.typecheck(t, c.TYPEmode).tpe
   }
 
   // The entrypoint for materializing `Derivation` instances.
@@ -46,8 +50,8 @@ class DerivationMacros(val c: whitebox.Context) {
       // if `isRootDerivation` is `false`, then this is a `Derivation` triggered inside another `Derivation`
       val isRootDerivation = c.openImplicits.count(_.pre =:= typeOf[Derivation.type]) == 1
 
-      if (isRootDerivation) materializeRootDerivation[A]
-      else materializeInnerDerivation[A]
+      if (isRootDerivation) materializeRootDerivation(weakTypeOf[A])
+      else materializeInnerDerivation(weakTypeOf[A])
     }
   }
 
@@ -56,19 +60,11 @@ class DerivationMacros(val c: whitebox.Context) {
   // In this case a `Derivation` instance is always materialized so that the implicit search does not stop here. We
   // materialize a `Derivation.failed` for missing implicits so that the `Derivation` at the root level can easily find
   // and handle them.
-  private[this] def materializeInnerDerivation[A: WeakTypeTag]: Tree = {
-    currentPath ::= weakTypeOf[A]
-
-    val res = DerivationMacroCompat.inferImplicitValue[A](c) match {
-      case EmptyTree =>
-        failedDerivations ::= currentPath
-        q"_root_.pureconfig.Derivation.Failed[${weakTypeOf[A]}]()"
-
-      case value =>
-        q"_root_.pureconfig.Derivation.Successful[${weakTypeOf[A]}]($value)"
+  private[this] def materializeInnerDerivation(typ: Type): Tree = {
+    DerivationMacroCompat.inferImplicitValue(c)(typ) match {
+      case EmptyTree => q"_root_.pureconfig.Derivation.Failed[$typ]()"
+      case value => q"_root_.pureconfig.Derivation.Successful[$typ]($value)"
     }
-    currentPath = currentPath.tail
-    res
   }
 
   // Materialize a `Derivation` at the root level, i.e. not caused by the materialization of another `Derivation`.
@@ -77,27 +73,26 @@ class DerivationMacros(val c: whitebox.Context) {
   // found error with a basic message. If an implicit is found, it still needs to search the tree found in order to
   // check if some inner derivations materialized a `Derivation.failed`. If that's the case, it collects those failures
   // and prints a nice message.
-  private[this] def materializeRootDerivation[A: WeakTypeTag]: Tree = {
-    DerivationMacroCompat.inferImplicitValue[A](c) match {
+  private[this] def materializeRootDerivation(typ: Type): Tree = {
+    DerivationMacroCompat.inferImplicitValue(c)(typ) match {
       case EmptyTree =>
         // failed to find an implicit at the root level of the derivation; set a generic implicitNotFound message
         // without further information
-        setImplicitNotFound(Nil)
+        setImplicitNotFound(typ, Nil)
 
         // cause the implicit to fail materializing - the message is ignored
         c.abort(c.enclosingPosition, "")
 
       case value =>
         // collect the failed derivations in the built implicit tree
-        val failed = failedDerivations.asInstanceOf[List[List[Type]]]
-        failedDerivations = Nil
+        val failed = collectFailedDerivations(value)
 
         if (failed.isEmpty) {
-          q"_root_.pureconfig.Derivation.Successful[${weakTypeOf[A]}]($value)"
+          q"_root_.pureconfig.Derivation.Successful[$typ]($value)"
         } else {
           // if there are failures, that means one of the inner implicits was not found - set a message with details
           // about the paths failed
-          setImplicitNotFound(failed)
+          setImplicitNotFound(typ, failed)
 
           // cause the implicit to fail materializing - the message is ignored
           c.abort(c.enclosingPosition, "")
@@ -105,13 +100,60 @@ class DerivationMacros(val c: whitebox.Context) {
     }
   }
 
+  // Traverses a tree and collects a list of paths from the root derivation to the failed leaves.
+  private[this] def collectFailedDerivations(tree: Tree): List[List[Type]] = {
+    val failures = mutable.ListBuffer[List[Type]]()
+
+    // Define a Traverser for a DFS on the AST. In "regular" derivations, the `Derivation.Failed` tress (if any) would
+    // be nested in layers of `Derivation.Successful` calls, so it would be trivial to extract the failing paths from
+    // there. However, `Lazy` flattens the structure of the tree, so special handling of `Lazy` trees is needed. The
+    // logic for that is in `LazyContextParser`.
+    val traverser = new Traverser {
+      private[this] var currentPath = List[Type]()
+      private[this] var lazyCtxOpt = Option.empty[LazyContext]
+
+      override def traverse(tree: Tree) = tree match {
+        case q"pureconfig.Derivation.Successful.apply[$typ]($valueExpr)" =>
+          currentPath = typ.toType :: currentPath
+          traverse(valueExpr)
+          currentPath = currentPath.tail
+
+        case q"pureconfig.Derivation.Failed.apply[$typ]()" =>
+          failures += typ.toType :: currentPath
+
+        case LazyContextTree(lazyCtx) =>
+          // if the `Lazy` context tree is found, store the created `LazyContext` instance and continue traversing from
+          // the `Lazy` entrypoint.
+          lazyCtxOpt = Some(lazyCtx)
+          traverse(lazyCtx.entrypoint)
+          lazyCtxOpt = None
+
+        case _ =>
+          // for every other tree, check if it is a reference to a lazy implicit. If so, follow the reference and
+          // continue traversing the corresponding tree with the new `LazyContext`.
+          lazyCtxOpt.flatMap(_.followRef(tree)) match {
+            case None => super.traverse(tree)
+
+            case Some((newLazyCtx, lazyTree)) =>
+              val oldLazyCtx = lazyCtxOpt
+              lazyCtxOpt = Some(newLazyCtx)
+              traverse(lazyTree)
+              lazyCtxOpt = oldLazyCtx
+          }
+      }
+    }
+
+    traverser.traverse(tree)
+    failures.toList.map(_.reverse)
+  }
+
   // Prepares and sets the message to be printed for the given failed derivations.
-  private[this] def setImplicitNotFound[A: WeakTypeTag](failedDerivations: List[List[Type]]): Unit = {
+  private[this] def setImplicitNotFound(typ: Type, failedDerivations: List[List[Type]]): Unit = {
     val builder = new StringBuilder()
 
     failedDerivations match {
-      case Nil => builder ++= s"could not find ${prettyPrintType(weakTypeOf[A])}\n"
-      case _ => builder ++= s"could not derive ${prettyPrintType(weakTypeOf[A])}, because:\n"
+      case Nil => builder ++= s"could not find ${prettyPrintType(typ)}\n"
+      case _ => builder ++= s"could not derive ${prettyPrintType(typ)}, because:\n"
     }
 
     def buildMessage(scopedFailedDerivations: List[List[Type]], depth: Int): Unit = {
@@ -137,7 +179,7 @@ class DerivationMacros(val c: whitebox.Context) {
       }
     }
 
-    buildMessage(failedDerivations.map(_.reverse).reverse.distinct, 1)
+    buildMessage(failedDerivations, 1)
     DerivationMacroCompat.setImplicitNotFound(c)(builder.toString)
   }
 
@@ -149,15 +191,4 @@ class DerivationMacros(val c: whitebox.Context) {
     case tq"$typeclass[$arg]" => s"a $typeclass instance for type $arg"
     case _ => s"an implicit value of $typ"
   }
-}
-
-private object DerivationMacros {
-
-  // Stores the list of paths (lists of types) to failed derivations. Both the outer list and the paths are stored in
-  // reverse for efficiency. The type of the `Type` values is path-dependent on the context of the derivation macro and
-  // should be able to be cast safely. Before a root derivation returns this list is emptied.
-  var failedDerivations: List[List[_ <: Universe#Type]] = Nil
-
-  // Stores the current path of the derivation.
-  var currentPath: List[_ <: Universe#Type] = Nil
 }

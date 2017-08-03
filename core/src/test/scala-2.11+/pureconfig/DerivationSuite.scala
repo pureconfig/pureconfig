@@ -89,14 +89,11 @@ class DerivationSuite extends BaseSuite {
       "    - missing a ConfigWriter instance for type Custom",
       "  - missing a ConfigWriter instance for type Custom2")
 
-    // FIXME this is not the expected output. Investigate the issue and find some way to show only the implicit with most priority
     illTyped(
       "implicitly[Derivation[ConfigWriter[Conf]]]",
       "could not derive a ConfigWriter instance for type Conf, because:",
       "  - missing a ConfigWriter instance for type ConfC, because:",
       "    - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
-      "      - missing a ConfigWriter instance for type Some\\[Custom\\], because:", // shouldn't appear
-      "        - missing a ConfigWriter instance for type Custom", // shouldn't appear
       "      - missing a ConfigWriter instance for type Custom",
       "    - missing a ConfigWriter instance for type Custom2")
   }
