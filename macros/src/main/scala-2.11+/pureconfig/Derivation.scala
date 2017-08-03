@@ -4,6 +4,8 @@ import scala.collection.mutable
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
+import pureconfig.derivation._
+
 sealed trait Derivation[A] {
   def value: A
 }
@@ -24,7 +26,7 @@ object Derivation {
 }
 
 @macrocompat.bundle
-class DerivationMacros(val c: whitebox.Context) extends LazyContextParser {
+class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with MacroCompat {
   import c.universe._
 
   private[this] implicit class RichType(val t: Type) {
@@ -61,7 +63,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser {
   // materialize a `Derivation.failed` for missing implicits so that the `Derivation` at the root level can easily find
   // and handle them.
   private[this] def materializeInnerDerivation(typ: Type): Tree = {
-    DerivationMacroCompat.inferImplicitValue(c)(typ) match {
+    inferImplicitValueCompat(typ) match {
       case EmptyTree => q"_root_.pureconfig.Derivation.Failed[$typ]()"
       case value => q"_root_.pureconfig.Derivation.Successful[$typ]($value)"
     }
@@ -74,7 +76,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser {
   // check if some inner derivations materialized a `Derivation.failed`. If that's the case, it collects those failures
   // and prints a nice message.
   private[this] def materializeRootDerivation(typ: Type): Tree = {
-    DerivationMacroCompat.inferImplicitValue(c)(typ) match {
+    inferImplicitValueCompat(typ) match {
       case EmptyTree =>
         // failed to find an implicit at the root level of the derivation; set a generic implicitNotFound message
         // without further information
@@ -180,7 +182,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser {
     }
 
     buildMessage(failedDerivations, 1)
-    DerivationMacroCompat.setImplicitNotFound(c)(builder.toString)
+    setImplicitNotFound(builder.toString)
   }
 
   private[this] def prettyPrintType(typ: Type): String =

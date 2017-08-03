@@ -1,10 +1,10 @@
-package pureconfig
+package pureconfig.derivation
 
 import scala.reflect.macros.whitebox
 
 /**
  * Encapsulates the logic to parse Scala syntax trees genetrated by `Lazy`, providing a high-level way to navigate
- * through such a tree.
+ * through such a tree. The code on this class is heavily-dependent on the implementation details of `Lazy`.
  */
 trait LazyContextParser {
   val c: whitebox.Context
