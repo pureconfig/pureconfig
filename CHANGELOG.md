@@ -10,7 +10,7 @@
   - `ConfigReader` for Scala tuples can now read from `ConfigLists`s.
   
 - Breaking changes
-  - `ConfigWriter` for tuples now writes tuples as `ConfigList`s, instead of a `ConfigObject` with keys `_1`, `_2`, and so on.
+  - `ConfigWriter` for tuples now writes them as `ConfigList`s, instead of a `ConfigObject` with keys `_1`, `_2`, and so on.
   
 - Bug fixes
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
