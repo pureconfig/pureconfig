@@ -53,6 +53,9 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[String]
 
   checkArbitrary[Boolean]
+  checkRead[Boolean](
+    true -> ConfigValueFactory.fromAnyRef("yes"),
+    false -> ConfigValueFactory.fromAnyRef("no"))
 
   checkArbitrary[Double]
   checkArbitrary2[Double, Percentage](_.toDoubleFraction)

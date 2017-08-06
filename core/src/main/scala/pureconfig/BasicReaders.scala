@@ -24,7 +24,11 @@ import pureconfig.error._
 trait PrimitiveReaders {
 
   implicit val stringConfigReader = ConfigReader.fromString[String](s => _ => Right(s))
-  implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError(_.toBoolean))
+  implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError({
+    case "yes" => true
+    case "no" => false
+    case other => other.toBoolean
+  }))
   implicit val doubleConfigReader = ConfigReader.fromNonEmptyString[Double](catchReadError({
     case v if v.last == '%' => v.dropRight(1).toDouble / 100d
     case v => v.toDouble
