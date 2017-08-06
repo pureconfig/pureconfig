@@ -36,6 +36,20 @@ trait DerivedReaders extends DerivedReaders1 {
       def from(value: ConfigValue): Either[ConfigReaderFailures, T] =
         reader.from(value).right.map(unwrapped.wrap)
     }
+
+  // used for tuples
+  implicit def deriveTupleInstance[F: IsTuple, Repr](
+    implicit
+    g: Generic.Aux[F, Repr],
+    gcr: ConfigReader[Repr],
+    pr: ConfigReader[F]): ConfigReader[F] = new ConfigReader[F] {
+    override def from(value: ConfigValue) = {
+      // Try to read first as the product representation (i.e.
+      // ConfigObject with '_1', '_2', etc. keys) and afterwards as the Generic
+      // representation (i.e. ConfigList).
+      pr.from(value).left.flatMap(_ => gcr.from(value).right.map(g.from))
+    }
+  }
 }
 
 /**
@@ -203,11 +217,11 @@ trait DerivedReaders1 {
   // building the `WrongSizeList` ConfigReaderFailure. We can't rely on the
   // `WrongSizeList` type alone since we can have HLists inside HLists and we
   // don't wan't to keep accumulating for inner HLists.
-  private[pureconfig] trait HListConfigReader[T <: HList] {
+  protected[pureconfig] trait HListConfigReader[T <: HList] {
     def from(cv: ConfigValue): Either[List[Either[(Int, Int), ConfigReaderFailure]], T]
   }
 
-  private[pureconfig] implicit final lazy val deriveHNilConfigReader: HListConfigReader[HNil] =
+  protected[pureconfig] implicit final lazy val deriveHNilConfigReader: HListConfigReader[HNil] =
     new HListConfigReader[HNil] {
       def from(cv: ConfigValue): Either[List[Either[(Int, Int), ConfigReaderFailure]], HNil] = {
         cv match {
@@ -218,7 +232,7 @@ trait DerivedReaders1 {
       }
     }
 
-  private[pureconfig] implicit final def deriveHConsConfigReader[H, T <: HList](implicit hr: ConfigReader[H], tr: HListConfigReader[T], tl: HKernelAux[T]): HListConfigReader[H :: T] =
+  protected[pureconfig] implicit final def deriveHConsConfigReader[H, T <: HList](implicit hr: ConfigReader[H], tr: HListConfigReader[T], tl: HKernelAux[T]): HListConfigReader[H :: T] =
     new HListConfigReader[H :: T] {
       def from(cv: ConfigValue): Either[List[Either[(Int, Int), ConfigReaderFailure]], H :: T] = {
         cv match {

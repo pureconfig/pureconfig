@@ -228,23 +228,26 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |""".stripMargin
   }
 
-  case class HListConf(v: (Int :: Int :: String :: HNil))
+  case class HListAndTupleConf(hlist: (Int :: Int :: String :: HNil), tuple: (Int, Int, String))
 
   it should "have a message showing lists of wrong size" in {
     val conf = ConfigFactory.parseString("""
       {
-        v = [1, 2, "three", 4]
+        hlist = [1, 2, "three", 4]
+        tuple = [1, 2, "three", 4, 5, 6]
       }
     """)
 
     val exception = intercept[ConfigReaderException[_]] {
-      conf.root().toOrThrow[HListConf]
+      conf.root().toOrThrow[HListAndTupleConf]
     }
 
     exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$HListConf. Failures are:
-        |  at 'v':
-        |    - List of wrong size found. Expected 3 elements. Found 4 elements instead.
-        |""".stripMargin
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$HListAndTupleConf. Failures are:
+          |  at 'hlist':
+          |    - List of wrong size found. Expected 3 elements. Found 4 elements instead.
+          |  at 'tuple':
+          |    - List of wrong size found. Expected 3 elements. Found 6 elements instead.
+          |""".stripMargin
   }
 }

@@ -18,6 +18,15 @@ trait DerivedWriters extends DerivedWriters1 {
     new ConfigWriter[T] {
       override def to(t: T): ConfigValue = writer.to(unwrapped.unwrap(t))
     }
+
+  // used for tuples
+  implicit final def deriveTupleInstance[F: IsTuple, Repr](
+    implicit
+    gen: Generic.Aux[F, Repr],
+    cc: ConfigWriter[Repr]): ConfigWriter[F] = new ConfigWriter[F] {
+    override def to(t: F): ConfigValue =
+      cc.to(gen.to(t))
+  }
 }
 
 /**
@@ -130,7 +139,7 @@ trait DerivedWriters1 {
   }
 
   // used for both products and coproducts
-  implicit final def deriveGenericInstance[F, Repr](
+  implicit final def deriveLabelledGenericInstance[F, Repr](
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[WrappedConfigWriter[F, Repr]]): ConfigWriter[F] = new ConfigWriter[F] {
