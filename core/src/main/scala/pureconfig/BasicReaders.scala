@@ -25,8 +25,8 @@ trait PrimitiveReaders {
 
   implicit val stringConfigReader = ConfigReader.fromString[String](s => _ => Right(s))
   implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError({
-    case "yes" => true
-    case "no" => false
+    case "yes" | "on" => true
+    case "no" | "off" => false
     case other => other.toBoolean
   }))
   implicit val doubleConfigReader = ConfigReader.fromNonEmptyString[Double](catchReadError({
