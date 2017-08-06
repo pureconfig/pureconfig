@@ -27,15 +27,15 @@ class Class2(id: String, value: Int) extends Identifiable {
 }
 ```
 
-Because PureConfig is based on Shapeless and Shapeless doesn't support non-case classes and interfaces,
+Because PureConfig is based on shapeless and shapeless doesn't support non-case classes and interfaces,
 the class above cannot be read automatically by PureConfig.
 
 #### Add support for Identifiable
 
 ##### Method 1: Use a Scala copy of the configuration
 
-Because  PureConfig works out-of-the-box with Scala sealed familes of case classes, one simple solution
-to support unsupported complex types is to
+Because PureConfig works out-of-the-box with Scala sealed familes of case classes, one simple solution
+to support unsupported complex types is to:
 
 1. define a hierarchy of Scala classes mirroring the complex type;
 2. define a conversion from this Scala configuration to the complex type.
@@ -75,7 +75,7 @@ implicit val identifiableConfigReader: ConfigReader[Identifiable] =
 ```
 
 **pros**: it's idiomatic and elegant. It uses a type supported by PureConfig to extract the data
-needed from the configuration and then map it to the original complex type. Note that this
+needed from the configuration and then maps it to the original complex type. Note that this
 method follows what you usually do in other libraries (e.g. Circe) to support new data types and
 it's both composable and nice to read.
 

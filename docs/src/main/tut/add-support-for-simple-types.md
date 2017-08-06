@@ -1,6 +1,7 @@
 ### Add support for simple types
 
-Let's see how to support the type
+PureConfig supports case classes but not regular classes. Let's see how to add support
+for a regular class with a single mutable field
 
 ```tut:silent
 import com.typesafe.config.ConfigFactory.parseString
