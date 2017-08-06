@@ -6,6 +6,7 @@ package pureconfig
 import com.typesafe.config._
 import java.nio.file.Paths
 import org.scalatest._
+import shapeless._
 
 import pureconfig.error._
 import pureconfig.syntax._
@@ -225,5 +226,25 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
           |  - Unable to read file ${workingDir}${file} (No such file or directory).
           |""".stripMargin
+  }
+
+  case class HListConf(v: (Int :: Int :: String :: HNil))
+
+  it should "have a message showing lists of wrong size" in {
+    val conf = ConfigFactory.parseString("""
+      {
+        v = [1, 2, "three", 4]
+      }
+    """)
+
+    val exception = intercept[ConfigReaderException[_]] {
+      conf.root().toOrThrow[HListConf]
+    }
+
+    exception.getMessage shouldBe
+      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$HListConf. Failures are:
+        |  at 'v':
+        |    - List of wrong size found. Expected 3 elements. Found 4 elements instead.
+        |""".stripMargin
   }
 }

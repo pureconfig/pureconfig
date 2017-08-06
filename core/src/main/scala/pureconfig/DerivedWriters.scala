@@ -25,7 +25,9 @@ trait DerivedWriters extends DerivedWriters1 {
  */
 trait DerivedWriters1 {
 
-  private[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] extends ConfigWriter[SubRepr]
+  private[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] {
+    def to(cv: SubRepr): ConfigValue
+  }
 
   implicit final def hNilConfigWriter[Wrapped]: WrappedConfigWriter[Wrapped, HNil] = new WrappedConfigWriter[Wrapped, HNil] {
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
@@ -106,6 +108,25 @@ trait DerivedWriters1 {
     override def to(keyVals: Map[String, T]): ConfigValue = {
       ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).asJava)
     }
+  }
+
+  // Auxiliary type to make sure we always return `ConfigList` when writing HLists.
+  private[pureconfig] trait HListConfigWriter[T <: HList] {
+    def to(v: T): ConfigList
+  }
+
+  private[pureconfig] implicit final lazy val deriveHNilConfigWriter: HListConfigWriter[HNil] = new HListConfigWriter[HNil] {
+    def to(v: HNil): ConfigList = ConfigValueFactory.fromIterable(List().asJava)
+  }
+
+  private[pureconfig] implicit final def deriveHConsConfigWriter[H, T <: HList](implicit hw: ConfigWriter[H], tw: HListConfigWriter[T]): HListConfigWriter[H :: T] =
+    new HListConfigWriter[H :: T] {
+      def to(v: (H :: T)): ConfigList =
+        ConfigValueFactory.fromIterable((hw.to(v.head) +: tw.to(v.tail).asScala).asJava)
+    }
+
+  implicit final def deriveHListConfigWriter[T <: HList](implicit hlw: HListConfigWriter[T]): ConfigWriter[T] = new ConfigWriter[T] {
+    def to(cv: T): ConfigValue = hlw.to(cv)
   }
 
   // used for both products and coproducts

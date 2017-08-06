@@ -21,4 +21,7 @@ object ConfigReaderFailures {
 
   def apply(configReaderFailure: ConfigReaderFailure): ConfigReaderFailures =
     new ConfigReaderFailures(configReaderFailure, List.empty[ConfigReaderFailure])
+
+  def apply(configReaderFailures: List[ConfigReaderFailure]): ConfigReaderFailures =
+    new ConfigReaderFailures(configReaderFailures.head, configReaderFailures.tail)
 }

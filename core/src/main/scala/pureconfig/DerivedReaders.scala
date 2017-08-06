@@ -10,6 +10,7 @@ import pureconfig.ConvertHelpers._
 import pureconfig.error._
 import shapeless._
 import shapeless.labelled._
+import shapeless.ops.hlist.HKernelAux
 
 /**
  * The default behavior of ConfigReaders that are implicitly derived in PureConfig is to raise a
@@ -194,6 +195,61 @@ trait DerivedReaders1 {
 
         case other =>
           fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
+      }
+    }
+  }
+
+  // We introduce this special type here to keep accumulating the numbers for
+  // building the `WrongSizeList` ConfigReaderFailure. We can't rely on the
+  // `WrongSizeList` type alone since we can have HLists inside HLists and we
+  // don't wan't to keep accumulating for inner HLists.
+  private[pureconfig] trait HListConfigReader[T <: HList] {
+    def from(cv: ConfigValue): Either[List[Either[(Int, Int), ConfigReaderFailure]], T]
+  }
+
+  private[pureconfig] implicit final lazy val deriveHNilConfigReader: HListConfigReader[HNil] =
+    new HListConfigReader[HNil] {
+      def from(cv: ConfigValue): Either[List[Either[(Int, Int), ConfigReaderFailure]], HNil] = {
+        cv match {
+          case cl: ConfigList if cl.size == 0 => Right(HNil)
+          case cl: ConfigList => Left(List(Left((0, cl.size))))
+          case other => Left(List(Right(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))))
+        }
+      }
+    }
+
+  private[pureconfig] implicit final def deriveHConsConfigReader[H, T <: HList](implicit hr: ConfigReader[H], tr: HListConfigReader[T], tl: HKernelAux[T]): HListConfigReader[H :: T] =
+    new HListConfigReader[H :: T] {
+      def from(cv: ConfigValue): Either[List[Either[(Int, Int), ConfigReaderFailure]], H :: T] = {
+        cv match {
+          case cl: ConfigList if cl.size == 0 => Left(List(Left((tl().length + 1, 0))))
+          case cl: ConfigList =>
+            val sl = cl.asScala
+            val hv = hr.from(sl.head).left.map(_.toList.map(Right(_)))
+            val tv = tr.from(ConfigValueFactory.fromAnyRef(sl.tail.asJava)).left.map {
+              _.map {
+                case Left((ex, fo)) => Left((ex + 1, fo + 1))
+                case other => other
+              }
+            }
+            (hv, tv) match {
+              case (Right(h), Right(t)) => Right(h :: t)
+              case (Left(h), Left(t)) => Left(h ++ t)
+              case (Left(h), _) => Left(h)
+              case (_, Left(t)) => Left(t)
+            }
+          case other => Left(List(Right(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))))
+        }
+      }
+    }
+
+  implicit final def deriveHListConfigReader[T <: HList](implicit hlr: HListConfigReader[T]): ConfigReader[T] = new ConfigReader[T] {
+    def from(cv: ConfigValue): Either[ConfigReaderFailures, T] = {
+      hlr.from(cv).left.map { failures =>
+        ConfigReaderFailures(failures.map {
+          case Left((ex, fo)) => WrongSizeList(ex, fo, ConfigValueLocation(cv), "")
+          case Right(f) => f
+        })
       }
     }
   }
