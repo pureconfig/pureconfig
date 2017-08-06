@@ -19,9 +19,6 @@ import pureconfig.error._
 
 package object pureconfig {
 
-  // an alias for a `Derivation` of a `ConfigReader`
-  private type DerivedConfigReader[A] = Derivation[ConfigReader[A]]
-
   // retrieves a value from a namespace, returning a failure if:
   //   - one of the parent keys doesn't exist or isn't an object;
   //   - `allowNullLeaf` is false and the leaf key doesn't exist.
@@ -51,7 +48,7 @@ package object pureconfig {
 
   // loads a value from a config in a given namespace. All `loadConfig` methods _must_ use this method to get correct
   // namespace handling, both in the values to load and in the error messages.
-  private[this] def loadValue[A](conf: TypesafeConfig, namespace: String)(implicit reader: DerivedConfigReader[A]): Either[ConfigReaderFailures, A] = {
+  private[this] def loadValue[A](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): Either[ConfigReaderFailures, A] = {
     getValue(conf, namespace, reader.value.isInstanceOf[AllowMissingKey]).right.flatMap { cv =>
       if (namespace.isEmpty) reader.value.from(cv)
       else improveFailures(reader.value.from(cv), namespace, ConfigValueLocation(conf.root()))
@@ -65,7 +62,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config: DerivedConfigReader]: Either[ConfigReaderFailures, Config] =
+  def loadConfig[Config](implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] =
     loadConfig("")
 
   /**
@@ -76,7 +73,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config: DerivedConfigReader](namespace: String): Either[ConfigReaderFailures, Config] = {
+  def loadConfig[Config](namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     for {
       _ <- invalidateCaches().right
       rawConfig <- load().right
@@ -92,7 +89,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config: DerivedConfigReader](path: Path): Either[ConfigReaderFailures, Config] =
+  def loadConfig[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] =
     loadConfig(path, "")
 
   /**
@@ -104,7 +101,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfig[Config: DerivedConfigReader](path: Path, namespace: String): Either[ConfigReaderFailures, Config] = {
+  def loadConfig[Config](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     for {
       _ <- invalidateCaches().right
       rawConfig <- loadFile(path).right
@@ -113,11 +110,11 @@ package object pureconfig {
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
-  def loadConfig[Config: DerivedConfigReader](conf: TypesafeConfig): Either[ConfigReaderFailures, Config] =
+  def loadConfig[Config](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] =
     loadValue(conf, "")
 
   /** Load a configuration of type `Config` from the given `Config` */
-  def loadConfig[Config: DerivedConfigReader](conf: TypesafeConfig, namespace: String): Either[ConfigReaderFailures, Config] =
+  def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] =
     loadValue(conf, namespace)
 
   /**
@@ -128,7 +125,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfigWithFallback[Config: DerivedConfigReader](conf: TypesafeConfig): Either[ConfigReaderFailures, Config] =
+  def loadConfigWithFallback[Config](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] =
     loadConfigWithFallback(conf, "")
 
   /**
@@ -140,7 +137,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadConfigWithFallback[Config: DerivedConfigReader](conf: TypesafeConfig, namespace: String): Either[ConfigReaderFailures, Config] = {
+  def loadConfigWithFallback[Config](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     for {
       _ <- invalidateCaches().right
       rawConfig <- load().right
@@ -161,7 +158,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigOrThrow[Config: DerivedConfigReader: ClassTag]: Config = {
+  def loadConfigOrThrow[Config: ClassTag](implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfig[Config])
   }
 
@@ -172,7 +169,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigOrThrow[Config: DerivedConfigReader: ClassTag](namespace: String): Config = {
+  def loadConfigOrThrow[Config: ClassTag](namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfig[Config](namespace))
   }
 
@@ -183,7 +180,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigOrThrow[Config: DerivedConfigReader: ClassTag](path: Path): Config = {
+  def loadConfigOrThrow[Config: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfig[Config](path))
   }
 
@@ -195,7 +192,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigOrThrow[Config: DerivedConfigReader: ClassTag](path: Path, namespace: String): Config = {
+  def loadConfigOrThrow[Config: ClassTag](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfig[Config](path, namespace))
   }
 
@@ -206,7 +203,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigOrThrow[Config: DerivedConfigReader: ClassTag](conf: TypesafeConfig): Config = {
+  def loadConfigOrThrow[Config: ClassTag](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfig[Config](conf))
   }
 
@@ -218,7 +215,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigOrThrow[Config: DerivedConfigReader: ClassTag](conf: TypesafeConfig, namespace: String): Config = {
+  def loadConfigOrThrow[Config: ClassTag](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfig[Config](conf, namespace))
   }
 
@@ -229,7 +226,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigWithFallbackOrThrow[Config: DerivedConfigReader: ClassTag](conf: TypesafeConfig): Config = {
+  def loadConfigWithFallbackOrThrow[Config: ClassTag](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfigWithFallback[Config](conf))
   }
 
@@ -241,7 +238,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigWithFallbackOrThrow[Config: DerivedConfigReader: ClassTag](conf: TypesafeConfig, namespace: String): Config = {
+  def loadConfigWithFallbackOrThrow[Config: ClassTag](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow(loadConfigWithFallback[Config](conf, namespace))
   }
 
@@ -253,7 +250,7 @@ package object pureconfig {
    * @param overrideOutputPath Override the path if it already exists
    */
   @throws[IllegalArgumentException]
-  def saveConfigAsPropertyFile[Config: ConfigWriter](conf: Config, outputPath: Path, overrideOutputPath: Boolean = false): Unit = {
+  def saveConfigAsPropertyFile[Config](conf: Config, outputPath: Path, overrideOutputPath: Boolean = false)(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
     if (!overrideOutputPath && Files.isRegularFile(outputPath)) {
       throw new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
     }
@@ -270,9 +267,9 @@ package object pureconfig {
    * @param conf The configuration to write
    * @param outputStream The stream in which the configuration should be written
    */
-  def saveConfigToStream[Config](conf: Config, outputStream: OutputStream)(implicit writer: ConfigWriter[Config]): Unit = {
+  def saveConfigToStream[Config](conf: Config, outputStream: OutputStream)(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
     val printOutputStream = new PrintStream(outputStream)
-    val rawConf = writer.to(conf)
+    val rawConf = writer.value.to(conf)
     printOutputStream.print(rawConf.render())
     printOutputStream.close()
   }
@@ -286,7 +283,7 @@ package object pureconfig {
    *
    * @param files Files ordered in decreasing priority containing part or all of a `Config`. Must not be empty.
    */
-  def loadConfigFromFiles[Config: DerivedConfigReader](files: Traversable[Path]): Either[ConfigReaderFailures, Config] = {
+  def loadConfigFromFiles[Config](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     if (files.isEmpty) {
       ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))(None)
     } else {
@@ -306,7 +303,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  def loadConfigFromFilesOrThrow[Config: DerivedConfigReader: ClassTag](files: Traversable[Path]): Config = {
+  def loadConfigFromFilesOrThrow[Config: ClassTag](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     getResultOrThrow[Config](loadConfigFromFiles[Config](files))
   }
 }
