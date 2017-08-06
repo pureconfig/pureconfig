@@ -23,7 +23,9 @@ trait DerivedWriters extends DerivedWriters1 {
 /**
  * Trait containing `ConfigWriter` instances for collection, product and coproduct types.
  */
-trait DerivedWriters1 extends DerivedWriters2 {
+trait DerivedWriters1 {
+
+  private[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] extends ConfigWriter[SubRepr]
 
   implicit final def hNilConfigWriter[Wrapped]: WrappedConfigWriter[Wrapped, HNil] = new WrappedConfigWriter[Wrapped, HNil] {
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
@@ -105,11 +107,6 @@ trait DerivedWriters1 extends DerivedWriters2 {
       ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.value.to).asJava)
     }
   }
-}
-
-trait DerivedWriters2 {
-
-  protected[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] extends ConfigWriter[SubRepr]
 
   // used for both products and coproducts
   implicit final def deriveGenericInstance[F, Repr](
