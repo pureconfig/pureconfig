@@ -54,7 +54,7 @@ Conf(new MyInt(3)).toConfig
 // res6: com.typesafe.config.ConfigValue = SimpleConfigObject({"n":"3"})
 ```
 
-If you want to define both operations, the easier way to add full support for a class is by creating a `ConfigConvert`:
+If you want to define both operations, the easiest way to add full support for a class is by creating a `ConfigConvert`:
 
 ```scala
 implicit val myIntConvert = ConfigConvert.viaString[MyInt](

@@ -49,7 +49,7 @@ And then:
 Conf(new MyInt(3)).toConfig
 ```
 
-If you want to define both operations, the easier way to add full support for a class is by creating a `ConfigConvert`:
+If you want to define both operations, the easiest way to add full support for a class is by creating a `ConfigConvert`:
 
 ```tut:book:silent
 implicit val myIntConvert = ConfigConvert.viaString[MyInt](
