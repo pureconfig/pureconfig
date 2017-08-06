@@ -42,8 +42,15 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
   // The entrypoint for materializing `Derivation` instances.
   def materializeDerivation[A: WeakTypeTag]: Tree = {
 
+    // check if the `-Xmacro-settings:materialize-derivations` scalac flag is enabled
+    val isDerivationEnabled = c.settings.contains("materialize-derivations")
+
+    // check if the first implicit in the chain is a `Derivation` (if it isn't, not only we can't show custom messages
+    // but we may be unable to parse `Lazy` trees)
+    val isHeadImplicitADerivation = c.openImplicits.headOption.exists(_.pre =:= typeOf[Derivation.type])
+
     // check the `-Xmacro-settings:materialize-derivations` scalac flag
-    if (!c.settings.contains("materialize-derivations")) {
+    if (!isDerivationEnabled || !isHeadImplicitADerivation) {
       // when not present, simply render the base `Derivation` constructor with `implcitly[A]`. This results in the same
       // behavior as without `Derivation` (apart from the extra wrapper).
       q"_root_.pureconfig.Derivation.Successful(implicitly[${weakTypeOf[A]}])"
