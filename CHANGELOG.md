@@ -5,7 +5,13 @@
     by config objects;
   - `ConfigFieldMapping` now has a `withOverrides` method that allows users to easily define exceptional cases to an
     existing mapping;
-  - `ConfigReader` and `ConfigWriter` for `java.math.BigDecimal` and `java.math.BigInteger`.
+  - `ConfigReader` and `ConfigWriter` for `java.math.BigDecimal` and `java.math.BigInteger`;
+  - `ConfigReader` and `ConfigWriter` for `shapeless.HList`;
+  - `ConfigReader` for Scala tuples can now read from `ConfigLists`s.
+  
+- Breaking changes
+  - `ConfigWriter` for tuples now writes tuples as `ConfigList`s, instead of a `ConfigObject` with keys `_1`, `_2`, and so on.
+  
 - Bug fixes
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
   - `loadConfig` methods no longer throw an exception when passed a namespace where one of the keys is not a config
