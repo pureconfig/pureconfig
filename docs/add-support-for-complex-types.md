@@ -10,7 +10,7 @@ support, the [second part](#add-support-for-identifiable) provides the three met
 #### Data type to support
 
 First of all, let's start with the data type that we want to support. 
-The example is composed by one interface and two implementations:
+The example is composed of one interface and two implementations:
 
 ```scala
 trait Identifiable {
