@@ -65,7 +65,7 @@ uses the raw configurations to do its magic.
 In the sbt configuration file use Scala `2.10`, `2.11` or `2.12`:
 
 ```scala
-scalaVersion := "2.12.1" // or "2.11.8", "2.10.5"
+scalaVersion := "2.12.3" // or "2.11.11", "2.10.6"
 ```
 
 Add PureConfig to your library dependencies. For Scala `2.11` and `2.12`:
@@ -88,6 +88,8 @@ libraryDependencies ++= Seq(
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/melrief/pureconfig/blob/master/example/build.sbt)
 used for the example.
 
+Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig.
+As a result we recommend only using 2.11.11 or 2.12.1 or newer within the minor series.
 
 ## Use PureConfig
 
