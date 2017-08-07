@@ -88,7 +88,8 @@ libraryDependencies ++= Seq(
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/melrief/pureconfig/blob/master/example/build.sbt)
 used for the example.
 
-Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig. As a result we recommend only using 2.11.9 or 2.12.1 or newer within the minor series.
+Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig.
+As a result we recommend only using 2.11.11 or 2.12.1 or newer within the minor series.
 
 ## Use PureConfig
 
