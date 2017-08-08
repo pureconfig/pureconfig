@@ -13,7 +13,7 @@ lazy val docs = (project in file("docs")).
   dependsOn(core)
 
 def module(proj: Project) = proj.
-  enablePlugins(TutPlugin).
+  enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
@@ -54,7 +54,7 @@ lazy val commonSettings = Seq(
 
   scalariformPreferences := scalariformPreferences.value
     .setPreference(DanglingCloseParenthesis, Prevent)
-    .setPreference(DoubleIndentClassDeclaration, true)
+    .setPreference(DoubleIndentConstructorArguments, true)
     .setPreference(SpacesAroundMultiImports, true),
 
   initialize := {
