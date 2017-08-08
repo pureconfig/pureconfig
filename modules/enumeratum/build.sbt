@@ -1,7 +1,7 @@
 name := "pureconfig-enumeratum"
 
 libraryDependencies ++= Seq(
-  "com.beachape" %% "enumeratum" % "1.5.6",
+  "com.beachape" %% "enumeratum" % "1.5.12",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest)
 
