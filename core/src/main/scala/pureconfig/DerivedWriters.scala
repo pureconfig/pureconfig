@@ -38,11 +38,11 @@ trait DerivedWriters1 {
     def to(cv: SubRepr): ConfigValue
   }
 
-  implicit final def hNilConfigWriter[Wrapped]: WrappedConfigWriter[Wrapped, HNil] = new WrappedConfigWriter[Wrapped, HNil] {
+  implicit final def labelledHNilConfigWriter[Wrapped]: WrappedConfigWriter[Wrapped, HNil] = new WrappedConfigWriter[Wrapped, HNil] {
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
-  implicit final def hConsConfigWriter[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
+  implicit final def labelledHConsConfigWriter[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit
     key: Witness.Aux[K],
     vFieldConvert: Lazy[ConfigWriter[V]],
@@ -120,23 +120,19 @@ trait DerivedWriters1 {
   }
 
   // Auxiliary type to make sure we always return `ConfigList` when writing HLists.
-  private[pureconfig] trait HListConfigWriter[T <: HList] {
+  private[pureconfig] trait HListConfigWriter[T <: HList] extends ConfigWriter[T] {
     def to(v: T): ConfigList
   }
 
-  private[pureconfig] implicit final lazy val deriveHNilConfigWriter: HListConfigWriter[HNil] = new HListConfigWriter[HNil] {
+  implicit final lazy val hNilConfigWriter: HListConfigWriter[HNil] = new HListConfigWriter[HNil] {
     def to(v: HNil): ConfigList = ConfigValueFactory.fromIterable(List().asJava)
   }
 
-  private[pureconfig] implicit final def deriveHConsConfigWriter[H, T <: HList](implicit hw: ConfigWriter[H], tw: HListConfigWriter[T]): HListConfigWriter[H :: T] =
+  implicit final def hConsConfigWriter[H, T <: HList](implicit hw: ConfigWriter[H], tw: HListConfigWriter[T]): HListConfigWriter[H :: T] =
     new HListConfigWriter[H :: T] {
       def to(v: (H :: T)): ConfigList =
         ConfigValueFactory.fromIterable((hw.to(v.head) +: tw.to(v.tail).asScala).asJava)
     }
-
-  implicit final def deriveHListConfigWriter[T <: HList](implicit hlw: HListConfigWriter[T]): ConfigWriter[T] = new ConfigWriter[T] {
-    def to(cv: T): ConfigValue = hlw.to(cv)
-  }
 
   // used for both products and coproducts
   implicit final def deriveLabelledGenericInstance[F, Repr](

@@ -67,7 +67,7 @@ trait DerivedReaders1 {
     def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
   }
 
-  implicit final def hNilConfigReader[Wrapped](
+  implicit final def labelledHNilConfigReader[Wrapped](
     implicit
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, HNil, HNil] = new WrappedDefaultValue[Wrapped, HNil, HNil] {
 
@@ -83,7 +83,7 @@ trait DerivedReaders1 {
     }
   }
 
-  implicit final def hConsConfigReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
+  implicit final def labelledHConsConfigReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit
     key: Witness.Aux[K],
     vFieldReader: Lazy[ConfigReader[V]],
@@ -213,7 +213,7 @@ trait DerivedReaders1 {
     }
   }
 
-  implicit final lazy val deriveHNilConfigReader: ConfigReader[HNil] =
+  implicit final lazy val hNilConfigReader: ConfigReader[HNil] =
     new ConfigReader[HNil] {
       def from(cv: ConfigValue): Either[ConfigReaderFailures, HNil] = {
         cv match {
@@ -224,7 +224,7 @@ trait DerivedReaders1 {
       }
     }
 
-  implicit final def deriveHConsConfigReader[H, T <: HList](implicit hr: ConfigReader[H], tr: ConfigReader[T], tl: HKernelAux[T]): ConfigReader[H :: T] =
+  implicit final def hConsConfigReader[H, T <: HList](implicit hr: ConfigReader[H], tr: ConfigReader[T], tl: HKernelAux[T]): ConfigReader[H :: T] =
     new ConfigReader[H :: T] {
       def from(cv: ConfigValue): Either[ConfigReaderFailures, H :: T] = {
         cv match {
