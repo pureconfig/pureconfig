@@ -23,7 +23,7 @@ trait MacroCompat {
   }
 
   // This should be simply defined as `c.inferImplicitValue(c.weakTypeOf[A])`, but divergent implicits are wrongly
-  // reported up to Scala 2.12.2. See https://github.com/scala/scala-dev/issues/398 for more information.
+  // reported up to Scala 2.12.2. See https://github.com/scala/bug/issues/10398 for more information.
   def inferImplicitValueCompat(typ: Type): Tree = {
     val cc = c.asInstanceOf[scala.reflect.macros.contexts.Context]
     val enclosingTree = cc.openImplicits.head.tree.asInstanceOf[cc.universe.analyzer.global.Tree]
