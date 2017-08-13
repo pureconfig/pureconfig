@@ -49,7 +49,6 @@ trait DerivedReaders extends DerivedReaders1 {
       // Try to read first as the product representation (i.e.
       // ConfigObject with '_1', '_2', etc. keys) and afterwards as the Generic
       // representation (i.e. ConfigList).
-      // val pr = deriveProductInstance[F, LRepr, DefaultRepr]
       value.valueType match {
         case ConfigValueType.OBJECT => deriveTupleInstanceAsObject(value)
         case ConfigValueType.LIST => deriveTupleInstanceAsList(value)
