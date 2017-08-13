@@ -25,6 +25,8 @@ pomExtra := {
   </developers>
 }
 
+osgiSettings
+
 OsgiKeys.exportPackage := Seq("pureconfig.module.squants.*")
 OsgiKeys.privatePackage := Seq()
 OsgiKeys.importPackage := Seq(s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""", "*")
