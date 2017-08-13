@@ -2,7 +2,7 @@ package pureconfig
 
 import scala.collection.JavaConverters._
 
-import com.typesafe.config.ConfigValueFactory
+import com.typesafe.config.{ ConfigValueFactory, ConfigValueType }
 import org.scalacheck.Shapeless._
 
 import pureconfig.error._
@@ -38,4 +38,7 @@ class TupleConvertersSuite extends BaseSuite {
     ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava) -> ConfigReaderFailures(List(
       CannotConvert("one", "Int", """java.lang.NumberFormatException: For input string: "one"""", None, "_1"),
       KeyNotFound("_3", None, Set()))))
+  checkFailures[(String, Int)](
+    ConfigValueFactory.fromAnyRef("str") -> ConfigReaderFailures(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), None, "")))
 }
