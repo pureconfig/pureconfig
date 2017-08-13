@@ -4,7 +4,7 @@ import ReleaseTransformations._
 enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
-  enablePlugins(TutPlugin).
+  enablePlugins(TutPlugin, SbtOsgi).
   settings(commonSettings, tutTargetDirectory := file(".")).
   dependsOn(macros).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
@@ -19,7 +19,7 @@ lazy val macros = (project in file("macros")).
   settings(commonSettings)
 
 def module(proj: Project) = proj.
-  enablePlugins(TutPlugin).
+  enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
@@ -38,8 +38,8 @@ lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
-  scalaVersion := "2.12.2",
-  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2"),
+  scalaVersion := "2.12.3",
+  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.3"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -60,12 +60,12 @@ lazy val commonSettings = Seq(
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
   // use sbt <module_name>/test:console to run an ammonite console
-  libraryDependencies += "com.lihaoyi" % "ammonite" % "0.9.0" % "test" cross CrossVersion.patch,
+  libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.1" % "test" cross CrossVersion.patch,
   initialCommands in (Test, console) := """ammonite.Main().run()""",
 
   scalariformPreferences := scalariformPreferences.value
     .setPreference(DanglingCloseParenthesis, Prevent)
-    .setPreference(DoubleIndentClassDeclaration, true)
+    .setPreference(DoubleIndentConstructorArguments, true)
     .setPreference(SpacesAroundMultiImports, true),
 
   initialize := {
@@ -112,8 +112,7 @@ lazy val scala211LintFlags = allVersionLintFlags ++ Seq(
 lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
   "-Ywarn-numeric-widen",
   "-Ywarn-unused-import",
-  "-Xlint:-unused,_", // Scala 2.12.2 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
-  "-Ywarn-unused:-params")
+  "-Xlint:-unused,_") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
 
 releaseTagComment := s"Release ${(version in ThisBuild).value}"
 releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"

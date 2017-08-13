@@ -8,9 +8,9 @@ object Dependencies {
     val typesafeConfig      = "1.3.1"
     val scalaTest           = "3.0.3"
     val joda                = "2.9.9"
-    val jodaConvert         = "1.8.1"
+    val jodaConvert         = "1.8.2"
     val scalaCheck          = "1.13.5"
-    val scalaCheckShapeless = "1.1.5"
+    val scalaCheckShapeless = "1.1.6"
   }
 
   val shapeless = "com.chuusai" %% "shapeless" % Version.shapeless
