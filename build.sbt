@@ -4,7 +4,7 @@ import ReleaseTransformations._
 enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
-  enablePlugins(TutPlugin).
+  enablePlugins(TutPlugin, SbtOsgi).
   settings(commonSettings, tutTargetDirectory := file(".")).
   dependsOn(macros).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
