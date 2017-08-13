@@ -140,9 +140,9 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
   case class KebabCaseConf(kebabCaseInt: Int, kebabCaseString: String)
   case class SnakeCaseConf(snakeCaseInt: Int, snakeCaseString: String)
   case class EnclosingConf(
-    camelCaseConf: CamelCaseConf,
-    kebabCaseConf: KebabCaseConf,
-    snakeCaseConf: SnakeCaseConf)
+      camelCaseConf: CamelCaseConf,
+      kebabCaseConf: KebabCaseConf,
+      snakeCaseConf: SnakeCaseConf)
 
   it should "have a message displaying candidate keys in case of a suspected misconfigured ProductHint" in {
     val conf = ConfigFactory.parseString("""{

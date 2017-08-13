@@ -5,7 +5,7 @@ import scala.collection.immutable.Seq
 
 import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions, ConfigValue }
 import org.joda.time.format.ISODateTimeFormat
-import org.scalacheck.Shapeless._
+import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig.arbitrary._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongType }
