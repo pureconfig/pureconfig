@@ -3,7 +3,7 @@ package pureconfig
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.ConfigValueFactory
-import org.scalacheck.Shapeless._
+import org.scalacheck.ScalacheckShapeless._
 import shapeless._
 
 class HListConvertersSuite extends BaseSuite {

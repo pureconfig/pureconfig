@@ -3,7 +3,7 @@ package pureconfig
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ ConfigValueFactory, ConfigValueType }
-import org.scalacheck.Shapeless._
+import org.scalacheck.ScalacheckShapeless._
 
 import pureconfig.error._
 
