@@ -38,18 +38,38 @@ trait DerivedReaders extends DerivedReaders1 {
     }
 
   // used for tuples
-  implicit def deriveTupleInstance[F: IsTuple, Repr](
+  implicit def deriveTupleInstance[F: IsTuple, Repr <: HList, LRepr <: HList, DefaultRepr <: HList](
     implicit
     g: Generic.Aux[F, Repr],
     gcr: ConfigReader[Repr],
-    pr: ConfigReader[F]): ConfigReader[F] = new ConfigReader[F] {
+    lg: LabelledGeneric.Aux[F, LRepr],
+    default: Default.AsOptions.Aux[F, DefaultRepr],
+    pr: WrappedDefaultValue[F, LRepr, DefaultRepr]): ConfigReader[F] = new ConfigReader[F] {
     override def from(value: ConfigValue) = {
       // Try to read first as the product representation (i.e.
       // ConfigObject with '_1', '_2', etc. keys) and afterwards as the Generic
       // representation (i.e. ConfigList).
-      pr.from(value).left.flatMap(_ => gcr.from(value).right.map(g.from))
+      // val pr = deriveProductInstance[F, LRepr, DefaultRepr]
+      value.valueType match {
+        case ConfigValueType.OBJECT => deriveTupleInstanceAsObject(value)
+        case ConfigValueType.LIST => deriveTupleInstanceAsList(value)
+        case other => fail(WrongType(other, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(value), ""))
+      }
     }
   }
+
+  private[pureconfig] def deriveTupleInstanceAsList[F: IsTuple, Repr <: HList](value: ConfigValue)(
+    implicit
+    gen: Generic.Aux[F, Repr],
+    cr: ConfigReader[Repr]): Either[ConfigReaderFailures, F] =
+    cr.from(value).right.map(gen.from)
+
+  private[pureconfig] def deriveTupleInstanceAsObject[F: IsTuple, Repr <: HList, DefaultRepr <: HList](value: ConfigValue)(
+    implicit
+    gen: LabelledGeneric.Aux[F, Repr],
+    default: Default.AsOptions.Aux[F, DefaultRepr],
+    cr: WrappedDefaultValue[F, Repr, DefaultRepr]): Either[ConfigReaderFailures, F] =
+    cr.fromWithDefault(value, default()).right.map(gen.from)
 }
 
 /**
@@ -59,7 +79,7 @@ trait DerivedReaders1 {
 
   private[pureconfig] trait WrappedConfigReader[Wrapped, SubRepr] extends ConfigReader[SubRepr]
 
-  private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
+  protected[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
       case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))

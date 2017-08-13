@@ -9,7 +9,7 @@ import org.scalactic.Equality
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 
-import pureconfig.error.ConfigReaderFailure
+import pureconfig.error._
 
 /**
  * Add utilities to a scalatest `FlatSpec` to test `ConfigConvert` instances
@@ -97,6 +97,22 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
           val result = cr.from(value)
           result.left.value.toList should have size 1
           result.left.value.head shouldBe a[E]
+        }
+    }
+
+  /**
+   * For each pair of `ConfigValue` and `ConfigReaderFailures`, check that `cr`
+   * fails with the provided errors when trying to read the provided
+   * `ConfigValue`.
+   */
+  def checkFailures[T](valuesToErrors: (ConfigValue, ConfigReaderFailures)*)(implicit cr: ConfigReader[T], tpe: TypeTag[T]): Unit =
+    for ((value, errors) <- valuesToErrors) {
+      it should s"fail when it tries to read a value of type ${tpe.tpe} " +
+        s"from ${value.render(ConfigRenderOptions.concise())}" in {
+          val result = cr.from(value)
+          val errorList = errors.toList
+          result.left.value.toList.size shouldEqual errorList.size
+          result.left.value.toList should contain theSameElementsAs errorList
         }
     }
 }

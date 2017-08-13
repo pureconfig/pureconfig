@@ -22,6 +22,8 @@ object ConfigReaderFailures {
   def apply(configReaderFailure: ConfigReaderFailure): ConfigReaderFailures =
     new ConfigReaderFailures(configReaderFailure, List.empty[ConfigReaderFailure])
 
-  def apply(configReaderFailures: List[ConfigReaderFailure]): ConfigReaderFailures =
+  def apply(configReaderFailures: List[ConfigReaderFailure]): ConfigReaderFailures = {
+    require(configReaderFailures.length > 0)
     new ConfigReaderFailures(configReaderFailures.head, configReaderFailures.tail)
+  }
 }
