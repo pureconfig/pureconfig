@@ -123,10 +123,10 @@ trait DerivedWriters1 {
     override def to(v: HNil): ConfigValue = ConfigValueFactory.fromIterable(List().asJava)
   }
 
-  implicit final def hConsConfigWriter[H, T <: HList](implicit hw: Derivation[Lazy[ConfigWriter[H]]], tw: Derivation[Lazy[ConfigWriter[T]]]): ConfigWriter[H :: T] =
+  implicit final def hConsConfigWriter[H, T <: HList](implicit hw: Derivation[Lazy[ConfigWriter[H]]], tw: Lazy[ConfigWriter[T]]): ConfigWriter[H :: T] =
     new ConfigWriter[H :: T] {
       override def to(v: (H :: T)): ConfigValue = {
-        tw.value.value.to(v.tail) match {
+        tw.value.to(v.tail) match {
           case cl: ConfigList =>
             ConfigValueFactory.fromIterable((hw.value.value.to(v.head) +: cl.asScala).asJava)
           case other =>

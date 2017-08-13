@@ -243,7 +243,7 @@ trait DerivedReaders1 {
       }
     }
 
-  implicit final def hConsConfigReader[H, T <: HList](implicit hr: Derivation[Lazy[ConfigReader[H]]], tr: Derivation[Lazy[ConfigReader[T]]], tl: HKernelAux[T]): ConfigReader[H :: T] =
+  implicit final def hConsConfigReader[H, T <: HList](implicit hr: Derivation[Lazy[ConfigReader[H]]], tr: Lazy[ConfigReader[T]], tl: HKernelAux[T]): ConfigReader[H :: T] =
     new ConfigReader[H :: T] {
       def from(cv: ConfigValue): Either[ConfigReaderFailures, H :: T] = {
         cv match {
@@ -251,7 +251,7 @@ trait DerivedReaders1 {
           case cl: ConfigList =>
             val sl = cl.asScala
             val hv = hr.value.value.from(sl.head)
-            val tv = tr.value.value.from(ConfigValueFactory.fromAnyRef(sl.tail.asJava))
+            val tv = tr.value.from(ConfigValueFactory.fromAnyRef(sl.tail.asJava))
             combineResults(hv, tv)(_ :: _)
           case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))
         }
