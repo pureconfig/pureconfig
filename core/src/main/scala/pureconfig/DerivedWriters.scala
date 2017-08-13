@@ -119,19 +119,20 @@ trait DerivedWriters1 {
     }
   }
 
-  // Auxiliary type to make sure we always return `ConfigList` when writing HLists.
-  private[pureconfig] trait HListConfigWriter[T <: HList] extends ConfigWriter[T] {
-    def to(v: T): ConfigList
+  implicit final lazy val hNilConfigWriter: ConfigWriter[HNil] = new ConfigWriter[HNil] {
+    override def to(v: HNil): ConfigValue = ConfigValueFactory.fromIterable(List().asJava)
   }
 
-  implicit final lazy val hNilConfigWriter: HListConfigWriter[HNil] = new HListConfigWriter[HNil] {
-    def to(v: HNil): ConfigList = ConfigValueFactory.fromIterable(List().asJava)
-  }
-
-  implicit final def hConsConfigWriter[H, T <: HList](implicit hw: ConfigWriter[H], tw: HListConfigWriter[T]): HListConfigWriter[H :: T] =
-    new HListConfigWriter[H :: T] {
-      def to(v: (H :: T)): ConfigList =
-        ConfigValueFactory.fromIterable((hw.to(v.head) +: tw.to(v.tail).asScala).asJava)
+  implicit final def hConsConfigWriter[H, T <: HList](implicit hw: ConfigWriter[H], tw: ConfigWriter[T]): ConfigWriter[H :: T] =
+    new ConfigWriter[H :: T] {
+      override def to(v: (H :: T)): ConfigValue = {
+        tw.to(v.tail) match {
+          case cl: ConfigList =>
+            ConfigValueFactory.fromIterable((hw.to(v.head) +: cl.asScala).asJava)
+          case other =>
+            throw new Exception(s"Unexpected value $other when trying to write a `ConfigValue` from an `HList`.")
+        }
+      }
     }
 
   // used for both products and coproducts
