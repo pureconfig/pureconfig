@@ -41,9 +41,13 @@ object ConfigConvert extends ConvertHelpers {
 
   def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
 
-  implicit def fromReaderAndWriter[T](implicit reader: ConfigReader[T], writer: ConfigWriter[T]) = new ConfigConvert[T] {
-    def from(config: ConfigValue) = reader.from(config)
-    def to(t: T) = writer.to(t)
+  implicit def fromReaderAndWriter[T](
+    implicit
+    reader: Derivation[ConfigReader[T]],
+    writer: Derivation[ConfigWriter[T]]) = new ConfigConvert[T] {
+
+    def from(config: ConfigValue) = reader.value.from(config)
+    def to(t: T) = writer.value.to(t)
   }
 
   def viaString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {

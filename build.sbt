@@ -5,12 +5,18 @@ enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
   enablePlugins(TutPlugin).
-  settings(commonSettings, tutTargetDirectory := file("."))
+  settings(commonSettings, tutTargetDirectory := file(".")).
+  dependsOn(macros).
+  dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
 lazy val docs = (project in file("docs")).
   enablePlugins(TutPlugin).
   settings(commonSettings, publishArtifact := false).
   dependsOn(core)
+
+lazy val macros = (project in file("macros")).
+  enablePlugins(TutPlugin).
+  settings(commonSettings)
 
 def module(proj: Project) = proj.
   enablePlugins(TutPlugin).
@@ -39,11 +45,16 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots")),
 
+  crossVersionSharedSources(unmanagedSourceDirectories in Compile),
+  crossVersionSharedSources(unmanagedSourceDirectories in Test),
+
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) => scala212LintFlags
     case Some((2, 11)) => scala211LintFlags
     case _ => allVersionLintFlags
   }),
+
+  scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
   scalacOptions in (Compile, console) ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import").contains),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
@@ -74,6 +85,15 @@ lazy val commonSettings = Seq(
     if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   })
+
+// add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
+// "scala-2.10" are natively supported by SBT)
+def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
+  unmanagedSrcs ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, y)) if y >= 11 => unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.11+") }
+    case _ => Nil
+  })
+}
 
 lazy val allVersionLintFlags = Seq(
   "-deprecation",

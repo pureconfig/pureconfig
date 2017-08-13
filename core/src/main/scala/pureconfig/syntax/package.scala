@@ -18,12 +18,12 @@ package object syntax {
   }
 
   implicit class PimpedConfigValue(val conf: ConfigValue) extends AnyVal {
-    def to[T](implicit reader: ConfigReader[T]): Either[ConfigReaderFailures, T] = reader.from(conf)
-    def toOrThrow[T](implicit reader: ConfigReader[T], cl: ClassTag[T]): T = getResultOrThrow(reader.from(conf))(cl)
+    def to[T](implicit reader: Derivation[ConfigReader[T]]): Either[ConfigReaderFailures, T] = reader.value.from(conf)
+    def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(reader.value.from(conf))(cl)
   }
 
   implicit class PimpedConfig(val conf: TypesafeConfig) extends AnyVal {
-    def to[T: ConfigReader]: Either[ConfigReaderFailures, T] = conf.root().to[T]
-    def toOrThrow[T](implicit reader: ConfigReader[T], cl: ClassTag[T]): T = getResultOrThrow(conf.root().to[T])(cl)
+    def to[T](implicit reader: Derivation[ConfigReader[T]]): Either[ConfigReaderFailures, T] = conf.root().to[T]
+    def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(conf.root().to[T])(cl)
   }
 }
