@@ -10,7 +10,6 @@ A boilerplate-free Scala library for loading configuration files.
 
 Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
-<p>&nbsp;<!-- for vertical padding between logo and demo--></p>
 
 ![](http://i.imgur.com/613aexN.gif)
 
