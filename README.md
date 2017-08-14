@@ -1,6 +1,6 @@
 # PureConfig
 
-<img src="docs/img/pureconfig-logo-1040x1200.png" width="260px" height="300px" align="left">
+<img src="docs/img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="left">
 A boilerplate-free Scala library for loading configuration files.
 
 [![Build Status](https://travis-ci.org/pureconfig/pureconfig.svg?branch=master)](https://travis-ci.org/pureconfig/pureconfig)
