@@ -4,16 +4,22 @@ import ReleaseTransformations._
 enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
-  enablePlugins(TutPlugin).
-  settings(commonSettings, tutTargetDirectory := file("."))
+  enablePlugins(TutPlugin, SbtOsgi).
+  settings(commonSettings, tutTargetDirectory := file(".")).
+  dependsOn(macros).
+  dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
 lazy val docs = (project in file("docs")).
   enablePlugins(TutPlugin).
   settings(commonSettings, publishArtifact := false).
   dependsOn(core)
 
-def module(proj: Project) = proj.
+lazy val macros = (project in file("macros")).
   enablePlugins(TutPlugin).
+  settings(commonSettings)
+
+def module(proj: Project) = proj.
+  enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
@@ -32,12 +38,15 @@ lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
-  scalaVersion := "2.12.2",
-  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2"),
+  scalaVersion := "2.12.3",
+  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.3"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots")),
+
+  crossVersionSharedSources(unmanagedSourceDirectories in Compile),
+  crossVersionSharedSources(unmanagedSourceDirectories in Test),
 
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) => scala212LintFlags
@@ -45,16 +54,18 @@ lazy val commonSettings = Seq(
     case _ => allVersionLintFlags
   }),
 
+  scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
+
   scalacOptions in (Compile, console) ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import").contains),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
   // use sbt <module_name>/test:console to run an ammonite console
-  libraryDependencies += "com.lihaoyi" % "ammonite" % "0.9.0" % "test" cross CrossVersion.patch,
+  libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.1" % "test" cross CrossVersion.patch,
   initialCommands in (Test, console) := """ammonite.Main().run()""",
 
   scalariformPreferences := scalariformPreferences.value
     .setPreference(DanglingCloseParenthesis, Prevent)
-    .setPreference(DoubleIndentClassDeclaration, true)
+    .setPreference(DoubleIndentConstructorArguments, true)
     .setPreference(SpacesAroundMultiImports, true),
 
   initialize := {
@@ -75,6 +86,15 @@ lazy val commonSettings = Seq(
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   })
 
+// add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
+// "scala-2.10" are natively supported by SBT)
+def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
+  unmanagedSrcs ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, y)) if y >= 11 => unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.11+") }
+    case _ => Nil
+  })
+}
+
 lazy val allVersionLintFlags = Seq(
   "-deprecation",
   "-encoding", "UTF-8", // yes, this is 2 args
@@ -92,8 +112,7 @@ lazy val scala211LintFlags = allVersionLintFlags ++ Seq(
 lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
   "-Ywarn-numeric-widen",
   "-Ywarn-unused-import",
-  "-Xlint:-unused,_", // Scala 2.12.2 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
-  "-Ywarn-unused:-params")
+  "-Xlint:-unused,_") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
 
 releaseTagComment := s"Release ${(version in ThisBuild).value}"
 releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"

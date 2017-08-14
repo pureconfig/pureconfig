@@ -63,8 +63,8 @@ private[pureconfig] object DurationConvert {
             val valueStr = s1 dropRight unitName.length
             // Reading Long first avoids losing precision unnecessarily
             Try(Duration(java.lang.Long.parseLong(valueStr), unit)).getOrElse {
-              // But if the value is a fractional number, then we have to parse it 
-              // as a Double, which will lose precision and possibly change the units. 
+              // But if the value is a fractional number, then we have to parse it
+              // as a Double, which will lose precision and possibly change the units.
               Duration(java.lang.Double.parseDouble(valueStr), unit)
             }
           case _ => throw new NumberFormatException("format error " + s)
