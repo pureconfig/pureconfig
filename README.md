@@ -8,7 +8,7 @@ A boilerplate-free Scala library for loading configuration files.
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-<p>&nbsp;<!-- for vertical padding between badges and words --></p>
+<br><!-- for vertical padding between badges and words -->
 Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right">
 <p>&nbsp;<!-- for vertical padding between logo and demo--></p>
