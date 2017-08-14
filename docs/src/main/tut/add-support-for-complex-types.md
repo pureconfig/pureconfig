@@ -10,7 +10,7 @@ support, the [second part](#add-support-for-identifiable) provides the three met
 #### Data type to support
 
 First of all, let's start with the data type that we want to support. 
-The example is composed by one interface and two implementations:
+The example is composed of one interface and two implementations:
 
 ```tut:silent
 trait Identifiable {
@@ -193,7 +193,7 @@ implicit val class2Generic = new LabelledGeneric[Class2] {
 }
 ```
 
-Point 2. is trivial because both `Class1` and `Class2` don't have default values for fields:
+Point 2 is trivial because both `Class1` and `Class2` don't have default values for fields:
 
 ```tut:silent:book
 implicit val class1Default = new Default.AsOptions[Class1] {
