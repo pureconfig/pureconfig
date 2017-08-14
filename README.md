@@ -1,6 +1,6 @@
 # PureConfig
 
-<img src="docs/img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="left">
+<img src="docs/img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right">
 A boilerplate-free Scala library for loading configuration files.
 
 [![Build Status](https://travis-ci.org/pureconfig/pureconfig.svg?branch=master)](https://travis-ci.org/pureconfig/pureconfig)
@@ -8,7 +8,7 @@ A boilerplate-free Scala library for loading configuration files.
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-<br clear="left">
+<br clear="right">
 <p>&nbsp;<!-- for vertical padding between logo and demo--></p>
 
 ![](http://i.imgur.com/613aexN.gif)
