@@ -30,11 +30,17 @@ class CoproductHintSuite extends BaseSuite {
     }
 
     it should "throw an exception when the hint field conflicts with a field of an option when using a FieldCoproductHint" in {
-      implicit val hint = new FieldCoproductHint[AnimalConfig]("age")
-      val cc = implicitly[ConfigConvert[AnimalConfig]]
+      sealed trait Conf
+      case class AmbiguousConf(typ: String) extends Conf
 
-      val ex = the[ConfigReaderException[_]] thrownBy cc.to(DogConfig(2))
-      ex.failures.toList shouldEqual List(CollidingKeys("age", ConfigValueFactory.fromAnyRef(2), None))
+      implicit val hint = new FieldCoproductHint[Conf]("typ")
+      val cc = implicitly[ConfigConvert[Conf]]
+
+      val conf = ConfigFactory.parseString("{ typ = ambiguousconf }")
+      cc.from(conf.root()) should failWithType[KeyNotFound] // "typ" should not be passed to the coproduct option
+
+      val ex = the[ConfigReaderException[_]] thrownBy cc.to(AmbiguousConf("ambiguousconf"))
+      ex.failures.toList shouldEqual List(CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguousconf"), None))
     }
   }
 
