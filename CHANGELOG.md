@@ -6,7 +6,10 @@
   - `ConfigFieldMapping` now has a `withOverrides` method that allows users to easily define exceptional cases to an
     existing mapping;
   - `ConfigReader` and `ConfigWriter` for `java.math.BigDecimal` and `java.math.BigInteger`;
-  - `ConfigReader` for `Boolean`s allows reading them from "yes", "no", "on" and "off" strings.
+  - `ConfigReader` for `Boolean`s allows reading them from "yes", "no", "on" and "off" strings;
+  - Added an experimental way to debug when a converter fails to be derived because an implicit is not found. See
+    [the documentation](https://github.com/pureconfig/pureconfig/blob/master/docs/debuging-implicits-not-found.md) for
+    more information on how to enable it.
 - Bug fixes
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
   - `loadConfig` methods no longer throw an exception when passed a namespace where one of the keys is not a config
