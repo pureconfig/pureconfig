@@ -70,7 +70,7 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
     case co: ConfigObject =>
       Option(co.get(key)) match {
         case Some(fv) => fv.unwrapped match {
-          case v: String if v == fieldValue(name) => Right(Some(cv))
+          case v: String if v == fieldValue(name) => Right(Some(co.withoutKey(key)))
           case _: String => Right(None)
           case _ => Left(ConfigReaderFailures(WrongType(fv.valueType, Set(ConfigValueType.STRING), ConfigValueLocation(fv), key)))
         }
