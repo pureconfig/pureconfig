@@ -31,7 +31,7 @@ In PureConfig, the derivation of config readers and writers is done by chaining 
 structures (like `Conf`) depend on the implicit converters of smaller ones (like `Boolean` or `Custom`). However, Scala
 is not helpful in case one of those upstream dependencies is missing, limiting itself to showing the message above.
 
-Since version 0.7.3, PureConfig provides a way to obtain better error messages for those cases. To enable it, we need to
+Since version 0.8.0, PureConfig provides a way to obtain better error messages for those cases. To enable it, we need to
 add the following entry to our SBT project:
 
 ```scala
