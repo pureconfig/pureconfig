@@ -19,6 +19,8 @@ A boilerplate-free Scala library for loading configuration files.
 - [Supported types](#supported-types)
 - [Configurable converters](docs/configurable-converters.md)
 - [Support new types](docs/support-new-types.md)
+  - [Add support for simple types](docs/add-support-for-simple-types.md)
+  - [Add support for complex types](docs/add-support-for-complex-types.md)
 - [Override behaviour for types](docs/override-behaviour-for-types.md)
 - [Override behaviour for case classes](docs/override-behaviour-for-case-classes.md)
   - [Field mappings](docs/override-behaviour-for-case-classes.md#field-mappings)
