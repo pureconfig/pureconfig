@@ -12,7 +12,7 @@ PureConfig is a Scala library for loading configuration files. It reads [Typesaf
 Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
 
-![](http://i.imgur.com/613aexN.gif)
+![](http://i.imgur.com/P6sda06.gif)
 
 
 ## Table of Contents
