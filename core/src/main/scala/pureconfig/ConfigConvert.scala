@@ -29,7 +29,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
    *         respectively.
    */
   def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
-    def from(config: ConfigValue) = outer.from(config).right.flatMap(toResult(f)(_)(ConfigValueLocation(config)))
+    def from(config: ConfigCursor) = outer.from(config).right.flatMap(toResult(f)(_)(ConfigValueLocation(config.value)))
     def to(a: B) = outer.to(g(a))
   }
 }
@@ -46,12 +46,12 @@ object ConfigConvert extends ConvertHelpers {
     reader: Derivation[ConfigReader[T]],
     writer: Derivation[ConfigWriter[T]]) = new ConfigConvert[T] {
 
-    def from(config: ConfigValue) = reader.value.from(config)
+    def from(config: ConfigCursor) = reader.value.from(config)
     def to(t: T) = writer.value.to(t)
   }
 
   def viaString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
+    override def from(config: ConfigCursor): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
@@ -109,7 +109,7 @@ object ConfigConvert extends ConvertHelpers {
 
   @deprecated(message = "The usage of Try has been deprecated. Please use ConfigReader.fromString instead", since = "0.6.0")
   def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToTryConvert(fromF)(config)
+    override def from(config: ConfigCursor): Either[ConfigReaderFailures, T] = stringToTryConvert(fromF)(config)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
   }
 
@@ -127,7 +127,7 @@ object ConfigConvert extends ConvertHelpers {
 
   @deprecated(message = "The usage of Try has been deprecated. Please use ConfigReader.fromNonEmptyString instead", since = "0.6.0")
   def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = new ConfigConvert[T] {
-    def from(config: ConfigValue) = ConfigReader.fromNonEmptyString[T](fromF andThen tryToEither).from(config)
+    def from(config: ConfigCursor) = ConfigReader.fromNonEmptyString[T](fromF andThen tryToEither).from(config)
     def to(t: T) = ConfigValueFactory.fromAnyRef(t)
   }
 

@@ -46,21 +46,21 @@ trait ConvertHelpers {
     case Failure(e) => location => Left(ThrowableFailure(e, location, ""))
   }
 
-  private[pureconfig] def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => Either[ConfigReaderFailures, T] =
+  private[pureconfig] def stringToTryConvert[T](fromF: String => Try[T]): ConfigCursor => Either[ConfigReaderFailures, T] =
     stringToEitherConvert[T](string => location => tryToEither(fromF(string))(location))
 
-  private[pureconfig] def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigValue => Either[ConfigReaderFailures, T] =
+  private[pureconfig] def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigCursor => Either[ConfigReaderFailures, T] =
     config => {
       // Because we can't trust Typesafe Config not to throw, we wrap the
       // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
       try {
-        val string = config.valueType match {
-          case ConfigValueType.STRING => config.unwrapped.toString
-          case _ => config.render(ConfigRenderOptions.concise)
+        val string = config.value.valueType match {
+          case ConfigValueType.STRING => config.value.unwrapped.toString
+          case _ => config.value.render(ConfigRenderOptions.concise)
         }
-        eitherToResult(fromF(string)(ConfigValueLocation(config)))
+        eitherToResult(fromF(string)(ConfigValueLocation(config.value)))
       } catch {
-        case NonFatal(t) => failWithThrowable(t)(ConfigValueLocation(config))
+        case NonFatal(t) => failWithThrowable(t)(ConfigValueLocation(config.value))
       }
     }
 

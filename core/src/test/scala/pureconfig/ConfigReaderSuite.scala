@@ -11,7 +11,7 @@ class ConfigReaderSuite extends BaseSuite {
   val strReader = ConfigReader[String]
 
   def intSummedReader(n: Int) = new ConfigReader[Int] {
-    def from(config: ConfigValue) = intReader.from(config).right.map(_ + n)
+    def from(config: ConfigCursor) = intReader.from(config).right.map(_ + n)
   }
 
   // generate configs that always read correctly as strings, but not always as integers
