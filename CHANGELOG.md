@@ -14,7 +14,10 @@
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
   - `loadConfig` methods no longer throw an exception when passed a namespace where one of the keys is not a config
     object;
-  - The `xmap` of `ConfigConvert` and the `map` method of `ConfigReader` now wrap exceptions that the functions used to map might throw in a `ConfigReaderFailure`.
+  - The `xmap` of `ConfigConvert` and the `map` method of `ConfigReader` now wrap exceptions that the functions used to
+    map might throw in a `ConfigReaderFailure`;
+  - `FieldCoproductHint` now removes the disambiguating key from the config object before passing it to the reader of a
+    coproduct option.
 
 ### 0.7.2 (May 29, 2017)
 
