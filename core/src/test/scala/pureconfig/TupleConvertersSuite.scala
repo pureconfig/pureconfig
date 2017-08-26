@@ -33,11 +33,11 @@ class TupleConvertersSuite extends BaseSuite {
   checkFailure[(String, Int), CannotConvert](ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> "two").asJava))
   checkFailure[(String, Int), CannotConvert](ConfigValueFactory.fromIterable(List("one", "two").asJava))
   checkFailures[(Int, Int, Int)](
-    ConfigValueFactory.fromIterable(List(1, "one").asJava) -> ConfigReaderFailures(List(WrongSizeList(3, 2, None, ""))))
+    ConfigValueFactory.fromIterable(List(1, "one").asJava) -> ConfigReaderFailures(WrongSizeList(3, 2, None, ""), Nil))
   checkFailures[(Int, Int, Int)](
-    ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava) -> ConfigReaderFailures(List(
+    ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava) -> ConfigReaderFailures(
       CannotConvert("one", "Int", """java.lang.NumberFormatException: For input string: "one"""", None, "_1"),
-      KeyNotFound("_3", None, Set()))))
+      List(KeyNotFound("_3", None, Set()))))
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef("str") -> ConfigReaderFailures(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), None, "")))
