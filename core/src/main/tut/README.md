@@ -32,6 +32,7 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
   - [Default field values](docs/override-behaviour-for-case-classes.md#default-field-values)
   - [Unknown keys](docs/override-behaviour-for-case-classes.md#unknown-keys)
 - [Override behaviour for sealed families](docs/override-behaviour-for-sealed-families.md)
+- [Debugging implicits not found](docs/debugging-implicits-not-found.md)
 - [Error handling](docs/error-handling.md)
 - [Handling missing keys](docs/handling-missing-keys.md)
 - [Example](docs/example.md)

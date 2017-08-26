@@ -1,4 +1,4 @@
-### 0.7.3 (unreleased)
+### 0.8.0 (unreleased)
 
 - New features
   - `loadConfig` methods now allow loading any type from a config when using a namespace, and not only types represented
@@ -8,7 +8,10 @@
   - `ConfigReader` and `ConfigWriter` for `java.math.BigDecimal` and `java.math.BigInteger`;
   - `ConfigReader` for `Boolean`s allows reading them from "yes", "no", "on" and "off" strings;
   - `ConfigReader` and `ConfigWriter` for `shapeless.HList`;
-  - `ConfigReader` for Scala tuples can now read from `ConfigLists`s.
+  - `ConfigReader` for Scala tuples can now read from `ConfigLists`s;
+  - Added an experimental way to debug when a converter fails to be derived because an implicit is not found. See
+    [the documentation](https://github.com/pureconfig/pureconfig/blob/master/docs/debuging-implicits-not-found.md) for
+    more information on how to enable it.
   
 - Breaking changes
   - `ConfigWriter` for tuples now writes them as `ConfigList`s, instead of a `ConfigObject` with keys `_1`, `_2`, and so on.
