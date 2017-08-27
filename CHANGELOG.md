@@ -7,9 +7,15 @@
     existing mapping;
   - `ConfigReader` and `ConfigWriter` for `java.math.BigDecimal` and `java.math.BigInteger`;
   - `ConfigReader` for `Boolean`s allows reading them from "yes", "no", "on" and "off" strings;
+  - `ConfigReader` and `ConfigWriter` for `shapeless.HList`;
+  - `ConfigReader` for Scala tuples can now read from `ConfigLists`s;
   - Added an experimental way to debug when a converter fails to be derived because an implicit is not found. See
     [the documentation](https://github.com/pureconfig/pureconfig/blob/master/docs/debuging-implicits-not-found.md) for
     more information on how to enable it.
+  
+- Breaking changes
+  - `ConfigWriter` for tuples now writes them as `ConfigList`s, instead of a `ConfigObject` with keys `_1`, `_2`, and so on.
+  
 - Bug fixes
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
   - `loadConfig` methods no longer throw an exception when passed a namespace where one of the keys is not a config

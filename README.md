@@ -113,7 +113,7 @@ val config: Either[pureconfig.error.ConfigReaderFailures,YourConfClass] = loadCo
 ```
 
 
-## Supported Types
+## Supported types
 
 Currently supported types for fields are:
 - `String`, `Boolean`, `Double` (standard
@@ -135,7 +135,8 @@ Currently supported types for fields are:
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - value classes for which readers and writers of the inner type are used;
 - case classes;
-- sealed families of case classes (ADTs).
+- sealed families of case classes (ADTs);
+- `shapeless.HList`s of elements whose type is in this list.
 
 # Example
 

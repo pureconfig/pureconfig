@@ -10,6 +10,7 @@ import pureconfig.ConvertHelpers._
 import pureconfig.error._
 import shapeless._
 import shapeless.labelled._
+import shapeless.ops.hlist.HKernelAux
 
 /**
  * The default behavior of ConfigReaders that are implicitly derived in PureConfig is to raise a
@@ -35,6 +36,39 @@ trait DerivedReaders extends DerivedReaders1 {
       def from(value: ConfigValue): Either[ConfigReaderFailures, T] =
         reader.from(value).right.map(unwrapped.wrap)
     }
+
+  // used for tuples
+  implicit def deriveTupleInstance[F: IsTuple, Repr <: HList, LRepr <: HList, DefaultRepr <: HList](
+    implicit
+    g: Generic.Aux[F, Repr],
+    gcr: ConfigReader[Repr],
+    lg: LabelledGeneric.Aux[F, LRepr],
+    default: Default.AsOptions.Aux[F, DefaultRepr],
+    pr: WrappedDefaultValue[F, LRepr, DefaultRepr]): ConfigReader[F] = new ConfigReader[F] {
+    override def from(value: ConfigValue) = {
+      // Try to read first as the product representation (i.e.
+      // ConfigObject with '_1', '_2', etc. keys) and afterwards as the Generic
+      // representation (i.e. ConfigList).
+      value.valueType match {
+        case ConfigValueType.OBJECT => deriveTupleInstanceAsObject(value)
+        case ConfigValueType.LIST => deriveTupleInstanceAsList(value)
+        case other => fail(WrongType(other, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(value), ""))
+      }
+    }
+  }
+
+  private[pureconfig] def deriveTupleInstanceAsList[F: IsTuple, Repr <: HList](value: ConfigValue)(
+    implicit
+    gen: Generic.Aux[F, Repr],
+    cr: ConfigReader[Repr]): Either[ConfigReaderFailures, F] =
+    cr.from(value).right.map(gen.from)
+
+  private[pureconfig] def deriveTupleInstanceAsObject[F: IsTuple, Repr <: HList, DefaultRepr <: HList](value: ConfigValue)(
+    implicit
+    gen: LabelledGeneric.Aux[F, Repr],
+    default: Default.AsOptions.Aux[F, DefaultRepr],
+    cr: WrappedDefaultValue[F, Repr, DefaultRepr]): Either[ConfigReaderFailures, F] =
+    cr.fromWithDefault(value, default()).right.map(gen.from)
 }
 
 /**
@@ -44,7 +78,7 @@ trait DerivedReaders1 {
 
   private[pureconfig] trait WrappedConfigReader[Wrapped, SubRepr] extends ConfigReader[SubRepr]
 
-  private[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
+  protected[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
     def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
       case co: ConfigObject => fromConfigObject(co, default)
       case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
@@ -52,7 +86,7 @@ trait DerivedReaders1 {
     def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
   }
 
-  implicit final def hNilConfigReader[Wrapped](
+  implicit final def labelledHNilConfigReader[Wrapped](
     implicit
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, HNil, HNil] = new WrappedDefaultValue[Wrapped, HNil, HNil] {
 
@@ -68,7 +102,7 @@ trait DerivedReaders1 {
     }
   }
 
-  implicit final def hConsConfigReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
+  implicit final def labelledHConsConfigReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit
     key: Witness.Aux[K],
     vFieldReader: Derivation[Lazy[ConfigReader[V]]],
@@ -197,6 +231,32 @@ trait DerivedReaders1 {
       }
     }
   }
+
+  implicit final lazy val hNilConfigReader: ConfigReader[HNil] =
+    new ConfigReader[HNil] {
+      def from(cv: ConfigValue): Either[ConfigReaderFailures, HNil] = {
+        cv match {
+          case cl: ConfigList if cl.size == 0 => Right(HNil)
+          case cl: ConfigList => fail(WrongSizeList(0, cl.size, ConfigValueLocation(cv), ""))
+          case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))
+        }
+      }
+    }
+
+  implicit final def hConsConfigReader[H, T <: HList](implicit hr: Derivation[Lazy[ConfigReader[H]]], tr: Lazy[ConfigReader[T]], tl: HKernelAux[T]): ConfigReader[H :: T] =
+    new ConfigReader[H :: T] {
+      def from(cv: ConfigValue): Either[ConfigReaderFailures, H :: T] = {
+        cv match {
+          case cl: ConfigList if cl.size != tl().length + 1 => fail(WrongSizeList(tl().length + 1, cl.size, ConfigValueLocation(cv), ""))
+          case cl: ConfigList =>
+            val sl = cl.asScala
+            val hv = hr.value.value.from(sl.head)
+            val tv = tr.value.from(ConfigValueFactory.fromAnyRef(sl.tail.asJava))
+            combineResults(hv, tv)(_ :: _)
+          case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))
+        }
+      }
+    }
 
   implicit final def deriveProductInstance[F, Repr <: HList, DefaultRepr <: HList](
     implicit
