@@ -1,4 +1,4 @@
-### 0.8.0 (unreleased)
+### 0.8.0 (Aug 27, 2017)
 
 - New features
   - `loadConfig` methods now allow loading any type from a config when using a namespace, and not only types represented
