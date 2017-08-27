@@ -18,6 +18,15 @@ trait DerivedWriters extends DerivedWriters1 {
     new ConfigWriter[T] {
       override def to(t: T): ConfigValue = writer.to(unwrapped.unwrap(t))
     }
+
+  // used for tuples
+  implicit final def deriveTupleInstance[F: IsTuple, Repr](
+    implicit
+    gen: Generic.Aux[F, Repr],
+    cc: ConfigWriter[Repr]): ConfigWriter[F] = new ConfigWriter[F] {
+    override def to(t: F): ConfigValue =
+      cc.to(gen.to(t))
+  }
 }
 
 /**
@@ -25,13 +34,15 @@ trait DerivedWriters extends DerivedWriters1 {
  */
 trait DerivedWriters1 {
 
-  private[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] extends ConfigWriter[SubRepr]
+  private[pureconfig] trait WrappedConfigWriter[Wrapped, SubRepr] {
+    def to(cv: SubRepr): ConfigValue
+  }
 
-  implicit final def hNilConfigWriter[Wrapped]: WrappedConfigWriter[Wrapped, HNil] = new WrappedConfigWriter[Wrapped, HNil] {
+  implicit final def labelledHNilConfigWriter[Wrapped]: WrappedConfigWriter[Wrapped, HNil] = new WrappedConfigWriter[Wrapped, HNil] {
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
-  implicit final def hConsConfigWriter[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
+  implicit final def labelledHConsConfigWriter[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
     implicit
     key: Witness.Aux[K],
     vFieldConvert: Derivation[Lazy[ConfigWriter[V]]],
@@ -108,8 +119,24 @@ trait DerivedWriters1 {
     }
   }
 
+  implicit final lazy val hNilConfigWriter: ConfigWriter[HNil] = new ConfigWriter[HNil] {
+    override def to(v: HNil): ConfigValue = ConfigValueFactory.fromIterable(List().asJava)
+  }
+
+  implicit final def hConsConfigWriter[H, T <: HList](implicit hw: Derivation[Lazy[ConfigWriter[H]]], tw: Lazy[ConfigWriter[T]]): ConfigWriter[H :: T] =
+    new ConfigWriter[H :: T] {
+      override def to(v: (H :: T)): ConfigValue = {
+        tw.value.to(v.tail) match {
+          case cl: ConfigList =>
+            ConfigValueFactory.fromIterable((hw.value.value.to(v.head) +: cl.asScala).asJava)
+          case other =>
+            throw new Exception(s"Unexpected value $other when trying to write a `ConfigValue` from an `HList`.")
+        }
+      }
+    }
+
   // used for both products and coproducts
-  implicit final def deriveGenericInstance[F, Repr](
+  implicit final def deriveLabelledGenericInstance[F, Repr](
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[WrappedConfigWriter[F, Repr]]): ConfigWriter[F] = new ConfigWriter[F] {

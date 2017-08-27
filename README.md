@@ -32,6 +32,7 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
   - [Default field values](docs/override-behaviour-for-case-classes.md#default-field-values)
   - [Unknown keys](docs/override-behaviour-for-case-classes.md#unknown-keys)
 - [Override behaviour for sealed families](docs/override-behaviour-for-sealed-families.md)
+- [Debugging implicits not found](docs/debugging-implicits-not-found.md)
 - [Error handling](docs/error-handling.md)
 - [Handling missing keys](docs/handling-missing-keys.md)
 - [Example](docs/example.md)
@@ -79,7 +80,7 @@ Add PureConfig to your library dependencies. For Scala `2.11` and `2.12`:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.7.2"
+  "com.github.pureconfig" %% "pureconfig" % "0.8.0"
 )
 ```
 
@@ -87,7 +88,7 @@ For Scala `2.10` you need also the Macro Paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.7.2",
+  "com.github.pureconfig" %% "pureconfig" % "0.8.0",
   compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch)
 )
 ```
@@ -112,7 +113,7 @@ val config: Either[pureconfig.error.ConfigReaderFailures,YourConfClass] = loadCo
 ```
 
 
-## Supported Types
+## Supported types
 
 Currently supported types for fields are:
 - `String`, `Boolean`, `Double` (standard
@@ -134,7 +135,8 @@ Currently supported types for fields are:
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - value classes for which readers and writers of the inner type are used;
 - case classes;
-- sealed families of case classes (ADTs).
+- sealed families of case classes (ADTs);
+- `shapeless.HList`s of elements whose type is in this list.
 
 # Example
 

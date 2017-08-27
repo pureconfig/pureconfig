@@ -255,7 +255,7 @@ final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigV
 }
 
 /**
- * A failure representing an unexpected empty string
+ * A failure representing an unexpected empty string.
  *
  * @param typ the type that was attempted to be converted to from an empty string
  * @param location an optional location of the ConfigValue that raised the
@@ -278,6 +278,21 @@ final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocat
  */
 final case class NonEmptyObjectFound(typ: String, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
   def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
+
+  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
+    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
+}
+
+/**
+ * A failure representing that a list of an unexpected size was found when attempting to read into an HList.
+ *
+ * @param expected the expected number of elements
+ * @param found the number of elements found
+ * @param location an optional location of the ConfigValue that raised the failure
+ * @param path the path to the value which was a list of an unexpected size
+ */
+final case class WrongSizeList(expected: Int, found: Int, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
+  def description = s"List of wrong size found. Expected $expected elements. Found $found elements instead."
 
   def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
     this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
