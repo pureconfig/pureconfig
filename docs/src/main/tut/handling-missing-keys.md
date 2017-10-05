@@ -27,7 +27,7 @@ ConfigFactory.empty.to[FooOpt]
 However, if you want to allow your custom `ConfigReader`s to handle missing
 keys, you can extend the `AllowMissingKey` trait. For `ConfigReader`s extending
 `AllowMissingKey`, a missing key will issue a call to the `from` method of the
-available `ConfigReader` for that type with a `null` value.
+available `ConfigReader` for that type with a cursor to an undefined value.
 
 Under this setup:
 
@@ -36,8 +36,8 @@ import com.typesafe.config._
 import pureconfig.syntax._
 
 implicit val cc = new ConfigReader[Int] with AllowMissingKey {
-  override def from(config: ConfigValue) =
-    if (config == null) Right(42) else config.to[Int]
+  override def from(cur: ConfigCursor) =
+    if (cur.isUndefined) Right(42) else cur.to[Int]
 }
 ```
 
