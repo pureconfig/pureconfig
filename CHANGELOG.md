@@ -1,3 +1,17 @@
+### 0.9.0 (unreleased)
+
+- New features
+  - A new `ConfigCursor` now provides idiomatic, safe methods to navigate through a config. It also holds context for
+    building failures with a more accurate location and path in the config;
+
+- Breaking changes
+  - `ConfigReader`, as well as many related methods and classes, now reads configs from `ConfigCursor` instances instead
+    of from direct `ConfigValue`s. Code can be migrated simply by accessing the `value` field of `ConfigCursor` whenever
+    a `ConfigValue` is needed. However, rewriting the code to use the new `ConfigCursor` methods is heavily recommended
+    as it provides safer config handling and much better error handling;
+  - The `CannotConvertNull` failure was removed, being superseeded by `KeyNotFound`;
+  - Methods deprecated in previous versions were removed.
+
 ### 0.8.0 (Aug 27, 2017)
 
 - New features
