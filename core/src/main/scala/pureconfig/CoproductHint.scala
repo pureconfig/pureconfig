@@ -1,6 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
+import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig.error._
 import pureconfig.syntax._
 
@@ -20,11 +20,11 @@ trait CoproductHint[T] {
    * class, it returns `Right(None)`. If `cv` is missing information for disambiguation or has a wrong type, a
    * `Left` containing a `Failure` is returned.
    *
-   * @param cv the `ConfigValue` of the sealed family
+   * @param cur a `ConfigCursor` at the sealed family option
    * @param name the name of the class or coproduct option to try
    * @return a `Either[ConfigReaderFailure, Option[ConfigValue]]` as defined above.
    */
-  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailures, Option[ConfigValue]]
+  def from(cur: ConfigCursor, name: String): Either[ConfigReaderFailures, Option[ConfigCursor]]
 
   /**
    * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
@@ -66,17 +66,12 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cv: ConfigValue, name: String): Either[ConfigReaderFailures, Option[ConfigValue]] = cv match {
-    case co: ConfigObject =>
-      Option(co.get(key)) match {
-        case Some(fv) => fv.unwrapped match {
-          case v: String if v == fieldValue(name) => Right(Some(co.withoutKey(key)))
-          case _: String => Right(None)
-          case _ => Left(ConfigReaderFailures(WrongType(fv.valueType, Set(ConfigValueType.STRING), ConfigValueLocation(fv), key)))
-        }
-        case None => Left(ConfigReaderFailures(KeyNotFound(key, ConfigValueLocation(co))))
-      }
-    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), "")))
+  def from(cur: ConfigCursor, name: String): Either[ConfigReaderFailures, Option[ConfigCursor]] = {
+    for {
+      objCur <- cur.asObjectCursor.right
+      valueCur <- objCur.atKey(key).right
+      valueStr <- valueCur.asString.right
+    } yield if (valueStr == fieldValue(name)) Some(objCur.withoutKey(key)) else None
   }
 
   def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
@@ -107,10 +102,8 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cv: ConfigValue, name: String) = cv.valueType match {
-    case ConfigValueType.STRING if cv.unwrapped.toString == fieldValue(name) => Right(Some(Map.empty[String, String].toConfig))
-    case ConfigValueType.STRING => Right(None)
-    case typ => Left(ConfigReaderFailures(WrongType(typ, Set(ConfigValueType.STRING), ConfigValueLocation(cv), "")))
+  def from(cur: ConfigCursor, name: String) = cur.asString.right.map { str =>
+    if (str == fieldValue(name)) Some(ConfigCursor(ConfigFactory.empty.root, cur.pathElems)) else None
   }
 
   def to(cv: ConfigValue, name: String) = cv match {
@@ -127,7 +120,7 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
  * the config without errors, while `to` will write the config as is, with no disambiguation information.
  */
 class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
-  def from(cv: ConfigValue, name: String) = Right(Some(cv))
+  def from(cur: ConfigCursor, name: String) = Right(Some(cur))
   def to(cv: ConfigValue, name: String) = Right(cv)
   def tryNextOnFail(name: String) = true
 }

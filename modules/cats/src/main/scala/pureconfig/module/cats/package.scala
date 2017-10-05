@@ -4,7 +4,7 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import _root_.cats.data.{ NonEmptyList, NonEmptyVector }
-import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation }
+import pureconfig.error.ConfigReaderFailures
 import pureconfig.{ ConfigCursor, ConfigReader, ConfigWriter }
 
 /**
@@ -12,10 +12,10 @@ import pureconfig.{ ConfigCursor, ConfigReader, ConfigWriter }
  */
 package object cats {
 
-  private[pureconfig] def fromNonEmpty[F[_], G[_], T](fromFT: F[T] => Option[G[T]])(configValue: ConfigCursor)(implicit ct: ClassTag[F[T]], fReader: ConfigReader[F[T]]): Either[ConfigReaderFailures, G[T]] =
-    fReader.from(configValue).right.flatMap { ft =>
+  private[pureconfig] def fromNonEmpty[F[_], G[_], T](fromFT: F[T] => Option[G[T]])(cur: ConfigCursor)(implicit ct: ClassTag[F[T]], fReader: ConfigReader[F[T]]): Either[ConfigReaderFailures, G[T]] =
+    fReader.from(cur).right.flatMap { ft =>
       fromFT(ft) match {
-        case None => Left(ConfigReaderFailures(EmptyTraversableFound(ct.toString, ConfigValueLocation(configValue.value), "")))
+        case None => Left(ConfigReaderFailures(EmptyTraversableFound(ct.toString, cur.location, cur.path)))
         case Some(nonEmpty) => Right(nonEmpty)
       }
     }

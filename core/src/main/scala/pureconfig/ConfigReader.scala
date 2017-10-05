@@ -18,10 +18,10 @@ trait ConfigReader[A] {
   /**
    * Convert the configuration given by a cursor into an instance of `A` if possible.
    *
-   * @param config The cursor from which the config should be loaded
+   * @param cur The cursor from which the config should be loaded
    * @return either a list of failures or an object of type `A`
    */
-  def from(config: ConfigCursor): Either[ConfigReaderFailures, A]
+  def from(cur: ConfigCursor): Either[ConfigReaderFailures, A]
 
   /**
    * Convert the given configuration into an instance of `A` if possible.
@@ -89,10 +89,10 @@ trait ConfigReader[A] {
    *         otherwise.
    */
   def orElse[AA >: A, B <: AA](reader: => ConfigReader[B]): ConfigReader[AA] =
-    fromCursor[AA] { cv: ConfigCursor =>
-      from(cv) match {
+    fromCursor[AA] { cur: ConfigCursor =>
+      from(cur) match {
         case Right(a) => Right(a)
-        case Left(failures) => reader.from(cv).left.map(failures ++ _)
+        case Left(failures) => reader.from(cur).left.map(failures ++ _)
       }
     }
 
@@ -103,7 +103,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader when the input configs are mapped using `f`.
    */
   def contramapConfig(f: ConfigValue => ConfigValue): ConfigReader[A] =
-    fromCursor[A] { a => from(a.copy(value = f(a.value))) }
+    fromCursor[A] { cur => from(ConfigCursor(f(cur.value), cur.pathElems)) }
 
   /**
    * Applies a function to config cursors before passing them to this reader.
@@ -112,7 +112,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader when the input cursors are mapped using `f`.
    */
   def contramapCursor(f: ConfigCursor => ConfigCursor): ConfigReader[A] =
-    fromCursor[A] { a => from(f(a)) }
+    fromCursor[A] { cur => from(f(cur)) }
 }
 
 /**
@@ -130,7 +130,7 @@ object ConfigReader extends BasicReaders with DerivedReaders {
    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
    */
   def fromCursor[A](fromF: ConfigCursor => Either[ConfigReaderFailures, A]) = new ConfigReader[A] {
-    def from(config: ConfigCursor) = fromF(config)
+    def from(cur: ConfigCursor) = fromF(cur)
   }
 
   /**
@@ -144,7 +144,7 @@ object ConfigReader extends BasicReaders with DerivedReaders {
     fromCursor(fromF.compose(_.value))
 
   def fromString[A](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, A]): ConfigReader[A] = new ConfigReader[A] {
-    override def from(config: ConfigCursor): Either[ConfigReaderFailures, A] = stringToEitherConvert(fromF)(config)
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, A] = stringToEitherConvert(fromF)(cur)
   }
 
   def fromStringTry[A](fromF: String => Try[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {

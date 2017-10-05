@@ -2,7 +2,7 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.error.{ CannotConvertNull, ConfigReaderFailures, ThrowableFailure }
+import pureconfig.error.{ ConfigReaderFailures, ThrowableFailure, UnknownKey }
 
 class ConfigReaderSuite extends BaseSuite {
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
@@ -11,7 +11,7 @@ class ConfigReaderSuite extends BaseSuite {
   val strReader = ConfigReader[String]
 
   def intSummedReader(n: Int) = new ConfigReader[Int] {
-    def from(config: ConfigCursor) = intReader.from(config).right.map(_ + n)
+    def from(cur: ConfigCursor) = intReader.from(cur).right.map(_ + n)
   }
 
   // generate configs that always read correctly as strings, but not always as integers
@@ -20,7 +20,7 @@ class ConfigReaderSuite extends BaseSuite {
       .map(ConfigValueFactory.fromAnyRef)
 
   val genReaderFailure: Gen[ConfigReaderFailures] =
-    Gen.const(ConfigReaderFailures(CannotConvertNull()))
+    Gen.const(ConfigReaderFailures(UnknownKey("", None)))
 
   implicit val arbConfig = Arbitrary(genConfig)
   implicit val arbReaderFailure = Arbitrary(genReaderFailure)

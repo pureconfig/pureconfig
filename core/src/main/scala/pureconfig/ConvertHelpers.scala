@@ -50,17 +50,14 @@ trait ConvertHelpers {
     stringToEitherConvert[T](string => location => tryToEither(fromF(string))(location))
 
   private[pureconfig] def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigCursor => Either[ConfigReaderFailures, T] =
-    config => {
+    cur => {
       // Because we can't trust Typesafe Config not to throw, we wrap the
       // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
       try {
-        val string = config.value.valueType match {
-          case ConfigValueType.STRING => config.value.unwrapped.toString
-          case _ => config.value.render(ConfigRenderOptions.concise)
-        }
-        eitherToResult(fromF(string)(ConfigValueLocation(config.value)))
+        val string = cur.asString.fold(_ => cur.value.render(ConfigRenderOptions.concise), identity)
+        eitherToResult(fromF(string)(cur.location)).left.map(_.withImprovedContext(cur.path, cur.location))
       } catch {
-        case NonFatal(t) => failWithThrowable(t)(ConfigValueLocation(config.value))
+        case NonFatal(t) => failWithThrowable(t)(cur.location)
       }
     }
 

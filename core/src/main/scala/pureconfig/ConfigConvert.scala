@@ -29,7 +29,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
    *         respectively.
    */
   def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
-    def from(config: ConfigCursor) = outer.from(config).right.flatMap(toResult(f)(_)(ConfigValueLocation(config.value)))
+    def from(cur: ConfigCursor) = outer.from(cur).right.flatMap(toResult(f)(_)(ConfigValueLocation(cur.value)))
     def to(a: B) = outer.to(g(a))
   }
 }
@@ -46,12 +46,12 @@ object ConfigConvert extends ConvertHelpers {
     reader: Derivation[ConfigReader[T]],
     writer: Derivation[ConfigWriter[T]]) = new ConfigConvert[T] {
 
-    def from(config: ConfigCursor) = reader.value.from(config)
+    def from(cur: ConfigCursor) = reader.value.from(cur)
     def to(t: T) = writer.value.to(t)
   }
 
   def viaString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigCursor): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(cur)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 

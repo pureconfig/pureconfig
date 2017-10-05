@@ -153,30 +153,17 @@ trait NumericReaders {
  */
 trait TypesafeConfigReaders {
 
-  implicit val configConfigReader: ConfigReader[Config] = new ConfigReader[Config] {
-    override def from(config: ConfigCursor): Either[ConfigReaderFailures, Config] = config.value match {
-      case co: ConfigObject => Right(co.toConfig)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
-    }
-  }
+  implicit val configConfigReader: ConfigReader[Config] =
+    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.value.toConfig))
 
-  implicit val configObjectConfigReader: ConfigReader[ConfigObject] = new ConfigReader[ConfigObject] {
-    override def from(config: ConfigCursor): Either[ConfigReaderFailures, ConfigObject] = config.value match {
-      case c: ConfigObject => Right(c)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
-    }
-  }
+  implicit val configObjectConfigReader: ConfigReader[ConfigObject] =
+    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.value))
 
-  implicit val configValueConfigReader: ConfigReader[ConfigValue] = new ConfigReader[ConfigValue] {
-    override def from(config: ConfigCursor): Either[ConfigReaderFailures, ConfigValue] = Right(config.value)
-  }
+  implicit val configValueConfigReader: ConfigReader[ConfigValue] =
+    ConfigReader.fromCursor(c => Right(c.value))
 
-  implicit val configListConfigReader: ConfigReader[ConfigList] = new ConfigReader[ConfigList] {
-    override def from(config: ConfigCursor): Either[ConfigReaderFailures, ConfigList] = config.value match {
-      case c: ConfigList => Right(c)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))
-    }
-  }
+  implicit val configListConfigReader: ConfigReader[ConfigList] =
+    ConfigReader.fromCursor(_.asListCursor.right.map(_.value))
 }
 
 /**

@@ -47,45 +47,6 @@ abstract class ConvertFailure extends ConfigReaderFailure {
 }
 
 /**
- * A failure representing the inability to convert a null value. Since a null
- * represents a missing value, the location of this failure is always at the
- * root (i.e. an empty string).
- *
- * @param candidates a set of candidate keys that might map to the desired value
- *                   in case of a misconfigured ProductHint
- */
-final case class CannotConvertNull(candidates: Set[String] = Set()) extends ConvertFailure {
-  val location = None
-  val path = ""
-
-  def description = "Cannot convert a null value."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    KeyNotFound(parentKey, parentLocation, candidates)
-}
-
-object CannotConvertNull {
-  @tailrec
-  private[this] def isSubsequence(s1: String, s2: String): Boolean = {
-    if (s1.isEmpty())
-      true
-    else if (s2.isEmpty())
-      false
-    else if (s1.head == s2.head)
-      isSubsequence(s1.tail, s2.tail)
-    else
-      isSubsequence(s1, s2.tail)
-  }
-
-  def apply(fieldName: String, keys: Iterable[String]): CannotConvertNull = {
-    val lcField = fieldName.toLowerCase.filter(c => c.isDigit || c.isLetter)
-    val objectKeys = keys.map(f => (f, f.toLowerCase))
-    val candidateKeys = objectKeys.filter(k => isSubsequence(lcField, k._2)).map(_._1).toSet
-    CannotConvertNull(candidateKeys)
-  }
-}
-
-/**
  * A failure representing the inability to convert a given value to a desired type.
  *
  * @param value the value that was requested to be converted
@@ -152,6 +113,27 @@ final case class KeyNotFound(key: String, location: Option[ConfigValueLocation],
       key = if (key.isEmpty) parentKey else parentKey + "." + key,
       location = location orElse parentLocation,
       candidates.map(parentKey + "." + _))
+}
+
+object KeyNotFound {
+  @tailrec
+  private[this] def isSubsequence(s1: String, s2: String): Boolean = {
+    if (s1.isEmpty)
+      true
+    else if (s2.isEmpty)
+      false
+    else if (s1.head == s2.head)
+      isSubsequence(s1.tail, s2.tail)
+    else
+      isSubsequence(s1, s2.tail)
+  }
+
+  def apply(key: String, location: Option[ConfigValueLocation], fieldName: String, keys: Iterable[String]): KeyNotFound = {
+    val lcField = fieldName.toLowerCase.filter(c => c.isDigit || c.isLetter)
+    val objectKeys = keys.map(f => (f, f.toLowerCase))
+    val candidateKeys = objectKeys.filter(k => isSubsequence(lcField, k._2)).map(_._1).toSet
+    KeyNotFound(key, location, candidateKeys)
+  }
 }
 
 /**
