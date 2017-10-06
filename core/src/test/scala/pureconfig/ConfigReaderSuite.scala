@@ -43,7 +43,7 @@ class ConfigReaderSuite extends BaseSuite {
   }
 
   it should "have a correct flatMap method" in forAll { conf: ConfigValue =>
-    val g = { n: Int => intSummedReader(n) }
+    val g: Int => ConfigReader[Int] = intSummedReader
     intReader.flatMap(g).from(conf) shouldEqual intReader.from(conf).right.flatMap(g(_).from(conf))
   }
 
