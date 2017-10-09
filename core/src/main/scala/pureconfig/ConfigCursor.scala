@@ -102,7 +102,7 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asCollectionCursor: Either[ConfigReaderFailures, Either[ConfigListCursor, ConfigObjectCursor]] = {
-    if (value == null) {
+    if (isUndefined) {
       fail(KeyNotFound(path, location, Set()))
     } else {
       val listAtLeft = asListCursor.right.map(Left.apply)
@@ -114,7 +114,7 @@ sealed trait ConfigCursor {
   }
 
   private[this] def castOrFail[A](expectedType: ConfigValueType, cast: => A): Either[ConfigReaderFailures, A] = {
-    if (value == null) {
+    if (isUndefined) {
       fail(KeyNotFound(path, location, Set()))
     } else if (value.valueType != expectedType) {
       fail(WrongType(value.valueType, Set(expectedType), location, path))
