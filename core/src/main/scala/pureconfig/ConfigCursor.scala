@@ -57,7 +57,7 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asString: Either[ConfigReaderFailures, String] =
-    castOrFail(ConfigValueType.STRING, value.unwrapped.asInstanceOf[String])
+    castOrFail(ConfigValueType.STRING, _.unwrapped.asInstanceOf[String])
 
   /**
    * Casts this cursor to a `ConfigListCursor`.
@@ -66,7 +66,7 @@ sealed trait ConfigCursor {
    *         otherwise.
    */
   def asListCursor: Either[ConfigReaderFailures, ConfigListCursor] =
-    castOrFail(ConfigValueType.LIST, value.asInstanceOf[ConfigList]).right.map(ConfigListCursor(_, pathElems))
+    castOrFail(ConfigValueType.LIST, _.asInstanceOf[ConfigList]).right.map(ConfigListCursor(_, pathElems))
 
   /**
    * Casts this cursor to a list of cursors.
@@ -84,7 +84,7 @@ sealed trait ConfigCursor {
    *         otherwise.
    */
   def asObjectCursor: Either[ConfigReaderFailures, ConfigObjectCursor] =
-    castOrFail(ConfigValueType.OBJECT, value.asInstanceOf[ConfigObject]).right.map(ConfigObjectCursor(_, pathElems))
+    castOrFail(ConfigValueType.OBJECT, _.asInstanceOf[ConfigObject]).right.map(ConfigObjectCursor(_, pathElems))
 
   /**
    * Casts this cursor to a map from config keys to cursors.
@@ -113,13 +113,13 @@ sealed trait ConfigCursor {
     }
   }
 
-  private[this] def castOrFail[A](expectedType: ConfigValueType, cast: => A): Either[ConfigReaderFailures, A] = {
+  private[this] def castOrFail[A](expectedType: ConfigValueType, cast: ConfigValue => A): Either[ConfigReaderFailures, A] = {
     if (isUndefined) {
       fail(KeyNotFound(path, location, Set()))
     } else if (value.valueType != expectedType) {
       fail(WrongType(value.valueType, Set(expectedType), location, path))
     } else {
-      Try(cast) match {
+      Try(cast(value)) match {
         case Success(v) => Right(v)
         case Failure(ex) =>
           // this should never happen, this is just a safety net
