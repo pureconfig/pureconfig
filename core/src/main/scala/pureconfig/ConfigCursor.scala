@@ -20,7 +20,7 @@ sealed trait ConfigCursor {
   def value: ConfigValue
 
   /**
-   * The path in the config to which this cursor points as a list of keys.
+   * The path in the config to which this cursor points as a list of keys in reverse order (deepest key first).
    */
   def pathElems: List[String]
 
