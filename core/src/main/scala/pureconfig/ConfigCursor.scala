@@ -242,7 +242,7 @@ case class ConfigObjectCursor(value: ConfigObject, pathElems: List[String]) exte
    */
   def atKey(key: String): Either[ConfigReaderFailures, ConfigCursor] = {
     atKeyOrUndefined(key) match {
-      case keyCur if keyCur.isUndefined => fail(KeyNotFound(keyCur.path, location, key, map.values.map(_.path)))
+      case keyCur if keyCur.isUndefined => fail(KeyNotFound(keyCur.path, location, key, keys))
       case keyCur => Right(keyCur)
     }
   }
