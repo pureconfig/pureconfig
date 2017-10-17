@@ -24,14 +24,6 @@ trait ConvertHelpers {
 
   def failWithThrowable[A](throwable: Throwable): Option[ConfigValueLocation] => Either[ConfigReaderFailures, A] = location => fail[A](ThrowableFailure(throwable, location, ""))
 
-  private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String, location: Option[ConfigValueLocation]): Either[ConfigReaderFailures, Z] =
-    result.left.map {
-      case ConfigReaderFailures(head, tail) =>
-        val headImproved = head.withImprovedContext(keyStr, location)
-        val tailImproved = tail.map(_.withImprovedContext(keyStr, location))
-        ConfigReaderFailures(headImproved, tailImproved)
-    }
-
   private[pureconfig] def toResult[A, B](f: A => B): A => Option[ConfigValueLocation] => Either[ConfigReaderFailures, B] =
     v => l => eitherToResult(tryToEither(Try(f(v)))(l))
 
