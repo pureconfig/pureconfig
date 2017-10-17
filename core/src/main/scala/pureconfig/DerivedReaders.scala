@@ -175,9 +175,8 @@ trait DerivedReaders1 {
         case Right(objCur) =>
           def keyValueReader(key: String, valueCur: ConfigCursor): Either[ConfigReaderFailures, (Int, T)] = {
             val keyResult = catchReadError(_.toInt)(implicitly)(key)(valueCur.location).left
-              .flatMap(t => fail(CannotConvert(key, "Int",
-                s"To convert an object to a collection, its keys must be read as Int but key $key has value" +
-                  s"${valueCur.value} which cannot converted. Error: ${t.because}", valueCur.location, valueCur.path)))
+              .flatMap(t => fail(CannotConvert(key, "Int", "To convert an object to a collection, its keys must be " +
+                s"read as integers but key $key is not a valid one. Error: ${t.because}", valueCur.location, valueCur.path)))
             val valueResult = configConvert.value.value.from(valueCur)
             combineResults(keyResult, valueResult)(_ -> _)
           }
