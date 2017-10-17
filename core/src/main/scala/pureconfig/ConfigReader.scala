@@ -40,7 +40,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader mapped by `f`.
    */
   def map[B](f: A => B): ConfigReader[B] =
-    fromCursor[B](v => from(v).right.flatMap(toResult(f)(_)(ConfigValueLocation(v.value))))
+    fromCursor[B] { cur => from(cur).right.flatMap(toResult(f)(_)(cur.location)) }
 
   /**
    * Maps a function that can possibly fail over the results of this reader.
@@ -51,7 +51,7 @@ trait ConfigReader[A] {
    *         as a success or failure.
    */
   def emap[B](f: A => Either[ConfigReaderFailures, B]): ConfigReader[B] =
-    fromCursor[B] { cv: ConfigCursor => from(cv).right.flatMap(f) }
+    fromCursor[B] { cur => from(cur).right.flatMap(f) }
 
   /**
    * Monadically bind a function over the results of this reader.
@@ -61,7 +61,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader bound by `f`.
    */
   def flatMap[B](f: A => ConfigReader[B]): ConfigReader[B] =
-    fromCursor[B] { cv: ConfigCursor => from(cv).right.flatMap(f(_).from(cv)) }
+    fromCursor[B] { cur => from(cur).right.flatMap(f(_).from(cur)) }
 
   /**
    * Combines this reader with another, returning both results as a pair.
@@ -71,8 +71,8 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of both readers as a pair.
    */
   def zip[B](reader: ConfigReader[B]): ConfigReader[(A, B)] =
-    fromCursor[(A, B)] { cv: ConfigCursor =>
-      (from(cv), reader.from(cv)) match {
+    fromCursor[(A, B)] { cur =>
+      (from(cur), reader.from(cur)) match {
         case (Right(a), Right(b)) => Right((a, b))
         case (Left(fa), Right(_)) => Left(fa)
         case (Right(_), Left(fb)) => Left(fb)
@@ -89,7 +89,7 @@ trait ConfigReader[A] {
    *         otherwise.
    */
   def orElse[AA >: A, B <: AA](reader: => ConfigReader[B]): ConfigReader[AA] =
-    fromCursor[AA] { cur: ConfigCursor =>
+    fromCursor[AA] { cur =>
       from(cur) match {
         case Right(a) => Right(a)
         case Left(failures) => reader.from(cur).left.map(failures ++ _)
