@@ -70,16 +70,16 @@ case object Winter extends Season
 
 implicit val seasonHint = new CoproductHint[Season] {
 
-  // Reads a config for Season (`cv`).
-  // - If `name` is the name of the concrete season `cv` refers to, returns
+  // Reads a config for Season (given by the cursor `cur`).
+  // - If `name` is the name of the concrete season `cur` refers to, returns
   //   `Success(Some(conf))`, where `conf` is the config for the concrete class
   //   (in this case, an empty object).
-  // - If `name` is not the name of the class for `cv`, returns
+  // - If `name` is not the name of the class for `cur`, returns
   //   `Success(None)`.
-  // - If `cv` is an invalid config for Season (in this case, if it isn't a
+  // - If `cur` is an invalid config for Season (in this case, if it isn't a
   //   string), returns a `Failure`.
-  def from(cv: ConfigValue, name: String) = cv.to[String].right.map { strConf =>
-    if(strConf == name) Some(ConfigFactory.empty.root) else None
+  def from(cur: ConfigCursor, name: String) = cur.asString.right.map { strConf =>
+    if(strConf == name) Some(ConfigCursor(ConfigFactory.empty.root, cur.pathElems)) else None
   }
 
   // Writes a config for a Season. `cv` is a config for the concrete season

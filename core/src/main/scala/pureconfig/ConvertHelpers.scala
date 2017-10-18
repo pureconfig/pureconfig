@@ -24,14 +24,6 @@ trait ConvertHelpers {
 
   def failWithThrowable[A](throwable: Throwable): Option[ConfigValueLocation] => Either[ConfigReaderFailures, A] = location => fail[A](ThrowableFailure(throwable, location, ""))
 
-  private[pureconfig] def improveFailures[Z](result: Either[ConfigReaderFailures, Z], keyStr: String, location: Option[ConfigValueLocation]): Either[ConfigReaderFailures, Z] =
-    result.left.map {
-      case ConfigReaderFailures(head, tail) =>
-        val headImproved = head.withImprovedContext(keyStr, location)
-        val tailImproved = tail.map(_.withImprovedContext(keyStr, location))
-        ConfigReaderFailures(headImproved, tailImproved)
-    }
-
   private[pureconfig] def toResult[A, B](f: A => B): A => Option[ConfigValueLocation] => Either[ConfigReaderFailures, B] =
     v => l => eitherToResult(tryToEither(Try(f(v)))(l))
 
@@ -46,21 +38,18 @@ trait ConvertHelpers {
     case Failure(e) => location => Left(ThrowableFailure(e, location, ""))
   }
 
-  private[pureconfig] def stringToTryConvert[T](fromF: String => Try[T]): ConfigValue => Either[ConfigReaderFailures, T] =
+  private[pureconfig] def stringToTryConvert[T](fromF: String => Try[T]): ConfigCursor => Either[ConfigReaderFailures, T] =
     stringToEitherConvert[T](string => location => tryToEither(fromF(string))(location))
 
-  private[pureconfig] def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigValue => Either[ConfigReaderFailures, T] =
-    config => {
+  private[pureconfig] def stringToEitherConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigCursor => Either[ConfigReaderFailures, T] =
+    cur => {
       // Because we can't trust Typesafe Config not to throw, we wrap the
       // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
       try {
-        val string = config.valueType match {
-          case ConfigValueType.STRING => config.unwrapped.toString
-          case _ => config.render(ConfigRenderOptions.concise)
-        }
-        eitherToResult(fromF(string)(ConfigValueLocation(config)))
+        val string = cur.asString.fold(_ => cur.value.render(ConfigRenderOptions.concise), identity)
+        eitherToResult(fromF(string)(cur.location)).left.map(_.withImprovedContext(cur.path, cur.location))
       } catch {
-        case NonFatal(t) => failWithThrowable(t)(ConfigValueLocation(config))
+        case NonFatal(t) => failWithThrowable(t)(cur.location)
       }
     }
 

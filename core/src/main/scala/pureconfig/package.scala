@@ -11,9 +11,9 @@ import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
 import com.typesafe.config.{ Config => TypesafeConfig, _ }
-import pureconfig.ConfigConvert.improveFailures
 import pureconfig.ConvertHelpers._
 import pureconfig.backend.ConfigFactoryWrapper._
+import pureconfig.backend.PathUtil
 import pureconfig.backend.PathUtil._
 import pureconfig.error._
 
@@ -50,8 +50,8 @@ package object pureconfig {
   // namespace handling, both in the values to load and in the error messages.
   private[this] def loadValue[A](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): Either[ConfigReaderFailures, A] = {
     getValue(conf, namespace, reader.value.isInstanceOf[AllowMissingKey]).right.flatMap { cv =>
-      if (namespace.isEmpty) reader.value.from(cv)
-      else improveFailures(reader.value.from(cv), namespace, ConfigValueLocation(conf.root()))
+      val cur = ConfigCursor(cv, PathUtil.splitPath(namespace))
+      reader.value.from(cur)
     }
   }
 
