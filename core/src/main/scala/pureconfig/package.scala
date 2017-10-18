@@ -7,13 +7,11 @@
 import java.io.{ OutputStream, PrintStream }
 import java.nio.file.{ Files, Path }
 
-import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
 import com.typesafe.config.{ Config => TypesafeConfig, _ }
 import pureconfig.ConvertHelpers._
 import pureconfig.backend.ConfigFactoryWrapper._
-import pureconfig.backend.PathUtil
 import pureconfig.backend.PathUtil._
 import pureconfig.error._
 
@@ -22,26 +20,18 @@ package object pureconfig {
   // retrieves a value from a namespace, returning a failure if:
   //   - one of the parent keys doesn't exist or isn't an object;
   //   - `allowNullLeaf` is false and the leaf key doesn't exist.
-  private[this] def getValue(conf: TypesafeConfig, namespace: String, allowNullLeaf: Boolean): Either[ConfigReaderFailures, ConfigValue] = {
-    @tailrec def getValue(cv: ConfigValue, path: List[String], curr: List[String]): Either[ConfigReaderFailures, ConfigValue] = {
-      (cv, path) match {
-        case (_, Nil) => Right(cv)
-
-        case (co: ConfigObject, key :: remaining) =>
-          co.get(key) match {
-            case null if remaining.nonEmpty || !allowNullLeaf =>
-              fail(KeyNotFound(joinPath((key :: curr).reverse), ConfigValueLocation(cv.origin()), Set.empty))
-            case childCv =>
-              getValue(childCv, remaining, key :: curr)
-          }
-
-        case _ => fail(WrongType(
-          cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv.origin()), joinPath(curr.reverse)))
-      }
+  private[this] def getValue(conf: TypesafeConfig, namespace: String, allowNullLeaf: Boolean): Either[ConfigReaderFailures, ConfigCursor] = {
+    def getValue(cur: ConfigCursor, path: List[String]): Either[ConfigReaderFailures, ConfigCursor] = path match {
+      case Nil => Right(cur)
+      case key :: remaining => for {
+        objCur <- cur.asObjectCursor
+        keyCur <- if (remaining.nonEmpty || !allowNullLeaf) objCur.atKey(key) else Right(objCur.atKeyOrUndefined(key))
+        finalCur <- getValue(keyCur, remaining)
+      } yield finalCur
     }
 
     // we're not expecting any exception here, this `try` is just for extra safety
-    try getValue(conf.root(), splitPath(namespace), Nil) catch {
+    try getValue(ConfigCursor(conf.root(), Nil), splitPath(namespace)) catch {
       case ex: ConfigException => fail(ThrowableFailure(ex, ConfigValueLocation(ex.origin()), ""))
     }
   }
@@ -49,10 +39,7 @@ package object pureconfig {
   // loads a value from a config in a given namespace. All `loadConfig` methods _must_ use this method to get correct
   // namespace handling, both in the values to load and in the error messages.
   private[this] def loadValue[A](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): Either[ConfigReaderFailures, A] = {
-    getValue(conf, namespace, reader.value.isInstanceOf[AllowMissingKey]).right.flatMap { cv =>
-      val cur = ConfigCursor(cv, PathUtil.splitPath(namespace))
-      reader.value.from(cur)
-    }
+    getValue(conf, namespace, reader.value.isInstanceOf[AllowMissingKey]).right.flatMap(reader.value.from)
   }
 
   /**
