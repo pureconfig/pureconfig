@@ -21,12 +21,6 @@ class CoproductConvertersSuite extends BaseSuite {
     ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(DogConfig(2))
   }
 
-  it should "read disambiguation information on sealed families with the cases nested in the companion" in {
-    import CarMaker._
-    val conf = ConfigFactory.parseString("{ type = bmw }")
-    ConfigConvert[CarMaker].from(conf.root()) shouldEqual Right(BMW)
-  }
-
   it should "write disambiguation information on sealed families by default" in {
     val conf = ConfigConvert[AnimalConfig].to(DogConfig(2))
     conf shouldBe a[ConfigObject]
@@ -46,12 +40,4 @@ class CoproductConvertersSuite extends BaseSuite {
     failures should have size 1
     failures.head shouldBe a[KeyNotFound]
   }
-}
-
-sealed trait CarMaker
-
-object CarMaker {
-  case object Mercedes extends CarMaker
-  case object BMW extends CarMaker
-  case object Tesla extends CarMaker
 }
