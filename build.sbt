@@ -60,9 +60,8 @@ lazy val commonSettings = Seq(
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
   // use sbt <module_name>/test:console to run an ammonite console
-  // disabled until Ammonite is published for Scala 2.12.4
-  // libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.1" % "test" cross CrossVersion.patch,
-  // initialCommands in (Test, console) := """ammonite.Main().run()""",
+  libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.3" % "test" cross CrossVersion.patch,
+  initialCommands in (Test, console) := """ammonite.Main().run()""",
 
   scalariformPreferences := scalariformPreferences.value
     .setPreference(DanglingCloseParenthesis, Prevent)
