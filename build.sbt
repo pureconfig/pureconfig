@@ -1,25 +1,28 @@
 import scalariform.formatter.preferences._
 import ReleaseTransformations._
+import microsites._
 
 enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
-  enablePlugins(TutPlugin, SbtOsgi).
-  settings(commonSettings, tutTargetDirectory := file(".")).
+  enablePlugins(SbtOsgi).
+  enablePlugins(TutPlugin).
+  settings(commonSettings).
+  settings(tutTargetDirectory := (baseDirectory.value) / "..").
   dependsOn(macros).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
 lazy val docs = (project in file("docs")).
-  enablePlugins(TutPlugin).
+  enablePlugins(MicrositesPlugin).
   settings(commonSettings, publishArtifact := false).
+  settings(micrositesSettings).
   dependsOn(core)
 
 lazy val macros = (project in file("macros")).
-  enablePlugins(TutPlugin).
   settings(commonSettings)
 
 def module(proj: Project) = proj.
-  enablePlugins(TutPlugin, SbtOsgi).
+  enablePlugins(SbtOsgi).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
@@ -74,8 +77,6 @@ lazy val commonSettings = Seq(
     assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
   },
 
-  tutTargetDirectory := baseDirectory.value,
-  scalacOptions in Tut := (scalacOptions in Tut).value.filterNot(Set("-Ywarn-unused-import")),
   autoAPIMappings := true,
 
   publishMavenStyle := true,
@@ -85,6 +86,30 @@ lazy val commonSettings = Seq(
     if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   })
+
+lazy val micrositesSettings = Seq(
+  micrositeName := "pureconfig",
+  micrositeDescription := "A boilerplate-free library for loading configuration files ",
+  micrositeAuthor := "pureconfig authors",
+  micrositeHomepage := "https://pureconfig.github.io/",
+  //micrositeBaseUrl := "pureconfig", // keep this empty to not have a base URL
+  //micrositeDocumentationUrl := "api/", // don't have yet
+  micrositeGithubOwner := "pureconfig",
+  micrositeGithubRepo := "pureconfig",
+  micrositeFavicons := Seq(
+    MicrositeFavicon("pureconfig-logo-16x16.ico", "16x16"),
+    MicrositeFavicon("pureconfig-logo-32x32.ico", "32x32")),
+  micrositePalette := Map(
+        "brand-primary"     -> "#f62333",
+        "brand-secondary"   -> "#8b0000",
+        "brand-tertiary"    -> "#320000",
+        "gray-dark"         -> "#453E46",
+        "gray"              -> "#837F84",
+        "gray-light"        -> "#E3E2E3",
+        "gray-lighter"      -> "#F4F3F4",
+        "white-color"       -> "#FFFFFF"),
+  micrositeGitterChannel := false // ugly
+  )
 
 // add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
 // "scala-2.10" are natively supported by SBT)
