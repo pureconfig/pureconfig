@@ -23,6 +23,7 @@ lazy val macros = (project in file("macros")).
 
 def module(proj: Project) = proj.
   enablePlugins(SbtOsgi).
+  enablePlugins(TutPlugin).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
