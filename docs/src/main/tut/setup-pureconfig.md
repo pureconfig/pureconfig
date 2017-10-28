@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/melrief/pureconfig/blob/master/example/build.sbt)
+For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt)
 used for the example.
 
 Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig.

@@ -4,10 +4,10 @@ title: Example
 ---
 ## {{page.title}}
 
-In the [example directory](https://github.com/melrief/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
+In the [example directory](https://github.com/pureconfig/pureconfig/tree/master/example/src/main/scala/pureconfig/example)
 there is an example of usage of PureConfig. In the example, the idea is to load a configuration for a directory
 watcher service. The configuration file
-(a real one is available [here](https://github.com/melrief/pureconfig/blob/master/example/src/main/resources/application.conf))
+(a real one is available [here](https://github.com/pureconfig/pureconfig/blob/master/example/src/main/resources/application.conf))
 for this program will look like:
 
 ```

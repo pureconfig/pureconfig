@@ -46,10 +46,10 @@ uses the raw configurations to do its magic.
 
 PureConfig is a free library developed by several people around the world.
 Contributions are welcomed and encouraged. If you want to contribute, we suggest to have a look at the
-[available issues](https://github.com/melrief/pureconfig/issues) and to talk with
-us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
+[available issues](https://github.com/pureconfig/pureconfig/issues) and to talk with
+us on the [pureconfig gitter channel](https://gitter.im/pureconfig/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
 
-If you'd like to add support for types which are not part the standard Java or Scala libraries, please consider submitting a pull request to create a [module](#internal-modules). [Pull Request #108](https://github.com/melrief/pureconfig/pull/108/files) created a very simple module. It should provide a good template for the pieces you'll need to add.
+If you'd like to add support for types which are not part the standard Java or Scala libraries, please consider submitting a pull request to create a [module](#internal-modules). [Pull Request #108](https://github.com/pureconfig/pureconfig/pull/108/files) created a very simple module. It should provide a good template for the pieces you'll need to add.
 
 The steps to create a new module, called _`nexttopmod`_, are:
 
@@ -66,7 +66,7 @@ welcoming environments for everyone.
 
 ## License
 
-[Mozilla Public License, version 2.0](https://github.com/melrief/pureconfig/blob/master/LICENSE)
+[Mozilla Public License, version 2.0](https://github.com/pureconfig/pureconfig/blob/master/LICENSE)
 
 
 ## Special Thanks

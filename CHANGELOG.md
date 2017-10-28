@@ -24,7 +24,7 @@
   - `ConfigReader` and `ConfigWriter` for `shapeless.HList`;
   - `ConfigReader` for Scala tuples can now read from `ConfigLists`s;
   - Added an experimental way to debug when a converter fails to be derived because an implicit is not found. See
-    [the documentation](https://github.com/pureconfig/pureconfig/blob/master/docs/debuging-implicits-not-found.md) for
+    [the documentation](https://pureconfig.github.io/08_debuging-implicits-not-found.html) for
     more information on how to enable it.
   
 - Breaking changes
@@ -59,7 +59,7 @@
   - `ConfigReader` and `ConfigWriter` for arbitrary Java `enum`s;
   - Improved error messages when a failure occurs reading a config;
 - Bug fixes
-  - `Duration.Undefined` is correctly handled when reading and writing configurations [[#184](https://github.com/melrief/pureconfig/issues/184)];
+  - `Duration.Undefined` is correctly handled when reading and writing configurations [[#184](https://github.com/pureconfig/pureconfig/issues/184)];
   - `loadConfig` method now handles properly cases where a requested config file cannot be read and when a provided
     namespace doesn't exist.
 
@@ -86,18 +86,18 @@
 
 - Bug fixes
   - `pureconfig.load*` methods don't throw exceptions on malformed configuration anymore
-     and wrap errors in `ConfigReaderFailures` [[#148](https://github.com/melrief/pureconfig/issues/148)].
+     and wrap errors in `ConfigReaderFailures` [[#148](https://github.com/pureconfig/pureconfig/issues/148)].
 
 ### 0.6.0 (Feb 14, 2017)
 
 - New features
   - New  `ProductHint` trait allowing customization of the derived `ConfigConvert` for case classes, superseeding
-    `ConfigFieldMapping` ([docs](https://github.com/melrief/pureconfig#override-behaviour-for-case-classes)). In
+    `ConfigFieldMapping` ([docs](https://pureconfig.github.io/06_override-behaviour-for-case-classes.html)). In
     addition to defining field name mappings, `ProductHint` instances control:
     - Whether default field values should be used when
-      fields are missing in the config ([docs](https://github.com/melrief/pureconfig#default-field-values));
+      fields are missing in the config ([docs](https://pureconfig.github.io/06_override-behaviour-for-case-classes.html#default-field-values));
     - Whether unknown keys are ignored or cause pureconfig to return a `Failure`
-      ([docs](https://github.com/melrief/pureconfig#unknown-keys)).
+      ([docs](https://pureconfig.github.io/06_override-behaviour-for-case-classes.html#unknown-keys)).
   - Support for reading and writing [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html)s;
   - Support for reading and writing [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html)s;
   - Support for reading and writing [`java.net.URI`](https://docs.oracle.com/javase/8/docs/api/java/net/URI.html)s;
@@ -135,7 +135,7 @@
   - More consistent handling of missing keys: if a config key is missing pureconfig always throws a
     `KeyNotFoundException` now, unless the `ConfigConvert` extends the new `AllowMissingKey` trait.
   - Add support for the `java.time` package. Converters types which support different string formats, such as `LocalDate`,
-    must be configured before they can be used. See the [README](https://github.com/melrief/pureconfig#configurable-converters)
+    must be configured before they can be used. See the [README](https://pureconfig.github.io/01_configurable-converters.html)
     for more details.
   - Add support for converting objects with numeric keys into lists. This is a functionallity also supported
     by typesafe config since version [1.0.1](https://github.com/typesafehub/config/blob/f6680a5dad51d992139d45a84fad734f1778bf50/NEWS.md#101-may-19-2013)
@@ -155,6 +155,6 @@
     - The old behavior can be restored by putting an implicit instance of `FirstSuccessCoproductHint` in scope (the
       migration to the new format is strongly recommended though, as the previous one may lead to ambiguous behavior);
     - More information about the default representation and on how to customize it can be seen in the
-      [README](https://github.com/melrief/pureconfig#override-behaviour-for-sealed-families).
+      [README](https://pureconfig.github.io/07_override-behaviour-for-sealed-families.html).
 - Bug fixes
   - `0` is accepted again as a valid `Duration` in configs.

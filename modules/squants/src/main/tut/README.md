@@ -8,7 +8,7 @@ Automatically create a converter to read [Squants](http://www.squants.com/)'s be
 
 ## Add pureconfig-squants to your project
 
-In addition to [core pureconfig](https://github.com/melrief/pureconfig), you'll need:
+In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-squants" % "0.8.0"

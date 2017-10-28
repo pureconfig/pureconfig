@@ -8,7 +8,7 @@ Automatically create a converters to read [Enumeratum](https://github.com/lloydm
 
 ## Add pureconfig-enumeratum to your project
 
-In addition to [core pureconfig](https://github.com/melrief/pureconfig), you'll need:
+In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.8.0"
