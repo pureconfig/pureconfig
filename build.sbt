@@ -102,14 +102,14 @@ lazy val micrositesSettings = Seq(
     MicrositeFavicon("pureconfig-logo-16x16.ico", "16x16"),
     MicrositeFavicon("pureconfig-logo-32x32.ico", "32x32")),
   micrositePalette := Map(
-        "brand-primary"     -> "#f62333",
-        "brand-secondary"   -> "#8b0000",
-        "brand-tertiary"    -> "#320000",
-        "gray-dark"         -> "#453E46",
-        "gray"              -> "#837F84",
-        "gray-light"        -> "#E3E2E3",
-        "gray-lighter"      -> "#F4F3F4",
-        "white-color"       -> "#FFFFFF"),
+        "brand-primary"   /* link color       */  -> "#ab4b4b",
+        "brand-secondary" /* nav/sidebar back */  -> "#4b4b4b",
+        "brand-tertiary"  /* sidebar top back */  -> "#292929",
+        "gray-dark"       /* section title    */  -> "#453E46",
+        "gray"            /* text color       */  -> "#837F84",
+        "gray-light"      /* star back        */  -> "#E3E2E3",
+        "gray-lighter"    /* code back        */  -> "#F4F3F4",
+        "white-color"                             -> "#FFFFFF"),
   micrositeGitterChannel := false // ugly
   )
 
