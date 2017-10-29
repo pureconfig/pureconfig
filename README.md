@@ -1,6 +1,6 @@
 # PureConfig
 
-<img src="docs/img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right">
+<img src="img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right">
 
 [![Build Status](https://travis-ci.org/pureconfig/pureconfig.svg?branch=master)](https://travis-ci.org/pureconfig/pureconfig)
 [![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
