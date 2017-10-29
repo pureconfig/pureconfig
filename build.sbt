@@ -88,7 +88,7 @@ lazy val commonSettings = Seq(
 
 lazy val micrositesSettings = Seq(
   micrositeName := "pureconfig",
-  micrositeDescription := "A boilerplate-free library for loading configuration files ",
+  micrositeDescription := "A boilerplate-free library for loading configuration files",
   micrositeAuthor := "pureconfig authors",
   micrositeHomepage := "https://pureconfig.github.io/",
   //micrositeBaseUrl := "pureconfig", // keep this empty to not have a base URL
