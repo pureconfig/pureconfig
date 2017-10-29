@@ -5,10 +5,8 @@ import microsites._
 enablePlugins(CrossPerProjectPlugin)
 
 lazy val core = (project in file("core")).
-  enablePlugins(SbtOsgi).
-  enablePlugins(TutPlugin).
-  settings(commonSettings).
-  settings(tutTargetDirectory := (baseDirectory.value) / "..").
+  enablePlugins(TutPlugin, SbtOsgi).
+  settings(commonSettings, tutTargetDirectory := file(".")).
   dependsOn(macros).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
@@ -23,8 +21,7 @@ lazy val macros = (project in file("macros")).
   settings(commonSettings)
 
 def module(proj: Project) = proj.
-  enablePlugins(SbtOsgi).
-  enablePlugins(TutPlugin).
+  enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
   settings(commonSettings)
