@@ -90,13 +90,13 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * @param values the values that should not be conver
    * @param cr the [[ConfigConvert]] to test
    */
-  def checkFailure[T, E <: ConfigReaderFailure](values: ConfigValue*)(implicit cr: ConfigReader[T], tpe: TypeTag[T], eTag: ClassTag[E]): Unit =
+  def checkFailure[T, E <: FailureReason](values: ConfigValue*)(implicit cr: ConfigReader[T], tpe: TypeTag[T], eTag: ClassTag[E]): Unit =
     for (value <- values) {
       it should s"fail when it tries to read a value of type ${tpe.tpe} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
           val result = cr.from(value)
           result.left.value.toList should have size 1
-          result.left.value.head shouldBe a[E]
+          result.left.value.head should matchPattern { case ConvertFailure(_: E, _, _) => }
         }
     }
 

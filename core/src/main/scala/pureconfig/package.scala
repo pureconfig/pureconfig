@@ -32,7 +32,7 @@ package object pureconfig {
 
     // we're not expecting any exception here, this `try` is just for extra safety
     try getValue(ConfigCursor(conf.root(), Nil), splitPath(namespace)) catch {
-      case ex: ConfigException => fail(ThrowableFailure(ex, ConfigValueLocation(ex.origin()), ""))
+      case ex: ConfigException => fail(ThrowableFailure(ex, ConfigValueLocation(ex.origin())))
     }
   }
 
@@ -272,7 +272,7 @@ package object pureconfig {
    */
   def loadConfigFromFiles[Config](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     if (files.isEmpty) {
-      ConfigConvert.failWithThrowable[Config](new IllegalArgumentException("The config files to load must not be empty."))(None)
+      Left(ConfigReaderFailures(NoFilesToRead))
     } else {
       files
         .map(parseFile)

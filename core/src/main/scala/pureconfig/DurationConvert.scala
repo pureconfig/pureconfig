@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import pureconfig.error.{ CannotConvert, ConfigReaderFailure, ConfigValueLocation }
-
 import scala.concurrent.duration.Duration.{ Inf, MinusInf }
 import scala.concurrent.duration.{ DAYS, Duration, FiniteDuration, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, SECONDS, TimeUnit }
 import scala.util.Try
+
+import pureconfig.error.{ CannotConvert, FailureReason }
 
 /**
  * Utility functions for converting a Duration to a String and vice versa.
@@ -16,14 +16,14 @@ private[pureconfig] object DurationConvert {
   /**
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
-  val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, Duration] = { string => location =>
+  val fromString: String => Either[FailureReason, Duration] = { string =>
     if (string == UndefinedDuration) Right(Duration.Undefined)
     else try {
       Right(parseDuration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
     } catch {
       case ex: NumberFormatException =>
         val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
-        Left(CannotConvert(string, "Duration", err, location, ""))
+        Left(CannotConvert(string, "Duration", err))
     }
   }
 

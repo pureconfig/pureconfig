@@ -30,9 +30,9 @@ package object enumeratum {
 
   implicit def enumeratumCharConfigConvert[A <: CharEnumEntry](implicit enum: CharEnum[A], ct: ClassTag[A]): ConfigConvert[A] =
     viaNonEmptyString[A](
-      s => location => ensureOneChar(s) match {
+      s => ensureOneChar(s) match {
         case Right(v) => Right(enum.withValue(v))
-        case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg, location, ""))
+        case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg))
       },
       _.value.toString)
 

@@ -15,7 +15,7 @@ package object cats {
   private[pureconfig] def fromNonEmpty[F[_], G[_], T](fromFT: F[T] => Option[G[T]])(cur: ConfigCursor)(implicit ct: ClassTag[F[T]], fReader: ConfigReader[F[T]]): Either[ConfigReaderFailures, G[T]] =
     fReader.from(cur).right.flatMap { ft =>
       fromFT(ft) match {
-        case None => Left(ConfigReaderFailures(EmptyTraversableFound(ct.toString, cur.location, cur.path)))
+        case None => cur.failed(EmptyTraversableFound(ct.toString))
         case Some(nonEmpty) => Right(nonEmpty)
       }
     }

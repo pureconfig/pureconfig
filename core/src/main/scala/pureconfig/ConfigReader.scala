@@ -6,7 +6,7 @@ import scala.util.Try
 import com.typesafe.config.ConfigValue
 import pureconfig.ConfigReader._
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, ConfigValueLocation }
+import pureconfig.error.{ ConfigReaderFailures, FailureReason }
 
 /**
  * Trait for objects capable of reading objects of a given type from `ConfigValues`.
@@ -40,7 +40,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader mapped by `f`.
    */
   def map[B](f: A => B): ConfigReader[B] =
-    fromCursor[B] { cur => from(cur).right.flatMap(toResult(f)(_)(cur.location)) }
+    fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailures(toResult(f)(v)) } }
 
   /**
    * Maps a function that can possibly fail over the results of this reader.
@@ -143,7 +143,7 @@ object ConfigReader extends BasicReaders with DerivedReaders {
   def fromFunction[A](fromF: ConfigValue => Either[ConfigReaderFailures, A]) =
     fromCursor(fromF.compose(_.value))
 
-  def fromString[A](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, A]): ConfigReader[A] = new ConfigReader[A] {
+  def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] = new ConfigReader[A] {
     override def from(cur: ConfigCursor): Either[ConfigReaderFailures, A] = stringToEitherConvert(fromF)(cur)
   }
 
@@ -155,8 +155,8 @@ object ConfigReader extends BasicReaders with DerivedReaders {
     fromString[A](optF(fromF))
   }
 
-  def fromNonEmptyString[A](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
-    fromString(string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)))
+  def fromNonEmptyString[A](fromF: String => Either[FailureReason, A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
+    fromString(string => ensureNonEmpty(ct)(string).right.flatMap(s => fromF(s)))
   }
 
   def fromNonEmptyStringTry[A](fromF: String => Try[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {

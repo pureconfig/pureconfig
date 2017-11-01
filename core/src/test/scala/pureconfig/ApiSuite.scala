@@ -36,7 +36,7 @@ class ApiSuite extends BaseSuite {
     case class Conf(f: Float)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
     loadConfig[Conf](conf = conf, namespace = "foo.bar") shouldBe Right(Conf(1.0F))
-    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar", None, Set.empty))
+    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar", Set.empty), "")
   }
 
   it should "loadConfig other values from a Typesafe Config with a namespace" in {
@@ -45,23 +45,23 @@ class ApiSuite extends BaseSuite {
     loadConfig[Float](conf = conf, namespace = "foo.bar.f") shouldBe Right(1.0F)
 
     loadConfig[Float](conf = conf, namespace = "foo.bar.h") should failWith(
-      KeyNotFound("foo.bar.h", None, Set.empty))
+      KeyNotFound("h", Set.empty), "foo.bar")
 
     loadConfig[Float](conf = conf, namespace = "foo.baz.f") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT), None, "foo.baz"))
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
 
     loadConfig[Float](conf = conf, namespace = "bar.foo.f") should failWith(
-      KeyNotFound("bar", None, Set.empty))
+      KeyNotFound("bar", Set.empty), "")
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0F))
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT), None, "foo.baz"))
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
 
     loadConfig[Option[Float]](conf = conf, namespace = "bar.foo.f") should failWith(
-      KeyNotFound("bar", None, Set.empty))
+      KeyNotFound("bar", Set.empty), "")
   }
 
   it should "handle correctly namespaces with special chars" in {
@@ -70,13 +70,13 @@ class ApiSuite extends BaseSuite {
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".f") shouldBe Right(1.0F)
 
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".h") should failWith(
-      KeyNotFound("\"fo.o\".\"ba r\".h", None, Set.empty))
+      KeyNotFound("h", Set.empty), "\"fo.o\".\"ba r\"")
 
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba z\".h") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT), None, "\"fo.o\".\"ba z\""))
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "\"fo.o\".\"ba z\"")
 
     loadConfig[Float](conf = conf, namespace = "\"b.a.r\".foo.f") should failWith(
-      KeyNotFound("\"b.a.r\"", None, Set.empty))
+      KeyNotFound("b.a.r", Set.empty), "")
   }
 
   it should "loadConfig from a configuration file" in {
@@ -91,7 +91,7 @@ class ApiSuite extends BaseSuite {
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
     loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true))
     loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failWithType[CannotReadFile]
-    loadConfig[Conf](path = path, namespace = "bar.foo") should failWith(KeyNotFound("bar", None, Set.empty))
+    loadConfig[Conf](path = path, namespace = "bar.foo") should failWith(KeyNotFound("bar", Set.empty))
   }
 
   it should "be able to load a realistic configuration file" in {
@@ -158,7 +158,7 @@ class ApiSuite extends BaseSuite {
   it should "fail if the list of files is empty" in {
     case class Conf(f: Float)
     val files = Set.empty[Path]
-    loadConfigFromFiles[Conf](files) should failWithType[ThrowableFailure]
+    loadConfigFromFiles[Conf](files) should failWithType[NoFilesToRead.type]
   }
 
   it should "ignore files that don't exist" in {

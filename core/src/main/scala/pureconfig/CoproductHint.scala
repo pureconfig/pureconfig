@@ -74,13 +74,18 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
     } yield if (valueStr == fieldValue(name)) Some(objCur.withoutKey(key)) else None
   }
 
+  // TODO: improve handling of failures on the write side
   def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
     case co: ConfigObject =>
-      if (co.containsKey(key)) Left(ConfigReaderFailures(CollidingKeys(key, co.get(key), ConfigValueLocation(co))))
-      else Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
-
+      if (co.containsKey(key)) {
+        Left(ConfigReaderFailures(ConvertFailure(CollidingKeys(key, co.get(key)), ConfigValueLocation(co), "")))
+      } else {
+        Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
+      }
     case _ =>
-      Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), "")))
+      Left(ConfigReaderFailures(ConvertFailure(
+        WrongType(cv.valueType, Set(ConfigValueType.OBJECT)),
+        ConfigValueLocation(cv), "")))
   }
 
   def tryNextOnFail(name: String) = false
@@ -106,10 +111,13 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
     if (str == fieldValue(name)) Some(ConfigCursor(ConfigFactory.empty.root, cur.pathElems)) else None
   }
 
+  // TODO: improve handling of failures on the write side
   def to(cv: ConfigValue, name: String) = cv match {
     case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
-    case _: ConfigObject => Left(ConfigReaderFailures(NonEmptyObjectFound(name, ConfigValueLocation(cv), "")))
-    case _ => Left(ConfigReaderFailures(WrongType(cv.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(cv), "")))
+    case _: ConfigObject => Left(ConfigReaderFailures(ConvertFailure(
+      NonEmptyObjectFound(name), ConfigValueLocation(cv), "")))
+    case _ => Left(ConfigReaderFailures(ConvertFailure(
+      WrongType(cv.valueType, Set(ConfigValueType.OBJECT)), ConfigValueLocation(cv), "")))
   }
 
   def tryNextOnFail(name: String) = false

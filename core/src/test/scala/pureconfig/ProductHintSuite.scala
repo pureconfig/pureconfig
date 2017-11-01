@@ -1,9 +1,8 @@
 package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject }
-import pureconfig.error.{ KeyNotFound, UnknownKey }
+import pureconfig.error.{ ConvertFailure, KeyNotFound, UnknownKey }
 import pureconfig.syntax._
-
 import scala.collection.JavaConverters._
 
 class ProductHintSuite extends BaseSuite {
@@ -51,7 +50,9 @@ class ProductHintSuite extends BaseSuite {
       }""").root()
 
     case class SampleConf(a: Int, b: String)
-    ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("a", None, Set("A")), KeyNotFound("b", None, Set("B")))
+    ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(
+      ConvertFailure(KeyNotFound("a", Set("A")), None, ""),
+      ConvertFailure(KeyNotFound("b", Set("B")), None, ""))
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
     ConfigConvert[SampleConf].from(conf) shouldBe Right(SampleConf(2, "two"))
@@ -144,9 +145,7 @@ class ProductHintSuite extends BaseSuite {
     }""")
 
     conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
-    val failures = conf.getConfig("conf").to[Conf2].left.value.toList
-    failures should have size 1
-    failures.head shouldEqual UnknownKey("b", None)
+    conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b")
   }
 
   it should "not use default arguments if specified through a product hint" in {
@@ -156,6 +155,9 @@ class ProductHintSuite extends BaseSuite {
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
-    loadConfig[Conf](conf1).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b", None), KeyNotFound("c", None), KeyNotFound("d", None))
+    loadConfig[Conf](conf1).left.value.toList should contain theSameElementsAs Seq(
+      ConvertFailure(KeyNotFound("b"), None, ""),
+      ConvertFailure(KeyNotFound("c"), None, ""),
+      ConvertFailure(KeyNotFound("d"), None, ""))
   }
 }

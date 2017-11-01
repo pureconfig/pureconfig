@@ -2,15 +2,15 @@ package pureconfig
 
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.ConfigValueFactory
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
-import org.scalatest.Inspectors._
-import pureconfig.error.CannotConvert
-
 import scala.concurrent.duration._
-import DurationConvertSuite._
 
-class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
+import com.typesafe.config.ConfigValueFactory
+import org.scalatest.Inspectors
+import pureconfig.DurationConvertSuite._
+import pureconfig.error.{ CannotConvert, ConvertFailure, ExceptionThrown }
+
+class DurationConvertSuite extends BaseSuite {
+
   "Converting a Duration to a String" should "pick an appropriate unit when dealing with whole units less than the next step up" in {
     fromD(Duration(14, TimeUnit.DAYS)) shouldBe "14d"
     fromD(Duration(16, TimeUnit.HOURS)) shouldBe "16h"
@@ -57,12 +57,13 @@ class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
     val leftSpacingSize = Set((0 to 2): _*)
     val rightSpacingSize = Set((0 to 2): _*)
     val zeroRepeatSize = Set((1 to 2): _*)
-    forAll(signs) { sign =>
-      forAll(leftSpacing) { lsc =>
-        forAll(rightSpacing) { rsc =>
-          forAll(leftSpacingSize) { ls =>
-            forAll(rightSpacingSize) { rs =>
-              forAll(zeroRepeatSize) { zr =>
+
+    Inspectors.forAll(signs) { sign =>
+      Inspectors.forAll(leftSpacing) { lsc =>
+        Inspectors.forAll(rightSpacing) { rsc =>
+          Inspectors.forAll(leftSpacingSize) { ls =>
+            Inspectors.forAll(rightSpacingSize) { rs =>
+              Inspectors.forAll(zeroRepeatSize) { zr =>
                 fromS(lsc * ls + sign + "0" * zr + rsc * rs) shouldBe Right(Duration(0, TimeUnit.DAYS))
               }
             }
@@ -73,13 +74,7 @@ class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
   }
   it should "report a helpful error message when failing to convert a bad duration" in {
     val badDuration = "10 lordsALeaping"
-    val result = BasicReaders.durationConfigReader.from(ConfigValueFactory.fromAnyRef(badDuration))
-    result match {
-      case Right(_) => fail("Should be failure")
-      case Left(ex) =>
-        ex.toList should have size 1
-        ex.head shouldBe a[CannotConvert]
-    }
+    BasicReaders.durationConfigReader.from(ConfigValueFactory.fromAnyRef(badDuration)) should failWithType[CannotConvert]
   }
   it should "correctly round trip when converting Duration.Undefined" in {
     fromS(fromD(Duration.Undefined)) shouldEqual Right(Duration.Undefined)
@@ -102,10 +97,10 @@ class DurationConvertSuite extends FlatSpec with Matchers with EitherValues {
     fromS(fromD(expected)).right.value shouldBe expected
   }
   it should "freak when given a value larger than 2^64" in {
-    val result = dcc.from(scc.to("12345678901234567890 ns"))
-    result shouldBe a[Left[_, _]]
-    val ex = result.left.value.head.asInstanceOf[error.ThrowableFailure].throwable
-    ex.getMessage should include regex "trying to construct too large duration"
+    dcc.from(scc.to("12345678901234567890 ns")) should failLike {
+      case ConvertFailure(ExceptionThrown(ex), _, _) =>
+        (include regex "trying to construct too large duration")(ex.getMessage)
+    }
   }
   it should "parse a fractional value" in {
     val expected = 1.5.minutes
@@ -121,5 +116,5 @@ object DurationConvertSuite {
   val scc = implicitly[ConfigConvert[String]]
   val dcc = implicitly[ConfigConvert[Duration]]
   val fromD = DurationConvert.fromDuration(_: Duration)
-  val fromS = DurationConvert.fromString(_: String)(None)
+  val fromS = DurationConvert.fromString(_: String)
 }

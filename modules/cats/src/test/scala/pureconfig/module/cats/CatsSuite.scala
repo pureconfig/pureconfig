@@ -2,11 +2,10 @@ package pureconfig.module.cats
 
 import cats.data.{ NonEmptyList, NonEmptyVector }
 import com.typesafe.config.ConfigFactory.parseString
-import org.scalatest._
-import pureconfig.error.ConfigReaderFailures
+import pureconfig.BaseSuite
 import pureconfig.syntax._
 
-class CatsSuite extends FlatSpec with Matchers with EitherValues {
+class CatsSuite extends BaseSuite {
 
   case class Numbers(numbers: NonEmptyList[Int])
 
@@ -17,8 +16,7 @@ class CatsSuite extends FlatSpec with Matchers with EitherValues {
 
   it should "return an EmptyTraversableFound when reading empty lists into NonEmptyList" in {
     val config = parseString("{ numbers: [] }")
-    config.to[Numbers] shouldEqual
-      Left(ConfigReaderFailures(EmptyTraversableFound("scala.collection.immutable.List", None, "numbers"), Nil))
+    config.to[Numbers] should failWith(EmptyTraversableFound("scala.collection.immutable.List"), "numbers")
   }
 
   case class NumVec(numbers: NonEmptyVector[Int])
@@ -30,7 +28,6 @@ class CatsSuite extends FlatSpec with Matchers with EitherValues {
 
   it should "return an EmptyTraversableFound when reading empty lists into NonEmptyVector" in {
     val config = parseString("{ numbers: [] }")
-    config.to[NumVec] shouldEqual
-      Left(ConfigReaderFailures(EmptyTraversableFound("scala.collection.immutable.Vector", None, "numbers"), Nil))
+    config.to[NumVec] should failWith(EmptyTraversableFound("scala.collection.immutable.Vector"), "numbers")
   }
 }

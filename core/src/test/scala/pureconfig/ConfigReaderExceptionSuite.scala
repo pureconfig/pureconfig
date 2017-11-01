@@ -29,12 +29,11 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
+          |  at the root:
+          |    - Key not found: 'b'.
+          |    - Key not found: 'c'.
           |  at 'a':
           |    - Cannot convert 'string' to Int: java.lang.NumberFormatException: For input string: "string".
-          |  at 'b':
-          |    - Key not found.
-          |  at 'c':
-          |    - Key not found.
           |""".stripMargin
   }
 
@@ -132,8 +131,8 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingA. Failures are:
           |  at 'values.v1':
           |    - No valid coproduct choice found for '{"a":2,"type":"unexpected"}'.
-          |  at 'values.v3.type':
-          |    - Key not found.
+          |  at 'values.v3':
+          |    - Key not found: 'type'.
           |""".stripMargin
   }
 
@@ -167,18 +166,16 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingConf. Failures are:
-          |  at 'camel-case-conf.camel-case-int':
-          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'camel-case-conf.camelCaseInt'
-          |  at 'camel-case-conf.camel-case-string':
-          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'camel-case-conf.camelCaseString'
-          |  at 'snake-case-conf.snake-case-int':
-          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'snake-case-conf.snake_case_int'
-          |  at 'snake-case-conf.snake-case-string':
-          |    - Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'snake-case-conf.snake_case_string'
+          |  at 'camel-case-conf':
+          |    - Key not found: 'camel-case-int'. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'camelCaseInt'
+          |    - Key not found: 'camel-case-string'. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'camelCaseString'
+          |  at 'snake-case-conf':
+          |    - Key not found: 'snake-case-int'. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'snake_case_int'
+          |    - Key not found: 'snake-case-string'. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |       - 'snake_case_string'
           |""".stripMargin
   }
 
@@ -193,8 +190,8 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  at 'a':
-          |    - (file:${workingDir}${file}:1) Key not found.
+          |  at the root:
+          |    - (file:${workingDir}${file}:1) Key not found: 'a'.
           |  at 'c':
           |    - (file:${workingDir}${file}:3) Cannot convert 'hello' to Int: java.lang.NumberFormatException: For input string: "hello".
           |""".stripMargin

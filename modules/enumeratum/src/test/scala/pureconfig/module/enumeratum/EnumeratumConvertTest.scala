@@ -4,12 +4,12 @@ import com.typesafe.config.ConfigFactory
 import enumeratum.EnumEntry.{ Snakecase, Uppercase }
 import enumeratum._
 import enumeratum.values._
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
+import org.scalatest.Inspectors
 import pureconfig.syntax._
-import org.scalatest.Inspectors._
+import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
 
-class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
+class EnumeratumConvertTest extends BaseSuite {
   sealed trait Greeting extends EnumEntry with Snakecase
 
   object Greeting extends Enum[Greeting] {
@@ -19,7 +19,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
     case object ShoutGoodBye extends Greeting with Uppercase
   }
 
-  "Enumeratum ConfigConvert" should "parse an enum" in forAll(Greeting.values) {
+  "Enumeratum ConfigConvert" should "parse an enum" in Inspectors.forAll(Greeting.values) {
     greeting =>
       val conf = ConfigFactory.parseString(s"""{greeting:"${greeting.entryName}"}""")
       case class Conf(greeting: Greeting)
@@ -36,7 +36,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
     case object CD extends IntLibraryItem(4, name = "cd")
   }
 
-  it should "parse an int enum" in forAll(IntLibraryItem.values) {
+  it should "parse an int enum" in Inspectors.forAll(IntLibraryItem.values) {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: IntLibraryItem)
@@ -53,7 +53,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
     case object CD extends LongLibraryItem(4L, name = "cd")
   }
 
-  it should "parse a long value enum" in forAll(LongLibraryItem.values) {
+  it should "parse a long value enum" in Inspectors.forAll(LongLibraryItem.values) {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: LongLibraryItem)
@@ -70,7 +70,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
     case object CD extends ShortLibraryItem(4, name = "cd")
   }
 
-  it should "parse a short value enum" in forAll(ShortLibraryItem.values) {
+  it should "parse a short value enum" in Inspectors.forAll(ShortLibraryItem.values) {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: ShortLibraryItem)
@@ -88,7 +88,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
     case object Empty extends StringLibraryItem("", number = 5)
   }
 
-  it should "parse a string value enum" in forAll(StringLibraryItem.values) {
+  it should "parse a string value enum" in Inspectors.forAll(StringLibraryItem.values) {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: StringLibraryItem)
@@ -105,7 +105,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
     case object CD extends ByteLibraryItem(4, name = "cd")
   }
 
-  it should "parse a byte value enum" in forAll(ByteLibraryItem.values) {
+  it should "parse a byte value enum" in Inspectors.forAll(ByteLibraryItem.values) {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: ByteLibraryItem)
@@ -122,7 +122,7 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
     case object CD extends CharLibraryItem('d', number = 4)
   }
 
-  it should "parse a char value enum" in forAll(CharLibraryItem.values) {
+  it should "parse a char value enum" in Inspectors.forAll(CharLibraryItem.values) {
     item =>
       val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
       case class Conf(item: CharLibraryItem)
@@ -132,8 +132,6 @@ class EnumeratumConvertTest extends FlatSpec with Matchers with EitherValues {
   it should "not parse a char value enum when given a string with more than one character" in {
     val conf = ConfigFactory.parseString(s"""{item:"string"}""")
     case class Conf(item: CharLibraryItem)
-    val failures = conf.to[Conf].left.value.toList
-    failures should have size 1
-    failures.head shouldBe a[CannotConvert]
+    conf.to[Conf] should failWithType[CannotConvert]
   }
 }

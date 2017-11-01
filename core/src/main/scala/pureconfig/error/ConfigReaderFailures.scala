@@ -15,19 +15,6 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
 
   def ++(that: ConfigReaderFailures): ConfigReaderFailures =
     new ConfigReaderFailures(head, tail ++ that.toList)
-
-  /**
-   * Improves the context of this list of failures with the path to the parent node and its optional location.
-   *
-   * @param parentKey the path to the parent node in the config
-   * @param parentLocation the location of the parent
-   * @return a new `ConfigReaderFailures` instance with its context improved.
-   */
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]): ConfigReaderFailures = {
-    ConfigReaderFailures(
-      head.withImprovedContext(parentKey, parentLocation),
-      tail.map(_.withImprovedContext(parentKey, parentLocation)))
-  }
 }
 
 object ConfigReaderFailures {
