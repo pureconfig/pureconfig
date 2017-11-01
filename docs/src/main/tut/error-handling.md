@@ -18,7 +18,7 @@ import pureconfig.error._
 import java.nio.file.{ Path, Paths }
 
 val cv = ConfigFactory.load.root().get("conf")
-val notFound = KeyNotFound("xpto", ConfigValueLocation(cv)).location.get
+val notFound = ConvertFailure(KeyNotFound("xpto"), ConfigValueLocation(cv), "conf").location.get
 ```
 
 We can extract useful error data:
