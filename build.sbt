@@ -38,8 +38,8 @@ lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
-  scalaVersion := "2.12.3",
-  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.3"),
+  scalaVersion := "2.12.4",
+  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.4"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -60,7 +60,7 @@ lazy val commonSettings = Seq(
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
   // use sbt <module_name>/test:console to run an ammonite console
-  libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.1" % "test" cross CrossVersion.patch,
+  libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.3" % "test" cross CrossVersion.patch,
   initialCommands in (Test, console) := """ammonite.Main().run()""",
 
   scalariformPreferences := scalariformPreferences.value
