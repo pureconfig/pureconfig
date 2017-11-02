@@ -24,9 +24,9 @@ package object pureconfig {
     def getValue(cur: ConfigCursor, path: List[String]): Either[ConfigReaderFailures, ConfigCursor] = path match {
       case Nil => Right(cur)
       case key :: remaining => for {
-        objCur <- cur.asObjectCursor
-        keyCur <- if (remaining.nonEmpty || !allowNullLeaf) objCur.atKey(key) else Right(objCur.atKeyOrUndefined(key))
-        finalCur <- getValue(keyCur, remaining)
+        objCur <- cur.asObjectCursor.right
+        keyCur <- (if (remaining.nonEmpty || !allowNullLeaf) objCur.atKey(key) else Right(objCur.atKeyOrUndefined(key))).right
+        finalCur <- getValue(keyCur, remaining).right
       } yield finalCur
     }
 
