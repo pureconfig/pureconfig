@@ -3,7 +3,7 @@ package pureconfig
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Seq
 
-import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions, ConfigValue }
+import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
 import org.joda.time.format.ISODateTimeFormat
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
@@ -53,7 +53,7 @@ class ProductConvertersSuite extends BaseSuite {
     case class EnclosingConf(conf: InnerConf)
 
     implicit val conv = new ConfigConvert[InnerConf] {
-      def from(cv: ConfigValue) = Right(InnerConf(42))
+      def from(cv: ConfigCursor) = Right(InnerConf(42))
       def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
     }
 
@@ -66,9 +66,9 @@ class ProductConvertersSuite extends BaseSuite {
     ConfigConvert[Conf].from(conf).left.value.toList should contain theSameElementsAs Seq(KeyNotFound("b", None))
 
     implicit val defaultInt = new ConfigConvert[Int] with AllowMissingKey {
-      def from(v: ConfigValue) =
-        if (v == null) Right(42) else {
-          val s = v.render(ConfigRenderOptions.concise)
+      def from(v: ConfigCursor) =
+        if (v.value == null) Right(42) else {
+          val s = v.value.render(ConfigRenderOptions.concise)
           catchReadError(_.toInt)(implicitly)(s)(None).left.map(ConfigReaderFailures.apply)
         }
       def to(v: Int) = ???

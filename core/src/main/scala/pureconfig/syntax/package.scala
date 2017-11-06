@@ -22,6 +22,11 @@ package object syntax {
     def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(reader.value.from(conf))(cl)
   }
 
+  implicit class PimpedConfigCursor(val cur: ConfigCursor) extends AnyVal {
+    def to[T](implicit reader: Derivation[ConfigReader[T]]): Either[ConfigReaderFailures, T] = reader.value.from(cur)
+    def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(reader.value.from(cur))(cl)
+  }
+
   implicit class PimpedConfig(val conf: TypesafeConfig) extends AnyVal {
     def to[T](implicit reader: Derivation[ConfigReader[T]]): Either[ConfigReaderFailures, T] = conf.root().to[T]
     def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(conf.root().to[T])(cl)

@@ -4,62 +4,12 @@
 package pureconfig.error
 
 import java.io.FileNotFoundException
-import java.net.URL
 import java.nio.file.Path
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-import com.typesafe.config.{ ConfigOrigin, ConfigRenderOptions, ConfigValue, ConfigValueType }
-
-/**
- * The file system location of a ConfigValue, represented by a url and a line
- * number
- *
- * @param url the URL describing the origin of the ConfigValue
- * @param lineNumber the line number (starting at 0), where the given
- *                   ConfigValue definition starts
- */
-case class ConfigValueLocation(url: URL, lineNumber: Int) {
-  def description: String = s"($url:$lineNumber)"
-}
-
-object ConfigValueLocation {
-  /**
-   * Helper method to create an optional ConfigValueLocation from a ConfigValue.
-   * Since it might not be possible to derive a ConfigValueLocation from a
-   * ConfigValue, this method returns Option.
-   *
-   * @param cv the ConfigValue to derive the location from
-   *
-   * @return a Some with the location of the ConfigValue, or None if it is not
-   *         possible to derive a location. It is not possible to derive
-   *         locations from ConfigValues that are not in files or for
-   *         ConfigValues that are null.
-   */
-  def apply(cv: ConfigValue): Option[ConfigValueLocation] =
-    Option(cv).flatMap(v => apply(v.origin()))
-
-  /**
-   * Helper method to create an optional ConfigValueLocation from a ConfigOrigin.
-   * Since it might not be possible to derive a ConfigValueLocation from a
-   * ConfigOrigin, this method returns Option.
-   *
-   * @param co the ConfigOrigin to derive the location from
-   *
-   * @return a Some with the location of the ConfigOrigin, or None if it is not
-   *         possible to derive a location. It is not possible to derive
-   *         locations from ConfigOrigin that are not in files or for
-   *         ConfigOrigin that are null.
-   */
-  def apply(co: ConfigOrigin): Option[ConfigValueLocation] =
-    Option(co).flatMap { origin =>
-      if (origin.url != null && origin.lineNumber != -1)
-        Some(ConfigValueLocation(origin.url, origin.lineNumber))
-      else
-        None
-    }
-}
+import com.typesafe.config.{ ConfigRenderOptions, ConfigValue, ConfigValueType }
 
 /**
  * A representation of a failure that might be raised from reading a
@@ -94,45 +44,6 @@ abstract class ConvertFailure extends ConfigReaderFailure {
    * The path to the `ConfigValue` that raised the failure.
    */
   def path: String
-}
-
-/**
- * A failure representing the inability to convert a null value. Since a null
- * represents a missing value, the location of this failure is always at the
- * root (i.e. an empty string).
- *
- * @param candidates a set of candidate keys that might map to the desired value
- *                   in case of a misconfigured ProductHint
- */
-final case class CannotConvertNull(candidates: Set[String] = Set()) extends ConvertFailure {
-  val location = None
-  val path = ""
-
-  def description = "Cannot convert a null value."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    KeyNotFound(parentKey, parentLocation, candidates)
-}
-
-object CannotConvertNull {
-  @tailrec
-  private[this] def isSubsequence(s1: String, s2: String): Boolean = {
-    if (s1.isEmpty())
-      true
-    else if (s2.isEmpty())
-      false
-    else if (s1.head == s2.head)
-      isSubsequence(s1.tail, s2.tail)
-    else
-      isSubsequence(s1, s2.tail)
-  }
-
-  def apply(fieldName: String, keys: Iterable[String]): CannotConvertNull = {
-    val lcField = fieldName.toLowerCase.filter(c => c.isDigit || c.isLetter)
-    val objectKeys = keys.map(f => (f, f.toLowerCase))
-    val candidateKeys = objectKeys.filter(k => isSubsequence(lcField, k._2)).map(_._1).toSet
-    CannotConvertNull(candidateKeys)
-  }
 }
 
 /**
@@ -202,6 +113,27 @@ final case class KeyNotFound(key: String, location: Option[ConfigValueLocation],
       key = if (key.isEmpty) parentKey else parentKey + "." + key,
       location = location orElse parentLocation,
       candidates.map(parentKey + "." + _))
+}
+
+object KeyNotFound {
+  @tailrec
+  private[this] def isSubsequence(s1: String, s2: String): Boolean = {
+    if (s1.isEmpty)
+      true
+    else if (s2.isEmpty)
+      false
+    else if (s1.head == s2.head)
+      isSubsequence(s1.tail, s2.tail)
+    else
+      isSubsequence(s1, s2.tail)
+  }
+
+  def apply(key: String, location: Option[ConfigValueLocation], fieldName: String, keys: Iterable[String]): KeyNotFound = {
+    val lcField = fieldName.toLowerCase.filter(c => c.isDigit || c.isLetter)
+    val objectKeys = keys.map(f => (f, f.toLowerCase))
+    val candidateKeys = objectKeys.filter(k => isSubsequence(lcField, k._2)).map(_._1).toSet
+    KeyNotFound(key, location, candidateKeys)
+  }
 }
 
 /**
