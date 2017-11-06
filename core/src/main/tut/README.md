@@ -128,6 +128,7 @@ Currently supported types for fields are:
   configured first - see [Configurable converters](docs/configurable-converters.md));
 - [`java.io.File`](https://docs.oracle.com/javase/8/docs/api/java/io/File.html);
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
+- [`java.net.InetAddress`](https://docs.oracle.com/javase/8/docs/api/java/net/InetAddress.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
 - [`java.util.regex.Pattern`](https://docs.oracle.com/javase/8/docs/api/index.html?java/util/regex/Pattern.html) and [`scala.util.matching.Regex`](https://www.scala-lang.org/files/archive/api/current/scala/util/matching/Regex.html);
 - [`java.math.BigDecimal`](https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html), [`java.math.BigInteger`](https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html),
