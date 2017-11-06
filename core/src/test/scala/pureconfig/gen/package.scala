@@ -2,6 +2,7 @@ package pureconfig
 
 import java.io.File
 import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
+import java.net.InetAddress
 import java.nio.file.{ Path, Paths }
 import java.time._
 import java.time.{ Duration => JavaDuration }
@@ -71,4 +72,14 @@ package object gen {
   val genJavaBigDecimal: Gen[JavaBigDecimal] = Arbitrary.arbitrary[BigDecimal].map(_.bigDecimal)
 
   val genBigInt: Gen[BigInteger] = Arbitrary.arbitrary[BigInt].map(_.bigInteger)
+
+  val genIPv4Address: Gen[InetAddress] = for {
+    bytes <- Gen.listOfN(4, Arbitrary.arbitrary[Byte])
+  } yield InetAddress.getByAddress(bytes.toArray)
+
+  val genIPv6Address: Gen[InetAddress] = for {
+    bytes <- Gen.listOfN(16, Arbitrary.arbitrary[Byte])
+  } yield InetAddress.getByAddress(bytes.toArray)
+
+  val genInetAddress: Gen[InetAddress] = Gen.oneOf(genIPv4Address, genIPv6Address)
 }

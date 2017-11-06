@@ -20,4 +20,5 @@ package object arbitrary {
   implicit val arbJodaDateTime = Arbitrary(genJodaDateTime)
   implicit val arbJavaBigDecimal = Arbitrary(genJavaBigDecimal)
   implicit val arbJavaBigInteger = Arbitrary(genBigInt)
+  implicit val arbInetAddress = Arbitrary(genInetAddress)
 }

@@ -1,8 +1,8 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigDecimal => JavaBigDecimal, BigInteger }
-import java.net.{ URI, URL }
+import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
+import java.net.{ InetAddress, URI, URL }
 import java.nio.file.Path
 import java.time._
 import java.time.{ Duration => JavaDuration }
@@ -133,6 +133,8 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkRead[URI](
     new URI("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
+
+  checkArbitrary[InetAddress]
 
   checkRead[ConfigList](
     ConfigValueFactory.fromIterable(List().asJava) -> ConfigValueFactory.fromIterable(List().asJava),

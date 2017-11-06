@@ -2,7 +2,7 @@ package pureconfig
 
 import java.io.File
 import java.math.{ BigInteger, MathContext, BigDecimal => JavaBigDecimal }
-import java.net.{ URI, URL }
+import java.net.{ InetAddress, URI, URL }
 import java.nio.file.{ Path, Paths }
 import java.time._
 import java.time.{ Duration => JavaDuration }
@@ -64,6 +64,7 @@ trait UriAndPathReaders {
   implicit val pathConfigReader = ConfigReader.fromString[Path](catchReadError(Paths.get(_)))
   implicit val fileConfigReader = ConfigReader.fromString[File](catchReadError(new File(_)))
   implicit val uriConfigReader = ConfigReader.fromString[URI](catchReadError(new URI(_)))
+  implicit val inetAdddressReader = ConfigReader.fromString[InetAddress](catchReadError(InetAddress.getByName))
 }
 
 /**

@@ -1,8 +1,8 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigDecimal => JavaBigDecimal, BigInteger }
-import java.net.{ URI, URL }
+import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
+import java.net.{ InetAddress, URI, URL }
 import java.nio.file.Path
 import java.time._
 import java.time.{ Duration => JavaDuration }
@@ -47,6 +47,7 @@ trait UriAndPathWriters {
   implicit val pathConfigWriter = ConfigWriter.toDefaultString[Path]
   implicit val fileConfigWriter = ConfigWriter.toDefaultString[File]
   implicit val uriConfigWriter = ConfigWriter.toDefaultString[URI]
+  implicit val inetAddressConfigWriter = ConfigWriter.toString[InetAddress](_.getHostAddress)
 }
 
 /**
