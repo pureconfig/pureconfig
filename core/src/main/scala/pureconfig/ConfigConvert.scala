@@ -29,7 +29,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
    *         respectively.
    */
   def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
-    def from(config: ConfigValue) = outer.from(config).right.flatMap(toResult(f)(_)(ConfigValueLocation(config)))
+    def from(cur: ConfigCursor) = outer.from(cur).right.flatMap(toResult(f)(_)(ConfigValueLocation(cur.value)))
     def to(a: B) = outer.to(g(a))
   }
 }
@@ -46,12 +46,12 @@ object ConfigConvert extends ConvertHelpers {
     reader: Derivation[ConfigReader[T]],
     writer: Derivation[ConfigWriter[T]]) = new ConfigConvert[T] {
 
-    def from(config: ConfigValue) = reader.value.from(config)
+    def from(cur: ConfigCursor) = reader.value.from(cur)
     def to(t: T) = writer.value.to(t)
   }
 
   def viaString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(config)
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(cur)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
 
@@ -74,72 +74,4 @@ object ConfigConvert extends ConvertHelpers {
   def viaNonEmptyStringOpt[T: ClassTag](fromF: String => Option[T], toF: T => String): ConfigConvert[T] = {
     viaNonEmptyString[T](optF(fromF), toF)
   }
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use viaString instead", since = "0.6.0")
-  def stringConvert[T](fromF: String => Try[T], toF: T => String): ConfigConvert[T] =
-    viaString[T](fromF andThen tryToEither, toF)
-
-  @deprecated(message = "Please use viaString instead", since = "0.7.0")
-  def fromStringConvert[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] =
-    viaString(fromF, toF)
-
-  @deprecated(message = "Please use viaStringTry instead", since = "0.7.0")
-  def fromStringConvertTry[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] =
-    viaStringTry(fromF, toF)
-
-  @deprecated(message = "Please use viaStringOpt instead", since = "0.7.0")
-  def fromStringConvertOpt[T](fromF: String => Option[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] =
-    viaStringOpt(fromF, toF)
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use viaNonEmptyString instead", since = "0.6.0")
-  def nonEmptyStringConvert[T](fromF: String => Try[T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] =
-    viaNonEmptyString[T](fromF andThen tryToEither[T], toF)
-
-  @deprecated(message = "Please use viaNonEmptyString instead", since = "0.7.0")
-  def fromNonEmptyStringConvert[T: ClassTag](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] =
-    viaNonEmptyString(fromF, toF)
-
-  @deprecated(message = "Please use viaNonEmptyStringTry instead", since = "0.7.0")
-  def fromNonEmptyStringConvertTry[T: ClassTag](fromF: String => Try[T], toF: T => String): ConfigConvert[T] =
-    viaNonEmptyStringTry(fromF, toF)
-
-  @deprecated(message = "Please use viaNonEmptyStringOpt instead", since = "0.7.0")
-  def fromNonEmptyStringConvertOpt[T: ClassTag](fromF: String => Option[T], toF: T => String): ConfigConvert[T] =
-    viaNonEmptyStringOpt(fromF, toF)
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use ConfigReader.fromString instead", since = "0.6.0")
-  def fromString[T](fromF: String => Try[T]): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, T] = stringToTryConvert(fromF)(config)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(t)
-  }
-
-  @deprecated(message = "Please use ConfigReader.fromString instead", since = "0.7.0")
-  def fromStringReader[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigReader[T] =
-    ConfigReader.fromString(fromF)
-
-  @deprecated(message = "Please use ConfigReader.fromStringTry instead", since = "0.7.0")
-  def fromStringReaderTry[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigReader[T] =
-    ConfigReader.fromStringTry(fromF)
-
-  @deprecated(message = "Please use ConfigReader.fromStringOpt instead", since = "0.7.0")
-  def fromStringReaderOpt[T](fromF: String => Option[T])(implicit ct: ClassTag[T]): ConfigReader[T] =
-    ConfigReader.fromStringOpt(fromF)
-
-  @deprecated(message = "The usage of Try has been deprecated. Please use ConfigReader.fromNonEmptyString instead", since = "0.6.0")
-  def fromNonEmptyString[T](fromF: String => Try[T])(implicit ct: ClassTag[T]): ConfigConvert[T] = new ConfigConvert[T] {
-    def from(config: ConfigValue) = ConfigReader.fromNonEmptyString[T](fromF andThen tryToEither).from(config)
-    def to(t: T) = ConfigValueFactory.fromAnyRef(t)
-  }
-
-  @deprecated(message = "Please use ConfigReader.fromNonEmptyString instead", since = "0.7.0")
-  def fromNonEmptyStringReader[T: ClassTag](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T]): ConfigReader[T] =
-    ConfigReader.fromNonEmptyString(fromF)
-
-  @deprecated(message = "Please use ConfigReader.fromNonEmptyStringTry instead", since = "0.7.0")
-  def fromNonEmptyStringReaderTry[T: ClassTag](fromF: String => Try[T]): ConfigReader[T] =
-    ConfigReader.fromNonEmptyStringTry(fromF)
-
-  @deprecated(message = "Please use ConfigReader.fromNonEmptyStringOpt instead", since = "0.7.0")
-  def fromNonEmptyStringReaderOpt[T: ClassTag](fromF: String => Option[T]): ConfigReader[T] =
-    ConfigReader.fromNonEmptyStringOpt(fromF)
 }

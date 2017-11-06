@@ -1,11 +1,9 @@
 package pureconfig
 
-import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable.Builder
+import scala.collection.mutable
 import scala.language.higherKinds
 
-import com.typesafe.config._
 import pureconfig.ConvertHelpers._
 import pureconfig.error._
 import shapeless._
@@ -33,7 +31,7 @@ trait DerivedReaders extends DerivedReaders1 {
     unwrapped: Unwrapped.Aux[T, U],
     reader: ConfigReader[U]): ConfigReader[T] =
     new ConfigReader[T] {
-      def from(value: ConfigValue): Either[ConfigReaderFailures, T] =
+      def from(value: ConfigCursor): Either[ConfigReaderFailures, T] =
         reader.from(value).right.map(unwrapped.wrap)
     }
 
@@ -45,30 +43,29 @@ trait DerivedReaders extends DerivedReaders1 {
     lg: LabelledGeneric.Aux[F, LRepr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
     pr: WrappedDefaultValue[F, LRepr, DefaultRepr]): ConfigReader[F] = new ConfigReader[F] {
-    override def from(value: ConfigValue) = {
+    override def from(cur: ConfigCursor) = {
       // Try to read first as the product representation (i.e.
       // ConfigObject with '_1', '_2', etc. keys) and afterwards as the Generic
       // representation (i.e. ConfigList).
-      value.valueType match {
-        case ConfigValueType.OBJECT => deriveTupleInstanceAsObject(value)
-        case ConfigValueType.LIST => deriveTupleInstanceAsList(value)
-        case other => fail(WrongType(other, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(value), ""))
+      cur.asCollectionCursor.right.flatMap {
+        case Right(objCur) => deriveTupleInstanceAsObject(objCur)
+        case Left(_) => deriveTupleInstanceAsList(cur)
       }
     }
   }
 
-  private[pureconfig] def deriveTupleInstanceAsList[F: IsTuple, Repr <: HList](value: ConfigValue)(
+  private[pureconfig] def deriveTupleInstanceAsList[F: IsTuple, Repr <: HList](cur: ConfigCursor)(
     implicit
     gen: Generic.Aux[F, Repr],
     cr: ConfigReader[Repr]): Either[ConfigReaderFailures, F] =
-    cr.from(value).right.map(gen.from)
+    cr.from(cur).right.map(gen.from)
 
-  private[pureconfig] def deriveTupleInstanceAsObject[F: IsTuple, Repr <: HList, DefaultRepr <: HList](value: ConfigValue)(
+  private[pureconfig] def deriveTupleInstanceAsObject[F: IsTuple, Repr <: HList, DefaultRepr <: HList](cur: ConfigObjectCursor)(
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cr: WrappedDefaultValue[F, Repr, DefaultRepr]): Either[ConfigReaderFailures, F] =
-    cr.fromWithDefault(value, default()).right.map(gen.from)
+    cr.fromWithDefault(cur, default()).right.map(gen.from)
 }
 
 /**
@@ -79,22 +76,16 @@ trait DerivedReaders1 {
   private[pureconfig] trait WrappedConfigReader[Wrapped, SubRepr] extends ConfigReader[SubRepr]
 
   protected[pureconfig] trait WrappedDefaultValue[Wrapped, SubRepr <: HList, DefaultRepr <: HList] {
-    def fromWithDefault(config: ConfigValue, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr] = config match {
-      case co: ConfigObject => fromConfigObject(co, default)
-      case other => fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
-    }
-    def fromConfigObject(co: ConfigObject, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
+    def fromWithDefault(cur: ConfigObjectCursor, default: DefaultRepr): Either[ConfigReaderFailures, SubRepr]
   }
 
   implicit final def labelledHNilConfigReader[Wrapped](
     implicit
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, HNil, HNil] = new WrappedDefaultValue[Wrapped, HNil, HNil] {
 
-    override def fromConfigObject(config: ConfigObject, default: HNil): Either[ConfigReaderFailures, HNil] = {
-      if (!hint.allowUnknownKeys && !config.isEmpty) {
-        val keys = config.keySet().asScala.toList map {
-          k => UnknownKey(k, ConfigValueLocation(config.get(k)))
-        }
+    def fromWithDefault(cur: ConfigObjectCursor, default: HNil): Either[ConfigReaderFailures, HNil] = {
+      if (!hint.allowUnknownKeys && cur.keys.nonEmpty) {
+        val keys = cur.map.toList.map { case (k, keyCur) => UnknownKey(k, keyCur.location) }
         Left(new ConfigReaderFailures(keys.head, keys.tail))
       } else {
         Right(HNil)
@@ -109,31 +100,30 @@ trait DerivedReaders1 {
     tConfigReader: Lazy[WrappedDefaultValue[Wrapped, T, U]],
     hint: ProductHint[Wrapped]): WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WrappedDefaultValue[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
-    override def fromConfigObject(co: ConfigObject, default: Option[V] :: U): Either[ConfigReaderFailures, FieldType[K, V] :: T] = {
+    def fromWithDefault(cur: ConfigObjectCursor, default: Option[V] :: U): Either[ConfigReaderFailures, FieldType[K, V] :: T] = {
       val fieldName = key.value.name
       val keyStr = hint.configKey(fieldName)
-      val headResult = improveFailures[V](
-        (co.get(keyStr), vFieldReader.value.value) match {
-          case (null, reader) =>
-            default.head match {
-              case Some(defaultValue) if hint.useDefaultArgs => Right[Nothing, V](defaultValue)
-              case _ if reader.isInstanceOf[AllowMissingKey] => reader.from(null)
-              case _ => fail[V](CannotConvertNull(fieldName, co.keySet.asScala))
-            }
-          case (value, reader) => reader.from(value)
-        },
-        keyStr,
-        ConfigValueLocation(co))
+
+      val headReader = vFieldReader.value.value
+      val headResult = cur.atKeyOrUndefined(keyStr) match {
+        case keyCur if keyCur.isUndefined =>
+          default.head match {
+            case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue)
+            case _ if headReader.isInstanceOf[AllowMissingKey] => headReader.from(keyCur)
+            case _ => fail(KeyNotFound(keyCur.path, cur.location, keyStr, cur.map.values.map(_.path)))
+          }
+        case keyCur => headReader.from(keyCur)
+      }
       // for performance reasons only, we shouldn't clone the config object unless necessary
-      val tailCo = if (hint.allowUnknownKeys) co else co.withoutKey(keyStr)
-      val tailResult = tConfigReader.value.fromWithDefault(tailCo, default.tail)
+      val tailCur = if (hint.allowUnknownKeys) cur.withoutKey(keyStr) else cur.withoutKey(keyStr)
+      val tailResult = tConfigReader.value.fromWithDefault(tailCur, default.tail)
       combineResults(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }
   }
 
   implicit final def cNilConfigReader[Wrapped]: WrappedConfigReader[Wrapped, CNil] = new WrappedConfigReader[Wrapped, CNil] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, CNil] =
-      fail(NoValidCoproductChoiceFound(config, ConfigValueLocation(config), ""))
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, CNil] =
+      fail(NoValidCoproductChoiceFound(cur.value, cur.location, cur.path))
   }
 
   implicit final def coproductConfigReader[Wrapped, Name <: Symbol, V, T <: Coproduct](
@@ -144,17 +134,17 @@ trait DerivedReaders1 {
     tConfigReader: Lazy[WrappedConfigReader[Wrapped, T]]): WrappedConfigReader[Wrapped, FieldType[Name, V] :+: T] =
     new WrappedConfigReader[Wrapped, FieldType[Name, V] :+: T] {
 
-      override def from(config: ConfigValue): Either[ConfigReaderFailures, FieldType[Name, V] :+: T] =
-        coproductHint.from(config, vName.value.name) match {
-          case Right(Some(hintConfig)) =>
-            vFieldConvert.value.value.from(hintConfig) match {
+      override def from(cur: ConfigCursor): Either[ConfigReaderFailures, FieldType[Name, V] :+: T] =
+        coproductHint.from(cur, vName.value.name) match {
+          case Right(Some(optCur)) =>
+            vFieldConvert.value.value.from(optCur) match {
               case Left(_) if coproductHint.tryNextOnFail(vName.value.name) =>
-                tConfigReader.value.from(config).right.map(s => Inr(s))
+                tConfigReader.value.from(cur).right.map(s => Inr(s))
 
               case vTry => vTry.right.map(v => Inl(field[Name](v)))
             }
 
-          case Right(None) => tConfigReader.value.from(config).right.map(s => Inr(s))
+          case Right(None) => tConfigReader.value.from(cur).right.map(s => Inr(s))
           case l: Left[_, _] => l.asInstanceOf[Either[ConfigReaderFailures, FieldType[Name, V] :+: T]]
         }
     }
@@ -162,11 +152,9 @@ trait DerivedReaders1 {
   implicit def deriveOption[T](implicit conv: Derivation[Lazy[ConfigReader[T]]]) = new OptionConfigReader[T]
 
   class OptionConfigReader[T](implicit conv: Derivation[Lazy[ConfigReader[T]]]) extends ConfigReader[Option[T]] with AllowMissingKey {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, Option[T]] = {
-      if (config == null || config.unwrapped() == null)
-        Right(None)
-      else
-        conv.value.value.from(config).right.map(Some(_))
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Option[T]] = {
+      if (cur.isUndefined || cur.isNull) Right(None)
+      else conv.value.value.from(cur).right.map(Some(_))
     }
   }
 
@@ -175,85 +163,69 @@ trait DerivedReaders1 {
     configConvert: Derivation[Lazy[ConfigReader[T]]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigReader[F[T]] {
 
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, F[T]] = {
-      config match {
-        case co: ConfigList =>
-          val z: Either[ConfigReaderFailures, Builder[T, F[T]]] = Right(cbf())
-
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F[T]] = {
+      cur.asCollectionCursor.right.flatMap {
+        case Left(listCur) =>
           // we called all the failures in the list
-          co.asScala.foldLeft(z) {
-            case (acc, value) =>
-              combineResults(acc, configConvert.value.value.from(value))(_ += _)
+          listCur.list.foldLeft[Either[ConfigReaderFailures, mutable.Builder[T, F[T]]]](Right(cbf())) {
+            case (acc, valueCur) =>
+              combineResults(acc, configConvert.value.value.from(valueCur))(_ += _)
           }.right.map(_.result())
-        case o: ConfigObject =>
-          val z: Either[ConfigReaderFailures, List[(Int, T)]] = Right(List.empty[(Int, T)])
-          def keyValueReader(key: String, value: ConfigValue): Either[ConfigReaderFailures, (Int, T)] = {
-            val keyResult = catchReadError(_.toInt)(implicitly)(key)(ConfigValueLocation(value)).left.flatMap(t => fail(CannotConvert(key, "Int",
-              s"To convert an object to a collection, its keys must be read as Int but key $key has value" +
-                s"$value which cannot converted. Error: ${t.because}", ConfigValueLocation(value), key)))
-            val valueResult = configConvert.value.value.from(value)
+
+        case Right(objCur) =>
+          def keyValueReader(key: String, valueCur: ConfigCursor): Either[ConfigReaderFailures, (Int, T)] = {
+            val keyResult = catchReadError(_.toInt)(implicitly)(key)(valueCur.location).left
+              .flatMap(t => fail(CannotConvert(key, "Int", "To convert an object to a collection, its keys must be " +
+                s"read as integers but key $key is not a valid one. Error: ${t.because}", valueCur.location, valueCur.path)))
+            val valueResult = configConvert.value.value.from(valueCur)
             combineResults(keyResult, valueResult)(_ -> _)
           }
 
-          o.asScala.foldLeft(z) {
+          objCur.map.foldLeft[Either[ConfigReaderFailures, List[(Int, T)]]](Right(Nil)) {
             case (acc, (str, v)) =>
               combineResults(acc, keyValueReader(str, v))(_ :+ _)
-          }.right.map {
-            l =>
-              val r = cbf()
-              r ++= l.sortBy(_._1).map(_._2)
-              r.result()
+          }.right.map { l =>
+            val r = cbf()
+            r ++= l.sortBy(_._1).map(_._2)
+            r.result()
           }
-        case other =>
-          fail(WrongType(other.valueType, Set(ConfigValueType.LIST, ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
       }
     }
   }
 
-  implicit def deriveMap[T](implicit configConvert: Derivation[Lazy[ConfigReader[T]]]) = new ConfigReader[Map[String, T]] {
-
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, Map[String, T]] = {
-      config match {
-        case co: ConfigObject =>
-          val z: Either[ConfigReaderFailures, Map[String, T]] = Right(Map.empty[String, T])
-
-          co.asScala.foldLeft(z) {
-            case (acc, (key, value)) =>
-              combineResults(
-                acc,
-                improveFailures(configConvert.value.value.from(value), key, ConfigValueLocation(value))) {
-                  (map, valueConverted) => map + (key -> valueConverted)
-                }
-          }
-
-        case other =>
-          fail(WrongType(other.valueType, Set(ConfigValueType.OBJECT), ConfigValueLocation(other), ""))
+  implicit def deriveMap[T](implicit reader: Derivation[Lazy[ConfigReader[T]]]) = new ConfigReader[Map[String, T]] {
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Map[String, T]] = {
+      cur.asMap.right.flatMap { map =>
+        map.foldLeft[Either[ConfigReaderFailures, Map[String, T]]](Right(Map())) {
+          case (acc, (key, valueConf)) =>
+            combineResults(acc, reader.value.value.from(valueConf)) { (map, value) => map + (key -> value) }
+        }
       }
     }
   }
 
   implicit final lazy val hNilConfigReader: ConfigReader[HNil] =
     new ConfigReader[HNil] {
-      def from(cv: ConfigValue): Either[ConfigReaderFailures, HNil] = {
-        cv match {
-          case cl: ConfigList if cl.size == 0 => Right(HNil)
-          case cl: ConfigList => fail(WrongSizeList(0, cl.size, ConfigValueLocation(cv), ""))
-          case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))
+      def from(cur: ConfigCursor): Either[ConfigReaderFailures, HNil] = {
+        cur.asList.right.flatMap {
+          case Nil => Right(HNil)
+          case cl => fail(WrongSizeList(0, cl.size, cur.location, cur.path))
         }
       }
     }
 
   implicit final def hConsConfigReader[H, T <: HList](implicit hr: Derivation[Lazy[ConfigReader[H]]], tr: Lazy[ConfigReader[T]], tl: HKernelAux[T]): ConfigReader[H :: T] =
     new ConfigReader[H :: T] {
-      def from(cv: ConfigValue): Either[ConfigReaderFailures, H :: T] = {
-        cv match {
-          case cl: ConfigList if cl.size != tl().length + 1 => fail(WrongSizeList(tl().length + 1, cl.size, ConfigValueLocation(cv), ""))
-          case cl: ConfigList =>
-            val sl = cl.asScala
-            val hv = hr.value.value.from(sl.head)
-            val tv = tr.value.from(ConfigValueFactory.fromAnyRef(sl.tail.asJava))
+      def from(cur: ConfigCursor): Either[ConfigReaderFailures, H :: T] = {
+        cur.asListCursor.right.flatMap {
+          case listCur if listCur.size != tl().length + 1 =>
+            fail(WrongSizeList(tl().length + 1, listCur.size, cur.location, cur.path))
+
+          case listCur =>
+            // it's guaranteed that the list cursor is non-empty at this point due to the case above
+            val hv = hr.value.value.from(listCur.atIndexOrUndefined(0))
+            val tv = tr.value.from(listCur.tailOption.get)
             combineResults(hv, tv)(_ :: _)
-          case other => fail(WrongType(other.valueType, Set(ConfigValueType.LIST), ConfigValueLocation(other), ""))
         }
       }
     }
@@ -264,8 +236,8 @@ trait DerivedReaders1 {
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cc: Lazy[WrappedDefaultValue[F, Repr, DefaultRepr]]): ConfigReader[F] = new ConfigReader[F] {
 
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, F] = {
-      cc.value.fromWithDefault(config, default()).right.map(gen.from)
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F] = {
+      cur.asObjectCursor.right.flatMap(cc.value.fromWithDefault(_, default())).right.map(gen.from)
     }
   }
 
@@ -273,8 +245,8 @@ trait DerivedReaders1 {
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[WrappedConfigReader[F, Repr]]): ConfigReader[F] = new ConfigReader[F] {
-    override def from(config: ConfigValue): Either[ConfigReaderFailures, F] = {
-      cc.value.from(config).right.map(gen.from)
+    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F] = {
+      cc.value.from(cur).right.map(gen.from)
     }
   }
 
