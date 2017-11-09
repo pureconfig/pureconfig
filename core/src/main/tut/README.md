@@ -36,7 +36,7 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
 - [Error handling](docs/error-handling.md)
 - [Handling missing keys](docs/handling-missing-keys.md)
 - [Example](docs/example.md)
-- [Whence the config files](docs/whence-the-config-files.md)
+- [Config files](docs/config-files.md)
 - [Support for Duration](docs/support-for-duration.md)
 - [Integrating with other libraries](#integrating-with-other-libraries)
 - [Contribute](#contribute)
@@ -101,15 +101,46 @@ As a result we recommend only using 2.11.11 or 2.12.1 or newer within the minor 
 
 ## Use PureConfig
 
-Import the library package and use one of the `loadConfig` methods:
+First, import the library, define data types, and a case class to hold the configuration:
 
-```tut:silent
-import pureconfig._
-import pureconfig.error.ConfigReaderFailures
+```scala
+import pureconfig.loadConfig
 
-case class YourConfClass(name: String, quantity: Int)
+sealed trait MyAdt
+case class AdtA(a: String) extends MyAdt
+case class AdtB(b: Int) extends MyAdt
+final case class Port(value: Int) extends AnyVal
+case class MyClass(
+  boolean: Boolean,
+  port: Port,
+  adt: MyAdt,
+  list: List[Double],
+  map: Map[String, String],
+  option: Option[String])
+```
 
-val config: Either[pureconfig.error.ConfigReaderFailures,YourConfClass] = loadConfig[YourConfClass]
+Second, define a configuration. Options for defining this are described in
+the [config files documentation](docs/config-files.md):
+
+`application.json`
+```json
+{ 
+  "boolean": true,
+  "port": 8080, 
+  "adt": { 
+    "type": "adtb", 
+    "b": 1 
+  }, 
+  "list": ["1", "20%"], 
+  "map": { "key": "value" } 
+}
+```
+
+Then, load the configuration ([in this case from the classpath](docs/config-files.md)):
+
+```scala
+loadConfig[MyClass](conf)
+// res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 
@@ -137,44 +168,6 @@ Currently supported types for fields are:
 - case classes;
 - sealed families of case classes (ADTs);
 - `shapeless.HList`s of elements whose type is in this list.
-
-# Example
-
-First, import the library, define data types, and a case class to hold the configuration:
-
-```tut:silent
-import com.typesafe.config.ConfigFactory.parseString
-import pureconfig.loadConfig
-
-sealed trait MyAdt
-case class AdtA(a: String) extends MyAdt
-case class AdtB(b: Int) extends MyAdt
-final case class Port(value: Int) extends AnyVal
-case class MyClass(
-  boolean: Boolean,
-  port: Port,
-  adt: MyAdt,
-  list: List[Double],
-  map: Map[String, String],
-  option: Option[String])
-```
-
-Then, load the configuration (in this case from a hard-coded string):
-
-```tut:book
-val conf = parseString("""{ 
-  "boolean": true,
-  "port": 8080, 
-  "adt": { 
-    "type": "adtb", 
-    "b": 1 
-  }, 
-  "list": ["1", "20%"], 
-  "map": { "key": "value" } 
-}""")
-
-loadConfig[MyClass](conf)
-```
 
 
 ## Integrating with other libraries

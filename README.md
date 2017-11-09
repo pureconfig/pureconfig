@@ -22,12 +22,6 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
 - [Add PureConfig to your project](#add-pureconfig-to-your-project)
 - [Use PureConfig](#use-pureconfig)
 - [Supported types](#supported-types)
-- [Integrating with other libraries](#integrating-with-other-libraries)
-- [Contribute](#contribute)
-- [License](#license)
-- [Special thanks](#special-thanks)
-
-## Deeper Documention
 - [Configurable converters](docs/configurable-converters.md)
 - [Support new types](docs/support-new-types.md)
   - [Add support for simple types](docs/add-support-for-simple-types.md)
@@ -44,7 +38,12 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
 - [Example](docs/example.md)
 - [Config files](docs/config-files.md)
 - [Support for Duration](docs/support-for-duration.md)
+- [Integrating with other libraries](#integrating-with-other-libraries)
+- [Contribute](#contribute)
 - [FAQ](docs/faq.md)
+- [License](#license)
+- [Special thanks](#special-thanks)
+
 
 ## Why
 
@@ -169,6 +168,7 @@ Currently supported types for fields are:
 - case classes;
 - sealed families of case classes (ADTs);
 - `shapeless.HList`s of elements whose type is in this list.
+
 
 ## Integrating with other libraries
 
