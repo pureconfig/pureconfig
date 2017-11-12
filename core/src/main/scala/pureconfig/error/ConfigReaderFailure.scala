@@ -61,7 +61,7 @@ case object NoFilesToRead extends ConfigReaderFailure {
 }
 
 /**
- * A failure occurred because an exception was thrown duing the reading process.
+ * A failure occurred because an exception was thrown during the reading process.
  *
  * @param throwable the exception thrown
  * @param location the optional location of the failure
