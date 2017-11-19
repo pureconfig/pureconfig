@@ -34,7 +34,7 @@ trait ConvertHelpers {
     // Because we can't trust Typesafe Config not to throw, we wrap the
     // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
     try {
-      cur.scopeFailures {
+      cur.scopeFailure {
         fromF(cur.asString.fold(_ => cur.value.render(ConfigRenderOptions.concise), identity))
       }
     } catch {

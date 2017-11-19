@@ -68,7 +68,7 @@ class ProductConvertersSuite extends BaseSuite {
       def from(cur: ConfigCursor) =
         if (cur.isUndefined) Right(42) else {
           val s = cur.value.render(ConfigRenderOptions.concise)
-          cur.scopeFailures(catchReadError(_.toInt)(implicitly)(s))
+          cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
         }
       def to(v: Int) = ???
     }

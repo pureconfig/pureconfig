@@ -28,7 +28,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
    *         respectively.
    */
   def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
-    def from(cur: ConfigCursor) = outer.from(cur).right.flatMap { v => cur.scopeFailures(toResult(f)(v)) }
+    def from(cur: ConfigCursor) = outer.from(cur).right.flatMap { v => cur.scopeFailure(toResult(f)(v)) }
     def to(a: B) = outer.to(g(a))
   }
 }

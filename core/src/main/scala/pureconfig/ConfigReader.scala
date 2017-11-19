@@ -40,7 +40,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader mapped by `f`.
    */
   def map[B](f: A => B): ConfigReader[B] =
-    fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailures(toResult(f)(v)) } }
+    fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailure(toResult(f)(v)) } }
 
   /**
    * Maps a function that can possibly fail over the results of this reader.

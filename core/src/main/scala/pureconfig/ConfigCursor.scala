@@ -147,7 +147,7 @@ sealed trait ConfigCursor {
    * @tparam A the returning type of the `ConfigReader`
    * @return a `ConfigReader` result built by scoping `reason` into the context of this cursor.
    */
-  def scopeFailures[A](result: Either[FailureReason, A]): Either[ConfigReaderFailures, A] =
+  def scopeFailure[A](result: Either[FailureReason, A]): Either[ConfigReaderFailures, A] =
     result.left.map { reason => ConfigReaderFailures(failureFor(reason), Nil) }
 
   private[this] def castOrFail[A](expectedType: ConfigValueType, cast: ConfigValue => A): Either[ConfigReaderFailures, A] = {
