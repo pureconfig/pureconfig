@@ -23,7 +23,7 @@ import pureconfig.error._
  */
 trait PrimitiveReaders {
 
-  implicit val stringConfigReader = ConfigReader.fromString[String](s => _ => Right(s))
+  implicit val stringConfigReader = ConfigReader.fromString[String](s => Right(s))
   implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError({
     case "yes" | "on" => true
     case "no" | "off" => false
@@ -109,10 +109,11 @@ trait DurationReaders {
     ConfigReader.fromNonEmptyString[Duration](DurationConvert.fromString)
 
   implicit val finiteDurationConfigReader: ConfigReader[FiniteDuration] = {
-    val fromString: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, FiniteDuration] = { string => location =>
-      DurationConvert.fromString(string)(location).right.flatMap {
+    val fromString: String => Either[FailureReason, FiniteDuration] = { string =>
+      DurationConvert.fromString(string).right.flatMap {
         case d: FiniteDuration => Right(d)
-        case _ => Left(CannotConvert(string, "FiniteDuration", s"Couldn't parse '$string' into a FiniteDuration because it's infinite.", location, ""))
+        case _ => Left(CannotConvert(string, "FiniteDuration",
+          s"Couldn't parse '$string' into a FiniteDuration because it's infinite."))
       }
     }
     ConfigReader.fromNonEmptyString[FiniteDuration](fromString)

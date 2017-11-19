@@ -6,7 +6,7 @@ import org.scalacheck.Arbitrary.{ arbitrary => arb }
 import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter, Derivation }
 import scala.collection.JavaConverters._
 
-import pureconfig.error.ConfigReaderFailures
+import pureconfig.error.{ ConfigReaderFailures, ConvertFailure }
 
 package object arbitrary {
 
@@ -42,7 +42,7 @@ package object arbitrary {
     Cogen[String].contramap[ConfigValue](_.render)
 
   implicit val arbConfigReaderFailures: Arbitrary[ConfigReaderFailures] = Arbitrary {
-    Gen.const(ConfigReaderFailures(EmptyTraversableFound("List", None, "")))
+    Gen.const(ConfigReaderFailures(ConvertFailure(EmptyTraversableFound("List"), None, "")))
   }
 
   implicit val cogenConfigReaderFailures: Cogen[ConfigReaderFailures] =

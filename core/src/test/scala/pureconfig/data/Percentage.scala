@@ -1,7 +1,7 @@
 package pureconfig.data
 
 import pureconfig.ConfigConvert
-import pureconfig.error.{ CannotConvert, ConfigValueLocation }
+import pureconfig.error.CannotConvert
 
 final case class Percentage(value: Int) {
   def toDoubleFraction: Double = value.toDouble / 100D
@@ -9,9 +9,9 @@ final case class Percentage(value: Int) {
 }
 
 object Percentage {
-  private val failConfigReadPercentage =
-    (s: String) => (l: Option[ConfigValueLocation]) =>
-      Left(CannotConvert(s, "Percentage", "Percentage is a dummy type, you should not read it", l, ""))
+  private val failConfigReadPercentage = { s: String =>
+    Left(CannotConvert(s, "Percentage", "Percentage is a dummy type, you should not read it"))
+  }
 
   implicit val percentageConfigWriter =
     ConfigConvert.viaNonEmptyString[Percentage](failConfigReadPercentage, percentage => s"${percentage.value} %")

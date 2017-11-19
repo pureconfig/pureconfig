@@ -41,7 +41,7 @@ class ValueClassSuite extends BaseSuite {
 
   {
     implicit def genericValueReader[T](implicit readT: Read[T]): ConfigReader[GenericValue[T]] =
-      ConfigReader.fromString(s => _ => Right(GenericValue.from(readT.read(s))))
+      ConfigReader.fromString(s => Right(GenericValue.from(readT.read(s))))
 
     "ConfigReader" should " should be able to override value classes ConfigReader" in {
       val reader = ConfigReader[GenericValue[String]]

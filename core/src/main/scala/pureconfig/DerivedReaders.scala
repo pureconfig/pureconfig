@@ -85,7 +85,7 @@ trait DerivedReaders1 {
 
     def fromWithDefault(cur: ConfigObjectCursor, default: HNil): Either[ConfigReaderFailures, HNil] = {
       if (!hint.allowUnknownKeys && cur.keys.nonEmpty) {
-        val keys = cur.map.toList.map { case (k, keyCur) => UnknownKey(k, keyCur.location) }
+        val keys = cur.map.toList.map { case (k, keyCur) => keyCur.failureFor(UnknownKey(k)) }
         Left(new ConfigReaderFailures(keys.head, keys.tail))
       } else {
         Right(HNil)
@@ -110,7 +110,7 @@ trait DerivedReaders1 {
           default.head match {
             case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue)
             case _ if headReader.isInstanceOf[AllowMissingKey] => headReader.from(keyCur)
-            case _ => fail(KeyNotFound(keyCur.path, cur.location, keyStr, cur.map.values.map(_.path)))
+            case _ => cur.failed(KeyNotFound.forKeys(keyStr, cur.keys))
           }
         case keyCur => headReader.from(keyCur)
       }
@@ -123,7 +123,7 @@ trait DerivedReaders1 {
 
   implicit final def cNilConfigReader[Wrapped]: WrappedConfigReader[Wrapped, CNil] = new WrappedConfigReader[Wrapped, CNil] {
     override def from(cur: ConfigCursor): Either[ConfigReaderFailures, CNil] =
-      fail(NoValidCoproductChoiceFound(cur.value, cur.location, cur.path))
+      cur.failed(NoValidCoproductChoiceFound(cur.value))
   }
 
   implicit final def coproductConfigReader[Wrapped, Name <: Symbol, V, T <: Coproduct](
@@ -174,9 +174,11 @@ trait DerivedReaders1 {
 
         case Right(objCur) =>
           def keyValueReader(key: String, valueCur: ConfigCursor): Either[ConfigReaderFailures, (Int, T)] = {
-            val keyResult = catchReadError(_.toInt)(implicitly)(key)(valueCur.location).left
-              .flatMap(t => fail(CannotConvert(key, "Int", "To convert an object to a collection, its keys must be " +
-                s"read as integers but key $key is not a valid one. Error: ${t.because}", valueCur.location, valueCur.path)))
+            val keyResult = catchReadError(_.toInt)(implicitly)(key)
+              .left.flatMap { t =>
+                valueCur.failed(CannotConvert(key, "Int", "To convert an object to a collection, its keys must be " +
+                  s"read as integers but key $key is not a valid one. Error: ${t.description}"))
+              }
             val valueResult = configConvert.value.value.from(valueCur)
             combineResults(keyResult, valueResult)(_ -> _)
           }
@@ -209,7 +211,7 @@ trait DerivedReaders1 {
       def from(cur: ConfigCursor): Either[ConfigReaderFailures, HNil] = {
         cur.asList.right.flatMap {
           case Nil => Right(HNil)
-          case cl => fail(WrongSizeList(0, cl.size, cur.location, cur.path))
+          case cl => cur.failed(WrongSizeList(0, cl.size))
         }
       }
     }
@@ -219,7 +221,7 @@ trait DerivedReaders1 {
       def from(cur: ConfigCursor): Either[ConfigReaderFailures, H :: T] = {
         cur.asListCursor.right.flatMap {
           case listCur if listCur.size != tl().length + 1 =>
-            fail(WrongSizeList(tl().length + 1, listCur.size, cur.location, cur.path))
+            cur.failed(WrongSizeList(tl().length + 1, listCur.size))
 
           case listCur =>
             // it's guaranteed that the list cursor is non-empty at this point due to the case above

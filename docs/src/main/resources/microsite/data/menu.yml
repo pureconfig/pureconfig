@@ -44,8 +44,8 @@ options:
     - title: Example
       url: example.html
 
-    - title: Whence the config files?
-      url: whence-the-config-files.html
+    - title: Config files
+      url: config-files.html
 
     - title: Support for Duration
       url: support-for-duration.html

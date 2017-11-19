@@ -6,271 +6,94 @@ package pureconfig.error
 import java.io.FileNotFoundException
 import java.nio.file.Path
 
-import scala.annotation.tailrec
-import scala.collection.mutable
-
-import com.typesafe.config.{ ConfigRenderOptions, ConfigValue, ConfigValueType }
+import pureconfig.ConfigCursor
 
 /**
- * A representation of a failure that might be raised from reading a
- * ConfigValue. The failure contains an optional file system location of the
- * configuration that raised the failure.
+ * A representation of a failure raised from reading a config. The failure contains an optional file system location of
+ * the configuration that raised the failure.
  */
-abstract class ConfigReaderFailure {
+trait ConfigReaderFailure {
+
   /**
    * A human-readable description of the failure.
    */
   def description: String
 
   /**
-   * The optional location of the ConfigReaderFailure.
+   * The optional location of the failure.
    */
   def location: Option[ConfigValueLocation]
-
-  /**
-   * Improves the context of this failure with the key to the parent node and
-   * its optional location.
-   */
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]): ConfigReaderFailure
 }
 
 /**
- * A representation of a failure that might be raised from converting from a
- * `ConfigValue` to a given type. The failure contains a path to the
+ * A failure occurred when converting from a `ConfigValue` to a given type. The failure contains a path to the
  * `ConfigValue` that raised the error.
+ *
+ * @param reason the reason for the conversion failure
+ * @param location the optional location of the failure
+ * @param path the path to the `ConfigValue` that raised the error
  */
-abstract class ConvertFailure extends ConfigReaderFailure {
+case class ConvertFailure(reason: FailureReason, location: Option[ConfigValueLocation], path: String)
+  extends ConfigReaderFailure {
+
+  def description = reason.description
+}
+
+object ConvertFailure {
+
   /**
-   * The path to the `ConfigValue` that raised the failure.
+   * Constructs a `ConvertFailure` from a reason and a `ConfigCursor`.
+   *
+   * @param reason the reason for the conversion failure
+   * @param cur the cursor where the failure ocurred
+   * @return a `ConvertFailure` for the given reason at the given cursor.
    */
-  def path: String
+  def apply(reason: FailureReason, cur: ConfigCursor): ConvertFailure =
+    ConvertFailure(reason, cur.location, cur.path)
 }
 
 /**
- * A failure representing the inability to convert a given value to a desired type.
- *
- * @param value the value that was requested to be converted
- * @param toType the target type that the value was requested to be converted to
- * @param because the reason why the conversion was not possible
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- * @param path the path to the value that couldn't be converted
+ * A failure occurred because a list of files to load was empty.
  */
-final case class CannotConvert(value: String, toType: String, because: String, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
-
-  def description = s"Cannot convert '$value' to $toType: $because."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
+case object NoFilesToRead extends ConfigReaderFailure {
+  def description = "The config files to load must not be empty."
+  def location = None
 }
 
 /**
- * A failure representing a collision of keys with different semantics. This
- * error is raised when a key that should be used to disambiguate a coproduct is
- * mapped to a field in a product.
+ * A failure occurred because an exception was thrown during the reading process.
  *
- * @param key the colliding key
- * @param existingValue the value of the key
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
+ * @param throwable the exception thrown
+ * @param location the optional location of the failure
  */
-final case class CollidingKeys(key: String, existingValue: ConfigValue, location: Option[ConfigValueLocation]) extends ConvertFailure {
-  def path = key
+final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigValueLocation])
+  extends ConfigReaderFailure {
 
-  def description = s"Key with value '{$existingValue.render(ConfigRenderOptions.concise)}' collides with a key necessary to disambiguate a coproduct."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
-}
-
-/**
- * A failure representing a key missing from a ConfigObject.
- *
- * @param key the key that is missing
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- * @param candidates a set of candidate keys that might correspond to the
- *                   desired key in case of a misconfigured ProductHint
- */
-final case class KeyNotFound(key: String, location: Option[ConfigValueLocation], candidates: Set[String] = Set()) extends ConvertFailure {
-  def path = key
-
-  def description = {
-    if (candidates.nonEmpty) {
-      val descLines = mutable.ListBuffer[String]()
-      descLines += "Key not found. You might have a misconfigured ProductHint, since the following similar keys were found:"
-      candidates.foreach { candidate =>
-        descLines += (s" - '$candidate'")
-      }
-      descLines.mkString("\n")
-    } else {
-      "Key not found."
-    }
-  }
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(
-      key = if (key.isEmpty) parentKey else parentKey + "." + key,
-      location = location orElse parentLocation,
-      candidates.map(parentKey + "." + _))
-}
-
-object KeyNotFound {
-  @tailrec
-  private[this] def isSubsequence(s1: String, s2: String): Boolean = {
-    if (s1.isEmpty)
-      true
-    else if (s2.isEmpty)
-      false
-    else if (s1.head == s2.head)
-      isSubsequence(s1.tail, s2.tail)
-    else
-      isSubsequence(s1, s2.tail)
-  }
-
-  def apply(key: String, location: Option[ConfigValueLocation], fieldName: String, keys: Iterable[String]): KeyNotFound = {
-    val lcField = fieldName.toLowerCase.filter(c => c.isDigit || c.isLetter)
-    val objectKeys = keys.map(f => (f, f.toLowerCase))
-    val candidateKeys = objectKeys.filter(k => isSubsequence(lcField, k._2)).map(_._1).toSet
-    KeyNotFound(key, location, candidateKeys)
-  }
-}
-
-/**
- * A failure representing the presence of an unknown key in a ConfigObject. This
- * error is raised when a key of a ConfigObject is not mapped into a field of a
- * given type, and the allowUnknownKeys property of the ProductHint for the type
- * in question is false.
- *
- * @param key the unknown key
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- */
-final case class UnknownKey(key: String, location: Option[ConfigValueLocation]) extends ConvertFailure {
-  def path = key
-
-  def description = s"Unknown key."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(key = parentKey + "." + key, location = location orElse parentLocation)
-}
-
-/**
- * A failure representing a wrong type of a given ConfigValue.
- *
- * @param foundType the ConfigValueType that was found
- * @param expectedTypes the ConfigValueTypes that were expected
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- * @param path the path to the value that had a wrong type
- */
-final case class WrongType(foundType: ConfigValueType, expectedTypes: Set[ConfigValueType], location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
-  def description = s"""Expected type ${expectedTypes.mkString(" or ")}. Found $foundType instead."""
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
-}
-
-/**
- * A failure that resulted in a Throwable being raised.
- *
- * @param throwable the Throwable that was raised
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- * @param path the path to the value that raised the Throwable
- */
-final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
   def description = s"${throwable.getMessage}."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
 }
 
 /**
- * A failure representing an unexpected empty string.
+ * A failure occurred due to the inability to read a requested file.
  *
- * @param typ the type that was attempted to be converted to from an empty string
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- * @param path the path to the value which was an unexpected empty string
- */
-final case class EmptyStringFound(typ: String, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
-  def description = s"Empty string found when trying to convert to $typ."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
-}
-
-/**
- * A failure representing an unexpected non-empty object when using `EnumCoproductHint` to write a config.
- *
- * @param typ the type for which a non-empty object was attempted to be written
- * @param location an optional location of the ConfigValue that raised the failure
- * @param path the path to the value which was an unexpected empty string
- */
-final case class NonEmptyObjectFound(typ: String, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
-  def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
-}
-
-/**
- * A failure representing that a list of an unexpected size was found when attempting to read into an HList.
- *
- * @param expected the expected number of elements
- * @param found the number of elements found
- * @param location an optional location of the ConfigValue that raised the failure
- * @param path the path to the value which was a list of an unexpected size
- */
-final case class WrongSizeList(expected: Int, found: Int, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
-  def description = s"List of wrong size found. Expected $expected elements. Found $found elements instead."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
-}
-
-/**
- * A failure representing the inability to find a valid choice for a given coproduct.
- *
- * @param value the ConfigValue that was unable to be mapped to a coproduct choice
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
- * @param path the path to the value who doesn't have a valid choice for a
- *             coproduct
- */
-final case class NoValidCoproductChoiceFound(value: ConfigValue, location: Option[ConfigValueLocation], path: String) extends ConvertFailure {
-  def description = s"No valid coproduct choice found for '${value.render(ConfigRenderOptions.concise())}'."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation, path = if (path.isEmpty) parentKey else parentKey + "." + path)
-}
-
-/**
- * A failure representing the inability to read a requested file.
+ * @param path the file system path of the file that couldn't be read
+ * @param reason an optional exception thrown when trying to read the file
  */
 final case class CannotReadFile(path: Path, reason: Option[Throwable]) extends ConfigReaderFailure {
-  val location = None
-
   def description = reason match {
     case Some(ex: FileNotFoundException) => s"Unable to read file ${ex.getMessage}." // a FileNotFoundException already includes the path
     case Some(ex) => s"Unable to read file $path (${ex.getMessage})."
     case None => s"Unable to read file $path."
   }
 
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) = this
+  def location = None
 }
 
 /**
- * A failure representing the inability to parse the configuration.
+ * A failure occurred due to the inability to parse the configuration.
  *
  * @param msg the error message from the parser
- * @param location an optional location of the ConfigValue that raised the
- *                 failure
+ * @param location the optional location of the failure
  */
 final case class CannotParse(msg: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
   def description = s"Unable to parse the configuration: $msg."
-
-  def withImprovedContext(parentKey: String, parentLocation: Option[ConfigValueLocation]) =
-    this.copy(location = location orElse parentLocation)
 }

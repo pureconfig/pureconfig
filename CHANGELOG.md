@@ -3,12 +3,17 @@
 - New features
   - A new `ConfigCursor` now provides idiomatic, safe methods to navigate through a config. It also holds context for
     building failures with a more accurate location and path in the config;
+  - `ConfigReaderFailure` was revamped to facilitate the propagation of context on failures. There is now a separation
+    between higher-level `ConfigReaderFailures` and concrete, location-agnostic `FailureReason`s.
 
 - Breaking changes
   - `ConfigReader`, as well as many related methods and classes, now reads configs from `ConfigCursor` instances instead
     of from direct `ConfigValue`s. Code can be migrated simply by accessing the `value` field of `ConfigCursor` whenever
     a `ConfigValue` is needed. However, rewriting the code to use the new `ConfigCursor` methods is heavily recommended
     as it provides safer config handling and much better error handling;
+  - Code for handling and raising failures may not work due to the revamp of the failure model. Inside `ConfigReader`
+    instances users should now use the `failed` method of the new `ConfigCursor` instead of manually creating instances
+    of `ConfigReaderFailures`;
   - The `CannotConvertNull` failure was removed, being superseeded by `KeyNotFound`;
   - Methods deprecated in previous versions were removed.
 

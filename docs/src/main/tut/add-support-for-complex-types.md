@@ -92,54 +92,35 @@ Similarly to adding support for simple types, it is possible to manually create 
 `ConfigReader[Identifiable]`:
 
 ```tut:silent
-import com.typesafe.config._
 import pureconfig._
 import pureconfig.error._
 
-def extractId(obj: ConfigObject): Either[ConfigReaderFailures, String] =
-  Option(obj.get("id")) match {
-    case None =>
-      Left(ConfigReaderFailures(KeyNotFound("id", ConfigValueLocation(obj))))
-    case Some(id) =>
-      ConfigReader[String].from(id)
-  }
+def extractId(objCur: ConfigObjectCursor): Either[ConfigReaderFailures, String] =
+  objCur.atKey("id").right.flatMap(_.asString)
 
-def extractValue(obj: ConfigObject): Either[ConfigReaderFailures, Int] =
-  Option(obj.get("value")) match {
-    case None =>
-      Left(ConfigReaderFailures(KeyNotFound("value", ConfigValueLocation(obj))))
-    case Some(value) =>
-      ConfigReader[Int].from(value)
-  }
+def extractValue(objCur: ConfigObjectCursor): Either[ConfigReaderFailures, Int] =
+  objCur.atKey("value").right.flatMap(ConfigReader[Int].from(_))
 
-implicit val identifiableConfigReader = ConfigReader.fromFunction({
-case obj: ConfigObject =>
- Option(obj.get("type")) match {
-   case None =>
-     Left(ConfigReaderFailures(KeyNotFound("type", ConfigValueLocation(obj))))
-   case Some(t) if t.valueType() == ConfigValueType.STRING =>
-     t.unwrapped().asInstanceOf[String] match {
-       case "class1" => extractId(obj).right.map(new Class1(_))
-       case "class2" =>
-         for {
-           id <- extractId(obj).right
-           value <- extractValue(obj).right
-         } yield new Class2(id, value)
-       case x =>
-         Left(ConfigReaderFailures(CannotConvert(obj.toString,
-           "Identifiable", s"type has value $t instead of class1 or class2",
-           ConfigValueLocation(obj),
-           "")))
-     }
-   case Some(t) =>
-     Left(ConfigReaderFailures(CannotConvert(obj.toString,
-       "Identifiable", s"type has value $t instead of class1 or class2",
-       ConfigValueLocation(obj),
-       "")))
- }
-case wrong =>
-  Left(ConfigReaderFailures(WrongType(wrong.valueType(), Set(ConfigValueType.OBJECT), ConfigValueLocation(wrong), "")))
-})
+def extractByType(typ: String, objCur: ConfigObjectCursor): Either[ConfigReaderFailures, Identifiable] = typ match {
+  case "class1" => extractId(objCur).right.map(new Class1(_))
+  case "class2" =>
+    for {
+      id <- extractId(objCur).right
+      value <- extractValue(objCur).right
+    } yield new Class2(id, value)
+  case t =>
+    objCur.failed(CannotConvert(objCur.value.toString, "Identifiable",
+      s"type has value $t instead of class1 or class2"))
+}
+
+implicit val identifiableConfigReader = ConfigReader.fromCursor { cur =>
+  for {
+    objCur <- cur.asObjectCursor.right
+    typeCur <- objCur.atKey("type").right
+    typeStr <- typeCur.asString.right
+    ident <- extractByType(typeStr, objCur).right
+  } yield ident
+}
 ```
 
 **pros**: The main feature of this method is that PureConfig delegates to it when decoding your configuration.

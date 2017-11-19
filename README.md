@@ -18,12 +18,11 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
 
 Read the [documentation](https://pureconfig.github.io/setup-pureconfig.html).
 
-## Example
+## Use PureConfig
 
 First, import the library, define data types, and a case class to hold the configuration:
 
 ```scala
-import com.typesafe.config.ConfigFactory.parseString
 import pureconfig.loadConfig
 
 sealed trait MyAdt
@@ -39,20 +38,60 @@ case class MyClass(
   option: Option[String])
 ```
 
-Then, load the configuration (in this case from a hard-coded string):
+Second, define a configuration. Options for defining this are described in
+the [config files documentation](docs/config-files.md):
+
+`application.json`
+```json
+{ 
+  "boolean": true,
+  "port": 8080, 
+  "adt": { 
+    "type": "adtb", 
+    "b": 1 
+  }, 
+  "list": ["1", "20%"], 
+  "map": { "key": "value" } 
+}
+```
+
+Then, load the configuration ([in this case from the classpath](docs/config-files.md)):
 
 ```scala
-val conf = parseString("""{
-  "boolean": true,
-  "port": 8080,
-  "adt": {
-    "type": "adtb",
-    "b": 1
-  },
-  "list": ["1", "20%"],
-  "map": { "key": "value" }
-}""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"adt":{"b":1,"type":"adtb"},"boolean":true,"list":["1","20%"],"map":{"key":"value"},"port":8080}))
-
 loadConfig[MyClass](conf)
-// res1: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+// res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+```
+
+## Contribute
+
+PureConfig is a free library developed by several people around the world.
+Contributions are welcomed and encouraged. If you want to contribute, we suggest to have a look at the
+[available issues](https://github.com/melrief/pureconfig/issues) and to talk with
+us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
+
+If you'd like to add support for types which are not part the standard Java or Scala libraries, please consider submitting a pull request to create a [module](#internal-modules). [Pull Request #108](https://github.com/melrief/pureconfig/pull/108/files) created a very simple module. It should provide a good template for the pieces you'll need to add.
+
+The steps to create a new module, called _`nexttopmod`_, are:
+
+1. Define a new project in the root `build.sbt`. There are other examples near the top of the file.
+2. Create a new  `modules/nexttopmod/` subdirectory.
+3. Add a `modules/nexttopmod/build.sbt` defining the module's name and special dependencies.
+4. Implement converters. Typically they're in a `package object` in `modules/nexttopmod/src/main/scala/pureconfig/module/nexttopmod/package.scala`.
+5. Test the converters. Usually tests would be in `modules/nexttopmod/src/test/scala/pureconfig/module/nexttopmod/NextTopModSuite.scala`.
+6. Optionally explain a little bit about how it works in `modules/nexttopmod/README.md`.
+
+PureConfig supports the [Typelevel](http://typelevel.org/) [code of conduct](http://typelevel.org/conduct.html) and wants all of its channels (Gitter, GitHub, etc.) to be
+welcoming environments for everyone.
+
+
+## License
+
+[Mozilla Public License, version 2.0](https://github.com/melrief/pureconfig/blob/master/LICENSE)
+
+
+## Special Thanks
+
+To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/typesafehub/config)
+developers.
+
+[typesafe-config]: https://github.com/typesafehub/config

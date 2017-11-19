@@ -24,22 +24,27 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
 
     val failures1 = conf.get("conf").to[Conf].left.value.toList
     failures1 should have size 2
-    failures1 should contain(KeyNotFound("a", Some(ConfigValueLocation(new URL("file", "", workingDir + file), 1))))
-    failures1 should contain(CannotConvert(
-      "hello",
-      "Int",
-      """java.lang.NumberFormatException: For input string: "hello"""",
+    failures1 should contain(ConvertFailure(
+      KeyNotFound("a"),
+      Some(ConfigValueLocation(new URL("file", "", workingDir + file), 1)),
+      ""))
+    failures1 should contain(ConvertFailure(
+      CannotConvert("hello", "Int", """java.lang.NumberFormatException: For input string: "hello""""),
       Some(ConfigValueLocation(new URL("file", "", workingDir + file), 3)),
       "c"))
 
     val failures2 = conf.get("other-conf").to[Conf].left.value.toList
     failures2 should have size 3
-    failures2 should contain(KeyNotFound("a", Some(ConfigValueLocation(new URL("file", "", workingDir + file), 7))))
-    failures2 should contain(KeyNotFound("b", Some(ConfigValueLocation(new URL("file", "", workingDir + file), 7))))
-    failures2 should contain(CannotConvert(
-      "hello",
-      "Int",
-      """java.lang.NumberFormatException: For input string: "hello"""",
+    failures2 should contain(ConvertFailure(
+      KeyNotFound("a"),
+      Some(ConfigValueLocation(new URL("file", "", workingDir + file), 7)),
+      ""))
+    failures2 should contain(ConvertFailure(
+      KeyNotFound("b"),
+      Some(ConfigValueLocation(new URL("file", "", workingDir + file), 7)),
+      ""))
+    failures2 should contain(ConvertFailure(
+      CannotConvert("hello", "Int", """java.lang.NumberFormatException: For input string: "hello""""),
       Some(ConfigValueLocation(new URL("file", "", workingDir + file), 9)),
       "c"))
   }
@@ -55,10 +60,8 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
 
     val failures = conf.get("conf").to[Conf].left.value.toList
     failures should have size 1
-    failures should contain(CannotConvert(
-      "string",
-      "Int",
-      """java.lang.NumberFormatException: For input string: "string"""",
+    failures should contain(ConvertFailure(
+      CannotConvert("string", "Int", """java.lang.NumberFormatException: For input string: "string""""),
       Some(ConfigValueLocation(new URL("file", "", workingDir + file2), 2)),
       "a"))
   }
