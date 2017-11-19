@@ -123,7 +123,7 @@ implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
 // hint: pureconfig.ProductHint[Holiday] = ProductHintImpl(<function1>,false,true)
 
 loadConfig[Holiday](parseString("""{ how-long: 21 days }"""))
-// res9: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(KeyNotFound(where,None,Set()),List()))
+// res9: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(ConvertFailure(KeyNotFound(where,Set()),None,),List()))
 ```
 
 ### Unknown keys
@@ -146,5 +146,5 @@ implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
 // hint: pureconfig.ProductHint[Holiday] = ProductHintImpl(<function1>,true,false)
 
 loadConfig[Holiday](parseString("""{ wher: Texas, how-long: 21 days }"""))
-// res2: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(UnknownKey(wher,None),List()))
+// res2: Either[pureconfig.error.ConfigReaderFailures,Holiday] = Left(ConfigReaderFailures(ConvertFailure(UnknownKey(wher),None,wher),List()))
 ```

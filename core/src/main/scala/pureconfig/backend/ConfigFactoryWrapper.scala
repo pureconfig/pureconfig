@@ -41,8 +41,8 @@ object ConfigFactoryWrapper {
         else
           e.getMessage).stripSuffix(".")
         fail(CannotParse(msg, ConfigValueLocation(e.origin())))
-      case e: ConfigException => failWithThrowable(e)(ConfigValueLocation(e.origin()))
-      case NonFatal(e) => failWithThrowable(e)(None)
+      case e: ConfigException => fail(ThrowableFailure(e, ConfigValueLocation(e.origin())))
+      case NonFatal(e) => fail(ThrowableFailure(e, None))
     }
   }
 }

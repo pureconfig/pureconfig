@@ -25,8 +25,8 @@ class CoproductHintSuite extends BaseSuite {
 
     it should "fail to read values that are not objects when using a FieldCoproductHint" in {
       val conf = ConfigValueFactory.fromAnyRef("Dog")
-      ConfigConvert[AnimalConfig].from(conf) shouldEqual Left(ConfigReaderFailures(
-        WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT), None, "")))
+      ConfigConvert[AnimalConfig].from(conf) should failWith(
+        WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)))
     }
 
     it should "throw an exception when the hint field conflicts with a field of an option when using a FieldCoproductHint" in {
@@ -40,7 +40,8 @@ class CoproductHintSuite extends BaseSuite {
       cc.from(conf.root()) should failWithType[KeyNotFound] // "typ" should not be passed to the coproduct option
 
       val ex = the[ConfigReaderException[_]] thrownBy cc.to(AmbiguousConf("ambiguousconf"))
-      ex.failures.toList shouldEqual List(CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguousconf"), None))
+      ex.failures.toList shouldEqual List(ConvertFailure(
+        CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguousconf")), None, ""))
     }
   }
 
@@ -71,13 +72,13 @@ class CoproductHintSuite extends BaseSuite {
 
     it should "fail to read values that are not case objects when using an EnumCoproductHint" in {
       val conf = ConfigFactory.parseString("{ which-animal = Dog, age = 2 }")
-      ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Left(ConfigReaderFailures(
-        WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING), None, "")))
+      ConfigConvert[AnimalConfig].from(conf.root()) should failWith(
+        WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)))
     }
 
     it should "fail to write values that are not case objects when using an EnumCoproductHint" in {
       val ex = the[ConfigReaderException[_]] thrownBy ConfigConvert[AnimalConfig].to(DogConfig(2))
-      ex.failures.toList shouldEqual List(NonEmptyObjectFound("DogConfig", None, ""))
+      ex.failures.toList shouldEqual List(ConvertFailure(NonEmptyObjectFound("DogConfig"), None, ""))
     }
   }
 

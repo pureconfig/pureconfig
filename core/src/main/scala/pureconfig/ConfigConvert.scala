@@ -10,9 +10,8 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
-
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, ConfigValueLocation }
+import pureconfig.error.{ ConfigReaderFailures, FailureReason }
 
 /**
  * Trait for objects capable of reading and writing objects of a given type from and to `ConfigValues`.
@@ -29,7 +28,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
    *         respectively.
    */
   def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
-    def from(cur: ConfigCursor) = outer.from(cur).right.flatMap(toResult(f)(_)(ConfigValueLocation(cur.value)))
+    def from(cur: ConfigCursor) = outer.from(cur).right.flatMap { v => cur.scopeFailure(toResult(f)(v)) }
     def to(a: B) = outer.to(g(a))
   }
 }
@@ -50,7 +49,7 @@ object ConfigConvert extends ConvertHelpers {
     def to(t: T) = writer.value.to(t)
   }
 
-  def viaString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
+  def viaString[T](fromF: String => Either[FailureReason, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(cur: ConfigCursor): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(cur)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
   }
@@ -63,8 +62,8 @@ object ConfigConvert extends ConvertHelpers {
     viaString[T](optF(fromF), toF)
   }
 
-  def viaNonEmptyString[T](fromF: String => Option[ConfigValueLocation] => Either[ConfigReaderFailure, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    viaString[T](string => location => ensureNonEmpty(ct)(string)(location).right.flatMap(s => fromF(s)(location)), toF)
+  def viaNonEmptyString[T](fromF: String => Either[FailureReason, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
+    viaString[T](string => ensureNonEmpty(ct)(string).right.flatMap(s => fromF(s)), toF)
   }
 
   def viaNonEmptyStringTry[T: ClassTag](fromF: String => Try[T], toF: T => String): ConfigConvert[T] = {

@@ -10,8 +10,8 @@ import scala.reflect.ClassTag
 package object enum {
   implicit def enumConfigConvert[T](implicit e: Enum[T], ct: ClassTag[T]): ConfigConvert[T] = {
     viaNonEmptyString(
-      s => location =>
-        e.decode(s).left.map(failure => CannotConvert(s, ct.runtimeClass.getSimpleName, failure.toString, location, "")),
+      s =>
+        e.decode(s).left.map(failure => CannotConvert(s, ct.runtimeClass.getSimpleName, failure.toString)),
       e.encode)
   }
 }

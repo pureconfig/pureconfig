@@ -1,11 +1,11 @@
 package pureconfig.module.enum
 
-import com.typesafe.config.ConfigFactory
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
-import pureconfig.syntax._
-import org.scalatest.Inspectors._
 import _root_.enum.Enum
+import com.typesafe.config.ConfigFactory
+import org.scalatest.Inspectors
+import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
+import pureconfig.syntax._
 
 sealed trait Greeting
 
@@ -17,8 +17,9 @@ object Greeting {
   final implicit val EnumInstance: Enum[Greeting] = Enum.derived[Greeting]
 }
 
-class EnumTest extends FlatSpec with Matchers with EitherValues {
-  "enum config convert" should "parse an enum" in forAll(Greeting.EnumInstance.values) { greeting =>
+class EnumTest extends BaseSuite {
+
+  "enum config convert" should "parse an enum" in Inspectors.forAll(Greeting.EnumInstance.values) { greeting =>
     val conf = ConfigFactory.parseString(s"""{greeting:"$greeting"}""")
     case class Conf(greeting: Greeting)
     conf.to[Conf].right.value shouldEqual Conf(greeting)
@@ -27,10 +28,6 @@ class EnumTest extends FlatSpec with Matchers with EitherValues {
   it should "politely refuse an invalid member" in {
     val conf = ConfigFactory.parseString(s"""{greeting:"Psych"}""")
     case class Conf(greeting: Greeting)
-    val failures = conf.to[Conf].left.value.toList
-    failures should have size 1
-    failures.head shouldBe a[CannotConvert]
+    conf.to[Conf] should failWithType[CannotConvert]
   }
-
 }
-
