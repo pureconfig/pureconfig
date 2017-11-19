@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Use pureconfig
+title: Use PureConfig
 ---
 ## {{page.title}}
 

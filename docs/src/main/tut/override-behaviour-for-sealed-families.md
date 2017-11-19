@@ -1,8 +1,8 @@
 ---
 layout: docs
-title: Override behaviour for sealed families
+title: Sealed families
 ---
-## {{page.title}}
+## Override behaviour for sealed families
 
 In order for PureConfig to disambiguate between different options of a sealed
 family of case classes, it must read and write additional information in

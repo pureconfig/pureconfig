@@ -1,8 +1,8 @@
 ---
 layout: docs
-title: Add PureConfig to your project
+title: Setup PureConfig
 ---
-## {{page.title}}
+## Add PureConfig to your project
 
 In the sbt configuration file use Scala `2.10`, `2.11` or `2.12`:
 

@@ -3,7 +3,7 @@ options:
     - title: Setup PureConfig
       url: setup-pureconfig.html
 
-    - title: Use Pureconfig
+    - title: Use PureConfig
       url: use-pureconfig.html
 
     - title: Supported types
@@ -44,10 +44,10 @@ options:
     - title: Example
       url: example.html
 
-    - title: Whence the config files
+    - title: Whence the config files?
       url: whence-the-config-files.html
 
-    - title: Support for duration
+    - title: Support for Duration
       url: support-for-duration.html
 
     - title: Integrating with other libraries

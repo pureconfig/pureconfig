@@ -1,8 +1,8 @@
 ---
 layout: docs
-title: Override behaviour for types
+title: Types
 ---
-## {{page.title}}
+## Override behaviour for types
 
 It is possible to override the behaviour of PureConfig for a certain type by
 implementing another instance of `ConfigReader`, `ConfigWriter` or `ConfigConvert`. For instance,

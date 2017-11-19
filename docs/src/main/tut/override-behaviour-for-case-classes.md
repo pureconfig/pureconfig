@@ -1,8 +1,8 @@
 ---
 layout: docs
-title: Override behaviour for case classes
+title: Case classes
 ---
-## {{page.title}}
+## Override behaviour for case classes
 
 PureConfig has to assume some conventions and behaviours when deriving
 `ConfigConvert` instances for case classes:

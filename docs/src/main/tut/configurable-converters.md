@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Configurable converters
+title: Configurable Converters
 ---
 ## {{page.title}}
 

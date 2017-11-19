@@ -1,8 +1,8 @@
 ---
 layout: docs
-title: Add support for simple types
+title: Simple types
 ---
-## {{page.title}}
+## Add support for simple types
 
 PureConfig supports case classes but not regular classes. Let's see how to add support
 for a regular class with a single mutable field
