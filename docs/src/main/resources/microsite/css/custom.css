@@ -1,0 +1,9 @@
+@charset "UTF-8";
+
+/* .fa-facebook .fa-twitter .fa-google-plus */
+ul.pull-right li:not([id]) {
+  visibility: hidden;
+  width: 0px;
+  height: 0px;
+  pointer-events: none;
+}
