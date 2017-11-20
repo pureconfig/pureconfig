@@ -36,7 +36,7 @@ is needed to read them:
 
 1. **Simple types** whose values can be converter from a **single value** in the configuration. A good
 example is `Int`, which has a `ConfigReader` instance that just convert a string value into a `Int`
-when possible. See [Add support for simple types](add-support-for-simple-types.html) for this group.
+when possible. See [Add support for simple types](docs/add-support-for-simple-types.html) for this group.
 2. **Complex types** that require access to an entire **sub-tree of the configuration** to be read.
-An example of this group are case classes. See [Add support for complex types](add-support-for-complex-types.html)
+An example of this group are case classes. See [Add support for complex types](docs/add-support-for-complex-types.html)
 for this group.

@@ -1,60 +1,60 @@
 options:
 
     - title: Setup PureConfig
-      url: setup-pureconfig.html
+      url: docs/index.html
 
     - title: Use PureConfig
-      url: use-pureconfig.html
+      url: docs/use-pureconfig.html
 
     - title: Supported types
-      url: supported-types.html
+      url: docs/supported-types.html
 
     - title: Configurable Converters
-      url: configurable-converters.html
+      url: docs/configurable-converters.html
 
     - title: Support new types
-      url: support-new-types.html
+      url: docs/support-new-types.html
 
       nested_options:
         - title: Simple types
-          url: add-support-for-simple-types.html
+          url: docs/add-support-for-simple-types.html
         - title: Complex types
-          url: add-support-for-complex-types.html
+          url: docs/add-support-for-complex-types.html
 
     - title: Override behaviour for
-      url: override-behaviour-for-types.html
+      url: docs/override-behaviour-for-types.html
 
       nested_options:
         - title: Types
-          url: override-behaviour-for-types.html
+          url: docs/override-behaviour-for-types.html
         - title: Case classes
-          url: override-behaviour-for-case-classes.html
+          url: docs/override-behaviour-for-case-classes.html
         - title: Sealed families
-          url: override-behaviour-for-sealed-families.html
+          url: docs/override-behaviour-for-sealed-families.html
 
     - title: Debugging implicits not found
-      url: debugging-implicits-not-found.html
+      url: docs/debugging-implicits-not-found.html
 
     - title: Error handling
-      url: error-handling.html
+      url: docs/error-handling.html
 
     - title: Handling missing keys
-      url: handling-missing-keys.html
+      url: docs/handling-missing-keys.html
 
     - title: Example
-      url: example.html
+      url: docs/example.html
 
     - title: Config files
-      url: config-files.html
+      url: docs/config-files.html
 
     - title: Support for Duration
-      url: support-for-duration.html
+      url: docs/support-for-duration.html
 
     - title: Integrating with other libraries
-      url: integrating.html
+      url: docs/integrating.html
 
     - title: Contribute
       url: index.html#contribute
 
     - title: FAQ
-      url: faq.html
+      url: docs/faq.html
