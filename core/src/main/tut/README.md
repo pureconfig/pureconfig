@@ -7,7 +7,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/typesafehub/config) configurations written in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](#supported-types). Users also have many ways to add support for custom types or customize existing ones.
+PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/typesafehub/config) configurations written in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](docs/supported-types.html). Users also have many ways to add support for custom types or customize existing ones.
 
 Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
@@ -16,7 +16,7 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
 
 ## Documentation
 
-Read the [documentation](https://pureconfig.github.io).
+Read the [documentation](https://pureconfig.github.io/docs).
 
 ## Use PureConfig
 
@@ -39,7 +39,7 @@ case class MyClass(
 ```
 
 Second, define a configuration. Options for defining this are described in
-the [config files documentation](docs/config-files.md):
+the [config files documentation](docs/config-files.html):
 
 `application.json`
 ```json
@@ -55,7 +55,7 @@ the [config files documentation](docs/config-files.md):
 }
 ```
 
-Then, load the configuration ([in this case from the classpath](docs/config-files.md)):
+Then, load the configuration ([in this case from the classpath](docs/config-files.html)):
 
 ```scala
 loadConfig[MyClass](conf)
@@ -69,7 +69,7 @@ Contributions are welcomed and encouraged. If you want to contribute, we suggest
 [available issues](https://github.com/melrief/pureconfig/issues) and to talk with
 us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
 
-If you'd like to add support for types which are not part the standard Java or Scala libraries, please consider submitting a pull request to create a [module](#internal-modules). [Pull Request #108](https://github.com/melrief/pureconfig/pull/108/files) created a very simple module. It should provide a good template for the pieces you'll need to add.
+If you'd like to add support for types which are not part the standard Java or Scala libraries, please consider submitting a pull request to create a [module](docs/integrating.html). [Pull Request #108](https://github.com/melrief/pureconfig/pull/108/files) created a very simple module. It should provide a good template for the pieces you'll need to add.
 
 The steps to create a new module, called _`nexttopmod`_, are:
 
