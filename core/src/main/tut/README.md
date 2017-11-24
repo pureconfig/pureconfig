@@ -16,7 +16,7 @@ Click on the demo gif below to see how PureConfig effortlessly translates your c
 
 ## Documentation
 
-Read the [documentation](https://pureconfig.github.io/setup-pureconfig.html).
+Read the [documentation](https://pureconfig.github.io).
 
 ## Use PureConfig
 

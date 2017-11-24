@@ -95,9 +95,6 @@ lazy val micrositesSettings = Seq(
   micrositeDocumentationUrl := "docs/",
   micrositeGithubOwner := "pureconfig",
   micrositeGithubRepo := "pureconfig",
-  micrositeFavicons := Seq(
-    MicrositeFavicon("pureconfig-logo-16x16.ico", "16x16"),
-    MicrositeFavicon("pureconfig-logo-32x32.ico", "32x32")),
   micrositePalette := Map(
         "brand-primary"   /* link color       */  -> "#ab4b4b",
         "brand-secondary" /* nav/sidebar back */  -> "#4b4b4b",
