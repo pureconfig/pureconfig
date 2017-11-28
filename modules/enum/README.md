@@ -8,7 +8,7 @@ Automatically create a converter to read [enum](https://github.com/julienrf/enum
 
 ## Add pureconfig-enum to your project
 
-In addition to [core pureconfig](https://github.com/melrief/pureconfig), you'll need:
+In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-enum" % "0.8.0"

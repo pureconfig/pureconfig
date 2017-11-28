@@ -1,0 +1,60 @@
+options:
+
+    - title: Setup PureConfig
+      url: docs/index.html
+
+    - title: Use PureConfig
+      url: docs/use-pureconfig.html
+
+    - title: Supported types
+      url: docs/supported-types.html
+
+    - title: Configurable Converters
+      url: docs/configurable-converters.html
+
+    - title: Support new types
+      url: docs/support-new-types.html
+
+      nested_options:
+        - title: Simple types
+          url: docs/add-support-for-simple-types.html
+        - title: Complex types
+          url: docs/add-support-for-complex-types.html
+
+    - title: Override behaviour for
+      url: docs/override-behaviour-for-types.html
+
+      nested_options:
+        - title: Types
+          url: docs/override-behaviour-for-types.html
+        - title: Case classes
+          url: docs/override-behaviour-for-case-classes.html
+        - title: Sealed families
+          url: docs/override-behaviour-for-sealed-families.html
+
+    - title: Debugging implicits not found
+      url: docs/debugging-implicits-not-found.html
+
+    - title: Error handling
+      url: docs/error-handling.html
+
+    - title: Handling missing keys
+      url: docs/handling-missing-keys.html
+
+    - title: Example
+      url: docs/example.html
+
+    - title: Config files
+      url: docs/config-files.html
+
+    - title: Support for Duration
+      url: docs/support-for-duration.html
+
+    - title: Integrating with other libraries
+      url: docs/integrating.html
+
+    - title: Contribute
+      url: index.html#contribute
+
+    - title: FAQ
+      url: docs/faq.html
