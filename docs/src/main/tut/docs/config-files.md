@@ -2,7 +2,7 @@
 layout: docs
 title: Config files
 ---
-## {{page.tile}}
+## {{page.title}}
 
 By default, PureConfig `loadConfig` methods load all resources in the classpath named:
 
