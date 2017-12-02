@@ -18,7 +18,7 @@ object Derivation {
   // A derivation for which an implicit `A` could be found. This is only used internally by the `materializeDerivation`
   // macro - when a derivation requested directly by a user is successfully materialized, it is guaranteed to be a
   // `Derivation.Successful`.
-  private[pureconfig] case class Failed[A]() extends Derivation[A] {
+  case class Failed[A]() extends Derivation[A] {
     def value = throw new IllegalStateException("Illegal Derivation")
   }
 
