@@ -16,6 +16,10 @@
     of `ConfigReaderFailures`;
   - The `CannotConvertNull` failure was removed, being superseeded by `KeyNotFound`;
   - Methods deprecated in previous versions were removed.
+  
+- Bug fixes
+  - Fixed a bug where some or all `Derivation` cases outside the `pureconfig` package were not showing the full error
+    description.
 
 ### 0.8.0 (Aug 27, 2017)
 
