@@ -1,7 +1,8 @@
 ---
 layout: docs
-title: Error handling
+title: Error Handling
 ---
+
 ## {{page.title}}
 
 The `pureconfig.error` package provides semantically rich case classes to

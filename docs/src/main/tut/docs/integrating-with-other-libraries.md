@@ -1,7 +1,8 @@
 ---
 layout: docs
-title: Integrating with other libraries
+title: Integrating with Other Libraries
 ---
+
 ## {{page.title}}
 
 ### Internal Modules

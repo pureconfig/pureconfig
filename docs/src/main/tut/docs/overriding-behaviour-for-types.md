@@ -1,8 +1,9 @@
 ---
 layout: docs
-title: Types
+title: Overriding Behaviour for Types
 ---
-## Override behaviour for types
+
+## {{page.title}}
 
 It is possible to override the behaviour of PureConfig for a certain type by
 implementing another instance of `ConfigReader`, `ConfigWriter` or `ConfigConvert`. For instance,
@@ -38,4 +39,9 @@ PureConfig will now use the custom `overrideStrReader` instance:
 ConfigReader[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
 ```
 
-A similar process can be followed to override `ConfigWriter` or `ConfigConvert`.
+A similar process can be followed to override `ConfigWriter` or `ConfigConvert`. All the techniques described in
+[Supporting New Types](supporting-new-types.html) can be used to override existing readers and writers.
+
+PureConfig has more fine-grained ways to configure the default readers and writers for case classes and sealed families.
+The [Case Classes](overriding-behaviour-for-case-classes.html) and
+[Sealed Families](overriding-behaviour-for-sealed-families.html) subsections show how to do that.
