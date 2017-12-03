@@ -68,7 +68,7 @@ loadConfig[MyClass](conf)
 ```
 
 The various `loadConfig` methods defer to Typesafe Config's
-[`ConfigFactory`](https://typesafehub.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
+[`ConfigFactory`](https://lightbend.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
 select where to load the config files from. Typesafe Config has [well-documented rules for configuration
 loading](https://github.com/typesafehub/config#standard-behavior) which we'll not repeat. Please see Typesafe
 Config's documentation for a full telling of the subtleties.

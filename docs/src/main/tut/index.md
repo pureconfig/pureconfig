@@ -5,7 +5,7 @@ title: PureConfig
 
 # {{page.title}}
 
-<img src="img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right">
+<img src="img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right" alt="PureConfig">
 
 [![Build Status](https://travis-ci.org/pureconfig/pureconfig.svg?branch=master)](https://travis-ci.org/pureconfig/pureconfig)
 [![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
@@ -17,4 +17,4 @@ PureConfig is a Scala library for loading configuration files. It reads [Typesaf
 Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
 
-<img src="http://i.imgur.com/P6sda06.gif" style="width: 100%;" />
+<img src="http://i.imgur.com/P6sda06.gif" style="width: 100%" alt="PureConfig demo">
