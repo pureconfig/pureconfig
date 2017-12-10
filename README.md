@@ -7,7 +7,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.11)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/typesafehub/config) configurations written in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](https://pureconfig.github.io/docs/built-in-supported-types.html). Users also have many ways to add support for custom types or customize existing ones.
+PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/typesafehub/config) configurations written in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](https://pureconfig.github.io/docs/built-in-supported-types.html). Users also have many ways to [add support for custom types](https://pureconfig.github.io/docs/supporting-new-types.html) or [customize existing ones](https://pureconfig.github.io/docs/overriding-behaviour-for-types.html).
 
 Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
@@ -56,8 +56,6 @@ As a result we recommend only using the latest Scala versions within the minor s
 In your code, first import the library and define data types and a case class to hold the configuration:
 
 ```scala
-import pureconfig.loadConfig
-
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt
@@ -71,26 +69,14 @@ case class MyClass(
   option: Option[String])
 ```
 
-Second, define a configuration:
-
-`application.json`
-```json
-{ 
-  "boolean": true,
-  "port": 8080, 
-  "adt": { 
-    "type": "adtb", 
-    "b": 1 
-  }, 
-  "list": ["1", "20%"], 
-  "map": { "key": "value" } 
-}
-```
+Second, define an `application.conf` file like
+[this](https://github.com/pureconfig/pureconfig/blob/master/docs/src/main/resources/application.conf) and add it as a
+resource file of your application.
 
 Finally, load the configuration:
 
 ```scala
-loadConfig[MyClass](conf)
+pureconfig.loadConfig[MyClass]
 // res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
@@ -100,18 +86,18 @@ select where to load the config files from. Typesafe Config has [well-documented
 loading](https://github.com/typesafehub/config#standard-behavior) which we'll not repeat. Please see Typesafe
 Config's documentation for a full telling of the subtleties.
 
-Alternatively, PureConfig also provides a `loadConfigFromFiles` method, which builds a configuration from
+Alternatively, PureConfig also provides a `loadConfigFromFiles` method that builds a configuration from
 an explicit list of files. Files earlier in the list have greater precedence than later ones. Each file can
 include a partial configuration as long as the whole list produces a complete configuration. For an example,
 see the test of `loadConfigFromFiles` in
 [`ApiSuite.scala`](https://github.com/pureconfig/pureconfig/blob/master/core/src/test/scala/pureconfig/ApiSuite.scala).
 
-Because PureConfig uses Typesafe Config to load configuration, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
+Because PureConfig uses Typesafe Config to load configurations, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
 
 ## Documentation
 
-Read the [documentation](https://pureconfig.github.io/docs) website.
+The full documentation can be found [here](https://pureconfig.github.io/docs).
 
 
 ## Contribute
@@ -119,20 +105,20 @@ Read the [documentation](https://pureconfig.github.io/docs) website.
 PureConfig is a free library developed by several people around the world.
 Contributions are welcomed and encouraged. If you want to contribute, we suggest to have a look at the
 [available issues](https://github.com/pureconfig/pureconfig/issues) and to talk with
-us on the [pureconfig gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
+us on the [PureConfig Gitter channel](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
 
-If you'd like to add support for types which are not part the standard Java or Scala libraries, please consider submitting a pull request to create a [module](https://pureconfig.github.io/docs/integrating-with-other-libraries.html). [Pull Request #108](https://github.com/pureconfig/pureconfig/pull/108/files) created a very simple module. It should provide a good template for the pieces you'll need to add.
+If you'd like to add support for types which are not part of the standard Java or Scala libraries, please consider submitting a pull request to create a [module](https://pureconfig.github.io/docs/integrating-with-other-libraries.html). [Pull Request #108](https://github.com/pureconfig/pureconfig/pull/108/files) created a very simple module. It should provide a good template for the pieces you'll need to add.
 
 The steps to create a new module, called _`nexttopmod`_, are:
 
-1. Define a new project in the root `build.sbt`. There are other examples near the top of the file.
-2. Create a new  `modules/nexttopmod/` subdirectory.
-3. Add a `modules/nexttopmod/build.sbt` defining the module's name and special dependencies.
-4. Implement converters. Typically they're in a `package object` in `modules/nexttopmod/src/main/scala/pureconfig/module/nexttopmod/package.scala`.
-5. Test the converters. Usually tests would be in `modules/nexttopmod/src/test/scala/pureconfig/module/nexttopmod/NextTopModSuite.scala`.
+1. Define a new project in the root `build.sbt`. There are other examples near the top of the file;
+2. Create a new  `modules/nexttopmod/` subdirectory;
+3. Add a `modules/nexttopmod/build.sbt` defining the module's name and special dependencies;
+4. Implement converters. Typically they're in a `package object` in `modules/nexttopmod/src/main/scala/pureconfig/module/nexttopmod/package.scala`;
+5. Test the converters. Usually tests would be in `modules/nexttopmod/src/test/scala/pureconfig/module/nexttopmod/NextTopModSuite.scala`;
 6. Optionally explain a little bit about how it works in `modules/nexttopmod/README.md`.
 
-PureConfig supports the [Typelevel](http://typelevel.org/) [code of conduct](http://typelevel.org/conduct.html) and wants all of its channels (Gitter, GitHub, etc.) to be
+PureConfig supports the [Typelevel](http://typelevel.org) [code of conduct](http://typelevel.org/conduct.html) and wants all of its channels (Gitter, GitHub, etc.) to be
 welcoming environments for everyone.
 
 
@@ -145,5 +131,3 @@ welcoming environments for everyone.
 
 To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/typesafehub/config)
 developers.
-
-[typesafe-config]: https://github.com/typesafehub/config

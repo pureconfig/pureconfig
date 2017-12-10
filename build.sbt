@@ -105,7 +105,7 @@ lazy val micrositesSettings = Seq(
         "gray-lighter"    /* code back        */  -> "#F4F3F4",
         "white-color"                             -> "#FFFFFF"),
   micrositeGitterChannel := false // ugly
-  )
+)
 
 // add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
 // "scala-2.10" are natively supported by SBT)

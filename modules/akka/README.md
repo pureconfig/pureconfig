@@ -4,7 +4,7 @@ Adds support for selected [Akka](http://akka.io/) classes to PureConfig.
 
 ## Add pureconfig-akka to your project
 
-In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
+In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.8.0"
