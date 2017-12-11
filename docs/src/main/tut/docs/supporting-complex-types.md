@@ -1,8 +1,9 @@
 ---
 layout: docs
-title: Complex types
+title: Complex Types
 ---
-## Add support for complex types
+
+## Supporting Complex Types
 
 Support for more complex types, such as Java configurations, can be achieved with many different methods,
 each one with pros and cons. The preferred method is shown [here](#method-1-use-a-scala-copy-of-the-configuration)

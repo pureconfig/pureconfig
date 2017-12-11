@@ -1,60 +1,37 @@
 options:
 
-    - title: Setup PureConfig
+    - title: Quick Start
       url: docs/index.html
 
-    - title: Use PureConfig
-      url: docs/use-pureconfig.html
+    - title: Built-in Supported Types
+      url: docs/built-in-supported-types.html
 
-    - title: Supported types
-      url: docs/supported-types.html
-
-    - title: Configurable Converters
-      url: docs/configurable-converters.html
-
-    - title: Support new types
-      url: docs/support-new-types.html
+    - title: Supporting New Types
+      url: docs/supporting-new-types.html
 
       nested_options:
-        - title: Simple types
-          url: docs/add-support-for-simple-types.html
-        - title: Complex types
-          url: docs/add-support-for-complex-types.html
+        - title: Simple Types
+          url: docs/supporting-simple-types.html
+        - title: Complex Types
+          url: docs/supporting-complex-types.html
 
-    - title: Override behaviour for
-      url: docs/override-behaviour-for-types.html
+    - title: Overriding Behaviour for Types
+      url: docs/overriding-behaviour-for-types.html
 
       nested_options:
-        - title: Types
-          url: docs/override-behaviour-for-types.html
-        - title: Case classes
-          url: docs/override-behaviour-for-case-classes.html
-        - title: Sealed families
-          url: docs/override-behaviour-for-sealed-families.html
+        - title: Case Classes
+          url: docs/overriding-behaviour-for-case-classes.html
+        - title: Sealed Families
+          url: docs/overriding-behaviour-for-sealed-families.html
 
-    - title: Debugging implicits not found
-      url: docs/debugging-implicits-not-found.html
+    - title: Using Configurable Converters
+      url: docs/using-configurable-converters.html
 
-    - title: Error handling
+    - title: Error Handling
       url: docs/error-handling.html
 
-    - title: Handling missing keys
-      url: docs/handling-missing-keys.html
-
-    - title: Example
-      url: docs/example.html
-
-    - title: Config files
-      url: docs/config-files.html
-
-    - title: Support for Duration
-      url: docs/support-for-duration.html
-
-    - title: Integrating with other libraries
-      url: docs/integrating.html
-
-    - title: Contribute
-      url: index.html#contribute
+    - title: Integrating with Other Libraries
+      url: docs/integrating-with-other-libraries.html
 
     - title: FAQ
       url: docs/faq.html
