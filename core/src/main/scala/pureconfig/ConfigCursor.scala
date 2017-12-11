@@ -3,6 +3,7 @@ package pureconfig
 import scala.collection.JavaConverters._
 import scala.util.{ Failure, Success, Try }
 
+import com.typesafe.config.ConfigValueType._
 import com.typesafe.config._
 import pureconfig.backend.PathUtil
 import pureconfig.error._
@@ -56,7 +57,7 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asString: Either[ConfigReaderFailures, String] =
-    castOrFail(ConfigValueType.STRING, _.unwrapped.asInstanceOf[String])
+    castOrFail(STRING, Set(NUMBER, BOOLEAN, NULL, STRING), { cv => String.valueOf(cv.unwrapped) })
 
   /**
    * Casts this cursor to a `ConfigListCursor`.
@@ -65,7 +66,7 @@ sealed trait ConfigCursor {
    *         otherwise.
    */
   def asListCursor: Either[ConfigReaderFailures, ConfigListCursor] =
-    castOrFail(ConfigValueType.LIST, _.asInstanceOf[ConfigList]).right.map(ConfigListCursor(_, pathElems))
+    castOrFail(LIST, Set(LIST), _.asInstanceOf[ConfigList]).right.map(ConfigListCursor(_, pathElems))
 
   /**
    * Casts this cursor to a list of cursors.
@@ -83,7 +84,7 @@ sealed trait ConfigCursor {
    *         otherwise.
    */
   def asObjectCursor: Either[ConfigReaderFailures, ConfigObjectCursor] =
-    castOrFail(ConfigValueType.OBJECT, _.asInstanceOf[ConfigObject]).right.map(ConfigObjectCursor(_, pathElems))
+    castOrFail(OBJECT, Set(OBJECT), _.asInstanceOf[ConfigObject]).right.map(ConfigObjectCursor(_, pathElems))
 
   /**
    * Casts this cursor to a map from config keys to cursors.
@@ -108,7 +109,7 @@ sealed trait ConfigCursor {
       lazy val mapAtRight = asObjectCursor.right.map(Right.apply)
       listAtLeft
         .left.flatMap(_ => mapAtRight)
-        .left.flatMap(_ => failed(WrongType(value.valueType, Set(ConfigValueType.LIST, ConfigValueType.OBJECT))))
+        .left.flatMap(_ => failed(WrongType(value.valueType, Set(LIST, OBJECT))))
     }
   }
 
@@ -150,10 +151,14 @@ sealed trait ConfigCursor {
   def scopeFailure[A](result: Either[FailureReason, A]): Either[ConfigReaderFailures, A] =
     result.left.map { reason => ConfigReaderFailures(failureFor(reason), Nil) }
 
-  private[this] def castOrFail[A](expectedType: ConfigValueType, cast: ConfigValue => A): Either[ConfigReaderFailures, A] = {
+  private[this] def castOrFail[A](
+    expectedType: ConfigValueType,
+    acceptedConfigTypes: Set[ConfigValueType],
+    cast: ConfigValue => A): Either[ConfigReaderFailures, A] = {
+
     if (isUndefined) {
       failed(KeyNotFound.forKeys(path, Set()))
-    } else if (value.valueType != expectedType) {
+    } else if (!acceptedConfigTypes.contains(value.valueType)) {
       failed(WrongType(value.valueType, Set(expectedType)))
     } else {
       Try(cast(value)) match {
