@@ -10,10 +10,12 @@ options:
       url: docs/supporting-new-types.html
 
       nested_options:
-        - title: Simple Types
-          url: docs/supporting-simple-types.html
+        - title: Combinators
+          url: docs/combinators.html
+        - title: Config Cursors
+          url: docs/config-cursors.html
         - title: Complex Types
-          url: docs/supporting-complex-types.html
+          url: docs/complex-types.html
 
     - title: Overriding Behaviour for Types
       url: docs/overriding-behaviour-for-types.html
