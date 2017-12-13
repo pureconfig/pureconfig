@@ -49,18 +49,8 @@ loadConfig[Conf](ConfigFactory.parseString("{ port = -1 }"))
 `orElse` can be use to provide alternative ways to load a config:
 
 ```tut:silent
-val defaultIntListReader = ConfigReader[List[Int]]
 val csvIntListReader = ConfigReader[String].map(_.split(",").map(_.toInt).toList)
-
-// scoping this in an object is important, as otherwise `defaultIntListReader`
-// would be defined as our custom reader instead of the default one
-object CustomReaders {
-  // reads lists of integers either as config lists or as strings with
-  // comma-separated numbers
-  implicit val intListReader = defaultIntListReader.orElse(csvIntListReader)
-}
-
-import CustomReaders._
+implicit val intListReader = ConfigReader[List[Int]].orElse(csvIntListReader)
 
 case class Conf(list: List[Int])
 ```
