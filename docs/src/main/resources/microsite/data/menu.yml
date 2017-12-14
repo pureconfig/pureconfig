@@ -17,14 +17,14 @@ options:
         - title: Complex Types
           url: docs/complex-types.html
 
-    - title: Overriding Behaviour for Types
-      url: docs/overriding-behaviour-for-types.html
+    - title: Overriding Behavior for Types
+      url: docs/overriding-behavior-for-types.html
 
       nested_options:
         - title: Case Classes
-          url: docs/overriding-behaviour-for-case-classes.html
+          url: docs/overriding-behavior-for-case-classes.html
         - title: Sealed Families
-          url: docs/overriding-behaviour-for-sealed-families.html
+          url: docs/overriding-behavior-for-sealed-families.html
 
     - title: Using Configurable Converters
       url: docs/using-configurable-converters.html

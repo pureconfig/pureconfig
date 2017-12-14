@@ -101,12 +101,12 @@
 
 - New features
   - New  `ProductHint` trait allowing customization of the derived `ConfigConvert` for case classes, superseeding
-    `ConfigFieldMapping` ([docs](https://pureconfig.github.io/docs/override-behaviour-for-case-classes.html)). In
+    `ConfigFieldMapping` ([docs](https://pureconfig.github.io/docs/override-behavior-for-case-classes.html)). In
     addition to defining field name mappings, `ProductHint` instances control:
     - Whether default field values should be used when
-      fields are missing in the config ([docs](https://pureconfig.github.io/docs/override-behaviour-for-case-classes.html#default-field-values));
+      fields are missing in the config ([docs](https://pureconfig.github.io/docs/override-behavior-for-case-classes.html#default-field-values));
     - Whether unknown keys are ignored or cause pureconfig to return a `Failure`
-      ([docs](https://pureconfig.github.io/docs/override-behaviour-for-case-classes.html#unknown-keys)).
+      ([docs](https://pureconfig.github.io/docs/override-behavior-for-case-classes.html#unknown-keys)).
   - Support for reading and writing [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html)s;
   - Support for reading and writing [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html)s;
   - Support for reading and writing [`java.net.URI`](https://docs.oracle.com/javase/8/docs/api/java/net/URI.html)s;
@@ -164,6 +164,6 @@
     - The old behavior can be restored by putting an implicit instance of `FirstSuccessCoproductHint` in scope (the
       migration to the new format is strongly recommended though, as the previous one may lead to ambiguous behavior);
     - More information about the default representation and on how to customize it can be seen in the
-      [documentation](https://pureconfig.github.io/docs/override-behaviour-for-sealed-families.html).
+      [documentation](https://pureconfig.github.io/docs/override-behavior-for-sealed-families.html).
 - Bug fixes
   - `0` is accepted again as a valid `Duration` in configs.

@@ -50,8 +50,8 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader mapped by `f`, with the resulting `Either` flattened
    *         as a success or failure.
    */
-  def emap[B](f: A => Either[ConfigReaderFailures, B]): ConfigReader[B] =
-    fromCursor[B] { cur => from(cur).right.flatMap(f) }
+  def emap[B](f: A => Either[FailureReason, B]): ConfigReader[B] =
+    fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailure(f(v)) } }
 
   /**
    * Monadically bind a function over the results of this reader.
