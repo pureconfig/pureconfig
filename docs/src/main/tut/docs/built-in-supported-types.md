@@ -14,7 +14,7 @@ The currently supported scalar types are:
   `Int`, `Long`, `Short`, `URL`, `URI`, `Duration`, `FiniteDuration`;
 - [`java.lang.Enum`](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html);
 - everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
-  configured first - see [Using Configurable Converters](using-configurable-converters.html));
+  configured first - see [Configurable Converters](configurable-converters.html));
 - [`java.io.File`](https://docs.oracle.com/javase/8/docs/api/java/io/File.html);
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);

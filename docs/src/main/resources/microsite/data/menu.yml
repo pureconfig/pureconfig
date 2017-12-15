@@ -26,8 +26,8 @@ options:
         - title: Sealed Families
           url: docs/overriding-behavior-for-sealed-families.html
 
-    - title: Using Configurable Converters
-      url: docs/using-configurable-converters.html
+    - title: Configurable Converters
+      url: docs/configurable-converters.html
 
     - title: Error Handling
       url: docs/error-handling.html
