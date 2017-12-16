@@ -5,31 +5,107 @@ title: Error Handling
 
 ## {{page.title}}
 
-The `pureconfig.error` package provides semantically rich case classes to
-describe failures reading from a `ConfigValue`. When implementing your own
-`ConfigConvert`s, you're recommended to use the provided case classes.
+PureConfig features a rich error model used in reading operations. Most PureConfig methods that read Scala types from
+configurations return an `Either[ConfigReaderFailures, A]`, with `A` being the type of a successful result and
+`ConfigReaderFailures` being a non-empty list of errors that caused the reading operation to fail.
 
-The `ConfigReaderFailure` class has an optional location field that can be used
-to point to the file system location of a `ConfigValue` that raised an error.
-When using the `ConfigReaderFailure` sealed family of case classes, you can use
-the `ConfigValueLocation.apply(cv: ConfigValue)` method to automatically create
-an optional location from a `ConfigValue`.
+From the various types of `ConfigReaderFailure`, one of them is of particular interest: a `ConvertFailure` is an error
+occurred during the conversion process itself. It features a reason (`FailureReason`), an optional location in the
+config files where the conversion error occurred and a path in the config.
 
-If we load a config and try to load a missing key:
+There are several possible `FailureReason`s, the most common being:
+
+- A general, uncategorized reason (`CannotConvert`);
+- A required key was not found (`KeyNotFound`);
+- A config value has a wrong type (`WrongType`).
+
+For example, given a config like this:
 
 ```tut:silent
-import com.typesafe.config._
-import pureconfig.error._
-import java.nio.file.{ Path, Paths }
+import com.typesafe.config.ConfigFactory
+import pureconfig._
 
-val cv = ConfigFactory.load.root().get("conf")
-val notFound = ConvertFailure(KeyNotFound("xpto"), ConfigValueLocation(cv), "conf").location.get
+case class Name(firstName: String, lastName: String)
+case class Person(name: Name, age: Int)
+case class Conf(person: Person)
 ```
 
-We can extract useful error data:
+Trying to load it with a string instead of an object at `name` results in a `ConvertFailure` because of a `WrongType`:
+
 ```tut:book
-// print the filename as a relative path
-Paths.get(System.getProperty("user.dir")).relativize(Paths.get(notFound.url.toURI))
-
-notFound.lineNumber
+val res = loadConfig[Conf](ConfigFactory.parseString("{ person: { name: John Doe, age: 35 } }"))
 ```
+
+All error-related classes are present in the `pureconfig.error` package.
+
+### Validations in custom readers
+
+When implementing custom readers, the cursor API already deals with the most common reasons for a reader to fail.
+However, it also provides a `failed` method for users to do validations on their side, too:
+
+```tut:silent
+import com.typesafe.config.ConfigValueType._
+import scala.util.{Try, Success, Failure}
+import pureconfig.error._
+
+case class PositiveInt(value: Int) {
+  require(value >= 0)
+}
+
+implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
+  cur.asString.right.flatMap { str =>
+    Try(str.toInt) match {
+      case Success(n) if n >= 0 => Right(PositiveInt(n))
+      case Success(n) => cur.failed(CannotConvert(str, "PositiveInt", s"$n is not positive"))
+      case Failure(_) => cur.failed(WrongType(STRING, Set(NUMBER)))
+    }
+  }
+}
+
+case class Conf(n: PositiveInt)
+```
+
+```tut:book
+loadConfig[Conf](ConfigFactory.parseString("{ n: 23 }"))
+loadConfig[Conf](ConfigFactory.parseString("{ n: -23 }"))
+loadConfig[Conf](ConfigFactory.parseString("{ n: abc }"))
+```
+
+### Custom failure reasons
+
+Users are not restricted to the failure reasons provided by PureConfig. If we want to use a domain-specific failure
+reason for our `PositiveInt`, for example, we can create it like this:
+
+```tut:silent
+case class NonPositiveInt(value: Int) extends FailureReason {
+  def description = s"$value is not positive"
+}
+
+implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
+  cur.asString.right.flatMap { str =>
+    Try(str.toInt) match {
+      case Success(n) if n >= 0 => Right(PositiveInt(n))
+      case Success(n) => cur.failed(NonPositiveInt(n))
+      case Failure(_) => cur.failed(WrongType(STRING, Set(NUMBER)))
+    }
+  }
+}
+```
+
+```tut:book
+loadConfig[Conf](ConfigFactory.parseString("{ n: -23 }"))
+```
+
+### Throwing an exception instead of returning `Either`
+
+In some usage patterns, there isn't a need to deal with errors as values. For example, a good practice to handle configs
+in an application is to load the whole config with PureConfig at initialization time, causing the application to fail
+fast in case of a malformed config. For those cases, the `loadConfigOrThrow` method can be used instead of `loadConfig`:
+
+```tut:book:fail
+loadConfigOrThrow[Conf](ConfigFactory.parseString("{ n: 23 }"))
+loadConfigOrThrow[Conf](ConfigFactory.parseString("{ n: -23 }"))
+```
+
+The message of the thrown exception contains human-readable information of all the errors found by PureConfig, with the
+errors grouped and organized by path.
