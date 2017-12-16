@@ -35,8 +35,8 @@ options:
     - title: Config Writers
       url: docs/config-writers.html
 
-    - title: Integrating with Other Libraries
-      url: docs/integrating-with-other-libraries.html
+    - title: Library Integrations
+      url: docs/library-integrations.html
 
     - title: FAQ
       url: docs/faq.html

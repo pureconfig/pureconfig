@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Integrating with Other Libraries
+title: Library Integrations
 ---
 
 ## {{page.title}}
