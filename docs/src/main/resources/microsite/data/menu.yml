@@ -32,6 +32,9 @@ options:
     - title: Error Handling
       url: docs/error-handling.html
 
+    - title: Config Writers
+      url: docs/config-writers.html
+
     - title: Integrating with Other Libraries
       url: docs/integrating-with-other-libraries.html
 
