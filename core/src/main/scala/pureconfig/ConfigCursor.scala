@@ -57,7 +57,7 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asString: Either[ConfigReaderFailures, String] =
-    castOrFail(STRING, Set(NUMBER, BOOLEAN, NULL, STRING), { cv => String.valueOf(cv.unwrapped) })
+    castOrFail(STRING, Set(NUMBER, BOOLEAN, STRING), { cv => String.valueOf(cv.unwrapped) })
 
   /**
    * Casts this cursor to a `ConfigListCursor`.
