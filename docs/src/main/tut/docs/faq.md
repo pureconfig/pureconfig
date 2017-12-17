@@ -140,8 +140,9 @@ loadConfig[Conf]
 //     - missing a ConfigReader instance for type Option[Custom], because:
 //       - missing a ConfigReader instance for type Custom
 //     - missing a ConfigReader instance for type Custom2
-//   loadConfig[Conf]
-//             ^
+// 
+//        loadConfig[Conf]
+//  
 ```
 
 Since this is an experimental feature, it may not work as intended in some unforesseen cases. If you find any issue with
