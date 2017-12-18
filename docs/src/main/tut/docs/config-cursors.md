@@ -42,13 +42,18 @@ An implementation of the `ConfigReader` using the cursors API is shown below:
 ```tut:silent
 import pureconfig._
 
+def firstNameOf(name: String): String =
+  name.substring(0, name.indexOf(' '))
+  
+def lastNameOf(name: String): String =
+  name.substring(name.lastIndexOf(' ') + 1)
+
 implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
   for {
     objCur <- cur.asObjectCursor.right      // 1
     nameCur <- objCur.atKey("name").right   // 2
     name <- nameCur.asString.right          // 3
-    nameWords = name.split(" ")
-  } yield new Person(nameWords.head, nameWords.last)
+  } yield new Person(firstNameOf(name), lastNameOf(name))
 }
 ```
 
