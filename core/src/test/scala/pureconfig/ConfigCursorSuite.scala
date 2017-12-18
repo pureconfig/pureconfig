@@ -9,7 +9,7 @@ class ConfigCursorSuite extends BaseSuite {
   val defaultPathStr = "key1.key2"
 
   def conf(confStr: String): ConfigValue = {
-    ConfigFactory.parseString(s"aux = $confStr").getValue("aux")
+    ConfigFactory.parseString(s"aux = $confStr").root.get("aux")
   }
 
   def cursor(confStr: String, pathElems: List[String] = defaultPath): ConfigCursor =
@@ -23,8 +23,12 @@ class ConfigCursorSuite extends BaseSuite {
   }
 
   it should "allow being casted to string in a safe way" in {
-    cursor("abc").asString shouldBe
-      Right("abc")
+    cursor("abc").asString shouldBe Right("abc")
+    cursor("4").asString shouldBe Right("4")
+    cursor("true").asString shouldBe Right("true")
+
+    cursor("null").asString should failWith(
+      WrongType(ConfigValueType.NULL, Set(ConfigValueType.STRING)), defaultPathStr)
 
     cursor("[1, 2]").asString should failWith(
       WrongType(ConfigValueType.LIST, Set(ConfigValueType.STRING)), defaultPathStr)
