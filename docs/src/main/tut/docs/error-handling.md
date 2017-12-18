@@ -102,8 +102,11 @@ In some usage patterns, there isn't a need to deal with errors as values. For ex
 in an application is to load the whole config with PureConfig at initialization time, causing the application to fail
 fast in case of a malformed config. For those cases, the `loadConfigOrThrow` method can be used instead of `loadConfig`:
 
-```tut:book:fail
+```tut:book
 loadConfigOrThrow[Conf](ConfigFactory.parseString("{ n: 23 }"))
+```
+
+```tut:book:fail
 loadConfigOrThrow[Conf](ConfigFactory.parseString("{ n: -23 }"))
 ```
 
