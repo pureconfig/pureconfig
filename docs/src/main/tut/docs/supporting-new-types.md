@@ -18,15 +18,13 @@ class MyInt(var value: Int) {
 }
 
 case class Conf(n: MyInt)
-
-val conf = ConfigFactory.parseString("{ n: 1 }")
 ```
 
 In order to read an instance of a given type `T` from a config, PureConfig needs to have in scope in implicit instance
-of `ConfigReader[T]` for that type. This won't compile because there's no `ConfigReader` instance for `MyInt`:
+of `ConfigReader[T]`. This won't compile because there's no `ConfigReader` instance for `MyInt`:
 
 ```tut:book:fail
-loadConfig[Conf](conf)
+loadConfig[Conf](ConfigFactory.parseString("{ n: 1 }"))
 ```
 
 PureConfig can be extended to support those types. To do so, an instance for the `ConfigReader` type class must be
@@ -71,7 +69,7 @@ list of errors. You can read more about cursors at [Config Cursors](config-curso
 Using any of the approaches above would now make `loadConfig` work:
 
 ```tut:book
-loadConfig[Conf](conf)
+loadConfig[Conf](ConfigFactory.parseString("{ n: 1 }"))
 ```
 
 The case above serves as an example for most simple types. While for those types it is straightforward to create a

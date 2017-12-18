@@ -5,7 +5,7 @@ title: Error Handling
 
 ## {{page.title}}
 
-PureConfig features a rich error model used in reading operations. Most PureConfig methods that read Scala types from
+PureConfig features a rich error model used on reading operations. Most PureConfig methods that read Scala types from
 configurations return an `Either[ConfigReaderFailures, A]`, with `A` being the type of a successful result and
 `ConfigReaderFailures` being a non-empty list of errors that caused the reading operation to fail.
 
@@ -73,8 +73,8 @@ loadConfig[Conf](ConfigFactory.parseString("{ n: abc }"))
 
 ### Custom failure reasons
 
-Users are not restricted to the failure reasons provided by PureConfig. If we want to use a domain-specific failure
-reason for our `PositiveInt`, for example, we can create it like this:
+Users are not restricted to the failure reasons provided by PureConfig. If we wanted to use a domain-specific failure
+reason for our `PositiveInt`, for example, we could create it like this:
 
 ```tut:silent
 case class NonPositiveInt(value: Int) extends FailureReason {

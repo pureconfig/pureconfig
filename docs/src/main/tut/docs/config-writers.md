@@ -18,7 +18,6 @@ writing operations:
 
 ```tut:silent
 import pureconfig._
-import com.typesafe.config.ConfigRenderOptions
 
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt

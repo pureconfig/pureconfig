@@ -8,7 +8,7 @@ title: Built-in Supported Types
 PureConfig comes with baked-in support for many types, most of them from the standard Java and Scala libraries. When
 using those types, users don't have to provide anything else in order to be able to use `loadConfig`.
 
-The currently supported scalar types are:
+The currently supported basic types are:
 
 - `String`, `Boolean`, `Double` (standard and percentage format ending with `%`), `Float` (also supporting percentage),
   `Int`, `Long`, `Short`, `URL`, `URI`, `Duration`, `FiniteDuration`;
@@ -38,4 +38,5 @@ Additionally, PureConfig also handles the following collections and composite Sc
 
 The support for these types already covers most simple cases, such as the one shown in [Quick Start](index.html). See
 [Supporting New Types](supporting-new-types.html) to see how to support types that are not on those lists and
-[Overriding Behavior for Types](overriding-behavior-for-types.md) to change how to read the built-in types above.
+[Overriding Behavior for Types](overriding-behavior-for-types.md) to change how PureConfig reads the built-in types
+above.

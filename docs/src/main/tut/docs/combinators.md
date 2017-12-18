@@ -5,10 +5,10 @@ title: Combinators
 
 ## {{page.title}}
 
-The combinators defined in `ConfigReader` are an easy way to create new `ConfigReader` instances by transforming
+The combinators defined in `ConfigReader` provide an easy way to create new `ConfigReader` instances by transforming
 existing ones. They are the simplest solution for supporting new simple types and for slightly modifying existing
-implementations, since the amount of boilerplate required is very small. This section will show some examples of
-combinators and how to work with them in PureConfig.
+implementations, since the amount of boilerplate required is very small. This section contains some examples of
+combinators and shows how to work with them in PureConfig.
 
 The simplest combinator is `map`, which simply transforms the result of an existing reader:
 
@@ -26,7 +26,7 @@ implicit val byteVectorReader = ConfigReader[String].map(_.getBytes.toVector)
 loadConfig[Conf](ConfigFactory.parseString("""{ bytes = "Hello world" }"""))
 ```
 
-`emap` allows you to validate the inputs and provide detailed failures:
+`emap` allows users to validate the inputs and provide detailed failures:
 
 ```tut:silent
 import pureconfig.error._
@@ -46,7 +46,7 @@ loadConfig[Conf](ConfigFactory.parseString("{ port = 8080 }"))
 loadConfig[Conf](ConfigFactory.parseString("{ port = -1 }"))
 ```
 
-`orElse` can be use to provide alternative ways to load a config:
+`orElse` can be used to provide alternative ways to load a config:
 
 ```tut:silent
 val csvIntListReader = ConfigReader[String].map(_.split(",").map(_.toInt).toList)
