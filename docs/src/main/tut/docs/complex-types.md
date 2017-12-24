@@ -135,7 +135,7 @@ features also for your custom class.
 
 #### Method 3: Give a `Generic` representation of your configuration
 
-PureConfig is based on [shapeless](https://github.com/milessabin/shapeless) `Generic`s which are used to represent data
+PureConfig is based on [shapeless](https://github.com/milessabin/shapeless) `Generic`, which is used to represent data
 structures in a generic form. The reason why in method 2 PureConfig was able to decode `IdentifiableDummy` but not
 `Identifiable` prior our code is that `IdentifiableDummy` has a `Generic` instance provided by shapeless while
 `Identifiable` doesn't. This method consists of adding the generic representation for the configuration.
@@ -156,7 +156,7 @@ import shapeless.labelled._
 val idw = Witness('id)
 
 implicit val class1Generic = new LabelledGeneric[Class1] {
-  // the generic representation of `Class1` is the field id of type String
+  // the generic representation of Class1 is the field id of type String
   override type Repr = FieldType[idw.T, String] :: HNil
 
   // mapping from/to is trivial
@@ -168,7 +168,7 @@ implicit val class1Generic = new LabelledGeneric[Class1] {
 val valuew = Witness('value)
 
 implicit val class2Generic = new LabelledGeneric[Class2] {
-  // the generic representation of `Class2` is the fields id of type String and value of type Int
+  // the generic representation of Class2 is the fields id of type String and value of type Int
   override type Repr = FieldType[idw.T, String] :: FieldType[valuew.T, Int] :: HNil
 
   // mapping from/to is trivial here too

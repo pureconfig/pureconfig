@@ -76,7 +76,7 @@ case class SuperSecretConfig(
   apiKey: Sensitive)
 ```
 
-Then when we print out the `SuperSecretConfig` after loading it via PureConfig, the senstive values are masked:
+Then when we print out the `SuperSecretConfig` after loading it via PureConfig, the sensitive values are masked:
 
 ```tut:book
 val secret = loadConfigOrThrow[SuperSecretConfig](ConfigFactory.parseString("""{
