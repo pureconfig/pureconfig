@@ -1,7 +1,7 @@
 name := "pureconfig-cats-effect"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-effect" % "0.6",
+  "org.typelevel" %% "cats-effect" % "0.7",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest)
 
