@@ -1,17 +1,15 @@
 package pureconfig.module.cats
 
 import scala.annotation.tailrec
-
-import cats.functor.{ Contravariant, Invariant }
-import cats.{ Eq, MonadError, MonadReader }
+import cats.{ Contravariant, Eq, Invariant, MonadError }
 import com.typesafe.config.ConfigValue
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures }
 
 package object instances {
 
-  implicit val configReaderCatsInstance: MonadError[ConfigReader, ConfigReaderFailures] with MonadReader[ConfigReader, ConfigValue] = {
-    new MonadError[ConfigReader, ConfigReaderFailures] with MonadReader[ConfigReader, ConfigValue] {
+  implicit val configReaderCatsInstance: MonadError[ConfigReader, ConfigReaderFailures] = {
+    new MonadError[ConfigReader, ConfigReaderFailures] {
 
       def pure[A](x: A): ConfigReader[A] =
         ConfigReader.fromFunction { _ => Right(x) }
@@ -39,12 +37,6 @@ package object instances {
             case r @ Right(_) => r
           }
         }
-
-      def ask: ConfigReader[ConfigValue] =
-        ConfigReader.fromFunction { cv => Right(cv) }
-
-      def local[A](f: ConfigValue => ConfigValue)(fa: ConfigReader[A]): ConfigReader[A] =
-        fa.contramapConfig(f)
     }
   }
 

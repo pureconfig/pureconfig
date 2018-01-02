@@ -14,11 +14,11 @@ import pureconfig.module.cats.instances._
 package object eq {
 
   implicit def configReaderEq[A: Eq]: Eq[ConfigReader[A]] =
-    Eq[ConfigValue => Either[ConfigReaderFailures, A]].on[ConfigReader[A]](_.from)
+    Eq.by[ConfigReader[A], ConfigValue => Either[ConfigReaderFailures, A]](_.from)
 
   implicit def configWriterEq[A: Arbitrary]: Eq[ConfigWriter[A]] =
-    Eq[A => ConfigValue].on[ConfigWriter[A]](_.to)
+    Eq.by[ConfigWriter[A], A => ConfigValue](_.to)
 
   implicit def configConvertEq[A: Eq: Arbitrary]: Eq[ConfigConvert[A]] =
-    Eq[(ConfigReader[A], ConfigWriter[A])].on[ConfigConvert[A]] { cc => (cc, cc) }
+    Eq.by[ConfigConvert[A], (ConfigReader[A], ConfigWriter[A])] { cc => (cc, cc) }
 }
