@@ -61,4 +61,4 @@ loadConfig[Conf](ConfigFactory.parseString("""{ list = "4,5,6" }"""))
 ```
 
 The full list of methods provided by `ConfigReader` can be seen
-[here](https://static.javadoc.io/com.github.pureconfig/pureconfig_2.12/0.8.0/pureconfig/ConfigReader.html).
+[here](https://www.javadoc.io/page/com.github.pureconfig/pureconfig_2.12/latest/pureconfig/ConfigReader.html).
