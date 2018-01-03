@@ -100,7 +100,7 @@
 ### 0.6.0 (Feb 14, 2017)
 
 - New features
-  - New  `ProductHint` trait allowing customization of the derived `ConfigConvert` for case classes, superseeding
+  - New `ProductHint` trait allowing customization of the derived `ConfigConvert` for case classes, superseeding
     `ConfigFieldMapping` ([docs](https://pureconfig.github.io/docs/override-behavior-for-case-classes.html)). In
     addition to defining field name mappings, `ProductHint` instances control:
     - Whether default field values should be used when
