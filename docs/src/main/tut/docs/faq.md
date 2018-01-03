@@ -5,6 +5,11 @@ title: FAQ
 
 ## {{page.title}}
 
+Here are some of the questions about PureConfig frequently asked on issues and other channels:
+* [How can I use PureConfig with Spark 2.1.0 (problematic shapeless dependency)?](#how-can-i-use-pureconfig-with-spark-210-problematic-shapeless-dependency)
+* [How can I avoid displaying sensitive parts of my configuration, such as passwords, when I print the result of PureConfig?](#how-can-i-avoid-displaying-sensitive-parts-of-my-configuration-such-as-passwords-when-i-print-the-result-of-pureconfig)
+* [How do I debug "implicit not found" errors?](#how-do-i-debug-implicit-not-found-errors)
+
 ### How can I use PureConfig with Spark 2.1.0 (problematic shapeless dependency)?
 
 Apache Spark (specifically version 2.1.0) has a transitive dependency
