@@ -6,7 +6,7 @@ title: Config Writers
 ## {{page.title}}
 
 The main use case for PureConfig, as described in the homepage, is to load configuration files to Scala classes in a
-typesafe and boilerplate-free way. However, there are situations where users may have the need to to the inverse
+typesafe and boilerplate-free way. However, there are situations where users may have the need to do the inverse
 operation: to write a config file from a Scala data structure. An example would be to save a config after it is changed
 in-app.
 

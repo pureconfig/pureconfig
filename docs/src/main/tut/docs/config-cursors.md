@@ -32,7 +32,7 @@ We intend our config to look like this:
 ```tut:silent
 import com.typesafe.config.ConfigFactory
 
-val conf = ConfigFactory.parseString("person = { name: John Doe }")
+val conf = ConfigFactory.parseString("person.name: John Doe")
 ```
 
 For the purposes of this example, we'll assume the provided `name` will always have at least two words.
@@ -81,8 +81,8 @@ While malformed configs will fail to load with appropriate errors:
 
 ```tut:book
 loadConfig[Conf](ConfigFactory.parseString("person = 45"))
-loadConfig[Conf](ConfigFactory.parseString("person = { eman = John Doe }"))
-loadConfig[Conf](ConfigFactory.parseString("person = { name = [1, 2] }"))
+loadConfig[Conf](ConfigFactory.parseString("person.eman = John Doe"))
+loadConfig[Conf](ConfigFactory.parseString("person.name = [1, 2]"))
 ```
 
 By using the appropriate `ConfigCursor` methods, all error handling was taken care of by PureConfig. That makes
