@@ -20,8 +20,8 @@ properly, most errors are automatically handled and filled with rich information
 We'll show how to implement our own `ConfigReader` for the following class:
 
 ```tut:silent
-class Person(firstName: String, lastName: String) {
-  override def toString = s"Person($firstName $lastName)"
+class Person(firstName: String, lastNames: Array[String]) {
+  override def toString = s"Person($firstName ${lastNames.mkString(" ")})"
 }
 
 case class Conf(person: Person)
@@ -43,17 +43,17 @@ An implementation of the `ConfigReader` using the cursors API is shown below:
 import pureconfig._
 
 def firstNameOf(name: String): String =
-  name.substring(0, name.indexOf(' '))
-  
-def lastNameOf(name: String): String =
-  name.substring(name.lastIndexOf(' ') + 1)
+  name.takeWhile(_ != ' ')
+
+def lastNamesOf(name: String): Array[String] =
+  name.dropWhile(_ != ' ').drop(1).split(" ")
 
 implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
   for {
     objCur <- cur.asObjectCursor.right      // 1
     nameCur <- objCur.atKey("name").right   // 2
     name <- nameCur.asString.right          // 3
-  } yield new Person(firstNameOf(name), lastNameOf(name))
+  } yield new Person(firstNameOf(name), lastNamesOf(name))
 }
 ```
 
