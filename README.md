@@ -71,7 +71,7 @@ case class MyClass(
 
 Second, define an `application.conf` file like
 [this](https://github.com/pureconfig/pureconfig/blob/master/docs/src/main/resources/application.conf) and add it as a
-resource file of your application.
+resource file of your application (with SBT, they are usually placed in `src/main/resources`).
 
 Finally, load the configuration:
 
@@ -97,7 +97,7 @@ Because PureConfig uses Typesafe Config to load configurations, it supports read
 
 ## Documentation
 
-The full documentation can be found [here](https://pureconfig.github.io/docs).
+Please see the [full PureConfig documentation](https://pureconfig.github.io/docs) for more information.
 
 
 ## Contribute
