@@ -5,10 +5,12 @@ title: Combinators
 
 ## {{page.title}}
 
-The combinators defined in `ConfigReader` provide an easy way to create new `ConfigReader` instances by transforming
-existing ones. They are the simplest solution for supporting new simple types and for slightly modifying existing
-implementations, since the amount of boilerplate required is very small. This section contains some examples of
-combinators and shows how to work with them in PureConfig.
+The combinators defined in
+[`ConfigReader`](https://www.javadoc.io/page/com.github.pureconfig/pureconfig_2.12/latest/pureconfig/ConfigReader.html)
+provide an easy way to create new `ConfigReader` instances by transforming existing ones. They are the simplest solution
+for supporting new simple types and for slightly modifying existing implementations, since the amount of boilerplate
+required is very small. This section contains some examples of combinators and shows how to work with them in
+PureConfig.
 
 The simplest combinator is `map`, which simply transforms the result of an existing reader:
 
@@ -19,7 +21,8 @@ import pureconfig._
 case class Conf(bytes: Vector[Byte])
 
 // reads an array of bytes from a string
-implicit val byteVectorReader = ConfigReader[String].map(_.getBytes.toVector)
+implicit val byteVectorReader: ConfigReader[Vector[Byte]] =
+  ConfigReader[String].map(_.getBytes.toVector)
 ```
 
 ```tut:book
@@ -59,6 +62,3 @@ case class Conf(list: List[Int])
 loadConfig[Conf](ConfigFactory.parseString("""{ list = [1,2,3] }"""))
 loadConfig[Conf](ConfigFactory.parseString("""{ list = "4,5,6" }"""))
 ```
-
-The full list of methods provided by `ConfigReader` can be seen
-[here](https://www.javadoc.io/page/com.github.pureconfig/pureconfig_2.12/latest/pureconfig/ConfigReader.html).
