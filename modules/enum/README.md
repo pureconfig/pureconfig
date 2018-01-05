@@ -8,7 +8,7 @@ Automatically create a converter to read [enum](https://github.com/julienrf/enum
 
 ## Add pureconfig-enum to your project
 
-In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
+In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-enum" % "0.8.0"
@@ -55,4 +55,4 @@ loadConfig[GreetingConf](conf)
 
 ## Can I configure how the elements are read?
 
-Nope. If you need more flexibility, look at [enumeratum](https://github.com/lloydmeta/enumeratum) and its companion pureconfig library, [pureconfig-enumeratum](https://github.com/leifwickland/pureconfig/tree/master/modules/enumeratum).
+Nope. If you need more flexibility, look at [enumeratum](https://github.com/lloydmeta/enumeratum) and its companion PureConfig library, [pureconfig-enumeratum](https://github.com/leifwickland/pureconfig/tree/master/modules/enumeratum).

@@ -3,7 +3,7 @@ layout: docs
 title: Complex Types
 ---
 
-## Supporting Complex Types
+## {{page.title}}
 
 Support for more complex types, such as Java configurations, can be achieved with many different methods,
 each one with pros and cons. The preferred method is shown [here](#method-1-use-a-scala-copy-of-the-configuration)
@@ -12,7 +12,7 @@ section is organized in the following way: the [first part](#data-type-to-suppor
 support, the [second part](#add-support-for-identifiable) provides the three methods to add support for that complex type and the
 [final part](#summary) discusses when one method should be picked instead of another one.
 
-#### Data type to support
+### Data type to support
 
 First of all, let's start with the data type that we want to support. 
 The example is composed of one interface and two implementations:
@@ -35,9 +35,9 @@ class Class2(id: String, value: Int) extends Identifiable {
 Because PureConfig is based on shapeless and shapeless doesn't support non-case classes and interfaces,
 the class above cannot be read automatically by PureConfig.
 
-#### Add support for Identifiable
+### Add support for Identifiable
 
-##### Method 1: Use a Scala copy of the configuration
+#### Method 1: Use a Scala copy of the configuration
 
 Because PureConfig works out-of-the-box with Scala sealed familes of case classes, one simple solution
 to support unsupported complex types is to:
@@ -47,7 +47,7 @@ to support unsupported complex types is to:
 
 In the case above, we could do:
 
-```tut:silent:book
+```tut:silent
 import pureconfig._
 import pureconfig.error._
 
@@ -66,11 +66,11 @@ final case class Class2Dummy(id: String, value: Int) extends IdentifiableDummy {
 }
 
 // change the coproduct hint to tell PureConfig that the type value specified
-// is the name of the class - "Dummy" because we want the type to be the one
-// of the new types, not in the mirroring types
+// is the name of the class without the "Dummy" suffix because we want the type to
+// be the one of the new types, not the mirroring types
 implicit val identifiableCoproductHint = new FieldCoproductHint[IdentifiableDummy]("type") {
   override protected def fieldValue(name: String): String =
-     name.take(name.length - "Dummy".length).toLowerCase
+    name.take(name.length - "Dummy".length).toLowerCase
 }
 
 // we tell PureConfig that to read Identifiable, it has to read IdentifiableDummy first
@@ -87,7 +87,7 @@ it's both composable and nice to read.
 **cons**: needs the configuration to be duplicated and PureConfig needs to do two
 steps to read it.
 
-##### Method 2: Implement `ConfigReader[Identifiable]` manually
+#### Method 2: Implement `ConfigReader[Identifiable]` manually
 
 Similarly to adding support for simple types, it is possible to manually create a
 `ConfigReader[Identifiable]`:
@@ -124,22 +124,21 @@ implicit val identifiableConfigReader = ConfigReader.fromCursor { cur =>
 }
 ```
 
-**pros**: The main feature of this method is that PureConfig delegates to it when decoding your configuration.
+**pros**: The main advantage of this method is that PureConfig delegates to it when decoding your configuration.
 PureConfig takes the manually defined `ConfigReader[Identifiable]` as a blackbox and applies it when it has to read your configuration.
 
-**cons**: The main feature of this method is also its drawback, because by taking control over 
+**cons**: The main advantage of this method is also its drawback, because by taking control over 
 PureConfig in how to read sealed families of case classes, it prevents PureConfig from doing its 
 magic. For instance, it prevents PureConfig from using the `CoproductHint` as strategy to read 
 `Identifiable`. This is, generally speaking, not a good idea. In most cases you want PureConfig 
 features also for your custom class.
 
-##### Method 3: Give a Generic representation of your configuration
+#### Method 3: Give a `Generic` representation of your configuration
 
-PureConfig is based on shapeless Generics which are used to represent data structures in a
-generic form. The reason why in method 2 PureConfig was able to decode
-`IdentifiableDummy` but not `Identifiable` prior our code is that `IdentifiableDummy`
-has a `Generic` instance provided by shapeless while `Identifiable` doesn't.
-This method consists of adding the generic representation for the configuration.
+PureConfig is based on [shapeless](https://github.com/milessabin/shapeless) `Generic`, which is used to represent data
+structures in a generic form. The reason why in method 2 PureConfig was able to decode `IdentifiableDummy` but not
+`Identifiable` prior our code is that `IdentifiableDummy` has a `Generic` instance provided by shapeless while
+`Identifiable` doesn't. This method consists of adding the generic representation for the configuration.
 
 Let's start with the concrete classes `Class1` and `Class2`. PureConfig needs to know
 two things in order to read them:
@@ -147,14 +146,14 @@ two things in order to read them:
 1. Their generic representation;
 2. For each field in the generic representation, whether each field in the generic representation has a default value.
 
-Point 1 is solved by the code:
+The first item is solved by the code:
 
-```tut:silent:book
+```tut:silent
 import shapeless._
 import shapeless.labelled._
 
 // create the singleton idw for the field id
-val idw = Witness('id) 
+val idw = Witness('id)
 
 implicit val class1Generic = new LabelledGeneric[Class1] {
   // the generic representation of Class1 is the field id of type String
@@ -179,9 +178,9 @@ implicit val class2Generic = new LabelledGeneric[Class2] {
 }
 ```
 
-Point 2 is trivial because both `Class1` and `Class2` don't have default values for fields:
+The second item is trivial because neither `Class1` nor `Class2` have default values for fields:
 
-```tut:silent:book
+```tut:silent
 implicit val class1Default = new Default.AsOptions[Class1] {
   override type Out = Option[String] :: HNil
   override def apply(): Out = None :: HNil
@@ -195,9 +194,9 @@ implicit val class2Default = new Default.AsOptions[Class2] {
 
 After we add this, PureConfig is able to load `Class1` and `Class2` from configuration.
 The second and final part of this method is to add the generic representation of `Identifiable`
-as a sealed family of `Class1` and `Class2`, or coproduct of them if you want:
+as a sealed family of `Class1` and `Class2`, or a coproduct of them if you want:
 
-```tut:silent:book
+```tut:silent
 val class1w = Witness('Class1)
 val class2w = Witness('Class2)
 
@@ -224,13 +223,13 @@ implicit val identifiableGeneric = new LabelledGeneric[Identifiable] {
 it provides the missing pieces of information to PureConfig so that PureConfig
 can derive the `ConfigReader[Identifiable]` by itself.
 
-**cons**: shapeless magic. If you know shapeless, this is doable, otherwise I would be careful.
+**cons**: shapeless magic. If you know shapeless, this is doable, otherwise caution is recommended.
 
-#### Summary
+### Summary
 
-- **method 1** is good to add support for complex types with a similar structure of what is supported by PureConfig, e.g. products and coproducts;
-- **method 2** is good to add support for simple types or types that don't need PureConfig's way to decode products (case classes) or coproducts (sealed families of classes);
-- **method 3** is good when method 2 is too slow or when you need to add only part of the information to let PureConfig work, e.g. if you had the generic representation of `Class1` and you just have to add the default instance for the arguments.
+- **Method 1** is good to add support for complex types with a similar structure of what is supported by PureConfig, e.g. products and coproducts;
+- **Method 2** is good to add support for simple types or types that don't need PureConfig's way to decode products (case classes) or coproducts (sealed families of classes);
+- **Method 3** is good when method 2 is too slow or when you need to add only part of the information to let PureConfig work, e.g. if you had the generic representation of `Class1` and you just have to add the default instance for the arguments.
 
 The preferred method is **method 1** because it's the easiest to use and the more idiomatic.
 In libraries like PureConfig, the best way to add a new data type is often to take something

@@ -10,28 +10,33 @@ options:
       url: docs/supporting-new-types.html
 
       nested_options:
-        - title: Simple Types
-          url: docs/supporting-simple-types.html
+        - title: Combinators
+          url: docs/combinators.html
+        - title: Config Cursors
+          url: docs/config-cursors.html
         - title: Complex Types
-          url: docs/supporting-complex-types.html
+          url: docs/complex-types.html
 
-    - title: Overriding Behaviour for Types
-      url: docs/overriding-behaviour-for-types.html
+    - title: Overriding Behavior for Types
+      url: docs/overriding-behavior-for-types.html
 
       nested_options:
         - title: Case Classes
-          url: docs/overriding-behaviour-for-case-classes.html
+          url: docs/overriding-behavior-for-case-classes.html
         - title: Sealed Families
-          url: docs/overriding-behaviour-for-sealed-families.html
+          url: docs/overriding-behavior-for-sealed-families.html
 
-    - title: Using Configurable Converters
-      url: docs/using-configurable-converters.html
+    - title: Configurable Converters
+      url: docs/configurable-converters.html
 
     - title: Error Handling
       url: docs/error-handling.html
 
-    - title: Integrating with Other Libraries
-      url: docs/integrating-with-other-libraries.html
+    - title: Config Writers
+      url: docs/config-writers.html
+
+    - title: Library Integrations
+      url: docs/library-integrations.html
 
     - title: FAQ
       url: docs/faq.html

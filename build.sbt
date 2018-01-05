@@ -59,8 +59,9 @@ lazy val commonSettings = Seq(
 
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
-  scalacOptions in (Compile, console) ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import").contains),
+  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
+  scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 
   // use sbt <module_name>/test:console to run an ammonite console
   libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.3" % "test" cross CrossVersion.patch,
@@ -88,7 +89,7 @@ lazy val commonSettings = Seq(
   })
 
 lazy val micrositesSettings = Seq(
-  micrositeName := "pureconfig",
+  micrositeName := "PureConfig",
   micrositeDescription := "A boilerplate-free library for loading configuration files",
   micrositeAuthor := "com.github.pureconfig",
   micrositeHomepage := "https://pureconfig.github.io/",
@@ -106,7 +107,7 @@ lazy val micrositesSettings = Seq(
         "gray-lighter"    /* code back        */  -> "#F4F3F4",
         "white-color"                             -> "#FFFFFF"),
   micrositeGitterChannel := false // ugly
-  )
+)
 
 // add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
 // "scala-2.10" are natively supported by SBT)
