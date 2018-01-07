@@ -1,8 +1,8 @@
 name := "pureconfig-cats"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "1.0.0",
-  "org.typelevel" %% "cats-laws" % "1.0.0" % "test",
+  "org.typelevel" %% "cats-core" % "1.0.1",
+  "org.typelevel" %% "cats-laws" % "1.0.1" % "test",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest,
   Dependencies.scalaCheck)
