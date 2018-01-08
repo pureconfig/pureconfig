@@ -6,10 +6,6 @@ libraryDependencies ++= Seq(
   Dependencies.scalaTest)
 
 pomExtra := {
-  <scm>
-    <url>git@github.com:pureconfig/pureconfig.git</url>
-    <connection>scm:git:git@github.com:pureconfig/pureconfig.git</connection>
-  </scm>
   <developers>
     <developer>
       <id>melrief</id>

@@ -7,7 +7,7 @@ Adds support for XML via [Scala XML](https://github.com/scala/scala-xml) to Pure
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-scala-xml" % "0.8.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-scala-xml" % "0.9.0"
 ```
 
 ## Example
@@ -26,7 +26,7 @@ case class Config(people: Elem)
 We can read a `Config` like:
 ```scala
 val conf = parseString(
-  s"""{ people = 
+  s"""{ people =
     |   \"\"\"<people>
     |      <person firstName="A" lastName="Person" />
     |      <person firstName="Another" lastName="Person" />
@@ -44,7 +44,7 @@ loadConfig[Config](conf)
 
 ## Notes
 
-All XML values are deserialized into `Elem`. 
+All XML values are deserialized into `Elem`.
 
-In HOCON files, if the XML contains quotes, you will need to either wrap the XML in triple-quotes or escape the 
+In HOCON files, if the XML contains quotes, you will need to either wrap the XML in triple-quotes or escape the
 embedded quotes.
