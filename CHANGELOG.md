@@ -1,4 +1,4 @@
-### 0.9.0 (unreleased)
+### 0.9.0 (Jan 8, 2018)
 
 - New features
   - A new `ConfigCursor` now provides idiomatic, safe methods to navigate through a config. It also holds context for

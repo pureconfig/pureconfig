@@ -7,7 +7,7 @@ Adds support for selected [Akka](http://akka.io/) classes to PureConfig.
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.8.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.9.0"
 ```
 
 ## Example
@@ -26,8 +26,8 @@ case class MyConfig(timeout: Timeout, actorPath: ActorPath)
 
 We can read a `MyConfig` like:
 ```tut:book
-val conf = parseString("""{ 
-  timeout: 5 seconds, 
+val conf = parseString("""{
+  timeout: 5 seconds,
   actor-path:  "akka://my-sys/user/service-a/worker1"
 }""")
 loadConfig[MyConfig](conf)
