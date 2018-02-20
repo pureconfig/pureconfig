@@ -6,6 +6,8 @@ libraryDependencies ++= Seq(
   Dependencies.scalaTest
 )
 
+crossScalaVersions := Seq("2.11.11", "2.12.4")
+
 pomExtra := {
   <developers>
     <developer>
