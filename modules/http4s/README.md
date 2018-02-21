@@ -1,7 +1,8 @@
 
 # Http4s module for PureConfig
 
-Adds support for selected [Http4s](http://http4s.org/) classes to PureConfig.
+Adds support for [Http4s](http://http4s.org/)'s Uri class to PureConfig. PRs adding support
+for other classes are welcome :)
 
 ## Add pureconfig-http4s to your project
 

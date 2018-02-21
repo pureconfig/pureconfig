@@ -6,7 +6,8 @@ libraryDependencies ++= Seq(
   Dependencies.scalaTest
 )
 
-crossScalaVersions := Seq("2.11.11", "2.12.4")
+// http4s 0.18.0 isn't published for Scala 2.10
+crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }
 
 pomExtra := {
   <developers>
