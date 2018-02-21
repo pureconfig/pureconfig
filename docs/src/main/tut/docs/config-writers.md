@@ -48,7 +48,7 @@ class MyInt(var value: Int) {
   override def toString: String = s"MyInt($value)"
 }
 
-implicit val myIntReader = ConfigWriter[Int].contramap[MyInt](_.value)
+implicit val myIntWriter = ConfigWriter[Int].contramap[MyInt](_.value)
 ```
 
 ```tut:book
