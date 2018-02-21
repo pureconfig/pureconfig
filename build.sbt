@@ -35,6 +35,7 @@ lazy val joda = module(project) in file("modules/joda")
 lazy val scalaxml = module(project) in file("modules/scala-xml")
 lazy val squants = module(project) in file("modules/squants")
 lazy val catseffect = module(project) in file("modules/cats-effect")
+lazy val http4s = module(project) in file("modules/http4s")
 
 lazy val commonSettings = Seq(
   organization := "com.github.pureconfig",
