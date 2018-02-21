@@ -40,7 +40,8 @@ jobs:
         - gem install sass jekyll:3.2.1 html-proofer
       script:
         - sbt makeMicrosite
-        - htmlproofer --allow_hash_href docs/target/site
+          # we're ignoring www.47deg.com due to SSL errors; we should check this again later
+        - htmlproofer --allow_hash_href --url-ignore '/www.47deg.com/' docs/target/site
       after_success: ignore
 
 cache:
