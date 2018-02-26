@@ -6,5 +6,5 @@ import pureconfig.ConfigReader
 package object http4s {
 
   implicit val uriReader: ConfigReader[Uri] =
-    ConfigReader[String].map(str => Uri(path = str))
+    ConfigReader.fromStringTry(Uri.fromString(_).toTry)
 }

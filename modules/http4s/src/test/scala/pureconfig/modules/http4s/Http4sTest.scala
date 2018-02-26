@@ -12,6 +12,6 @@ class Http4sTest extends BaseSuite {
   "reading the uri config" should "parse the uri" in {
     val conf = ConfigFactory.parseString(s"""{uri:"http://http4s.org/"}""")
 
-    conf.to[ServerConfig].right.value shouldEqual ServerConfig(Uri(path = "http://http4s.org/"))
+    conf.to[ServerConfig].right.value shouldEqual ServerConfig(Uri.unsafeFromString("http://http4s.org/"))
   }
 }
