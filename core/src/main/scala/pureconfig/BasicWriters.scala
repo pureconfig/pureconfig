@@ -21,6 +21,7 @@ import com.typesafe.config._
 trait PrimitiveWriters {
 
   implicit val stringConfigWriter = ConfigWriter.forPrimitive[String]
+  implicit val charConfigWriter = ConfigWriter.forPrimitive[Char]
   implicit val booleanConfigWriter = ConfigWriter.forPrimitive[Boolean]
   implicit val doubleConfigWriter = ConfigWriter.forPrimitive[Double]
   implicit val floatConfigWriter = ConfigWriter.forPrimitive[Float]

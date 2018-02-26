@@ -24,6 +24,12 @@ import pureconfig.error._
 trait PrimitiveReaders {
 
   implicit val stringConfigReader = ConfigReader.fromString[String](s => Right(s))
+  implicit val charConfigReader = ConfigReader.fromNonEmptyString[Char](s =>
+    s.size match {
+      case 1 => Right(s.charAt(0))
+      case len => Left(WrongSizeString(1, len))
+    }
+  )
   implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError({
     case "yes" | "on" => true
     case "no" | "off" => false
