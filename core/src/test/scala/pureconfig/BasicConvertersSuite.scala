@@ -13,7 +13,8 @@ import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.equality._
-import pureconfig.error.{ CannotConvert, EmptyStringFound }
+import pureconfig.error.{ CannotConvert, EmptyStringFound, WrongSizeString }
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -51,6 +52,10 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[Year]
 
   checkArbitrary[String]
+
+  checkArbitrary[Char]
+  checkFailure[Char, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
+  checkFailure[Char, WrongSizeString](ConfigValueFactory.fromAnyRef("not a char"))
 
   checkArbitrary[Boolean]
   checkRead[Boolean](
