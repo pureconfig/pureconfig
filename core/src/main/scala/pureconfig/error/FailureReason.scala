@@ -141,6 +141,16 @@ final case class WrongSizeList(expected: Int, found: Int) extends FailureReason 
 }
 
 /**
+ * A failure reason given when a string is not of the expected size.
+ *
+ * @param expected the expected number of characters
+ * @param found the number of characters found
+ */
+final case class WrongSizeString(expected: Int, found: Int) extends FailureReason {
+  def description = s"String of wrong size found. Expected $expected characters. Found $found characters instead."
+}
+
+/**
  * A failure reason given when a valid choice for a coproduct cannot be found.
  *
  * @param value the ConfigValue that was unable to be mapped to a coproduct choice
