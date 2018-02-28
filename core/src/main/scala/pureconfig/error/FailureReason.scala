@@ -141,11 +141,11 @@ final case class WrongSizeList(expected: Int, found: Int) extends FailureReason 
 }
 
 /**
-  * A failure reason given when a string is not of the expected size.
-  *
-  * @param expected the expected number of characters
-  * @param found the number of characters found
-  */
+ * A failure reason given when a string is not of the expected size.
+ *
+ * @param expected the expected number of characters
+ * @param found the number of characters found
+ */
 final case class WrongSizeString(expected: Int, found: Int) extends FailureReason {
   def description = s"String of wrong size found. Expected $expected characters. Found $found characters instead."
 }

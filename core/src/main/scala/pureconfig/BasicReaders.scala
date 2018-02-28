@@ -28,8 +28,7 @@ trait PrimitiveReaders {
     s.size match {
       case 1 => Right(s.charAt(0))
       case len => Left(WrongSizeString(1, len))
-    }
-  )
+    })
   implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError({
     case "yes" | "on" => true
     case "no" | "off" => false
