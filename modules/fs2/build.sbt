@@ -10,10 +10,6 @@ libraryDependencies ++= Seq(
 crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }
 
 pomExtra := {
-  <scm>
-    <url>git@github.com:pureconfig/pureconfig.git</url>
-    <connection>scm:git:git@github.com:pureconfig/pureconfig.git</connection>
-  </scm>
     <developers>
       <developer>
         <id>keirlawson</id>
