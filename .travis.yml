@@ -41,7 +41,11 @@ jobs:
       script:
         - sbt makeMicrosite
           # we're ignoring www.47deg.com due to SSL errors; we should check this again later
-        - htmlproofer --allow_hash_href --url-ignore '/www.47deg.com/' docs/target/site
+        - htmlproofer \
+            --allow_hash_href \
+            --url-ignore '/www.47deg.com/' \
+            --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)" \
+            docs/target/site
       after_success: ignore
 
 cache:
