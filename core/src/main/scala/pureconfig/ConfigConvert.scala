@@ -49,6 +49,11 @@ object ConfigConvert extends ConvertHelpers {
     def to(t: T) = writer.value.to(t)
   }
 
+  def viaReaderAndWriter[T](reader: ConfigReader[T], writer: ConfigWriter[T]): ConfigConvert[T] = new ConfigConvert[T] {
+    def from(cur: ConfigCursor): Either[ConfigReaderFailures, T] = reader.from(cur)
+    def to(t: T): ConfigValue = writer.to(t)
+  }
+
   def viaString[T](fromF: String => Either[FailureReason, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
     override def from(cur: ConfigCursor): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(cur)
     override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
