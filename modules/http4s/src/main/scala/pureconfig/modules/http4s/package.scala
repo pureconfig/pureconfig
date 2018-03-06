@@ -9,6 +9,6 @@ package object http4s {
   implicit val uriReader: ConfigReader[Uri] =
     ConfigReader.fromString(str =>
       Uri.fromString(str).fold(
-        err => Left(CannotConvert(str, "Uri", err.getMessage())),
+        err => Left(CannotConvert(str, "Uri", err.sanitized)),
         uri => Right(uri)))
 }
