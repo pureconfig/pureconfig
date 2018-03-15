@@ -18,7 +18,8 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 - [`pureconfig-joda`](https://github.com/pureconfig/pureconfig/tree/master/modules/joda) provides configurable converters for [Joda-Time](http://www.joda.org/joda-time/) types;
 - [`pureconfig-scala-xml`](https://github.com/pureconfig/pureconfig/tree/master/modules/scala-xml) provides support for XML via [scala-xml](https://github.com/scala/scala-xml);
 - [`pureconfig-squants`](https://github.com/pureconfig/pureconfig/tree/master/modules/squants) provides converters for [Squants](http://www.squants.com/)'s beautiful types representing units of measure;
-- [`pureconfig-http4s`](https://github.com/pureconfig/pureconfig/tree/master/modules/http4s) provides converters for [Http4s](http://http4s.org/) types.
+- [`pureconfig-http4s`](https://github.com/pureconfig/pureconfig/tree/master/modules/http4s) provides converters for [Http4s](http://http4s.org/) types;
+- [`pureconfig-hadoop`](https://github.com/pureconfig/pureconfig/tree/master/modules/hadoop) provides converters for [Hadoop](http://hadoop.apache.org//) types.
 
 ### External Integrations
 
