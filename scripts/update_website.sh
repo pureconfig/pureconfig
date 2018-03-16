@@ -25,7 +25,7 @@ else
 fi
 
 # delete all files and folders at the website that aren't a version folder
-ls -d -1 "$WEBSITE_DIR"/** | egrep -v 'v[0-9]+\.[0-9]+' | xargs rm -r
+ls -d -1 "$WEBSITE_DIR"/** | grep -Ev 'v[0-9]+\.[0-9]+' | xargs rm -r
 
 # generate the main website pages
 sbt "set siteDirectory in docs := file(\"$WEBSITE_DIR\")" \
@@ -44,7 +44,7 @@ echo "The website for version $VERSION was generated."
 echo
 git -C "$WEBSITE_DIR" status
 
-read -p "Press Enter to commit and push these changes..."
+read -rp "Press Enter to commit and push these changes..."
 
 # commit and push the changes
 git -C "$WEBSITE_DIR" commit -m "$COMMIT_MESSAGE"
