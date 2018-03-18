@@ -12,35 +12,12 @@ libraryDependencies ++= Seq(
   scalaCheck,
   scalaCheckShapeless)
 
-pomExtra := {
-  <developers>
-    <developer>
-      <id>melrief</id>
-      <name>Mario Pastorelli</name>
-      <url>https://github.com/melrief</url>
-    </developer>
-    <developer>
-      <id>leifwickland</id>
-      <name>Leif Wickland</name>
-      <url>https://github.com/leifwickland</url>
-    </developer>
-    <developer>
-      <id>jcazevedo</id>
-      <name>Joao Azevedo</name>
-      <url>https://github.com/jcazevedo</url>
-    </developer>
-    <developer>
-      <id>ruippeixotog</id>
-      <name>Rui Gonçalves</name>
-      <url>https://github.com/ruippeixotog</url>
-    </developer>
-    <developer>
-      <id>derekmorr</id>
-      <name>Derek Morr</name>
-      <url>https://github.com/derekmorr</url>
-    </developer>
-  </developers>
-}
+developers := List(
+  Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
+  Developer("leifwickland", "Leif Wickland", "leifwickland@gmail.com", url("https://github.com/leifwickland")),
+  Developer("jcazevedo", "Joao Azevedo", "joao.c.azevedo@gmail.com", url("https://github.com/jcazevedo")),
+  Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")),
+  Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")))
 
 osgiSettings
 

@@ -15,15 +15,8 @@ libraryDependencies ++= {
   }
 }
 
-pomExtra := {
-  <developers>
-    <developer>
-      <id>derekmorr</id>
-      <name>Derek Morr</name>
-      <url>https://github.com/derekmorr</url>
-    </developer>
-  </developers>
-}
+developers := List(
+  Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")))
 
 osgiSettings
 

@@ -10,12 +10,5 @@ libraryDependencies ++= Seq(
   scalaMacrosParadise,
   scalaCheck)
 
-pomExtra := {
-  <developers>
-    <developer>
-      <id>ruippeixotog</id>
-      <name>Rui Gonçalves</name>
-      <url>https://github.com/ruippeixotog</url>
-    </developer>
-  </developers>
-}
+developers := List(
+  Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")))
