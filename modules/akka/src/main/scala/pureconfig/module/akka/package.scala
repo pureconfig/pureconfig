@@ -17,5 +17,4 @@ package object akka {
 
   implicit val actorPathCC: ConfigConvert[ActorPath] =
     viaString[ActorPath](catchReadError(ActorPath.fromString), _.toSerializationFormat)
-
 }

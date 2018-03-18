@@ -2,17 +2,17 @@ package pureconfig.module
 
 import java.io._
 
-import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
-
-import scala.language.higherKinds
-import cats.effect.{ Effect, Sync }
-import com.typesafe.config.ConfigFactory
-import _root_.fs2.{ async, io, Stream, text }
-import pureconfig.error.ConfigReaderException
-import cats.implicits._
-
 import scala.concurrent.ExecutionContext
+import scala.language.higherKinds
 import scala.reflect.ClassTag
+
+import _root_.fs2.{ Stream, async, io, text }
+import cats.effect.{ Effect, Sync }
+import cats.implicits._
+import com.typesafe.config.ConfigFactory
+
+import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
+import pureconfig.error.ConfigReaderException
 
 package object fs2 {
 
