@@ -1,7 +1,5 @@
 package pureconfig.module
 
-import pureconfig.ConfigConvert._
-
 import _root_.squants.electro._
 import _root_.squants.energy._
 import _root_.squants.information._
@@ -13,6 +11,8 @@ import _root_.squants.radio._
 import _root_.squants.space._
 import _root_.squants.thermal._
 import _root_.squants.time._
+
+import pureconfig.ConfigConvert._
 
 /**
  * Provides [[ConfigConvert]] instances for Squants [[_root_.squants.Dimension]].
