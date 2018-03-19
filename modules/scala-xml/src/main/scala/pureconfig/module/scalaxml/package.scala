@@ -2,8 +2,8 @@ package pureconfig.module
 
 import scala.xml.{ Elem, XML }
 
-import pureconfig.{ ConfigReader, ConfigWriter }
 import pureconfig.ConvertHelpers.catchReadError
+import pureconfig.{ ConfigReader, ConfigWriter }
 
 /**
  * [[ConfigReader]] and [[ConfigWriter]] instances for Scala-XML's data structures.

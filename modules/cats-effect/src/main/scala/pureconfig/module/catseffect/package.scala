@@ -4,13 +4,14 @@ import java.io.OutputStream
 import java.nio.file.Path
 
 import scala.language.higherKinds
-import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
-import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
+import scala.reflect.ClassTag
+
+import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.implicits._
-import cats.data.NonEmptyList
 
-import scala.reflect.ClassTag
+import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
+import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
 
 package object catseffect {
 
