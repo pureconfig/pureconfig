@@ -9,15 +9,8 @@ libraryDependencies ++= Seq(
 // fs2 0.10 isn't published for Scala 2.10
 crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }
 
-pomExtra := {
-    <developers>
-      <developer>
-        <id>keirlawson</id>
-        <name>Keir Lawson</name>
-        <url>https://github.com/keirlawson/</url>
-      </developer>
-    </developers>
-}
+developers := List(
+  Developer("keirlawson", "Keir Lawson", "keirlawson@gmail.com", url("https://github.com/keirlawson")))
 
 osgiSettings
 

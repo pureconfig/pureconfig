@@ -7,20 +7,9 @@ libraryDependencies ++= Seq(
   Dependencies.scalaTest,
   Dependencies.scalaCheck)
 
-pomExtra := {
-  <developers>
-    <developer>
-      <id>derekmorr</id>
-      <name>Derek Morr</name>
-      <url>https://github.com/derekmorr</url>
-    </developer>
-    <developer>
-      <id>ruippeixotog</id>
-      <name>Rui Gonçalves</name>
-      <url>https://github.com/ruippeixotog</url>
-    </developer>
-  </developers>
-}
+developers := List(
+  Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")),
+  Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")))
 
 osgiSettings
 

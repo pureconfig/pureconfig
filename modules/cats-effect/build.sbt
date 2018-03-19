@@ -5,15 +5,8 @@ libraryDependencies ++= Seq(
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest)
 
-pomExtra := {
-    <developers>
-      <developer>
-        <id>keirlawson</id>
-        <name>Keir Lawson</name>
-        <url>https://github.com/keirlawson/</url>
-      </developer>
-    </developers>
-}
+developers := List(
+  Developer("keirlawson", "Keir Lawson", "keirlawson@gmail.com", url("https://github.com/keirlawson")))
 
 osgiSettings
 
