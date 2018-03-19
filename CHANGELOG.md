@@ -1,3 +1,9 @@
+### 0.9.1 (unreleased)
+
+- New features
+  - `ConfigReader` and `ConfigWriter` for `Char`;
+  - Modules for `fs2`, `hadoop` and `http4s`.
+
 ### 0.9.0 (Jan 8, 2018)
 
 - New features
