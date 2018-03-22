@@ -1,4 +1,4 @@
-### 0.9.1 (unreleased)
+### 0.9.1 (Mar 22, 2018)
 
 - New features
   - `ConfigReader` and `ConfigWriter` for `Char`;
