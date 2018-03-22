@@ -5,7 +5,7 @@ version := "1.0"
 scalaVersion := "2.12.2"
 
 libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.9.0",
+  "com.github.pureconfig" %% "pureconfig" % "0.9.1",
 
   // needed for Scala 2.10
   compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
