@@ -1,7 +1,7 @@
 name := "pureconfig-http4s"
 
 libraryDependencies ++= Seq(
-  "org.http4s" %% "http4s-core" % "0.18.0",
+  "org.http4s" %% "http4s-core" % "0.18.4",
   Dependencies.scalaMacrosParadise,
   Dependencies.scalaTest
 )
