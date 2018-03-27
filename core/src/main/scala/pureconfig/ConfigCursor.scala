@@ -95,6 +95,26 @@ sealed trait ConfigCursor {
   def asMap: Either[ConfigReaderFailures, Map[String, ConfigCursor]] =
     asObjectCursor.right.map(_.map)
 
+  @inline private final def atPathSegment(pathSegment: PathSegment): Either[ConfigReaderFailures, ConfigCursor] = {
+    pathSegment match {
+      case PathSegment.Key(k) => this.asObjectCursor.right.flatMap(_.atKey(k))
+      case PathSegment.Index(i) => this.asListCursor.right.flatMap(_.atIndex(i))
+    }
+  }
+
+  /**
+   * Returns a cursor to the config at the path composed of given path segments.
+   *
+   * @param pathSegments the path of the config for which a cursor should be returned
+   * @return a `Right` with a cursor to the config at `pathSegments` if such a config exists, a `Left` with a list of
+   *         failures otherwise.
+   */
+  final def atPath(pathSegments: PathSegment*): Either[ConfigReaderFailures, ConfigCursor] = {
+    pathSegments.foldLeft(Right(this): Either[ConfigReaderFailures, ConfigCursor]) {
+      case (soFar, segment) => soFar.right.flatMap(_.atPathSegment(segment))
+    }
+  }
+
   /**
    * Casts this cursor as either a `ConfigListCursor` or a `ConfigObjectCursor`.
    *
