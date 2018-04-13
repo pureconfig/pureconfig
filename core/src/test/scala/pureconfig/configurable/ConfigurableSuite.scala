@@ -1,14 +1,16 @@
 package pureconfig.configurable
 
-import com.typesafe.config.ConfigFactory
 import java.time._
 import java.time.format.DateTimeFormatter
 
-import org.scalatest._
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigRenderOptions.concise
 import org.scalacheck.{ Arbitrary, Gen }
-import prop.PropertyChecks
+import org.scalatest._
+import org.scalatest.prop.PropertyChecks
+import pureconfig.configurable.ConfigurableSuite._
+import pureconfig.error.UnknownKey
 import pureconfig.syntax._
-import ConfigurableSuite._
 
 import scala.collection.JavaConverters._
 
@@ -86,6 +88,34 @@ class ConfigurableSuite extends FlatSpec with Matchers with EitherValues with Pr
       val conf = ConfigFactory.parseString(s"""{zoned-date-time:"${zonedDateTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}"}""")
       case class Conf(zonedDateTime: ZonedDateTime)
       conf.to[Conf].right.value shouldEqual Conf(zonedDateTime)
+  }
+
+  sealed trait Animal
+  final case object Bird extends Animal
+  final case object Monkey extends Animal
+  case class Food(food: String)
+
+  it should "parse using generic map reader" in {
+    val conf = ConfigFactory.parseString("""{"bird": {"food": "worms"}, "monkey": {"food": "banana"}}""")
+
+    implicit val reader = genericMapReader[Animal, Food] {
+      case "bird" => Right(Bird)
+      case "monkey" => Right(Monkey)
+      case animal => Left(UnknownKey(s"$animal is unsupported"))
+    }
+
+    conf.to[Map[Animal, Food]].right.value shouldEqual Map(Bird -> Food("worms"), Monkey -> Food("banana"))
+  }
+
+  it should "format using generic map writer" in {
+
+    implicit val writer = genericMapWriter[Animal, Food] {
+      case Bird => "bird"
+      case Monkey => "monkey"
+    }
+
+    val config = Map[Animal, Food](Bird -> Food("worms"), Monkey -> Food("banana")).toConfig.render(concise())
+    config shouldEqual """{"bird":{"food":"worms"},"monkey":{"food":"banana"}}"""
   }
 }
 
