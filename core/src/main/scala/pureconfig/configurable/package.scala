@@ -3,7 +3,13 @@ package pureconfig
 import java.time._
 import java.time.format.DateTimeFormatter
 
+import com.typesafe.config.ConfigValueFactory
 import pureconfig.ConfigConvert.{ catchReadError, viaNonEmptyString }
+import pureconfig.ConvertHelpers._
+import pureconfig.error.{ ConfigReaderFailures, FailureReason }
+import shapeless.Lazy
+
+import scala.collection.JavaConverters._
 
 /**
  * Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
@@ -52,4 +58,23 @@ package object configurable {
   def zonedDateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[ZonedDateTime] =
     viaNonEmptyString[ZonedDateTime](
       catchReadError(ZonedDateTime.parse(_, formatter)), _.format(formatter))
+
+  def genericMapReader[K, V](keyParser: String => Either[FailureReason, K])(implicit readerV: Derivation[Lazy[ConfigReader[V]]]): ConfigReader[Map[K, V]] =
+    ConfigReader.fromCursor { cursor =>
+      cursor.asMap.right.flatMap { map =>
+        map.foldLeft[Either[ConfigReaderFailures, Map[K, V]]](Right(Map.empty)) {
+          case (acc, (key, valueCursor)) =>
+            val eitherKeyOrError = cursor.scopeFailure(keyParser(key))
+            val eitherValueOrError = readerV.value.value.from(valueCursor)
+            combineResults(acc, combineResults(eitherKeyOrError, eitherValueOrError)(_ -> _))(_ + _)
+        }
+      }
+    }
+
+  def genericMapWriter[K, V](keyFormatter: K => String)(implicit writerV: Derivation[Lazy[ConfigWriter[V]]]): ConfigWriter[Map[K, V]] =
+    ConfigWriter.fromFunction[Map[K, V]](map =>
+      ConfigValueFactory.fromMap(map.map {
+        case (key, value) =>
+          keyFormatter(key) -> writerV.value.value.to(value)
+      }.asJava))
 }
