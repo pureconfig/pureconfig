@@ -1,3 +1,8 @@
+### 0.9.2 (unreleased)
+
+- New features
+  - Added support for creating reader/writer for generic map.
+
 ### 0.9.1 (Mar 22, 2018)
 
 - New features
