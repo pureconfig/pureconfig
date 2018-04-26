@@ -32,6 +32,8 @@ Additionally, PureConfig also handles the following collections and composite Sc
 - `Option` for optional values, i.e. values that can or cannot be in the configuration, of types on this list;
 - collections implementing the `TraversableOnce` trait, where the type of the elements is on this list;
 - `Map`s from `String` keys to any value type that is on this list;
+- `Map`s from types convertible to `String` to any value type that is on this list (must be configured first - see
+  [Configurable Converters](configurable-converters.html));
 - `shapeless.HList`s of elements whose type is on this list;
 - case classes;
 - sealed families of case classes (ADTs).
