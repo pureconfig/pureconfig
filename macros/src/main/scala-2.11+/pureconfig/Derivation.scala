@@ -53,7 +53,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
     if (!isDerivationEnabled || !isHeadImplicitADerivation) {
       // when not present, simply render the base `Derivation` constructor with `implcitly[A]`. This results in the same
       // behavior as without `Derivation` (apart from the extra wrapper).
-      q"_root_.pureconfig.Derivation.Successful(implicitly[${weakTypeOf[A]}])"
+      q"_root_.pureconfig.Derivation.Successful(_root_.scala.Predef.implicitly[${weakTypeOf[A]}])"
 
     } else {
       // if `isRootDerivation` is `false`, then this is a `Derivation` triggered inside another `Derivation`
