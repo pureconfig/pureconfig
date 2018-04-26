@@ -21,6 +21,6 @@ class DerivationMacros(val c: whitebox.Context) {
 
   // Derivations are not supported on Scala 2.10. This is a shim executing a regular implicit search.
   def materializeDerivation[A: WeakTypeTag]: Tree = {
-    q"_root_.pureconfig.Derivation.Successful(implicitly[${weakTypeOf[A]}])"
+    q"_root_.pureconfig.Derivation.Successful(_root_.scala.Predef.implicitly[${weakTypeOf[A]}])"
   }
 }
