@@ -4,9 +4,8 @@ name := "pureconfig-akka"
 crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.19",
-  Dependencies.scalaMacrosParadise,
-  Dependencies.scalaTest)
+  "com.typesafe.akka" %% "akka-actor" % "2.5.12",
+  Dependencies.scalaMacrosParadise)
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")),

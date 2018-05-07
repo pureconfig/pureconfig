@@ -1,9 +1,7 @@
 name := "pureconfig-scala-xml"
 
 libraryDependencies ++= Seq(
-  Dependencies.scalaMacrosParadise,
-  Dependencies.scalaTest,
-  Dependencies.scalaCheck)
+  Dependencies.scalaMacrosParadise)
 
 // on scala 2.11+, pull in newer scala-xml library
 libraryDependencies ++= {

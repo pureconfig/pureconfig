@@ -3,10 +3,9 @@ package pureconfig
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
-import org.joda.time.format.ISODateTimeFormat
+import org.scalacheck.Arbitrary
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
-import pureconfig.arbitrary._
 import pureconfig.error.{ KeyNotFound, WrongType }
 
 class ProductConvertersSuite extends BaseSuite {
@@ -17,14 +16,21 @@ class ProductConvertersSuite extends BaseSuite {
   case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
 
   /* A configuration with a field of a type that is unknown to `ConfigConvert` */
-  case class ConfigWithUnknownType(d: org.joda.time.DateTime)
+  class MyType(myField: String) {
+    def getMyField: String = myField
+    override def equals(obj: Any): Boolean = obj match {
+      case mt: MyType => myField.equals(mt.getMyField)
+      case _ => false
+    }
+  }
+  case class ConfigWithUnknownType(d: MyType)
 
   // tests
 
   checkArbitrary[FlatConfig]
 
-  implicit val dateConfigConvert = ConfigConvert.viaString[org.joda.time.DateTime](
-    catchReadError(org.joda.time.DateTime.parse), ISODateTimeFormat.dateTime().print)
+  implicit val arbMyType = Arbitrary(Arbitrary.arbitrary[String].map(new MyType(_)))
+  implicit val myTypeConvert = ConfigConvert.viaString[MyType](catchReadError(new MyType(_)), _.getMyField)
   checkArbitrary[ConfigWithUnknownType]
 
   it should s"be able to override all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in forAll {

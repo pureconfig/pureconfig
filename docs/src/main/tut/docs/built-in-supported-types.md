@@ -36,6 +36,7 @@ Additionally, PureConfig also handles the following collections and composite Sc
   [Configurable Converters](configurable-converters.html));
 - `shapeless.HList`s of elements whose type is on this list;
 - case classes;
+- classes with only public `val` and `var` parameters in their constructor (Scala 2.11+);
 - sealed families of case classes (ADTs).
 
 The support for these types already covers most simple cases, such as the one shown in [Quick Start](index.html). See

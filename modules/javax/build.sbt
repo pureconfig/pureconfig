@@ -1,8 +1,7 @@
 name := "pureconfig-javax"
 
 libraryDependencies ++= Seq(
-  Dependencies.scalaMacrosParadise,
-  Dependencies.scalaTest)
+  Dependencies.scalaMacrosParadise)
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")))

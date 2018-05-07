@@ -1,10 +1,8 @@
 name := "pureconfig-http4s"
 
 libraryDependencies ++= Seq(
-  "org.http4s" %% "http4s-core" % "0.18.4",
-  Dependencies.scalaMacrosParadise,
-  Dependencies.scalaTest
-)
+  "org.http4s" %% "http4s-core" % "0.18.10",
+  Dependencies.scalaMacrosParadise)
 
 // http4s 0.18.0 isn't published for Scala 2.10
 crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }

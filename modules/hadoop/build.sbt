@@ -1,9 +1,8 @@
 name := "pureconfig-hadoop"
 
 libraryDependencies ++= Seq(
-  "org.apache.hadoop" % "hadoop-common" % "3.0.0" % "provided,tut",
-  Dependencies.scalaMacrosParadise,
-  Dependencies.scalaTest)
+  "org.apache.hadoop" % "hadoop-common" % "3.1.0" % "provided,tut",
+  Dependencies.scalaMacrosParadise)
 
 developers := List(
   Developer("lmnet", "Yuriy Badalyantc", "lmnet89@gmail.com", url("https://github.com/lmnet")))
