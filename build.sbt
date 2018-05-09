@@ -66,11 +66,6 @@ lazy val commonSettings = Seq(
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 
-  // use sbt <module_name>/test:console to run an ammonite console
-  // not published for Scala 2.12.6 (maybe now there's another way of integrating this?)
-  // libraryDependencies += "com.lihaoyi" % "ammonite" % "1.1.0" % "test" cross CrossVersion.full,
-  // initialCommands in (Test, console) := """ammonite.Main().run()""",
-
   scalariformPreferences := scalariformPreferences.value
     .setPreference(DanglingCloseParenthesis, Prevent)
     .setPreference(DoubleIndentConstructorArguments, true)
