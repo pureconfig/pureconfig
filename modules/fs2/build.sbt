@@ -1,10 +1,9 @@
 name := "pureconfig-fs2"
 
 libraryDependencies ++= Seq(
-  "co.fs2" %% "fs2-core" % "0.10.2",
-  "co.fs2" %% "fs2-io" % "0.10.2",
-  Dependencies.scalaMacrosParadise,
-  Dependencies.scalaTest)
+  "co.fs2" %% "fs2-core" % "0.10.4",
+  "co.fs2" %% "fs2-io" % "0.10.4",
+  Dependencies.scalaMacrosParadise)
 
 // fs2 0.10 isn't published for Scala 2.10
 crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }

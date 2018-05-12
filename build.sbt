@@ -44,8 +44,8 @@ lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
-  scalaVersion := "2.12.4",
-  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.4"),
+  scalaVersion := "2.12.6",
+  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -65,10 +65,6 @@ lazy val commonSettings = Seq(
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
-
-  // use sbt <module_name>/test:console to run an ammonite console
-  libraryDependencies += "com.lihaoyi" % "ammonite" % "1.0.3" % "test" cross CrossVersion.patch,
-  initialCommands in (Test, console) := """ammonite.Main().run()""",
 
   scalariformPreferences := scalariformPreferences.value
     .setPreference(DanglingCloseParenthesis, Prevent)

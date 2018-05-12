@@ -13,7 +13,7 @@ import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.syntax._
 
-class MyInt(var value: Int) {
+class MyInt(value: Int) {
   override def toString: String = s"MyInt($value)"
 }
 

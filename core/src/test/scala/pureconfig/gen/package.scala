@@ -7,7 +7,6 @@ import java.time._
 import java.time.{ Duration => JavaDuration }
 
 import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.configurable.ConfigurableSuite
 import pureconfig.data._
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -61,12 +60,6 @@ package object gen {
 
   val genPercentage: Gen[Percentage] =
     Gen.choose[Int](0, 100).map(Percentage.apply)
-
-  val genJodaDateTime: Gen[org.joda.time.DateTime] =
-    for {
-      dateTime <- ConfigurableSuite.localDateTimeArbitrary.arbitrary
-    } yield new org.joda.time.DateTime(dateTime.getYear, dateTime.getMonthValue, dateTime.getDayOfMonth,
-      dateTime.getHour, dateTime.getMinute, dateTime.getSecond, org.joda.time.DateTimeZone.UTC)
 
   val genJavaBigDecimal: Gen[JavaBigDecimal] = Arbitrary.arbitrary[BigDecimal].map(_.bigDecimal)
 

@@ -44,11 +44,12 @@ and [Overriding Behavior for Types](overriding-behavior-for-types.html) for crea
 `ConfigWriter` also has useful combinators and factory methods to simplify new implementations:
 
 ```tut:silent
-class MyInt(var value: Int) {
+class MyInt(value: Int) {
+  def getValue: Int = value
   override def toString: String = s"MyInt($value)"
 }
 
-implicit val myIntWriter = ConfigWriter[Int].contramap[MyInt](_.value)
+implicit val myIntWriter = ConfigWriter[Int].contramap[MyInt](_.getValue)
 ```
 
 ```tut:book
@@ -58,7 +59,7 @@ ConfigWriter[MyInt].to(new MyInt(1))
 Finally, if you need both the reading and the writing part for a custom type, you can implement a `ConfigConvert`:
 
 ```tut:silent
-implicit val myIntConvert = ConfigConvert[Int].xmap[MyInt](new MyInt(_), _.value)
+implicit val myIntConvert = ConfigConvert[Int].xmap[MyInt](new MyInt(_), _.getValue)
 ```
 
 ```tut:book
