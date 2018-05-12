@@ -32,7 +32,7 @@ class ValueClassSuite extends BaseSuite {
 
   behavior of "ConfigConvert for Value Classes"
 
-  checkRead[IntWrapper](new IntWrapper(1) -> ConfigWriter.forPrimitive[Int].to(1))
+  checkRead[IntWrapper](ConfigWriter.forPrimitive[Int].to(1) -> new IntWrapper(1))
   checkWrite[IntWrapper](new IntWrapper(1) -> ConfigWriter.forPrimitive[Int].to(1))
 
   "ConfigReader[PrivateFloatValue]" should "not be derivable because the constructor is private" in {

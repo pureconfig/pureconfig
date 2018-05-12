@@ -41,11 +41,11 @@ class BasicConvertersSuite extends BaseSuite {
     ConfigConvert[Duration].to(Duration.Inf))
 
   checkReadString[FiniteDuration](
-    5.seconds -> "5 seconds",
-    28.millis -> "28 ms",
-    28.millis -> "28ms",
-    28.millis -> "28 milliseconds",
-    1.day -> "1d")
+    "5 seconds" -> 5.seconds,
+    "28 ms" -> 28.millis,
+    "28ms" -> 28.millis,
+    "28 milliseconds" -> 28.millis,
+    "1d" -> 1.day)
 
   checkArbitrary[Instant]
 
@@ -56,10 +56,10 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[Period]
 
   checkReadString[Period](
-    Period.ofDays(1) -> "1d",
-    Period.ofWeeks(4) -> "4 weeks",
-    Period.ofMonths(13) -> "13 months",
-    Period.ofYears(2) -> "2y")
+    "1d" -> Period.ofDays(1),
+    "4 weeks" -> Period.ofWeeks(4),
+    "13 months" -> Period.ofMonths(13),
+    "2y" -> Period.ofYears(2))
 
   checkArbitrary[Year]
 
@@ -71,10 +71,10 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Boolean]
   checkRead[Boolean](
-    true -> ConfigValueFactory.fromAnyRef("yes"),
-    true -> ConfigValueFactory.fromAnyRef("on"),
-    false -> ConfigValueFactory.fromAnyRef("no"),
-    false -> ConfigValueFactory.fromAnyRef("off"))
+    ConfigValueFactory.fromAnyRef("yes") -> true,
+    ConfigValueFactory.fromAnyRef("on") -> true,
+    ConfigValueFactory.fromAnyRef("no") -> false,
+    ConfigValueFactory.fromAnyRef("off") -> false)
 
   checkArbitrary[Double]
   checkArbitrary2[Double, Percentage](_.toDoubleFraction)
@@ -101,8 +101,8 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[File]
 
-  checkRead[DayOfWeek]((DayOfWeek.MONDAY, ConfigValueFactory.fromAnyRef("MONDAY")))
-  checkRead[Month]((Month.JULY, ConfigValueFactory.fromAnyRef("JULY")))
+  checkReadString[DayOfWeek]("MONDAY" -> DayOfWeek.MONDAY)
+  checkReadString[Month]("JULY" -> Month.JULY)
   checkFailure[DayOfWeek, CannotConvert](
     ConfigValueFactory.fromAnyRef("thursday"), // lowercase string vs upper case enum
     ConfigValueFactory.fromAnyRef("this is not a day")) // no such value
@@ -112,8 +112,8 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[immutable.List[Float]]
   checkRead[immutable.List[Int]](
     // order of keys maintained
-    (List(2, 3, 1), ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava)),
-    (List(4, 2), ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava)))
+    ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava) -> List(2, 3, 1),
+    ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava) -> List(4, 2))
   checkFailure[immutable.List[Int], CannotConvert](
     ConfigValueFactory.fromMap(Map("1" -> 1, "a" -> 2).asJava))
 
@@ -128,7 +128,7 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[immutable.Set[Double]]
   checkRead[immutable.Set[Int]](
-    (Set(4, 5, 6), ConfigValueFactory.fromMap(Map("1" -> 4, "2" -> 5, "3" -> 6).asJava)))
+    ConfigValueFactory.fromMap(Map("1" -> 4, "2" -> 5, "3" -> 6).asJava) -> Set(4, 5, 6))
 
   checkArbitrary[immutable.Stream[String]]
 
@@ -138,22 +138,22 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Option[Int]]
 
-  checkRead[Pattern](Pattern.compile("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
+  checkReadString[Pattern]("(a|b)" -> Pattern.compile("(a|b)"))
 
-  checkRead[Regex](new Regex("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
+  checkReadString[Regex]("(a|b)" -> new Regex("(a|b)"))
 
   checkFailure[Pattern, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
   checkFailure[Regex, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
 
-  checkRead[URL](
-    new URL("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
+  checkReadString[URL](
+    "http://host/path?with=query&param" -> new URL("http://host/path?with=query&param"))
 
-  checkRead[URI](
-    new URI("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
+  checkReadString[URI](
+    "http://host/path?with=query&param" -> new URI("http://host/path?with=query&param"))
 
   checkRead[ConfigList](
     ConfigValueFactory.fromIterable(List().asJava) -> ConfigValueFactory.fromIterable(List().asJava),
-    ConfigValueFactory.fromIterable(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
+    ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava) -> ConfigValueFactory.fromIterable(List(1, 2, 3).asJava))
 
   checkRead[ConfigValue](
     ConfigValueFactory.fromAnyRef(4) -> ConfigValueFactory.fromAnyRef(4),
@@ -164,9 +164,9 @@ class BasicConvertersSuite extends BaseSuite {
     val conf = ConfigFactory.parseString("""{ v1 = 3, v2 = 4 }""".stripMargin)
 
     checkRead[ConfigObject](
-      ConfigValueFactory.fromMap(Map("v1" -> 3, "v2" -> 4).asJava) -> conf.root().asInstanceOf[ConfigValue])
+      conf.root() -> ConfigValueFactory.fromMap(Map("v1" -> 3, "v2" -> 4).asJava))
 
     checkRead[Config](
-      conf -> conf.root().asInstanceOf[ConfigValue])
+      conf.root() -> conf)
   }
 }

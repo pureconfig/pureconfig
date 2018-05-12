@@ -21,6 +21,6 @@ class HListConvertersSuite extends BaseSuite {
 
   // Check HNil
   val emptyConfigList = ConfigValueFactory.fromIterable(List().asJava)
-  checkRead[HNil](HNil -> emptyConfigList)
+  checkRead[HNil](emptyConfigList -> HNil)
   checkWrite[HNil](HNil -> emptyConfigList)
 }

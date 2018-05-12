@@ -27,10 +27,8 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * representations.
    */
   def checkArbitrary[T](implicit cc: ConfigConvert[T], arb: Arbitrary[T], tpe: TypeTag[T], equality: Equality[T]): Unit =
-    it should s"read an arbitrary ${tpe.tpe}" in forAll {
-      (t: T) =>
-        val result = cc.from(cc.to(t))
-        result.right.value shouldEqual t
+    it should s"read an arbitrary ${tpe.tpe}" in forAll { t: T =>
+      cc.from(cc.to(t)).right.value shouldEqual t
     }
 
   /**
@@ -52,36 +50,34 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
    * @param arb the `Arbitrary` used to generate values to write a `ConfigValue` via `cw`
    */
   def checkArbitrary2[T1, T2](f: T2 => T1)(implicit cr: ConfigConvert[T1], cw: ConfigConvert[T2], arb: Arbitrary[T2], tpe1: TypeTag[T1], tpe2: TypeTag[T2], equality: Equality[T1]): Unit =
-    it should s"read a ${tpe1.tpe} from an arbitrary ${tpe2.tpe}" in forAll {
-      (t2: T2) => cr.from(cw.to(t2)).right.value shouldEqual f(t2)
+    it should s"read a ${tpe1.tpe} from an arbitrary ${tpe2.tpe}" in forAll { t2: T2 =>
+      cr.from(cw.to(t2)).right.value shouldEqual f(t2)
     }
 
   /**
    * For each pair of value of type `T` and `ConfigValue`, check that `ConfigReader[T].from`
    * successfully converts the latter into to former. Useful to test specific values
    */
-  def checkRead[T](valuesToReprs: (T, ConfigValue)*)(implicit cr: ConfigReader[T], tpe: TypeTag[T], equality: Equality[T]): Unit =
-    for ((value, repr) <- valuesToReprs) {
-      it should s"read the value $value of type ${tpe.tpe} " +
-        s"from ${repr.render(ConfigRenderOptions.concise())}" in {
-          cr.from(repr).right.value shouldEqual value
-        }
+  def checkRead[T: Equality](reprsToValues: (ConfigValue, T)*)(implicit cr: ConfigReader[T], tpe: TypeTag[T]): Unit =
+    for ((repr, value) <- reprsToValues) {
+      it should s"read the value $value of type ${tpe.tpe} from ${repr.render(ConfigRenderOptions.concise())}" in {
+        cr.from(repr).right.value shouldEqual value
+      }
     }
 
   /** Similar to [[checkRead()]] but work on ConfigValues of type String */
-  def checkReadString[T](valuesToStr: (T, String)*)(implicit cr: ConfigReader[T], tpe: TypeTag[T], equality: Equality[T]): Unit =
-    checkRead[T](valuesToStr.map { case (t, s) => t -> ConfigValueFactory.fromAnyRef(s) }: _*)(cr, tpe, equality)
+  def checkReadString[T: ConfigReader: TypeTag: Equality](strsToValues: (String, T)*): Unit =
+    checkRead[T](strsToValues.map { case (s, t) => ConfigValueFactory.fromAnyRef(s) -> t }: _*)
 
   /**
    * For each pair of value of type `T` and `ConfigValue`, check that `ConfigWriter[T].to`
    * successfully converts the former into the latter. Useful to test specific values
    */
-  def checkWrite[T](valuesToReprs: (T, ConfigValue)*)(implicit cw: ConfigWriter[T], tpe: TypeTag[T], equality: Equality[T]): Unit =
+  def checkWrite[T: Equality](valuesToReprs: (T, ConfigValue)*)(implicit cw: ConfigWriter[T], tpe: TypeTag[T]): Unit =
     for ((value, repr) <- valuesToReprs) {
-      it should s"write the value $value of type ${tpe.tpe} " +
-        s"to ${repr.render(ConfigRenderOptions.concise())}" in {
-          cw.to(value) shouldEqual repr
-        }
+      it should s"write the value $value of type ${tpe.tpe} to ${repr.render(ConfigRenderOptions.concise())}" in {
+        cw.to(value) shouldEqual repr
+      }
     }
 
   /**
