@@ -1,7 +1,7 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigDecimal => JavaBigDecimal, BigInteger }
+import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
@@ -14,10 +14,9 @@ import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.equality._
 import pureconfig.error.{ CannotConvert, EmptyStringFound, WrongSizeString }
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.{ Duration, FiniteDuration, _ }
 import scala.util.matching.Regex
 
 class BasicConvertersSuite extends BaseSuite {
@@ -41,6 +40,13 @@ class BasicConvertersSuite extends BaseSuite {
     ConfigConvert[Duration].to(Duration.MinusInf),
     ConfigConvert[Duration].to(Duration.Inf))
 
+  checkReadString[FiniteDuration](
+    5.seconds -> "5 seconds",
+    28.millis -> "28 ms",
+    28.millis -> "28ms",
+    28.millis -> "28 milliseconds",
+    1.day -> "1d")
+
   checkArbitrary[Instant]
 
   checkArbitrary[ZoneOffset]
@@ -48,6 +54,12 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[ZoneId]
 
   checkArbitrary[Period]
+
+  checkReadString[Period](
+    Period.ofDays(1) -> "1d",
+    Period.ofWeeks(4) -> "4 weeks",
+    Period.ofMonths(13) -> "13 months",
+    Period.ofYears(2) -> "2y")
 
   checkArbitrary[Year]
 

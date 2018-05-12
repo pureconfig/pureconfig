@@ -10,9 +10,10 @@ import scala.util.Try
 import pureconfig.error.{ CannotConvert, FailureReason }
 
 /**
- * Utility functions for converting a Duration to a String and vice versa.
+ * Utility functions for converting a `String` to a `Duration` and vice versa. The parser accepts the HOCON unit
+ * syntax.
  */
-private[pureconfig] object DurationConvert {
+private[pureconfig] object DurationUtils {
   /**
    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
    */
