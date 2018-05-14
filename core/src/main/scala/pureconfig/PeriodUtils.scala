@@ -48,15 +48,12 @@ private[pureconfig] object PeriodUtils {
     }
   }
 
-  private def periodOf(n: Int, unit: ChronoUnit): Either[String, Period] = {
-    if (unit.isTimeBased) Left(unit + " cannot be converted to a java.time.Period")
-    unit match {
-      case DAYS => Right(Period.ofDays(n))
-      case WEEKS => Right(Period.ofWeeks(n))
-      case MONTHS => Right(Period.ofMonths(n))
-      case YEARS => Right(Period.ofYears(n))
-      case _ => Left(unit + " cannot be converted to a java.time.Period")
-    }
+  private def periodOf(n: Int, unit: ChronoUnit): Either[String, Period] = unit match {
+    case DAYS => Right(Period.ofDays(n))
+    case WEEKS => Right(Period.ofWeeks(n))
+    case MONTHS => Right(Period.ofMonths(n))
+    case YEARS => Right(Period.ofYears(n))
+    case _ => Left(unit + " cannot be converted to a java.time.Period") // cannot happen
   }
 
   private def getUnits(s: String): String =

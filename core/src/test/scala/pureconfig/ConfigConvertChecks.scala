@@ -80,6 +80,26 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPro
       }
     }
 
+  /** Similar to [[checkWrite()]] but work on ConfigValues of type String */
+  def checkWriteString[T: ConfigWriter: TypeTag: Equality](valuesToStrs: (T, String)*): Unit =
+    checkWrite[T](valuesToStrs.map { case (t, s) => t -> ConfigValueFactory.fromAnyRef(s) }: _*)
+
+  /**
+   * For each pair of value of type `T` and `ConfigValue`, check that `ConfigReader[T].from`
+   * successfully converts the latter into to former and `ConfigWriter[T].to` successfully converts the former into the
+   * latter.
+   */
+  def checkReadWrite[T: ConfigReader: ConfigWriter: TypeTag: Equality](reprsValues: (ConfigValue, T)*): Unit = {
+    checkRead[T](reprsValues: _*)
+    checkWrite[T](reprsValues.map(_.swap): _*)
+  }
+
+  /** Similar to [[checkReadWrite()]] but work on ConfigValues of type String */
+  def checkReadWriteString[T: ConfigReader: ConfigWriter: TypeTag: Equality](strsValues: (String, T)*): Unit = {
+    checkReadString[T](strsValues: _*)
+    checkWriteString[T](strsValues.map(_.swap): _*)
+  }
+
   /**
    * Check that `cc` returns error of type `E` when trying to read each value passed with `values`
    *

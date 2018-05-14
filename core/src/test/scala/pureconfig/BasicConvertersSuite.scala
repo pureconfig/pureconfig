@@ -20,7 +20,6 @@ import scala.concurrent.duration.{ Duration, FiniteDuration, _ }
 import scala.util.matching.Regex
 
 class BasicConvertersSuite extends BaseSuite {
-
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
 
   behavior of "ConfigConvert"
@@ -60,6 +59,10 @@ class BasicConvertersSuite extends BaseSuite {
     "4 weeks" -> Period.ofWeeks(4),
     "13 months" -> Period.ofMonths(13),
     "2y" -> Period.ofYears(2))
+
+  checkFailure[Period, CannotConvert](
+    ConfigValueFactory.fromAnyRef("4kb"),
+    ConfigValueFactory.fromAnyRef("x weeks"))
 
   checkArbitrary[Year]
 
@@ -101,8 +104,8 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[File]
 
-  checkReadString[DayOfWeek]("MONDAY" -> DayOfWeek.MONDAY)
-  checkReadString[Month]("JULY" -> Month.JULY)
+  checkReadWriteString[DayOfWeek]("MONDAY" -> DayOfWeek.MONDAY)
+  checkReadWriteString[Month]("JULY" -> Month.JULY)
   checkFailure[DayOfWeek, CannotConvert](
     ConfigValueFactory.fromAnyRef("thursday"), // lowercase string vs upper case enum
     ConfigValueFactory.fromAnyRef("this is not a day")) // no such value
@@ -138,24 +141,23 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Option[Int]]
 
-  checkReadString[Pattern]("(a|b)" -> Pattern.compile("(a|b)"))
-
-  checkReadString[Regex]("(a|b)" -> new Regex("(a|b)"))
-
+  checkReadWriteString[Pattern]("(a|b)" -> Pattern.compile("(a|b)"))
   checkFailure[Pattern, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
+
+  checkReadWriteString[Regex]("(a|b)" -> new Regex("(a|b)"))
   checkFailure[Regex, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
 
-  checkReadString[URL](
+  checkReadWriteString[URL](
     "http://host/path?with=query&param" -> new URL("http://host/path?with=query&param"))
 
-  checkReadString[URI](
+  checkReadWriteString[URI](
     "http://host/path?with=query&param" -> new URI("http://host/path?with=query&param"))
 
-  checkRead[ConfigList](
+  checkReadWrite[ConfigList](
     ConfigValueFactory.fromIterable(List().asJava) -> ConfigValueFactory.fromIterable(List().asJava),
-    ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava) -> ConfigValueFactory.fromIterable(List(1, 2, 3).asJava))
+    ConfigValueFactory.fromIterable(List(1, 2, 3).asJava) -> ConfigValueFactory.fromIterable(List(1, 2, 3).asJava))
 
-  checkRead[ConfigValue](
+  checkReadWrite[ConfigValue](
     ConfigValueFactory.fromAnyRef(4) -> ConfigValueFactory.fromAnyRef(4),
     ConfigValueFactory.fromAnyRef("str") -> ConfigValueFactory.fromAnyRef("str"),
     ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
@@ -163,10 +165,10 @@ class BasicConvertersSuite extends BaseSuite {
   {
     val conf = ConfigFactory.parseString("""{ v1 = 3, v2 = 4 }""".stripMargin)
 
-    checkRead[ConfigObject](
+    checkReadWrite[ConfigObject](
       conf.root() -> ConfigValueFactory.fromMap(Map("v1" -> 3, "v2" -> 4).asJava))
 
-    checkRead[Config](
+    checkReadWrite[Config](
       conf.root() -> conf)
   }
 }
