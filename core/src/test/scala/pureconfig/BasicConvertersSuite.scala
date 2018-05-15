@@ -43,8 +43,12 @@ class BasicConvertersSuite extends BaseSuite {
     "5 seconds" -> 5.seconds,
     "28 ms" -> 28.millis,
     "28ms" -> 28.millis,
+    "28" -> 28.millis,
     "28 milliseconds" -> 28.millis,
     "1d" -> 1.day)
+
+  checkRead[FiniteDuration](
+    ConfigValueFactory.fromAnyRef(28) -> 28.millis)
 
   checkArbitrary[Instant]
 
@@ -56,9 +60,13 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkReadString[Period](
     "1d" -> Period.ofDays(1),
+    "42" -> Period.ofDays(42),
     "4 weeks" -> Period.ofWeeks(4),
     "13 months" -> Period.ofMonths(13),
     "2y" -> Period.ofYears(2))
+
+  checkRead[Period](
+    ConfigValueFactory.fromAnyRef(42) -> Period.ofDays(42))
 
   checkFailure[Period, CannotConvert](
     ConfigValueFactory.fromAnyRef("4kb"),

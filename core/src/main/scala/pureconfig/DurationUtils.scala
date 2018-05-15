@@ -20,7 +20,7 @@ private[pureconfig] object DurationUtils {
   val fromString: String => Either[FailureReason, Duration] = { string =>
     if (string == UndefinedDuration) Right(Duration.Undefined)
     else try {
-      Right(parseDuration(addZeroUnit(justAMinute(itsGreekToMe(string)))))
+      Right(parseDuration(addDefaultUnit(justAMinute(itsGreekToMe(string)))))
     } catch {
       case ex: NumberFormatException =>
         val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
@@ -75,11 +75,12 @@ private[pureconfig] object DurationUtils {
 
   ////////////////////////////////////
 
-  private val zeroRegex = "\\s*[+-]?0+\\s*$".r
+  private val onlyNumberRegex = "\\s*[+-]?[0-9]+\\s*$".r
   private val fauxMuRegex = "([0-9])(\\s*)us(\\s*)$".r
   private val shortMinuteRegex = "([0-9])(\\s*)m(\\s*)$".r
 
-  private val addZeroUnit = { s: String => if (zeroRegex.unapplySeq(s).isDefined) "0d" else s }
+  // To maintain compatibility with Typesafe Config, use "ms" as default unit.
+  private val addDefaultUnit = { s: String => if (onlyNumberRegex.unapplySeq(s).isDefined) s + " ms" else s }
 
   // To maintain compatibility with Typesafe Config, replace "us" with "µs".
   private val itsGreekToMe = fauxMuRegex.replaceSomeIn(_: String, m => Some(s"${m.group(1)}${m.group(2)}µs${m.group(3)}"))
