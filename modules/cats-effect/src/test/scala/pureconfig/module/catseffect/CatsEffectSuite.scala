@@ -8,6 +8,7 @@ import pureconfig.error.{ ConfigReaderException, ConvertFailure }
 import java.nio.file.{ Path, Paths }
 
 import cats.data.NonEmptyList
+import com.typesafe.config.ConfigFactory
 
 class CatsEffectSuite extends BaseSuite {
 
@@ -45,6 +46,22 @@ class CatsEffectSuite extends BaseSuite {
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]
+  }
+
+  it should "run successfully from a Typesafe Config object" in {
+    val config = ConfigFactory.load("application.properties")
+
+    val load = loadConfigF[IO, SomeCaseClass](config)
+
+    load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
+  }
+
+  it should "run successfully from a Typesafe Config object with a namespace" in {
+    val config = ConfigFactory.load("namespaced.properties")
+
+    val load = loadConfigF[IO, SomeCaseClass](config, "somecaseclass")
+
+    load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
 
   "saveConfigToStreamF" should "delay writing to stream until run" in {

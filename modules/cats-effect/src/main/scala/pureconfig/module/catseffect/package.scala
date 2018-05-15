@@ -10,6 +10,7 @@ import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.implicits._
 
+import com.typesafe.config.{ Config => TypesafeConfig }
 import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
 import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
 
@@ -70,6 +71,14 @@ package object catseffect {
    */
   def loadConfigF[F[_], A](path: Path, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     configToF(() => pureconfig.loadConfig[A](path, namespace))
+  }
+
+  def loadConfigF[F[_], A](conf: TypesafeConfig)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+    configToF(() => pureconfig.loadConfig[A](conf))
+  }
+
+  def loadConfigF[F[_], A](conf: TypesafeConfig, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+    configToF(() => pureconfig.loadConfig[A](conf, namespace))
   }
 
   /**
