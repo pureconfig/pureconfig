@@ -38,6 +38,7 @@ lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val squants = module(project) in file("modules/squants")
+lazy val yaml = module(project) in file("modules/yaml")
 
 lazy val commonSettings = Seq(
   organization := "com.github.pureconfig",
