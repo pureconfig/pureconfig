@@ -24,20 +24,20 @@ def module(proj: Project) = proj.
   enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
   dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
-  settings(commonSettings)
+  settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
 lazy val cats = module(project) in file("modules/cats")
+lazy val `cats-effect` = module(project) in file("modules/cats-effect")
 lazy val enum = module(project) in file("modules/enum")
 lazy val enumeratum = module(project) in file("modules/enumeratum")
-lazy val javax = module(project) in file("modules/javax")
-lazy val joda = module(project) in file("modules/joda")
-lazy val scalaxml = module(project) in file("modules/scala-xml")
-lazy val squants = module(project) in file("modules/squants")
-lazy val catseffect = module(project) in file("modules/cats-effect")
-lazy val http4s = module(project) in file("modules/http4s")
 lazy val fs2 = module(project) in file("modules/fs2")
 lazy val hadoop = module(project) in file("modules/hadoop")
+lazy val http4s = module(project) in file("modules/http4s")
+lazy val javax = module(project) in file("modules/javax")
+lazy val joda = module(project) in file("modules/joda")
+lazy val `scala-xml` = module(project) in file("modules/scala-xml")
+lazy val squants = module(project) in file("modules/squants")
 
 lazy val commonSettings = Seq(
   organization := "com.github.pureconfig",
