@@ -1,7 +1,6 @@
 # YAML module for PureConfig
 
-Adds support to PureConfig for reading YAML files as configurations. The module uses the
-[SnakeYAML](https://bitbucket.org/asomov/snakeyaml) to parse YAML documents and reuses the existing PureConfig structure
+Adds support to PureConfig for reading YAML files as configurations. The module uses [SnakeYAML](https://bitbucket.org/asomov/snakeyaml) to parse YAML documents and reuses the existing PureConfig structure
 of `ConfigReader`s and hints to read configurations to domain objects without boilerplate.
 
 ## Add pureconfig-yaml to your project
