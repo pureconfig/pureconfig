@@ -14,7 +14,14 @@ class YamlApiSuite extends BaseSuite {
     Paths.get(URLDecoder.decode(getClass.getResource("/" + path).getFile, "UTF-8"))
 
   case class InnerConf(aa: Int, bb: String)
-  case class Conf(str: String, b: Boolean, s: Set[Int], xs: List[Long], map: Map[String, Double], inner: InnerConf)
+  case class Conf(
+      str: String,
+      b: Boolean,
+      n: BigInt,
+      s: Set[Int],
+      xs: List[Long],
+      map: Map[String, Double],
+      inner: InnerConf)
 
   behavior of "YAML loading"
 
@@ -22,6 +29,7 @@ class YamlApiSuite extends BaseSuite {
     loadYaml[Conf](resourcePath("basic.yaml")) shouldBe Right(Conf(
       "abc",
       true,
+      BigInt("1234567890123456789012345678901234567890"),
       Set(4, 6, 8),
       List(10L, 10000L, 10000000L, 10000000000L),
       Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
@@ -34,6 +42,7 @@ class YamlApiSuite extends BaseSuite {
     loadYamlOrThrow[Conf](resourcePath("basic.yaml")) shouldBe Conf(
       "abc",
       true,
+      BigInt("1234567890123456789012345678901234567890"),
       Set(4, 6, 8),
       List(10L, 10000L, 10000000L, 10000000000L),
       Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
@@ -63,6 +72,7 @@ class YamlApiSuite extends BaseSuite {
       Conf(
         "abc",
         true,
+        BigInt("1234567890123456789012345678901234567890"),
         Set(4, 6, 8),
         List(10L, 10000L, 10000000L, 10000000000L),
         Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
@@ -82,6 +92,7 @@ class YamlApiSuite extends BaseSuite {
       Conf(
         "abc",
         true,
+        BigInt("1234567890123456789012345678901234567890"),
         Set(4, 6, 8),
         List(10L, 10000L, 10000000L, 10000000000L),
         Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),

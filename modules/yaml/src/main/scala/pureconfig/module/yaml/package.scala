@@ -46,10 +46,7 @@ package object yaml {
       case _: java.lang.Integer | _: java.lang.Long | _: java.lang.Double | _: java.lang.String | _: java.lang.Boolean =>
         Right(obj) // these types are supported directly by `ConfigValueFactory.fromAnyRef`
 
-      case i: java.math.BigInteger =>
-        Right(i.longValue(): java.lang.Long)
-
-      case _: java.util.Date | _: java.sql.Date | _: java.sql.Timestamp =>
+      case _: java.util.Date | _: java.sql.Date | _: java.sql.Timestamp | _: java.math.BigInteger =>
         Right(obj.toString)
 
       case ba: Array[Byte] =>
