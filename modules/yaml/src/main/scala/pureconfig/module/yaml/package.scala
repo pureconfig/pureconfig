@@ -1,11 +1,10 @@
 package pureconfig.module
 
-import java.io.{ IOException, Reader }
+import java.io.IOException
 import java.nio.file.{ Files, Path }
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
-import scala.util.Try
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
@@ -67,30 +66,52 @@ package object yaml {
     ConfigValueLocation(path.toUri.toURL, mark.getLine + 1)
   }
 
+  private[this] def using[A <: AutoCloseable, B](resource: => A)(f: A ⇒ B): B = {
+    try f(resource)
+    finally resource.close()
+  }
+
   // Opens and processes a YAML file, converting all exceptions into the most appropriate PureConfig errors.
-  private[this] def handleYamlErrors[A](path: Path)(f: Reader => Either[ConfigReaderFailures, A]): Either[ConfigReaderFailures, A] = {
-    lazy val ioReader = Files.newBufferedReader(path)
-    try f(ioReader)
+  private[this] def handleYamlErrors[A](path: Option[Path])(block: => Either[ConfigReaderFailures, A]): Either[ConfigReaderFailures, A] = {
+    try block
     catch {
-      case ex: IOException => Left(ConfigReaderFailures(CannotReadFile(path, Some(ex))))
+      case ex: IOException if path.isDefined => Left(ConfigReaderFailures(CannotReadFile(path.get, Some(ex))))
       case ex: MarkedYAMLException => Left(ConfigReaderFailures(
-        CannotParse(ex.getProblem, Some(toConfigValueLocation(path, ex.getProblemMark)))))
+        CannotParse(ex.getProblem, path.map(toConfigValueLocation(_, ex.getProblemMark)))))
       case ex: YAMLException => Left(ConfigReaderFailures(CannotParse(ex.getMessage, None)))
       case NonFatal(ex) => Left(ConfigReaderFailures(ThrowableFailure(ex, None)))
-    } finally {
-      Try(ioReader.close())
     }
   }
 
   /**
    * Loads a configuration of type `Config` from the given YAML file.
    *
+   * @param path the path of the YAML file to read
    * @return A `Success` with the configuration if it is possible to create an instance of type
    *         `Config` from the YAML file, else a `Failure` with details on why it isn't possible
    */
   def loadYaml[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
-    handleYamlErrors(path) { ioReader =>
-      val yamlObj = new Yaml(new SafeConstructor()).load(ioReader)
+    handleYamlErrors(Some(path)) {
+      using(Files.newBufferedReader(path)) { ioReader =>
+        val yamlObj = new Yaml(new SafeConstructor()).load(ioReader)
+
+        yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
+          reader.value.from(ConfigCursor(cv, Nil))
+        }
+      }
+    }
+  }
+
+  /**
+   * Loads a configuration of type `Config` from the given string.
+   *
+   * @param content the string containing the YAML document
+   * @return A `Success` with the configuration if it is possible to create an instance of type
+   *         `Config` from `content`, else a `Failure` with details on why it isn't possible
+   */
+  def loadYaml[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+    handleYamlErrors(None) {
+      val yamlObj = new Yaml(new SafeConstructor()).load(content)
 
       yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
         reader.value.from(ConfigCursor(cv, Nil))
@@ -101,6 +122,7 @@ package object yaml {
   /**
    * Loads a configuration of type `Config` from the given YAML file.
    *
+   * @param path the path of the YAML file to read
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
@@ -112,16 +134,55 @@ package object yaml {
   }
 
   /**
+   * Loads a configuration of type `Config` from the given string.
+   *
+   * @param content the string containing the YAML document
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadYamlOrThrow[Config: ClassTag](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+    loadYaml(content) match {
+      case Right(config) => config
+      case Left(failures) => throw new ConfigReaderException[Config](failures)
+    }
+  }
+
+  /**
    * Loads a configuration of type `Config` from the given multi-document YAML file. `Config` must have a
    * `ConfigReader` supporting reading from config lists.
    *
+   * @param path the path of the YAML file to read
    * @return A `Success` with the configuration if it is possible to create an instance of type
    *         `Config` from the multi-document YAML file, else a `Failure` with details on why it
    *         isn't possible
    */
   def loadYamls[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
-    handleYamlErrors(path) { ioReader =>
-      val yamlObjs = new Yaml(new SafeConstructor()).loadAll(ioReader)
+    handleYamlErrors(Some(path)) {
+      using(Files.newBufferedReader(path)) { ioReader =>
+        val yamlObjs = new Yaml(new SafeConstructor()).loadAll(ioReader)
+
+        yamlObjs.asScala.map(yamlObjToConfigValue)
+          .foldRight(Right(Nil): Either[ConfigReaderFailures, List[AnyRef]])(combineResults(_, _)(_ :: _))
+          .right.flatMap { cvs =>
+            val cl = ConfigValueFactory.fromAnyRef(cvs.asJava)
+            reader.value.from(ConfigCursor(cl, Nil))
+          }
+      }
+    }
+  }
+
+  /**
+   * Loads a configuration of type `Config` from the given multi-document string. `Config` must have a
+   * `ConfigReader` supporting reading from config lists.
+   *
+   * @param content the string containing the YAML documents
+   * @return A `Success` with the configuration if it is possible to create an instance of type
+   *         `Config` from the multi-document string, else a `Failure` with details on why it
+   *         isn't possible
+   */
+  def loadYamls[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+    handleYamlErrors(None) {
+      val yamlObjs = new Yaml(new SafeConstructor()).loadAll(content)
 
       yamlObjs.asScala.map(yamlObjToConfigValue)
         .foldRight(Right(Nil): Either[ConfigReaderFailures, List[AnyRef]])(combineResults(_, _)(_ :: _))
@@ -136,11 +197,27 @@ package object yaml {
    * Loads a configuration of type `Config` from the given multi-document YAML file. `Config` must have a
    * `ConfigReader` supporting reading from config lists.
    *
+   * @param path the path of the YAML file to read
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
   def loadYamlsOrThrow[Config: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     loadYamls(path) match {
+      case Right(config) => config
+      case Left(failures) => throw new ConfigReaderException[Config](failures)
+    }
+  }
+
+  /**
+   * Loads a configuration of type `Config` from the given multi-document string. `Config` must have a
+   * `ConfigReader` supporting reading from config lists.
+   *
+   * @param content the string containing the YAML documents
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadYamlsOrThrow[Config: ClassTag](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+    loadYamls(content) match {
       case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[Config](failures)
     }
