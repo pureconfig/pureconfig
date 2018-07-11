@@ -1,6 +1,5 @@
 package pureconfig.module.joda
 
-import com.typesafe.config.ConfigValueFactory
 import org.joda.time._
 import org.scalacheck.Arbitrary
 import JodaSuite._
@@ -18,9 +17,8 @@ class JodaSuite extends BaseSuite {
 
   checkArbitrary[DateTimeZone]
 
-  checkRead[DateTimeFormatter](
-    DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ") ->
-      ConfigValueFactory.fromAnyRef("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ"))
+  checkReadString[DateTimeFormatter](
+    "yyyy-MM-dd'T'HH:mm:ss.SSSZZZ" -> DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ"))
 }
 
 object JodaSuite {

@@ -1,7 +1,7 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigDecimal => JavaBigDecimal, BigInteger }
+import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
 import java.net.{ URI, URL }
 import java.nio.file.Path
 import java.time._
@@ -14,14 +14,12 @@ import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.equality._
 import pureconfig.error.{ CannotConvert, EmptyStringFound, WrongSizeString }
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.{ Duration, FiniteDuration, _ }
 import scala.util.matching.Regex
 
 class BasicConvertersSuite extends BaseSuite {
-
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
 
   behavior of "ConfigConvert"
@@ -41,6 +39,17 @@ class BasicConvertersSuite extends BaseSuite {
     ConfigConvert[Duration].to(Duration.MinusInf),
     ConfigConvert[Duration].to(Duration.Inf))
 
+  checkReadString[FiniteDuration](
+    "5 seconds" -> 5.seconds,
+    "28 ms" -> 28.millis,
+    "28ms" -> 28.millis,
+    "28" -> 28.millis,
+    "28 milliseconds" -> 28.millis,
+    "1d" -> 1.day)
+
+  checkRead[FiniteDuration](
+    ConfigValueFactory.fromAnyRef(28) -> 28.millis)
+
   checkArbitrary[Instant]
 
   checkArbitrary[ZoneOffset]
@@ -48,6 +57,20 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[ZoneId]
 
   checkArbitrary[Period]
+
+  checkReadString[Period](
+    "1d" -> Period.ofDays(1),
+    "42" -> Period.ofDays(42),
+    "4 weeks" -> Period.ofWeeks(4),
+    "13 months" -> Period.ofMonths(13),
+    "2y" -> Period.ofYears(2))
+
+  checkRead[Period](
+    ConfigValueFactory.fromAnyRef(42) -> Period.ofDays(42))
+
+  checkFailure[Period, CannotConvert](
+    ConfigValueFactory.fromAnyRef("4kb"),
+    ConfigValueFactory.fromAnyRef("x weeks"))
 
   checkArbitrary[Year]
 
@@ -59,10 +82,10 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Boolean]
   checkRead[Boolean](
-    true -> ConfigValueFactory.fromAnyRef("yes"),
-    true -> ConfigValueFactory.fromAnyRef("on"),
-    false -> ConfigValueFactory.fromAnyRef("no"),
-    false -> ConfigValueFactory.fromAnyRef("off"))
+    ConfigValueFactory.fromAnyRef("yes") -> true,
+    ConfigValueFactory.fromAnyRef("on") -> true,
+    ConfigValueFactory.fromAnyRef("no") -> false,
+    ConfigValueFactory.fromAnyRef("off") -> false)
 
   checkArbitrary[Double]
   checkArbitrary2[Double, Percentage](_.toDoubleFraction)
@@ -89,8 +112,8 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[File]
 
-  checkRead[DayOfWeek]((DayOfWeek.MONDAY, ConfigValueFactory.fromAnyRef("MONDAY")))
-  checkRead[Month]((Month.JULY, ConfigValueFactory.fromAnyRef("JULY")))
+  checkReadWriteString[DayOfWeek]("MONDAY" -> DayOfWeek.MONDAY)
+  checkReadWriteString[Month]("JULY" -> Month.JULY)
   checkFailure[DayOfWeek, CannotConvert](
     ConfigValueFactory.fromAnyRef("thursday"), // lowercase string vs upper case enum
     ConfigValueFactory.fromAnyRef("this is not a day")) // no such value
@@ -100,8 +123,8 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[immutable.List[Float]]
   checkRead[immutable.List[Int]](
     // order of keys maintained
-    (List(2, 3, 1), ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava)),
-    (List(4, 2), ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava)))
+    ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava) -> List(2, 3, 1),
+    ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava) -> List(4, 2))
   checkFailure[immutable.List[Int], CannotConvert](
     ConfigValueFactory.fromMap(Map("1" -> 1, "a" -> 2).asJava))
 
@@ -116,7 +139,7 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[immutable.Set[Double]]
   checkRead[immutable.Set[Int]](
-    (Set(4, 5, 6), ConfigValueFactory.fromMap(Map("1" -> 4, "2" -> 5, "3" -> 6).asJava)))
+    ConfigValueFactory.fromMap(Map("1" -> 4, "2" -> 5, "3" -> 6).asJava) -> Set(4, 5, 6))
 
   checkArbitrary[immutable.Stream[String]]
 
@@ -126,24 +149,23 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Option[Int]]
 
-  checkRead[Pattern](Pattern.compile("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
-
-  checkRead[Regex](new Regex("(a|b)") -> ConfigValueFactory.fromAnyRef("(a|b)"))
-
+  checkReadWriteString[Pattern]("(a|b)" -> Pattern.compile("(a|b)"))
   checkFailure[Pattern, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
+
+  checkReadWriteString[Regex]("(a|b)" -> new Regex("(a|b)"))
   checkFailure[Regex, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
 
-  checkRead[URL](
-    new URL("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
+  checkReadWriteString[URL](
+    "http://host/path?with=query&param" -> new URL("http://host/path?with=query&param"))
 
-  checkRead[URI](
-    new URI("http://host/path?with=query&param") -> ConfigValueFactory.fromAnyRef("http://host/path?with=query&param"))
+  checkReadWriteString[URI](
+    "http://host/path?with=query&param" -> new URI("http://host/path?with=query&param"))
 
-  checkRead[ConfigList](
+  checkReadWrite[ConfigList](
     ConfigValueFactory.fromIterable(List().asJava) -> ConfigValueFactory.fromIterable(List().asJava),
-    ConfigValueFactory.fromIterable(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
+    ConfigValueFactory.fromIterable(List(1, 2, 3).asJava) -> ConfigValueFactory.fromIterable(List(1, 2, 3).asJava))
 
-  checkRead[ConfigValue](
+  checkReadWrite[ConfigValue](
     ConfigValueFactory.fromAnyRef(4) -> ConfigValueFactory.fromAnyRef(4),
     ConfigValueFactory.fromAnyRef("str") -> ConfigValueFactory.fromAnyRef("str"),
     ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
@@ -151,10 +173,10 @@ class BasicConvertersSuite extends BaseSuite {
   {
     val conf = ConfigFactory.parseString("""{ v1 = 3, v2 = 4 }""".stripMargin)
 
-    checkRead[ConfigObject](
-      ConfigValueFactory.fromMap(Map("v1" -> 3, "v2" -> 4).asJava) -> conf.root().asInstanceOf[ConfigValue])
+    checkReadWrite[ConfigObject](
+      conf.root() -> ConfigValueFactory.fromMap(Map("v1" -> 3, "v2" -> 4).asJava))
 
-    checkRead[Config](
-      conf -> conf.root().asInstanceOf[ConfigValue])
+    checkReadWrite[Config](
+      conf.root() -> conf)
   }
 }

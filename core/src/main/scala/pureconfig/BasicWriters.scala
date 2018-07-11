@@ -83,8 +83,8 @@ trait JavaTimeWriters {
  */
 trait DurationWriters {
 
-  implicit val durationConfigWriter = ConfigWriter.toString[Duration](DurationConvert.fromDuration)
-  implicit val finiteDurationConfigWriter = ConfigWriter.toString[FiniteDuration](DurationConvert.fromDuration)
+  implicit val durationConfigWriter = ConfigWriter.toString[Duration](DurationUtils.fromDuration)
+  implicit val finiteDurationConfigWriter = ConfigWriter.toString[FiniteDuration](DurationUtils.fromDuration)
 }
 
 /**
