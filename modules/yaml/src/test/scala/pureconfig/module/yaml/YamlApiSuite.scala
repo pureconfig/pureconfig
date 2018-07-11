@@ -13,6 +13,9 @@ class YamlApiSuite extends BaseSuite {
   def resourcePath(path: String): Path =
     Paths.get(URLDecoder.decode(getClass.getResource("/" + path).getFile, "UTF-8"))
 
+  def resourceContents(path: String): String =
+    new String(Files.readAllBytes(resourcePath(path)))
+
   case class InnerConf(aa: Int, bb: String)
   case class Conf(
       str: String,
@@ -34,14 +37,10 @@ class YamlApiSuite extends BaseSuite {
       List(10L, 10000L, 10000000L, 10000000000L),
       Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
       InnerConf(42, "def")))
-
-    loadYaml[Conf](Paths.get("nonexisting.yaml")) should failWithType[CannotReadFile]
   }
 
   it should "loadYaml from a string" in {
-    val contents = new String(Files.readAllBytes(resourcePath("basic.yaml")))
-
-    loadYaml[Conf](contents) shouldBe Right(Conf(
+    loadYaml[Conf](resourceContents("basic.yaml")) shouldBe Right(Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -60,14 +59,10 @@ class YamlApiSuite extends BaseSuite {
       List(10L, 10000L, 10000000L, 10000000000L),
       Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
       InnerConf(42, "def"))
-
-    a[ConfigReaderException[_]] should be thrownBy loadYamlOrThrow[Conf](Paths.get("nonexisting.yaml"))
   }
 
   it should "loadYamlOrThrow from a string" in {
-    val contents = new String(Files.readAllBytes(resourcePath("basic.yaml")))
-
-    loadYamlOrThrow[Conf](contents) shouldBe Conf(
+    loadYamlOrThrow[Conf](resourceContents("basic.yaml")) shouldBe Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -75,16 +70,6 @@ class YamlApiSuite extends BaseSuite {
       List(10L, 10000L, 10000000L, 10000000000L),
       Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
       InnerConf(42, "def"))
-  }
-
-  it should "fail with a domain error when a non-string key is found" in {
-    loadYaml[ConfigValue](resourcePath("non_string_keys.yaml")) should failWithType[NonStringKeyFound]
-  }
-
-  it should "fail with the correct config location filled when a YAML fails to be parsed" in {
-    loadYaml[ConfigValue](resourcePath("illegal.yaml")) should failWith(CannotParse(
-      "mapping values are not allowed here",
-      Some(ConfigValueLocation(resourcePath("illegal.yaml").toUri.toURL, 3))))
   }
 
   it should "loadYamls from a multi-document YAML file" in {
@@ -103,14 +88,10 @@ class YamlApiSuite extends BaseSuite {
         List(10L, 10000L, 10000000L, 10000000000L),
         Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
         InnerConf(42, "def"))))
-
-    loadYamls[List[InnerConf]](Paths.get("nonexisting.yaml")) should failWithType[CannotReadFile]
   }
 
   it should "loadYamls from a string" in {
-    val content = new String(Files.readAllBytes(resourcePath("multi2.yaml")))
-
-    loadYamls[(InnerConf, Conf)](content) shouldBe Right((
+    loadYamls[(InnerConf, Conf)](resourceContents("multi2.yaml")) shouldBe Right((
       InnerConf(1, "abc"),
       Conf(
         "abc",
@@ -138,8 +119,6 @@ class YamlApiSuite extends BaseSuite {
         List(10L, 10000L, 10000000L, 10000000000L),
         Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
         InnerConf(42, "def"))))
-
-    a[ConfigReaderException[_]] should be thrownBy loadYamlsOrThrow[List[InnerConf]](Paths.get("nonexisting.yaml"))
   }
 
   it should "loadYamlsOrThrow from a string" in {
@@ -155,5 +134,26 @@ class YamlApiSuite extends BaseSuite {
         List(10L, 10000L, 10000000L, 10000000000L),
         Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
         InnerConf(42, "def"))))
+  }
+
+  it should "fail with a domain error when a file does not exist" in {
+    loadYaml[ConfigValue](Paths.get("nonexisting.yaml")) should failWithType[CannotReadFile]
+    loadYamls[List[ConfigValue]](Paths.get("nonexisting.yaml")) should failWithType[CannotReadFile]
+    a[ConfigReaderException[_]] should be thrownBy loadYamlOrThrow[ConfigValue](Paths.get("nonexisting.yaml"))
+    a[ConfigReaderException[_]] should be thrownBy loadYamlsOrThrow[List[ConfigValue]](Paths.get("nonexisting.yaml"))
+  }
+
+  it should "fail with a domain error when a non-string key is found" in {
+    loadYaml[ConfigValue](resourcePath("non_string_keys.yaml")) should failWithType[NonStringKeyFound]
+    loadYaml[ConfigValue](resourceContents("non_string_keys.yaml")) should failWithType[NonStringKeyFound]
+  }
+
+  it should "fail with the correct config location filled when a YAML fails to be parsed" in {
+    loadYaml[ConfigValue](resourcePath("illegal.yaml")) should failWith(CannotParse(
+      "mapping values are not allowed here",
+      Some(ConfigValueLocation(resourcePath("illegal.yaml").toUri.toURL, 3))))
+
+    loadYaml[ConfigValue](resourceContents("illegal.yaml")) should failWith(CannotParse(
+      "mapping values are not allowed here", None))
   }
 }
