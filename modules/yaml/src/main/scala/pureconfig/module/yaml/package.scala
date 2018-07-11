@@ -24,7 +24,7 @@ package object yaml {
   private[this] def yamlObjToConfigValue(obj: AnyRef): Either[ConfigReaderFailures, ConfigValue] = {
 
     def aux(obj: AnyRef): Either[ConfigReaderFailures, AnyRef] = obj match {
-      case m: java.util.Map[Object @unchecked, Object @unchecked] =>
+      case m: java.util.Map[AnyRef @unchecked, AnyRef @unchecked] =>
         val entries = m.asScala.map {
           case (k: String, v) => aux(v).right.map { v: AnyRef => k -> v }
           case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
@@ -33,12 +33,12 @@ package object yaml {
           .foldLeft(Right(Map.empty): Either[ConfigReaderFailures, Map[String, AnyRef]])(combineResults(_, _)(_ + _))
           .right.map(_.asJava)
 
-      case xs: java.util.List[Object @unchecked] =>
+      case xs: java.util.List[AnyRef @unchecked] =>
         xs.asScala.map(aux)
           .foldRight(Right(Nil): Either[ConfigReaderFailures, List[AnyRef]])(combineResults(_, _)(_ :: _))
           .right.map(_.asJava)
 
-      case s: java.util.Set[Object @unchecked] =>
+      case s: java.util.Set[AnyRef @unchecked] =>
         s.asScala.map(aux)
           .foldLeft(Right(Set.empty): Either[ConfigReaderFailures, Set[AnyRef]])(combineResults(_, _)(_ + _))
           .right.map(_.asJava)
