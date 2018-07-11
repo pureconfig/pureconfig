@@ -8,6 +8,7 @@ import pureconfig.error.{ ConfigReaderException, ConvertFailure }
 import java.nio.file.{ Path, Paths }
 
 import cats.data.NonEmptyList
+import com.typesafe.config.ConfigFactory
 
 class CatsEffectSuite extends BaseSuite {
 
@@ -42,6 +43,40 @@ class CatsEffectSuite extends BaseSuite {
     val propertiesPath = getPath("wrong.properties")
 
     val load = loadConfigF[IO, SomeCaseClass](propertiesPath)
+
+    val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
+    thrown.failures.head shouldBe a[ConvertFailure]
+  }
+
+  it should "run successfully from a Typesafe Config object" in {
+    val config = ConfigFactory.load("application.properties")
+
+    val load = loadConfigF[IO, SomeCaseClass](config)
+
+    load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
+  }
+
+  it should "run successfully from a Typesafe Config object with a namespace" in {
+    val config = ConfigFactory.load("namespaced.properties")
+
+    val load = loadConfigF[IO, SomeCaseClass](config, "somecaseclass")
+
+    load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
+  }
+
+  it should "fail when ran with a Typesafe Config object that doesn't match the format" in {
+    val config = ConfigFactory.load("wrong.properties")
+
+    val load = loadConfigF[IO, SomeCaseClass](config)
+
+    val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
+    thrown.failures.head shouldBe a[ConvertFailure]
+  }
+
+  it should "fail if the Typesafe config object doesn't have the required field in a namespace" in {
+    val config = ConfigFactory.load("namespaced-wrong.properties")
+
+    val load = loadConfigF[IO, SomeCaseClass](config, "somecaseclass")
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]

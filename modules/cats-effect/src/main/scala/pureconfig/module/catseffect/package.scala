@@ -10,6 +10,7 @@ import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.implicits._
 
+import com.typesafe.config.{ Config => TypesafeConfig }
 import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
 import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
 
@@ -70,6 +71,26 @@ package object catseffect {
    */
   def loadConfigF[F[_], A](path: Path, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     configToF(() => pureconfig.loadConfig[A](path, namespace))
+  }
+
+  /**
+   * Load a configuration of type `A` from the given `Config`
+   * @return The returned action will complete with `A` if it is possible to create an instance of type
+   *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
+   *         details on why it isn't possible
+   */
+  def loadConfigF[F[_], A](conf: TypesafeConfig)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+    configToF(() => pureconfig.loadConfig[A](conf))
+  }
+
+  /**
+   * Load a configuration of type `A` from the given `Config`
+   * @return The returned action will complete with `A` if it is possible to create an instance of type
+   *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
+   *         details on why it isn't possible
+   */
+  def loadConfigF[F[_], A](conf: TypesafeConfig, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+    configToF(() => pureconfig.loadConfig[A](conf, namespace))
   }
 
   /**
