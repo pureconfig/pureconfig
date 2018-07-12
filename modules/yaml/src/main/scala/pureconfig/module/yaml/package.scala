@@ -5,6 +5,7 @@ import java.nio.file.{ Files, Path }
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
+import scala.util.Try
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
@@ -68,7 +69,7 @@ package object yaml {
 
   private[this] def using[A <: AutoCloseable, B](resource: => A)(f: A ⇒ B): B = {
     try f(resource)
-    finally resource.close()
+    finally Try(resource.close())
   }
 
   // Opens and processes a YAML file, converting all exceptions into the most appropriate PureConfig errors.
