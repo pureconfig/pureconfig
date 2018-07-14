@@ -2,6 +2,7 @@ package pureconfig.module
 
 import java.io.IOException
 import java.nio.file.{ Files, Path }
+import java.util.Base64
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
@@ -50,7 +51,7 @@ package object yaml {
         Right(obj.toString)
 
       case ba: Array[Byte] =>
-        Right(new String(ba))
+        Right(Base64.getEncoder.encodeToString(ba))
 
       case null =>
         Right(null)

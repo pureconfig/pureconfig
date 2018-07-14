@@ -1,6 +1,7 @@
 str: abc
 b: true
 n: 1234567890123456789012345678901234567890
+data: !!binary dGhpcyBpcyBhIG1lc3NhZ2U=
 s: !!set
   ? 4
   ? 6
