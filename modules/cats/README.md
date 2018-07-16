@@ -19,7 +19,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.9.1"
 To load a `NonEmptyList[Int]` into a configuration, we need a class to hold our configuration:
 
 ```scala
-import cats.data.{NonEmptyList, NonEmptyVector}
+import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector}
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import pureconfig.module.cats._
@@ -46,6 +46,16 @@ then load the config:
 ```scala
 loadConfig[MyVecConfig](conf)
 // res2: Either[pureconfig.error.ConfigReaderFailures,MyVecConfig] = Right(MyVecConfig(NonEmptyVector(1, 2, 3)))
+```
+
+Similarly, `NonEmptySet` is also supported:
+
+```scala
+case class MySetConfig(numbers: NonEmptySet[Int])
+```
+```scala
+loadConfig[MySetConfig](conf)
+// res3: Either[pureconfig.error.ConfigReaderFailures,MySetConfig] = Right(MySetConfig(TreeSet(1, 2, 3)))
 ```
 
 ### Using cats type class instances for readers and writers
@@ -76,13 +86,13 @@ And we can finally put them to use:
 
 ```scala
 constIntReader.from(conf.root())
-// res8: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(42)
+// res9: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(42)
 
 safeIntReader.from(conf.root())
-// res9: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(-1)
+// res10: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(-1)
 
 someWriter[String].to(Some("abc"))
-// res10: com.typesafe.config.ConfigValue = Quoted("abc")
+// res11: com.typesafe.config.ConfigValue = Quoted("abc")
 ```
 
 ### Extra syntatic sugar

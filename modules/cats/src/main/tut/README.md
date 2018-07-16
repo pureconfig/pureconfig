@@ -19,7 +19,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.9.1"
 To load a `NonEmptyList[Int]` into a configuration, we need a class to hold our configuration:
 
 ```tut:silent
-import cats.data.{NonEmptyList, NonEmptyVector}
+import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector}
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import pureconfig.module.cats._
@@ -42,6 +42,15 @@ case class MyVecConfig(numbers: NonEmptyVector[Int])
 then load the config:
 ```tut:book
 loadConfig[MyVecConfig](conf)
+```
+
+Similarly, `NonEmptySet` is also supported:
+
+```tut:silent
+case class MySetConfig(numbers: NonEmptySet[Int])
+```
+```tut:book
+loadConfig[MySetConfig](conf)
 ```
 
 ### Using cats type class instances for readers and writers

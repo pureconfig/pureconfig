@@ -1,11 +1,12 @@
 package pureconfig.module
 
-import scala.language.higherKinds
-import scala.reflect.ClassTag
-
-import _root_.cats.data.{ NonEmptyList, NonEmptyVector }
+import _root_.cats.data.{ NonEmptyList, NonEmptySet, NonEmptyVector }
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.{ ConfigCursor, ConfigReader, ConfigWriter }
+
+import scala.collection.immutable.SortedSet
+import scala.language.higherKinds
+import scala.reflect.ClassTag
 
 /**
  * `ConfigReader` and `ConfigWriter` instances for cats data structures.
@@ -31,4 +32,10 @@ package object cats {
 
   implicit def nonEmptyVectorWriter[T](implicit vectorWriter: ConfigWriter[Vector[T]]): ConfigWriter[NonEmptyVector[T]] =
     ConfigWriter.fromFunction(nonEmptyVector => vectorWriter.to(nonEmptyVector.toVector))
+
+  implicit def nonEmptySetReader[T](implicit listReader: ConfigReader[SortedSet[T]]): ConfigReader[NonEmptySet[T]] =
+    ConfigReader.fromCursor(fromNonEmpty[SortedSet, NonEmptySet, T](NonEmptySet.fromSet))
+
+  implicit def nonEmptySetWriter[T](implicit listWriter: ConfigWriter[SortedSet[T]]): ConfigWriter[NonEmptySet[T]] =
+    ConfigWriter.fromFunction(nel => listWriter.to(nel.toSortedSet))
 }
