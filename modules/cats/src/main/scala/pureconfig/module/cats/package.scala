@@ -1,11 +1,12 @@
 package pureconfig.module
 
-import scala.language.higherKinds
-import scala.reflect.ClassTag
-
-import _root_.cats.data.{ NonEmptyList, NonEmptyVector }
+import _root_.cats.data.{ NonEmptyList, NonEmptySet, NonEmptyVector }
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.{ ConfigCursor, ConfigReader, ConfigWriter }
+
+import scala.collection.immutable.SortedSet
+import scala.language.higherKinds
+import scala.reflect.ClassTag
 
 /**
  * `ConfigReader` and `ConfigWriter` instances for cats data structures.
@@ -20,15 +21,18 @@ package object cats {
       }
     }
 
-  implicit def nonEmptyListReader[T](implicit listReader: ConfigReader[List[T]]): ConfigReader[NonEmptyList[T]] =
+  implicit def nonEmptyListReader[T](implicit reader: ConfigReader[List[T]]): ConfigReader[NonEmptyList[T]] =
     ConfigReader.fromCursor(fromNonEmpty[List, NonEmptyList, T](NonEmptyList.fromList))
+  implicit def nonEmptyListWriter[T](implicit writer: ConfigWriter[List[T]]): ConfigWriter[NonEmptyList[T]] =
+    ConfigWriter.fromFunction(nel => writer.to(nel.toList))
 
-  implicit def nonEmptyListWriter[T](implicit listWriter: ConfigWriter[List[T]]): ConfigWriter[NonEmptyList[T]] =
-    ConfigWriter.fromFunction(nel => listWriter.to(nel.toList))
-
-  implicit def nonEmptyVectorReader[T](implicit vectorReader: ConfigReader[Vector[T]]): ConfigReader[NonEmptyVector[T]] =
+  implicit def nonEmptyVectorReader[T](implicit reader: ConfigReader[Vector[T]]): ConfigReader[NonEmptyVector[T]] =
     ConfigReader.fromCursor(fromNonEmpty[Vector, NonEmptyVector, T](NonEmptyVector.fromVector))
+  implicit def nonEmptyVectorWriter[T](implicit writer: ConfigWriter[Vector[T]]): ConfigWriter[NonEmptyVector[T]] =
+    ConfigWriter.fromFunction(nonEmptyVector => writer.to(nonEmptyVector.toVector))
 
-  implicit def nonEmptyVectorWriter[T](implicit vectorWriter: ConfigWriter[Vector[T]]): ConfigWriter[NonEmptyVector[T]] =
-    ConfigWriter.fromFunction(nonEmptyVector => vectorWriter.to(nonEmptyVector.toVector))
+  implicit def nonEmptySetReader[T](implicit reader: ConfigReader[SortedSet[T]]): ConfigReader[NonEmptySet[T]] =
+    ConfigReader.fromCursor(fromNonEmpty[SortedSet, NonEmptySet, T](NonEmptySet.fromSet))
+  implicit def nonEmptySetWriter[T](implicit writer: ConfigWriter[SortedSet[T]]): ConfigWriter[NonEmptySet[T]] =
+    ConfigWriter.fromFunction(nel => writer.to(nel.toSortedSet))
 }
