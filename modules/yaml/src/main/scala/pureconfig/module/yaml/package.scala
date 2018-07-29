@@ -95,6 +95,8 @@ package object yaml {
   def loadYaml[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     handleYamlErrors(Some(path)) {
       using(Files.newBufferedReader(path)) { ioReader =>
+        // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
+        // abstraction over SnakeYAML
         val yamlObj = new Yaml(new SafeConstructor()).load(ioReader)
 
         yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
@@ -113,6 +115,8 @@ package object yaml {
    */
   def loadYaml[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     handleYamlErrors(None) {
+      // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
+      // abstraction over SnakeYAML
       val yamlObj = new Yaml(new SafeConstructor()).load(content)
 
       yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
@@ -161,6 +165,8 @@ package object yaml {
   def loadYamls[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     handleYamlErrors(Some(path)) {
       using(Files.newBufferedReader(path)) { ioReader =>
+        // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
+        // abstraction over SnakeYAML
         val yamlObjs = new Yaml(new SafeConstructor()).loadAll(ioReader)
 
         yamlObjs.asScala.map(yamlObjToConfigValue)
@@ -184,6 +190,8 @@ package object yaml {
    */
   def loadYamls[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     handleYamlErrors(None) {
+      // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
+      // abstraction over SnakeYAML
       val yamlObjs = new Yaml(new SafeConstructor()).loadAll(content)
 
       yamlObjs.asScala.map(yamlObjToConfigValue)
