@@ -21,11 +21,11 @@ class TupleConvertersSuite extends BaseSuite {
   checkArbitrary[(Long, Foo, Boolean, Foo)]
 
   // Check readers from objects and lists
-  checkRead[(String, Int)](("one", 2) -> ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava))
-  checkRead[(String, Int)](("one", 2) -> ConfigValueFactory.fromIterable(List("one", 2).asJava))
+  checkRead[(String, Int)](ConfigValueFactory.fromMap(Map("_1" -> "one", "_2" -> 2).asJava) -> (("one", 2)))
+  checkRead[(String, Int)](ConfigValueFactory.fromIterable(List("one", 2).asJava) -> (("one", 2)))
 
   // Check writers
-  checkWrite[Tuple1[Int]](new Tuple1(1) -> ConfigValueFactory.fromIterable(List(1).asJava))
+  checkWrite[Tuple1[Int]](Tuple1(1) -> ConfigValueFactory.fromIterable(List(1).asJava))
   checkWrite[(String, Int)](("one", 2) -> ConfigValueFactory.fromIterable(List("one", 2).asJava))
   checkWrite[(Int, (Long, String), Boolean)]((1, (2l, "three"), false) -> ConfigValueFactory.fromIterable(List(1, List(2l, "three").asJava, false).asJava))
 

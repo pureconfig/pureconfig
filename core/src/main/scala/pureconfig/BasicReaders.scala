@@ -95,7 +95,7 @@ trait JavaTimeReaders {
     ConfigReader.fromNonEmptyString[ZoneId](catchReadError(ZoneId.of))
 
   implicit val periodConfigReader: ConfigReader[Period] =
-    ConfigReader.fromNonEmptyString[Period](catchReadError(Period.parse))
+    ConfigReader.fromNonEmptyString[Period](PeriodUtils.fromString)
 
   implicit val javaDurationConfigReader: ConfigReader[JavaDuration] =
     ConfigReader.fromNonEmptyString[JavaDuration](catchReadError(JavaDuration.parse))
@@ -111,11 +111,11 @@ trait JavaTimeReaders {
 trait DurationReaders {
 
   implicit val durationConfigReader: ConfigReader[Duration] =
-    ConfigReader.fromNonEmptyString[Duration](DurationConvert.fromString)
+    ConfigReader.fromNonEmptyString[Duration](DurationUtils.fromString)
 
   implicit val finiteDurationConfigReader: ConfigReader[FiniteDuration] = {
     val fromString: String => Either[FailureReason, FiniteDuration] = { string =>
-      DurationConvert.fromString(string).right.flatMap {
+      DurationUtils.fromString(string).right.flatMap {
         case d: FiniteDuration => Right(d)
         case _ => Left(CannotConvert(string, "FiniteDuration",
           s"Couldn't parse '$string' into a FiniteDuration because it's infinite."))

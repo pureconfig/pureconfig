@@ -6,10 +6,10 @@ import scala.concurrent.duration._
 
 import com.typesafe.config.ConfigValueFactory
 import org.scalatest.Inspectors
-import pureconfig.DurationConvertSuite._
+import pureconfig.DurationUtilsSuite._
 import pureconfig.error.{ CannotConvert, ConvertFailure, ExceptionThrown }
 
-class DurationConvertSuite extends BaseSuite {
+class DurationUtilsSuite extends BaseSuite {
 
   "Converting a Duration to a String" should "pick an appropriate unit when dealing with whole units less than the next step up" in {
     fromD(Duration(14, TimeUnit.DAYS)) shouldBe "14d"
@@ -112,9 +112,9 @@ class DurationConvertSuite extends BaseSuite {
   }
 }
 
-object DurationConvertSuite {
+object DurationUtilsSuite {
   val scc = implicitly[ConfigConvert[String]]
   val dcc = implicitly[ConfigConvert[Duration]]
-  val fromD = DurationConvert.fromDuration(_: Duration)
-  val fromS = DurationConvert.fromString(_: String)
+  val fromD = DurationUtils.fromDuration(_: Duration)
+  val fromS = DurationUtils.fromString(_: String)
 }
