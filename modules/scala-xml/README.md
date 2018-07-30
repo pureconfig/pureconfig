@@ -35,7 +35,7 @@ val conf = parseString(
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"people":"<people>\n      <person firstName=\"A\" lastName=\"Person\" />\n      <person firstName=\"Another\" lastName=\"Person\" />\n    </people>"}))
 
 loadConfig[Config](conf)
-// res1: Either[pureconfig.error.ConfigReaderFailures,Config] =
+// res0: Either[pureconfig.error.ConfigReaderFailures,Config] =
 // Right(Config(<people>
 //       <person lastName="Person" firstName="A"/>
 //       <person lastName="Person" firstName="Another"/>
