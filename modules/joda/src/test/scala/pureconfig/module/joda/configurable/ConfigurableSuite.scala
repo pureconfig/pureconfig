@@ -76,8 +76,8 @@ object ConfigurableSuite {
   implicit val dateTimeArbitrary: Arbitrary[DateTime] =
     Arbitrary(
       for {
-        localDateTime <- localDateTimeArbitrary.arbitrary
         zoneId <- zoneIdArbitrary.arbitrary
+        localDateTime <- localDateTimeArbitrary.arbitrary if !zoneId.isLocalDateTimeGap(localDateTime)
       } yield localDateTime.toDateTime(zoneId))
 
   implicit val periodArbitrary: Arbitrary[Period] =
