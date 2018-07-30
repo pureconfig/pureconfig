@@ -12,6 +12,6 @@ developers := List(
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig.modules.http4s.*")
+OsgiKeys.exportPackage := Seq("pureconfig.module.http4s.*")
 OsgiKeys.privatePackage := Seq()
 OsgiKeys.importPackage := Seq(s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""", "*")
