@@ -14,7 +14,7 @@ import pureconfig.module.cats.eq._
 import pureconfig.module.cats.instances._
 
 class CatsLawsSuite extends FunSuite with Matchers with Discipline {
-  checkAll("ConfigReader[Int]", MonadErrorTests[ConfigReader, ConfigReaderFailures].monadError[Int, Int, Int])
+  checkAll("ConfigReader[Int]", ApplicativeErrorTests[ConfigReader, ConfigReaderFailures].applicativeError[Int, Int, Int])
   checkAll("ConfigWriter[Int]", ContravariantTests[ConfigWriter].contravariant[Int, Int, Int])
   checkAll("ConfigConvert[Int]", InvariantTests[ConfigConvert].invariant[Int, Int, Int])
 }
