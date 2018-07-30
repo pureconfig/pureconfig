@@ -20,7 +20,7 @@ To load an `Uri` into a configuration, create a class to hold it:
 import org.http4s.Uri
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
-import pureconfig.modules.http4s._
+import pureconfig.module.http4s._
 
 case class MyConfig(uri: Uri)
 ```

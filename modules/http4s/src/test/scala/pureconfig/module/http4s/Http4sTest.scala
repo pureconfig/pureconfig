@@ -1,4 +1,4 @@
-package pureconfig.modules.http4s
+package pureconfig.module.http4s
 
 import com.typesafe.config.ConfigFactory
 import org.http4s.Uri

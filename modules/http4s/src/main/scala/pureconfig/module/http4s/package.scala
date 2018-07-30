@@ -1,4 +1,4 @@
-package pureconfig.modules
+package pureconfig.module
 
 import org.http4s.Uri
 import pureconfig.ConfigReader
