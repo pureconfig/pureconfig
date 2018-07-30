@@ -52,4 +52,4 @@ loadConfig[GreetingConf](conf)
 
 ## Can I configure how the elements are read?
 
-Nope. If you need more flexibility, look at [enumeratum](https://github.com/lloydmeta/enumeratum) and its companion pureconfig library, [pureconfig-enumeratum](https://github.com/leifwickland/pureconfig/tree/master/modules/enumeratum).
+Nope. If you need more flexibility, look at [enumeratum](https://github.com/lloydmeta/enumeratum) and its companion PureConfig library, [pureconfig-enumeratum](https://github.com/leifwickland/pureconfig/tree/master/modules/enumeratum).
