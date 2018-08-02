@@ -256,7 +256,8 @@ package object pureconfig {
    * @param outputStream The stream in which the configuration should be written
    */
   def saveConfigToStream[Config](conf: Config, outputStream: OutputStream)(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
-    // HOCON requires UTF-8
+    // HOCON requires UTF-8:
+    // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json
     val printOutputStream = new OutputStreamWriter(outputStream, UTF_8)
     val rawConf = writer.value.to(conf)
     printOutputStream.write(rawConf.render())
