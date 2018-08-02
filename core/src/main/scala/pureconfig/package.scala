@@ -4,7 +4,8 @@
 /**
  * @author Mario Pastorelli
  */
-import java.io.{ OutputStream, PrintStream }
+import java.io.{ OutputStream, OutputStreamWriter }
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.{ Files, Path }
 
 import scala.reflect.ClassTag
@@ -255,9 +256,10 @@ package object pureconfig {
    * @param outputStream The stream in which the configuration should be written
    */
   def saveConfigToStream[Config](conf: Config, outputStream: OutputStream)(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
-    val printOutputStream = new PrintStream(outputStream)
+    // HOCON requires UTF-8
+    val printOutputStream = new OutputStreamWriter(outputStream, UTF_8)
     val rawConf = writer.value.to(conf)
-    printOutputStream.print(rawConf.render())
+    printOutputStream.write(rawConf.render())
     printOutputStream.close()
   }
 
