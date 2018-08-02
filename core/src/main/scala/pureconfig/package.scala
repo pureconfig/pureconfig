@@ -265,27 +265,28 @@ package object pureconfig {
   }
 
   /**
-   * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them into a `Config`.
+   * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them
+   * into a `Config`.
    *
    * This is a convenience method which enables having default configuration which backstops local configuration.
    *
-   * Note: If an element of `files` references a file which doesn't exist or can't be read, it will silently be ignored.
+   * The behavior of the method if an element of `files` references a file which doesn't exist or can't be read is
+   * defined by the `failOnReadError` flag. With `failOnReadError = false`, such files will silently be ignored while
+   * otherwise they would yield a failure (a `Left` value).
    *
    * @param files Files ordered in decreasing priority containing part or all of a `Config`. Must not be empty.
    */
-  def loadConfigFromFiles[Config](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
-    if (files.isEmpty) {
-      Left(ConfigReaderFailures(NoFilesToRead))
-    } else {
-      files
-        .map(parseFile)
-        .foldLeft[Either[ConfigReaderFailures, Seq[TypesafeConfig]]](Right(Seq())) {
-          case (c1, Left(failures)) if failures.toList.exists(_.isInstanceOf[CannotReadFile]) => c1
-          case (c1, c2) => ConfigConvert.combineResults(c1, c2)(_ :+ _)
-        }
-        .right.map(_.reduce(_.withFallback(_)).resolve)
-        .right.flatMap(loadConfig[Config])
-    }
+  def loadConfigFromFiles[Config](files: Traversable[Path], failOnReadError: Boolean = false)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+    files.map(parseFile)
+      .map {
+        case Left(failures) if failures.toList.exists(_.isInstanceOf[CannotReadFile]) && !failOnReadError =>
+          Right(ConfigFactory.empty())
+        case conf => conf
+      }
+      .foldLeft[Either[ConfigReaderFailures, TypesafeConfig]](Right(ConfigFactory.empty())) {
+        case (c1, c2) => ConfigConvert.combineResults(c1, c2)(_.withFallback(_))
+      }
+      .right.flatMap { conf => loadConfig[Config](conf.resolve) }
   }
 
   /**
