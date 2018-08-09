@@ -1,7 +1,7 @@
 # Cats module for PureConfig
 
 Adds support for selected [cats](http://typelevel.org/cats/) data structures to PureConfig, provides instances of
-`cats` type classes for `ConfigReader`,  `ConfigWriter` and `ConfigConvert` and some syntatic sugar for pureconfig
+`cats` type classes for `ConfigReader`,  `ConfigWriter` and `ConfigConvert` and some syntactic sugar for pureconfig
 classes.
 
 ## Add pureconfig-cats to your project
@@ -16,41 +16,38 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.9.1"
 
 ### Reading cats data structures from a config
 
-To load a `NonEmptyList[Int]` into a configuration, we need a class to hold our configuration:
+The following cats data structures are supported: 
+
+* `NonEmptyList`, `NonEmptyVector`, `NonEmptySet`
+* `NonEmptyMap[K, V]` only string keys are supported by default because it relies on `Map`.
+For a custom key you'll also have to provide an implicit on Ordering[K].
+
+Here is an example of usage:
 
 ```tut:silent
-import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector}
+import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap}
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import pureconfig.module.cats._
 
-case class MyConfig(numbers: NonEmptyList[Int])
+case class MyConfig(
+  numberList: NonEmptyList[Int],
+  numberSet: NonEmptySet[Int],
+  numberVector: NonEmptyVector[Int],
+  numberMap: NonEmptyMap[String, Int]
+)
 ```
 
 We can read a `MyConfig` like:
 ```tut:book
-val conf = parseString("""{ numbers: [1,2,3] }""")
+val conf = parseString("""{ 
+  number-list: [1,2,3],
+  number-set: [1,2,3],
+  number-vector: [1,2,3],
+  number-map { "one": 1, "two": 2, "three": 3 }     
+}""")
+
 loadConfig[MyConfig](conf)
-```
-
-You can also load `NonEmptyVector`. First, define a case class for the config:
-
-```tut:silent
-case class MyVecConfig(numbers: NonEmptyVector[Int])
-```
-
-then load the config:
-```tut:book
-loadConfig[MyVecConfig](conf)
-```
-
-Similarly, `NonEmptySet` is also supported:
-
-```tut:silent
-case class MySetConfig(numbers: NonEmptySet[Int])
-```
-```tut:book
-loadConfig[MySetConfig](conf)
 ```
 
 ### Using cats type class instances for readers and writers
