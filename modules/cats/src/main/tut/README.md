@@ -26,6 +26,7 @@ Here is an example of usage:
 
 ```tut:silent
 import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap}
+import cats.instances.string._
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import pureconfig.module.cats._
@@ -49,6 +50,8 @@ val conf = parseString("""{
 
 loadConfig[MyConfig](conf)
 ```
+
+Note that `NonEmptyMap[K,V]` requires an implicit of `Order[K]`. If your key is a `String` you should import `cats.instances.string._`.
 
 ### Using cats type class instances for readers and writers
 
