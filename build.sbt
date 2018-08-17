@@ -2,8 +2,6 @@ import scalariform.formatter.preferences._
 import ReleaseTransformations._
 import microsites._
 
-enablePlugins(CrossPerProjectPlugin)
-
 lazy val core = (project in file("core")).
   enablePlugins(TutPlugin, SbtOsgi).
   settings(commonSettings, tutTargetDirectory := file(".")).
