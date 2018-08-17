@@ -33,7 +33,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"actor-path":"akka://my-sys/user/service-a/worker1","timeout":"5 seconds"}))
 
 loadConfig[MyConfig](conf)
-// res1: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(Timeout(5 seconds),akka://my-sys/user/service-a/worker1))
+// res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(Timeout(5 seconds),akka://my-sys/user/service-a/worker1))
 ```
 
 
