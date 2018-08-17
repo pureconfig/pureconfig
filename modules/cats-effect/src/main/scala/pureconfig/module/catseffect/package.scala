@@ -9,8 +9,7 @@ import scala.reflect.ClassTag
 import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.implicits._
-
-import com.typesafe.config.{ Config => TypesafeConfig }
+import com.typesafe.config.{ ConfigRenderOptions, Config => TypesafeConfig }
 import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
 import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
 
@@ -99,10 +98,15 @@ package object catseffect {
    * @param conf The configuration to save
    * @param outputPath Where to write the configuration
    * @param overrideOutputPath Override the path if it already exists
+   * @param options the config rendering options
    * @return The return action will save out the supplied configuration upon invocation
    */
-  def saveConfigAsPropertyFileF[F[_], A](conf: A, outputPath: Path, overrideOutputPath: Boolean = false)(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = F.delay {
-    pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath)
+  def saveConfigAsPropertyFileF[F[_], A](
+    conf: A,
+    outputPath: Path,
+    overrideOutputPath: Boolean = false,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = F.delay {
+    pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options)
   }
 
   /**
@@ -110,10 +114,14 @@ package object catseffect {
    *
    * @param conf The configuration to write
    * @param outputStream The stream in which the configuration should be written
+   * @param options the config rendering options
    * @return The return action will save out the supplied configuration upon invocation
    */
-  def saveConfigToStreamF[F[_], A](conf: A, outputStream: OutputStream)(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = F.delay {
-    pureconfig.saveConfigToStream(conf, outputStream)
+  def saveConfigToStreamF[F[_], A](
+    conf: A,
+    outputStream: OutputStream,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = F.delay {
+    pureconfig.saveConfigToStream(conf, outputStream, options)
   }
 
   /**

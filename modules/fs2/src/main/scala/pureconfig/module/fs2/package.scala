@@ -9,8 +9,7 @@ import scala.reflect.ClassTag
 import _root_.fs2.{ Stream, async, io, text }
 import cats.effect.{ Effect, Sync }
 import cats.implicits._
-import com.typesafe.config.ConfigFactory
-
+import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
 import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
 import pureconfig.error.ConfigReaderException
 
@@ -55,10 +54,14 @@ package object fs2 {
    * Writes the configuration to a fs2 byte stream
    *
    * @param config The configuration to write
+   * @param options the config rendering options
    * @return the configuration as a stream of utf-8 bytes
    */
-  def saveConfigToStream[F[_], A](config: A)(implicit writer: Derivation[ConfigWriter[A]]): Stream[F, Byte] = {
-    val asString = writer.value.to(config).render()
+  def saveConfigToStream[F[_], A](
+    config: A,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit writer: Derivation[ConfigWriter[A]]): Stream[F, Byte] = {
+
+    val asString = writer.value.to(config).render(options)
     Stream.emit(asString).through(text.utf8Encode)
   }
 

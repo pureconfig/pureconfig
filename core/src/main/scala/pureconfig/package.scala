@@ -236,9 +236,15 @@ package object pureconfig {
    * @param conf The configuration to save
    * @param outputPath Where to write the configuration
    * @param overrideOutputPath Override the path if it already exists
+   * @param options the config rendering options
    */
   @throws[IllegalArgumentException]
-  def saveConfigAsPropertyFile[Config](conf: Config, outputPath: Path, overrideOutputPath: Boolean = false)(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
+  def saveConfigAsPropertyFile[Config](
+    conf: Config,
+    outputPath: Path,
+    overrideOutputPath: Boolean = false,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
+
     if (!overrideOutputPath && Files.isRegularFile(outputPath)) {
       throw new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
     }
@@ -246,7 +252,7 @@ package object pureconfig {
       throw new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists and is a directory")
     }
 
-    saveConfigToStream(conf, Files.newOutputStream(outputPath))
+    saveConfigToStream(conf, Files.newOutputStream(outputPath), options)
   }
 
   /**
@@ -254,13 +260,18 @@ package object pureconfig {
    *
    * @param conf The configuration to write
    * @param outputStream The stream in which the configuration should be written
+   * @param options the config rendering options
    */
-  def saveConfigToStream[Config](conf: Config, outputStream: OutputStream)(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
+  def saveConfigToStream[Config](
+    conf: Config,
+    outputStream: OutputStream,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit writer: Derivation[ConfigWriter[Config]]): Unit = {
+
     // HOCON requires UTF-8:
     // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json
     val printOutputStream = new OutputStreamWriter(outputStream, UTF_8)
     val rawConf = writer.value.to(conf)
-    printOutputStream.write(rawConf.render())
+    printOutputStream.write(rawConf.render(options))
     printOutputStream.close()
   }
 
