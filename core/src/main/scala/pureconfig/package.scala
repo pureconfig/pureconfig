@@ -274,7 +274,7 @@ package object pureconfig {
    * defined by the `failOnReadError` flag. With `failOnReadError = false`, such files will silently be ignored while
    * otherwise they would yield a failure (a `Left` value).
    *
-   * @param files Files ordered in decreasing priority containing part or all of a `Config`. Must not be empty.
+   * @param files Files ordered in decreasing priority containing part or all of a `Config`
    */
   def loadConfigFromFiles[Config](files: Traversable[Path], failOnReadError: Boolean = false)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     files.map(parseFile)
