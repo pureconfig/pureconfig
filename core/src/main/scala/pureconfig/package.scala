@@ -252,7 +252,7 @@ package object pureconfig {
       throw new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists and is a directory")
     }
 
-    saveConfigToStream(conf, Files.newOutputStream(outputPath))
+    saveConfigToStream(conf, Files.newOutputStream(outputPath), options)
   }
 
   /**
