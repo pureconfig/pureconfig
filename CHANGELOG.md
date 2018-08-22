@@ -1,7 +1,17 @@
 ### 0.9.2 (unreleased)
 
 - New features
-  - Added support for creating reader/writer for generic map.
+  - Users can now configure whether `loadConfigFromFiles` ignores or fails on non-existing or unreadable files;
+  - Custom `ConfigRenderOptions` can now be passed to all config writing API methods;
+  - PureConfig can now read `Period` instances written in the human-readable format supported by
+    [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md#period-format);
+  - New configurable instances allow reading and writing maps with any key type, provided the respective
+    conversion to/from strings;
+  - `ConfigCursor` has a new `atPath` method for deep navigation into the config;
+  - New `pureconfig-yaml` module adding support to load configs from YAML files.
+
+- Bug fixes
+  - Fixed a bug where PureConfig was not working when custom preludes were used.
 
 ### 0.9.1 (Mar 22, 2018)
 
