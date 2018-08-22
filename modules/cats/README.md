@@ -73,7 +73,7 @@ We are now ready to use the new syntax:
 
 ```scala
 // a reader that returns a constant value
-val constIntReader = Monad[ConfigReader].pure(42)
+val constIntReader = 42.pure[ConfigReader]
 
 // a Int reader that returns -1 if an error occurs
 val safeIntReader = ConfigReader[Int].handleError(_ => -1)

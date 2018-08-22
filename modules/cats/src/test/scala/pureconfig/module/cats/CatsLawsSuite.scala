@@ -4,7 +4,9 @@ import cats.instances.either._
 import cats.instances.int._
 import cats.instances.tuple._
 import cats.instances.unit._
+import cats.kernel.laws.discipline.SemigroupTests
 import cats.laws.discipline._
+import com.typesafe.config.ConfigValue
 import org.scalatest.{ FunSuite, Matchers }
 import org.typelevel.discipline.scalatest.Discipline
 import pureconfig._
@@ -14,7 +16,10 @@ import pureconfig.module.cats.eq._
 import pureconfig.module.cats.instances._
 
 class CatsLawsSuite extends FunSuite with Matchers with Discipline {
-  checkAll("ConfigReader[Int]", MonadErrorTests[ConfigReader, ConfigReaderFailures].monadError[Int, Int, Int])
-  checkAll("ConfigWriter[Int]", ContravariantTests[ConfigWriter].contravariant[Int, Int, Int])
-  checkAll("ConfigConvert[Int]", InvariantTests[ConfigConvert].invariant[Int, Int, Int])
+  checkAll("ConfigReader[Int]", ApplicativeErrorTests[ConfigReader, ConfigReaderFailures].applicativeError[Int, Int, Int])
+  checkAll("ConfigWriter[Int]", ContravariantSemigroupalTests[ConfigWriter].contravariantSemigroupal[Int, Int, Int])
+  checkAll("ConfigConvert[Int]", InvariantSemigroupalTests[ConfigConvert].invariantSemigroupal[Int, Int, Int])
+
+  checkAll("ConfigValue", SemigroupTests[ConfigValue].semigroup)
+  checkAll("ConfigReaderFailures", SemigroupTests[ConfigReaderFailures].semigroup)
 }
