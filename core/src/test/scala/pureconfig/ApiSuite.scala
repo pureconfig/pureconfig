@@ -155,16 +155,22 @@ class ApiSuite extends BaseSuite {
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(0.99F))
   }
 
-  it should "fail if the list of files is empty" in {
+  it should "use an empty config if the list of files is empty" in {
     case class Conf(f: Float)
     val files = Set.empty[Path]
-    loadConfigFromFiles[Conf](files) should failWithType[NoFilesToRead.type]
+    loadConfigFromFiles[Conf](files) should failWithType[KeyNotFound] // f is missing
   }
 
-  it should "ignore files that don't exist" in {
+  it should "ignore files that don't exist when failOnReadError is false" in {
     case class Conf(b: Boolean, d: Double)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf") :+ nonExistingPath
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D))
+  }
+
+  it should "fail if any of the files doesn't exist and failOnReadError is true" in {
+    case class Conf(f: Float)
+    val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf") :+ nonExistingPath
+    loadConfigFromFiles[Conf](files, failOnReadError = true) should failWithType[CannotReadFile]
   }
 
   "loadConfigWithFallback" should "fallback if no config keys are found" in {

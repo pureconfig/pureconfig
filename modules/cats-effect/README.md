@@ -33,12 +33,12 @@ To test that this `IO` does indeed return a `MyConfig` instance:
 ```scala
 //Show the contents of the file
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
-// res4: String =
+// res2: String =
 // somefield=1234
 // anotherfield=some string
 
 load.unsafeRunSync().equals(MyConfig(1234, "some string"))
-// res5: Boolean = true
+// res3: Boolean = true
 ```
 
 ### Writing configuration

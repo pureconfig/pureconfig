@@ -33,7 +33,7 @@ val conf = parseString("""{ numbers: [1,2,3] }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"numbers":[1,2,3]}))
 
 loadConfig[MyConfig](conf)
-// res1: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3)))
+// res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3)))
 ```
 
 You can also load `NonEmptyVector`. First, define a case class for the config:
@@ -45,7 +45,7 @@ case class MyVecConfig(numbers: NonEmptyVector[Int])
 then load the config:
 ```scala
 loadConfig[MyVecConfig](conf)
-// res2: Either[pureconfig.error.ConfigReaderFailures,MyVecConfig] = Right(MyVecConfig(NonEmptyVector(1, 2, 3)))
+// res1: Either[pureconfig.error.ConfigReaderFailures,MyVecConfig] = Right(MyVecConfig(NonEmptyVector(1, 2, 3)))
 ```
 
 Similarly, `NonEmptySet` is also supported:
@@ -55,7 +55,7 @@ case class MySetConfig(numbers: NonEmptySet[Int])
 ```
 ```scala
 loadConfig[MySetConfig](conf)
-// res3: Either[pureconfig.error.ConfigReaderFailures,MySetConfig] = Right(MySetConfig(TreeSet(1, 2, 3)))
+// res2: Either[pureconfig.error.ConfigReaderFailures,MySetConfig] = Right(MySetConfig(TreeSet(1, 2, 3)))
 ```
 
 ### Using cats type class instances for readers and writers
@@ -86,13 +86,13 @@ And we can finally put them to use:
 
 ```scala
 constIntReader.from(conf.root())
-// res9: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(42)
+// res6: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(42)
 
 safeIntReader.from(conf.root())
-// res10: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(-1)
+// res7: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(-1)
 
 someWriter[String].to(Some("abc"))
-// res11: com.typesafe.config.ConfigValue = Quoted("abc")
+// res8: com.typesafe.config.ConfigValue = Quoted("abc")
 ```
 
 ### Extra syntatic sugar
