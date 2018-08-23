@@ -135,6 +135,9 @@ lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
   "-Ywarn-unused-import",
   "-Xlint:-unused,_") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
 
+// do not publish the root project
+skip in publish := true
+
 releaseTagComment := s"Release ${(version in ThisBuild).value}"
 releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"
 
