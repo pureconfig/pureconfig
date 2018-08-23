@@ -1,4 +1,4 @@
-### 0.9.2 (unreleased)
+### 0.9.2 (Aug 23, 2018)
 
 - New features
   - Users can now configure whether `loadConfigFromFiles` ignores or fails on non-existing or unreadable files;

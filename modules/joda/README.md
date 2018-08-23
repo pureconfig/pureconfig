@@ -13,7 +13,7 @@ The converters need to be provided a `org.joda.time.format.DateTimeFormatter` to
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-joda" % "0.9.1"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-joda" % "0.9.2"
 ```
 
 ## Example

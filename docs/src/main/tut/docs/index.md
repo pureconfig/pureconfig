@@ -9,14 +9,14 @@ To use PureConfig in an existing SBT project with Scala 2.10 or a later version,
 `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.1"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.2"
 ```
 
 For Scala 2.10 you also need the Macro Paradise plugin:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.9.1",
+  "com.github.pureconfig" %% "pureconfig" % "0.9.2",
   compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch)
 )
 ```
