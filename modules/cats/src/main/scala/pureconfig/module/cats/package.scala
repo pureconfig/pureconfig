@@ -18,20 +18,20 @@ package object cats {
   implicit def nonEmptyListReader[T](implicit reader: ConfigReader[List[T]]): ConfigReader[NonEmptyList[T]] =
     fromNonEmpty(reader)(NonEmptyList.fromList)
   implicit def nonEmptyListWriter[T](implicit writer: ConfigWriter[List[T]]): ConfigWriter[NonEmptyList[T]] =
-    ConfigWriter.fromFunction(nel => writer.to(nel.toList))
+    writer.contramap(_.toList)
 
   implicit def nonEmptyVectorReader[T](implicit reader: ConfigReader[Vector[T]]): ConfigReader[NonEmptyVector[T]] =
     fromNonEmpty(reader)(NonEmptyVector.fromVector)
   implicit def nonEmptyVectorWriter[T](implicit writer: ConfigWriter[Vector[T]]): ConfigWriter[NonEmptyVector[T]] =
-    ConfigWriter.fromFunction(nonEmptyVector => writer.to(nonEmptyVector.toVector))
+    writer.contramap(_.toVector)
 
   implicit def nonEmptySetReader[T](implicit reader: ConfigReader[SortedSet[T]]): ConfigReader[NonEmptySet[T]] =
     fromNonEmpty(reader)(NonEmptySet.fromSet)
   implicit def nonEmptySetWriter[T](implicit writer: ConfigWriter[SortedSet[T]]): ConfigWriter[NonEmptySet[T]] =
-    ConfigWriter.fromFunction(nonEmptySet => writer.to(nonEmptySet.toSortedSet))
+    writer.contramap(_.toSortedSet)
 
   implicit def nonEmptyMapReader[A, B](implicit reader: ConfigReader[Map[A, B]], ord: Order[A]): ConfigReader[NonEmptyMap[A, B]] =
     fromNonEmpty(reader)(x => NonEmptyMap.fromMap(SortedMap(x.toSeq: _*)(ord.toOrdering)))
   implicit def nonEmptyMapWriter[A, B](implicit writer: ConfigWriter[Map[A, B]]): ConfigWriter[NonEmptyMap[A, B]] =
-    ConfigWriter.fromFunction(nonEmptyMap ⇒ writer.to(nonEmptyMap.toSortedMap))
+    writer.contramap(_.toSortedMap)
 }

@@ -19,8 +19,11 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.9.1"
 The following cats data structures are supported: 
 
 * `NonEmptyList`, `NonEmptyVector`, `NonEmptySet`
-* `NonEmptyMap[K, V]` only string keys are supported by default because it relies on `Map`.
-For a custom key you'll also have to provide an implicit on Ordering[K].
+* `NonEmptyMap[K, V]` implicits of `ConfigReader[Map[K, V]]` and `Order[K]` should be in the scope.
+For example, if your key is a `String` then `Order[String]` can be imported from `cats.instances.string._`
+
+All of these data structures rely on the instances of their unrestricted (i.e. possibly empty) variants.
+Custom collection readers, if any, may affect the behavior of these too.
 
 Here is an example of usage:
 
@@ -52,8 +55,6 @@ val conf = parseString("""{
 loadConfig[MyConfig](conf)
 // res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3),TreeSet(1, 2, 3),NonEmptyVector(1, 2, 3),Map(one -> 1, three -> 3, two -> 2)))
 ```
-
-Note that `NonEmptyMap[K,V]` requires an implicit of `Order[K]`. If your key is a `String` you should import `cats.instances.string._`.
 
 ### Using cats type class instances for readers and writers
 
