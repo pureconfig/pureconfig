@@ -1,11 +1,14 @@
 import Dependencies._
 
-name := "pureconfig-core"
+name := "pureconfig-generic"
 
 libraryDependencies ++= Seq(
+  shapeless.value,
+  scalaMacrosParadise,
   typesafeConfig,
   scalaTest,
-  scalaCheck)
+  scalaCheck,
+  scalaCheckShapeless.value)
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
@@ -16,6 +19,6 @@ developers := List(
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig.*")
+OsgiKeys.exportPackage := Seq("pureconfig.generic.*")
 OsgiKeys.privatePackage := Seq()
 OsgiKeys.importPackage := Seq(s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""", "*")

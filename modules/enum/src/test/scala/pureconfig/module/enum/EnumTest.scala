@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.Inspectors
 import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 sealed trait Greeting

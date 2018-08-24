@@ -6,6 +6,7 @@ import java.nio.file.{ Files, Path, Paths }
 import com.typesafe.config.ConfigValue
 import pureconfig.BaseSuite
 import pureconfig.error.{ CannotParse, CannotReadFile, ConfigReaderException, ConfigValueLocation }
+import pureconfig.generic.auto._
 import pureconfig.module.yaml.error.NonStringKeyFound
 
 class YamlApiSuite extends BaseSuite {

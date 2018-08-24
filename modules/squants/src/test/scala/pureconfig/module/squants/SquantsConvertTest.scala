@@ -5,6 +5,7 @@ import org.scalacheck.{ Arbitrary, Gen }
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
 import org.scalatest.prop.PropertyChecks
 import pureconfig.ConfigConvert
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 import _root_.squants._
 import _root_.squants.market._

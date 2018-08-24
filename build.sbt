@@ -5,7 +5,21 @@ import microsites._
 lazy val core = (project in file("core")).
   enablePlugins(TutPlugin, SbtOsgi).
   settings(commonSettings, tutTargetDirectory := file(".")).
-  dependsOn(macros).
+  dependsOn(macros)
+
+// A special module for now, since tests depend on it. We should improve this organization later.
+lazy val generic = (project in file("modules/generic")).
+  enablePlugins(TutPlugin, SbtOsgi).
+  dependsOn(core).
+  settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+
+lazy val macros = (project in file("macros")).
+  enablePlugins(TutPlugin).
+  settings(commonSettings)
+
+lazy val tests = (project in file("tests")).
+  settings(commonSettings).
+  dependsOn(core, generic).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
 lazy val docs = (project in file("docs")).
@@ -14,14 +28,10 @@ lazy val docs = (project in file("docs")).
   settings(micrositesSettings).
   dependsOn(core)
 
-lazy val macros = (project in file("macros")).
-  enablePlugins(TutPlugin).
-  settings(commonSettings)
-
 def module(proj: Project) = proj.
   enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
-  dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
+  dependsOn(tests % "test->test"). // In order to reuse thDerivationSuite scalacheck generators
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
@@ -37,6 +47,11 @@ lazy val joda = module(project) in file("modules/joda")
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val squants = module(project) in file("modules/squants")
 lazy val yaml = module(project) in file("modules/yaml")
+
+// aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
+lazy val bundle = (project in file("bundle")).
+  settings(commonSettings, name := "pureconfig").
+  dependsOn(core, generic)
 
 lazy val commonSettings = Seq(
   organization := "com.github.pureconfig",

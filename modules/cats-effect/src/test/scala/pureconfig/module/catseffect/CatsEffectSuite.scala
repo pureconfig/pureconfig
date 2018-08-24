@@ -5,6 +5,7 @@ import java.io._
 import cats.effect.IO
 import pureconfig.BaseSuite
 import pureconfig.error.{ ConfigReaderException, ConvertFailure }
+import pureconfig.generic.auto._
 import java.nio.file.{ Path, Paths }
 
 import cats.data.NonEmptyList

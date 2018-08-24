@@ -4,6 +4,7 @@ import scala.xml.Elem
 
 import com.typesafe.config.ConfigFactory.parseString
 import org.scalatest._
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 class ScalaXMLSuite extends FlatSpec with Matchers with EitherValues {

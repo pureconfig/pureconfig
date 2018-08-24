@@ -6,6 +6,7 @@ import akka.actor.ActorPath
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import org.scalatest._
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 class AkkaSuite extends FlatSpec with Matchers with EitherValues {
