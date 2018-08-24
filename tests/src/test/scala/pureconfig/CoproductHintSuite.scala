@@ -1,7 +1,8 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueFactory, ConfigValueType }
+import com.typesafe.config._
 import pureconfig.error._
+import pureconfig.generic._
 import pureconfig.generic.auto._
 
 class CoproductHintSuite extends BaseSuite {

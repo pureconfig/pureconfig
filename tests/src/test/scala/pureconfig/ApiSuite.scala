@@ -11,6 +11,7 @@ import pureconfig.PathUtils._
 import scala.concurrent.duration.FiniteDuration
 
 import pureconfig.error._
+import pureconfig.generic.ProductHint
 import pureconfig.generic.auto._
 
 class ApiSuite extends BaseSuite {

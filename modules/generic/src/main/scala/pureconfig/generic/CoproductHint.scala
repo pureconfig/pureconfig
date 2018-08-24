@@ -1,6 +1,7 @@
-package pureconfig
+package pureconfig.generic
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueType }
+import pureconfig.ConfigCursor
 import pureconfig.error._
 import pureconfig.syntax._
 

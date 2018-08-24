@@ -3,6 +3,7 @@ package pureconfig
 import com.typesafe.config.{ ConfigFactory, ConfigObject }
 import pureconfig.error.{ ConvertFailure, KeyNotFound, UnknownKey }
 import pureconfig.generic.auto._
+import pureconfig.generic.ProductHint
 import pureconfig.syntax._
 import scala.collection.JavaConverters._
 

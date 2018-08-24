@@ -1,4 +1,6 @@
-package pureconfig
+package pureconfig.generic
+
+import pureconfig._
 
 /**
  * A trait that can be implemented to customize how case classes are read from and written to a config.
