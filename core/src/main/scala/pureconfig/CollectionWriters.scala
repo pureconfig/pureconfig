@@ -5,6 +5,9 @@ import scala.language.higherKinds
 
 import com.typesafe.config._
 
+/**
+ * Trait containing `ConfigWriter` instances for collection types.
+ */
 trait CollectionWriters {
 
   implicit def optionWriter[T](implicit conv: Derivation[ConfigWriter[T]]) = new OptionConfigWriter[T]

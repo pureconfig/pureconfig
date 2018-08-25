@@ -15,6 +15,9 @@ import pureconfig.error._
  */
 trait AllowMissingKey { self: ConfigReader[_] => }
 
+/**
+ * Trait containing `ConfigReader` instances for collection types.
+ */
 trait CollectionReaders {
 
   implicit def optionReader[T](implicit conv: Derivation[ConfigReader[T]]) = new OptionConfigReader[T]

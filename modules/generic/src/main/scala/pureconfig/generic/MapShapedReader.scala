@@ -6,10 +6,22 @@ import pureconfig.error._
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
 
+/**
+ * A `ConfigReader` for generic representations that reads values in the shape of a config object.
+ *
+ * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
+ * @tparam Repr the generic representation
+ */
 trait MapShapedReader[Wrapped, Repr] extends ConfigReader[Repr]
 
 object MapShapedReader {
 
+  /**
+   * A special form of `MapShapedReader` that includes usage of the field's default values.
+   * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
+   * @tparam Repr the generic representation
+   * @tparam DefaultRepr the generic representation of the default arguments
+   */
   trait WithDefaults[Wrapped, Repr, DefaultRepr] {
     def fromWithDefault(cur: ConfigObjectCursor, default: DefaultRepr): Either[ConfigReaderFailures, Repr]
   }

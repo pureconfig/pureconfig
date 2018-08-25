@@ -6,6 +6,11 @@ import pureconfig.{ ConfigCursor, ConfigReader, Derivation }
 import shapeless._
 import shapeless.ops.hlist.HKernelAux
 
+/**
+ * A `ConfigReader` for generic representations that reads values in the shape of a sequence.
+ *
+ * @tparam Repr the generic representation
+ */
 trait SeqShapedReader[Repr] extends ConfigReader[Repr]
 
 object SeqShapedReader {

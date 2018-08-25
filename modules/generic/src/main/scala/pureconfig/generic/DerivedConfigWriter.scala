@@ -4,6 +4,11 @@ import com.typesafe.config._
 import pureconfig._
 import shapeless._
 
+/**
+ * A `ConfigWriter` derived with `shapeless`.
+ *
+ * @tparam A the type of objects writable by this `ConfigWriter`
+ */
 trait DerivedConfigWriter[A] extends ConfigWriter[A]
 
 object DerivedConfigWriter extends DerivedConfigWriter1 {

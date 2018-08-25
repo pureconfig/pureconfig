@@ -8,6 +8,12 @@ import pureconfig.error.ConfigReaderException
 import shapeless._
 import shapeless.labelled.FieldType
 
+/**
+ * A `ConfigWriter` for generic representations that writes values in the shape of a config object.
+ *
+ * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
+ * @tparam Repr the generic representation
+ */
 trait MapShapedWriter[Wrapped, Repr] extends ConfigWriter[Repr]
 
 object MapShapedWriter {

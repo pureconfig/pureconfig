@@ -4,10 +4,13 @@ import scala.reflect.macros.blackbox
 
 import pureconfig._
 
+/**
+ * Macros used to circunvent divergence checker restrictions in the compiler.
+ */
 class ExportMacros(val c: blackbox.Context) {
   import c.universe._
 
-  final def exportReader[A](implicit a: c.WeakTypeTag[A]): c.Expr[Exported[ConfigReader[A]]] = {
+  final def exportDerivedReader[A](implicit a: c.WeakTypeTag[A]): c.Expr[Exported[ConfigReader[A]]] = {
     c.typecheck(q"_root_.shapeless.lazily[_root_.pureconfig.generic.DerivedConfigReader[$a]]", silent = true) match {
       case EmptyTree => c.abort(c.enclosingPosition, s"Unable to infer value of type $a")
       case t =>
@@ -16,7 +19,7 @@ class ExportMacros(val c: blackbox.Context) {
     }
   }
 
-  final def exportWriter[A](implicit a: c.WeakTypeTag[A]): c.Expr[Exported[ConfigWriter[A]]] = {
+  final def exportDerivedWriter[A](implicit a: c.WeakTypeTag[A]): c.Expr[Exported[ConfigWriter[A]]] = {
     c.typecheck(q"_root_.shapeless.lazily[_root_.pureconfig.generic.DerivedConfigWriter[$a]]", silent = true) match {
       case EmptyTree => c.abort(c.enclosingPosition, s"Unable to infer value of type $a")
       case t =>
