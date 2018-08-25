@@ -138,15 +138,17 @@ lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
 // do not publish the root project
 skip in publish := true
 
+releaseCrossBuild := true
 releaseTagComment := s"Release ${(version in ThisBuild).value}"
 releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"
 
-// redefine the release process so that we use sbt-doge cross building operator (+)
+// redefine the release process due to https://github.com/sbt/sbt-release/issues/184
+// and to append `sonatypeReleaseAll`
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
   runClean,
-  releaseStepCommandAndRemaining("+test"),
+  runTest,
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
