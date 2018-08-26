@@ -15,6 +15,7 @@ Given an `AnimalConf` sealed trait:
 ```tut:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
 
 sealed trait AnimalConf
 case class DogConf(age: Int) extends AnimalConf
@@ -36,6 +37,8 @@ of a case class option, we can use another field.
 First, define a `CoproductHint` in implicit scope:
 
 ```tut:silent
+import pureconfig.generic.FieldCoproductHint
+
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
 ```
 
@@ -65,6 +68,8 @@ traits, you can just write the lowercase name of the class by using an `EnumCopr
 an enumeration for seasons:
 
 ```tut:silent
+import pureconfig.generic.EnumCoproductHint
+
 sealed trait Season
 case object Spring extends Season
 case object Summer extends Season

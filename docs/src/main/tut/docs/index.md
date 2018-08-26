@@ -26,9 +26,11 @@ For a full example of `build.sbt` you can have a look at this [build.sbt](https:
 Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig.
 As a result we recommend only using the latest Scala versions within the minor series.
 
-In your code, first import the library and define data types and a case class to hold the configuration:
+In your code, import `pureconfig.generic.auto` and define data types and a case class to hold the configuration:
 
 ```tut:silent
+import pureconfig.generic.auto._
+
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt

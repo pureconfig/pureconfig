@@ -18,6 +18,7 @@ writing operations:
 
 ```tut:silent
 import pureconfig._
+import pureconfig.generic.auto._
 
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt

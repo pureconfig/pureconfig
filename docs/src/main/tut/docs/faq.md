@@ -70,6 +70,7 @@ A solution we've seen address this concern is to wrap the sensitive field in an 
 ```tut:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
 
 case class Sensitive(value: String) extends AnyVal {
   override def toString: String = "MASKED"
@@ -106,6 +107,7 @@ to understand the reason of the failure. Consider the following example:
 ```tut:silent:reset
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
 
 class Custom(x: Int, s: String) // not a case class
 class Custom2(x: Int, s: String) // not a case class

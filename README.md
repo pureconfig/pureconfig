@@ -54,9 +54,11 @@ For a full example of `build.sbt` you can have a look at this [build.sbt](https:
 Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig.
 As a result we recommend only using the latest Scala versions within the minor series.
 
-In your code, first import the library and define data types and a case class to hold the configuration:
+In your code, import `pureconfig.generic.auto` and define data types and a case class to hold the configuration:
 
 ```scala
+import pureconfig.generic.auto._
+
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
 case class AdtB(b: Int) extends MyAdt
@@ -78,7 +80,7 @@ Finally, load the configuration:
 
 ```scala
 pureconfig.loadConfig[MyClass]
-// res3: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+// res0: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Left(ConfigReaderFailures(ConvertFailure(KeyNotFound(boolean,Set()),None,),List(ConvertFailure(KeyNotFound(port,Set()),None,), ConvertFailure(KeyNotFound(adt,Set()),None,), ConvertFailure(KeyNotFound(list,Set()),None,), ConvertFailure(KeyNotFound(map,Set()),None,))))
 ```
 
 The various `loadConfig` methods defer to Typesafe Config's

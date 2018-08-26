@@ -4,7 +4,7 @@ import microsites._
 
 lazy val core = (project in file("core")).
   enablePlugins(TutPlugin, SbtOsgi).
-  settings(commonSettings, tutTargetDirectory := file(".")).
+  settings(commonSettings).
   dependsOn(macros)
 
 // A special module for now, since tests depend on it. We should improve this organization later.
@@ -22,11 +22,18 @@ lazy val tests = (project in file("tests")).
   dependsOn(core, generic).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
+// aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
+lazy val bundle = (project in file("bundle")).
+  enablePlugins(TutPlugin, SbtOsgi).
+  settings(commonSettings).
+  settings(name := "pureconfig", tutTargetDirectory := file(".")).
+  dependsOn(core, generic)
+
 lazy val docs = (project in file("docs")).
   enablePlugins(MicrositesPlugin).
   settings(commonSettings, publishArtifact := false).
   settings(micrositesSettings).
-  dependsOn(core)
+  dependsOn(bundle)
 
 def module(proj: Project) = proj.
   enablePlugins(TutPlugin, SbtOsgi).
@@ -47,11 +54,6 @@ lazy val joda = module(project) in file("modules/joda")
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val squants = module(project) in file("modules/squants")
 lazy val yaml = module(project) in file("modules/yaml")
-
-// aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
-lazy val bundle = (project in file("bundle")).
-  settings(commonSettings, name := "pureconfig").
-  dependsOn(core, generic)
 
 lazy val commonSettings = Seq(
   organization := "com.github.pureconfig",

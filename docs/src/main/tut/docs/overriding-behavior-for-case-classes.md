@@ -41,6 +41,8 @@ instance in implicit scope:
 ```tut:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
+import pureconfig.generic.ProductHint
 
 case class SampleConf(foo: Int, bar: String)
 
@@ -72,8 +74,6 @@ can make sure the following implicit is in scope before loading or writing
 configuration files:
 
 ```tut:silent
-import pureconfig._
-
 implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 ```
 
@@ -89,6 +89,8 @@ For example, with this setup:
 ```tut:reset:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
+import pureconfig.generic.ProductHint
 import scala.concurrent.duration._
 
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
@@ -130,6 +132,8 @@ case class field, leading to potential bugs due to misspellings:
 // reset tut's REPL session to remove the implicit ProductHint defined above.
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
+import pureconfig.generic.ProductHint
 import scala.concurrent.duration._
 
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
@@ -158,6 +162,7 @@ Consider this configuration:
 ```tut:reset:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
 
 case class Foo(a: Int)
 case class FooOpt(a: Option[Int])
