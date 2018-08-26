@@ -84,6 +84,12 @@ class ProductConvertersSuite extends BaseSuite {
     ConfigConvert[Conf].from(conf).right.value shouldBe Conf(1, 42)
   }
 
+  it should "not write empty option fields" in {
+    case class Conf(a: Int, b: Option[Int])
+    ConfigConvert[Conf].to(Conf(42, Some(1))) shouldBe ConfigFactory.parseString("""{ a: 42, b: 1 }""").root()
+    ConfigConvert[Conf].to(Conf(42, None)) shouldBe ConfigFactory.parseString("""{ a: 42 }""").root()
+  }
+
   it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {
     case class Foo(i: Int)
     case class Bar(foo: Foo)
