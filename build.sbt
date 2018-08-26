@@ -39,6 +39,7 @@ def module(proj: Project) = proj.
   enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
   dependsOn(tests % "test->test"). // In order to reuse thDerivationSuite scalacheck generators
+  dependsOn(generic % "tut"). // Allow auto-derivation in documentation
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")

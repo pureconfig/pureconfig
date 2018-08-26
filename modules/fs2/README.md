@@ -21,6 +21,7 @@ To load a configuration file from a path using cats-effect's `IO`:
 
 
 ```scala
+import pureconfig.generic.auto._
 import pureconfig.module.fs2._
 import cats.effect.IO
 import fs2.io.file

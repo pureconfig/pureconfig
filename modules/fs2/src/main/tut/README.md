@@ -27,6 +27,7 @@ Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
 ```
 
 ```tut:silent
+import pureconfig.generic.auto._
 import pureconfig.module.fs2._
 import cats.effect.IO
 import fs2.io.file

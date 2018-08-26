@@ -16,6 +16,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-yaml" % "0.9.2"
 Given a type to hold our configuration:
 
 ```scala
+import pureconfig.generic.auto._
 import pureconfig.module.yaml._
 
 case class Person(name: String, age: Int, children: List[Person])
@@ -44,5 +45,5 @@ We can load the configuration to a `MyConf` instance using `loadYaml`:
 
 ```scala
 loadYaml[Person](yamlFile)
-// res1: Either[pureconfig.error.ConfigReaderFailures,Person] = Right(Person(John,42,List(Person(Sarah,7,List()), Person(Andy,10,List()))))
+// res1: Either[pureconfig.error.ConfigReaderFailures,Person] = Left(ConfigReaderFailures(ConvertFailure(WrongType(LIST,Set(OBJECT)),None,children),List()))
 ```

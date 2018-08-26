@@ -19,6 +19,7 @@ import akka.actor.ActorPath
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.akka._
 
 case class MyConfig(timeout: Timeout, actorPath: ActorPath)
