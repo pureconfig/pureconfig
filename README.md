@@ -80,7 +80,7 @@ Finally, load the configuration:
 
 ```scala
 pureconfig.loadConfig[MyClass]
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Left(ConfigReaderFailures(ConvertFailure(KeyNotFound(boolean,Set()),None,),List(ConvertFailure(KeyNotFound(port,Set()),None,), ConvertFailure(KeyNotFound(adt,Set()),None,), ConvertFailure(KeyNotFound(list,Set()),None,), ConvertFailure(KeyNotFound(map,Set()),None,))))
+// res0: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
 The various `loadConfig` methods defer to Typesafe Config's
