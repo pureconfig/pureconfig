@@ -1,9 +1,10 @@
 package pureconfig
 
 import com.typesafe.config.ConfigFactory
+import pureconfig.NonAutoDerivationSuite._
 import shapeless.test.illTyped
 
-class NonAutoDerivationSuite extends BaseSuite {
+object NonAutoDerivationSuite {
 
   sealed trait Entity
   case class Person(name: String, surname: String) extends Entity
@@ -11,6 +12,9 @@ class NonAutoDerivationSuite extends BaseSuite {
 
   val person = Person("John", "Doe")
   val conf = ConfigFactory.parseString("{ type: person, name: John, surname: Doe }")
+}
+
+class NonAutoDerivationSuite extends BaseSuite {
 
   behavior of "default"
 
@@ -20,11 +24,6 @@ class NonAutoDerivationSuite extends BaseSuite {
   }
 
   behavior of "semiauto"
-
-  it should "not provide instance derivation for products and coproducts out-of-the-box" in {
-    illTyped("{ import pureconfig.generic.semiauto._; loadConfig[Entity](conf) }")
-    illTyped("{ import pureconfig.generic.semiauto._; ConfigWriter[Entity] }")
-  }
 
   it should "provide methods to derive readers on demand" in {
     import pureconfig.generic.semiauto._

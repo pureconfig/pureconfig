@@ -17,7 +17,7 @@ For Scala 2.10 you also need the Macro Paradise plugin:
 ```scala
 libraryDependencies ++= Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.9.2",
-  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch)
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
 )
 ```
 
