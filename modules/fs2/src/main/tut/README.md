@@ -10,8 +10,6 @@ In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.9.2"
 ```
 
-Note that as fs2 only supports Scala 2.11+ this module in only available for those versions.
-
 ## Example
 ### Reading configuration
 

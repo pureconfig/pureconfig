@@ -3,9 +3,8 @@ import Dependencies._
 name := "pureconfig-tests"
 
 libraryDependencies ++= Seq(
-  scalaMacrosParadise,
   scalaTest,
   scalaCheck,
-  scalaCheckShapeless.value)
+  scalaCheckShapeless)
 
 skip in publish := true

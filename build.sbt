@@ -62,7 +62,7 @@ lazy val commonSettings = Seq(
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
   scalaVersion := "2.12.6",
-  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6"),
+  crossScalaVersions := Seq("2.11.12", "2.12.6"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -141,16 +141,14 @@ lazy val allVersionLintFlags = Seq(
   "-unchecked",
   "-Xfatal-warnings",
   "-Yno-adapted-args",
-  "-Ywarn-dead-code")
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-unused-import")
 
 lazy val scala211LintFlags = allVersionLintFlags ++ Seq(
-  "-Ywarn-numeric-widen", // In 2.10 this produces a strange spurious error
-  "-Ywarn-unused-import", // Not available in 2.10
   "-Xlint")
 
 lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
-  "-Ywarn-numeric-widen",
-  "-Ywarn-unused-import",
   "-Xlint:-unused,_") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
 
 // do not publish the root project

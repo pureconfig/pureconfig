@@ -7,7 +7,6 @@ import pureconfig._
 /**
  * Macros used to circunvent divergence checker restrictions in the compiler.
  */
-@macrocompat.bundle
 class ExportMacros(val c: blackbox.Context) {
   import c.universe._
 

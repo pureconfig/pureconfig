@@ -3,9 +3,7 @@ import Dependencies._
 name := "pureconfig-core"
 
 libraryDependencies ++= Seq(
-  typesafeConfig,
-  scalaTest,
-  scalaCheck)
+  typesafeConfig)
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),

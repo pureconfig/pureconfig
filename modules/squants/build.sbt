@@ -1,8 +1,7 @@
 name := "pureconfig-squants"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "squants" % "1.3.0",
-  Dependencies.scalaMacrosParadise)
+  "org.typelevel" %% "squants" % "1.3.0")
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),

@@ -33,20 +33,11 @@ certain type. In other words, you define **what** to load and PureConfig provide
 
 ## Quick Start
 
-To use PureConfig in an existing SBT project with Scala 2.10 or a later version, add the following dependency to your
+To use PureConfig in an existing SBT project with Scala 2.11 or a later version, add the following dependency to your
 `build.sbt`:
 
 ```scala
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.2"
-```
-
-For Scala 2.10 you need also the Macro Paradise plugin:
-
-```scala
-libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.9.2",
-  compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
-)
 ```
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).

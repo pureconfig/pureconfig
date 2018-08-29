@@ -25,7 +25,6 @@ object Derivation {
   implicit def materializeDerivation[A]: Derivation[A] = macro DerivationMacros.materializeDerivation[A]
 }
 
-@macrocompat.bundle
 class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with MacroCompat {
   import c.universe._
 

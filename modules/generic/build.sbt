@@ -3,12 +3,7 @@ import Dependencies._
 name := "pureconfig-generic"
 
 libraryDependencies ++= Seq(
-  shapeless.value,
-  scalaMacrosParadise,
-  typesafeConfig,
-  scalaTest,
-  scalaCheck,
-  scalaCheckShapeless.value)
+  shapeless)
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
