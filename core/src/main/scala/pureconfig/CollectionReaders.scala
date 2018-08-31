@@ -8,26 +8,26 @@ import pureconfig.ConvertHelpers._
 import pureconfig.error._
 
 /**
- * The default behavior of ConfigReaders that are implicitly derived in PureConfig is to raise a
- * KeyNotFoundException when a required key is missing. Mixing in this trait to a ConfigReader
- * allows customizing this behavior. When a key is missing, but the ConfigReader of the given
- * type extends this trait, the `from` method of the ConfigReader is called with null.
+ * A marker trait signaling that a `ConfigReader` accepts missing (undefined) values.
+ *
+ * The standard behavior of `ConfigReader`s that expect required keys in config objects is to return a `KeyNotFound`
+ * failure when one or more of them are missing. Mixing in this trait into the key's `ConfigReader` signals that a
+ * value is missing for the key, the `ConfigReader` can be called with an cursor in the "undefined" state.
  */
-trait AllowMissingKey { self: ConfigReader[_] => }
+trait ReadsMissingKeys { this: ConfigReader[_] => }
 
 /**
  * Trait containing `ConfigReader` instances for collection types.
  */
 trait CollectionReaders {
 
-  implicit def optionReader[T](implicit conv: Derivation[ConfigReader[T]]) = new OptionConfigReader[T]
-
-  class OptionConfigReader[T](implicit conv: Derivation[ConfigReader[T]]) extends ConfigReader[Option[T]] with AllowMissingKey {
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Option[T]] = {
-      if (cur.isUndefined || cur.isNull) Right(None)
-      else conv.value.from(cur).right.map(Some(_))
+  implicit def optionReader[T](implicit conv: Derivation[ConfigReader[T]]): ConfigReader[Option[T]] =
+    new ConfigReader[Option[T]] with ReadsMissingKeys {
+      override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Option[T]] = {
+        if (cur.isUndefined || cur.isNull) Right(None)
+        else conv.value.from(cur).right.map(Some(_))
+      }
     }
-  }
 
   implicit def traversableReader[T, F[T] <: TraversableOnce[T]](
     implicit

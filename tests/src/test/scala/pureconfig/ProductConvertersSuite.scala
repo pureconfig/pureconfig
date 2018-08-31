@@ -73,7 +73,7 @@ class ProductConvertersSuite extends BaseSuite {
     val conf = ConfigFactory.parseString("""{ a: 1 }""").root()
     ConfigConvert[Conf].from(conf) should failWith(KeyNotFound("b"))
 
-    implicit val defaultInt = new ConfigConvert[Int] with AllowMissingKey {
+    implicit val defaultInt = new ConfigConvert[Int] with ReadsMissingKeys {
       def from(cur: ConfigCursor) =
         if (cur.isUndefined) Right(42) else {
           val s = cur.value.render(ConfigRenderOptions.concise)
