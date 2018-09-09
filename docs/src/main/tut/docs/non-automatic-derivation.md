@@ -47,8 +47,8 @@ they are used instead of the automatically-derived ones.
 ### Semi-Automatic
 
 With semi-automatic derivation, readers can still be derived using all the machinery presented on these documentation
-pages, but the reader instances are not provided as implicits. Instead, PureConfig provides two one-liner methods which
-that can be used to create derived instances, which you must put somewhere on the implicit scope.
+pages, but the reader instances are not provided as implicits. Instead, PureConfig provides two one-liner methods to
+create derived instances, which you must put somewhere on the implicit scope.
 
 Semi-automatic derivation is enabled by importing `pureconfig.generic.semiauto._`. We can now explicitly define the
 reader for `Person` by calling `deriveReader`:

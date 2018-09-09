@@ -1,10 +1,10 @@
 package pureconfig
 
 import com.typesafe.config.ConfigFactory
-import pureconfig.NonAutoDerivationSuite._
+import pureconfig.DerivationModesSuite._
 import shapeless.test.illTyped
 
-object NonAutoDerivationSuite {
+object DerivationModesSuite {
 
   sealed trait Entity
   case class Person(name: String, surname: String) extends Entity
@@ -14,7 +14,7 @@ object NonAutoDerivationSuite {
   val conf = ConfigFactory.parseString("{ type: person, name: John, surname: Doe }")
 }
 
-class NonAutoDerivationSuite extends BaseSuite {
+class DerivationModesSuite extends BaseSuite {
 
   behavior of "default"
 
