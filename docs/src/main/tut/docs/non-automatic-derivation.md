@@ -103,6 +103,6 @@ pureconfig.loadConfig[Person](conf)
 ```
 
 If you don't need reader or writer derivation anywhere in your project, you can replace the `pureconfig` Maven
-dependency by `pureconfig-core`. `pureconfig-core` contains only the core classes needed by PureConfig, as well as
+dependency with `pureconfig-core`. `pureconfig-core` contains only the core classes needed by PureConfig, as well as
 readers and writers for primitive and collection types. It has the advantage of not depending on shapeless, which can be
 useful to prevent version conflicts.
