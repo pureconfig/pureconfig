@@ -66,7 +66,33 @@ sealed trait ConfigCursor {
    *         otherwise.
    */
   def asListCursor: Either[ConfigReaderFailures, ConfigListCursor] =
-    castOrFail(LIST, Set(LIST), _.asInstanceOf[ConfigList]).right.map(ConfigListCursor(_, pathElems))
+    if (isUndefined) {
+      failed(KeyNotFound.forKeys(path, Set()))
+    } else {
+      val ve = value.valueType() match {
+        case ConfigValueType.OBJECT =>
+          val ll =
+            value.asInstanceOf[ConfigObject].asScala.foldLeft[Either[List[String], List[(Int, ConfigValue)]]](Right(Nil)) {
+              case (acc, (str, v)) =>
+                (acc, Try(str.toInt)) match {
+                  case (Right(a), Success(b)) => Right(a :+ (b -> v))
+                  case (Left(keys), Failure(_)) => Left(keys :+ str)
+                  case (_, Failure(_)) => Left(List(str))
+                  case (Left(keys), _) => Left(keys)
+                }
+            }
+
+          ll.left.map(CannotConvertObjectToList)
+            .right.map(l => ConfigValueFactory.fromIterable(l.sortBy(_._1).map(_._2).asJava))
+        case ConfigValueType.LIST =>
+          Right(value.asInstanceOf[ConfigList])
+        case other =>
+          Left(WrongType(other, Set(LIST, OBJECT)))
+      }
+
+      ve.left.flatMap(failed)
+        .right.map(ConfigListCursor(_, pathElems))
+    }
 
   /**
    * Casts this cursor to a list of cursors.

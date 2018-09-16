@@ -158,3 +158,18 @@ final case class WrongSizeString(expected: Int, found: Int) extends FailureReaso
 final case class NoValidCoproductChoiceFound(value: ConfigValue) extends FailureReason {
   def description = s"No valid coproduct choice found for '${value.render(ConfigRenderOptions.concise())}'."
 }
+
+/**
+ * A failure reason given when a ConfigObject can't be converted to a ConfigList.
+ *
+ * @param failingKeys the list of keys whose conversion to integer failed
+ */
+final case class CannotConvertObjectToList(failingKeys: List[String]) extends FailureReason {
+  def description = {
+    val keysStr = failingKeys.dropRight(1).map(k => s"'$k'").mkString(", ") +
+      failingKeys.lastOption.fold("")(k => s" and '$k'")
+
+    "To convert an object to a list, its keys must read as integers but " +
+      s"""key${if (failingKeys.size > 1) "s" else ""} ${keysStr} are not valid ones."""
+  }
+}

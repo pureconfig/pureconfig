@@ -164,33 +164,12 @@ trait DerivedReaders1 {
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigReader[F[T]] {
 
     override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F[T]] = {
-      cur.asCollectionCursor.right.flatMap {
-        case Left(listCur) =>
-          // we called all the failures in the list
-          listCur.list.foldLeft[Either[ConfigReaderFailures, mutable.Builder[T, F[T]]]](Right(cbf())) {
-            case (acc, valueCur) =>
-              combineResults(acc, configConvert.value.value.from(valueCur))(_ += _)
-          }.right.map(_.result())
-
-        case Right(objCur) =>
-          def keyValueReader(key: String, valueCur: ConfigCursor): Either[ConfigReaderFailures, (Int, T)] = {
-            val keyResult = catchReadError(_.toInt)(implicitly)(key)
-              .left.flatMap { t =>
-                valueCur.failed(CannotConvert(key, "Int", "To convert an object to a collection, its keys must be " +
-                  s"read as integers but key $key is not a valid one. Error: ${t.description}"))
-              }
-            val valueResult = configConvert.value.value.from(valueCur)
-            combineResults(keyResult, valueResult)(_ -> _)
-          }
-
-          objCur.map.foldLeft[Either[ConfigReaderFailures, List[(Int, T)]]](Right(Nil)) {
-            case (acc, (str, v)) =>
-              combineResults(acc, keyValueReader(str, v))(_ :+ _)
-          }.right.map { l =>
-            val r = cbf()
-            r ++= l.sortBy(_._1).map(_._2)
-            r.result()
-          }
+      cur.asListCursor.right.flatMap { listCur =>
+        // we called all the failures in the list
+        listCur.list.foldLeft[Either[ConfigReaderFailures, mutable.Builder[T, F[T]]]](Right(cbf())) {
+          case (acc, valueCur) =>
+            combineResults(acc, configConvert.value.value.from(valueCur))(_ += _)
+        }.right.map(_.result())
       }
     }
   }

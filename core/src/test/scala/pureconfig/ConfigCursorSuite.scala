@@ -1,7 +1,7 @@
 package pureconfig
 
 import com.typesafe.config._
-import pureconfig.error.{ KeyNotFound, WrongType }
+import pureconfig.error.{ CannotConvertObjectToList, KeyNotFound, WrongType }
 
 class ConfigCursorSuite extends BaseSuite {
 
@@ -39,24 +39,33 @@ class ConfigCursorSuite extends BaseSuite {
 
   it should "allow being casted to a list cursor in a safe way" in {
     cursor("abc").asListCursor should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), defaultPathStr)
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT)), defaultPathStr)
 
     cursor("[1, 2]").asListCursor shouldBe
       Right(ConfigListCursor(conf("[1, 2]").asInstanceOf[ConfigList], defaultPath))
 
     cursor("{ a: 1, b: 2 }").asListCursor should failWith(
-      WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), defaultPathStr)
+      CannotConvertObjectToList(List("a", "b")), defaultPathStr)
+
+    cursor("{ 0: a, 1: b }").asListCursor shouldBe
+      Right(ConfigListCursor(conf("""["a", "b"]""").asInstanceOf[ConfigList], defaultPath))
+
+    cursor("{ 10: a, 3: b }").asListCursor shouldBe
+      Right(ConfigListCursor(conf("""["b", "a"]""").asInstanceOf[ConfigList], defaultPath))
   }
 
   it should "allow being casted to a list of cursors in a safe way" in {
     cursor("abc").asList should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), defaultPathStr)
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT)), defaultPathStr)
 
     cursor("[1, 2]").asList shouldBe
       Right(List(cursor("1", "0" :: defaultPath), cursor("2", "1" :: defaultPath)))
 
     cursor("{ a: 1, b: 2 }").asList should failWith(
-      WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), defaultPathStr)
+      CannotConvertObjectToList(List("a", "b")), defaultPathStr)
+
+    cursor("{ 3: a, 10: b }").asList shouldBe
+      Right(List(cursor("a", "0" :: defaultPath), cursor("b", "1" :: defaultPath)))
   }
 
   it should "allow being casted to an object cursor in a safe way" in {

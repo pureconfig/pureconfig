@@ -13,7 +13,7 @@ import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.equality._
-import pureconfig.error.{ CannotConvert, EmptyStringFound, WrongSizeString }
+import pureconfig.error.{ CannotConvert, CannotConvertObjectToList, EmptyStringFound, WrongSizeString }
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration.{ Duration, FiniteDuration, _ }
@@ -125,7 +125,7 @@ class BasicConvertersSuite extends BaseSuite {
     // order of keys maintained
     ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava) -> List(2, 3, 1),
     ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava) -> List(4, 2))
-  checkFailure[immutable.List[Int], CannotConvert](
+  checkFailure[immutable.List[Int], CannotConvertObjectToList](
     ConfigValueFactory.fromMap(Map("1" -> 1, "a" -> 2).asJava))
 
   checkArbitrary[immutable.ListSet[Int]]
