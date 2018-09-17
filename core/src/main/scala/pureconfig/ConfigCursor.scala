@@ -75,8 +75,8 @@ sealed trait ConfigCursor {
             value.asInstanceOf[ConfigObject].asScala.foldLeft[Either[List[String], List[(Int, ConfigValue)]]](Right(Nil)) {
               case (acc, (str, v)) =>
                 (acc, Try(str.toInt)) match {
-                  case (Right(a), Success(b)) => Right(a :+ (b -> v))
-                  case (Left(keys), Failure(_)) => Left(keys :+ str)
+                  case (Right(a), Success(b)) => Right((b -> v) :: a)
+                  case (Left(keys), Failure(_)) => Left(str :: keys)
                   case (_, Failure(_)) => Left(List(str))
                   case (Left(keys), _) => Left(keys)
                 }
