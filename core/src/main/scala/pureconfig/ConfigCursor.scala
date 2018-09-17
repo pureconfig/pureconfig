@@ -90,7 +90,7 @@ sealed trait ConfigCursor {
           Left(WrongType(other, Set(LIST, OBJECT)))
       }
 
-      ve.left.flatMap(failed)
+      scopeFailure(ve)
         .right.map(ConfigListCursor(_, pathElems))
     }
 
