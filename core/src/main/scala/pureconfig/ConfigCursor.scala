@@ -87,7 +87,7 @@ sealed trait ConfigCursor {
         case ConfigValueType.LIST =>
           Right(value.asInstanceOf[ConfigList])
         case other =>
-          Left(WrongType(other, Set(LIST, OBJECT)))
+          Left(WrongType(other, Set(LIST)))
       }
 
       scopeFailure(ve)

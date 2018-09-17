@@ -39,7 +39,7 @@ class ConfigCursorSuite extends BaseSuite {
 
   it should "allow being casted to a list cursor in a safe way" in {
     cursor("abc").asListCursor should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT)), defaultPathStr)
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), defaultPathStr)
 
     cursor("[1, 2]").asListCursor shouldBe
       Right(ConfigListCursor(conf("[1, 2]").asInstanceOf[ConfigList], defaultPath))
@@ -56,7 +56,7 @@ class ConfigCursorSuite extends BaseSuite {
 
   it should "allow being casted to a list of cursors in a safe way" in {
     cursor("abc").asList should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT)), defaultPathStr)
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), defaultPathStr)
 
     cursor("[1, 2]").asList shouldBe
       Right(List(cursor("1", "0" :: defaultPath), cursor("2", "1" :: defaultPath)))
