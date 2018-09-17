@@ -82,7 +82,7 @@ sealed trait ConfigCursor {
                 }
             }
 
-          ll.left.map(CannotConvertObjectToList)
+          ll.left.map(ks => CannotConvertObjectToList(ks.sorted))
             .right.map(l => ConfigValueFactory.fromIterable(l.sortBy(_._1).map(_._2).asJava))
         case ConfigValueType.LIST =>
           Right(value.asInstanceOf[ConfigList])
