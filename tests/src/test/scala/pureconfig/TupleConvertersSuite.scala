@@ -22,6 +22,7 @@ class TupleConvertersSuite extends BaseSuite {
 
   // Check readers from objects and lists
   checkRead[(String, Int)](ConfigValueFactory.fromMap(Map("_1" -> "one", "_2" -> 2).asJava) -> (("one", 2)))
+  checkRead[(String, Int)](ConfigValueFactory.fromMap(Map("0" -> "one", "1" -> 2).asJava) -> (("one", 2)))
   checkRead[(String, Int)](ConfigValueFactory.fromIterable(List("one", 2).asJava) -> (("one", 2)))
 
   // Check writers
@@ -48,5 +49,5 @@ class TupleConvertersSuite extends BaseSuite {
 
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef("str") -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT)), None, "")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), None, "")))
 }

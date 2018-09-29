@@ -175,6 +175,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with this cursor as a list or object cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
+  @deprecated("Use `asListCursor` and/or `asCollectionCursor` instead", "0.10.0")
   def asCollectionCursor: Either[ConfigReaderFailures, Either[ConfigListCursor, ConfigObjectCursor]] = {
     if (isUndefined) {
       failed(KeyNotFound.forKeys(path, Set()))
@@ -255,7 +256,7 @@ object ConfigCursor {
    * describes. This code mimics the behavior of the package-private `com.typesafe.config.impl.DefaultTransformer` class
    * in Typesafe Config.
    */
-  private def transform(configValue: ConfigValue, requested: ConfigValueType): Either[WrongType, ConfigValue] = {
+  private[pureconfig] def transform(configValue: ConfigValue, requested: ConfigValueType): Either[WrongType, ConfigValue] = {
     (configValue.valueType(), requested) match {
       case (valueType, requestedType) if valueType == requestedType =>
         Right(configValue)

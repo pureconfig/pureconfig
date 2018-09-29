@@ -102,17 +102,6 @@ class ConfigCursorSuite extends BaseSuite {
       Right(Map("a" -> cursor("1", "a" :: defaultPath), "b" -> cursor("2", "b" :: defaultPath)))
   }
 
-  it should "allow being casted to a collection cursor in a safe way" in {
-    cursor("abc").asCollectionCursor should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT)), defaultPathStr)
-
-    cursor("[1, 2]").asCollectionCursor shouldBe
-      Right(Left(ConfigListCursor(conf("[1, 2]").asInstanceOf[ConfigList], defaultPath)))
-
-    cursor("{ a: 1, b: 2 }").asCollectionCursor shouldBe
-      Right(Right(ConfigObjectCursor(conf("{ a: 1, b: 2 }").asInstanceOf[ConfigObject], defaultPath)))
-  }
-
   it should "allow access to a given path" in {
     cursor("{ a: 2 }").atPath() shouldBe Right(cursor("{ a: 2 }", defaultPath))
     cursor("{ a: 2 }").atPath("a") shouldBe Right(cursor("2", "a" :: defaultPath))
@@ -131,7 +120,6 @@ class ConfigCursorSuite extends BaseSuite {
     cur.asList should failWithType[KeyNotFound]
     cur.asObjectCursor should failWithType[KeyNotFound]
     cur.asMap should failWithType[KeyNotFound]
-    cur.asCollectionCursor should failWithType[KeyNotFound]
   }
 
   behavior of "ConfigListCursor"
