@@ -24,6 +24,7 @@ For example, given a config like this:
 ```tut:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
 
 case class Name(firstName: String, lastName: String)
 case class Person(name: Name, age: Int)

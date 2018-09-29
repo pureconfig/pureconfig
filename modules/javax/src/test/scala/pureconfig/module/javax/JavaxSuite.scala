@@ -5,6 +5,7 @@ import javax.security.auth.x500.X500Principal
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest._
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 class JavaxSuite extends FlatSpec with Matchers with EitherValues {

@@ -19,7 +19,8 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.9
 Given a Greeting ADT which implements one of Enumeratum's `EnumEntry` types:
 
 ```scala
-import pureconfig.loadConfig
+import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.enumeratum._
 import com.typesafe.config.ConfigFactory.parseString
 import enumeratum._

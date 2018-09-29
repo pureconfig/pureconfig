@@ -18,7 +18,6 @@ object DerivationChecks {
   def illTyped(code: String, expected: String*): Unit = macro DerivationChecksMacros.illTyped
 }
 
-@macrocompat.bundle
 class DerivationChecksMacros(val c: blackbox.Context) {
   import c.universe._
 

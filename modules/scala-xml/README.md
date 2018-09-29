@@ -18,6 +18,7 @@ To load an `Elem` into a configuration, we'll create a class to hold our configu
 import scala.xml.Elem
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.scalaxml._
 
 case class Config(people: Elem)

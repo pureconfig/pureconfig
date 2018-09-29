@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter
 import pureconfig._
 import pureconfig.configurable._
 import pureconfig.ConvertHelpers._
+import pureconfig.generic.auto._
 
 case class Conf(date: LocalDate, intMap: Map[Int, Int])
 

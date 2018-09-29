@@ -1,8 +1,7 @@
 name := "pureconfig-enum"
 
 libraryDependencies ++= Seq(
-  "org.julienrf" %% "enum" % "3.1",
-  Dependencies.scalaMacrosParadise)
+  "org.julienrf" %% "enum" % "3.1")
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),

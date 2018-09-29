@@ -17,6 +17,7 @@ The simplest combinator is `map`, which simply transforms the result of an exist
 ```tut:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
 
 case class Conf(bytes: Vector[Byte])
 

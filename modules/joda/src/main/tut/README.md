@@ -27,7 +27,8 @@ val isoFormatter = ISODateTimeFormat.dateTimeParser.withZoneUTC
 
 Create a ConfigConvert to read DateTime with that format:
 ```tut:silent
-import pureconfig.loadConfig
+import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.joda.configurable._
 import com.typesafe.config.ConfigFactory.parseString
 

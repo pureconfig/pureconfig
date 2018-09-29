@@ -4,6 +4,7 @@ import cats.data.{ NonEmptyList, NonEmptyMap, NonEmptySet, NonEmptyVector }
 import cats.instances.int._
 import cats.instances.string._
 import com.typesafe.config.ConfigFactory.parseString
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 import pureconfig.{ BaseSuite, ConfigConvertChecks }
 

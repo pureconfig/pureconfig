@@ -33,6 +33,7 @@ To load a `Path` into a configuration, we create a class to hold our configurati
 import org.apache.hadoop.fs.Path
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.hadoop._
 
 case class MyConfig(path: Path)

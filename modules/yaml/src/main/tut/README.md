@@ -16,6 +16,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-yaml" % "0.9.2"
 Given a type to hold our configuration:
 
 ```tut:silent
+import pureconfig.generic.auto._
 import pureconfig.module.yaml._
 
 case class Person(name: String, age: Int, children: List[Person])

@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory
 import org.http4s.Uri
 import pureconfig.BaseSuite
 import pureconfig.error.{ CannotConvert, ConfigReaderFailures, ConvertFailure }
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 class Http4sTest extends BaseSuite {
