@@ -6,8 +6,9 @@ package pureconfig
 import scala.concurrent.duration.Duration.{ Inf, MinusInf }
 import scala.concurrent.duration.{ DAYS, Duration, FiniteDuration, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, SECONDS, TimeUnit }
 import scala.util.Try
+import scala.util.control.NonFatal
 
-import pureconfig.error.{ CannotConvert, FailureReason }
+import pureconfig.error.{ CannotConvert, ExceptionThrown, FailureReason }
 
 /**
  * Utility functions for converting a `String` to a `Duration` and vice versa. The parser accepts the HOCON unit
@@ -25,6 +26,8 @@ private[pureconfig] object DurationUtils {
       case ex: NumberFormatException =>
         val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
         Left(CannotConvert(string, "Duration", err))
+      case NonFatal(t) =>
+        Left(ExceptionThrown(t))
     }
   }
 

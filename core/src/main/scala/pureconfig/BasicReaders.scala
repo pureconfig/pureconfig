@@ -24,22 +24,39 @@ import pureconfig.error._
 trait PrimitiveReaders {
 
   implicit val stringConfigReader = ConfigReader.fromCursor(_.asString)
+
   implicit val charConfigReader = ConfigReader.fromNonEmptyString[Char](s =>
     s.size match {
       case 1 => Right(s.charAt(0))
       case len => Left(WrongSizeString(1, len))
     })
+
   implicit val booleanConfigReader = ConfigReader.fromCursor(_.asBoolean)
-  implicit val doubleConfigReader = ConfigReader.fromNonEmptyString[Double](catchReadError({
-    case v if v.last == '%' => v.dropRight(1).toDouble / 100d
-    case v => v.toDouble
-  }))
-  implicit val floatConfigReader = ConfigReader.fromNonEmptyString[Float](catchReadError({
-    case v if v.last == '%' => v.dropRight(1).toFloat / 100f
-    case v => v.toFloat
-  }))
+
+  implicit val doubleConfigReader = ConfigReader.fromCursor({ cur =>
+    val asStringReader = catchReadError({
+      case v if v.last == '%' => v.dropRight(1).toDouble / 100f
+      case v => v.toDouble
+    })
+
+    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s)))
+      .left.flatMap(_ => cur.asDouble)
+  })
+
+  implicit val floatConfigReader = ConfigReader.fromCursor({ cur =>
+    val asStringReader = catchReadError({
+      case v if v.last == '%' => v.dropRight(1).toFloat / 100f
+      case v => v.toFloat
+    })
+
+    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s)))
+      .left.flatMap(_ => cur.asFloat)
+  })
+
   implicit val intConfigReader = ConfigReader.fromCursor(_.asInt)
+
   implicit val longConfigReader = ConfigReader.fromCursor(_.asLong)
+
   implicit val shortConfigReader = ConfigReader.fromCursor(_.asShort)
 }
 
