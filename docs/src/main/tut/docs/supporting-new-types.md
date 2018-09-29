@@ -11,6 +11,7 @@ supported out-of-the-box:
 ```tut:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 class MyInt(value: Int) {

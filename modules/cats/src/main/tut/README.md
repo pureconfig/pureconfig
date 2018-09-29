@@ -32,6 +32,7 @@ import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap}
 import cats.instances.string._
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.cats._
 
 case class MyConfig(

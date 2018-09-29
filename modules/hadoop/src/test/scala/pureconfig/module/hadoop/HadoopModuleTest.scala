@@ -4,6 +4,7 @@ import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
 import org.apache.hadoop.fs.Path
 import pureconfig.{ BaseSuite, ConfigWriter }
 import pureconfig.error.{ CannotConvert, EmptyStringFound }
+import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 class HadoopModuleTest extends BaseSuite {

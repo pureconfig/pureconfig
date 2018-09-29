@@ -41,6 +41,7 @@ An implementation of the `ConfigReader` using the cursors API is shown below:
 
 ```tut:silent
 import pureconfig._
+import pureconfig.generic.auto._
 
 def firstNameOf(name: String): String =
   name.takeWhile(_ != ' ')

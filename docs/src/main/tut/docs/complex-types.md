@@ -50,6 +50,8 @@ In the case above, we could do:
 ```tut:silent
 import pureconfig._
 import pureconfig.error._
+import pureconfig.generic.auto._
+import pureconfig.generic.FieldCoproductHint
 
 // define the "dummy" scala hierarchy
 sealed trait IdentifiableDummy {

@@ -1,11 +1,7 @@
 name := "pureconfig-akka"
 
-// akka 2.4 isn't published for Scala 2.10
-crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.10")) }
-
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.5.12",
-  Dependencies.scalaMacrosParadise)
+  "com.typesafe.akka" %% "akka-actor" % "2.5.12")
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")),

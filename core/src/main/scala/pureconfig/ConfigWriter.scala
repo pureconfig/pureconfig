@@ -41,7 +41,7 @@ trait ConfigWriter[A] {
 /**
  * Provides methods to create [[ConfigWriter]] instances.
  */
-object ConfigWriter extends BasicWriters with DerivedWriters {
+object ConfigWriter extends BasicWriters with CollectionWriters with ExportedWriters {
 
   def apply[A](implicit writer: ConfigWriter[A]): ConfigWriter[A] = writer
 

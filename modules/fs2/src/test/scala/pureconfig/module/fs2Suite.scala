@@ -2,6 +2,7 @@ package pureconfig.module
 
 import cats.effect.IO
 import _root_.fs2.{ Scheduler, Stream, text }
+import pureconfig.generic.auto._
 import pureconfig.module.{ fs2 => testee }
 import org.scalatest.{ FlatSpec, Matchers }
 import pureconfig.error.ConfigReaderException

@@ -2,7 +2,6 @@ sudo: false
 language: scala
 
 scala:
-  - 2.10.7
   - 2.11.12
   - 2.12.6
 jdk:
@@ -26,7 +25,7 @@ after_success:
 jobs:
   include:
     - env: JOB=microsite
-      scala: 2.12.4
+      scala: 2.12.6
       addons:
         apt:
           packages:

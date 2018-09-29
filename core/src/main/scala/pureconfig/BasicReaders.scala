@@ -1,7 +1,7 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigInteger, MathContext, BigDecimal => JavaBigDecimal }
+import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
 import java.net.{ URI, URL }
 import java.nio.file.{ Path, Paths }
 import java.time._
@@ -126,17 +126,6 @@ trait DurationReaders {
  */
 trait NumericReaders {
 
-  // BigDecimal String parsing copied from Scala 2.11.
-  // The Scala 2.10 bigDecimal class is hard-coded to use 128-bits of prevision when parsing BigDecimal from String.
-  // This causes truncation for large values.
-  // Scala 2.11+ fixed this bug by adapting precision to accommodate all digits in the string.
-  private def exact(repr: JavaBigDecimal): BigDecimal = {
-    val mc =
-      if (repr.precision <= BigDecimal.defaultMathContext.getPrecision) BigDecimal.defaultMathContext
-      else new MathContext(repr.precision, java.math.RoundingMode.HALF_EVEN)
-    new BigDecimal(repr, mc)
-  }
-
   implicit val javaBigIntegerReader: ConfigReader[BigInteger] =
     ConfigReader.fromNonEmptyString[BigInteger](catchReadError(new BigInteger(_)))
 
@@ -147,7 +136,7 @@ trait NumericReaders {
     ConfigReader.fromNonEmptyString[BigInt](catchReadError(BigInt(_)))
 
   implicit val scalaBigDecimalReader: ConfigReader[BigDecimal] =
-    ConfigReader.fromNonEmptyString[BigDecimal](catchReadError(s => exact(new JavaBigDecimal(s))))
+    ConfigReader.fromNonEmptyString[BigDecimal](catchReadError(BigDecimal(_)))
 }
 
 /**

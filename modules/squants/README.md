@@ -20,7 +20,8 @@ Given a type to hold our configuration:
 
 ```scala
 import com.typesafe.config.ConfigFactory.parseString
-import pureconfig.loadConfig
+import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.squants._
 import squants.thermal._
 import squants.space._

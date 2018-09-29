@@ -14,6 +14,7 @@ For instance, the default behavior of PureConfig for `String` is to return the s
 ```tut:silent
 import com.typesafe.config.ConfigValueFactory
 import pureconfig._
+import pureconfig.generic.auto._
 ```
 
 ```tut:book

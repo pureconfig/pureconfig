@@ -19,7 +19,8 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-enum" % "0.9.2"
 Given a Greeting ADT composed of `case object`s with an `implicit` `Enum` instance:
 
 ```scala
-import pureconfig.loadConfig
+import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.enum._
 import com.typesafe.config.ConfigFactory.parseString
 import enum.Enum

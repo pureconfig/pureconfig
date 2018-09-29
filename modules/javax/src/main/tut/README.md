@@ -18,6 +18,7 @@ To load a KerberosPrincipal into a configuration, we need a class to hold our co
 import javax.security.auth.kerberos.KerberosPrincipal
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.module.javax._
 
 case class MyConfig(principal: KerberosPrincipal)

@@ -4,24 +4,43 @@ import microsites._
 
 lazy val core = (project in file("core")).
   enablePlugins(TutPlugin, SbtOsgi).
-  settings(commonSettings, tutTargetDirectory := file(".")).
-  dependsOn(macros).
-  dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
+  settings(commonSettings).
+  dependsOn(macros)
 
-lazy val docs = (project in file("docs")).
-  enablePlugins(MicrositesPlugin).
-  settings(commonSettings, publishArtifact := false).
-  settings(micrositesSettings).
-  dependsOn(core)
+// A special module for now, since `tests` depend on it. We should improve this organization later by separating the
+// test helpers (which all projects' tests should depend on) from the core+generic test implementations.
+lazy val generic = (project in file("modules/generic")).
+  enablePlugins(TutPlugin, SbtOsgi).
+  dependsOn(core).
+  settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val macros = (project in file("macros")).
   enablePlugins(TutPlugin).
   settings(commonSettings)
 
+lazy val tests = (project in file("tests")).
+  settings(commonSettings).
+  dependsOn(core, generic).
+  dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
+
+// aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
+lazy val bundle = (project in file("bundle")).
+  enablePlugins(TutPlugin, SbtOsgi).
+  settings(commonSettings).
+  settings(name := "pureconfig", tutTargetDirectory := file(".")).
+  dependsOn(core, generic)
+
+lazy val docs = (project in file("docs")).
+  enablePlugins(MicrositesPlugin).
+  settings(commonSettings, publishArtifact := false).
+  settings(micrositesSettings).
+  dependsOn(bundle)
+
 def module(proj: Project) = proj.
   enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
-  dependsOn(core % "test->test"). // In order to reuse the scalacheck generators
+  dependsOn(tests % "test->test"). // In order to reuse thDerivationSuite scalacheck generators
+  dependsOn(generic % "tut"). // Allow auto-derivation in documentation
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
@@ -44,7 +63,7 @@ lazy val commonSettings = Seq(
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
   scalaVersion := "2.12.6",
-  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6"),
+  crossScalaVersions := Seq("2.11.12", "2.12.6"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -123,16 +142,14 @@ lazy val allVersionLintFlags = Seq(
   "-unchecked",
   "-Xfatal-warnings",
   "-Yno-adapted-args",
-  "-Ywarn-dead-code")
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-unused-import")
 
 lazy val scala211LintFlags = allVersionLintFlags ++ Seq(
-  "-Ywarn-numeric-widen", // In 2.10 this produces a strange spurious error
-  "-Ywarn-unused-import", // Not available in 2.10
   "-Xlint")
 
 lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
-  "-Ywarn-numeric-widen",
-  "-Ywarn-unused-import",
   "-Xlint:-unused,_") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
 
 // do not publish the root project
