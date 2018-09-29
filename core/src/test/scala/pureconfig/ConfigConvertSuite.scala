@@ -1,9 +1,8 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
+import com.typesafe.config.{ ConfigValue, ConfigValueFactory, ConfigValueType }
 import org.scalacheck.{ Arbitrary, Gen }
-
-import pureconfig.error.{ CannotConvert, ExceptionThrown }
+import pureconfig.error.{ ExceptionThrown, WrongType }
 
 class ConfigConvertSuite extends BaseSuite {
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
@@ -30,6 +29,6 @@ class ConfigConvertSuite extends BaseSuite {
     cc.from(ConfigValueFactory.fromAnyRef(1)) should failWith(
       ExceptionThrown(throwable))
     cc.from(ConfigValueFactory.fromAnyRef("test")) should failWith(
-      CannotConvert("test", "Int", """java.lang.NumberFormatException: For input string: "test""""))
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
   }
 }

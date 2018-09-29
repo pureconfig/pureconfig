@@ -57,7 +57,61 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asString: Either[ConfigReaderFailures, String] =
-    castOrFail(STRING, Set(NUMBER, BOOLEAN, STRING), { cv => String.valueOf(cv.unwrapped) })
+    castOrFail(STRING, v => Right(v.unwrapped.asInstanceOf[String]))
+
+  /**
+   * Casts this cursor to a boolean.
+   *
+   * @return a `Right` with the boolean value pointed to by this cursor if the cast can be done, `Left` with a list of
+   *         failures otherwise.
+   */
+  def asBoolean: Either[ConfigReaderFailures, Boolean] =
+    castOrFail(BOOLEAN, v => Right(v.unwrapped.asInstanceOf[Boolean]))
+
+  /**
+   * Casts this cursor to a long.
+   *
+   * @return a `Right` with the long value pointed to by this cursor if the cast can be done, `Left` with a list of
+   *         failures otherwise.
+   */
+  def asLong: Either[ConfigReaderFailures, Long] =
+    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Long](_.toLong) _)(v.unwrapped.toString) })
+
+  /**
+   * Casts this cursor to an int.
+   *
+   * @return a `Right` with the int value pointed to by this cursor if the cast can be done, `Left` with a list of
+   *         failures otherwise.
+   */
+  def asInt: Either[ConfigReaderFailures, Int] =
+    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Int](_.toInt) _)(v.unwrapped.toString) })
+
+  /**
+   * Casts this cursor to a short.
+   *
+   * @return a `Right` with the short value pointed to by this cursor if the cast can be done, `Left` with a list of
+   *         failures otherwise.
+   */
+  def asShort: Either[ConfigReaderFailures, Short] =
+    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Short](_.toShort) _)(v.unwrapped.toString) })
+
+  /**
+   * Casts this cursor to a double.
+   *
+   * @return a `Right` with the double value pointed to by this cursor if the cast can be done, `Left` with a list of
+   *         failures otherwise.
+   */
+  def asDouble: Either[ConfigReaderFailures, Double] =
+    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Double](_.toDouble) _)(v.unwrapped.toString) })
+
+  /**
+   * Casts this cursor to a float.
+   *
+   * @return a `Right` with the float value pointed to by this cursor if the cast can be done, `Left` with a list of
+   *         failures otherwise.
+   */
+  def asFloat: Either[ConfigReaderFailures, Float] =
+    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Float](_.toFloat) _)(v.unwrapped.toString) })
 
   /**
    * Casts this cursor to a `ConfigListCursor`.
@@ -66,33 +120,7 @@ sealed trait ConfigCursor {
    *         otherwise.
    */
   def asListCursor: Either[ConfigReaderFailures, ConfigListCursor] =
-    if (isUndefined) {
-      failed(KeyNotFound.forKeys(path, Set()))
-    } else {
-      val ve = value.valueType() match {
-        case ConfigValueType.OBJECT =>
-          val ll =
-            value.asInstanceOf[ConfigObject].asScala.foldLeft[Either[List[String], List[(Int, ConfigValue)]]](Right(Nil)) {
-              case (acc, (str, v)) =>
-                (acc, Try(str.toInt)) match {
-                  case (Right(a), Success(b)) => Right((b -> v) :: a)
-                  case (Left(keys), Failure(_)) => Left(str :: keys)
-                  case (_, Failure(_)) => Left(List(str))
-                  case (Left(keys), _) => Left(keys)
-                }
-            }
-
-          ll.left.map(ks => CannotConvertObjectToList(ks.sorted))
-            .right.map(l => ConfigValueFactory.fromIterable(l.sortBy(_._1).map(_._2).asJava))
-        case ConfigValueType.LIST =>
-          Right(value.asInstanceOf[ConfigList])
-        case other =>
-          Left(WrongType(other, Set(LIST)))
-      }
-
-      scopeFailure(ve)
-        .right.map(ConfigListCursor(_, pathElems))
-    }
+    castOrFail(LIST, v => Right(v.asInstanceOf[ConfigList])).right.map(ConfigListCursor(_, pathElems))
 
   /**
    * Casts this cursor to a list of cursors.
@@ -110,7 +138,7 @@ sealed trait ConfigCursor {
    *         otherwise.
    */
   def asObjectCursor: Either[ConfigReaderFailures, ConfigObjectCursor] =
-    castOrFail(OBJECT, Set(OBJECT), _.asInstanceOf[ConfigObject]).right.map(ConfigObjectCursor(_, pathElems))
+    castOrFail(OBJECT, v => Right(v.asInstanceOf[ConfigObject])).right.map(ConfigObjectCursor(_, pathElems))
 
   /**
    * Casts this cursor to a map from config keys to cursors.
@@ -199,20 +227,13 @@ sealed trait ConfigCursor {
 
   private[this] def castOrFail[A](
     expectedType: ConfigValueType,
-    acceptedConfigTypes: Set[ConfigValueType],
-    cast: ConfigValue => A): Either[ConfigReaderFailures, A] = {
+    cast: ConfigValue => Either[FailureReason, A]): Either[ConfigReaderFailures, A] = {
 
     if (isUndefined) {
       failed(KeyNotFound.forKeys(path, Set()))
-    } else if (!acceptedConfigTypes.contains(value.valueType)) {
-      failed(WrongType(value.valueType, Set(expectedType)))
     } else {
-      Try(cast(value)) match {
-        case Success(v) => Right(v)
-        case Failure(ex) =>
-          // this should never happen, this is just a safety net
-          failed(CannotConvert(value.toString, expectedType.toString, ex.toString))
-      }
+      scopeFailure(ConfigCursor.transform(value, expectedType))
+        .right.flatMap(v => scopeFailure(cast(v)))
     }
   }
 }
@@ -227,6 +248,69 @@ object ConfigCursor {
    * @return a `ConfigCursor` for `value` at the path given by `pathElems`.
    */
   def apply(value: ConfigValue, pathElems: List[String]): ConfigCursor = SimpleConfigCursor(value, pathElems)
+
+  /**
+   * Handle automatic type conversions of `ConfigValue`s the way the
+   * [[https://github.com/lightbend/config/blob/master/HOCON.md#automatic-type-conversions HOCON specification]]
+   * describes. This code mimics the behavior of the package-private `com.typesafe.config.impl.DefaultTransformer` class
+   * in Typesafe Config.
+   */
+  private def transform(configValue: ConfigValue, requested: ConfigValueType): Either[WrongType, ConfigValue] = {
+    (configValue.valueType(), requested) match {
+      case (valueType, requestedType) if valueType == requestedType =>
+        Right(configValue)
+
+      case (ConfigValueType.STRING, requestedType) =>
+        val s = configValue.unwrapped.asInstanceOf[String]
+
+        requestedType match {
+          case ConfigValueType.NUMBER =>
+            lazy val tryLong = Try(s.toLong).map(ConfigValueFactory.fromAnyRef)
+            lazy val tryDouble = Try(s.toDouble).map(ConfigValueFactory.fromAnyRef)
+            // Try#toEither is only available in Scala 2.12+.
+            (tryLong orElse tryDouble) match {
+              case Success(value) => Right(value)
+              case Failure(_) => Left(WrongType(configValue.valueType, Set(NUMBER)))
+            }
+
+          case ConfigValueType.NULL if s == "null" =>
+            Right(ConfigValueFactory.fromAnyRef(null))
+
+          case ConfigValueType.BOOLEAN if s == "true" || s == "yes" || s == "on" =>
+            Right(ConfigValueFactory.fromAnyRef(true))
+
+          case ConfigValueType.BOOLEAN if s == "false" || s == "no" || s == "off" =>
+            Right(ConfigValueFactory.fromAnyRef(false))
+
+          case other =>
+            Left(WrongType(configValue.valueType(), Set(other)))
+        }
+
+      case (ConfigValueType.NUMBER | ConfigValueType.BOOLEAN, ConfigValueType.STRING) =>
+        Right(ConfigValueFactory.fromAnyRef(configValue.unwrapped.toString))
+
+      case (ConfigValueType.OBJECT, ConfigValueType.LIST) =>
+        val obj = configValue.asInstanceOf[ConfigObject].asScala
+        val ll = obj.foldLeft[Either[List[String], List[(Int, ConfigValue)]]](Right(Nil)) {
+          case (acc, (str, v)) =>
+            (acc, Try(str.toInt)) match {
+              case (Right(a), Success(b)) => Right((b -> v) :: a)
+              case (Left(keys), Failure(_)) => Left(str :: keys)
+              case (Right(a), Failure(_)) => Right(a)
+              case (Left(keys), _) => Left(keys)
+            }
+        }
+
+        ll.left.map(_ => WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)))
+          .right.flatMap {
+            case l if l.nonEmpty => Right(ConfigValueFactory.fromIterable(l.sortBy(_._1).map(_._2).asJava))
+            case _ => Left(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)))
+          }
+
+      case (valueType, requestedType) =>
+        Left(WrongType(valueType, Set(requestedType)))
+    }
+  }
 }
 
 /**
@@ -298,6 +382,9 @@ case class ConfigListCursor(value: ConfigList, pathElems: List[String], offset: 
    */
   def list: List[ConfigCursor] =
     value.asScala.toList.drop(offset).zipWithIndex.map { case (cv, idx) => ConfigCursor(cv, indexKey(idx) :: pathElems) }
+
+  // Avoid resetting the offset when using ConfigCursor's implementation.
+  override def asListCursor: Either[ConfigReaderFailures, ConfigListCursor] = Right(this)
 }
 
 /**

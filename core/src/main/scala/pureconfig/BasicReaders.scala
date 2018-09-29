@@ -23,17 +23,13 @@ import pureconfig.error._
  */
 trait PrimitiveReaders {
 
-  implicit val stringConfigReader = ConfigReader.fromString[String](s => Right(s))
+  implicit val stringConfigReader = ConfigReader.fromCursor(_.asString)
   implicit val charConfigReader = ConfigReader.fromNonEmptyString[Char](s =>
     s.size match {
       case 1 => Right(s.charAt(0))
       case len => Left(WrongSizeString(1, len))
     })
-  implicit val booleanConfigReader = ConfigReader.fromNonEmptyString[Boolean](catchReadError({
-    case "yes" | "on" => true
-    case "no" | "off" => false
-    case other => other.toBoolean
-  }))
+  implicit val booleanConfigReader = ConfigReader.fromCursor(_.asBoolean)
   implicit val doubleConfigReader = ConfigReader.fromNonEmptyString[Double](catchReadError({
     case v if v.last == '%' => v.dropRight(1).toDouble / 100d
     case v => v.toDouble
@@ -42,9 +38,9 @@ trait PrimitiveReaders {
     case v if v.last == '%' => v.dropRight(1).toFloat / 100f
     case v => v.toFloat
   }))
-  implicit val intConfigReader = ConfigReader.fromNonEmptyString[Int](catchReadError(_.toInt))
-  implicit val longConfigReader = ConfigReader.fromNonEmptyString[Long](catchReadError(_.toLong))
-  implicit val shortConfigReader = ConfigReader.fromNonEmptyString[Short](catchReadError(_.toShort))
+  implicit val intConfigReader = ConfigReader.fromCursor(_.asInt)
+  implicit val longConfigReader = ConfigReader.fromCursor(_.asLong)
+  implicit val shortConfigReader = ConfigReader.fromCursor(_.asShort)
 }
 
 /**

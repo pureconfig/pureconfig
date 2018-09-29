@@ -33,7 +33,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |    - Key not found: 'b'.
           |    - Key not found: 'c'.
           |  at 'a':
-          |    - Cannot convert 'string' to Int: java.lang.NumberFormatException: For input string: "string".
+          |    - Expected type NUMBER. Found STRING instead.
           |""".stripMargin
   }
 
@@ -193,7 +193,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
           |  at the root:
           |    - (file:${workingDir}${file}:1) Key not found: 'a'.
           |  at 'c':
-          |    - (file:${workingDir}${file}:3) Cannot convert 'hello' to Int: java.lang.NumberFormatException: For input string: "hello".
+          |    - (file:${workingDir}${file}:3) Expected type NUMBER. Found STRING instead.
           |""".stripMargin
   }
 

@@ -13,7 +13,7 @@ import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.equality._
-import pureconfig.error.{ CannotConvert, CannotConvertObjectToList, EmptyStringFound, WrongSizeString }
+import pureconfig.error._
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration.{ Duration, FiniteDuration, _ }
@@ -124,16 +124,23 @@ class BasicConvertersSuite extends BaseSuite {
   checkRead[immutable.List[Int]](
     // order of keys maintained
     ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava) -> List(2, 3, 1),
-    ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava) -> List(4, 2))
-  checkFailure[immutable.List[Int], CannotConvertObjectToList](
-    ConfigValueFactory.fromMap(Map("1" -> 1, "a" -> 2).asJava))
+    ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava) -> List(4, 2),
+    ConfigValueFactory.fromMap(Map("1" -> 1, "a" -> 2).asJava) -> List(1))
+
+  checkFailure[immutable.List[Int], WrongType](
+    ConfigValueFactory.fromMap(Map("b" -> 1, "a" -> 2).asJava),
+    ConfigValueFactory.fromMap(Map().asJava))
 
   checkArbitrary[immutable.ListSet[Int]]
 
   checkArbitrary[immutable.Map[String, Int]]
-  checkFailure[immutable.Map[String, Int], CannotConvert](
-    ConfigFactory.parseString("conf.a=1").root(), // nested map should fail
-    ConfigFactory.parseString("{ a=b }").root()) // wrong value type should fail
+  checkFailures[immutable.Map[String, Int]](
+    // nested map should fail
+    ConfigFactory.parseString("conf.a=1").root() -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.NUMBER)), None, "conf")),
+    // wrong value type should fail
+    ConfigFactory.parseString("{ a=b }").root() -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "a")))
 
   checkArbitrary[immutable.Queue[Boolean]]
 
