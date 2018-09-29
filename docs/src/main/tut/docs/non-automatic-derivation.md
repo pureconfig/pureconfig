@@ -47,8 +47,8 @@ they are used instead of the automatically-derived ones.
 ### Semi-Automatic
 
 With semi-automatic derivation, readers can still be derived using all the machinery presented on these documentation
-pages, but the reader instances are not provided as implicits. Instead, PureConfig provides two one-liner methods which
-that can be used to create derived instances, which you must put somewhere on the implicit scope.
+pages, but the reader instances are not provided as implicits. Instead, PureConfig provides two one-liner methods to
+create derived instances, which you must put somewhere on the implicit scope.
 
 Semi-automatic derivation is enabled by importing `pureconfig.generic.semiauto._`. We can now explicitly define the
 reader for `Person` by calling `deriveReader`:
@@ -103,6 +103,6 @@ pureconfig.loadConfig[Person](conf)
 ```
 
 If you don't need reader or writer derivation anywhere in your project, you can replace the `pureconfig` Maven
-dependency by `pureconfig-core`. `pureconfig-core` contains only the core classes needed by PureConfig, as well as
+dependency with `pureconfig-core`. `pureconfig-core` contains only the core classes needed by PureConfig, as well as
 readers and writers for primitive and collection types. It has the advantage of not depending on shapeless, which can be
 useful to prevent version conflicts.

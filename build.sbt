@@ -7,7 +7,8 @@ lazy val core = (project in file("core")).
   settings(commonSettings).
   dependsOn(macros)
 
-// A special module for now, since tests depend on it. We should improve this organization later.
+// A special module for now, since `tests` depend on it. We should improve this organization later by separating the
+// test helpers (which all projects' tests should depend on) from the core+generic test implementations.
 lazy val generic = (project in file("modules/generic")).
   enablePlugins(TutPlugin, SbtOsgi).
   dependsOn(core).
