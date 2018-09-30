@@ -25,6 +25,9 @@ object Boilerplate {
     GenProductReaders,
     GenProductWriters)
 
+  val testTemplates: Seq[Template] = Seq(
+    GenProductTests)
+
   val header = "// auto-generated boilerplate"
   val maxArity = 22
 
@@ -34,6 +37,15 @@ object Boilerplate {
   def gen(dir : File) = for (t <- templates) yield {
     val tgtFile = t.filename(dir)
     IO.write(tgtFile, t.body)
+    tgtFile
+  }
+
+  /**
+   * Return a sequence of the generated test files. As a side-effect, it actually generates them...
+   */
+  def genTests(dir: File): Seq[File] = testTemplates.map { template =>
+    val tgtFile = template.filename(dir)
+    IO.write(tgtFile, template.body)
     tgtFile
   }
 
@@ -131,9 +143,12 @@ object Boilerplate {
       val paramNames = synTypes.map(tpe => s"key$tpe: String").mkString(", ")
       val writerInstances = synTypes.map(tpe => s"writer$tpe: ConfigWriter[$tpe]").mkString(", ")
 
-      val withValuesStr = synTypes.zipWithIndex.map { case (tpe, i) =>
-        s".withValue(key$tpe, writer$tpe.to(values._${i + 1}))"
-      }.mkString
+      val withValuesStr = if (arity != 1) {
+        synTypes.zipWithIndex.map { case (tpe, i) =>
+          s".withValue(key$tpe, writer$tpe.to(values._${i + 1}))"
+        }.mkString
+      } else
+        s".withValue(key${synTypes.head}, writer${synTypes.head}.to(values))"
 
       block"""
         |package pureconfig
@@ -142,7 +157,7 @@ object Boilerplate {
         |
         |private[pureconfig] trait ProductWriters {
         -
-        -  final def forProduct$arity[B, ${`A..N`}]($paramNames)(f: B => Product$arity[${`A..N`}])(implicit
+        -  final def forProduct$arity[B, ${`A..N`}]($paramNames)(f: B => ${if (arity != 1) s"Product$arity[${`A..N`}]" else s"${`A..N`}"})(implicit
         -    $writerInstances
         -  ): ConfigWriter[B] = new ConfigWriter[B] {
         -    def to(a: B): ConfigValue = {
@@ -151,6 +166,35 @@ object Boilerplate {
         -      baseConf${withValuesStr}.root()
         -    }
         -  }
+        |}
+      """
+    }
+  }
+
+  object GenProductTests extends Template {
+    def filename(root: sbt.File) = root / "pureconfig" / "ForProductNSuite.scala"
+
+    def content(tv: TemplateVals): String = {
+      import tv._
+
+      val params = (0 until arity).map(i => s"s$i: String").mkString(", ")
+      val paramNames = (0 until arity).map(i => s""""s$i"""").mkString(", ")
+
+      block"""
+        |package pureconfig
+        |
+        |import org.scalacheck.ScalacheckShapeless._
+        |
+        |class ForProductNSuite extends BaseSuite {
+        |
+        |  behavior of "ConfigReader.forProductN and ConfigWriter.forProductN"
+        -
+        -  case class Foo$arity($params)
+        -  object Foo$arity {
+        -    implicit val foo${arity}Writer = ConfigWriter.forProduct$arity($paramNames)((Foo$arity.unapply _).andThen(_.get))
+        -    implicit val foo${arity}Reader = ConfigReader.forProduct$arity($paramNames)(Foo$arity.apply)
+        -  }
+        -  checkArbitrary[Foo$arity]
         |}
       """
     }

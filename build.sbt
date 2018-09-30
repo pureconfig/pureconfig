@@ -21,7 +21,9 @@ lazy val macros = (project in file("macros")).
   settings(commonSettings)
 
 lazy val tests = (project in file("tests")).
-  settings(commonSettings).
+  settings(
+    commonSettings,
+    sourceGenerators in Test += (sourceManaged in Test).map(Boilerplate.genTests).taskValue).
   dependsOn(core, generic).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
