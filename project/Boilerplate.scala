@@ -94,15 +94,7 @@ object Boilerplate {
 
       val results = synTypes.zip(synVals).map { case (tpe, v) =>
         s"""
-           |-        val ${v}Result = objCur.atKeyOrUndefined(key$tpe) match {
-           |-          case cur if cur.isUndefined =>
-           |-            if (reader$tpe.isInstanceOf[AllowMissingKey])
-           |-              reader$tpe.from(cur)
-           |-            else
-           |-              objCur.failed(KeyNotFound.forKeys(key$tpe, objCur.keys))
-           |-          case cur => reader$tpe.from(cur)
-           |-        }
-           |-
+           |-        val ${v}Result = if (reader$tpe.isInstanceOf[AllowMissingKey]) reader$tpe.from(objCur.atKeyOrUndefined(key$tpe)) else objCur.atKey(key$tpe).right.flatMap(reader$tpe.from)
          """.stripMargin
       }.mkString("\n")
 
