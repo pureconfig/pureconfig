@@ -21,7 +21,9 @@ object Boilerplate {
     }
   }
 
-  val templates: Seq[Template] = Seq(GenProductReaders)
+  val templates: Seq[Template] = Seq(
+    GenProductReaders,
+    GenProductWriters)
 
   val header = "// auto-generated boilerplate"
   val maxArity = 22
@@ -114,6 +116,40 @@ object Boilerplate {
         -        val baseF: Either[ConfigReaderFailures, $curriedTypes => B] = Right(${if (arity != 1) "f.curried" else "f"})
         -        $resultCombination
         -      }
+        -  }
+        |}
+      """
+    }
+  }
+
+  object GenProductWriters extends Template {
+    def filename(root: sbt.File) = root / "pureconfig" / "ProductWriters.scala"
+
+    def content(tv: TemplateVals): String = {
+      import tv._
+
+      val paramNames = synTypes.map(tpe => s"key$tpe: String").mkString(", ")
+      val writerInstances = synTypes.map(tpe => s"writer$tpe: ConfigWriter[$tpe]").mkString(", ")
+
+      val withValuesStr = synTypes.zipWithIndex.map { case (tpe, i) =>
+        s".withValue(key$tpe, writer$tpe.to(values._${i + 1}))"
+      }.mkString
+
+      block"""
+        |package pureconfig
+        |
+        |import com.typesafe.config._
+        |
+        |private[pureconfig] trait ProductWriters {
+        -
+        -  final def forProduct$arity[B, ${`A..N`}]($paramNames)(f: B => Product$arity[${`A..N`}])(implicit
+        -    $writerInstances
+        -  ): ConfigWriter[B] = new ConfigWriter[B] {
+        -    def to(a: B): ConfigValue = {
+        -      val values = f(a)
+        -      val baseConf = ConfigFactory.empty()
+        -      baseConf${withValuesStr}.root()
+        -    }
         -  }
         |}
       """
