@@ -75,7 +75,10 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asLong: Either[ConfigReaderFailures, Long] =
-    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Long](_.toLong) _)(v.unwrapped.toString) })
+    castOrFail(NUMBER, _.unwrapped match {
+      case i: java.lang.Number if i.longValue() == i => Right(i.longValue())
+      case v => Left(CannotConvert(v.toString, "Long", "Unable to convert Number to Long"))
+    })
 
   /**
    * Casts this cursor to an int.
@@ -84,7 +87,10 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asInt: Either[ConfigReaderFailures, Int] =
-    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Int](_.toInt) _)(v.unwrapped.toString) })
+    castOrFail(NUMBER, _.unwrapped match {
+      case i: java.lang.Number if i.intValue() == i => Right(i.intValue())
+      case v => Left(CannotConvert(v.toString, "Int", "Unable to convert Number to Int"))
+    })
 
   /**
    * Casts this cursor to a short.
@@ -93,7 +99,10 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asShort: Either[ConfigReaderFailures, Short] =
-    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Short](_.toShort) _)(v.unwrapped.toString) })
+    castOrFail(NUMBER, _.unwrapped match {
+      case i: java.lang.Number if i.shortValue() == i => Right(i.shortValue())
+      case v => Left(CannotConvert(v.toString, "Short", "Unable to convert Number to Short"))
+    })
 
   /**
    * Casts this cursor to a double.
@@ -102,7 +111,10 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asDouble: Either[ConfigReaderFailures, Double] =
-    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Double](_.toDouble) _)(v.unwrapped.toString) })
+    castOrFail(NUMBER, _.unwrapped match {
+      case i: java.lang.Number if i.doubleValue() == i => Right(i.doubleValue())
+      case v => Left(CannotConvert(v.toString, "Double", "Unable to convert Number to Double"))
+    })
 
   /**
    * Casts this cursor to a float.
@@ -111,7 +123,10 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   def asFloat: Either[ConfigReaderFailures, Float] =
-    castOrFail(NUMBER, { v => (ConvertHelpers.catchReadError[Float](_.toFloat) _)(v.unwrapped.toString) })
+    castOrFail(NUMBER, _.unwrapped match {
+      case i: java.lang.Number if i.floatValue() == i => Right(i.floatValue())
+      case v => Left(CannotConvert(v.toString, "Float", "Unable to convert Number to Float"))
+    })
 
   /**
    * Casts this cursor to a `ConfigListCursor`.
