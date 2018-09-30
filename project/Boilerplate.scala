@@ -93,9 +93,7 @@ object Boilerplate {
       val readerInstances = synTypes.map(tpe => s"reader$tpe: ConfigReader[$tpe]").mkString(", ")
 
       val results = synTypes.zip(synVals).map { case (tpe, v) =>
-        s"""
-           |-        val ${v}Result = if (reader$tpe.isInstanceOf[AllowMissingKey]) reader$tpe.from(objCur.atKeyOrUndefined(key$tpe)) else objCur.atKey(key$tpe).right.flatMap(reader$tpe.from)
-         """.stripMargin
+        s"-        val ${v}Result = if (reader$tpe.isInstanceOf[AllowMissingKey]) reader$tpe.from(objCur.atKeyOrUndefined(key$tpe)) else objCur.atKey(key$tpe).right.flatMap(reader$tpe.from)"
       }.mkString("\n")
 
       val curriedTypes = synTypes.mkString(" => ")
