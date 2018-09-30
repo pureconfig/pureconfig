@@ -305,21 +305,12 @@ object ConfigCursor {
 
       case (ConfigValueType.OBJECT, ConfigValueType.LIST) =>
         val obj = configValue.asInstanceOf[ConfigObject].asScala
-        val ll = obj.foldLeft[Either[List[String], List[(Int, ConfigValue)]]](Right(Nil)) {
-          case (acc, (str, v)) =>
-            (acc, Try(str.toInt)) match {
-              case (Right(a), Success(b)) => Right((b -> v) :: a)
-              case (Left(keys), Failure(_)) => Left(str :: keys)
-              case (Right(a), Failure(_)) => Right(a)
-              case (Left(keys), _) => Left(keys)
-            }
-        }
+        val ll = obj.flatMap { case (str, v) => Try(str.toInt).toOption.map(_ -> v) }.toList
 
-        ll.left.map(_ => WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)))
-          .right.flatMap {
-            case l if l.nonEmpty => Right(ConfigValueFactory.fromIterable(l.sortBy(_._1).map(_._2).asJava))
-            case _ => Left(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)))
-          }
+        ll match {
+          case l if l.nonEmpty => Right(ConfigValueFactory.fromIterable(l.sortBy(_._1).map(_._2).asJava))
+          case _ => Left(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)))
+        }
 
       case (valueType, requestedType) =>
         Left(WrongType(valueType, Set(requestedType)))
