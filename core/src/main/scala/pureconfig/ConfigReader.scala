@@ -118,7 +118,7 @@ trait ConfigReader[A] {
 /**
  * Provides methods to create [[ConfigReader]] instances.
  */
-object ConfigReader extends BasicReaders with CollectionReaders with ExportedReaders {
+object ConfigReader extends BasicReaders with CollectionReaders with ProductReaders with ExportedReaders {
 
   def apply[A](implicit reader: ConfigReader[A]): ConfigReader[A] = reader
 

@@ -4,7 +4,9 @@ import microsites._
 
 lazy val core = (project in file("core")).
   enablePlugins(TutPlugin, SbtOsgi).
-  settings(commonSettings).
+  settings(
+    commonSettings,
+    sourceGenerators in Compile += (sourceManaged in Compile).map(Boilerplate.gen).taskValue).
   dependsOn(macros)
 
 // A special module for now, since `tests` depend on it. We should improve this organization later by separating the
