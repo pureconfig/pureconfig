@@ -230,12 +230,10 @@ sealed trait ConfigCursor {
     expectedType: ConfigValueType,
     cast: ConfigValue => Either[FailureReason, A]): Either[ConfigReaderFailures, A] = {
 
-    if (isUndefined) {
+    if (isUndefined)
       failed(KeyNotFound.forKeys(path, Set()))
-    } else {
-      scopeFailure(ConfigCursor.transform(value, expectedType))
-        .right.flatMap(v => scopeFailure(cast(v)))
-    }
+    else
+      scopeFailure(ConfigCursor.transform(value, expectedType).right.flatMap(cast))
   }
 }
 
