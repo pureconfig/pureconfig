@@ -450,4 +450,7 @@ case class ConfigObjectCursor(value: ConfigObject, pathElems: List[String]) exte
    */
   def map: Map[String, ConfigCursor] =
     value.asScala.toMap.map { case (key, cv) => key -> ConfigCursor(cv, key :: pathElems) }
+
+  // Avoid unnecessary cast.
+  override def asObjectCursor: Either[ConfigReaderFailures, ConfigObjectCursor] = Right(this)
 }
