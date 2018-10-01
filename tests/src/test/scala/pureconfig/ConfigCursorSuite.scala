@@ -158,6 +158,10 @@ class ConfigCursorSuite extends BaseSuite {
     listCursor("[]").list shouldBe Nil
   }
 
+  it should "retain the correct offset after calling the asListCursor method" in {
+    listCursor("[1, 2]").tailOption.map(_.asListCursor) shouldBe (Some(Right(listCursor("[2]").copy(offset = 1))))
+  }
+
   behavior of "ConfigObjectCursor"
 
   def objCursor(confStr: String, pathElems: List[String] = defaultPath): ConfigObjectCursor =
