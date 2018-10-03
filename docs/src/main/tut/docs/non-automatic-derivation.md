@@ -91,9 +91,9 @@ import pureconfig._
 
 implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
   for {
-    objCur <- cur.asObjectCursor.right
-    name <- objCur.atKey("name").right.flatMap(_.asString).right
-    surname <- objCur.atKey("surname").right.flatMap(_.asString).right
+    objCur <- cur.asObjectCursor
+    name <- objCur.atKey("name").right.flatMap(_.asString)
+    surname <- objCur.atKey("surname").right.flatMap(_.asString)
   } yield Person(name, surname)
 }
 ```

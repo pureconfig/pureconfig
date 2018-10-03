@@ -60,7 +60,7 @@ Finally, we could simply implement the `ConfigReader` interface by hand:
 
 ```tut:book:silent
 implicit object MyIntReader extends ConfigReader[MyInt] {
-  def from(cur: ConfigCursor) = cur.asString.right.map(s => new MyInt(s.toInt))
+  def from(cur: ConfigCursor) = cur.asString.map(s => new MyInt(s.toInt))
 }
 ```
 
