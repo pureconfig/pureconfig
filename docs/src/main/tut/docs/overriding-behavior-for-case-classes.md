@@ -175,14 +175,14 @@ loadConfig[Foo](ConfigFactory.empty)
 loadConfig[FooOpt](ConfigFactory.empty)
 ```
 
-However, if you want to allow your custom `ConfigReader`s to handle missing keys, you can extend the `AllowMissingKey`
-trait. For `ConfigReader`s extending `AllowMissingKey`, a missing key will issue a call to the `from` method of the
+However, if you want to allow your custom `ConfigReader`s to handle missing keys, you can extend the `ReadsMissingKeys`
+trait. For `ConfigReader`s extending `ReadsMissingKeys`, a missing key will issue a call to the `from` method of the
 available `ConfigReader` for that type with a [cursor](config-cursors.html) to an undefined value.
 
 Under this setup:
 
 ```tut:silent
-implicit val maybeIntReader = new ConfigReader[Int] with AllowMissingKey {
+implicit val maybeIntReader = new ConfigReader[Int] with ReadsMissingKeys {
   override def from(cur: ConfigCursor) =
     if (cur.isUndefined) Right(42) else ConfigReader[Int].from(cur)
 }

@@ -2,7 +2,7 @@ package pureconfig
 
 import scala.collection.JavaConverters._
 
-import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
+import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions, ConfigValueFactory }
 import org.scalacheck.Arbitrary
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
@@ -68,20 +68,30 @@ class ProductConvertersSuite extends BaseSuite {
     ConfigConvert[EnclosingConf].from(emptyConf) should failWith(KeyNotFound("conf"))
   }
 
-  it should "allow custom ConfigConverts to handle missing keys" in {
+  it should "allow custom ConfigReaders to handle missing keys" in {
     case class Conf(a: Int, b: Int)
     val conf = ConfigFactory.parseString("""{ a: 1 }""").root()
-    ConfigConvert[Conf].from(conf) should failWith(KeyNotFound("b"))
+    ConfigReader[Conf].from(conf) should failWith(KeyNotFound("b"))
 
-    implicit val defaultInt = new ConfigConvert[Int] with AllowMissingKey {
+    implicit val defaultInt = new ConfigReader[Int] with ReadsMissingKeys {
       def from(cur: ConfigCursor) =
         if (cur.isUndefined) Right(42) else {
           val s = cur.value.render(ConfigRenderOptions.concise)
           cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
         }
-      def to(v: Int) = ???
     }
-    ConfigConvert[Conf].from(conf).right.value shouldBe Conf(1, 42)
+    ConfigReader[Conf].from(conf).right.value shouldBe Conf(1, 42)
+  }
+
+  it should "allow custom ConfigWriters to handle missing keys" in {
+    case class Conf(a: Int, b: Int)
+    ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ a: 0, b: 3 }""").root()
+
+    implicit val nonZeroInt = new ConfigWriter[Int] with WritesMissingKeys[Int] {
+      def to(v: Int) = ConfigValueFactory.fromAnyRef(v)
+      def toOpt(a: Int) = if (a == 0) None else Some(to(a))
+    }
+    ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ b: 3 }""").root()
   }
 
   it should "not write empty option fields" in {

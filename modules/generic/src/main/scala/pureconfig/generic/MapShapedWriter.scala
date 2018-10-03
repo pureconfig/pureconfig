@@ -34,8 +34,8 @@ object MapShapedWriter {
       val rem = tConfigWriter.value.to(t.tail)
       // TODO check that all keys are unique
       vFieldConvert.value.value match {
-        case f: CollectionWriters.OptionConfigWriter[_] =>
-          f.toOption(t.head) match {
+        case f: WritesMissingKeys[V @unchecked] =>
+          f.toOpt(t.head) match {
             case Some(v) =>
               rem.asInstanceOf[ConfigObject].withValue(keyStr, v)
             case None =>
