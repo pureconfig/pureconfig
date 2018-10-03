@@ -99,17 +99,17 @@ import pureconfig._
 import pureconfig.error._
 
 def extractId(objCur: ConfigObjectCursor): Either[ConfigReaderFailures, String] =
-  objCur.atKey("id").right.flatMap(_.asString)
+  objCur.atKey("id").flatMap(_.asString)
 
 def extractValue(objCur: ConfigObjectCursor): Either[ConfigReaderFailures, Int] =
-  objCur.atKey("value").right.flatMap(ConfigReader[Int].from(_))
+  objCur.atKey("value").flatMap(ConfigReader[Int].from(_))
 
 def extractByType(typ: String, objCur: ConfigObjectCursor): Either[ConfigReaderFailures, Identifiable] = typ match {
-  case "class1" => extractId(objCur).right.map(new Class1(_))
+  case "class1" => extractId(objCur).map(new Class1(_))
   case "class2" =>
     for {
-      id <- extractId(objCur).right
-      value <- extractValue(objCur).right
+      id <- extractId(objCur)
+      value <- extractValue(objCur)
     } yield new Class2(id, value)
   case t =>
     objCur.failed(CannotConvert(objCur.value.toString, "Identifiable",
@@ -118,10 +118,10 @@ def extractByType(typ: String, objCur: ConfigObjectCursor): Either[ConfigReaderF
 
 implicit val identifiableConfigReader = ConfigReader.fromCursor { cur =>
   for {
-    objCur <- cur.asObjectCursor.right
-    typeCur <- objCur.atKey("type").right
-    typeStr <- typeCur.asString.right
-    ident <- extractByType(typeStr, objCur).right
+    objCur <- cur.asObjectCursor
+    typeCur <- objCur.atKey("type")
+    typeStr <- typeCur.asString
+    ident <- extractByType(typeStr, objCur)
   } yield ident
 }
 ```

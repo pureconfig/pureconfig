@@ -51,9 +51,9 @@ def lastNamesOf(name: String): Array[String] =
 
 implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
   for {
-    objCur <- cur.asObjectCursor.right      // 1
-    nameCur <- objCur.atKey("name").right   // 2
-    name <- nameCur.asString.right          // 3
+    objCur <- cur.asObjectCursor      // 1
+    nameCur <- objCur.atKey("name")   // 2
+    name <- nameCur.asString          // 3
   } yield new Person(firstNameOf(name), lastNamesOf(name))
 }
 ```
@@ -62,7 +62,7 @@ The factory method `ConfigReader.fromCursor` allows us to create a `ConfigReader
 the required `ConfigCursor => Either[ConfigReaderFailures, A]` function. Since most methods in the cursor API return
 `Either` values with failures at their left side,
 [for comprehensions](https://docs.scala-lang.org/tour/for-comprehensions.html) are a natural fit (note that on Scala
-2.12 and above, the `.right` projections at the end of the `Either` results aren't needed). Let's analyze the lines
+2.11 and below you need to add `.right` projections at the end of each `Either` result). Let's analyze the lines
 marked above:
 
 1. `asObjectCursor` casts a cursor to a special `ConfigObjectCursor`, which contains methods exclusive to config

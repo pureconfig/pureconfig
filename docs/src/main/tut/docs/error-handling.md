@@ -54,7 +54,7 @@ case class PositiveInt(value: Int) {
 }
 
 implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
-  cur.asString.right.flatMap { str =>
+  cur.asString.flatMap { str =>
     Try(str.toInt) match {
       case Success(n) if n >= 0 => Right(PositiveInt(n))
       case Success(n) => cur.failed(CannotConvert(str, "PositiveInt", s"$n is not positive"))
@@ -83,7 +83,7 @@ case class NonPositiveInt(value: Int) extends FailureReason {
 }
 
 implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
-  cur.asString.right.flatMap { str =>
+  cur.asString.flatMap { str =>
     Try(str.toInt) match {
       case Success(n) if n >= 0 => Right(PositiveInt(n))
       case Success(n) => cur.failed(NonPositiveInt(n))
