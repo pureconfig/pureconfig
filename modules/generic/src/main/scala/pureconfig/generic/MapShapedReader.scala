@@ -56,7 +56,7 @@ object MapShapedReader {
         case keyCur if keyCur.isUndefined =>
           default.head match {
             case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue)
-            case _ if headReader.isInstanceOf[AllowMissingKey] => headReader.from(keyCur)
+            case _ if headReader.isInstanceOf[ReadsMissingKeys] => headReader.from(keyCur)
             case _ => cur.failed(KeyNotFound.forKeys(keyStr, cur.keys))
           }
         case keyCur => headReader.from(keyCur)

@@ -40,7 +40,7 @@ package object pureconfig {
   // loads a value from a config in a given namespace. All `loadConfig` methods _must_ use this method to get correct
   // namespace handling, both in the values to load and in the error messages.
   private[this] def loadValue[A](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): Either[ConfigReaderFailures, A] = {
-    getValue(conf, namespace, reader.value.isInstanceOf[AllowMissingKey]).right.flatMap(reader.value.from)
+    getValue(conf, namespace, reader.value.isInstanceOf[ReadsMissingKeys]).right.flatMap(reader.value.from)
   }
 
   /**
