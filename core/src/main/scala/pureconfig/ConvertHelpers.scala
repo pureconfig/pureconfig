@@ -1,10 +1,9 @@
 package pureconfig
 
 import scala.reflect.ClassTag
-import scala.util.{ Failure, Success, Try }
 import scala.util.control.NonFatal
+import scala.util.{ Failure, Success, Try }
 
-import com.typesafe.config._
 import pureconfig.error._
 
 /**
@@ -28,18 +27,6 @@ trait ConvertHelpers {
   private[pureconfig] def tryToEither[T](t: Try[T]): Either[FailureReason, T] = t match {
     case Success(v) => Right(v)
     case Failure(e) => Left(ExceptionThrown(e))
-  }
-
-  private[pureconfig] def stringToEitherConvert[T](fromF: String => Either[FailureReason, T]): ConfigCursor => Either[ConfigReaderFailures, T] = { cur =>
-    // Because we can't trust Typesafe Config not to throw, we wrap the
-    // evaluation into a `try-catch` to prevent an unintentional exception from escaping.
-    try {
-      cur.scopeFailure {
-        fromF(cur.asString.fold(_ => cur.value.render(ConfigRenderOptions.concise), identity))
-      }
-    } catch {
-      case NonFatal(t) => cur.failed(ExceptionThrown(t))
-    }
   }
 
   private[pureconfig] def ensureNonEmpty[T](implicit ct: ClassTag[T]): String => Either[FailureReason, String] = {

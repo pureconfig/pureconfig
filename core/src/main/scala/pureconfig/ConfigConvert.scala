@@ -9,9 +9,8 @@ package pureconfig
 import scala.reflect.ClassTag
 import scala.util.Try
 
-import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ ConfigReaderFailures, FailureReason }
+import pureconfig.error.FailureReason
 
 /**
  * Trait for objects capable of reading and writing objects of a given type from and to `ConfigValues`.
@@ -49,10 +48,10 @@ object ConfigConvert extends ConvertHelpers {
     def to(t: T) = writer.value.to(t)
   }
 
-  def viaString[T](fromF: String => Either[FailureReason, T], toF: T => String): ConfigConvert[T] = new ConfigConvert[T] {
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, T] = stringToEitherConvert(fromF)(cur)
-    override def to(t: T): ConfigValue = ConfigValueFactory.fromAnyRef(toF(t))
-  }
+  def viaString[T](fromF: String => Either[FailureReason, T], toF: T => String): ConfigConvert[T] =
+    fromReaderAndWriter(
+      Derivation.Successful(ConfigReader.fromString(fromF)),
+      Derivation.Successful(ConfigWriter.toString(toF)))
 
   def viaStringTry[T: ClassTag](fromF: String => Try[T], toF: T => String): ConfigConvert[T] = {
     viaString[T](tryF(fromF), toF)

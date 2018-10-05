@@ -143,9 +143,8 @@ object ConfigReader extends BasicReaders with CollectionReaders with ExportedRea
   def fromFunction[A](fromF: ConfigValue => Either[ConfigReaderFailures, A]) =
     fromCursor(fromF.compose(_.value))
 
-  def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] = new ConfigReader[A] {
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, A] = stringToEitherConvert(fromF)(cur)
-  }
+  def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] =
+    ConfigReader.fromCursor(_.asString).emap(fromF)
 
   def fromStringTry[A](fromF: String => Try[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
     fromString[A](tryF(fromF))

@@ -33,17 +33,19 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     pr: MapShapedReader.WithDefaults[F, LRepr, DefaultRepr]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
 
     def from(cur: ConfigCursor) = {
-      // Try to read first as the product representation (i.e.
-      // ConfigObject with '_1', '_2', etc. keys) and afterwards as the Generic
-      // representation (i.e. ConfigList).
-      cur.asCollectionCursor.right.flatMap {
-        case Right(objCur) => tupleAsObjectReader(objCur)
-        case Left(_) => tupleAsListReader(cur)
+      // Try to read first as the list representation and afterwards as the product representation (i.e. ConfigObject
+      // with '_1', '_2', etc. keys).
+      val cc = cur.asListCursor.right.map(Right.apply).left.flatMap(failure =>
+        cur.asObjectCursor.right.map(Left.apply).left.map(_ => failure))
+
+      cc.right.flatMap {
+        case Right(listCur) => tupleAsListReader(listCur)
+        case Left(objCur) => tupleAsObjectReader(objCur)
       }
     }
   }
 
-  private[pureconfig] def tupleAsListReader[F: IsTuple, Repr <: HList](cur: ConfigCursor)(
+  private[pureconfig] def tupleAsListReader[F: IsTuple, Repr <: HList](cur: ConfigListCursor)(
     implicit
     gen: Generic.Aux[F, Repr],
     cr: SeqShapedReader[Repr]): Either[ConfigReaderFailures, F] =

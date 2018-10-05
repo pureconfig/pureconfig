@@ -5,9 +5,8 @@ package pureconfig
 
 import java.net.URL
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ ConfigFactory, ConfigValueType }
 import org.scalatest._
-
 import pureconfig.error._
 import pureconfig.generic.auto._
 
@@ -30,7 +29,7 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
       Some(ConfigValueLocation(new URL("file", "", workingDir + file), 1)),
       ""))
     failures1 should contain(ConvertFailure(
-      CannotConvert("hello", "Int", """java.lang.NumberFormatException: For input string: "hello""""),
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)),
       Some(ConfigValueLocation(new URL("file", "", workingDir + file), 3)),
       "c"))
 
@@ -45,7 +44,7 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
       Some(ConfigValueLocation(new URL("file", "", workingDir + file), 7)),
       ""))
     failures2 should contain(ConvertFailure(
-      CannotConvert("hello", "Int", """java.lang.NumberFormatException: For input string: "hello""""),
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)),
       Some(ConfigValueLocation(new URL("file", "", workingDir + file), 9)),
       "c"))
   }
@@ -62,7 +61,7 @@ class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with Eithe
     val failures = conf.get("conf").to[Conf].left.value.toList
     failures should have size 1
     failures should contain(ConvertFailure(
-      CannotConvert("string", "Int", """java.lang.NumberFormatException: For input string: "string""""),
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)),
       Some(ConfigValueLocation(new URL("file", "", workingDir + file2), 2)),
       "a"))
   }
