@@ -44,9 +44,7 @@ def module(proj: Project) = proj.
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
-lazy val cats = (module(project) in file("modules/cats")).settings(
-  crossScalaVersions ~= (_.filterNot(_.startsWith("2.10.")))
-)
+lazy val cats = (module(project) in file("modules/cats"))
 lazy val `cats-effect` = module(project) in file("modules/cats-effect")
 lazy val enum = module(project) in file("modules/enum")
 lazy val enumeratum = module(project) in file("modules/enumeratum")
