@@ -28,8 +28,7 @@ class ForProductNSuite extends BaseSuite {
     val result = confWithMissingKeys.to[Foo1]
     result.left.value.toList.size shouldEqual failures.size
     result.left.value.toList should contain theSameElementsAs failures
-  }
-  #
+  }#
 
   ]
 }
