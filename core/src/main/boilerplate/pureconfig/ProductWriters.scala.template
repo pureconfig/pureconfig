@@ -1,7 +1,30 @@
 package pureconfig
 
-trait ProductWriters {
+import com.typesafe.config._
 
+trait ProductWriters {
+  // Special case because we don't want f to be B => Product1[A0].
+  final def forProduct1[B, A0](keyA0: String)(f: B => A0)(implicit
+    writerA0: ConfigWriter[A0]
+  ): ConfigWriter[B] = new ConfigWriter[B] {
+    def to(a: B): ConfigValue = {
+      val values = f(a)
+      val baseConf = ConfigFactory.empty()
+      baseConf.withValue(keyA0, writerA0.to(values)).root()
+    }
+  }
+
+  [2..22#final def forProduct1[B, [#A0#]]([#keyA0: String#])(f: B => Product1[[#A0#]])(implicit
+    [#writerA0: ConfigWriter[A0]#]
+  ): ConfigWriter[B] = new ConfigWriter[B] {
+    def to(a: B): ConfigValue = {
+      val values = f(a)
+      val baseConf = ConfigFactory.empty()
+      baseConf.[#withValue(keyA0, writerA0.to(values._1))#.].root()
+    }
+  }#
+
+  ]
 }
 
 object ProductWriters extends ProductWriters
