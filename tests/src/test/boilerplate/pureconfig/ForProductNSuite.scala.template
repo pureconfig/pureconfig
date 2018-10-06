@@ -1,19 +1,35 @@
 package pureconfig
 
-import org.scalacheck.ScalacheckShapeless._
 import java.util.UUID
+
+import com.typesafe.config._
+import org.scalacheck._
+import org.scalacheck.ScalacheckShapeless._
+import pureconfig.error._
+import pureconfig.syntax._
 
 class ForProductNSuite extends BaseSuite {
   behavior of "ConfigReader.forProductN and ConfigWriter.forProductN"
 
   [#case class Foo1([#s0: String#])
   object Foo1 {
-    [#val k0 = UUID.randomUUID().toString#
-    ]
-    implicit val foo1Writer = ConfigWriter.forProduct1([#k0#])((Foo1.unapply _).andThen(_.get))
-    implicit val foo1Reader = ConfigReader.forProduct1([#k0#])(Foo1.apply)
+    val keys = List([#UUID.randomUUID().toString#])
+    implicit val foo1Writer = ConfigWriter.forProduct1([#keys(0)#])((Foo1.unapply _).andThen(_.get))
+    implicit val foo1Reader = ConfigReader.forProduct1([#keys(0)#])(Foo1.apply)
   }
-  checkArbitrary[Foo1]#
+  checkArbitrary[Foo1]
+
+  it should "produce ConfigReaders returning correct KeyNotFound failures in the absence of certain keys for arity 1" in
+  forAll(Gen.choose(0, (##1 << 1) - ##2), Arbitrary.arbitrary[Foo1]) { (bitmask, foo) =>
+    val conf = foo.toConfig
+    val missingKeys = Foo1.keys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
+    val confWithMissingKeys = missingKeys.foldLeft(conf.asInstanceOf[ConfigObject])(_.withoutKey(_))
+    val failures = missingKeys.map(k => ConvertFailure(KeyNotFound(k, Set.empty), None, ""))
+    val result = confWithMissingKeys.to[Foo1]
+    result.left.value.toList.size shouldEqual failures.size
+    result.left.value.toList should contain theSameElementsAs failures
+  }
+  #
 
   ]
 }
