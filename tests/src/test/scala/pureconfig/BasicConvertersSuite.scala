@@ -13,7 +13,7 @@ import com.typesafe.config._
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.equality._
-import pureconfig.error.{ CannotConvert, EmptyStringFound, WrongSizeString }
+import pureconfig.error._
 import pureconfig.generic.auto._
 import scala.collection.JavaConverters._
 import scala.collection.immutable
@@ -27,16 +27,22 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Duration]
   checkFailure[Duration, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
-  checkFailure[Duration, CannotConvert](ConfigValueFactory.fromIterable(List(1).asJava))
+  checkFailures[Duration](
+    ConfigValueFactory.fromIterable(List(1).asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.STRING)), None, "")))
 
   checkArbitrary[JavaDuration]
   checkFailure[JavaDuration, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
-  checkFailure[JavaDuration, CannotConvert](ConfigValueFactory.fromIterable(List(1).asJava))
+  checkFailures[JavaDuration](
+    ConfigValueFactory.fromIterable(List(1).asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.STRING)), None, "")))
 
   checkArbitrary[FiniteDuration]
   checkFailure[FiniteDuration, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
+  checkFailures[FiniteDuration](
+    ConfigValueFactory.fromIterable(List(1).asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.STRING)), None, "")))
   checkFailure[FiniteDuration, CannotConvert](
-    ConfigValueFactory.fromIterable(List(1).asJava),
     ConfigConvert[Duration].to(Duration.MinusInf),
     ConfigConvert[Duration].to(Duration.Inf))
 
@@ -90,11 +96,19 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Double]
   checkArbitrary2[Double, Percentage](_.toDoubleFraction)
-  checkFailure[Double, EmptyStringFound](ConfigValueFactory.fromAnyRef(""))
-  checkFailure[Double, CannotConvert](ConfigValueFactory.fromIterable(List(1, 2, 3, 4).asJava))
+  checkFailures[Double](
+    ConfigValueFactory.fromAnyRef("") -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "")),
+    ConfigValueFactory.fromIterable(List(1, 2, 3, 4).asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.NUMBER)), None, "")))
 
   checkArbitrary[Float]
   checkArbitrary2[Float, Percentage](_.toFloatFraction)
+  checkFailures[Float](
+    ConfigValueFactory.fromAnyRef("") -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "")),
+    ConfigValueFactory.fromIterable(List(1, 2, 3, 4).asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.NUMBER)), None, "")))
 
   checkArbitrary[Int]
 
@@ -125,16 +139,25 @@ class BasicConvertersSuite extends BaseSuite {
   checkRead[immutable.List[Int]](
     // order of keys maintained
     ConfigValueFactory.fromMap(Map("2" -> 1, "0" -> 2, "1" -> 3).asJava) -> List(2, 3, 1),
-    ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava) -> List(4, 2))
-  checkFailure[immutable.List[Int], CannotConvert](
-    ConfigValueFactory.fromMap(Map("1" -> 1, "a" -> 2).asJava))
+    ConfigValueFactory.fromMap(Map("3" -> 2, "1" -> 4).asJava) -> List(4, 2),
+    ConfigValueFactory.fromMap(Map("1" -> 1, "a" -> 2).asJava) -> List(1))
+
+  checkFailures[immutable.List[Int]](
+    ConfigValueFactory.fromMap(Map("b" -> 1, "a" -> 2).asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), None, "")),
+    ConfigValueFactory.fromMap(Map().asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), None, "")))
 
   checkArbitrary[immutable.ListSet[Int]]
 
   checkArbitrary[immutable.Map[String, Int]]
-  checkFailure[immutable.Map[String, Int], CannotConvert](
-    ConfigFactory.parseString("conf.a=1").root(), // nested map should fail
-    ConfigFactory.parseString("{ a=b }").root()) // wrong value type should fail
+  checkFailures[immutable.Map[String, Int]](
+    // nested map should fail
+    ConfigFactory.parseString("conf.a=1").root() -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.NUMBER)), None, "conf")),
+    // wrong value type should fail
+    ConfigFactory.parseString("{ a=b }").root() -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "a")))
 
   checkArbitrary[immutable.Queue[Boolean]]
 

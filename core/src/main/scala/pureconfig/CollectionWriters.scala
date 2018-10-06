@@ -6,11 +6,29 @@ import scala.language.higherKinds
 import com.typesafe.config._
 
 /**
+ * A trait signaling that a `ConfigWriter` can write missing (undefined) values.
+ *
+ * `ConfigWriter`s always produce a valid `ConfigValue` with their `to` method. This trait adds an extra `toOpt`
+ * method that parent writers can use in order to decide whether or not they should write a value using this writer.
+ */
+trait WritesMissingKeys[A] { this: ConfigWriter[A] =>
+  def toOpt(a: A): Option[ConfigValue]
+}
+
+/**
  * Trait containing `ConfigWriter` instances for collection types.
  */
 trait CollectionWriters {
 
-  implicit def optionWriter[T](implicit conv: Derivation[ConfigWriter[T]]) = new CollectionWriters.OptionConfigWriter[T]
+  implicit def optionWriter[T](implicit conv: Derivation[ConfigWriter[T]]): ConfigWriter[Option[T]] =
+    new ConfigWriter[Option[T]] with WritesMissingKeys[Option[T]] {
+      override def to(t: Option[T]): ConfigValue = t match {
+        case Some(v) => conv.value.to(v)
+        case None => ConfigValueFactory.fromAnyRef(null)
+      }
+
+      def toOpt(t: Option[T]): Option[ConfigValue] = t.map(conv.value.to)
+    }
 
   implicit def traversableWriter[T, F[T] <: TraversableOnce[T]](
     implicit
@@ -28,15 +46,4 @@ trait CollectionWriters {
   }
 }
 
-object CollectionWriters extends CollectionWriters {
-
-  // TODO: change this to an `AllowMissingKey`-like trait for better extensibility
-  class OptionConfigWriter[T](implicit conv: Derivation[ConfigWriter[T]]) extends ConfigWriter[Option[T]] {
-    override def to(t: Option[T]): ConfigValue = t match {
-      case Some(v) => conv.value.to(v)
-      case None => ConfigValueFactory.fromAnyRef(null)
-    }
-
-    def toOption(t: Option[T]): Option[ConfigValue] = t.map(conv.value.to)
-  }
-}
+object CollectionWriters extends CollectionWriters

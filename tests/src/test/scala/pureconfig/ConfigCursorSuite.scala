@@ -46,6 +46,18 @@ class ConfigCursorSuite extends BaseSuite {
 
     cursor("{ a: 1, b: 2 }").asListCursor should failWith(
       WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), defaultPathStr)
+
+    cursor("{ 0: a, 1: b }").asListCursor shouldBe
+      Right(ConfigListCursor(conf("""["a", "b"]""").asInstanceOf[ConfigList], defaultPath))
+
+    cursor("{ 10: a, 3: b }").asListCursor shouldBe
+      Right(ConfigListCursor(conf("""["b", "a"]""").asInstanceOf[ConfigList], defaultPath))
+
+    cursor("{ 1: a, c: b }").asListCursor shouldBe
+      Right(ConfigListCursor(conf("""["a"]""").asInstanceOf[ConfigList], defaultPath))
+
+    cursor("{}").asListCursor should failWith(
+      WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), defaultPathStr)
   }
 
   it should "allow being casted to a list of cursors in a safe way" in {
@@ -56,6 +68,15 @@ class ConfigCursorSuite extends BaseSuite {
       Right(List(cursor("1", "0" :: defaultPath), cursor("2", "1" :: defaultPath)))
 
     cursor("{ a: 1, b: 2 }").asList should failWith(
+      WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), defaultPathStr)
+
+    cursor("{ 3: a, 10: b }").asList shouldBe
+      Right(List(cursor("a", "0" :: defaultPath), cursor("b", "1" :: defaultPath)))
+
+    cursor("{ 1: a, c: b }").asList shouldBe
+      Right(List(cursor("a", "0" :: defaultPath)))
+
+    cursor("{}").asList should failWith(
       WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), defaultPathStr)
   }
 
@@ -81,17 +102,6 @@ class ConfigCursorSuite extends BaseSuite {
       Right(Map("a" -> cursor("1", "a" :: defaultPath), "b" -> cursor("2", "b" :: defaultPath)))
   }
 
-  it should "allow being casted to a collection cursor in a safe way" in {
-    cursor("abc").asCollectionCursor should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST, ConfigValueType.OBJECT)), defaultPathStr)
-
-    cursor("[1, 2]").asCollectionCursor shouldBe
-      Right(Left(ConfigListCursor(conf("[1, 2]").asInstanceOf[ConfigList], defaultPath)))
-
-    cursor("{ a: 1, b: 2 }").asCollectionCursor shouldBe
-      Right(Right(ConfigObjectCursor(conf("{ a: 1, b: 2 }").asInstanceOf[ConfigObject], defaultPath)))
-  }
-
   it should "allow access to a given path" in {
     cursor("{ a: 2 }").atPath() shouldBe Right(cursor("{ a: 2 }", defaultPath))
     cursor("{ a: 2 }").atPath("a") shouldBe Right(cursor("2", "a" :: defaultPath))
@@ -110,7 +120,6 @@ class ConfigCursorSuite extends BaseSuite {
     cur.asList should failWithType[KeyNotFound]
     cur.asObjectCursor should failWithType[KeyNotFound]
     cur.asMap should failWithType[KeyNotFound]
-    cur.asCollectionCursor should failWithType[KeyNotFound]
   }
 
   behavior of "ConfigListCursor"
@@ -147,6 +156,10 @@ class ConfigCursorSuite extends BaseSuite {
   it should "provide a direct conversion to a list of cursors" in {
     listCursor("[1, 2]").list shouldBe List(cursor("1", "0" :: defaultPath), cursor("2", "1" :: defaultPath))
     listCursor("[]").list shouldBe Nil
+  }
+
+  it should "retain the correct offset after calling the asListCursor method" in {
+    listCursor("[1, 2]").tailOption.map(_.asListCursor) shouldBe (Some(Right(listCursor("[2]").copy(offset = 1))))
   }
 
   behavior of "ConfigObjectCursor"
