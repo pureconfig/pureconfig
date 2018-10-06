@@ -1,0 +1,19 @@
+package pureconfig
+
+import org.scalacheck.ScalacheckShapeless._
+import java.util.UUID
+
+class ForProductNSuite extends BaseSuite {
+  behavior of "ConfigReader.forProductN and ConfigWriter.forProductN"
+
+  [#case class Foo1([#s0: String#])
+  object Foo1 {
+    [#val k0 = UUID.randomUUID().toString#
+    ]
+    implicit val foo1Writer = ConfigWriter.forProduct1([#k0#])((Foo1.unapply _).andThen(_.get))
+    implicit val foo1Reader = ConfigReader.forProduct1([#k0#])(Foo1.apply)
+  }
+  checkArbitrary[Foo1]#
+
+  ]
+}

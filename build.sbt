@@ -18,6 +18,7 @@ lazy val macros = (project in file("macros")).
   settings(commonSettings)
 
 lazy val tests = (project in file("tests")).
+  enablePlugins(BoilerplatePlugin).
   settings(commonSettings).
   dependsOn(core, generic).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
