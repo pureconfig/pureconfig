@@ -1,18 +1,15 @@
 import scalariform.formatter.preferences._
 import ReleaseTransformations._
-import microsites._
 
 lazy val core = (project in file("core")).
-  enablePlugins(TutPlugin, SbtOsgi).
-  settings(
-    commonSettings,
-    sourceGenerators in Compile += (sourceManaged in Compile).map(Boilerplate.gen).taskValue).
+  enablePlugins(BoilerplatePlugin, SbtOsgi, TutPlugin).
+  settings(commonSettings).
   dependsOn(macros)
 
 // A special module for now, since `tests` depend on it. We should improve this organization later by separating the
 // test helpers (which all projects' tests should depend on) from the core+generic test implementations.
 lazy val generic = (project in file("modules/generic")).
-  enablePlugins(TutPlugin, SbtOsgi).
+  enablePlugins(SbtOsgi, TutPlugin).
   dependsOn(core).
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
@@ -21,15 +18,13 @@ lazy val macros = (project in file("macros")).
   settings(commonSettings)
 
 lazy val tests = (project in file("tests")).
-  settings(
-    commonSettings,
-    sourceGenerators in Test += (sourceManaged in Test).map(Boilerplate.genTests).taskValue).
+  settings(commonSettings).
   dependsOn(core, generic).
   dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle")).
-  enablePlugins(TutPlugin, SbtOsgi).
+  enablePlugins(SbtOsgi, TutPlugin).
   settings(commonSettings).
   settings(name := "pureconfig", tutTargetDirectory := file(".")).
   dependsOn(core, generic)
@@ -41,7 +36,7 @@ lazy val docs = (project in file("docs")).
   dependsOn(bundle)
 
 def module(proj: Project) = proj.
-  enablePlugins(TutPlugin, SbtOsgi).
+  enablePlugins(SbtOsgi, TutPlugin).
   dependsOn(core).
   dependsOn(tests % "test->test"). // In order to reuse thDerivationSuite scalacheck generators
   dependsOn(generic % "tut"). // Allow auto-derivation in documentation

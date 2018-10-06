@@ -1,0 +1,7 @@
+package pureconfig
+
+trait ProductReaders {
+
+}
+
+object ProductReaders extends ProductReaders

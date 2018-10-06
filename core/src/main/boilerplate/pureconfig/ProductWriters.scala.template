@@ -1,0 +1,7 @@
+package pureconfig
+
+trait ProductWriters {
+
+}
+
+object ProductWriters extends ProductWriters
