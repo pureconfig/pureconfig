@@ -10,7 +10,7 @@ trait ProductReaders {
     def from(cur: ConfigCursor): Either[ConfigReaderFailures, B] =
       cur.asObjectCursor.right.flatMap { objCur =>
         val a0Result: Either[ConfigReaderFailures, A0 => B] = Right(f)
-        val a1Result = ConvertHelpers.combineResults(a0Result, if (readerA0.isInstanceOf[AllowMissingKey]) readerA0.from(objCur.atKeyOrUndefined(keyA0)) else objCur.atKey(keyA0).right.flatMap(readerA0.from))(_(_))
+        val a1Result = ConvertHelpers.combineResults(a0Result, if (readerA0.isInstanceOf[ReadsMissingKeys]) readerA0.from(objCur.atKeyOrUndefined(keyA0)) else objCur.atKey(keyA0).right.flatMap(readerA0.from))(_(_))
         a1Result
       }
   }
@@ -21,7 +21,7 @@ trait ProductReaders {
     def from(cur: ConfigCursor): Either[ConfigReaderFailures, B] =
       cur.asObjectCursor.right.flatMap { objCur =>
         val a##0Result: Either[ConfigReaderFailures, [#A0# => ] => B] = Right(f.curried)
-        [#val a1Result = ConvertHelpers.combineResults(a0Result, if (readerA0.isInstanceOf[AllowMissingKey]) readerA0.from(objCur.atKeyOrUndefined(keyA0)) else objCur.atKey(keyA0).right.flatMap(readerA0.from))(_(_))#
+        [#val a1Result = ConvertHelpers.combineResults(a0Result, if (readerA0.isInstanceOf[ReadsMissingKeys]) readerA0.from(objCur.atKeyOrUndefined(keyA0)) else objCur.atKey(keyA0).right.flatMap(readerA0.from))(_(_))#
         ]
         a1Result
       }
