@@ -48,7 +48,7 @@ class ForProductNSuite extends BaseSuite {
       [#if ((bitmask & ##1 << 0) == ##0) "missing" else foo.s0#])
   }
 
-  it should "produce ConfigWriters respecting the WritesMissingKeys trait for for arity 1" in
+  it should "produce ConfigWriters respecting the WritesMissingKeys trait for arity 1" in
   forAll(bitmaskGen1) { bitmask =>
     implicit val emptyStringWriter = new ConfigWriter[String] with WritesMissingKeys[String] {
       def to(v: String) = ConfigValueFactory.fromAnyRef(v)
