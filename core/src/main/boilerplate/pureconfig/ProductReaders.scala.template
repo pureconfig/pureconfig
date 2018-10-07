@@ -4,7 +4,7 @@ import pureconfig.error._
 
 trait ProductReaders {
   // Special case because f can't be curried.
-  final def forProduct1[B, A0](keyA0: String)(f: (A0) => B)(implicit
+  final def forProduct1[B, A0](keyA0: String)(f: A0 => B)(implicit
     readerA0: ConfigReader[A0]
   ): ConfigReader[B] = new ConfigReader[B] {
     def from(cur: ConfigCursor): Either[ConfigReaderFailures, B] =
