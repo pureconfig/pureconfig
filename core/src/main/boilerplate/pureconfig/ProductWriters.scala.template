@@ -3,7 +3,7 @@ package pureconfig
 import com.typesafe.config._
 
 trait ProductWriters {
-  @inline final def combineWriterResult[A](
+  @inline private def combineWriterResult[A](
       previousResult: Config,
       writer: ConfigWriter[A],
       key: String,
