@@ -19,8 +19,9 @@ class ForProductNSuite extends BaseSuite {
   }
   checkArbitrary[Foo1]
 
+  val bitmaskGen1 = Gen.choose(0, (##1 << 1) - ##2)
   it should "produce ConfigReaders returning correct KeyNotFound failures in the absence of certain keys for arity 1" in
-  forAll(Gen.choose(0, (##1 << 1) - ##2), Arbitrary.arbitrary[Foo1]) { (bitmask, foo) =>
+  forAll(bitmaskGen1, Arbitrary.arbitrary[Foo1]) { (bitmask, foo) =>
     val conf = foo.toConfig
     val missingKeys = Foo1.keys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
     val confWithMissingKeys = missingKeys.foldLeft(conf.asInstanceOf[ConfigObject])(_.withoutKey(_))
@@ -28,6 +29,22 @@ class ForProductNSuite extends BaseSuite {
     val result = confWithMissingKeys.to[Foo1]
     result.left.value.toList.size shouldEqual failures.size
     result.left.value.toList should contain theSameElementsAs failures
+  }
+
+  it should "produce ConfigReaders respecting the ReadsMissingKeys trait for arity 1" in
+  forAll(bitmaskGen1, Arbitrary.arbitrary[Foo1]) { (bitmask, foo) =>
+    val conf = foo.toConfig
+    val missingKeys = Foo1.keys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
+    val confWithMissingKeys = missingKeys.foldLeft(conf.asInstanceOf[ConfigObject])(_.withoutKey(_))
+    implicit val missingStringReader = new ConfigReader[String] with ReadsMissingKeys {
+      def from(cur: ConfigCursor): Either[ConfigReaderFailures, String] =
+        if (cur.isUndefined || cur.isNull) Right("missing")
+        else cur.asString
+    }
+    val fooKeys = Foo1.keys
+    val fooReader = ConfigReader.forProduct1([#fooKeys(0)#])(Foo1.apply)
+    fooReader.from(ConfigCursor.apply(confWithMissingKeys, List.empty)).right.value shouldEqual Foo1(
+      [#if ((bitmask & ##1 << 0) == ##0) "missing" else foo.s0#])
   }#
 
   ]
