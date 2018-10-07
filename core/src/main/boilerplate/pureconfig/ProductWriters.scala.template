@@ -19,8 +19,20 @@ trait ProductWriters {
   ): ConfigWriter[B] = new ConfigWriter[B] {
     def to(a: B): ConfigValue = {
       val values = f(a)
-      val baseConf = ConfigFactory.empty()
-      baseConf.[#withValue(keyA0, writerA0.to(values._1))#.].root()
+      val a##0Conf = ConfigFactory.empty()
+      [#val a1Conf = writerA0 match {
+        case w: WritesMissingKeys[A0 @unchecked] =>
+          w.toOpt(values._1) match {
+            case Some(v) =>
+              a0Conf.withValue(keyA0, v)
+            case None =>
+              a0Conf
+          }
+        case _ =>
+          a0Conf.withValue(keyA0, writerA0.to(values._1))
+      }#
+      ]
+      a1Conf.root()
     }
   }#
 
