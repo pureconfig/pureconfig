@@ -13,6 +13,8 @@
     will continue to be published as a Maven artifact aggregating the two aforementioned artifacts;
   - Users have now more control over reader and writer derivation. See the
     [docs](https://pureconfig.github.io/docs) for more information;
+  - New factory methods `forProduct1`, `forProduct2`, ..., `forProduct22` were added to the companion objects of
+    `ConfigReader` and `ConfigWriter`;
   - A new `WritesMissingKeys` trait enables custom writers to handle missing keys, a feature previously restricted to
     the built-in `Option` writer;
   - Cursors now perform the
