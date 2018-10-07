@@ -1,0 +1,45 @@
+package pureconfig
+
+import pureconfig.error._
+
+trait ProductReaders {
+  @inline private def combineReaderResult[B, A](
+      previousResult: Either[ConfigReaderFailures, A => B],
+      reader: ConfigReader[A],
+      key: String,
+      cursor: ConfigObjectCursor): Either[ConfigReaderFailures, B] =
+    ConvertHelpers.combineResults(
+      previousResult,
+      if (reader.isInstanceOf[ReadsMissingKeys])
+        reader.from(cursor.atKeyOrUndefined(key))
+      else
+        cursor.atKey(key).right.flatMap(reader.from))(_(_))
+
+  // Special case because f can't be curried.
+  final def forProduct1[B, A0](keyA0: String)(f: A0 => B)(implicit
+    readerA0: ConfigReader[A0]
+  ): ConfigReader[B] = new ConfigReader[B] {
+    def from(cur: ConfigCursor): Either[ConfigReaderFailures, B] =
+      cur.asObjectCursor.right.flatMap { objCur =>
+        val a0Result: Either[ConfigReaderFailures, A0 => B] = Right(f)
+        val a1Result = combineReaderResult(a0Result, readerA0, keyA0, objCur)
+        a1Result
+      }
+  }
+
+  [2..22#final def forProduct1[B, [#A0#]]([#keyA0: String#])(f: ([#A0#]) => B)(implicit
+    [#readerA0: ConfigReader[A0]#]
+  ): ConfigReader[B] = new ConfigReader[B] {
+    def from(cur: ConfigCursor): Either[ConfigReaderFailures, B] =
+      cur.asObjectCursor.right.flatMap { objCur =>
+        val a##0Result: Either[ConfigReaderFailures, [#A0# => ] => B] = Right(f.curried)
+        [#val a1Result = combineReaderResult(a0Result, readerA0, keyA0, objCur)#
+        ]
+        a1Result
+      }
+  }#
+
+  ]
+}
+
+object ProductReaders extends ProductReaders
