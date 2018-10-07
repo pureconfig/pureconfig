@@ -32,19 +32,35 @@ class ForProductNSuite extends BaseSuite {
   }
 
   it should "produce ConfigReaders respecting the ReadsMissingKeys trait for arity 1" in
-  forAll(bitmaskGen1, Arbitrary.arbitrary[Foo1]) { (bitmask, foo) =>
-    val conf = foo.toConfig
-    val missingKeys = Foo1.keys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
-    val confWithMissingKeys = missingKeys.foldLeft(conf.asInstanceOf[ConfigObject])(_.withoutKey(_))
+  forAll(bitmaskGen1) { bitmask =>
+    val foo = Foo1([#UUID.randomUUID().toString#])
     implicit val missingStringReader = new ConfigReader[String] with ReadsMissingKeys {
       def from(cur: ConfigCursor): Either[ConfigReaderFailures, String] =
         if (cur.isUndefined || cur.isNull) Right("missing")
         else cur.asString
     }
+    val conf = foo.toConfig
+    val missingKeys = Foo1.keys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
+    val confWithMissingKeys = missingKeys.foldLeft(conf.asInstanceOf[ConfigObject])(_.withoutKey(_))
     val fooKeys = Foo1.keys
     val fooReader = ConfigReader.forProduct1([#fooKeys(0)#])(Foo1.apply)
     fooReader.from(ConfigCursor.apply(confWithMissingKeys, List.empty)).right.value shouldEqual Foo1(
       [#if ((bitmask & ##1 << 0) == ##0) "missing" else foo.s0#])
+  }
+
+  it should "produce ConfigWriters respecting the WritesMissingKeys trait for for arity 1" in
+  forAll(bitmaskGen1) { bitmask =>
+    implicit val emptyStringWriter = new ConfigWriter[String] with WritesMissingKeys[String] {
+      def to(v: String) = ConfigValueFactory.fromAnyRef(v)
+      def toOpt(v: String) = if (v.isEmpty) None else Some(to(v))
+    }
+    val newFoo = Foo1(
+      [#if ((bitmask & ##1 << 0) == ##0) "" else UUID.randomUUID().toString#])
+    val fooKeys = Foo1.keys
+    val missingKeys = fooKeys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
+    val fooWriter = ConfigWriter.forProduct1([#fooKeys(0)#])((Foo1.unapply _).andThen(_.get))
+    val conf = fooWriter.to(newFoo)
+    conf.asInstanceOf[ConfigObject].keySet should not(contain theSameElementsAs missingKeys)
   }#
 
   ]
