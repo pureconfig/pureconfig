@@ -15,6 +15,14 @@ trait ProductReaders {
       else
         cursor.atKey(key).right.flatMap(reader.from))(_(_))
 
+  /**
+   * Builds a `ConfigReader` for an object created from the value of 1 key.
+   *
+   * @param f the function converting the value to the target object
+   * @tparam B the type of the target object
+   * @return a `ConfigReader` for an object of type `B` that is created from the value in the
+   *         provided key using `f`.
+   */
   // Special case because f can't be curried.
   final def forProduct1[B, A0](keyA0: String)(f: A0 => B)(implicit
     readerA0: ConfigReader[A0]
@@ -26,8 +34,16 @@ trait ProductReaders {
         a1Result
       }
   }
-
-  [2..22#final def forProduct1[B, [#A0#]]([#keyA0: String#])(f: ([#A0#]) => B)(implicit
+  [2..22#
+  /**
+   * Builds a `ConfigReader` for an object created from the values of 1 keys.
+   *
+   * @param f the function converting the tuple of values to the target object
+   * @tparam B the type of the target object
+   * @return a `ConfigReader` for an object of type `B` that is created from the values in the
+   *         provided keys using `f`.
+   */
+  final def forProduct1[B, [#A0#]]([#keyA0: String#])(f: ([#A0#]) => B)(implicit
     [#readerA0: ConfigReader[A0]#]
   ): ConfigReader[B] = new ConfigReader[B] {
     def from(cur: ConfigCursor): Either[ConfigReaderFailures, B] =
