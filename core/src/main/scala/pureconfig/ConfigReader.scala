@@ -120,7 +120,7 @@ trait ConfigReader[A] {
  */
 object ConfigReader extends BasicReaders with CollectionReaders with ProductReaders with ExportedReaders {
 
-  def apply[A](implicit reader: ConfigReader[A]): ConfigReader[A] = reader
+  def apply[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[A] = reader.value
 
   /**
    * Creates a `ConfigReader` from a function reading a `ConfigCursor`.

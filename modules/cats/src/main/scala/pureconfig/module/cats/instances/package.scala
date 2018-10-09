@@ -10,7 +10,7 @@ package object instances {
   implicit val configReaderInstance: ApplicativeError[ConfigReader, ConfigReaderFailures] =
     new ApplicativeError[ConfigReader, ConfigReaderFailures] {
       def pure[A](x: A): ConfigReader[A] =
-        ConfigReader(ConfigReader.fromFunction { _ => Right(x) })
+        ConfigReader.fromFunction { _ => Right(x) }
 
       def ap[A, B](ff: ConfigReader[A => B])(fa: ConfigReader[A]): ConfigReader[B] =
         ff.zip(fa).map { case (f, a) => f(a) }

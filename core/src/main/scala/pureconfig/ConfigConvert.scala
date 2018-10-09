@@ -37,7 +37,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
  */
 object ConfigConvert extends ConvertHelpers {
 
-  def apply[T](implicit conv: ConfigConvert[T]): ConfigConvert[T] = conv
+  def apply[T](implicit conv: Derivation[ConfigConvert[T]]): ConfigConvert[T] = conv.value
 
   implicit def fromReaderAndWriter[T](
     implicit
