@@ -53,7 +53,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
       // when not present, start an implicit search for `A` and place it inside a `Derivation.Successful` if the search
       // succeeds.
       val tpe = weakTypeOf[A]
-      c.inferImplicitValue(tpe) match {
+      inferImplicitValueCompat(tpe) match {
         case EmptyTree =>
           c.abort(c.enclosingPosition, s"could not derive ${prettyPrintType(tpe)}")
         case t =>
