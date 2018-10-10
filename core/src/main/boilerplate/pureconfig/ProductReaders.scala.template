@@ -18,7 +18,7 @@ trait ProductReaders {
   /**
    * Builds a `ConfigReader` for an object created from the value of 1 key.
    *
-   * @param f the function converting the value to the target object
+   * @param f the function converting the read value to the target object
    * @tparam B the type of the target object
    * @return a `ConfigReader` for an object of type `B` that is created from the value in the
    *         provided key using `f`.
@@ -38,7 +38,7 @@ trait ProductReaders {
   [2..22#/**
    * Builds a `ConfigReader` for an object created from the values of 1 keys.
    *
-   * @param f the function converting the tuple of values to the target object
+   * @param f the function converting the read values to the target object
    * @tparam B the type of the target object
    * @return a `ConfigReader` for an object of type `B` that is created from the values in the
    *         provided keys using `f`.
