@@ -36,8 +36,8 @@ trait ProductWriters {
       a1Conf.root()
     }
   }
-  [2..22#
-  /**
+
+  [2..22#/**
    * Builds a `ConfigWriter` for an object written as 1 keys.
    *
    * @param f the function converting the source object to a tuple of values

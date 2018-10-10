@@ -34,8 +34,8 @@ trait ProductReaders {
         a1Result
       }
   }
-  [2..22#
-  /**
+
+  [2..22#/**
    * Builds a `ConfigReader` for an object created from the values of 1 keys.
    *
    * @param f the function converting the tuple of values to the target object
