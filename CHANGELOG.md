@@ -1,3 +1,27 @@
+### 0.10.0 (unreleased)
+
+- Breaking changes
+  - Auto derivation of readers and writers for case classes and sealed traits is now disabled by default. Now users need
+    to import `pureconfig.generic.auto._` everywhere a config is loaded or written (e.g. in files with calls to
+    `loadConfig`);
+  - The `AllowMissingKeys` trait was renamed to `ReadsMissingKeys`;
+  - Dropped support for Scala 2.10.
+
+- New features
+  - The auto-derivation features of PureConfig, powered by shapeless, were extracted to a separate `pureconfig-generic`
+    module, while `pureconfig-core` was left with only the absolute minimum for PureConfig to be useful. `pureconfig`
+    will continue to be published as a Maven artifact aggregating the two aforementioned artifacts;
+  - Users have now more control over reader and writer derivation. See the
+    [docs](https://pureconfig.github.io/docs) for more information;
+  - New factory methods `forProduct1`, `forProduct2`, ..., `forProduct22` were added to the companion objects of
+    `ConfigReader` and `ConfigWriter`;
+  - A new `WritesMissingKeys` trait enables custom writers to handle missing keys, a feature previously restricted to
+    the built-in `Option` writer;
+  - Cursors now perform the
+    [automatic type conversions](https://github.com/lightbend/config/blob/master/HOCON.md#automatic-type-conversions)
+    required by HOCON when `as<type>` methods are called. Cursors now provide `asBoolean`, `asLong`, `asInt`, `asShort`,
+    `asDouble` and `asFloat`.
+
 ### 0.9.2 (Aug 23, 2018)
 
 - New features
