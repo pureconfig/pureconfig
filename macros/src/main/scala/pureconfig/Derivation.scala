@@ -52,11 +52,12 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
     if (!isDerivationEnabled || !isHeadImplicitADerivation) {
       // when not present, start an implicit search for `A` and place it inside a `Derivation.Successful` if the search
       // succeeds.
-      c.inferImplicitValue(weakTypeOf[A]) match {
+      val tpe = weakTypeOf[A]
+      c.inferImplicitValue(tpe) match {
         case EmptyTree =>
-          c.abort(c.enclosingPosition, s"could not derive ${prettyPrintType(weakTypeOf[A])}")
+          c.abort(c.enclosingPosition, s"could not derive ${prettyPrintType(tpe)}")
         case t =>
-          q"_root_.pureconfig.Derivation.Successful($t)"
+          q"_root_.pureconfig.Derivation.Successful[${tpe}]($t)"
       }
 
     } else {
