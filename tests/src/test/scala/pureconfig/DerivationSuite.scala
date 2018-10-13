@@ -122,7 +122,11 @@ class DerivationSuite extends BaseSuite {
 
     illTyped(
       "Derivation.materializeDerivation[ConfigReader[Conf]]",
-      "could not derive a ConfigReader instance for type Conf")
+      "could not derive a ConfigReader instance for type Conf, because:",
+      "  - missing a ConfigReader instance for type ConfC, because:",
+      "    - missing a ConfigReader instance for type Option\\[Custom\\], because:",
+      "      - missing a ConfigReader instance for type Custom",
+      "    - missing a ConfigReader instance for type Custom2")
   }
 
   it should "fallback to a regular implicit search if it's not at the root of that search" in {
