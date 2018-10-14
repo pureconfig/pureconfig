@@ -52,7 +52,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
     // messages
     val isMaterializationExplicitCall = {
       val firstMacroCall = c.enclosingMacros.reverse.find(ctx => ctx.prefix.tree.tpe =:= ctx.typeOf[Derivation.type])
-      firstMacroCall.fold(false)(_.openImplicits.isEmpty)
+      firstMacroCall.exists(_.openImplicits.isEmpty)
     }
 
     // Determine what to do if an implicit search fails. If we're in the context of an implicit search, we want to set
