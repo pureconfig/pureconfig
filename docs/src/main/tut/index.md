@@ -1,9 +1,8 @@
 ---
 layout: home
-title: PureConfig
 ---
 
-# {{page.title}}
+# PureConfig
 
 <img src="img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right" alt="PureConfig">
 
