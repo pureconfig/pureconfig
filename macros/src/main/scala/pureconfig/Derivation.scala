@@ -51,8 +51,8 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
     // check if the materialization was called explicitly, in which case we want to have the nicer compiler error
     // messages
     val isMaterializationExplicitCall = {
-      val firstMacroCall = c.enclosingMacros.reverse.find(c => c.prefix.tree.tpe =:= c.typeOf[Derivation.type])
-      firstMacroCall.fold(false)(c => !c.openImplicits.exists(_.pre =:= c.typeOf[Derivation.type]))
+      val firstMacroCall = c.enclosingMacros.reverse.find(ctx => ctx.prefix.tree.tpe =:= ctx.typeOf[Derivation.type])
+      firstMacroCall.fold(false)(_.openImplicits.isEmpty)
     }
 
     // check the `-Xmacro-settings:materialize-derivations` scalac flag and make sure we're not in an explicit
