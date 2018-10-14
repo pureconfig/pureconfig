@@ -97,7 +97,7 @@ package object yaml {
       using(Files.newBufferedReader(path)) { ioReader =>
         // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
         // abstraction over SnakeYAML
-        val yamlObj = new Yaml(new SafeConstructor()).load(ioReader)
+        val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](ioReader)
 
         yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
           reader.value.from(ConfigCursor(cv, Nil))
@@ -117,7 +117,7 @@ package object yaml {
     handleYamlErrors(None) {
       // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
       // abstraction over SnakeYAML
-      val yamlObj = new Yaml(new SafeConstructor()).load(content)
+      val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](content)
 
       yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
         reader.value.from(ConfigCursor(cv, Nil))
