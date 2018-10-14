@@ -27,7 +27,9 @@ trait MacroCompat {
   def inferImplicitValueCompat(typ: Type): Tree = {
     val cc = c.asInstanceOf[scala.reflect.macros.contexts.Context]
     val enclosingTree =
-      cc.openImplicits.headOption.map(_.tree).getOrElse(EmptyTree).asInstanceOf[cc.universe.analyzer.global.Tree]
+      cc.openImplicits.headOption.map(_.tree)
+        .orElse(cc.enclosingMacros.lastOption.map(_.macroApplication))
+        .getOrElse(EmptyTree).asInstanceOf[cc.universe.analyzer.global.Tree]
 
     val res: cc.Tree = cc.universe.analyzer.inferImplicit(
       enclosingTree, typ.asInstanceOf[cc.Type], false, cc.callsiteTyper.context, true, false, cc.enclosingPosition,
