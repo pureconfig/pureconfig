@@ -62,8 +62,8 @@ lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
-  scalaVersion := "2.12.6",
-  crossScalaVersions := Seq("2.11.12", "2.12.6"),
+  scalaVersion := "2.12.7",
+  crossScalaVersions := Seq("2.11.12", "2.12.7"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
