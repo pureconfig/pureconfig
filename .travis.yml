@@ -3,7 +3,7 @@ language: scala
 
 scala:
   - 2.11.12
-  - 2.12.6
+  - 2.12.7
 jdk:
   - oraclejdk8
 env:
@@ -25,7 +25,7 @@ after_success:
 jobs:
   include:
     - env: JOB=microsite
-      scala: 2.12.6
+      scala: 2.12.7
       addons:
         apt:
           packages:
