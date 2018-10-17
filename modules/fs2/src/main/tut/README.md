@@ -27,18 +27,24 @@ Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
 ```tut:silent
 import pureconfig.generic.auto._
 import pureconfig.module.fs2._
-import cats.effect.IO
+import cats.effect.{IO, ContextShift}
 import fs2.io.file
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
+
+import java.util.concurrent.Executors
 
 case class MyConfig(somefield: Int, anotherfield: String)
 
 val chunkSize = 4096
 
-val configStream = file.readAll[IO](somePath, chunkSize)
+implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
+val blockingEc: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newCachedThreadPool())
 
-val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream)
+val configStream = file.readAll[IO](somePath, blockingEc, chunkSize)
+
+val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream, blockingEc)
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:
@@ -54,10 +60,11 @@ load.unsafeRunSync().equals(MyConfig(1234, "some string"))
 To create a byte stream from a configuration:
 
 ```tut:silent
-import cats.implicits._
 import pureconfig.module.fs2._
 import fs2.text
 import cats.effect.IO
+
+import cats.instances.string._
 
 val someConfig = MyConfig(1234, "some string")
 
