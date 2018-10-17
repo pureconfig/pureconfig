@@ -1,7 +1,7 @@
 package pureconfig.module
 
-import cats.effect.IO
-import _root_.fs2.{ Scheduler, Stream, text }
+import cats.effect.{ IO, Timer, ContextShift }
+import _root_.fs2.{ Stream, text }
 import pureconfig.generic.auto._
 import pureconfig.module.{ fs2 => testee }
 import org.scalatest.{ FlatSpec, Matchers }
@@ -14,12 +14,14 @@ import scala.concurrent.ExecutionContext
 
 class fs2Suite extends FlatSpec with Matchers {
 
-  implicit val executionContext = ExecutionContext.global
+  val blockingEc = ExecutionContext.global
+
+  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   private def delayEachLine(stream: Stream[IO, String], delay: FiniteDuration) = {
-    val sch = Scheduler[IO](1)
     val byLine = stream.through(text.lines)
-    sch.flatMap(_.fixedDelay[IO](delay)).zipWith(byLine)((_, line) => line).intersperse("\n")
+    Stream.fixedDelay[IO](delay).zipWith(byLine)((_, line) => line).intersperse("\n")
   }
 
   case class SomeCaseClass(somefield: Int, anotherfield: String)
@@ -29,7 +31,7 @@ class fs2Suite extends FlatSpec with Matchers {
     val someConfig = "somefield=1234\nanotherfield=some string"
     val configBytes = Stream.emit(someConfig).through(text.utf8Encode)
 
-    val myConfig = testee.streamConfig[IO, SomeCaseClass](configBytes)
+    val myConfig = testee.streamConfig[IO, SomeCaseClass](configBytes, blockingEc)
 
     myConfig.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
@@ -37,7 +39,7 @@ class fs2Suite extends FlatSpec with Matchers {
   it should "error when stream is blank" in {
     val blankStream = Stream.empty.covaryAll[IO, Byte]
 
-    val configLoad = testee.streamConfig[IO, SomeCaseClass](blankStream)
+    val configLoad = testee.streamConfig[IO, SomeCaseClass](blankStream, blockingEc)
 
     configLoad.attempt.unsafeRunSync().left.value shouldBe a[ConfigReaderException[_]]
 
@@ -49,7 +51,7 @@ class fs2Suite extends FlatSpec with Matchers {
     val configStream = Stream.emit(someConfig)
     val configBytes = delayEachLine(configStream, 200.milliseconds).through(text.utf8Encode)
 
-    val myConfig = testee.streamConfig[IO, SomeCaseClass](configBytes)
+    val myConfig = testee.streamConfig[IO, SomeCaseClass](configBytes, blockingEc)
 
     myConfig.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }

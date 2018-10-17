@@ -19,9 +19,9 @@ package object catseffect {
 
   private def configToF[F[_], A](getConfig: () => Either[ConfigReaderFailures, A])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     val delayedLoad = F.delay {
-      getConfig().leftMap(ConfigReaderException[A])
+      getConfig().leftMap[Throwable](ConfigReaderException[A])
     }
-    delayedLoad.flatMap(F.fromEither)
+    delayedLoad.rethrow
   }
 
   /**

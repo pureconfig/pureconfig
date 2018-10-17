@@ -6,8 +6,8 @@ import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-import _root_.fs2.{ Stream, async, io, text }
-import cats.effect.{ Effect, Sync }
+import _root_.fs2.{ Stream, io, text }
+import cats.effect.{ Concurrent, Sync, ContextShift }
 import cats.implicits._
 import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
 import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
@@ -38,15 +38,17 @@ package object fs2 {
    *         `A` from the configuration stream, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def streamConfig[F[_], A](configStream: Stream[F, Byte])(implicit F: Effect[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A], ec: ExecutionContext): F[A] = {
+  def streamConfig[F[_], A](configStream: Stream[F, Byte], blockingExecutionContext: ExecutionContext)(
+    implicit
+    F: Concurrent[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A], CS: ContextShift[F]): F[A] = {
     pipedStreams.flatMap {
       case (in, out) =>
-        val outputSink = io.writeOutputStream[F](out.pure[F])
+        val outputSink = io.writeOutputStream[F](out.pure[F], blockingExecutionContext)
         val sunkStream = configStream.to(outputSink)
 
         val parseConfig = parseStream(in)
 
-        async.fork(sunkStream.compile.drain) >> parseConfig
+        Concurrent[F].start(sunkStream.compile.drain) >> parseConfig
     }
   }
 
