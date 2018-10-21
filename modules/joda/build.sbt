@@ -1,8 +1,8 @@
 name := "pureconfig-joda"
 
 libraryDependencies ++= Seq(
-  "joda-time" % "joda-time" % "2.9.9",
-  "org.joda" % "joda-convert" % "2.0.1")
+  "joda-time" % "joda-time" % "2.10",
+  "org.joda" % "joda-convert" % "2.1.1")
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),

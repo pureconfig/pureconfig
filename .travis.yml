@@ -3,7 +3,7 @@ language: scala
 
 scala:
   - 2.11.12
-  - 2.12.6
+  - 2.12.7
 jdk:
   - oraclejdk8
 env:
@@ -25,7 +25,7 @@ after_success:
 jobs:
   include:
     - env: JOB=microsite
-      scala: 2.12.6
+      scala: 2.12.7
       addons:
         apt:
           packages:
@@ -39,10 +39,8 @@ jobs:
         - gem install sass jekyll:3.2.1 html-proofer
       script:
         - sbt makeMicrosite
-          # we're ignoring www.47deg.com due to SSL errors; we should check this again later
         - htmlproofer \
             --allow_hash_href \
-            --url-ignore '/www.47deg.com/' \
             --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)" \
             docs/target/site
       after_success: ignore
