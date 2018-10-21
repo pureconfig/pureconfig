@@ -76,7 +76,8 @@ pureconfig.loadConfig[Person](conf)
 ### Manual
 
 When case class and sealed trait derivation is not needed or wanted, we can simply not import anything and define our
-reader using any of ways explained in [Supporting New Types](supporting-new-types.html):
+reader using any of ways explained in [Supporting New Types](supporting-new-types.html). The `forProductN` helper
+methods are also convenient for creating readers and writers for case class-like types without generic derivation:
 
 ```tut:invisible:reset
 import com.typesafe.config.ConfigFactory
@@ -89,13 +90,7 @@ val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 ```tut:silent
 import pureconfig._
 
-implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
-  for {
-    objCur <- cur.asObjectCursor
-    name <- objCur.atKey("name").right.flatMap(_.asString)
-    surname <- objCur.atKey("surname").right.flatMap(_.asString)
-  } yield Person(name, surname)
-}
+implicit val personReader = ConfigReader.forProduct2("name", "surname")((name, surname) => Person(name, surname))
 ```
 
 ```tut:book
