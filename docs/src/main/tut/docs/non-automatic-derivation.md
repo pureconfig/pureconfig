@@ -90,7 +90,7 @@ val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 ```tut:silent
 import pureconfig._
 
-implicit val personReader = ConfigReader.forProduct2("name", "surname")((name, surname) => Person(name, surname))
+implicit val personReader = ConfigReader.forProduct2("name", "surname")(Person(_, _))
 ```
 
 ```tut:book
