@@ -46,7 +46,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
 
     // check if the first implicit in the chain is a `Derivation` (if it isn't, not only we can't show custom messages
     // but we may be unable to parse `Lazy` trees)
-    val isHeadImplicitADerivation = c.openImplicits.headOption.exists(_.pre =:= typeOf[Derivation.type])
+    lazy val isHeadImplicitADerivation = c.openImplicits.lastOption.exists(_.pre =:= typeOf[Derivation.type])
 
     // check if the materialization was called explicitly, in which case we want to have the nicer compiler error
     // messages
@@ -80,10 +80,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
 
     } else {
       // if `isRootDerivation` is `false`, then this is a `Derivation` triggered inside another `Derivation`
-      val isRootDerivation = if (isMaterializationExplicitCall)
-        c.enclosingMacros.count(c => c.prefix.tree.tpe =:= c.typeOf[Derivation.type]) == 1
-      else
-        c.openImplicits.count(_.pre =:= typeOf[Derivation.type]) == 1
+      val isRootDerivation = c.enclosingMacros.count(c => c.prefix.tree.tpe =:= c.typeOf[Derivation.type]) == 1
 
       if (isRootDerivation) materializeRootDerivation(weakTypeOf[A], onFailedImplicitSearch)
       else materializeInnerDerivation(weakTypeOf[A])
