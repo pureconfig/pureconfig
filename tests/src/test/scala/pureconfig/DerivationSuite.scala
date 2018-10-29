@@ -119,18 +119,14 @@ class DerivationSuite extends BaseSuite {
       "could not derive a ConfigConvert instance for type Option\\[Custom\\], because:",
       "  - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
       "    - missing a ConfigWriter instance for type Custom")
-  }
 
-  it should "fallback to a regular implicit search if it's being materialized explicitly" in {
     illTyped(
       "Derivation.materializeDerivation[ConfigReader[Conf]]",
-      "could not find implicit value for parameter e: pureconfig.ConfigReader\\[DerivationSuite.this.Conf\\]")
-
-    {
-      implicit val cr = customReader
-      implicit val cr2 = customReader2
-      Derivation.materializeDerivation[ConfigReader[Conf]]
-    }
+      "could not derive a ConfigReader instance for type Conf, because:",
+      "  - missing a ConfigReader instance for type ConfC, because:",
+      "    - missing a ConfigReader instance for type Option\\[Custom\\], because:",
+      "      - missing a ConfigReader instance for type Custom",
+      "    - missing a ConfigReader instance for type Custom2")
   }
 
   it should "fallback to a regular implicit search if it's not at the root of that search" in {

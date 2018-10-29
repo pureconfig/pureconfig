@@ -46,19 +46,43 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
 
     // check if the first implicit in the chain is a `Derivation` (if it isn't, not only we can't show custom messages
     // but we may be unable to parse `Lazy` trees)
-    val isHeadImplicitADerivation = c.openImplicits.headOption.exists(_.pre =:= typeOf[Derivation.type])
+    lazy val isHeadImplicitADerivation = c.openImplicits.lastOption.exists(_.pre =:= typeOf[Derivation.type])
 
-    // check the `-Xmacro-settings:materialize-derivations` scalac flag
-    if (!isDerivationEnabled || !isHeadImplicitADerivation) {
-      // when not present, simply render the base `Derivation` constructor with `implcitly[A]`. This results in the same
-      // behavior as without `Derivation` (apart from the extra wrapper).
-      q"_root_.pureconfig.Derivation.Successful(_root_.scala.Predef.implicitly[${weakTypeOf[A]}])"
+    // check if the materialization was called explicitly, in which case we want to have the nicer compiler error
+    // messages
+    val isMaterializationExplicitCall = {
+      val firstMacroCall = c.enclosingMacros.reverse.find(ctx => ctx.prefix.tree.tpe =:= ctx.typeOf[Derivation.type])
+      firstMacroCall.exists(_.openImplicits.isEmpty)
+    }
+
+    // Determine what to do if an implicit search fails. If we're in the context of an implicit search, we want to set
+    // the provided message in the @implicitNotFound annotation. If we're inside an explicit call to
+    // `materializeDerivation` we want to abort with the message
+    val onFailedImplicitSearch: String => Nothing = if (isMaterializationExplicitCall)
+      c.abort(c.enclosingPosition, _)
+    else
+      msg => {
+        setImplicitNotFound(msg)
+        // cause the implicit to fail materializing - the message is ignored
+        c.abort(c.enclosingPosition, "")
+      }
+
+    // check the `-Xmacro-settings:materialize-derivations` scalac flag and make sure we're not in an explicit
+    // materialization call
+    if ((!isDerivationEnabled || !isHeadImplicitADerivation) && !isMaterializationExplicitCall) {
+      // when not present, start an implicit search for `A` and place it inside a `Derivation.Successful` if the search
+      // succeeds.
+      val tpe = weakTypeOf[A]
+      inferImplicitValueCompat(tpe) match {
+        case EmptyTree => c.abort(c.enclosingPosition, "")
+        case t => q"_root_.pureconfig.Derivation.Successful[${tpe}]($t)"
+      }
 
     } else {
       // if `isRootDerivation` is `false`, then this is a `Derivation` triggered inside another `Derivation`
-      val isRootDerivation = c.openImplicits.count(_.pre =:= typeOf[Derivation.type]) == 1
+      val isRootDerivation = c.enclosingMacros.count(c => c.prefix.tree.tpe =:= c.typeOf[Derivation.type]) == 1
 
-      if (isRootDerivation) materializeRootDerivation(weakTypeOf[A])
+      if (isRootDerivation) materializeRootDerivation(weakTypeOf[A], onFailedImplicitSearch)
       else materializeInnerDerivation(weakTypeOf[A])
     }
   }
@@ -81,15 +105,13 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
   // found error with a basic message. If an implicit is found, it still needs to search the tree found in order to
   // check if some inner derivations materialized a `Derivation.failed`. If that's the case, it collects those failures
   // and prints a nice message.
-  private[this] def materializeRootDerivation(typ: Type): Tree = {
+  private[this] def materializeRootDerivation(typ: Type, failImplicitSearch: String => Nothing): Tree = {
     inferImplicitValueCompat(typ) match {
       case EmptyTree =>
         // failed to find an implicit at the root level of the derivation; set a generic implicitNotFound message
         // without further information
-        setImplicitNotFound(typ, Nil)
-
-        // cause the implicit to fail materializing - the message is ignored
-        c.abort(c.enclosingPosition, "")
+        val implicitNotFoundMsg = buildImplicitNotFound(typ, Nil)
+        failImplicitSearch(implicitNotFoundMsg)
 
       case value =>
         // collect the failed derivations in the built implicit tree
@@ -100,10 +122,8 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
         } else {
           // if there are failures, that means one of the inner implicits was not found - set a message with details
           // about the paths failed
-          setImplicitNotFound(typ, failed)
-
-          // cause the implicit to fail materializing - the message is ignored
-          c.abort(c.enclosingPosition, "")
+          val implicitNotFoundMsg = buildImplicitNotFound(typ, failed)
+          failImplicitSearch(implicitNotFoundMsg)
         }
     }
   }
@@ -155,8 +175,8 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
     failures.toList.map(_.reverse)
   }
 
-  // Prepares and sets the message to be printed for the given failed derivations.
-  private[this] def setImplicitNotFound(typ: Type, failedDerivations: List[List[Type]]): Unit = {
+  // Prepares the message to be printed for the given failed derivations.
+  private[this] def buildImplicitNotFound(typ: Type, failedDerivations: List[List[Type]]): String = {
     val builder = new StringBuilder()
 
     failedDerivations match {
@@ -188,7 +208,7 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
     }
 
     buildMessage(failedDerivations, 1)
-    setImplicitNotFound(builder.toString)
+    builder.toString
   }
 
   private[this] def prettyPrintType(typ: Type): String =

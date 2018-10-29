@@ -26,7 +26,10 @@ trait MacroCompat {
   // reported up to Scala 2.12.2. See https://github.com/scala/bug/issues/10398 for more information.
   def inferImplicitValueCompat(typ: Type): Tree = {
     val cc = c.asInstanceOf[scala.reflect.macros.contexts.Context]
-    val enclosingTree = cc.openImplicits.head.tree.asInstanceOf[cc.universe.analyzer.global.Tree]
+    val enclosingTree =
+      cc.openImplicits.headOption.map(_.tree)
+        .orElse(cc.enclosingMacros.lastOption.map(_.macroApplication))
+        .getOrElse(EmptyTree).asInstanceOf[cc.universe.analyzer.global.Tree]
 
     val res: cc.Tree = cc.universe.analyzer.inferImplicit(
       enclosingTree, typ.asInstanceOf[cc.Type], false, cc.callsiteTyper.context, true, false, cc.enclosingPosition,
