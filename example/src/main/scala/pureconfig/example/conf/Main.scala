@@ -10,6 +10,7 @@ import java.nio.file.Path
 
 import pureconfig._
 import pureconfig.example.conf._
+import pureconfig.generic.auto._
 
 /*
 This is an example of configuration for our directory watcher. The configuration needs:
