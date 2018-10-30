@@ -1,4 +1,4 @@
-### 0.10.0 (unreleased)
+### 0.10.0 (Oct 30, 2018)
 
 - Breaking changes
   - Auto derivation of readers and writers for case classes and sealed traits is now disabled by default. Now users need
