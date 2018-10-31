@@ -1,7 +1,7 @@
 package pureconfig
 
 import com.typesafe.config._
-import pureconfig.error.{ KeyNotFound, WrongType }
+import pureconfig.error.{ CannotConvert, KeyNotFound, WrongType }
 
 class ConfigCursorSuite extends BaseSuite {
 
@@ -35,6 +35,72 @@ class ConfigCursorSuite extends BaseSuite {
 
     cursor("{ a: 1, b: 2 }").asString should failWith(
       WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), defaultPathStr)
+  }
+
+  it should "allow being cast to boolean in a safe way" in {
+    cursor("true").asBoolean shouldBe Right(true)
+    cursor("false").asBoolean shouldBe Right(false)
+
+    cursor("abc").asBoolean should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)))
+    cursor("1").asBoolean should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)))
+    cursor("TRUE").asBoolean should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)))
+  }
+
+  it should "allow being cast to long in a safe way" in {
+    cursor("3").asLong shouldBe Right(3l)
+
+    cursor("abc").asLong should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
+    cursor("true").asLong should failWith(
+      WrongType(ConfigValueType.BOOLEAN, Set(ConfigValueType.NUMBER)))
+    cursor("1.1").asLong should failWith(
+      CannotConvert("1.1", "Long", "Unable to convert Number to Long"))
+  }
+
+  it should "allow being cast to int in a safe way" in {
+    cursor("3").asInt shouldBe Right(3)
+
+    cursor("abc").asInt should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
+    cursor("true").asInt should failWith(
+      WrongType(ConfigValueType.BOOLEAN, Set(ConfigValueType.NUMBER)))
+    cursor("1.1").asInt should failWith(
+      CannotConvert("1.1", "Int", "Unable to convert Number to Int"))
+  }
+
+  it should "allow being cast to short in a safe way" in {
+    cursor("3").asShort shouldBe Right(3)
+
+    cursor("abc").asShort should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
+    cursor("true").asShort should failWith(
+      WrongType(ConfigValueType.BOOLEAN, Set(ConfigValueType.NUMBER)))
+    cursor("1.1").asShort should failWith(
+      CannotConvert("1.1", "Short", "Unable to convert Number to Short"))
+  }
+
+  it should "allow being cast to double in a safe way" in {
+    cursor("3").asDouble shouldBe Right(3.0)
+    cursor("3.1").asDouble shouldBe Right(3.1)
+
+    cursor("abc").asDouble should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
+    cursor("true").asDouble should failWith(
+      WrongType(ConfigValueType.BOOLEAN, Set(ConfigValueType.NUMBER)))
+  }
+
+  it should "allow being cast to float in a safe way" in {
+    cursor("3").asFloat shouldBe Right(3.0)
+
+    cursor("abc").asFloat should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
+    cursor("true").asFloat should failWith(
+      WrongType(ConfigValueType.BOOLEAN, Set(ConfigValueType.NUMBER)))
+    cursor("1.1").asFloat should failWith(
+      CannotConvert("1.1", "Float", "Unable to convert Number to Float"))
   }
 
   it should "allow being casted to a list cursor in a safe way" in {
