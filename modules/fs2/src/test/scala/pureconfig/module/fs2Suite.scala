@@ -14,8 +14,6 @@ import scala.concurrent.ExecutionContext
 
 class fs2Suite extends FlatSpec with Matchers {
 
-  val blockingEc = ExecutionContext.global
-
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
