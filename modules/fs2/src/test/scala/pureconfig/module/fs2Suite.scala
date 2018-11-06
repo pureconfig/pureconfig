@@ -1,6 +1,6 @@
 package pureconfig.module
 
-import cats.effect.{ IO, Timer, ContextShift }
+import cats.effect.{ IO, Timer }
 import _root_.fs2.{ Stream, text }
 import pureconfig.generic.auto._
 import pureconfig.module.{ fs2 => testee }
@@ -15,7 +15,6 @@ import scala.concurrent.ExecutionContext
 class fs2Suite extends FlatSpec with Matchers {
 
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   private def delayEachLine(stream: Stream[IO, String], delay: FiniteDuration) = {
     val byLine = stream.through(text.lines)
