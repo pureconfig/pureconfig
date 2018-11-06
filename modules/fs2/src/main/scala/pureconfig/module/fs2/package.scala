@@ -20,8 +20,8 @@ package object fs2 {
    * @return The returned action will complete with `A` if it is possible to create an instance of type
    *         `A` from the configuration stream, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
-    *         It can also raise any exception that the stream can raise, as well as any exception that
-    *         ConfigFactory.parseString might throw. 
+   *         It can also raise any exception that the stream can raise, as well as any exception that
+   *         ConfigFactory.parseString might throw.
    */
   def streamConfig[F[_], A](configStream: Stream[F, Byte])(
     implicit
