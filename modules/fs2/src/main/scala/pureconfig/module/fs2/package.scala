@@ -30,12 +30,9 @@ package object fs2 {
       bytes <- configStream.compile.to[Array]
       string = new String(bytes, UTF_8)
       configOrError <- F.delay(ConfigFactoryWrapper.parseString(string))
-      a <- F.fromEither {
-        (for {
-          config <- configOrError
-          a <- pureconfig.loadConfig[A](config)
-        } yield a).leftMap(ConfigReaderException[A])
-      }
+      config <- F.fromEither(configOrError.leftMap(ConfigReaderException[A]))
+      aOrError <- F.delay(pureconfig.loadConfig[A](config))
+      a <- F.fromEither(aOrError.leftMap(ConfigReaderException[A]))
     } yield a
   }
 
