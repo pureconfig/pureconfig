@@ -7,7 +7,8 @@ import scala.reflect.ClassTag
 import _root_.fs2.{ Stream, text }
 import cats.effect.Sync
 import cats.implicits._
-import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
+import com.typesafe.config.ConfigRenderOptions
+import pureconfig.backend.ConfigFactoryWrapper
 import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
 import pureconfig.error.ConfigReaderException
 
@@ -29,8 +30,13 @@ package object fs2 {
     for {
       bytes <- configStream.compile.to[Array]
       string = new String(bytes, UTF_8)
-      config <- F.delay(ConfigFactory.parseString(string))
-      a <- F.fromEither(pureconfig.loadConfig[A](config).leftMap(ConfigReaderException[A]))
+      configOrError <- F.delay(ConfigFactoryWrapper.parseString(string))
+      a <- F.fromEither {
+        (for {
+          config <- configOrError
+          a <- pureconfig.loadConfig[A](config)
+        } yield a).leftMap(ConfigReaderException[A])
+      }
     } yield a
   }
 

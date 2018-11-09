@@ -23,6 +23,10 @@ object ConfigFactoryWrapper {
   def load(): Either[ConfigReaderFailures, Config] =
     unsafeToEither(ConfigFactory.load())
 
+  /** @see `com.typesafe.config.ConfigFactory.parseString()` */
+  def parseString(s: String): Either[ConfigReaderFailures, Config] =
+    unsafeToEither(ConfigFactory.parseString(s))
+
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): Either[ConfigReaderFailures, Config] =
     unsafeToEither(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
