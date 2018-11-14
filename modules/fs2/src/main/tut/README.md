@@ -44,7 +44,7 @@ val blockingEc: ExecutionContext = ExecutionContext.fromExecutorService(Executor
 
 val configStream = file.readAll[IO](somePath, blockingEc, chunkSize)
 
-val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream, blockingEc)
+val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream)
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:
