@@ -8,7 +8,7 @@
 [![Scaladoc](https://javadoc.io/badge/com.github.pureconfig/pureconfig_2.12.svg)](https://javadoc.io/page/com.github.pureconfig/pureconfig_2.12/latest/pureconfig/index.html)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/typesafehub/config) configurations written in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](https://pureconfig.github.io/docs/built-in-supported-types.html). Users also have many ways to [add support for custom types](https://pureconfig.github.io/docs/supporting-new-types.html) or [customize existing ones](https://pureconfig.github.io/docs/overriding-behavior-for-types.html).
+PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/lightbend/config) configurations written in [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](https://pureconfig.github.io/docs/built-in-supported-types.html). Users also have many ways to [add support for custom types](https://pureconfig.github.io/docs/supporting-new-types.html) or [customize existing ones](https://pureconfig.github.io/docs/overriding-behavior-for-types.html).
 
 Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
@@ -75,18 +75,18 @@ pureconfig.loadConfig[MyClass]
 ```
 
 The various `loadConfig` methods defer to Typesafe Config's
-[`ConfigFactory`](https://typesafehub.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
+[`ConfigFactory`](https://lightbend.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
 select where to load the config files from. Typesafe Config has [well-documented rules for configuration
-loading](https://github.com/typesafehub/config#standard-behavior) which we'll not repeat. Please see Typesafe
+loading](https://github.com/lightbend/config#standard-behavior) which we'll not repeat. Please see Typesafe
 Config's documentation for a full telling of the subtleties.
 
 Alternatively, PureConfig also provides a `loadConfigFromFiles` method that builds a configuration from
 an explicit list of files. Files earlier in the list have greater precedence than later ones. Each file can
 include a partial configuration as long as the whole list produces a complete configuration. For an example,
 see the test of `loadConfigFromFiles` in
-[`ApiSuite.scala`](https://github.com/pureconfig/pureconfig/blob/master/core/src/test/scala/pureconfig/ApiSuite.scala).
+[`ApiSuite.scala`](https://github.com/pureconfig/pureconfig/blob/master/tests/src/test/scala/pureconfig/ApiSuite.scala).
 
-Because PureConfig uses Typesafe Config to load configurations, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
+Because PureConfig uses Typesafe Config to load configurations, it supports reading files in [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/lightbend/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
 
 ## Documentation
@@ -123,5 +123,5 @@ welcoming environments for everyone.
 
 ## Special Thanks
 
-To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/typesafehub/config)
+To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/lightbend/config)
 developers.
