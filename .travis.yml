@@ -36,12 +36,12 @@ jobs:
       install:
         - rvm use 2.4 --install --fuzzy
         - gem update --system
-        - gem install sass jekyll:3.2.1 html-proofer
+        - gem install sass jekyll:3.2.1 html-proofer:3.9.3
       script:
         - sbt makeMicrosite
-        - htmlproofer \
-            --allow_hash_href \
-            --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)" \
+        - htmlproofer
+            --allow-hash-href
+            --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
             docs/target/site
       after_success: ignore
 
