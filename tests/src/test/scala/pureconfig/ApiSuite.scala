@@ -175,6 +175,12 @@ class ApiSuite extends BaseSuite {
     loadConfigFromFiles[Conf](files, failOnReadError = true) should failWithType[CannotReadFile]
   }
 
+  it should "use a namespace if given" in {
+    case class Conf(f: Float)
+    val files = listResourcesFromNames("/conf/loadConfigFromFiles/outerobject.conf")
+    loadConfigFromFiles[Conf](files, namespace = "foo") shouldBe Right(Conf(3.0F))
+  }
+
   "loadConfigWithFallback" should "fallback if no config keys are found" in {
     case class Conf(f: Float, o: Option[Int], d: Double)
     val priority1Conf = ConfigFactory.load("conf/loadConfigFromFiles/priority1.conf")
