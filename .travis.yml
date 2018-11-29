@@ -39,9 +39,9 @@ jobs:
         - gem install sass jekyll:3.2.1 html-proofer:3.9.3
       script:
         - sbt makeMicrosite
-        - htmlproofer \
-            --allow-hash-href \
-            --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)" \
+        - htmlproofer
+            --allow-hash-href
+            --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
             docs/target/site
       after_success: ignore
 
