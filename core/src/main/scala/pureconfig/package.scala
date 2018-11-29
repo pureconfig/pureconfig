@@ -286,8 +286,10 @@ package object pureconfig {
    * otherwise they would yield a failure (a `Left` value).
    *
    * @param files Files ordered in decreasing priority containing part or all of a `Config`
+   * @param failOnReadError Where to return an error if any files fail to read
+   * @param namespace the base namespace from which the configuration should be load
    */
-  def loadConfigFromFiles[Config](files: Traversable[Path], failOnReadError: Boolean = false)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+  def loadConfigFromFiles[Config](files: Traversable[Path], failOnReadError: Boolean = false, namespace: String = "")(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
     files.map(parseFile)
       .map {
         case Left(failures) if failures.toList.exists(_.isInstanceOf[CannotReadFile]) && !failOnReadError =>
@@ -297,7 +299,7 @@ package object pureconfig {
       .foldLeft[Either[ConfigReaderFailures, TypesafeConfig]](Right(ConfigFactory.empty())) {
         case (c1, c2) => ConfigConvert.combineResults(c1, c2)(_.withFallback(_))
       }
-      .right.flatMap { conf => loadConfig[Config](conf.resolve) }
+      .right.flatMap { conf => loadConfig[Config](conf.resolve, namespace) }
   }
 
   /**
