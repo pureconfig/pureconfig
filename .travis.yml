@@ -40,7 +40,7 @@ jobs:
       script:
         - sbt makeMicrosite
         - htmlproofer \
-            --allow_hash_href \
+            --allow-hash-href \
             --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)" \
             docs/target/site
       after_success: ignore
