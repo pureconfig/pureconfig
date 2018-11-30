@@ -42,7 +42,7 @@ jobs:
         - htmlproofer
             --allow-hash-href
             --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
-            --url-ignore "search.maven.org/artifact/com.github.pureconfig/pureconfig_2.12$"
+            --url-ignore "search[.]maven[.]org"
             docs/target/site
       after_success: ignore
 
