@@ -5,7 +5,7 @@ version := "1.0"
 scalaVersion := "2.12.7"
 
 libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.10.0")
+  "com.github.pureconfig" %% "pureconfig" % "0.10.1")
 
 crossScalaVersions := Seq("2.11.12", "2.12.7")
 

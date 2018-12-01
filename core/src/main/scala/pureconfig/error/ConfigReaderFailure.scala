@@ -55,7 +55,7 @@ object ConvertFailure {
 /**
  * A failure occurred because a list of files to load was empty.
  */
-@deprecated("`loadConfigFromFiles` won't return this failure anymore", "0.10.0")
+@deprecated("`loadConfigFromFiles` won't return this failure anymore", "0.10.1")
 case object NoFilesToRead extends ConfigReaderFailure {
   def description = "The config files to load must not be empty."
   def location = None
