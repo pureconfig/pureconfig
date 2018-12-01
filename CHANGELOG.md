@@ -1,4 +1,4 @@
-### 0.10.1 (Oct 30, 2018)
+### 0.10.1 (Nov 30, 2018)
 
 - New features
   - `loadConfigFromFiles` now accepts a `namespace` parameter like the other `loadConfig*` varieties. (#437)
