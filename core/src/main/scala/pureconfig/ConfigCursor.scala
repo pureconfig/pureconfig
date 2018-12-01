@@ -190,7 +190,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with this cursor as a list or object cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  @deprecated("Use `asListCursor` and/or `asObjectCursor` instead", "0.10.0")
+  @deprecated("Use `asListCursor` and/or `asObjectCursor` instead", "0.10.1")
   def asCollectionCursor: Either[ConfigReaderFailures, Either[ConfigListCursor, ConfigObjectCursor]] = {
     if (isUndefined) {
       failed(KeyNotFound.forKeys(path, Set()))
