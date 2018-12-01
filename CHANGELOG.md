@@ -1,3 +1,11 @@
+### 0.10.1 (Oct 30, 2018)
+
+- New features
+  - `loadConfigFromFiles` now accepts a `namespace` parameter like the other `loadConfig*` varieties. (#437)
+
+- Bug fixes
+  - `scala-compiler` and `scala-reflect` dependencies are now `provided`, rather than regular, dependencies. (#434)
+
 ### 0.10.0 (Oct 30, 2018)
 
 - Breaking changes
