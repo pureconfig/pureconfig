@@ -51,7 +51,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"apollo":"1969-07-20T20:18:00.000Z","pluto":"2021-01-20T06:59:59.999Z"}))
 
 loadConfig[GreatDatesConfig](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,GreatDatesConfig] = Right(GreatDatesConfig(1969-07-20T20:18:00.000Z,2021-01-20T06:59:59.999Z))
+// res0: pureconfig.ReaderResult[GreatDatesConfig] = Right(GreatDatesConfig(1969-07-20T20:18:00.000Z,2021-01-20T06:59:59.999Z))
 ```
 
 Note that you'll need to configure a separate converter for each of the Joda Time types that you want to load from your configuration.  For example, call `localDateConfigConvert` to support `LocalDateTime`. Most of the Joda Time types are supported by methods with likewise unsurprising names in the [`joda.configurable` package](src/main/scala/pureconfig/module/joda/configurable/package.scala).

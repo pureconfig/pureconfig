@@ -96,12 +96,11 @@ Similarly to adding support for simple types, it is possible to manually create 
 
 ```tut:silent
 import pureconfig._
-import pureconfig.error._
 
 val class1Reader = ConfigReader.forProduct1("id")(new Class1(_))
 val class2Reader = ConfigReader.forProduct2("id", "value")(new Class2(_, _))
 
-def extractByType(typ: String, objCur: ConfigObjectCursor): Either[ConfigReaderFailures, Identifiable] = typ match {
+def extractByType(typ: String, objCur: ConfigObjectCursor): ReaderResult[Identifiable] = typ match {
   case "class1" => class1Reader.from(objCur)
   case "class2" => class2Reader.from(objCur)
   case t =>

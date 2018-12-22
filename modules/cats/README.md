@@ -54,7 +54,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-list":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-set":[1,2,3],"number-vector":[1,2,3]}))
 
 loadConfig[MyConfig](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3),TreeSet(1, 2, 3),NonEmptyVector(1, 2, 3),Map(one -> 1, three -> 3, two -> 2)))
+// res0: pureconfig.ReaderResult[MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3),TreeSet(1, 2, 3),NonEmptyVector(1, 2, 3),Map(one -> 1, three -> 3, two -> 2)))
 ```
 
 ### Using cats type class instances for readers and writers
@@ -85,10 +85,10 @@ And we can finally put them to use:
 
 ```scala
 constIntReader.from(conf.root())
-// res4: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(42)
+// res4: pureconfig.ReaderResult[Int] = Right(42)
 
 safeIntReader.from(conf.root())
-// res5: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(-1)
+// res5: pureconfig.ReaderResult[Int] = Right(-1)
 
 someWriter[String].to(Some("abc"))
 // res6: com.typesafe.config.ConfigValue = Quoted("abc")

@@ -51,7 +51,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"ShoutGoodBye","start":"WhisperHello"}))
 
 loadConfig[GreetingConf](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,GreetingConf] = Right(GreetingConf(WhisperHello,ShoutGoodBye))
+// res0: pureconfig.ReaderResult[GreetingConf] = Right(GreetingConf(WhisperHello,ShoutGoodBye))
 ```
 
 ## Can I configure how the elements are read?
