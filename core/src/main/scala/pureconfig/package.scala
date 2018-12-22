@@ -9,6 +9,9 @@ import java.io.{ OutputStream, OutputStreamWriter }
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.{ Files, Path }
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
+import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import com.typesafe.config.{ Config => TypesafeConfig, _ }
@@ -23,12 +26,24 @@ package object pureconfig {
    *
    * @tparam A the type of the result
    */
-  type ReaderResult[A] = Either[ConfigReaderFailures, A]
+  type ReaderResult[+A] = Either[ConfigReaderFailures, A]
 
   /**
    * Object containing useful constructors and utility methods for `ReaderResult`s.
    */
   object ReaderResult {
+
+    /**
+     * Sequences a collection of `ReaderResult`s into a `ReaderResult` of a collection.
+     */
+    def sequence[A, CC[X] <: TraversableOnce[X]](rs: CC[ReaderResult[A]])(implicit cbf: CanBuildFrom[CC[A], A, CC[A]]): ReaderResult[CC[A]] = {
+      rs.foldLeft[ReaderResult[mutable.Builder[A, CC[A]]]](Right(cbf())) {
+        case (Right(builder), Right(a)) => Right(builder += a)
+        case (Left(err), Right(_)) => Left(err)
+        case (Right(_), Left(err)) => Left(err)
+        case (Left(errs), Left(err)) => Left(errs ++ err)
+      }.right.map(_.result())
+    }
 
     /**
      * Merges two `ReaderResult`s using a given function.

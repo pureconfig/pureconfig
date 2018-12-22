@@ -5,6 +5,7 @@ import java.nio.file.{ Files, Path }
 import java.util.Base64
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.reflect.ClassTag
 import scala.util.Try
 import scala.util.control.NonFatal
@@ -29,19 +30,13 @@ package object yaml {
           case (k: String, v) => aux(v).right.map { v: AnyRef => k -> v }
           case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
         }
-        entries
-          .foldLeft(Right(Map.empty): ReaderResult[Map[String, AnyRef]])(ReaderResult.zipWith(_, _)(_ + _))
-          .right.map(_.asJava)
+        ReaderResult.sequence[(String, AnyRef), mutable.Iterable](entries).right.map(_.toMap.asJava)
 
       case xs: java.util.List[AnyRef @unchecked] =>
-        xs.asScala.map(aux)
-          .foldRight(Right(Nil): ReaderResult[List[AnyRef]])(ReaderResult.zipWith(_, _)(_ :: _))
-          .right.map(_.asJava)
+        ReaderResult.sequence(xs.asScala.map(aux)).right.map(_.toList.asJava)
 
       case s: java.util.Set[AnyRef @unchecked] =>
-        s.asScala.map(aux)
-          .foldLeft(Right(Set.empty): ReaderResult[Set[AnyRef]])(ReaderResult.zipWith(_, _)(_ + _))
-          .right.map(_.asJava)
+        ReaderResult.sequence(s.asScala.map(aux)).right.map(_.toSet.asJava)
 
       case _: java.lang.Integer | _: java.lang.Long | _: java.lang.Double | _: java.lang.String | _: java.lang.Boolean =>
         Right(obj) // these types are supported directly by `ConfigValueFactory.fromAnyRef`

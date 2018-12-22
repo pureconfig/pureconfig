@@ -164,13 +164,6 @@ sealed trait ConfigCursor {
   def asMap: ReaderResult[Map[String, ConfigCursor]] =
     asObjectCursor.right.map(_.map)
 
-  @inline private final def atPathSegment(pathSegment: PathSegment): ReaderResult[ConfigCursor] = {
-    pathSegment match {
-      case PathSegment.Key(k) => this.asObjectCursor.right.flatMap(_.atKey(k))
-      case PathSegment.Index(i) => this.asListCursor.right.flatMap(_.atIndex(i))
-    }
-  }
-
   /**
    * Returns a cursor to the config at the path composed of given path segments.
    *
@@ -178,11 +171,8 @@ sealed trait ConfigCursor {
    * @return a `Right` with a cursor to the config at `pathSegments` if such a config exists, a `Left` with a list of
    *         failures otherwise.
    */
-  final def atPath(pathSegments: PathSegment*): ReaderResult[ConfigCursor] = {
-    pathSegments.foldLeft(Right(this): ReaderResult[ConfigCursor]) {
-      case (soFar, segment) => soFar.right.flatMap(_.atPathSegment(segment))
-    }
-  }
+  @deprecated("Use `.fluent.at(pathSegments).cursor` instead", "0.10.2")
+  final def atPath(pathSegments: PathSegment*): ReaderResult[ConfigCursor] = fluent.at(pathSegments: _*).cursor
 
   /**
    * Casts this cursor as either a `ConfigListCursor` or a `ConfigObjectCursor`.
@@ -202,6 +192,10 @@ sealed trait ConfigCursor {
         .left.flatMap(_ => failed(WrongType(value.valueType, Set(LIST, OBJECT))))
     }
   }
+
+  def fluent: FluentConfigCursor =
+    if (isUndefined) FluentConfigCursor(failed(KeyNotFound.forKeys(path, Set())))
+    else FluentConfigCursor(Right(this))
 
   /**
    * Returns a failed `ConfigReader` result resulting from scoping a `FailureReason` into the context of this cursor.
@@ -282,7 +276,7 @@ object ConfigCursor {
             lazy val tryLong = Try(s.toLong).map(ConfigValueFactory.fromAnyRef)
             lazy val tryDouble = Try(s.toDouble).map(ConfigValueFactory.fromAnyRef)
             // Try#toEither is only available in Scala 2.12+.
-            (tryLong orElse tryDouble) match {
+            tryLong.orElse(tryDouble) match {
               case Success(value) => Right(value)
               case Failure(_) => Left(WrongType(configValue.valueType, Set(NUMBER)))
             }
