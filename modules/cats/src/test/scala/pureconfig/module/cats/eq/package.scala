@@ -7,14 +7,13 @@ import cats.laws.discipline.eq._
 import com.typesafe.config.ConfigValue
 import org.scalacheck.Arbitrary
 import pureconfig._
-import pureconfig.error.ConfigReaderFailures
 import pureconfig.module.cats.arbitrary._
 import pureconfig.module.cats.instances._
 
 package object eq {
 
   implicit def configReaderEq[A: Eq]: Eq[ConfigReader[A]] =
-    Eq.by[ConfigReader[A], ConfigValue => Either[ConfigReaderFailures, A]](_.from)
+    Eq.by[ConfigReader[A], ConfigValue => ReaderResult[A]](_.from)
 
   implicit def configWriterEq[A: Arbitrary]: Eq[ConfigWriter[A]] =
     Eq.by[ConfigWriter[A], A => ConfigValue](_.to)

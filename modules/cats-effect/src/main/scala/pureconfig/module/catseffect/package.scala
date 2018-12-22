@@ -10,14 +10,14 @@ import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.implicits._
 import com.typesafe.config.{ ConfigRenderOptions, Config => TypesafeConfig }
-import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
-import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
+import pureconfig._
+import pureconfig.error.ConfigReaderException
 
 package object catseffect {
 
   private val defaultNameSpace = ""
 
-  private def configToF[F[_], A](getConfig: () => Either[ConfigReaderFailures, A])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+  private def configToF[F[_], A](getConfig: () => ReaderResult[A])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     val delayedLoad = F.delay {
       getConfig().leftMap[Throwable](ConfigReaderException[A])
     }

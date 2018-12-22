@@ -6,7 +6,7 @@ import scala.util.Try
 import com.typesafe.config.ConfigValue
 import pureconfig.ConfigReader._
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ ConfigReaderFailures, FailureReason }
+import pureconfig.error.FailureReason
 
 /**
  * Trait for objects capable of reading objects of a given type from `ConfigValues`.
@@ -21,7 +21,7 @@ trait ConfigReader[A] {
    * @param cur The cursor from which the config should be loaded
    * @return either a list of failures or an object of type `A`
    */
-  def from(cur: ConfigCursor): Either[ConfigReaderFailures, A]
+  def from(cur: ConfigCursor): ReaderResult[A]
 
   /**
    * Convert the given configuration into an instance of `A` if possible.
@@ -29,7 +29,7 @@ trait ConfigReader[A] {
    * @param config The configuration from which the config should be loaded
    * @return either a list of failures or an object of type `A`
    */
-  def from(config: ConfigValue): Either[ConfigReaderFailures, A] =
+  def from(config: ConfigValue): ReaderResult[A] =
     from(ConfigCursor(config, Nil))
 
   /**
@@ -129,7 +129,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * @tparam A the type of the objects readable by the returned reader
    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
    */
-  def fromCursor[A](fromF: ConfigCursor => Either[ConfigReaderFailures, A]) = new ConfigReader[A] {
+  def fromCursor[A](fromF: ConfigCursor => ReaderResult[A]) = new ConfigReader[A] {
     def from(cur: ConfigCursor) = fromF(cur)
   }
 
@@ -140,7 +140,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * @tparam A the type of the objects readable by the returned reader
    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
    */
-  def fromFunction[A](fromF: ConfigValue => Either[ConfigReaderFailures, A]) =
+  def fromFunction[A](fromF: ConfigValue => ReaderResult[A]) =
     fromCursor(fromF.compose(_.value))
 
   def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] =

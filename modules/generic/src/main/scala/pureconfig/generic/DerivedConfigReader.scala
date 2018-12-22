@@ -1,7 +1,6 @@
 package pureconfig.generic
 
 import pureconfig._
-import pureconfig.error._
 import shapeless._
 
 /**
@@ -20,7 +19,7 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     unwrapped: Unwrapped.Aux[T, U],
     reader: ConfigReader[U]): DerivedConfigReader[T] = new DerivedConfigReader[T] {
 
-    def from(value: ConfigCursor): Either[ConfigReaderFailures, T] =
+    def from(value: ConfigCursor): ReaderResult[T] =
       reader.from(value).right.map(unwrapped.wrap)
   }
 
@@ -48,14 +47,14 @@ object DerivedConfigReader extends DerivedConfigReader1 {
   private[pureconfig] def tupleAsListReader[F: IsTuple, Repr <: HList](cur: ConfigListCursor)(
     implicit
     gen: Generic.Aux[F, Repr],
-    cr: SeqShapedReader[Repr]): Either[ConfigReaderFailures, F] =
+    cr: SeqShapedReader[Repr]): ReaderResult[F] =
     cr.from(cur).right.map(gen.from)
 
   private[pureconfig] def tupleAsObjectReader[F: IsTuple, Repr <: HList, DefaultRepr <: HList](cur: ConfigObjectCursor)(
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
-    cr: MapShapedReader.WithDefaults[F, Repr, DefaultRepr]): Either[ConfigReaderFailures, F] =
+    cr: MapShapedReader.WithDefaults[F, Repr, DefaultRepr]): ReaderResult[F] =
     cr.fromWithDefault(cur, default()).right.map(gen.from)
 }
 
@@ -67,7 +66,7 @@ trait DerivedConfigReader1 {
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cc: Lazy[MapShapedReader.WithDefaults[F, Repr, DefaultRepr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
 
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F] = {
+    override def from(cur: ConfigCursor): ReaderResult[F] = {
       cur.asObjectCursor.right.flatMap(cc.value.fromWithDefault(_, default())).right.map(gen.from)
     }
   }
@@ -77,7 +76,7 @@ trait DerivedConfigReader1 {
     gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[MapShapedReader[F, Repr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
 
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F] = {
+    override def from(cur: ConfigCursor): ReaderResult[F] = {
       cc.value.from(cur).right.map(gen.from)
     }
   }

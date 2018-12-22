@@ -1,7 +1,7 @@
 package pureconfig.generic
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueType }
-import pureconfig.ConfigCursor
+import pureconfig.{ ConfigCursor, ReaderResult }
 import pureconfig.error._
 import pureconfig.syntax._
 
@@ -25,7 +25,7 @@ trait CoproductHint[T] {
    * @param name the name of the class or coproduct option to try
    * @return a `Either[ConfigReaderFailure, Option[ConfigValue]]` as defined above.
    */
-  def from(cur: ConfigCursor, name: String): Either[ConfigReaderFailures, Option[ConfigCursor]]
+  def from(cur: ConfigCursor, name: String): ReaderResult[Option[ConfigCursor]]
 
   /**
    * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
@@ -36,7 +36,7 @@ trait CoproductHint[T] {
    * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some error
    *         occurred.
    */
-  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue]
+  def to(cv: ConfigValue, name: String): ReaderResult[ConfigValue]
 
   /**
    * Defines what to do if `from` returns `Success(Some(_))` for a class or coproduct option, but its `ConfigConvert`
@@ -67,7 +67,7 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cur: ConfigCursor, name: String): Either[ConfigReaderFailures, Option[ConfigCursor]] = {
+  def from(cur: ConfigCursor, name: String): ReaderResult[Option[ConfigCursor]] = {
     for {
       objCur <- cur.asObjectCursor.right
       valueCur <- objCur.atKey(key).right
@@ -76,7 +76,7 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
   }
 
   // TODO: improve handling of failures on the write side
-  def to(cv: ConfigValue, name: String): Either[ConfigReaderFailures, ConfigValue] = cv match {
+  def to(cv: ConfigValue, name: String): ReaderResult[ConfigValue] = cv match {
     case co: ConfigObject =>
       if (co.containsKey(key)) {
         Left(ConfigReaderFailures(ConvertFailure(CollidingKeys(key, co.get(key)), ConfigValueLocation(co), "")))
