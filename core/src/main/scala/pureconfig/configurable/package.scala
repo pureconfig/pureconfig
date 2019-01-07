@@ -60,7 +60,7 @@ package object configurable {
   def genericMapReader[K, V](keyParser: String => Either[FailureReason, K])(implicit readerV: Derivation[ConfigReader[V]]): ConfigReader[Map[K, V]] =
     ConfigReader.fromCursor { cursor =>
       cursor.asMap.right.flatMap { map =>
-        map.foldLeft[ReaderResult[Map[K, V]]](Right(Map.empty)) {
+        map.foldLeft[ConfigReader.Result[Map[K, V]]](Right(Map.empty)) {
           case (acc, (key, valueCursor)) =>
             val eitherKeyOrError = cursor.scopeFailure(keyParser(key))
             val eitherValueOrError = readerV.value.from(valueCursor)

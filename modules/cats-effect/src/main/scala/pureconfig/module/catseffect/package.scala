@@ -17,7 +17,7 @@ package object catseffect {
 
   private val defaultNameSpace = ""
 
-  private def configToF[F[_], A](getConfig: () => ReaderResult[A])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+  private def configToF[F[_], A](getConfig: () => ConfigReader.Result[A])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     val delayedLoad = F.delay {
       getConfig().leftMap[Throwable](ConfigReaderException[A])
     }

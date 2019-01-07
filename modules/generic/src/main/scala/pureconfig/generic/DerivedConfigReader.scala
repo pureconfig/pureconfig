@@ -19,7 +19,7 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     unwrapped: Unwrapped.Aux[T, U],
     reader: ConfigReader[U]): DerivedConfigReader[T] = new DerivedConfigReader[T] {
 
-    def from(value: ConfigCursor): ReaderResult[T] =
+    def from(value: ConfigCursor): ConfigReader.Result[T] =
       reader.from(value).right.map(unwrapped.wrap)
   }
 
@@ -47,14 +47,14 @@ object DerivedConfigReader extends DerivedConfigReader1 {
   private[pureconfig] def tupleAsListReader[F: IsTuple, Repr <: HList](cur: ConfigListCursor)(
     implicit
     gen: Generic.Aux[F, Repr],
-    cr: SeqShapedReader[Repr]): ReaderResult[F] =
+    cr: SeqShapedReader[Repr]): ConfigReader.Result[F] =
     cr.from(cur).right.map(gen.from)
 
   private[pureconfig] def tupleAsObjectReader[F: IsTuple, Repr <: HList, DefaultRepr <: HList](cur: ConfigObjectCursor)(
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
-    cr: MapShapedReader.WithDefaults[F, Repr, DefaultRepr]): ReaderResult[F] =
+    cr: MapShapedReader.WithDefaults[F, Repr, DefaultRepr]): ConfigReader.Result[F] =
     cr.fromWithDefault(cur, default()).right.map(gen.from)
 }
 
@@ -66,7 +66,7 @@ trait DerivedConfigReader1 {
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cc: Lazy[MapShapedReader.WithDefaults[F, Repr, DefaultRepr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
 
-    override def from(cur: ConfigCursor): ReaderResult[F] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[F] = {
       cur.asObjectCursor.right.flatMap(cc.value.fromWithDefault(_, default())).right.map(gen.from)
     }
   }
@@ -76,7 +76,7 @@ trait DerivedConfigReader1 {
     gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[MapShapedReader[F, Repr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
 
-    override def from(cur: ConfigCursor): ReaderResult[F] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[F] = {
       cc.value.from(cur).right.map(gen.from)
     }
   }

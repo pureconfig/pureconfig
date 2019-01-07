@@ -47,5 +47,5 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"path":"hdfs://some.domain/foo/bar.gz"}))
 
 loadConfig[MyConfig](conf)
-// res0: pureconfig.ReaderResult[MyConfig] = Right(MyConfig(hdfs://some.domain/foo/bar.gz))
+// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(hdfs://some.domain/foo/bar.gz))
 ```

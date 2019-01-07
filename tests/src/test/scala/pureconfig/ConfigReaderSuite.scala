@@ -52,7 +52,7 @@ class ConfigReaderSuite extends BaseSuite {
   }
 
   it should "have a correct zip method" in forAll { conf: ConfigValue =>
-    def zip[A, B](r1: ConfigReader[A], r2: ConfigReader[B]): ReaderResult[(A, B)] = {
+    def zip[A, B](r1: ConfigReader[A], r2: ConfigReader[B]): ConfigReader.Result[(A, B)] = {
       (r1.from(conf), r2.from(conf)) match {
         case (Right(a), Right(b)) => Right((a, b))
         case (Left(fa), Right(_)) => Left(fa)
@@ -68,7 +68,7 @@ class ConfigReaderSuite extends BaseSuite {
   }
 
   it should "have a correct orElse method" in forAll { conf: ConfigValue =>
-    def orElse[AA, A <: AA, B <: AA](r1: ConfigReader[A], r2: ConfigReader[B]): ReaderResult[AA] = {
+    def orElse[AA, A <: AA, B <: AA](r1: ConfigReader[A], r2: ConfigReader[B]): ConfigReader.Result[AA] = {
       (r1.from(conf), r2.from(conf)) match {
         case (Right(a), _) => Right(a)
         case (Left(_), Right(b)) => Right(b)

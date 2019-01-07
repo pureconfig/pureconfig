@@ -35,7 +35,7 @@ class ForProductNSuite extends BaseSuite {
   forAll(bitmaskGen1) { bitmask =>
     val foo = Foo1([#UUID.randomUUID().toString#])
     implicit val missingStringReader = new ConfigReader[String] with ReadsMissingKeys {
-      def from(cur: ConfigCursor): ReaderResult[String] =
+      def from(cur: ConfigCursor): ConfigReader.Result[String] =
         if (cur.isUndefined || cur.isNull) Right("missing")
         else cur.asString
     }

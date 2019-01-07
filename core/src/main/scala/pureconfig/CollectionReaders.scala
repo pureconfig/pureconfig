@@ -20,7 +20,7 @@ trait CollectionReaders {
 
   implicit def optionReader[T](implicit conv: Derivation[ConfigReader[T]]): ConfigReader[Option[T]] =
     new ConfigReader[Option[T]] with ReadsMissingKeys {
-      override def from(cur: ConfigCursor): ReaderResult[Option[T]] = {
+      override def from(cur: ConfigCursor): ConfigReader.Result[Option[T]] = {
         if (cur.isUndefined || cur.isNull) Right(None)
         else conv.value.from(cur).right.map(Some(_))
       }
@@ -31,10 +31,10 @@ trait CollectionReaders {
     configConvert: Derivation[ConfigReader[T]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigReader[F[T]] {
 
-    override def from(cur: ConfigCursor): ReaderResult[F[T]] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[F[T]] = {
       cur.asListCursor.right.flatMap { listCur =>
         // we called all the failures in the list
-        listCur.list.foldLeft[ReaderResult[mutable.Builder[T, F[T]]]](Right(cbf())) {
+        listCur.list.foldLeft[ConfigReader.Result[mutable.Builder[T, F[T]]]](Right(cbf())) {
           case (acc, valueCur) =>
             ReaderResult.zipWith(acc, configConvert.value.from(valueCur))(_ += _)
         }.right.map(_.result())
@@ -43,9 +43,9 @@ trait CollectionReaders {
   }
 
   implicit def mapReader[T](implicit reader: Derivation[ConfigReader[T]]) = new ConfigReader[Map[String, T]] {
-    override def from(cur: ConfigCursor): ReaderResult[Map[String, T]] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, T]] = {
       cur.asMap.right.flatMap { map =>
-        map.foldLeft[ReaderResult[Map[String, T]]](Right(Map())) {
+        map.foldLeft[ConfigReader.Result[Map[String, T]]](Right(Map())) {
           case (acc, (key, valueConf)) =>
             ReaderResult.zipWith(acc, reader.value.from(valueConf)) { (map, value) => map + (key -> value) }
         }

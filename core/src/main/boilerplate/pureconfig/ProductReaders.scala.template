@@ -2,10 +2,10 @@ package pureconfig
 
 trait ProductReaders {
   @inline private def combineReaderResult[B, A](
-      previousResult: ReaderResult[A => B],
+      previousResult: ConfigReader.Result[A => B],
       reader: ConfigReader[A],
       key: String,
-      cursor: ConfigObjectCursor): ReaderResult[B] =
+      cursor: ConfigObjectCursor): ConfigReader.Result[B] =
     ReaderResult.zipWith(
       previousResult,
       if (reader.isInstanceOf[ReadsMissingKeys])
@@ -25,9 +25,9 @@ trait ProductReaders {
   final def forProduct1[B, A0](keyA0: String)(f: A0 => B)(implicit
     readerA0: ConfigReader[A0]
   ): ConfigReader[B] = new ConfigReader[B] {
-    def from(cur: ConfigCursor): ReaderResult[B] =
+    def from(cur: ConfigCursor): ConfigReader.Result[B] =
       cur.asObjectCursor.right.flatMap { objCur =>
-        val a0Result: ReaderResult[A0 => B] = Right(f)
+        val a0Result: ConfigReader.Result[A0 => B] = Right(f)
         val a1Result = combineReaderResult(a0Result, readerA0, keyA0, objCur)
         a1Result
       }
@@ -44,9 +44,9 @@ trait ProductReaders {
   final def forProduct1[B, [#A0#]]([#keyA0: String#])(f: ([#A0#]) => B)(implicit
     [#readerA0: ConfigReader[A0]#]
   ): ConfigReader[B] = new ConfigReader[B] {
-    def from(cur: ConfigCursor): ReaderResult[B] =
+    def from(cur: ConfigCursor): ConfigReader.Result[B] =
       cur.asObjectCursor.right.flatMap { objCur =>
-        val a##0Result: ReaderResult[[#A0# => ] => B] = Right(f.curried)
+        val a##0Result: ConfigReader.Result[[#A0# => ] => B] = Right(f.curried)
         [#val a1Result = combineReaderResult(a0Result, readerA0, keyA0, objCur)#
         ]
         a1Result

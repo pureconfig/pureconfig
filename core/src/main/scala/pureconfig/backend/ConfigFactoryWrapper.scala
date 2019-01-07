@@ -5,7 +5,7 @@ import java.nio.file.Path
 import scala.util.control.NonFatal
 
 import com.typesafe.config._
-import pureconfig.ReaderResult
+import pureconfig._
 import pureconfig.error._
 
 /**
@@ -16,26 +16,26 @@ object ConfigFactoryWrapper {
   private[this] val strictSettings = ConfigParseOptions.defaults.setAllowMissing(false)
 
   /** @see `com.typesafe.config.ConfigFactory.invalidateCaches()` */
-  def invalidateCaches(): ReaderResult[Unit] =
+  def invalidateCaches(): ConfigReader.Result[Unit] =
     unsafeToEither(ConfigFactory.invalidateCaches())
 
   /** @see `com.typesafe.config.ConfigFactory.load()` */
-  def load(): ReaderResult[Config] =
+  def load(): ConfigReader.Result[Config] =
     unsafeToEither(ConfigFactory.load())
 
   /** @see `com.typesafe.config.ConfigFactory.parseString()` */
-  def parseString(s: String): ReaderResult[Config] =
+  def parseString(s: String): ConfigReader.Result[Config] =
     unsafeToEither(ConfigFactory.parseString(s))
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
-  def parseFile(path: Path): ReaderResult[Config] =
+  def parseFile(path: Path): ConfigReader.Result[Config] =
     unsafeToEither(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
-  def loadFile(path: Path): ReaderResult[Config] =
+  def loadFile(path: Path): ConfigReader.Result[Config] =
     parseFile(path).right.flatMap(rawConfig => unsafeToEither(ConfigFactory.load(rawConfig)))
 
-  private def unsafeToEither[A](f: => A, path: Option[Path] = None): ReaderResult[A] = {
+  private def unsafeToEither[A](f: => A, path: Option[Path] = None): ConfigReader.Result[A] = {
     try Right(f) catch {
       case e: ConfigException.IO if path.nonEmpty => ReaderResult.fail(CannotReadFile(path.get, Option(e.getCause)))
       case e: ConfigException.Parse =>
