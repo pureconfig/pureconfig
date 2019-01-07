@@ -128,12 +128,12 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
   type Result[A] = Either[ConfigReaderFailures, A]
 
   /**
-   * Object containing useful constructors and utility methods for `ReaderResult`s.
+   * Object containing useful constructors and utility methods for `Result`s.
    */
   object Result {
 
     /**
-     * Merges two `ReaderResult`s using a given function.
+     * Merges two `Result`s using a given function.
      */
     def zipWith[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(f: (A, B) => C): ConfigReader.Result[C] =
       (first, second) match {
@@ -144,7 +144,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
       }
 
     /**
-     * Returns a `ReaderResult` containing a single failure.
+     * Returns a `Result` containing a single failure.
      */
     def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
   }
