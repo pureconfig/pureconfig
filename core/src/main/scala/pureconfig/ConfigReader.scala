@@ -6,7 +6,7 @@ import scala.util.Try
 import com.typesafe.config.ConfigValue
 import pureconfig.ConfigReader._
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ ConfigReaderFailures, FailureReason }
+import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, FailureReason }
 
 /**
  * Trait for objects capable of reading objects of a given type from `ConfigValues`.
@@ -126,6 +126,28 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * @tparam A the type of the result
    */
   type Result[A] = Either[ConfigReaderFailures, A]
+
+  /**
+   * Object containing useful constructors and utility methods for `ReaderResult`s.
+   */
+  object Result {
+
+    /**
+     * Merges two `ReaderResult`s using a given function.
+     */
+    def zipWith[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(f: (A, B) => C): ConfigReader.Result[C] =
+      (first, second) match {
+        case (Right(a), Right(b)) => Right(f(a, b))
+        case (Left(aFailures), Left(bFailures)) => Left(aFailures ++ bFailures)
+        case (_, l: Left[_, _]) => l.asInstanceOf[Left[ConfigReaderFailures, Nothing]]
+        case (l: Left[_, _], _) => l.asInstanceOf[Left[ConfigReaderFailures, Nothing]]
+      }
+
+    /**
+     * Returns a `ReaderResult` containing a single failure.
+     */
+    def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
+  }
 
   def apply[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[A] = reader.value
 

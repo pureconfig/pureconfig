@@ -64,7 +64,7 @@ package object configurable {
           case (acc, (key, valueCursor)) =>
             val eitherKeyOrError = cursor.scopeFailure(keyParser(key))
             val eitherValueOrError = readerV.value.from(valueCursor)
-            ReaderResult.zipWith(acc, ReaderResult.zipWith(eitherKeyOrError, eitherValueOrError)(_ -> _))(_ + _)
+            ConfigReader.Result.zipWith(acc, ConfigReader.Result.zipWith(eitherKeyOrError, eitherValueOrError)(_ -> _))(_ + _)
         }
       }
     }

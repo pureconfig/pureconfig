@@ -34,7 +34,7 @@ object SeqShapedReader {
             // it's guaranteed that the list cursor is non-empty at this point due to the case above
             val hv = hr.value.value.from(listCur.atIndexOrUndefined(0))
             val tv = tr.value.from(listCur.tailOption.get)
-            ReaderResult.zipWith(hv, tv)(_ :: _)
+            ConfigReader.Result.zipWith(hv, tv)(_ :: _)
         }
       }
     }

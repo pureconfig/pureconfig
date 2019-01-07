@@ -18,28 +18,6 @@ import pureconfig.error._
 
 package object pureconfig {
 
-  /**
-   * Object containing useful constructors and utility methods for `ReaderResult`s.
-   */
-  object ReaderResult {
-
-    /**
-     * Merges two `ReaderResult`s using a given function.
-     */
-    def zipWith[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(f: (A, B) => C): ConfigReader.Result[C] =
-      (first, second) match {
-        case (Right(a), Right(b)) => Right(f(a, b))
-        case (Left(aFailures), Left(bFailures)) => Left(aFailures ++ bFailures)
-        case (_, l: Left[_, _]) => l.asInstanceOf[Left[ConfigReaderFailures, Nothing]]
-        case (l: Left[_, _], _) => l.asInstanceOf[Left[ConfigReaderFailures, Nothing]]
-      }
-
-    /**
-     * Returns a `ReaderResult` containing a single failure.
-     */
-    def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
-  }
-
   // retrieves a value from a namespace, returning a failure if:
   //   - one of the parent keys doesn't exist or isn't an object;
   //   - `allowNullLeaf` is false and the leaf key doesn't exist.
@@ -55,7 +33,7 @@ package object pureconfig {
 
     // we're not expecting any exception here, this `try` is just for extra safety
     try getValue(ConfigCursor(conf.root(), Nil), splitPath(namespace)) catch {
-      case ex: ConfigException => ReaderResult.fail(ThrowableFailure(ex, ConfigValueLocation(ex.origin())))
+      case ex: ConfigException => ConfigReader.Result.fail(ThrowableFailure(ex, ConfigValueLocation(ex.origin())))
     }
   }
 
@@ -319,7 +297,7 @@ package object pureconfig {
         case conf => conf
       }
       .foldLeft[ConfigReader.Result[TypesafeConfig]](Right(ConfigFactory.empty())) {
-        case (c1, c2) => ReaderResult.zipWith(c1, c2)(_.withFallback(_))
+        case (c1, c2) => ConfigReader.Result.zipWith(c1, c2)(_.withFallback(_))
       }
       .right.flatMap { conf => loadConfig[Config](conf.resolve, namespace) }
   }

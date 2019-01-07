@@ -30,17 +30,17 @@ package object yaml {
           case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
         }
         entries
-          .foldLeft(Right(Map.empty): ConfigReader.Result[Map[String, AnyRef]])(ReaderResult.zipWith(_, _)(_ + _))
+          .foldLeft(Right(Map.empty): ConfigReader.Result[Map[String, AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ + _))
           .right.map(_.asJava)
 
       case xs: java.util.List[AnyRef @unchecked] =>
         xs.asScala.map(aux)
-          .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ReaderResult.zipWith(_, _)(_ :: _))
+          .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
           .right.map(_.asJava)
 
       case s: java.util.Set[AnyRef @unchecked] =>
         s.asScala.map(aux)
-          .foldLeft(Right(Set.empty): ConfigReader.Result[Set[AnyRef]])(ReaderResult.zipWith(_, _)(_ + _))
+          .foldLeft(Right(Set.empty): ConfigReader.Result[Set[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ + _))
           .right.map(_.asJava)
 
       case _: java.lang.Integer | _: java.lang.Long | _: java.lang.Double | _: java.lang.String | _: java.lang.Boolean =>
@@ -169,7 +169,7 @@ package object yaml {
         val yamlObjs = new Yaml(new SafeConstructor()).loadAll(ioReader)
 
         yamlObjs.asScala.map(yamlObjToConfigValue)
-          .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ReaderResult.zipWith(_, _)(_ :: _))
+          .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
           .right.flatMap { cvs =>
             val cl = ConfigValueFactory.fromAnyRef(cvs.asJava)
             reader.value.from(ConfigCursor(cl, Nil))
@@ -194,7 +194,7 @@ package object yaml {
       val yamlObjs = new Yaml(new SafeConstructor()).loadAll(content)
 
       yamlObjs.asScala.map(yamlObjToConfigValue)
-        .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ReaderResult.zipWith(_, _)(_ :: _))
+        .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
         .right.flatMap { cvs =>
           val cl = ConfigValueFactory.fromAnyRef(cvs.asJava)
           reader.value.from(ConfigCursor(cl, Nil))

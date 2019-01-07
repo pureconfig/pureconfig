@@ -6,7 +6,7 @@ trait ProductReaders {
       reader: ConfigReader[A],
       key: String,
       cursor: ConfigObjectCursor): ConfigReader.Result[B] =
-    ReaderResult.zipWith(
+    ConfigReader.Result.zipWith(
       previousResult,
       if (reader.isInstanceOf[ReadsMissingKeys])
         reader.from(cursor.atKeyOrUndefined(key))

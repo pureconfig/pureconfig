@@ -36,7 +36,7 @@ trait CollectionReaders {
         // we called all the failures in the list
         listCur.list.foldLeft[ConfigReader.Result[mutable.Builder[T, F[T]]]](Right(cbf())) {
           case (acc, valueCur) =>
-            ReaderResult.zipWith(acc, configConvert.value.from(valueCur))(_ += _)
+            ConfigReader.Result.zipWith(acc, configConvert.value.from(valueCur))(_ += _)
         }.right.map(_.result())
       }
     }
@@ -47,7 +47,7 @@ trait CollectionReaders {
       cur.asMap.right.flatMap { map =>
         map.foldLeft[ConfigReader.Result[Map[String, T]]](Right(Map())) {
           case (acc, (key, valueConf)) =>
-            ReaderResult.zipWith(acc, reader.value.from(valueConf)) { (map, value) => map + (key -> value) }
+            ConfigReader.Result.zipWith(acc, reader.value.from(valueConf)) { (map, value) => map + (key -> value) }
         }
       }
     }

@@ -63,7 +63,7 @@ object MapShapedReader {
       // for performance reasons only, we shouldn't clone the config object unless necessary
       val tailCur = if (hint.allowUnknownKeys) cur.withoutKey(keyStr) else cur.withoutKey(keyStr)
       val tailResult = tConfigReader.value.fromWithDefault(tailCur, default.tail)
-      ReaderResult.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
+      ConfigReader.Result.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }
   }
 

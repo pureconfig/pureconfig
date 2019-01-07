@@ -37,16 +37,16 @@ object ConfigFactoryWrapper {
 
   private def unsafeToReaderResult[A](f: => A, path: Option[Path] = None): ConfigReader.Result[A] = {
     try Right(f) catch {
-      case e: ConfigException.IO if path.nonEmpty => ReaderResult.fail(CannotReadFile(path.get, Option(e.getCause)))
+      case e: ConfigException.IO if path.nonEmpty => ConfigReader.Result.fail(CannotReadFile(path.get, Option(e.getCause)))
       case e: ConfigException.Parse =>
         val msg = (if (e.origin != null)
           // Removing the error origin from the exception message since origin is stored and used separately:
           e.getMessage.stripPrefix(s"${e.origin.description}: ")
         else
           e.getMessage).stripSuffix(".")
-        ReaderResult.fail(CannotParse(msg, ConfigValueLocation(e.origin())))
-      case e: ConfigException => ReaderResult.fail(ThrowableFailure(e, ConfigValueLocation(e.origin())))
-      case NonFatal(e) => ReaderResult.fail(ThrowableFailure(e, None))
+        ConfigReader.Result.fail(CannotParse(msg, ConfigValueLocation(e.origin())))
+      case e: ConfigException => ConfigReader.Result.fail(ThrowableFailure(e, ConfigValueLocation(e.origin())))
+      case NonFatal(e) => ConfigReader.Result.fail(ThrowableFailure(e, None))
     }
   }
 }
