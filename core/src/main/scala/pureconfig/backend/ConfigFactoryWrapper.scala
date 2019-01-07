@@ -17,25 +17,25 @@ object ConfigFactoryWrapper {
 
   /** @see `com.typesafe.config.ConfigFactory.invalidateCaches()` */
   def invalidateCaches(): ConfigReader.Result[Unit] =
-    unsafeToEither(ConfigFactory.invalidateCaches())
+    unsafeToReaderResult(ConfigFactory.invalidateCaches())
 
   /** @see `com.typesafe.config.ConfigFactory.load()` */
   def load(): ConfigReader.Result[Config] =
-    unsafeToEither(ConfigFactory.load())
+    unsafeToReaderResult(ConfigFactory.load())
 
   /** @see `com.typesafe.config.ConfigFactory.parseString()` */
   def parseString(s: String): ConfigReader.Result[Config] =
-    unsafeToEither(ConfigFactory.parseString(s))
+    unsafeToReaderResult(ConfigFactory.parseString(s))
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): ConfigReader.Result[Config] =
-    unsafeToEither(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
+    unsafeToReaderResult(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =
-    parseFile(path).right.flatMap(rawConfig => unsafeToEither(ConfigFactory.load(rawConfig)))
+    parseFile(path).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
 
-  private def unsafeToEither[A](f: => A, path: Option[Path] = None): ConfigReader.Result[A] = {
+  private def unsafeToReaderResult[A](f: => A, path: Option[Path] = None): ConfigReader.Result[A] = {
     try Right(f) catch {
       case e: ConfigException.IO if path.nonEmpty => ReaderResult.fail(CannotReadFile(path.get, Option(e.getCause)))
       case e: ConfigException.Parse =>
