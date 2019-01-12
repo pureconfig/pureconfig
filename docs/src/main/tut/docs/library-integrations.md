@@ -20,6 +20,7 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 - [`pureconfig-javax`](https://github.com/pureconfig/pureconfig/tree/master/modules/javax) provides converters for classes in `javax` packages;
 - [`pureconfig-joda`](https://github.com/pureconfig/pureconfig/tree/master/modules/joda) provides configurable converters for [Joda-Time](http://www.joda.org/joda-time/) types;
 - [`pureconfig-scala-xml`](https://github.com/pureconfig/pureconfig/tree/master/modules/scala-xml) provides support for XML via [scala-xml](https://github.com/scala/scala-xml);
+- [`pureconfig-scalaz`](https://github.com/pureconfig/pureconfig/tree/master/modules/scalaz) provides converters for [Scalaz](https://github.com/scalaz/scalaz) data structures and Scalaz typeclass instances;
 - [`pureconfig-squants`](https://github.com/pureconfig/pureconfig/tree/master/modules/squants) provides converters for [Squants](http://www.squants.com/)'s beautiful types representing units of measure;
 - [`pureconfig-yaml`](https://github.com/pureconfig/pureconfig/tree/master/modules/yaml) provides support for reading YAML files as configurations.
 
