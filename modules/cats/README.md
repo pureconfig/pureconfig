@@ -17,9 +17,9 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.10.1"
 ### Reading cats data structures from a config
 
 The following cats data structures are supported: 
-
-* `NonEmptyList`, `NonEmptyVector`, `NonEmptySet`
+* `NonEmptyList`, `NonEmptyVector`, `NonEmptySet`, `NonEmptyChain`
 * `NonEmptyMap[K, V]` implicits of `ConfigReader[Map[K, V]]` and `Order[K]` should be in the scope.
+* Cats data types with `Foldable` and `Alternative` (i.e. non-reducible) typeclass instances, e.g. `Chain`.
 For example, if your key is a `String` then `Order[String]` can be imported from `cats.instances.string._`
 
 All of these data structures rely on the instances of their unrestricted (i.e. possibly empty) variants.

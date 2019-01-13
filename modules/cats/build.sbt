@@ -2,7 +2,8 @@ name := "pureconfig-cats"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "1.4.0",
-  "org.typelevel" %% "cats-laws" % "1.4.0" % "test")
+  "org.typelevel" %% "cats-laws" % "1.4.0" % "test",
+  Dependencies.shapeless % Provided)
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")),
