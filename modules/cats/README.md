@@ -28,7 +28,7 @@ Custom collection readers, if any, may affect the behavior of these too.
 Here is an example of usage:
 
 ```scala
-import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap}
+import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap, NonEmptyChain}
 import cats.instances.string._
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
@@ -39,7 +39,8 @@ case class MyConfig(
   numberList: NonEmptyList[Int],
   numberSet: NonEmptySet[Int],
   numberVector: NonEmptyVector[Int],
-  numberMap: NonEmptyMap[String, Int]
+  numberMap: NonEmptyMap[String, Int],
+  numberChain: NonEmptyChain[Int]
 )
 ```
 
@@ -49,7 +50,8 @@ val conf = parseString("""{
   number-list: [1,2,3],
   number-set: [1,2,3],
   number-vector: [1,2,3],
-  number-map { "one": 1, "two": 2, "three": 3 }     
+  number-map { "one": 1, "two": 2, "three": 3 },
+  number-chain: [1,2,3]
 }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-list":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-set":[1,2,3],"number-vector":[1,2,3]}))
 
