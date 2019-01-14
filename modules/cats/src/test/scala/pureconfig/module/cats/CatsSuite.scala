@@ -48,7 +48,7 @@ class CatsSuite extends BaseSuite with ConfigConvertChecks {
     config.to[NumMap] should failWith(EmptyTraversableFound("scala.collection.immutable.Map"), "numbers")
   }
 
-  it should "return an EmptyTraversableFound when reading empty map into NonEmptyChain" in {
+  it should "return an EmptyTraversableFound when reading empty chain into NonEmptyChain" in {
     val config = parseString("{ numbers: [] }")
     config.to[NumChain] should failWith(EmptyTraversableFound("cats.data.Chain"), "numbers")
   }
