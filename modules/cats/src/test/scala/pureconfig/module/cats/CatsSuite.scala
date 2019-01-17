@@ -3,7 +3,9 @@ package pureconfig.module.cats
 import cats.data._
 import cats.instances.int._
 import cats.instances.string._
+import cats.syntax.foldable._
 import com.typesafe.config.ConfigFactory.parseString
+import org.scalactic.Equality
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 import pureconfig.{ BaseSuite, ConfigConvertChecks }
@@ -11,6 +13,14 @@ import pureconfig.{ BaseSuite, ConfigConvertChecks }
 import scala.collection.immutable.{ SortedMap, SortedSet }
 
 class CatsSuite extends BaseSuite with ConfigConvertChecks {
+
+  //TODO: Should be safe to drop after Cats version >= 1.6 (https://github.com/typelevel/cats/pull/2690)
+  implicit val numChainEq: Equality[NumChain] = new Equality[NumChain] {
+    override def areEqual(a: NumChain, b: Any): Boolean = b match {
+      case NumChain(nec) => implicitly[Equality[TraversableOnce[Int]]].areEqual(a.numbers.toList, nec.toList)
+      case _ => false
+    }
+  }
 
   case class Numbers(numbers: NonEmptyList[Int])
   case class NumVec(numbers: NonEmptyVector[Int])
@@ -24,9 +34,7 @@ class CatsSuite extends BaseSuite with ConfigConvertChecks {
   checkReadWrite[NumMap](parseString(s"""{ 
                                            numbers {"1": 1, "2": 2, "3": 3 }
                                          }""").root() → NumMap(NonEmptyMap(("1", 1), SortedMap("2" → 2, "3" → 3))))
-  // Chain seems to break referential transparency unless prepend/append order is the same
-  checkReadWrite[NumChain](parseString(s"""{ numbers: [1,2,3] }""").root() →
-    NumChain(NonEmptyChain.fromChainPrepend(1, 2 +: 3 +: Chain.empty)))
+  checkReadWrite[NumChain](parseString(s"""{ numbers: [1,2,3] }""").root() → NumChain(NonEmptyChain(1, 2, 3)))
 
   it should "return an EmptyTraversableFound when reading empty lists into NonEmptyList" in {
     val config = parseString("{ numbers: [] }")
