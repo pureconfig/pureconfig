@@ -5,8 +5,7 @@ import java.time.format.DateTimeFormatter
 
 import com.typesafe.config.ConfigValueFactory
 import pureconfig.ConfigConvert.{ catchReadError, viaNonEmptyString }
-import pureconfig.ConvertHelpers._
-import pureconfig.error.{ ConfigReaderFailures, FailureReason }
+import pureconfig.error.FailureReason
 
 import scala.collection.JavaConverters._
 
@@ -61,11 +60,11 @@ package object configurable {
   def genericMapReader[K, V](keyParser: String => Either[FailureReason, K])(implicit readerV: Derivation[ConfigReader[V]]): ConfigReader[Map[K, V]] =
     ConfigReader.fromCursor { cursor =>
       cursor.asMap.right.flatMap { map =>
-        map.foldLeft[Either[ConfigReaderFailures, Map[K, V]]](Right(Map.empty)) {
+        map.foldLeft[ConfigReader.Result[Map[K, V]]](Right(Map.empty)) {
           case (acc, (key, valueCursor)) =>
             val eitherKeyOrError = cursor.scopeFailure(keyParser(key))
             val eitherValueOrError = readerV.value.from(valueCursor)
-            combineResults(acc, combineResults(eitherKeyOrError, eitherValueOrError)(_ -> _))(_ + _)
+            ConfigReader.Result.zipWith(acc, ConfigReader.Result.zipWith(eitherKeyOrError, eitherValueOrError)(_ -> _))(_ + _)
         }
       }
     }

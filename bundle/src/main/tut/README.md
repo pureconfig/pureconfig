@@ -71,8 +71,11 @@ Finally, load the configuration:
 
 ```scala
 pureconfig.loadConfig[MyClass]
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+// res0: pureconfig.ConfigReader.Result[MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
+
+`ConfigReader.Result[MyClass]` is just an alias for `Either[ConfigReaderFailures, MyClass]`, so you can handle it just like you
+would handle an `Either` value.
 
 The various `loadConfig` methods defer to Typesafe Config's
 [`ConfigFactory`](https://lightbend.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to

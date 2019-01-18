@@ -4,9 +4,6 @@ import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable
 import scala.language.higherKinds
 
-import pureconfig.ConvertHelpers._
-import pureconfig.error._
-
 /**
  * A marker trait signaling that a `ConfigReader` accepts missing (undefined) values.
  *
@@ -23,7 +20,7 @@ trait CollectionReaders {
 
   implicit def optionReader[T](implicit conv: Derivation[ConfigReader[T]]): ConfigReader[Option[T]] =
     new ConfigReader[Option[T]] with ReadsMissingKeys {
-      override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Option[T]] = {
+      override def from(cur: ConfigCursor): ConfigReader.Result[Option[T]] = {
         if (cur.isUndefined || cur.isNull) Right(None)
         else conv.value.from(cur).right.map(Some(_))
       }
@@ -34,23 +31,23 @@ trait CollectionReaders {
     configConvert: Derivation[ConfigReader[T]],
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigReader[F[T]] {
 
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F[T]] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[F[T]] = {
       cur.asListCursor.right.flatMap { listCur =>
         // we called all the failures in the list
-        listCur.list.foldLeft[Either[ConfigReaderFailures, mutable.Builder[T, F[T]]]](Right(cbf())) {
+        listCur.list.foldLeft[ConfigReader.Result[mutable.Builder[T, F[T]]]](Right(cbf())) {
           case (acc, valueCur) =>
-            combineResults(acc, configConvert.value.from(valueCur))(_ += _)
+            ConfigReader.Result.zipWith(acc, configConvert.value.from(valueCur))(_ += _)
         }.right.map(_.result())
       }
     }
   }
 
   implicit def mapReader[T](implicit reader: Derivation[ConfigReader[T]]) = new ConfigReader[Map[String, T]] {
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Map[String, T]] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, T]] = {
       cur.asMap.right.flatMap { map =>
-        map.foldLeft[Either[ConfigReaderFailures, Map[String, T]]](Right(Map())) {
+        map.foldLeft[ConfigReader.Result[Map[String, T]]](Right(Map())) {
           case (acc, (key, valueConf)) =>
-            combineResults(acc, reader.value.from(valueConf)) { (map, value) => map + (key -> value) }
+            ConfigReader.Result.zipWith(acc, reader.value.from(valueConf)) { (map, value) => map + (key -> value) }
         }
       }
     }

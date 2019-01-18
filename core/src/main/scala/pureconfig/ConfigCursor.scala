@@ -56,7 +56,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the string value pointed to by this cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  def asString: Either[ConfigReaderFailures, String] =
+  def asString: ConfigReader.Result[String] =
     castOrFail(STRING, v => Right(v.unwrapped.asInstanceOf[String]))
 
   /**
@@ -65,7 +65,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the boolean value pointed to by this cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  def asBoolean: Either[ConfigReaderFailures, Boolean] =
+  def asBoolean: ConfigReader.Result[Boolean] =
     castOrFail(BOOLEAN, v => Right(v.unwrapped.asInstanceOf[Boolean]))
 
   /**
@@ -74,7 +74,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the long value pointed to by this cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  def asLong: Either[ConfigReaderFailures, Long] =
+  def asLong: ConfigReader.Result[Long] =
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Number if i.longValue() == i => Right(i.longValue())
       case v => Left(CannotConvert(v.toString, "Long", "Unable to convert Number to Long"))
@@ -86,7 +86,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the int value pointed to by this cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  def asInt: Either[ConfigReaderFailures, Int] =
+  def asInt: ConfigReader.Result[Int] =
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Number if i.intValue() == i => Right(i.intValue())
       case v => Left(CannotConvert(v.toString, "Int", "Unable to convert Number to Int"))
@@ -98,7 +98,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the short value pointed to by this cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  def asShort: Either[ConfigReaderFailures, Short] =
+  def asShort: ConfigReader.Result[Short] =
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Number if i.shortValue() == i => Right(i.shortValue())
       case v => Left(CannotConvert(v.toString, "Short", "Unable to convert Number to Short"))
@@ -110,7 +110,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the double value pointed to by this cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  def asDouble: Either[ConfigReaderFailures, Double] =
+  def asDouble: ConfigReader.Result[Double] =
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Number if i.doubleValue() == i => Right(i.doubleValue())
       case v => Left(CannotConvert(v.toString, "Double", "Unable to convert Number to Double"))
@@ -122,7 +122,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the float value pointed to by this cursor if the cast can be done, `Left` with a list of
    *         failures otherwise.
    */
-  def asFloat: Either[ConfigReaderFailures, Float] =
+  def asFloat: ConfigReader.Result[Float] =
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Number if i.floatValue() == i => Right(i.floatValue())
       case v => Left(CannotConvert(v.toString, "Float", "Unable to convert Number to Float"))
@@ -134,7 +134,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with this cursor as a list cursor if the cast can be done, `Left` with a list of failures
    *         otherwise.
    */
-  def asListCursor: Either[ConfigReaderFailures, ConfigListCursor] =
+  def asListCursor: ConfigReader.Result[ConfigListCursor] =
     castOrFail(LIST, v => Right(v.asInstanceOf[ConfigList])).right.map(ConfigListCursor(_, pathElems))
 
   /**
@@ -143,7 +143,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with the list pointed to by this cursor if the cast can be done, `Left` with a list of failures
    *         otherwise.
    */
-  def asList: Either[ConfigReaderFailures, List[ConfigCursor]] =
+  def asList: ConfigReader.Result[List[ConfigCursor]] =
     asListCursor.right.map(_.list)
 
   /**
@@ -152,7 +152,7 @@ sealed trait ConfigCursor {
    * @return a `Right` with this cursor as an object cursor if it points to an object, `Left` with a list of failures
    *         otherwise.
    */
-  def asObjectCursor: Either[ConfigReaderFailures, ConfigObjectCursor] =
+  def asObjectCursor: ConfigReader.Result[ConfigObjectCursor] =
     castOrFail(OBJECT, v => Right(v.asInstanceOf[ConfigObject])).right.map(ConfigObjectCursor(_, pathElems))
 
   /**
@@ -161,10 +161,10 @@ sealed trait ConfigCursor {
    * @return a `Right` with the map pointed to by this cursor if the cast can be done, `Left` with a list of failures
    *         otherwise.
    */
-  def asMap: Either[ConfigReaderFailures, Map[String, ConfigCursor]] =
+  def asMap: ConfigReader.Result[Map[String, ConfigCursor]] =
     asObjectCursor.right.map(_.map)
 
-  @inline private final def atPathSegment(pathSegment: PathSegment): Either[ConfigReaderFailures, ConfigCursor] = {
+  @inline private final def atPathSegment(pathSegment: PathSegment): ConfigReader.Result[ConfigCursor] = {
     pathSegment match {
       case PathSegment.Key(k) => this.asObjectCursor.right.flatMap(_.atKey(k))
       case PathSegment.Index(i) => this.asListCursor.right.flatMap(_.atIndex(i))
@@ -178,8 +178,8 @@ sealed trait ConfigCursor {
    * @return a `Right` with a cursor to the config at `pathSegments` if such a config exists, a `Left` with a list of
    *         failures otherwise.
    */
-  final def atPath(pathSegments: PathSegment*): Either[ConfigReaderFailures, ConfigCursor] = {
-    pathSegments.foldLeft(Right(this): Either[ConfigReaderFailures, ConfigCursor]) {
+  final def atPath(pathSegments: PathSegment*): ConfigReader.Result[ConfigCursor] = {
+    pathSegments.foldLeft(Right(this): ConfigReader.Result[ConfigCursor]) {
       case (soFar, segment) => soFar.right.flatMap(_.atPathSegment(segment))
     }
   }
@@ -191,7 +191,7 @@ sealed trait ConfigCursor {
    *         failures otherwise.
    */
   @deprecated("Use `asListCursor` and/or `asObjectCursor` instead", "0.10.1")
-  def asCollectionCursor: Either[ConfigReaderFailures, Either[ConfigListCursor, ConfigObjectCursor]] = {
+  def asCollectionCursor: ConfigReader.Result[Either[ConfigListCursor, ConfigObjectCursor]] = {
     if (isUndefined) {
       failed(KeyNotFound.forKeys(path, Set()))
     } else {
@@ -212,7 +212,7 @@ sealed trait ConfigCursor {
    * @tparam A the returning type of the `ConfigReader`
    * @return a failed `ConfigReader` result built by scoping `reason` into the context of this cursor.
    */
-  def failed[A](reason: FailureReason): Either[ConfigReaderFailures, A] =
+  def failed[A](reason: FailureReason): ConfigReader.Result[A] =
     Left(ConfigReaderFailures(failureFor(reason)))
 
   /**
@@ -238,12 +238,12 @@ sealed trait ConfigCursor {
    * @tparam A the returning type of the `ConfigReader`
    * @return a `ConfigReader` result built by scoping `reason` into the context of this cursor.
    */
-  def scopeFailure[A](result: Either[FailureReason, A]): Either[ConfigReaderFailures, A] =
+  def scopeFailure[A](result: Either[FailureReason, A]): ConfigReader.Result[A] =
     result.left.map { reason => ConfigReaderFailures(failureFor(reason), Nil) }
 
   private[this] def castOrFail[A](
     expectedType: ConfigValueType,
-    cast: ConfigValue => Either[FailureReason, A]): Either[ConfigReaderFailures, A] = {
+    cast: ConfigValue => Either[FailureReason, A]): ConfigReader.Result[A] = {
 
     if (isUndefined)
       failed(KeyNotFound.forKeys(path, Set()))
@@ -348,7 +348,7 @@ case class ConfigListCursor(value: ConfigList, pathElems: List[String], offset: 
    * @return a `Right` with a cursor to the config at `idx` if such a config exists, a `Left` with a list of failures
    *         otherwise.
    */
-  def atIndex(idx: Int): Either[ConfigReaderFailures, ConfigCursor] = {
+  def atIndex(idx: Int): ConfigReader.Result[ConfigCursor] = {
     atIndexOrUndefined(idx) match {
       case idxCur if idxCur.isUndefined => failed(KeyNotFound.forKeys(indexKey(idx), Set()))
       case idxCur => Right(idxCur)
@@ -389,7 +389,7 @@ case class ConfigListCursor(value: ConfigList, pathElems: List[String], offset: 
     value.asScala.toList.drop(offset).zipWithIndex.map { case (cv, idx) => ConfigCursor(cv, indexKey(idx) :: pathElems) }
 
   // Avoid resetting the offset when using ConfigCursor's implementation.
-  override def asListCursor: Either[ConfigReaderFailures, ConfigListCursor] = Right(this)
+  override def asListCursor: ConfigReader.Result[ConfigListCursor] = Right(this)
 }
 
 /**
@@ -420,7 +420,7 @@ case class ConfigObjectCursor(value: ConfigObject, pathElems: List[String]) exte
    * @return a `Right` with a cursor to the config at `key` if such a config exists, a `Left` with a list of failures
    *         otherwise.
    */
-  def atKey(key: String): Either[ConfigReaderFailures, ConfigCursor] = {
+  def atKey(key: String): ConfigReader.Result[ConfigCursor] = {
     atKeyOrUndefined(key) match {
       case keyCur if keyCur.isUndefined => failed(KeyNotFound.forKeys(key, keys))
       case keyCur => Right(keyCur)
@@ -452,5 +452,5 @@ case class ConfigObjectCursor(value: ConfigObject, pathElems: List[String]) exte
     value.asScala.toMap.map { case (key, cv) => key -> ConfigCursor(cv, key :: pathElems) }
 
   // Avoid unnecessary cast.
-  override def asObjectCursor: Either[ConfigReaderFailures, ConfigObjectCursor] = Right(this)
+  override def asObjectCursor: ConfigReader.Result[ConfigObjectCursor] = Right(this)
 }

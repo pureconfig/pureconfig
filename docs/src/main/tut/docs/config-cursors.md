@@ -9,7 +9,7 @@ When a `ConfigReader` needs to be created from scratch, users need to implement 
 signature:
 
 ```scala
-def from(cur: ConfigCursor): Either[ConfigReaderFailures, A]
+def from(cur: ConfigCursor): ConfigReader.Result[A]
 ```
 
 The `ConfigCursor` class is a wrapper for the raw `ConfigValue` provided by Typesafe Config. It provides an idiomatic,
@@ -59,7 +59,7 @@ implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
 ```
 
 The factory method `ConfigReader.fromCursor` allows us to create a `ConfigReader` without much boilerplate by providing
-the required `ConfigCursor => Either[ConfigReaderFailures, A]` function. Since most methods in the cursor API return
+the required `ConfigCursor => ConfigReader.Result[A]` function. Since most methods in the cursor API return
 `Either` values with failures at their left side,
 [for comprehensions](https://docs.scala-lang.org/tour/for-comprehensions.html) are a natural fit (note that on Scala
 2.11 and below you need to add `.right` projections at the end of each `Either` result). Let's analyze the lines
