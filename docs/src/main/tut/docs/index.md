@@ -45,7 +45,7 @@ Finally, load the configuration:
 pureconfig.loadConfig[MyClass]
 ```
 
-`ReaderResult[MyClass]` is just an alias for `Either[ConfigReaderFailures, MyClass]`, so you can handle it just like you
+`ConfigReader.Result[MyClass]` is just an alias for `Either[ConfigReaderFailures, MyClass]`, so you can handle it just like you
 would handle an `Either` value.
 
 The various `loadConfig` methods defer to Typesafe Config's

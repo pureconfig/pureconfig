@@ -1,12 +1,15 @@
 package pureconfig
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
+import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.Try
 
 import com.typesafe.config.ConfigValue
 import pureconfig.ConfigReader._
 import pureconfig.ConvertHelpers._
-import pureconfig.error.FailureReason
+import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, FailureReason }
 
 /**
  * Trait for objects capable of reading objects of a given type from `ConfigValues`.
@@ -21,7 +24,7 @@ trait ConfigReader[A] {
    * @param cur The cursor from which the config should be loaded
    * @return either a list of failures or an object of type `A`
    */
-  def from(cur: ConfigCursor): ReaderResult[A]
+  def from(cur: ConfigCursor): ConfigReader.Result[A]
 
   /**
    * Convert the given configuration into an instance of `A` if possible.
@@ -29,7 +32,7 @@ trait ConfigReader[A] {
    * @param config The configuration from which the config should be loaded
    * @return either a list of failures or an object of type `A`
    */
-  def from(config: ConfigValue): ReaderResult[A] =
+  def from(config: ConfigValue): ConfigReader.Result[A] =
     from(ConfigCursor(config, Nil))
 
   /**
@@ -120,6 +123,47 @@ trait ConfigReader[A] {
  */
 object ConfigReader extends BasicReaders with CollectionReaders with ProductReaders with ExportedReaders {
 
+  /**
+   * The type of most config PureConfig reading methods.
+   *
+   * @tparam A the type of the result
+   */
+  type Result[A] = Either[ConfigReaderFailures, A]
+
+  /**
+   * Object containing useful constructors and utility methods for `Result`s.
+   */
+  object Result {
+
+    /**
+     * Sequences a collection of `Result`s into a `Result` of a collection.
+     */
+    def sequence[A, CC[X] <: TraversableOnce[X]](rs: CC[ConfigReader.Result[A]])(implicit cbf: CanBuildFrom[CC[A], A, CC[A]]): ConfigReader.Result[CC[A]] = {
+      rs.foldLeft[ConfigReader.Result[mutable.Builder[A, CC[A]]]](Right(cbf())) {
+        case (Right(builder), Right(a)) => Right(builder += a)
+        case (Left(err), Right(_)) => Left(err)
+        case (Right(_), Left(err)) => Left(err)
+        case (Left(errs), Left(err)) => Left(errs ++ err)
+      }.right.map(_.result())
+    }
+
+    /**
+     * Merges two `Result`s using a given function.
+     */
+    def zipWith[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(f: (A, B) => C): ConfigReader.Result[C] =
+      (first, second) match {
+        case (Right(a), Right(b)) => Right(f(a, b))
+        case (Left(aFailures), Left(bFailures)) => Left(aFailures ++ bFailures)
+        case (_, l: Left[_, _]) => l.asInstanceOf[Left[ConfigReaderFailures, Nothing]]
+        case (l: Left[_, _], _) => l.asInstanceOf[Left[ConfigReaderFailures, Nothing]]
+      }
+
+    /**
+     * Returns a `Result` containing a single failure.
+     */
+    def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
+  }
+
   def apply[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[A] = reader.value
 
   /**
@@ -129,7 +173,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * @tparam A the type of the objects readable by the returned reader
    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
    */
-  def fromCursor[A](fromF: ConfigCursor => ReaderResult[A]) = new ConfigReader[A] {
+  def fromCursor[A](fromF: ConfigCursor => ConfigReader.Result[A]) = new ConfigReader[A] {
     def from(cur: ConfigCursor) = fromF(cur)
   }
 
@@ -140,7 +184,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * @tparam A the type of the objects readable by the returned reader
    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
    */
-  def fromFunction[A](fromF: ConfigValue => ReaderResult[A]) =
+  def fromFunction[A](fromF: ConfigValue => ConfigReader.Result[A]) =
     fromCursor(fromF.compose(_.value))
 
   def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] =

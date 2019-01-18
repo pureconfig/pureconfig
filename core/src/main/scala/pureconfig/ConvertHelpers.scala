@@ -11,12 +11,12 @@ import pureconfig.error._
  */
 trait ConvertHelpers {
 
-  @deprecated("Use `ReaderResult.zipWith` instead", "0.10.2")
-  def combineResults[A, B, C](first: ReaderResult[A], second: ReaderResult[B])(f: (A, B) => C): ReaderResult[C] =
-    ReaderResult.zipWith(first, second)(f)
+  @deprecated("Use `ConfigReader.Result.zipWith` instead", "0.10.2")
+  def combineResults[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(f: (A, B) => C): ConfigReader.Result[C] =
+    ConfigReader.Result.zipWith(first, second)(f)
 
-  @deprecated("Use `ReaderResult.fail` instead", "0.10.2")
-  def fail[A](failure: ConfigReaderFailure): ReaderResult[A] = Left(ConfigReaderFailures(failure))
+  @deprecated("Use `ConfigReader.Result.fail` instead", "0.10.2")
+  def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
 
   private[pureconfig] def toResult[A, B](f: A => B): A => Either[FailureReason, B] =
     v => tryToEither(Try(f(v)))

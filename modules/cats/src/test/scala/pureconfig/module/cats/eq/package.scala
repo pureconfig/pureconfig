@@ -13,7 +13,7 @@ import pureconfig.module.cats.instances._
 package object eq {
 
   implicit def configReaderEq[A: Eq]: Eq[ConfigReader[A]] =
-    Eq.by[ConfigReader[A], ConfigValue => ReaderResult[A]](_.from)
+    Eq.by[ConfigReader[A], ConfigValue => ConfigReader.Result[A]](_.from)
 
   implicit def configWriterEq[A: Arbitrary]: Eq[ConfigWriter[A]] =
     Eq.by[ConfigWriter[A], A => ConfigValue](_.to)

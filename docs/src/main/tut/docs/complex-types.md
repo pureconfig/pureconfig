@@ -100,7 +100,7 @@ import pureconfig._
 val class1Reader = ConfigReader.forProduct1("id")(new Class1(_))
 val class2Reader = ConfigReader.forProduct2("id", "value")(new Class2(_, _))
 
-def extractByType(typ: String, objCur: ConfigObjectCursor): ReaderResult[Identifiable] = typ match {
+def extractByType(typ: String, objCur: ConfigObjectCursor): ConfigReader.Result[Identifiable] = typ match {
   case "class1" => class1Reader.from(objCur)
   case "class2" => class2Reader.from(objCur)
   case t =>
