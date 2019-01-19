@@ -107,7 +107,7 @@ case class FluentConfigCursor(cursor: ConfigReader.Result[ConfigCursor]) {
    * @return a `Right` with the list obtained by mapping all elements of the list pointed to by this cursor if all
    *         casts and mappings can be done, `Left` with a list of failures otherwise.
    */
-  def mapList[A](f: ConfigCursor => ConfigReader.Result[A]) =
+  def mapList[A](f: ConfigCursor => ConfigReader.Result[A]): ConfigReader.Result[List[A]] =
     asListCursor.right.flatMap { listCur => ConfigReader.Result.sequence(listCur.list.map(f)) }
 
   /**

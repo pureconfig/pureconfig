@@ -5,7 +5,6 @@ import java.nio.file.{ Files, Path }
 import java.util.Base64
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.reflect.ClassTag
 import scala.util.Try
 import scala.util.control.NonFatal
@@ -26,11 +25,11 @@ package object yaml {
 
     def aux(obj: AnyRef): ConfigReader.Result[AnyRef] = obj match {
       case m: java.util.Map[AnyRef @unchecked, AnyRef @unchecked] =>
-        val entries = m.asScala.map {
+        val entries: Iterable[ConfigReader.Result[(String, AnyRef)]] = m.asScala.map {
           case (k: String, v) => aux(v).right.map { v: AnyRef => k -> v }
           case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
         }
-        ConfigReader.Result.sequence[(String, AnyRef), mutable.Iterable](entries).right.map(_.toMap.asJava)
+        ConfigReader.Result.sequence(entries).right.map(_.toMap.asJava)
 
       case xs: java.util.List[AnyRef @unchecked] =>
         ConfigReader.Result.sequence(xs.asScala.map(aux)).right.map(_.toList.asJava)
