@@ -21,7 +21,7 @@ class ScalazSuite extends BaseSuite with ConfigConvertChecks {
 
   checkArbitrary[NonEmptyList[Int]]
 
-  checkArbitrary[==>>[String, Int]]
+  checkArbitrary[String ==>> Int]
 
   it should "return an EmptyIListFound when reading empty list into NonEmptyList" in {
     val config = parseString("{ numbers: [] }")

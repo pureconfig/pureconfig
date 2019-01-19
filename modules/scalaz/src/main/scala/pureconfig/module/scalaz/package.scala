@@ -20,7 +20,7 @@ package object scalaz {
   implicit def iSetConvert[T: Order](implicit cc: ConfigConvert[List[T]]): ConfigConvert[ISet[T]] =
     cc.xmap(l => ISet.fromList(l), _.toList)
 
-  implicit def mapConvert[A: Order, B](implicit cc: ConfigConvert[Map[A, B]]): ConfigConvert[==>>[A, B]] =
+  implicit def mapConvert[A: Order, B](implicit cc: ConfigConvert[Map[A, B]]): ConfigConvert[A ==>> B] =
     cc.xmap(m => ==>>.fromList(m.toList), _.toList.toMap)
 
   implicit def nonEmptyListReader[T](implicit cr: ConfigReader[IList[T]]): ConfigReader[NonEmptyList[T]] =

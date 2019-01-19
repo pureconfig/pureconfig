@@ -19,7 +19,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-scalaz" % "0.10.2"
 The following `scalaz` data structures are supported:
 
 * `IList`, `ISet`, `Maybe`, `NonEmptyList` and `==>>`
-* `Order[A]` should also be in scope, when you're relying on either `ConfigReader[==>>[A, B]]` or `ConfigReader[ISet[A]]`.
+* `Order[A]` should also be in scope, when you're relying on either `ConfigReader[A ==>> B]` or `ConfigReader[ISet[A]]`.
 For example, if your `ISet` instance contains `String` values then `Order[String]` can be imported via `scalaz.std.string._`
 
 Here is an usage example:
@@ -37,7 +37,7 @@ case class ScalazConfig(
   numberLst: IList[Int],
   numberSet: ISet[Int],
   numberNel: NonEmptyList[Int],
-  numberMap: ==>>[String, Int],
+  numberMap: String ==>> Int,
   numberMaybe: Maybe[Int]
 )
 ```
