@@ -8,6 +8,9 @@ import scalaz.{ \/, Maybe, NonEmptyList, Validation }
 
 import scala.reflect.ClassTag
 
+/**
+ * Useful extension methods that bring `scalaz` data structures into `pureconfig` world.
+ */
 package object syntax {
 
   implicit final class ConfigConvertCompanionObjectOps(val co: ConfigConvert.type) extends AnyVal {
