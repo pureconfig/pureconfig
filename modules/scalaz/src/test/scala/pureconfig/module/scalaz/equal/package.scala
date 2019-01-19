@@ -3,7 +3,6 @@ package pureconfig.module.scalaz
 import com.typesafe.config.ConfigValue
 import org.scalacheck.{ Arbitrary, Gen }
 import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter }
-import pureconfig.error.ConfigReaderFailures
 import pureconfig.module.scalaz.arbitrary._
 import pureconfig.module.scalaz.instances._
 
@@ -28,7 +27,7 @@ package object equal {
     }
 
   implicit def configReaderEqual[A: Equal]: Equal[ConfigReader[A]] =
-    Equal.equalBy[ConfigReader[A], ConfigValue => Either[ConfigReaderFailures, A]](_.from)
+    Equal.equalBy[ConfigReader[A], ConfigValue => ConfigReader.Result[A]](_.from)
 
   implicit def configWriterEqual[A: Arbitrary]: Equal[ConfigWriter[A]] =
     Equal.equalBy[ConfigWriter[A], A => ConfigValue](_.to)

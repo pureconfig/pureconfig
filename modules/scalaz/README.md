@@ -9,7 +9,7 @@ classes.
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-scalaz" % "0.10.1"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-scalaz" % "0.10.2"
 ```
 
 ## Example
@@ -54,7 +54,7 @@ val scalazConf = parseString("""{
 // scalazConf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-lst":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-maybe":1,"number-nel":[1,2,3],"number-set":[1,2,3]}))
 
 loadConfig[ScalazConfig](scalazConf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,ScalazConfig] = Right(ScalazConfig([1,2,3],Bin(2,Bin(1,Tip(),Tip()),Bin(3,Tip(),Tip())),NonEmpty[1,2,3],Bin(three,3,Bin(one,1,Tip,Tip),Bin(two,2,Tip,Tip)),Just(1)))
+// res0: pureconfig.ConfigReader.Result[ScalazConfig] = Right(ScalazConfig([1,2,3],Bin(2,Bin(1,Tip(),Tip()),Bin(3,Tip(),Tip())),NonEmpty[1,2,3],Bin(three,3,Bin(one,1,Tip,Tip),Bin(two,2,Tip,Tip)),Just(1)))
 ```
 
 ### Using `scalaz` type class instances for readers
@@ -90,16 +90,16 @@ val invalidConf = parseString("""{ s: "abc" }""")
 // invalidConf: com.typesafe.config.Config = Config(SimpleConfigObject({"s":"abc"}))
 
 constReader.from(validConf.root())
-// res3: Either[pureconfig.error.ConfigReaderFailures,SimpleConfig] = Right(SimpleConfig(42))
+// res3: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
 
 constReader.from(invalidConf.root())
-// res4: Either[pureconfig.error.ConfigReaderFailures,SimpleConfig] = Right(SimpleConfig(42))
+// res4: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
 
 safeReader.from(validConf.root())
-// res5: Either[pureconfig.error.ConfigReaderFailures,SimpleConfig] = Right(SimpleConfig(1))
+// res5: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(1))
 
 safeReader.from(invalidConf.root())
-// res6: Either[pureconfig.error.ConfigReaderFailures,SimpleConfig] = Right(SimpleConfig(-1))
+// res6: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(-1))
 ```
 
 In case there's a necessity to parse multiple configs and accumulate errors, you could leverage from `Semigroup` instance for `ConfigReaderFailures`:
