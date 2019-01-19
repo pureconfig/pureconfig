@@ -45,5 +45,5 @@ We can load the configuration to a `MyConf` instance using `loadYaml`:
 
 ```scala
 loadYaml[Person](yamlFile)
-// res1: Either[pureconfig.error.ConfigReaderFailures,Person] = Right(Person(John,42,List(Person(Sarah,7,List()), Person(Andy,10,List()))))
+// res1: pureconfig.ConfigReader.Result[Person] = Right(Person(John,42,List(Person(Sarah,7,List()), Person(Andy,10,List()))))
 ```

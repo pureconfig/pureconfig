@@ -45,6 +45,9 @@ Finally, load the configuration:
 pureconfig.loadConfig[MyClass]
 ```
 
+`ConfigReader.Result[MyClass]` is just an alias for `Either[ConfigReaderFailures, MyClass]`, so you can handle it just like you
+would handle an `Either` value.
+
 The various `loadConfig` methods defer to Typesafe Config's
 [`ConfigFactory`](https://lightbend.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
 select where to load the config files from. Typesafe Config has [well-documented rules for configuration

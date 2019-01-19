@@ -13,7 +13,6 @@ import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.error.{ Mark, MarkedYAMLException, YAMLException }
-import pureconfig.ConvertHelpers._
 import pureconfig._
 import pureconfig.error._
 import pureconfig.module.yaml.error.{ NonStringKeyFound, UnsupportedYamlType }
@@ -22,26 +21,26 @@ package object yaml {
 
   // Converts an object created by SnakeYAML to a Typesafe `ConfigValue`.
   // (https://bitbucket.org/asomov/snakeyaml/wiki/Documentation#markdown-header-loading-yaml)
-  private[this] def yamlObjToConfigValue(obj: AnyRef): Either[ConfigReaderFailures, ConfigValue] = {
+  private[this] def yamlObjToConfigValue(obj: AnyRef): ConfigReader.Result[ConfigValue] = {
 
-    def aux(obj: AnyRef): Either[ConfigReaderFailures, AnyRef] = obj match {
+    def aux(obj: AnyRef): ConfigReader.Result[AnyRef] = obj match {
       case m: java.util.Map[AnyRef @unchecked, AnyRef @unchecked] =>
         val entries = m.asScala.map {
           case (k: String, v) => aux(v).right.map { v: AnyRef => k -> v }
           case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
         }
         entries
-          .foldLeft(Right(Map.empty): Either[ConfigReaderFailures, Map[String, AnyRef]])(combineResults(_, _)(_ + _))
+          .foldLeft(Right(Map.empty): ConfigReader.Result[Map[String, AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ + _))
           .right.map(_.asJava)
 
       case xs: java.util.List[AnyRef @unchecked] =>
         xs.asScala.map(aux)
-          .foldRight(Right(Nil): Either[ConfigReaderFailures, List[AnyRef]])(combineResults(_, _)(_ :: _))
+          .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
           .right.map(_.asJava)
 
       case s: java.util.Set[AnyRef @unchecked] =>
         s.asScala.map(aux)
-          .foldLeft(Right(Set.empty): Either[ConfigReaderFailures, Set[AnyRef]])(combineResults(_, _)(_ + _))
+          .foldLeft(Right(Set.empty): ConfigReader.Result[Set[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ + _))
           .right.map(_.asJava)
 
       case _: java.lang.Integer | _: java.lang.Long | _: java.lang.Double | _: java.lang.String | _: java.lang.Boolean =>
@@ -74,7 +73,7 @@ package object yaml {
   }
 
   // Opens and processes a YAML file, converting all exceptions into the most appropriate PureConfig errors.
-  private[this] def handleYamlErrors[A](path: Option[Path])(block: => Either[ConfigReaderFailures, A]): Either[ConfigReaderFailures, A] = {
+  private[this] def handleYamlErrors[A](path: Option[Path])(block: => ConfigReader.Result[A]): ConfigReader.Result[A] = {
     try block
     catch {
       case ex: IOException if path.isDefined => Left(ConfigReaderFailures(CannotReadFile(path.get, Some(ex))))
@@ -92,7 +91,7 @@ package object yaml {
    * @return A `Success` with the configuration if it is possible to create an instance of type
    *         `Config` from the YAML file, else a `Failure` with details on why it isn't possible
    */
-  def loadYaml[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+  def loadYaml[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
     handleYamlErrors(Some(path)) {
       using(Files.newBufferedReader(path)) { ioReader =>
         // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
@@ -113,7 +112,7 @@ package object yaml {
    * @return A `Success` with the configuration if it is possible to create an instance of type
    *         `Config` from `content`, else a `Failure` with details on why it isn't possible
    */
-  def loadYaml[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+  def loadYaml[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
     handleYamlErrors(None) {
       // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
       // abstraction over SnakeYAML
@@ -162,7 +161,7 @@ package object yaml {
    *         `Config` from the multi-document YAML file, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadYamls[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+  def loadYamls[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
     handleYamlErrors(Some(path)) {
       using(Files.newBufferedReader(path)) { ioReader =>
         // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
@@ -170,7 +169,7 @@ package object yaml {
         val yamlObjs = new Yaml(new SafeConstructor()).loadAll(ioReader)
 
         yamlObjs.asScala.map(yamlObjToConfigValue)
-          .foldRight(Right(Nil): Either[ConfigReaderFailures, List[AnyRef]])(combineResults(_, _)(_ :: _))
+          .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
           .right.flatMap { cvs =>
             val cl = ConfigValueFactory.fromAnyRef(cvs.asJava)
             reader.value.from(ConfigCursor(cl, Nil))
@@ -188,14 +187,14 @@ package object yaml {
    *         `Config` from the multi-document string, else a `Failure` with details on why it
    *         isn't possible
    */
-  def loadYamls[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Either[ConfigReaderFailures, Config] = {
+  def loadYamls[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
     handleYamlErrors(None) {
       // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
       // abstraction over SnakeYAML
       val yamlObjs = new Yaml(new SafeConstructor()).loadAll(content)
 
       yamlObjs.asScala.map(yamlObjToConfigValue)
-        .foldRight(Right(Nil): Either[ConfigReaderFailures, List[AnyRef]])(combineResults(_, _)(_ :: _))
+        .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
         .right.flatMap { cvs =>
           val cl = ConfigValueFactory.fromAnyRef(cvs.asJava)
           reader.value.from(ConfigCursor(cl, Nil))

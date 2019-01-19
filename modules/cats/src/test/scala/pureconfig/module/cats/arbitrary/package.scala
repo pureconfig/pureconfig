@@ -3,7 +3,7 @@ package pureconfig.module.cats
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Cogen, Gen }
 import org.scalacheck.Arbitrary.{ arbitrary => arb }
-import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter, Derivation }
+import pureconfig._
 import scala.collection.JavaConverters._
 
 import pureconfig.error.{ ConfigReaderFailures, ConvertFailure }
@@ -49,7 +49,7 @@ package object arbitrary {
     Cogen[String].contramap[ConfigReaderFailures](_.toString)
 
   implicit def arbConfigReader[A: Arbitrary]: Arbitrary[ConfigReader[A]] = Arbitrary {
-    arb[ConfigValue => Either[ConfigReaderFailures, A]].map(ConfigReader.fromFunction)
+    arb[ConfigValue => ConfigReader.Result[A]].map(ConfigReader.fromFunction)
   }
 
   implicit def arbConfigWriter[A: Cogen]: Arbitrary[ConfigWriter[A]] = Arbitrary {

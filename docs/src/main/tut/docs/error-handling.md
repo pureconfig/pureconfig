@@ -6,8 +6,8 @@ title: Error Handling
 ## {{page.title}}
 
 PureConfig features a rich error model used on reading operations. Most PureConfig methods that read Scala types from
-configurations return an `Either[ConfigReaderFailures, A]`, with `A` being the type of a successful result and
-`ConfigReaderFailures` being a non-empty list of errors that caused the reading operation to fail.
+configurations return a `ConfigReader.Result[A]` - an alias for `Either[ConfigReaderFailures, A]`, with `A` being the type of a
+successful result and `ConfigReaderFailures` being a non-empty list of errors that caused the reading operation to fail.
 
 From the various types of `ConfigReaderFailure`, one of them is of particular interest: a `ConvertFailure` is an error
 occurred during the conversion process itself. It features a reason (`FailureReason`), an optional location in the
