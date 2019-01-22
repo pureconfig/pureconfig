@@ -1,9 +1,7 @@
 package pureconfig.module.cats
 
 import cats.data._
-import cats.instances.int._
-import cats.instances.string._
-import cats.syntax.foldable._
+import cats.implicits._
 import com.typesafe.config.ConfigFactory.parseString
 import org.scalactic.Equality
 import pureconfig.generic.auto._

@@ -4,8 +4,7 @@ import _root_.cats.data._
 import _root_.cats.kernel.Order
 import _root_.cats.{ Alternative, Foldable }
 import _root_.cats.implicits._
-import pureconfig.{ ConfigReader, ConfigWriter }
-import shapeless._
+import pureconfig.{ ConfigReader, ConfigWriter, Exported }
 
 import scala.collection.immutable.{ SortedMap, SortedSet }
 import scala.language.higherKinds
@@ -40,14 +39,10 @@ package object cats {
     writer.contramap(_.toSortedMap)
 
   // For emptiable foldables not covered by TraversableOnce reader/writer, e.g. Chain.
-  implicit def nonReducibleReader[T, F[_]: Foldable: Alternative](implicit
-    reader: ConfigReader[TraversableOnce[T]],
-    ev: ¬¬[F[T]] <:!< (TraversableOnce[T] ∨ Option[T])): ConfigReader[F[T]] =
-    reader.map(to => (to :\ Alternative[F].empty[T])(_.pure[F] <+> _))
-  implicit def nonReducibleWriter[T, F[_]: Foldable: Alternative](implicit
-    writer: ConfigWriter[TraversableOnce[T]],
-    ev: ¬¬[F[T]] <:!< (TraversableOnce[T] ∨ Option[T])): ConfigWriter[F[T]] =
-    writer.contramap(_.toList)
+  implicit def lowPriorityNonReducibleReader[T, F[_]: Foldable: Alternative](implicit reader: ConfigReader[TraversableOnce[T]]): Exported[ConfigReader[F[T]]] =
+    Exported(reader.map(to => (to :\ Alternative[F].empty[T])(_.pure[F] <+> _)))
+  implicit def lowPriorityNonReducibleWriter[T, F[_]: Foldable: Alternative](implicit writer: ConfigWriter[TraversableOnce[T]]): Exported[ConfigWriter[F[T]]] =
+    Exported(writer.contramap(_.toList))
 
   implicit def nonEmptyChainReader[T](implicit reader: ConfigReader[Chain[T]]): ConfigReader[NonEmptyChain[T]] =
     fromNonEmpty(reader)(NonEmptyChain.fromChain)
