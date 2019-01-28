@@ -1,5 +1,8 @@
 package pureconfig
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
+import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -131,6 +134,18 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * Object containing useful constructors and utility methods for `Result`s.
    */
   object Result {
+
+    /**
+     * Sequences a collection of `Result`s into a `Result` of a collection.
+     */
+    def sequence[A, CC[X] <: TraversableOnce[X]](rs: CC[ConfigReader.Result[A]])(implicit cbf: CanBuildFrom[CC[A], A, CC[A]]): ConfigReader.Result[CC[A]] = {
+      rs.foldLeft[ConfigReader.Result[mutable.Builder[A, CC[A]]]](Right(cbf())) {
+        case (Right(builder), Right(a)) => Right(builder += a)
+        case (Left(err), Right(_)) => Left(err)
+        case (Right(_), Left(err)) => Left(err)
+        case (Left(errs), Left(err)) => Left(errs ++ err)
+      }.right.map(_.result())
+    }
 
     /**
      * Merges two `Result`s using a given function.

@@ -1,7 +1,6 @@
 package pureconfig
 
 import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
 import scala.language.higherKinds
 
 /**
@@ -32,24 +31,16 @@ trait CollectionReaders {
     cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigReader[F[T]] {
 
     override def from(cur: ConfigCursor): ConfigReader.Result[F[T]] = {
-      cur.asListCursor.right.flatMap { listCur =>
-        // we called all the failures in the list
-        listCur.list.foldLeft[ConfigReader.Result[mutable.Builder[T, F[T]]]](Right(cbf())) {
-          case (acc, valueCur) =>
-            ConfigReader.Result.zipWith(acc, configConvert.value.from(valueCur))(_ += _)
-        }.right.map(_.result())
+      cur.fluent.mapList { valueCur => configConvert.value.from(valueCur) }.right.map { coll =>
+        val builder = cbf()
+        (builder ++= coll).result()
       }
     }
   }
 
   implicit def mapReader[T](implicit reader: Derivation[ConfigReader[T]]) = new ConfigReader[Map[String, T]] {
     override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, T]] = {
-      cur.asMap.right.flatMap { map =>
-        map.foldLeft[ConfigReader.Result[Map[String, T]]](Right(Map())) {
-          case (acc, (key, valueConf)) =>
-            ConfigReader.Result.zipWith(acc, reader.value.from(valueConf)) { (map, value) => map + (key -> value) }
-        }
-      }
+      cur.fluent.mapObject { valueCur => reader.value.from(valueCur) }
     }
   }
 }

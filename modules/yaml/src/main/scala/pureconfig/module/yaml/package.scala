@@ -25,23 +25,17 @@ package object yaml {
 
     def aux(obj: AnyRef): ConfigReader.Result[AnyRef] = obj match {
       case m: java.util.Map[AnyRef @unchecked, AnyRef @unchecked] =>
-        val entries = m.asScala.map {
+        val entries: Iterable[ConfigReader.Result[(String, AnyRef)]] = m.asScala.map {
           case (k: String, v) => aux(v).right.map { v: AnyRef => k -> v }
           case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
         }
-        entries
-          .foldLeft(Right(Map.empty): ConfigReader.Result[Map[String, AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ + _))
-          .right.map(_.asJava)
+        ConfigReader.Result.sequence(entries).right.map(_.toMap.asJava)
 
       case xs: java.util.List[AnyRef @unchecked] =>
-        xs.asScala.map(aux)
-          .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
-          .right.map(_.asJava)
+        ConfigReader.Result.sequence(xs.asScala.map(aux)).right.map(_.toList.asJava)
 
       case s: java.util.Set[AnyRef @unchecked] =>
-        s.asScala.map(aux)
-          .foldLeft(Right(Set.empty): ConfigReader.Result[Set[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ + _))
-          .right.map(_.asJava)
+        ConfigReader.Result.sequence(s.asScala.map(aux)).right.map(_.toSet.asJava)
 
       case _: java.lang.Integer | _: java.lang.Long | _: java.lang.Double | _: java.lang.String | _: java.lang.Boolean =>
         Right(obj) // these types are supported directly by `ConfigValueFactory.fromAnyRef`

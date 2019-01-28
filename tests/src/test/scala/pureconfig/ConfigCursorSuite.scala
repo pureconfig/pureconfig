@@ -102,14 +102,6 @@ class ConfigCursorSuite extends BaseSuite {
       Right(Map("a" -> cursor("1", "a" :: defaultPath), "b" -> cursor("2", "b" :: defaultPath)))
   }
 
-  it should "allow access to a given path" in {
-    cursor("{ a: 2 }").atPath() shouldBe Right(cursor("{ a: 2 }", defaultPath))
-    cursor("{ a: 2 }").atPath("a") shouldBe Right(cursor("2", "a" :: defaultPath))
-    cursor("{ a: { b: 2 } }").atPath("a", "b") shouldBe Right(cursor("2", "b" :: "a" :: defaultPath))
-    cursor("{ a: { b: [{ c: 2 }] } }").atPath("a", "b", 0, "c") shouldBe Right(cursor("2", "c" :: "0" :: "b" :: "a" :: defaultPath))
-    cursor("{ a: { b: { c: 2 } } }").atPath("a", "c") should failWith(KeyNotFound("c", Set()), s"$defaultPathStr.a")
-  }
-
   it should "handle in a safe way cursors to undefined values" in {
     val cur = ConfigCursor(null, defaultPath)
     cur.path shouldBe defaultPathStr
