@@ -2,6 +2,7 @@ package pureconfig.module
 
 import java.nio.charset.StandardCharsets.UTF_8
 
+import scala.collection.compat._
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 import _root_.fs2.{ Stream, text }
