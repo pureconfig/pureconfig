@@ -74,5 +74,5 @@ val configStream: fs2.Stream[IO, Byte] = saveConfigToStream(someConfig)
 And to confirm the stream has the values we expect:
 
 ```tut:book
-configStream.through(text.utf8Decode).to(fs2.Sink.showLinesStdOut).compile.drain.unsafeRunSync
+configStream.through(text.utf8Decode).showLinesStdOut.compile.drain.unsafeRunSync
 ```
