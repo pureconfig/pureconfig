@@ -1,3 +1,9 @@
+### 0.10.2 (Feb 5, 2019)
+
+- New features
+  - Added `ConfigReader.Result[A]` as an alias for `Either[ConfigReaderFailures, A]`;
+  - Introduced `FluentConfigCursor`, an alternative API to `ConfigCursor` focused on config navigation over error handling.
+
 ### 0.10.1 (Nov 30, 2018)
 
 - New features

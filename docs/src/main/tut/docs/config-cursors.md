@@ -58,6 +58,10 @@ implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
 }
 ```
 
+```tut:invisible
+assert(loadConfig[Conf](conf).isRight)
+```
+
 The factory method `ConfigReader.fromCursor` allows us to create a `ConfigReader` without much boilerplate by providing
 the required `ConfigCursor => ConfigReader.Result[A]` function. Since most methods in the cursor API return
 `Either` values with failures at their left side,
@@ -72,7 +76,17 @@ access a non-existing key results in an error, stopping the for comprehension;
 3. having a cursor for the `name` key we want, `asString` tries to cast the config value pointed to by the cursor to a
 string.
 
-Loading a well-formed config will now work correctly:
+You can use the fluent cursor API, an alternative interface focused on easy navigation over error handling, to achieve the same effect:
+
+```tut:silent
+implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
+  cur.fluent.at("name").asString.map { name =>
+    new Person(firstNameOf(name), lastNamesOf(name))
+  }
+}
+```
+
+Either way, a well-formed config will now work correctly:
 
 ```tut:book
 loadConfig[Conf](conf)
