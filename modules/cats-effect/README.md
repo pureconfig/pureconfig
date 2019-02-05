@@ -7,7 +7,7 @@ Adds support for loading configuration using [cats-effect](https://github.com/ty
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.10.1"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.10.2"
 ```
 
 ## Example
