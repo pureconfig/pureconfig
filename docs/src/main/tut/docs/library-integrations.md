@@ -23,6 +23,7 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 - [`pureconfig-scala-xml`](https://github.com/pureconfig/pureconfig/tree/master/modules/scala-xml) provides support for XML via [scala-xml](https://github.com/scala/scala-xml);
 - [`pureconfig-scalaz`](https://github.com/pureconfig/pureconfig/tree/master/modules/scalaz) provides converters for [Scalaz](https://github.com/scalaz/scalaz) data structures and Scalaz typeclass instances;
 - [`pureconfig-squants`](https://github.com/pureconfig/pureconfig/tree/master/modules/squants) provides converters for [Squants](http://www.squants.com/)'s beautiful types representing units of measure;
+- [`pureconfig-sttp`](https://github.com/pureconfig/pureconfig/tree/master/modules/sttp) provides converters for [sttp](https://github.com/softwaremill/sttp) types;
 - [`pureconfig-yaml`](https://github.com/pureconfig/pureconfig/tree/master/modules/yaml) provides support for reading YAML files as configurations.
 
 ### External Integrations
