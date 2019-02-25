@@ -95,7 +95,7 @@ class SquantsConvertTest extends FlatSpec with Matchers with EitherValues with P
 
   def checkConfig[T](config: SquantConfig[T])(implicit cc: ConfigConvert[T]) = {
     val configString = s"""{value:"${config.value.toString}"}"""
-    ConfigFactory.parseString(configString).to[SquantConfig[T]].right.value shouldEqual config
+    ConfigFactory.parseString(configString).to[SquantConfig[T]] shouldEqual Right(config)
   }
 
   def quantityAbitrary[T <: Quantity[T]](dim: Dimension[T]): Arbitrary[T] = {

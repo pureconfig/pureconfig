@@ -2,12 +2,12 @@ name := "example"
 
 version := "1.0"
 
-scalaVersion := "2.12.7"
+scalaVersion := "2.12.8"
 
 libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.10.1")
+  "com.github.pureconfig" %% "pureconfig" % "0.10.2")
 
-crossScalaVersions := Seq("2.11.12", "2.12.7")
+crossScalaVersions := Seq("2.12.8", "2.11.12")
 
 scalacOptions ++= Seq(
   "-deprecation",
