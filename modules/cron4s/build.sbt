@@ -1,7 +1,7 @@
 name := "pureconfig-cron4s"
 
 libraryDependencies ++= Seq(
-  "com.github.alonsodomin.cron4s" %% "cron4s-core" % "0.4.5")
+  "com.github.alonsodomin.cron4s" %% "cron4s-core" % "0.5.0")
 
 developers := List(
   Developer("bardurdam", "Bárður Viberg Dam", "bardurdam@gmail.com", url("https://github.com/bardurdam")))

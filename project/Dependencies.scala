@@ -7,7 +7,7 @@ object Dependencies {
     val typesafeConfig      = "1.3.3"
 
     val scalaTest           = "3.0.5"
-    val scalaCheck          = "1.13.5" // update blocked by cats-laws in the cats module
+    val scalaCheck          = "1.13.5" // update blocked by cats-laws in the cats module (https://github.com/typelevel/cats/issues/2449)
     val scalaCheckShapeless = "1.1.8"
   }
 

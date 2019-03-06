@@ -1,7 +1,7 @@
 name := "pureconfig-squants"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "squants" % "1.3.0")
+  "org.typelevel" %% "squants" % "1.3.0")  // blocked by https://github.com/typelevel/squants/issues/321
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
