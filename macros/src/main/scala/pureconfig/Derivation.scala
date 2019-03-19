@@ -1,11 +1,17 @@
 package pureconfig
 
+import scala.annotation.implicitNotFound
 import scala.collection.mutable
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
 import pureconfig.derivation._
 
+@implicitNotFound("""Cannot find an implicit Derivation for ${A}.
+If your application does not define a Derivation elsewhere,
+consider using PureConfig's auto derivation by defining the following:
+
+import pureconfig.generic.auto._""")
 sealed trait Derivation[A] {
   def value: A
 }
