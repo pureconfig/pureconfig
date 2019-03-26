@@ -7,11 +7,8 @@ import scala.reflect.macros.whitebox
 
 import pureconfig.derivation._
 
-@implicitNotFound("""Cannot find an implicit Derivation for ${A}.
-If your application does not define a Derivation elsewhere,
-consider using PureConfig's auto derivation by defining the following:
-
-import pureconfig.generic.auto._""")
+@implicitNotFound("""Cannot find an implicit instance of ${A}.
+If you are trying to read or write a case class or sealed trait consider using PureConfig's auto derivation by adding `import pureconfig.generic.auto._`""")
 sealed trait Derivation[A] {
   def value: A
 }
