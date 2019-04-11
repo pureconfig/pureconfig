@@ -1,5 +1,6 @@
 package pureconfig.module.cron4s
 
+import java.util.{ Map => JMap }
 import com.typesafe.config.ConfigFactory
 import _root_.cron4s.expr.CronExpr
 import _root_.cron4s.Cron
@@ -29,4 +30,12 @@ class Cron4sSuite extends BaseSuite {
 
     conf.to[Config].left.value shouldEqual errors
   }
+
+  "writing a cron expression" should "generate a valid configuration" in {
+    val exprStr = "10-35 2,4,6 * ? * *"
+    val cfg = Config(Cron.unsafeParse(exprStr))
+
+    cfg.toConfig.unwrapped().asInstanceOf[JMap[String, String]].get("schedule") shouldEqual exprStr
+  }
+
 }

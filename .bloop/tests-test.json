@@ -1,0 +1,316 @@
+{
+    "version" : "1.1.2",
+    "project" : {
+        "name" : "tests-test",
+        "directory" : "/Users/alonsodomin/Workspace/Projects/pureconfig/tests",
+        "sources" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/src/test/scala-2.12",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/src/test/scala",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/src/test/java",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/src/test/scala-2.12-2.11+",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/src/test/scala-2.11+",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/src/test/java-2.11+",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/target/scala-2.12/src_managed/test"
+        ],
+        "dependencies" : [
+            "core",
+            "generic",
+            "macros-test",
+            "tests"
+        ],
+        "classpath" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/tests/scala-2.12/classes",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/core/scala-2.12/classes",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/macros/scala-2.12/classes",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/generic/scala-2.12/classes",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/macros/scala-2.12/test-classes",
+            "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.8.jar",
+            "/Users/alonsodomin/.ivy2/cache/com.typesafe/config/bundles/config-1.3.3.jar",
+            "/Users/alonsodomin/.ivy2/cache/com.chuusai/shapeless_2.12/bundles/shapeless_2.12-2.3.3.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.typelevel/macro-compat_2.12/jars/macro-compat_2.12-1.1.1.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.scalatest/scalatest_2.12/bundles/scalatest_2.12-3.0.5.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.scalactic/scalactic_2.12/bundles/scalactic_2.12-3.0.5.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.12.8.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.scala-lang.modules/scala-xml_2.12/bundles/scala-xml_2.12-1.0.6.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.scalacheck/scalacheck_2.12/jars/scalacheck_2.12-1.13.5.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.scala-sbt/test-interface/jars/test-interface-1.0.jar",
+            "/Users/alonsodomin/.ivy2/cache/com.github.alexarchambault/scalacheck-shapeless_1.13_2.12/jars/scalacheck-shapeless_1.13_2.12-1.1.8.jar"
+        ],
+        "out" : "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/tests",
+        "classesDir" : "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/tests/scala-2.12/test-classes",
+        "resources" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/src/test/resources",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/tests/target/scala-2.12/resource_managed/test"
+        ],
+        "scala" : {
+            "organization" : "org.scala-lang",
+            "name" : "scala-compiler",
+            "version" : "2.12.8",
+            "options" : [
+                "-deprecation",
+                "-encoding",
+                "UTF-8",
+                "-feature",
+                "-unchecked",
+                "-Yno-adapted-args",
+                "-Ywarn-dead-code",
+                "-Ywarn-numeric-widen",
+                "-Ywarn-unused-import",
+                "-Xlint:-unused,_",
+                "-P:semanticdb:synthetics:on",
+                "-P:semanticdb:failures:warning",
+                "-P:semanticdb:sourceroot:/Users/alonsodomin/Workspace/Projects/pureconfig",
+                "-Yrangepos",
+                "-Xplugin-require:semanticdb",
+                "-Xplugin:/Users/alonsodomin/.ivy2/cache/org.scalameta/semanticdb-scalac_2.12.8/jars/semanticdb-scalac_2.12.8-4.1.4.jar",
+                "-Xmacro-settings:materialize-derivations"
+            ],
+            "jars" : [
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-compiler/jars/scala-compiler-2.12.8.jar",
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.8.jar",
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.12.8.jar",
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang.modules/scala-xml_2.12/bundles/scala-xml_2.12-1.0.6.jar",
+                "/Users/alonsodomin/.ivy2/cache/jline/jline/jars/jline-2.14.6.jar"
+            ],
+            "setup" : {
+                "order" : "mixed",
+                "addLibraryToBootClasspath" : true,
+                "addCompilerToClasspath" : false,
+                "addExtraJarsToClasspath" : false,
+                "manageBootClasspath" : true,
+                "filterLibraryFromClasspath" : true
+            }
+        },
+        "java" : {
+            "options" : [
+            ]
+        },
+        "test" : {
+            "frameworks" : [
+                {
+                    "names" : [
+                        "org.scalacheck.ScalaCheckFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.specs2.runner.Specs2Framework",
+                        "org.specs2.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.specs.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.scalatest.tools.Framework",
+                        "org.scalatest.tools.ScalaTestFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "com.novocode.junit.JUnitFramework"
+                    ]
+                }
+            ],
+            "options" : {
+                "excludes" : [
+                ],
+                "arguments" : [
+                ]
+            }
+        },
+        "platform" : {
+            "name" : "jvm",
+            "config" : {
+                "home" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre",
+                "options" : [
+                ]
+            },
+            "mainClass" : [
+            ]
+        },
+        "resolution" : {
+            "modules" : [
+                {
+                    "organization" : "org.scala-lang",
+                    "name" : "scala-library",
+                    "version" : "2.12.8",
+                    "artifacts" : [
+                        {
+                            "name" : "scala-library",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.8.jar"
+                        },
+                        {
+                            "name" : "scala-library",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.8-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "com.typesafe",
+                    "name" : "config",
+                    "version" : "1.3.3",
+                    "artifacts" : [
+                        {
+                            "name" : "config",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.typesafe/config/bundles/config-1.3.3.jar"
+                        },
+                        {
+                            "name" : "config",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.typesafe/config/srcs/config-1.3.3-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "com.chuusai",
+                    "name" : "shapeless_2.12",
+                    "version" : "2.3.3",
+                    "artifacts" : [
+                        {
+                            "name" : "shapeless_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.chuusai/shapeless_2.12/bundles/shapeless_2.12-2.3.3.jar"
+                        },
+                        {
+                            "name" : "shapeless_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.chuusai/shapeless_2.12/srcs/shapeless_2.12-2.3.3-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.typelevel",
+                    "name" : "macro-compat_2.12",
+                    "version" : "1.1.1",
+                    "artifacts" : [
+                        {
+                            "name" : "macro-compat_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.typelevel/macro-compat_2.12/jars/macro-compat_2.12-1.1.1.jar"
+                        },
+                        {
+                            "name" : "macro-compat_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.typelevel/macro-compat_2.12/srcs/macro-compat_2.12-1.1.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.scalatest",
+                    "name" : "scalatest_2.12",
+                    "version" : "3.0.5",
+                    "artifacts" : [
+                        {
+                            "name" : "scalatest_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalatest/scalatest_2.12/bundles/scalatest_2.12-3.0.5.jar"
+                        },
+                        {
+                            "name" : "scalatest_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalatest/scalatest_2.12/srcs/scalatest_2.12-3.0.5-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.scalactic",
+                    "name" : "scalactic_2.12",
+                    "version" : "3.0.5",
+                    "artifacts" : [
+                        {
+                            "name" : "scalactic_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalactic/scalactic_2.12/bundles/scalactic_2.12-3.0.5.jar"
+                        },
+                        {
+                            "name" : "scalactic_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalactic/scalactic_2.12/srcs/scalactic_2.12-3.0.5-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.scala-lang",
+                    "name" : "scala-reflect",
+                    "version" : "2.12.8",
+                    "artifacts" : [
+                        {
+                            "name" : "scala-reflect",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.12.8.jar"
+                        },
+                        {
+                            "name" : "scala-reflect",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-reflect/srcs/scala-reflect-2.12.8-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.scala-lang.modules",
+                    "name" : "scala-xml_2.12",
+                    "version" : "1.0.6",
+                    "artifacts" : [
+                        {
+                            "name" : "scala-xml_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang.modules/scala-xml_2.12/bundles/scala-xml_2.12-1.0.6.jar"
+                        },
+                        {
+                            "name" : "scala-xml_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang.modules/scala-xml_2.12/srcs/scala-xml_2.12-1.0.6-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.scalacheck",
+                    "name" : "scalacheck_2.12",
+                    "version" : "1.13.5",
+                    "artifacts" : [
+                        {
+                            "name" : "scalacheck_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalacheck/scalacheck_2.12/jars/scalacheck_2.12-1.13.5.jar"
+                        },
+                        {
+                            "name" : "scalacheck_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalacheck/scalacheck_2.12/srcs/scalacheck_2.12-1.13.5-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.scala-sbt",
+                    "name" : "test-interface",
+                    "version" : "1.0",
+                    "artifacts" : [
+                        {
+                            "name" : "test-interface",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-sbt/test-interface/jars/test-interface-1.0.jar"
+                        },
+                        {
+                            "name" : "test-interface",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-sbt/test-interface/srcs/test-interface-1.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "com.github.alexarchambault",
+                    "name" : "scalacheck-shapeless_1.13_2.12",
+                    "version" : "1.1.8",
+                    "artifacts" : [
+                        {
+                            "name" : "scalacheck-shapeless_1.13_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.github.alexarchambault/scalacheck-shapeless_1.13_2.12/jars/scalacheck-shapeless_1.13_2.12-1.1.8.jar"
+                        },
+                        {
+                            "name" : "scalacheck-shapeless_1.13_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.github.alexarchambault/scalacheck-shapeless_1.13_2.12/srcs/scalacheck-shapeless_1.13_2.12-1.1.8-sources.jar"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

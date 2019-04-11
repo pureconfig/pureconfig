@@ -1,0 +1,147 @@
+{
+    "version" : "1.1.2",
+    "project" : {
+        "name" : "pureconfig-test",
+        "directory" : "/Users/alonsodomin/Workspace/Projects/pureconfig",
+        "sources" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/src/test/scala-2.12",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/src/test/scala",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/src/test/java",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/target/scala-2.12/src_managed/test"
+        ],
+        "dependencies" : [
+            "pureconfig",
+            "yaml-test",
+            "sttp-test",
+            "squants-test",
+            "scalaz-test",
+            "scala-xml-test",
+            "joda-test",
+            "javax-test",
+            "http4s-test",
+            "hadoop-test",
+            "fs2-test",
+            "enumeratum-test",
+            "enum-test",
+            "cron4s-test",
+            "cats-effect-test",
+            "cats-test",
+            "akka-test",
+            "docs-test",
+            "bundle-test",
+            "tests-test",
+            "macros-test",
+            "generic-test",
+            "core-test"
+        ],
+        "classpath" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/pureconfig/scala-2.12/classes",
+            "/Users/alonsodomin/.sbt/boot/scala-2.12.7/lib/scala-library.jar"
+        ],
+        "out" : "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/pureconfig",
+        "classesDir" : "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/pureconfig/scala-2.12/test-classes",
+        "resources" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/src/test/resources",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/target/scala-2.12/resource_managed/test"
+        ],
+        "scala" : {
+            "organization" : "org.scala-lang",
+            "name" : "scala-compiler",
+            "version" : "2.12.7",
+            "options" : [
+                "-P:semanticdb:synthetics:on",
+                "-P:semanticdb:failures:warning",
+                "-P:semanticdb:sourceroot:/Users/alonsodomin/Workspace/Projects/pureconfig",
+                "-Yrangepos",
+                "-Xplugin-require:semanticdb",
+                "-Xplugin:/Users/alonsodomin/.ivy2/cache/org.scalameta/semanticdb-scalac_2.12.7/jars/semanticdb-scalac_2.12.7-4.1.4.jar"
+            ],
+            "jars" : [
+                "/Users/alonsodomin/.sbt/boot/scala-2.12.7/lib/scala-library.jar",
+                "/Users/alonsodomin/.sbt/boot/scala-2.12.7/lib/scala-compiler.jar",
+                "/Users/alonsodomin/.sbt/boot/scala-2.12.7/lib/jline.jar",
+                "/Users/alonsodomin/.sbt/boot/scala-2.12.7/lib/scala-reflect.jar",
+                "/Users/alonsodomin/.sbt/boot/scala-2.12.7/lib/scala-xml_2.12.jar"
+            ],
+            "setup" : {
+                "order" : "mixed",
+                "addLibraryToBootClasspath" : true,
+                "addCompilerToClasspath" : false,
+                "addExtraJarsToClasspath" : false,
+                "manageBootClasspath" : true,
+                "filterLibraryFromClasspath" : true
+            }
+        },
+        "java" : {
+            "options" : [
+            ]
+        },
+        "test" : {
+            "frameworks" : [
+                {
+                    "names" : [
+                        "org.scalacheck.ScalaCheckFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.specs2.runner.Specs2Framework",
+                        "org.specs2.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.specs.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.scalatest.tools.Framework",
+                        "org.scalatest.tools.ScalaTestFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "com.novocode.junit.JUnitFramework"
+                    ]
+                }
+            ],
+            "options" : {
+                "excludes" : [
+                ],
+                "arguments" : [
+                ]
+            }
+        },
+        "platform" : {
+            "name" : "jvm",
+            "config" : {
+                "home" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre",
+                "options" : [
+                ]
+            },
+            "mainClass" : [
+            ]
+        },
+        "resolution" : {
+            "modules" : [
+                {
+                    "organization" : "org.scala-lang",
+                    "name" : "scala-library",
+                    "version" : "2.12.7",
+                    "artifacts" : [
+                        {
+                            "name" : "scala-library",
+                            "path" : "/Users/alonsodomin/.sbt/boot/scala-2.12.7/lib/scala-library.jar"
+                        },
+                        {
+                            "name" : "scala-library",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.7-sources.jar"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

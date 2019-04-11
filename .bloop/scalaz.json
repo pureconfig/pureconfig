@@ -1,0 +1,175 @@
+{
+    "version" : "1.1.2",
+    "project" : {
+        "name" : "scalaz",
+        "directory" : "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz",
+        "sources" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/src/main/scala-2.12",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/src/main/scala",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/src/main/java",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/src/main/scala-2.12-2.11+",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/src/main/scala-2.11+",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/src/main/java-2.11+",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/target/scala-2.12/src_managed/main"
+        ],
+        "dependencies" : [
+            "core",
+            "tests",
+            "generic"
+        ],
+        "classpath" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/core/scala-2.12/classes",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/macros/scala-2.12/classes",
+            "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.8.jar",
+            "/Users/alonsodomin/.ivy2/cache/com.typesafe/config/bundles/config-1.3.3.jar",
+            "/Users/alonsodomin/.ivy2/cache/org.scalaz/scalaz-core_2.12/bundles/scalaz-core_2.12-7.2.27.jar"
+        ],
+        "out" : "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/scalaz",
+        "classesDir" : "/Users/alonsodomin/Workspace/Projects/pureconfig/.bloop/scalaz/scala-2.12/classes",
+        "resources" : [
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/src/main/resources",
+            "/Users/alonsodomin/Workspace/Projects/pureconfig/modules/scalaz/target/scala-2.12/resource_managed/main"
+        ],
+        "scala" : {
+            "organization" : "org.scala-lang",
+            "name" : "scala-compiler",
+            "version" : "2.12.8",
+            "options" : [
+                "-deprecation",
+                "-encoding",
+                "UTF-8",
+                "-feature",
+                "-unchecked",
+                "-Yno-adapted-args",
+                "-Ywarn-dead-code",
+                "-Ywarn-numeric-widen",
+                "-Ywarn-unused-import",
+                "-Xlint:-unused,_",
+                "-P:semanticdb:synthetics:on",
+                "-P:semanticdb:failures:warning",
+                "-P:semanticdb:sourceroot:/Users/alonsodomin/Workspace/Projects/pureconfig",
+                "-Yrangepos",
+                "-Xplugin-require:semanticdb",
+                "-Xplugin:/Users/alonsodomin/.ivy2/cache/org.scalameta/semanticdb-scalac_2.12.8/jars/semanticdb-scalac_2.12.8-4.1.4.jar"
+            ],
+            "jars" : [
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-compiler/jars/scala-compiler-2.12.8.jar",
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.8.jar",
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.12.8.jar",
+                "/Users/alonsodomin/.ivy2/cache/org.scala-lang.modules/scala-xml_2.12/bundles/scala-xml_2.12-1.0.6.jar",
+                "/Users/alonsodomin/.ivy2/cache/jline/jline/jars/jline-2.14.6.jar"
+            ],
+            "setup" : {
+                "order" : "mixed",
+                "addLibraryToBootClasspath" : true,
+                "addCompilerToClasspath" : false,
+                "addExtraJarsToClasspath" : false,
+                "manageBootClasspath" : true,
+                "filterLibraryFromClasspath" : true
+            }
+        },
+        "java" : {
+            "options" : [
+            ]
+        },
+        "test" : {
+            "frameworks" : [
+                {
+                    "names" : [
+                        "org.scalacheck.ScalaCheckFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.specs2.runner.Specs2Framework",
+                        "org.specs2.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.specs.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "org.scalatest.tools.Framework",
+                        "org.scalatest.tools.ScalaTestFramework"
+                    ]
+                },
+                {
+                    "names" : [
+                        "com.novocode.junit.JUnitFramework"
+                    ]
+                }
+            ],
+            "options" : {
+                "excludes" : [
+                ],
+                "arguments" : [
+                ]
+            }
+        },
+        "platform" : {
+            "name" : "jvm",
+            "config" : {
+                "home" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre",
+                "options" : [
+                ]
+            },
+            "mainClass" : [
+            ]
+        },
+        "resolution" : {
+            "modules" : [
+                {
+                    "organization" : "org.scala-lang",
+                    "name" : "scala-library",
+                    "version" : "2.12.8",
+                    "artifacts" : [
+                        {
+                            "name" : "scala-library",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.8.jar"
+                        },
+                        {
+                            "name" : "scala-library",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.8-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "com.typesafe",
+                    "name" : "config",
+                    "version" : "1.3.3",
+                    "artifacts" : [
+                        {
+                            "name" : "config",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.typesafe/config/bundles/config-1.3.3.jar"
+                        },
+                        {
+                            "name" : "config",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/com.typesafe/config/srcs/config-1.3.3-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization" : "org.scalaz",
+                    "name" : "scalaz-core_2.12",
+                    "version" : "7.2.27",
+                    "artifacts" : [
+                        {
+                            "name" : "scalaz-core_2.12",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalaz/scalaz-core_2.12/bundles/scalaz-core_2.12-7.2.27.jar"
+                        },
+                        {
+                            "name" : "scalaz-core_2.12",
+                            "classifier" : "sources",
+                            "path" : "/Users/alonsodomin/.ivy2/cache/org.scalaz/scalaz-core_2.12/srcs/scalaz-core_2.12-7.2.27-sources.jar"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
