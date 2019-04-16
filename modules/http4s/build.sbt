@@ -1,7 +1,7 @@
 name := "pureconfig-http4s"
 
 libraryDependencies ++= Seq(
-  "org.http4s" %% "http4s-core" % "0.19.0")
+  "org.http4s" %% "http4s-core" % "0.20.0-RC1")
 
 developers := List(
   Developer("jcranky", "Paulo Siqueira", "paulo.siqueira@gmail.com", url("https://github.com/jcranky")))
