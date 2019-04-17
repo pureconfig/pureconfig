@@ -60,7 +60,7 @@ val scalazConf = parseString("""{
 // scalazConf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-dequeue":[1,2,3],"number-dlist":[1,2,3],"number-heap":[1,2,3],"number-ilist":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-maybe":1,"number-nel":[1,2,3],"number-set":[1,2,3]}))
 
 loadConfig[ScalazConfig](scalazConf)
-// res0: pureconfig.ConfigReader.Result[ScalazConfig] = Right(ScalazConfig(scalaz.DList@3900a9bc,FullDequeue(OneAnd(1,[]),1,OneAnd(3,[2]),2),[1,2,3],<heap>,Bin(2,Bin(1,Tip(),Tip()),Bin(3,Tip(),Tip())),Just(1),NonEmpty[1,2,3],Bin(three,3,Bin(one,1,Tip,Tip),Bin(two,2,Tip,Tip))))
+// res0: pureconfig.ConfigReader.Result[ScalazConfig] = Right(ScalazConfig(scalaz.DList@284be06d,FullDequeue(OneAnd(1,[]),1,OneAnd(3,[2]),2),[1,2,3],<heap>,Bin(2,Bin(1,Tip(),Tip()),Bin(3,Tip(),Tip())),Just(1),NonEmpty[1,2,3],Bin(three,3,Bin(one,1,Tip,Tip),Bin(two,2,Tip,Tip))))
 ```
 
 ### Using `scalaz` type class instances for readers
@@ -141,7 +141,7 @@ val res = loadConfig[MyConfig](myConf).left.map(_.toNel)
 // res: scala.util.Either[scalaz.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig] = Left(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),None,),ConvertFailure(KeyNotFound(s,Set()),None,)])
 ```
 
-This allows `scalaz` users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
+This allows `scalaz` users to easily convert a result of a `ConfigReader` into a `ValidationNel`:
 
 ```scala
 import scalaz.{ Validation, ValidationNel }
