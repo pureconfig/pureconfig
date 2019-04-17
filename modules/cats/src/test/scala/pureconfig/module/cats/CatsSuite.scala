@@ -3,7 +3,6 @@ package pureconfig.module.cats
 import cats.data._
 import cats.implicits._
 import com.typesafe.config.ConfigFactory.parseString
-import org.scalactic.Equality
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 import pureconfig.{ BaseSuite, ConfigConvertChecks }
@@ -11,14 +10,6 @@ import pureconfig.{ BaseSuite, ConfigConvertChecks }
 import scala.collection.immutable.{ SortedMap, SortedSet }
 
 class CatsSuite extends BaseSuite with ConfigConvertChecks {
-
-  //TODO: Should be safe to drop after Cats version >= 1.6 (https://github.com/typelevel/cats/pull/2690)
-  implicit val numChainEq: Equality[NumChain] = new Equality[NumChain] {
-    override def areEqual(a: NumChain, b: Any): Boolean = b match {
-      case NumChain(nec) => implicitly[Equality[TraversableOnce[Int]]].areEqual(a.numbers.toList, nec.toList)
-      case _ => false
-    }
-  }
 
   case class Numbers(numbers: NonEmptyList[Int])
   case class NumVec(numbers: NonEmptyVector[Int])

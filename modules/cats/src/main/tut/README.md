@@ -60,7 +60,7 @@ loadConfig[MyConfig](conf)
 
 ### Using cats type class instances for readers and writers
 
-In order to to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
+In order to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
 operations provided by `cats`, we need some extra imports:
 
 ```tut:silent
@@ -92,7 +92,7 @@ safeIntReader.from(conf.root())
 someWriter[String].to(Some("abc"))
 ```
 
-### Extra syntatic sugar
+### Extra syntactic sugar
 
 We can provide some useful extension methods by importing:
 
