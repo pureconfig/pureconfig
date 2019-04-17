@@ -1,6 +1,6 @@
 package pureconfig.module
 
-import _root_.scalaz.{==>>, DList, Dequeue, Heap, ICons, IList, INil, ISet, Maybe, NonEmptyList, Order}
+import _root_.scalaz.{ ==>>, DList, Dequeue, Heap, ICons, IList, INil, ISet, Maybe, NonEmptyList, Order }
 import _root_.scalaz.std.list._
 import _root_.scalaz.syntax.foldable._
 import pureconfig._
