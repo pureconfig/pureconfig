@@ -47,7 +47,7 @@ case class MyConfig(
 
 We can read a `MyConfig` like:
 ```tut:book
-val conf = parseString("""{ 
+val conf = parseString("""{
   number-list: [1,2,3],
   number-set: [1,2,3],
   number-vector: [1,2,3],
