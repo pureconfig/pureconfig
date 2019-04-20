@@ -63,12 +63,13 @@ Then load the config:
 loadConfig[AnimalConf](ConfigFactory.parseString("{ type: Bird, can-fly: true }"))
 ```
 
-With a `CoproductHint` you can even opt not to use any extra field at all. If you encode enumerations using sealed
-traits, you can just write the lowercase name of the class by using an `EnumCoproductHint`. For example, if we create
-an enumeration for seasons:
+If you encode enumerations using sealed traits of case objects, you can use the
+`deriveEnumeration(Reader|Writer|Convert)` methods from the
+`pureconfig.generic.semiauto` package to derive `ConfigReader`, `ConfigWriter`
+or `ConfigConvert` instances for your sealed trait.
 
 ```tut:silent
-import pureconfig.generic.EnumCoproductHint
+import pureconfig.generic.semiauto._
 
 sealed trait Season
 case object Spring extends Season
@@ -76,7 +77,7 @@ case object Summer extends Season
 case object Autumn extends Season
 case object Winter extends Season
 
-implicit val seasonHint = new EnumCoproductHint[Season]
+implicit val seasonConvert: ConfigConvert[Season] = deriveEnumerationConvert[Season]
 
 case class MyConf(list: List[Season])
 ```
@@ -85,4 +86,22 @@ We can load seasons by specifying them by class name:
 
 ```tut:book
 loadConfig[MyConf](ConfigFactory.parseString("{ list: [spring, summer, autumn, winter] }"))
+```
+
+By default, enumerations will be encoded as strings with the lowercase name of
+the class, but that behavior can be overridden by specifying a different
+transformation function.
+
+```tut:silent
+sealed trait Color
+case object RainyBlue extends Color
+case object SunnyYellow extends Color
+
+implicit val colorReader: ConfigReader[Color] = deriveEnumerationReader[Color](ConfigFieldMapping(PascalCase, KebabCase))
+
+case class ColorList(colors: List[Color])
+```
+
+```tut:book
+loadConfig[ColorList](ConfigFactory.parseString("{ colors: [rainy-blue, sunny-yellow] }"))
 ```
