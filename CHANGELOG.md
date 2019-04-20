@@ -1,3 +1,11 @@
+### 0.10.3 (unreleased)
+
+- New features
+  - Added `deriveEnumerationReader`, `deriveEnumerationWriter` and `deriveEnumerationConvert` to the
+    `pureconfig.generic.semiauto` package, allowing the derivation of readers and writers for enumerations encoded as
+    sealed traits of case objects. As a consequence, the `EnumCoproductHint` is now deprecated in favor of these new
+    methods.
+
 ### 0.10.2 (Feb 5, 2019)
 
 - New features
