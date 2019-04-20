@@ -48,43 +48,6 @@ class CoproductHintSuite extends BaseSuite {
   }
 
   {
-    sealed trait Color
-    case object RainyBlue extends Color
-    case object SunnyYellow extends Color
-
-    implicit val hint = new EnumCoproductHint[Color] {
-      override def fieldValue(name: String) = ConfigFieldMapping(CamelCase, KebabCase)(name)
-    }
-
-    implicit val badHint = new EnumCoproductHint[AnimalConfig]
-
-    it should "read values as expected when using an EnumCoproductHint" in {
-      val conf = ConfigValueFactory.fromAnyRef("rainy-blue")
-      ConfigConvert[Color].from(conf) shouldEqual Right(RainyBlue)
-      val conf2 = ConfigValueFactory.fromAnyRef("sunny-yellow")
-      ConfigConvert[Color].from(conf2) shouldEqual Right(SunnyYellow)
-    }
-
-    it should "write values as expected when using an EnumCoproductHint" in {
-      val conf = ConfigConvert[Color].to(RainyBlue)
-      conf shouldEqual ConfigValueFactory.fromAnyRef("rainy-blue")
-      val conf2 = ConfigConvert[Color].to(SunnyYellow)
-      conf2 shouldEqual ConfigValueFactory.fromAnyRef("sunny-yellow")
-    }
-
-    it should "fail to read values that are not case objects when using an EnumCoproductHint" in {
-      val conf = ConfigFactory.parseString("{ which-animal = Dog, age = 2 }")
-      ConfigConvert[AnimalConfig].from(conf.root()) should failWith(
-        WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)))
-    }
-
-    it should "fail to write values that are not case objects when using an EnumCoproductHint" in {
-      val ex = the[ConfigReaderException[_]] thrownBy ConfigConvert[AnimalConfig].to(DogConfig(2))
-      ex.failures.toList shouldEqual List(ConvertFailure(NonEmptyObjectFound("DogConfig"), None, ""))
-    }
-  }
-
-  {
     implicit val hint = new FirstSuccessCoproductHint[AnimalConfig]
 
     it should "read values as expected when using a FirstSuccessCoproductHint" in {
