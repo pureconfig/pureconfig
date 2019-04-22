@@ -86,8 +86,6 @@ class DerivationModesSuite extends BaseSuite {
   it should "provide methods to derive full converters for enumerations encoded as sealed traits" in {
     import pureconfig.generic.semiauto._
 
-    import pureconfig.generic.semiauto._
-
     implicit val colorConvert = deriveEnumerationConvert[Color]
 
     ConfigConvert[Color].from(ConfigValueFactory.fromAnyRef("rainyblue")) shouldBe Right(RainyBlue)
