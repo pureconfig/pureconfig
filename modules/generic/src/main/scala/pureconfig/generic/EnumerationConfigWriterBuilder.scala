@@ -14,7 +14,8 @@ object EnumerationConfigWriterBuilder {
     new EnumerationConfigWriterBuilder[CNil] {
       def build(transformName: String => String): ConfigWriter[CNil] =
         new ConfigWriter[CNil] {
-          def to(a: CNil): ConfigValue = ConfigValueFactory.fromAnyRef(null)
+          def to(a: CNil): ConfigValue =
+            throw new IllegalStateException("Cannot encode CNil. This is likely a bug in PureConfig.")
         }
     }
 
