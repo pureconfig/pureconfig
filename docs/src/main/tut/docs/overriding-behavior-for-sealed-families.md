@@ -87,20 +87,20 @@ We can load seasons by specifying them by class name:
 loadConfig[MyConf](ConfigFactory.parseString("{ list: [spring, summer, autumn, winter] }"))
 ```
 
-By default, enumerations will be encoded as strings with the lowercase name of
-the class, but that behavior can be overridden by specifying a different
-transformation function.
+By default, enumerations will be encoded as strings with the `kebab-case`
+representation of the class name, but that behavior can be overridden by
+specifying a different transformation function.
 
 ```tut:silent
 sealed trait Color
 case object RainyBlue extends Color
 case object SunnyYellow extends Color
 
-implicit val colorReader: ConfigReader[Color] = deriveEnumerationReader[Color](ConfigFieldMapping(PascalCase, KebabCase))
+implicit val colorReader: ConfigReader[Color] = deriveEnumerationReader[Color](ConfigFieldMapping(PascalCase, SnakeCase))
 
 case class ColorList(colors: List[Color])
 ```
 
 ```tut:book
-loadConfig[ColorList](ConfigFactory.parseString("{ colors: [rainy-blue, sunny-yellow] }"))
+loadConfig[ColorList](ConfigFactory.parseString("{ colors: [rainy_blue, sunny_yellow] }"))
 ```

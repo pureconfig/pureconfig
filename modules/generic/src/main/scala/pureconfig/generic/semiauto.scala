@@ -15,32 +15,32 @@ object semiauto {
     ConfigConvert.fromReaderAndWriter(Derivation.Successful(reader.value), Derivation.Successful(writer.value))
 
   /**
-   * Derive a `ConfigReader` for a sealed family of case objects where each type is encoded as the lowercase
+   * Derive a `ConfigReader` for a sealed family of case objects where each type is encoded as the kebab-case
    * representation of the type name.
    */
   final def deriveEnumerationReader[A](
     implicit
     readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]]): ConfigReader[A] =
-    deriveEnumerationReader(_.toLowerCase)
+    deriveEnumerationReader(ConfigFieldMapping(PascalCase, KebabCase))
 
   /**
-   * Derive a `ConfigWriter` for a sealed family of case objects where each type is encoded as the lowercase
+   * Derive a `ConfigWriter` for a sealed family of case objects where each type is encoded as the kebab-case
    * representation of the type name.
    */
   final def deriveEnumerationWriter[A](
     implicit
     writerBuilder: Lazy[EnumerationConfigWriterBuilder[A]]): ConfigWriter[A] =
-    deriveEnumerationWriter(_.toLowerCase)
+    deriveEnumerationWriter(ConfigFieldMapping(PascalCase, KebabCase))
 
   /**
-   * Derive a `ConfigConvert` for a sealed family of case objects where each type is encoded as the lowercase
+   * Derive a `ConfigConvert` for a sealed family of case objects where each type is encoded as the kebab-case
    * representation of the type name.
    */
   final def deriveEnumerationConvert[A](
     implicit
     readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]],
     writerBuilder: Lazy[EnumerationConfigWriterBuilder[A]]): ConfigConvert[A] =
-    deriveEnumerationConvert(_.toLowerCase)
+    deriveEnumerationConvert(ConfigFieldMapping(PascalCase, KebabCase))
 
   /**
    * Derive a `ConfigReader` for a sealed family of case objects where each type is encoded with the `transformName`
