@@ -64,9 +64,8 @@ loadConfig[AnimalConf](ConfigFactory.parseString("{ type: Bird, can-fly: true }"
 ```
 
 If you encode enumerations using sealed traits of case objects, you can use the
-`deriveEnumeration(Reader|Writer|Convert)` methods from the
-`pureconfig.generic.semiauto` package to derive `ConfigReader`, `ConfigWriter`
-or `ConfigConvert` instances for your sealed trait.
+`deriveEnumerationReader` method from the `pureconfig.generic.semiauto` package
+to derive `ConfigReader` instances for your sealed trait.
 
 ```tut:silent
 import pureconfig.generic.semiauto._
@@ -77,7 +76,7 @@ case object Summer extends Season
 case object Autumn extends Season
 case object Winter extends Season
 
-implicit val seasonConvert: ConfigConvert[Season] = deriveEnumerationConvert[Season]
+implicit val seasonConvert: ConfigReader[Season] = deriveEnumerationReader[Season]
 
 case class MyConf(list: List[Season])
 ```
