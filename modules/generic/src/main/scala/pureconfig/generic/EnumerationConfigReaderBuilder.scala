@@ -43,8 +43,7 @@ object EnumerationConfigReaderBuilder {
     reprReaderBuilder: EnumerationConfigReaderBuilder[Repr]): EnumerationConfigReaderBuilder[A] =
     new EnumerationConfigReaderBuilder[A] {
       def build(transformName: String => String): ConfigReader[A] = {
-        lazy val reprReader = reprReaderBuilder.build(transformName)
-        reprReader.map(gen.from)
+        reprReaderBuilder.build(transformName).map(gen.from)
       }
     }
 }
