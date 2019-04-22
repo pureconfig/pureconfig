@@ -44,9 +44,7 @@ object EnumerationConfigReaderBuilder {
     new EnumerationConfigReaderBuilder[A] {
       def build(transformName: String => String): ConfigReader[A] = {
         lazy val reprReader = reprReaderBuilder.build(transformName)
-        new ConfigReader[A] {
-          def from(cur: ConfigCursor): Result[A] = reprReader.from(cur).right.map(gen.from)
-        }
+        reprReader.map(gen.from)
       }
     }
 }

@@ -43,9 +43,7 @@ object EnumerationConfigWriterBuilder {
     new EnumerationConfigWriterBuilder[A] {
       def build(transformName: String => String): ConfigWriter[A] = {
         lazy val reprWriter = reprWriterBuilder.build(transformName)
-        new ConfigWriter[A] {
-          def to(a: A): ConfigValue = reprWriter.to(gen.to(a))
-        }
+        reprWriter.contramap(gen.to)
       }
     }
 }
