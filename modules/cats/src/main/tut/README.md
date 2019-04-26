@@ -47,7 +47,7 @@ case class MyConfig(
 
 We can read a `MyConfig` like:
 ```tut:book
-val conf = parseString("""{ 
+val conf = parseString("""{
   number-list: [1,2,3],
   number-set: [1,2,3],
   number-vector: [1,2,3],
@@ -60,7 +60,7 @@ loadConfig[MyConfig](conf)
 
 ### Using cats type class instances for readers and writers
 
-In order to to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
+In order to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
 operations provided by `cats`, we need some extra imports:
 
 ```tut:silent
@@ -92,7 +92,7 @@ safeIntReader.from(conf.root())
 someWriter[String].to(Some("abc"))
 ```
 
-### Extra syntatic sugar
+### Extra syntactic sugar
 
 We can provide some useful extension methods by importing:
 
