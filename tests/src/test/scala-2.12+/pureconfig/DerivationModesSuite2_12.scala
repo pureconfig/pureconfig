@@ -1,6 +1,5 @@
 package pureconfig
 
-import com.typesafe.config.ConfigFactory
 import shapeless.test.illTyped
 
 class DerivationModesSuite2_12 extends BaseSuite {

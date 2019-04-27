@@ -41,7 +41,7 @@ trait CollectionWriters {
 
   implicit def mapWriter[T](implicit configConvert: Derivation[ConfigWriter[T]]) = new ConfigWriter[Map[String, T]] {
     override def to(keyVals: Map[String, T]): ConfigValue = {
-      ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).asJava)
+      ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).toMap.asJava)
     }
   }
 }

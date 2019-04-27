@@ -136,31 +136,40 @@ lazy val micrositesSettings = Seq(
   micrositeGitterChannel := false // ugly
 )
 
-// add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
-// "scala-2.10" are natively supported by SBT)
+// add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as
+// "scala-2.11" are natively supported by SBT).
+// In order to keep this simple, we're doing this case by case, taking advantage of the fact that we intend to support
+// only 3 major versions at any given moment.
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
-  unmanagedSrcs ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, y)) if y >= 11 => unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.11+") }
-    case _ => Nil
-  })
+  unmanagedSrcs ++= {
+    val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
+    List(
+      if(minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
+      if(minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
+    ).flatten
+  }
 }
 
 lazy val allVersionLintFlags = Seq(
-  "-deprecation",
+  // "-deprecation",    // Either#right is deprecated on Scala 2.13
+  // "-Xfatal-warnings",
   "-encoding", "UTF-8", // yes, this is 2 args
   "-feature",
   "-unchecked",
-  "-Xfatal-warnings",
-  "-Yno-adapted-args",
   "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-unused-import")
+  "-Ywarn-numeric-widen")
 
 lazy val scala211LintFlags = allVersionLintFlags ++ Seq(
-  "-Xlint")
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-unused-import")
 
 lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
-  "-Xlint:-unused,_") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
+  "-Xlint:-unused,_",
+  "-Yno-adapted-args",
+  "-Ywarn-unused-import") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
+
+lazy val scala213LintFlags = allVersionLintFlags
 
 // do not publish the root project
 skip in publish := true
