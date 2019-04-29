@@ -12,6 +12,7 @@ env:
   - JOB=test
 
 script:
+  # `coverage` was temporarily disabled (https://github.com/scoverage/sbt-scoverage/issues/282)
   - sbt "++$TRAVIS_SCALA_VERSION test" "++$TRAVIS_SCALA_VERSION tut" "++$TRAVIS_SCALA_VERSION doc" "++$TRAVIS_SCALA_VERSION publishLocal"
   - (cd example ; sbt ++$TRAVIS_SCALA_VERSION test)
 
@@ -20,6 +21,7 @@ script:
       git diff --exit-code;
       fi
 
+# Coverage publishing temporarily disabled (https://github.com/scoverage/sbt-scoverage/issues/282)
 #after_success:
 #  - sbt ++$TRAVIS_SCALA_VERSION "++$TRAVIS_SCALA_VERSION coverageReport" coverageAggregate coveralls
 

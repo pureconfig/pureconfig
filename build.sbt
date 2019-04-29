@@ -26,8 +26,7 @@ lazy val tests = (project in file("tests")).
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle")).
   enablePlugins(SbtOsgi, TutPlugin).
-  settings(commonSettings).
-  settings(name := "pureconfig", tutTargetDirectory := file(".")).
+  settings(commonSettings, tutTargetDirectory := file(".")).
   dependsOn(core, generic)
 
 lazy val docs = (project in file("docs")).
