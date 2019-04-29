@@ -2,8 +2,8 @@ package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
 import org.scalacheck.{ Prop, Properties }
-import org.scalatest.prop.Checkers
 import org.scalatest.FunSuite
+import org.scalatestplus.scalacheck.Checkers
 import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter }
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.module.scalaz.arbitrary._

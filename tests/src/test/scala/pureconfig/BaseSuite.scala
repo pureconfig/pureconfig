@@ -1,7 +1,7 @@
 package pureconfig
 
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class BaseSuite
   extends FlatSpec
@@ -9,4 +9,4 @@ class BaseSuite
   with Matchers
   with ConfigReaderMatchers
   with EitherValues
-  with GeneratorDrivenPropertyChecks
+  with ScalaCheckDrivenPropertyChecks

@@ -88,6 +88,7 @@ lazy val commonSettings = Seq(
     }
   },
 
+  scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import"),
@@ -166,7 +167,7 @@ lazy val lintFlags = Map(
     "-Ywarn-unused-import"),
   (2, 12) -> List(
     "-deprecation",                 // Either#right is deprecated on Scala 2.13
-    "-Xlint",
+    "-Xlint:_,-unused",
     "-Xfatal-warnings",
     "-Yno-adapted-args",
     "-Ywarn-unused:_,-implicits"),  // Some implicits are intentionally used just as evidences, triggering warnings
