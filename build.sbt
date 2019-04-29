@@ -81,11 +81,12 @@ lazy val commonSettings = Seq(
   crossVersionSharedSources(unmanagedSourceDirectories in Compile),
   crossVersionSharedSources(unmanagedSourceDirectories in Test),
 
-  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 12)) => scala212LintFlags
-    case Some((2, 11)) => scala211LintFlags
-    case _ => allVersionLintFlags
-  }),
+  scalacOptions ++= allVersionLintFlags ++ {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some(v) => lintFlags.getOrElse(v, Nil)
+      case _ => Nil
+    }
+  },
 
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
@@ -149,26 +150,28 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   }
 }
 
-lazy val allVersionLintFlags = Seq(
-  // "-deprecation",    // Either#right is deprecated on Scala 2.13
-  // "-Xfatal-warnings",
+lazy val allVersionLintFlags = List(
   "-encoding", "UTF-8", // yes, this is 2 args
   "-feature",
   "-unchecked",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen")
 
-lazy val scala211LintFlags = allVersionLintFlags ++ Seq(
-  "-Xlint",
-  "-Yno-adapted-args",
-  "-Ywarn-unused-import")
-
-lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
-  "-Xlint:-unused,_",
-  "-Yno-adapted-args",
-  "-Ywarn-unused-import") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
-
-lazy val scala213LintFlags = allVersionLintFlags
+lazy val lintFlags = Map(
+  (2L, 11L) -> List(
+    "-deprecation",
+    "-Xlint",
+    "-Xfatal-warnings",
+    "-Yno-adapted-args",
+    "-Ywarn-unused-import"),
+  (2, 12) -> List(
+    "-deprecation",                 // Either#right is deprecated on Scala 2.13
+    "-Xlint",
+    "-Xfatal-warnings",
+    "-Yno-adapted-args",
+    "-Ywarn-unused:_,-implicits"),  // Some implicits are intentionally used just as evidences, triggering warnings
+  (2, 13) -> List(
+    "-Ywarn-unused:_,-implicits"))
 
 // do not publish the root project
 skip in publish := true
