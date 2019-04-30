@@ -12,18 +12,23 @@ env:
   - JOB=test
 
 script:
-  # Coverage temporarily disabled due to lack of support for Scala 2.13.0-RC1 (https://github.com/scoverage/sbt-scoverage/issues/282)
-  - sbt "++$TRAVIS_SCALA_VERSION test" "++$TRAVIS_SCALA_VERSION tut" "++$TRAVIS_SCALA_VERSION doc" "++$TRAVIS_SCALA_VERSION publishLocal"
-  - (cd example ; sbt ++$TRAVIS_SCALA_VERSION test)
+  - >
+    sbt coverage
+    "++$TRAVIS_SCALA_VERSION test"
+    "++$TRAVIS_SCALA_VERSION tut"
+    "++$TRAVIS_SCALA_VERSION doc"
+    "++$TRAVIS_SCALA_VERSION publishLocal"
+
+  # Compile example project
+  - (cd example; sbt ++$TRAVIS_SCALA_VERSION test)
 
   # check if there are no changes after `tut` runs
   - if [[ $TRAVIS_SCALA_VERSION =~ ^2\.12.* ]]; then
       git diff --exit-code;
       fi
 
-# Coverage temporarily disabled due to lack of support for Scala 2.13.0-RC1 (https://github.com/scoverage/sbt-scoverage/issues/282)
-#after_success:
-#  - sbt ++$TRAVIS_SCALA_VERSION "++$TRAVIS_SCALA_VERSION coverageReport" coverageAggregate coveralls
+after_success:
+  - sbt ++$TRAVIS_SCALA_VERSION "++$TRAVIS_SCALA_VERSION coverageReport" coverageAggregate coveralls
 
 jobs:
   include:
