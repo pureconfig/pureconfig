@@ -26,8 +26,7 @@ lazy val tests = (project in file("tests")).
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle")).
   enablePlugins(SbtOsgi, TutPlugin).
-  settings(commonSettings).
-  settings(name := "pureconfig", tutTargetDirectory := file(".")).
+  settings(commonSettings, tutTargetDirectory := file(".")).
   dependsOn(core, generic)
 
 lazy val docs = (project in file("docs")).
@@ -40,7 +39,7 @@ def module(proj: Project) = proj.
   enablePlugins(SbtOsgi, TutPlugin).
   dependsOn(core).
   dependsOn(tests % "test->test"). // In order to reuse thDerivationSuite scalacheck generators
-  dependsOn(generic % "tut"). // Allow auto-derivation in documentation
+  dependsOn(generic % "Tut"). // Allow auto-derivation in documentation
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
@@ -82,12 +81,14 @@ lazy val commonSettings = Seq(
   crossVersionSharedSources(unmanagedSourceDirectories in Compile),
   crossVersionSharedSources(unmanagedSourceDirectories in Test),
 
-  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 12)) => scala212LintFlags
-    case Some((2, 11)) => scala211LintFlags
-    case _ => allVersionLintFlags
-  }),
+  scalacOptions ++= allVersionLintFlags ++ {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some(v) => lintFlags.getOrElse(v, Nil)
+      case _ => Nil
+    }
+  },
 
+  scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import"),
@@ -136,31 +137,42 @@ lazy val micrositesSettings = Seq(
   micrositeGitterChannel := false // ugly
 )
 
-// add support for Scala version ranges such as "scala-2.11+" in source folders (single version folders such as
-// "scala-2.10" are natively supported by SBT)
+// add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as
+// "scala-2.11" are natively supported by SBT).
+// In order to keep this simple, we're doing this case by case, taking advantage of the fact that we intend to support
+// only 3 major versions at any given moment.
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
-  unmanagedSrcs ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, y)) if y >= 11 => unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.11+") }
-    case _ => Nil
-  })
+  unmanagedSrcs ++= {
+    val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
+    List(
+      if(minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
+      if(minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
+    ).flatten
+  }
 }
 
-lazy val allVersionLintFlags = Seq(
-  "-deprecation",
+lazy val allVersionLintFlags = List(
   "-encoding", "UTF-8", // yes, this is 2 args
   "-feature",
   "-unchecked",
-  "-Xfatal-warnings",
-  "-Yno-adapted-args",
   "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-unused-import")
+  "-Ywarn-numeric-widen")
 
-lazy val scala211LintFlags = allVersionLintFlags ++ Seq(
-  "-Xlint")
-
-lazy val scala212LintFlags = allVersionLintFlags ++ Seq(
-  "-Xlint:-unused,_") // Scala 2.12.3 has excessive warnings about unused implicits. See https://github.com/scala/bug/issues/10270
+lazy val lintFlags = Map(
+  (2L, 11L) -> List(
+    "-deprecation",
+    "-Xlint",
+    "-Xfatal-warnings",
+    "-Yno-adapted-args",
+    "-Ywarn-unused-import"),
+  (2, 12) -> List(
+    "-deprecation",                 // Either#right is deprecated on Scala 2.13
+    "-Xlint:_,-unused",
+    "-Xfatal-warnings",
+    "-Yno-adapted-args",
+    "-Ywarn-unused:_,-implicits"),  // Some implicits are intentionally used just as evidences, triggering warnings
+  (2, 13) -> List(
+    "-Ywarn-unused:_,-implicits"))
 
 // do not publish the root project
 skip in publish := true

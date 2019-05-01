@@ -298,7 +298,7 @@ object ConfigCursor {
         Right(ConfigValueFactory.fromAnyRef(configValue.unwrapped.toString))
 
       case (ConfigValueType.OBJECT, ConfigValueType.LIST) =>
-        val obj = configValue.asInstanceOf[ConfigObject].asScala
+        val obj = configValue.asInstanceOf[ConfigObject].asScala.toIterator
         val ll = obj.flatMap { case (str, v) => Try(str.toInt).toOption.map(_ -> v) }.toList
 
         ll match {

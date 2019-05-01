@@ -6,15 +6,15 @@ import scala.reflect.runtime.universe._
 import com.typesafe.config.{ ConfigRenderOptions, ConfigValue, ConfigValueFactory }
 import org.scalacheck.Arbitrary
 import org.scalactic.Equality
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ EitherValues, FlatSpec, Matchers }
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import pureconfig.error._
 
 /**
  * Add utilities to a scalatest `FlatSpec` to test `ConfigConvert` instances
  */
-trait ConfigConvertChecks { this: FlatSpec with Matchers with GeneratorDrivenPropertyChecks with EitherValues =>
+trait ConfigConvertChecks { this: FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks with EitherValues =>
 
   /**
    * For each value of type `T`, check that the value produced by converting to and then from `ConfigValue` is the same

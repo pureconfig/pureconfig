@@ -1,6 +1,7 @@
 package pureconfig
 
 import com.typesafe.config.ConfigFactory
+import pureconfig.generic.auto._
 
 class CoproductConvertersSuite2_12 extends BaseSuite {
 

@@ -31,6 +31,11 @@ class DerivationModesSuite extends BaseSuite {
 
   behavior of "semiauto"
 
+  it should "not provide instance derivation for products and coproducts out-of-the-box" in {
+    illTyped("{ import pureconfig.generic.semiauto._; loadConfig[Entity](conf) }")
+    illTyped("{ import pureconfig.generic.semiauto._; ConfigWriter[Entity] }")
+  }
+
   it should "provide methods to derive readers on demand" in {
     import pureconfig.generic.semiauto._
 
