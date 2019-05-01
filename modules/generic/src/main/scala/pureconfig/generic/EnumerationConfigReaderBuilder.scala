@@ -1,7 +1,7 @@
 package pureconfig.generic
 
 import pureconfig.ConfigReader.Result
-import pureconfig.error.NoValidCoproductChoiceFound
+import pureconfig.generic.error.NoValidCoproductChoiceFound
 import pureconfig.{ ConfigCursor, ConfigReader }
 import shapeless._
 import shapeless.labelled._

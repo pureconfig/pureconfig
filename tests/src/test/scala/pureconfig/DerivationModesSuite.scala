@@ -2,7 +2,8 @@ package pureconfig
 
 import com.typesafe.config.{ ConfigFactory, ConfigValueFactory, ConfigValueType }
 import pureconfig.DerivationModesSuite._
-import pureconfig.error.{ NoValidCoproductChoiceFound, WrongType }
+import pureconfig.error.WrongType
+import pureconfig.generic.error.NoValidCoproductChoiceFound
 import shapeless.test.illTyped
 
 object DerivationModesSuite {

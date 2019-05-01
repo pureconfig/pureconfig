@@ -4,6 +4,7 @@ import com.typesafe.config._
 import pureconfig.error._
 import pureconfig.generic._
 import pureconfig.generic.auto._
+import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 
 class CoproductHintSuite extends BaseSuite {
 
@@ -31,19 +32,33 @@ class CoproductHintSuite extends BaseSuite {
         WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)))
     }
 
-    it should "throw an exception when the hint field conflicts with a field of an option when using a FieldCoproductHint" in {
+    it should "fail to read values in the discriminating field that are not strings when using a FieldCoproductHint" in {
+      val conf = ConfigFactory.parseString("{ which-animal { type = Dog }, age = 2 }")
+      ConfigConvert[AnimalConfig].from(conf.root()) should be(Left(
+        ConfigReaderFailures(
+          ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), None, "which-animal"))))
+    }
+
+    it should "fail with an appropriate reason if an unexpected value is found at the discriminating field when using a FieldCoproductHint" in {
+      val conf = ConfigFactory.parseString("{ which-animal = unexpected, age = 2 }")
+      ConfigConvert[AnimalConfig].from(conf.root()) should be(Left(
+        ConfigReaderFailures(
+          ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), None, "which-animal"))))
+    }
+
+    it should "fail to read when the hint field conflicts with a field of an option when using a FieldCoproductHint" in {
       sealed trait Conf
       case class AmbiguousConf(typ: String) extends Conf
 
       implicit val hint = new FieldCoproductHint[Conf]("typ")
       val cc = implicitly[ConfigConvert[Conf]]
 
-      val conf = ConfigFactory.parseString("{ typ = ambiguousconf }")
+      val conf = ConfigFactory.parseString("{ typ = ambiguous-conf }")
       cc.from(conf.root()) should failWithType[KeyNotFound] // "typ" should not be passed to the coproduct option
 
-      val ex = the[ConfigReaderException[_]] thrownBy cc.to(AmbiguousConf("ambiguousconf"))
+      val ex = the[ConfigReaderException[_]] thrownBy cc.to(AmbiguousConf("ambiguous-conf"))
       ex.failures.toList shouldEqual List(ConvertFailure(
-        CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguousconf")), None, ""))
+        CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguous-conf")), None, ""))
     }
   }
 

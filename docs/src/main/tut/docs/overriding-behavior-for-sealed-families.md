@@ -25,7 +25,7 @@ case class BirdConf(canFly: Boolean) extends AnimalConf
 This will load a `DogConf` instance:
 
 ```tut:book
-loadConfig[AnimalConf](ConfigFactory.parseString("{ type: dogconf, age: 4 }"))
+loadConfig[AnimalConf](ConfigFactory.parseString("{ type: dog-conf, age: 4 }"))
 ```
 
 For sealed families, PureConfig provides a way to customize the conversion
@@ -45,7 +45,7 @@ implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
 Then load the config:
 
 ```tut:book
-loadConfig[AnimalConf](ConfigFactory.parseString("{ kind: dogconf, age: 4 }"))
+loadConfig[AnimalConf](ConfigFactory.parseString("{ kind: dog-conf, age: 4 }"))
 ```
 
 `FieldCoproductHint` can also be adapted to write class names in a different
