@@ -132,7 +132,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingA. Failures are:
           |  at 'values.v1.type':
-          |    - Unexpected value "unexpected" found. You might have a misconfigured FieldCoproductHint. Note that the default transformation of FieldCoproductHint changed from converting to lower case to converting to kebab case in version 0.10.3.
+          |    - Unexpected value "unexpected" found. You might have a misconfigured FieldCoproductHint. Note that the default transformation of FieldCoproductHint changed from converting to lower case to converting to kebab case in version 0.10.3 of PureConfig.
           |  at 'values.v3':
           |    - Key not found: 'type'.
           |""".stripMargin
