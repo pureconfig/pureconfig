@@ -2,8 +2,9 @@ import Dependencies._
 
 name := "pureconfig-core"
 
-libraryDependencies ++= Seq(
-  typesafeConfig)
+crossScalaVersions ~= { _ :+ "2.13.0-RC1" }
+
+libraryDependencies += typesafeConfig
 
 osgiSettings
 

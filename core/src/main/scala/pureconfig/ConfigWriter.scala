@@ -1,7 +1,6 @@
 package pureconfig
 
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
-import pureconfig.ConfigWriter._
 
 /**
  * Trait for objects capable of writing objects of a given type to `ConfigValues`.
@@ -9,6 +8,7 @@ import pureconfig.ConfigWriter._
  * @tparam A the type of objects writable by this `ConfigWriter`
  */
 trait ConfigWriter[A] {
+  import pureconfig.ConfigWriter._
 
   /**
    * Converts a type `A` to a `ConfigValue`.

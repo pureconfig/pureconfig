@@ -1,13 +1,11 @@
 package pureconfig
 
-import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.Try
 
 import com.typesafe.config.ConfigValue
-import pureconfig.ConfigReader._
 import pureconfig.ConvertHelpers._
 import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, FailureReason }
 
@@ -17,6 +15,7 @@ import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, FailureReas
  * @tparam A the type of objects readable by this `ConfigReader`
  */
 trait ConfigReader[A] {
+  import pureconfig.ConfigReader._
 
   /**
    * Convert the configuration given by a cursor into an instance of `A` if possible.
@@ -138,8 +137,8 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
     /**
      * Sequences a collection of `Result`s into a `Result` of a collection.
      */
-    def sequence[A, CC[X] <: TraversableOnce[X]](rs: CC[ConfigReader.Result[A]])(implicit cbf: CanBuildFrom[CC[A], A, CC[A]]): ConfigReader.Result[CC[A]] = {
-      rs.foldLeft[ConfigReader.Result[mutable.Builder[A, CC[A]]]](Right(cbf())) {
+    def sequence[A, CC[X] <: TraversableOnce[X]](rs: CC[ConfigReader.Result[A]])(implicit cbf: FactoryCompat[A, CC[A]]): ConfigReader.Result[CC[A]] = {
+      rs.foldLeft[ConfigReader.Result[mutable.Builder[A, CC[A]]]](Right(cbf.newBuilder())) {
         case (Right(builder), Right(a)) => Right(builder += a)
         case (Left(err), Right(_)) => Left(err)
         case (Right(_), Left(err)) => Left(err)

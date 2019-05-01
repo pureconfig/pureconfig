@@ -4,6 +4,7 @@ language: scala
 scala:
   - 2.11.12
   - 2.12.8
+  - 2.13.0-RC1
 jdk:
   - oraclejdk8
 env:
@@ -11,8 +12,15 @@ env:
   - JOB=test
 
 script:
-  - sbt coverage "++$TRAVIS_SCALA_VERSION test" "++$TRAVIS_SCALA_VERSION tut" "++$TRAVIS_SCALA_VERSION doc"
-  - (cd example ; sbt ++$TRAVIS_SCALA_VERSION test)
+  - >
+    sbt coverage
+    "++$TRAVIS_SCALA_VERSION test"
+    "++$TRAVIS_SCALA_VERSION tut"
+    "++$TRAVIS_SCALA_VERSION doc"
+    "++$TRAVIS_SCALA_VERSION publishLocal"
+
+  # Compile example project
+  - (cd example; sbt ++$TRAVIS_SCALA_VERSION test)
 
   # check if there are no changes after `tut` runs
   - if [[ $TRAVIS_SCALA_VERSION =~ ^2\.12.* ]]; then
