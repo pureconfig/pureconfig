@@ -106,7 +106,7 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
   def tryNextOnFail(name: String) = false
 
   override def failToDisambiguate(cur: ConfigCursor): ConfigReader.Result[CNil] =
-    cur.fluent.at(key).cursor.flatMap(cur => cur.failed(UnexpectedValueForFieldCoproductHint(cur.value)))
+    cur.fluent.at(key).cursor.right.flatMap(cur => cur.failed(UnexpectedValueForFieldCoproductHint(cur.value)))
 }
 
 /**
