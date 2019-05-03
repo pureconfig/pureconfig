@@ -5,7 +5,6 @@ import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.error.{ NoValidCoproductChoiceFound, UnexpectedValueForFieldCoproductHint }
 import pureconfig.syntax._
-import shapeless.CNil
 
 /**
  * A trait that can be implemented to disambiguate between the different options of a coproduct or sealed family.
@@ -56,8 +55,8 @@ trait CoproductHint[T] {
    * @param cur a `ConfigCursor` at the sealed family option
    * @return a failed `ConfigReader` result scoped into the context of a `ConfigCursor`.
    */
-  def failToDisambiguate(cur: ConfigCursor): ConfigReader.Result[CNil] =
-    cur.failed(NoValidCoproductChoiceFound(cur.value))
+  def noOptionFound(cur: ConfigCursor): ConfigReaderFailures =
+    ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
 }
 
 /**
@@ -105,8 +104,11 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
 
   def tryNextOnFail(name: String) = false
 
-  override def failToDisambiguate(cur: ConfigCursor): ConfigReader.Result[CNil] =
-    cur.fluent.at(key).cursor.right.flatMap(cur => cur.failed(UnexpectedValueForFieldCoproductHint(cur.value)))
+  override def noOptionFound(cur: ConfigCursor): ConfigReaderFailures =
+    cur.fluent.at(key).cursor.fold(
+      identity,
+      cur => ConfigReaderFailures(cur.failureFor(UnexpectedValueForFieldCoproductHint(cur.value))))
+}
 }
 
 /**

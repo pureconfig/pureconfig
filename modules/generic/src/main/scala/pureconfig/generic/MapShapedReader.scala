@@ -72,7 +72,7 @@ object MapShapedReader {
     coproductHint: CoproductHint[Wrapped]): MapShapedReader[Wrapped, CNil] =
     new MapShapedReader[Wrapped, CNil] {
       override def from(cur: ConfigCursor): ConfigReader.Result[CNil] =
-        coproductHint.failToDisambiguate(cur)
+        Left(coproductHint.noOptionFound(cur))
     }
 
   final implicit def cConsReader[Wrapped, Name <: Symbol, V, T <: Coproduct](
