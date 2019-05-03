@@ -70,15 +70,13 @@ trait CoproductHint[T] {
  */
 class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
 
-  private val fieldTransformation: String => String = ConfigFieldMapping(PascalCase, KebabCase)
-
   /**
    * Returns the field value for a class or coproduct option name.
    *
    * @param name the name of the class or coproduct option
    * @return the field value associated with the given class or coproduct option name.
    */
-  protected def fieldValue(name: String): String = fieldTransformation(name)
+  protected def fieldValue(name: String): String = FieldCoproductHint.defaultMapping(name)
 
   def from(cur: ConfigCursor, name: String): ConfigReader.Result[Option[ConfigCursor]] = {
     for {
@@ -109,6 +107,9 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
       identity,
       cur => ConfigReaderFailures(cur.failureFor(UnexpectedValueForFieldCoproductHint(cur.value))))
 }
+
+object FieldCoproductHint {
+  val defaultMapping: String => String = ConfigFieldMapping(PascalCase, KebabCase)
 }
 
 /**
