@@ -49,11 +49,11 @@ trait CoproductHint[T] {
   def tryNextOnFail(name: String): Boolean
 
   /**
-   * Returns a failed `ConfigReader` result scoped into the context of a `ConfigCursor` at the sealed family option,
-   * representing the failure to disambiguate the config value.
+   * Returns a non empty list of failures scoped into the context of a `ConfigCursor`, representing the failure to read
+   * an option from the config value.
    *
    * @param cur a `ConfigCursor` at the sealed family option
-   * @return a failed `ConfigReader` result scoped into the context of a `ConfigCursor`.
+   * @return a non empty list of reader failures.
    */
   def noOptionFound(cur: ConfigCursor): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
