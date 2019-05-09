@@ -67,10 +67,13 @@ object MapShapedReader {
     }
   }
 
-  implicit def cNilReader[Wrapped]: MapShapedReader[Wrapped, CNil] = new MapShapedReader[Wrapped, CNil] {
-    override def from(cur: ConfigCursor): ConfigReader.Result[CNil] =
-      cur.failed(NoValidCoproductChoiceFound(cur.value))
-  }
+  implicit def cNilReader[Wrapped](
+    implicit
+    coproductHint: CoproductHint[Wrapped]): MapShapedReader[Wrapped, CNil] =
+    new MapShapedReader[Wrapped, CNil] {
+      override def from(cur: ConfigCursor): ConfigReader.Result[CNil] =
+        Left(coproductHint.noOptionFound(cur))
+    }
 
   final implicit def cConsReader[Wrapped, Name <: Symbol, V, T <: Coproduct](
     implicit

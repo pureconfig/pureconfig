@@ -49,7 +49,8 @@ object MapShapedWriter {
   }
 
   implicit def cNilWriter[Wrapped]: MapShapedWriter[Wrapped, CNil] = new MapShapedWriter[Wrapped, CNil] {
-    override def to(t: CNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
+    override def to(t: CNil): ConfigValue =
+      throw new IllegalStateException("Cannot encode CNil. This is likely a bug in PureConfig.")
   }
 
   final implicit def cConsWriter[Wrapped, Name <: Symbol, V, T <: Coproduct](
