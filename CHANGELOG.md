@@ -7,6 +7,7 @@
     fieldValue(name: String): String = name.toLowerCase }`.
 
 - New features
+  - Added support for Scala 2.13.0-RC1;
   - Added `deriveEnumerationReader`, `deriveEnumerationWriter` and `deriveEnumerationConvert` to the
     `pureconfig.generic.semiauto` package, allowing the derivation of readers and writers for enumerations encoded as
     sealed traits of case objects. As a consequence, the `EnumCoproductHint` is now deprecated in favor of these new
