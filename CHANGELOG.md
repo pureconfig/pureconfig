@@ -1,4 +1,4 @@
-### 0.10.3 (unreleased)
+### 0.11.0 (May 9, 2019)
 
 - Breaking changes
   - The default transformation in `FieldCoproductHint` changed from converting class names to lower case to converting

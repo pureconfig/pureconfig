@@ -7,7 +7,7 @@ Adds support for XML via [Scala XML](https://github.com/scala/scala-xml) to Pure
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-scala-xml" % "0.10.2"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-scala-xml" % "0.11.0"
 ```
 
 ## Example

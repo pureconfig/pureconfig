@@ -9,7 +9,7 @@ To use PureConfig in an existing SBT project with Scala 2.11 or a later version,
 `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.10.2"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.11.0"
 ```
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).
