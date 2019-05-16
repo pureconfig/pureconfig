@@ -12,7 +12,7 @@ object Dependencies {
 
   object Version {
     val shapeless           = "2.3.3"
-    val typesafeConfig      = "1.3.3"
+    val typesafeConfig      = "1.3.4"
 
     val scalaTest           = "3.0.8-RC2"
 
