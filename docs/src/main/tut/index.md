@@ -14,7 +14,4 @@ layout: home
 
 PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/lightbend/config) configurations written in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](docs/built-in-supported-types.html). Users also have many ways to [add support for custom types](docs/supporting-new-types.html) or [customize existing ones](docs/overriding-behavior-for-types.html).
 
-Watch the demo GIF below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
-
-<img src="http://i.imgur.com/P6sda06.gif" style="width: 100%" alt="PureConfig demo">
