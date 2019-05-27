@@ -13,7 +13,7 @@ final case class UnexpectedValueForFieldCoproductHint(value: ConfigValue) extend
   def description =
     s"Unexpected value ${value.render(ConfigRenderOptions.concise())} found. Note that the default transformation " +
       "for representing class names in config values changed from converting to lower case to converting to kebab " +
-      "case in version 0.10.3 of PureConfig. See " +
+      "case in version 0.11.0 of PureConfig. See " +
       "https://pureconfig.github.io/docs/overriding-behavior-for-sealed-families.html for more details on how to use " +
       "a different transformation."
 }
