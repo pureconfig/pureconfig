@@ -118,7 +118,7 @@ object FieldCoproductHint {
  *
  * @tparam T the type of the coproduct or sealed family for which this hint applies
  */
-@deprecated("Use `pureconfig.generic.semiauto.deriveEnumerationReader[T]`, `pureconfig.generic.semiauto.deriveEnumerationWriter[T]` and `pureconfig.generic.semiauto.deriveEnumerationConvert[T]` instead", "0.10.3")
+@deprecated("Use `pureconfig.generic.semiauto.deriveEnumerationReader[T]`, `pureconfig.generic.semiauto.deriveEnumerationWriter[T]` and `pureconfig.generic.semiauto.deriveEnumerationConvert[T]` instead", "0.11.0")
 class EnumCoproductHint[T] extends CoproductHint[T] {
 
   /**
