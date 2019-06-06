@@ -45,6 +45,7 @@ def module(proj: Project) = proj.
 lazy val akka = module(project) in file("modules/akka")
 lazy val cats = module(project) in file("modules/cats")
 lazy val `cats-effect` = module(project) in file("modules/cats-effect")
+lazy val circe = module(project) in file("modules/circe")
 lazy val cron4s = module(project) in file("modules/cron4s")
 lazy val enum = module(project) in file("modules/enum")
 lazy val enumeratum = module(project) in file("modules/enumeratum")

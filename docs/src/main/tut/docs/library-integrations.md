@@ -25,6 +25,7 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 - [`pureconfig-squants`](https://github.com/pureconfig/pureconfig/tree/master/modules/squants) provides converters for [Squants](http://www.squants.com/)'s beautiful types representing units of measure;
 - [`pureconfig-sttp`](https://github.com/pureconfig/pureconfig/tree/master/modules/sttp) provides converters for [sttp](https://github.com/softwaremill/sttp) types;
 - [`pureconfig-yaml`](https://github.com/pureconfig/pureconfig/tree/master/modules/yaml) provides support for reading YAML files as configurations.
+- [`pureconfig-circe`](https://github.com/pureconfig/pureconfig/tree/master/modules/circe) provides converters for Circe's Json AST
 
 ### External Integrations
 

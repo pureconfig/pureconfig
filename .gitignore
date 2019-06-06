@@ -22,3 +22,6 @@ project/plugins/project/
 # ENSIME specific
 .ensime
 .ensime_cache
+
+# Bloop specific
+.bloop
