@@ -20,10 +20,9 @@ import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.circe._
-import pureconfig.error.CannotConvert
 ```
 
-### Reading Json  values directly
+### Reading Json values directly
 
 Imagine a class, `UserConfig`, that has a `Json` field:
 
