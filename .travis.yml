@@ -11,9 +11,9 @@ env:
   # marker environment variable to make the build matrix more readable in the UI
   - JOB=test
 
+    # sbt coverage TODO: Enable coverage again after scoverage is published for 2.13 https://github.com/scoverage/scalac-scoverage-plugin/pull/260
 script:
   - >
-    # sbt coverage TODO: Enable coverage again after scoverage is published for 2.13 https://github.com/scoverage/scalac-scoverage-plugin/pull/260
     sbt
     "++$TRAVIS_SCALA_VERSION test"
     "++$TRAVIS_SCALA_VERSION tut"
