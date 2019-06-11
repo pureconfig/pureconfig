@@ -44,7 +44,7 @@ class ConfigCursorSuite extends BaseSuite {
     cursor("abc").asBoolean should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)))
     cursor("1").asBoolean should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)))
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.BOOLEAN)))
     cursor("TRUE").asBoolean should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)))
   }
