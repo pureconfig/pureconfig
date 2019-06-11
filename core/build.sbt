@@ -2,7 +2,7 @@ import Dependencies._
 
 name := "pureconfig-core"
 
-// crossScalaVersions ~= { _ :+ "2.13.0-RC1" }
+crossScalaVersions ~= { _ :+ "2.13.0" }
 
 libraryDependencies += typesafeConfig
 
