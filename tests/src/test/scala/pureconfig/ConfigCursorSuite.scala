@@ -85,6 +85,8 @@ class ConfigCursorSuite extends BaseSuite {
   it should "allow being cast to double in a safe way" in {
     cursor("3").asDouble shouldBe Right(3.0)
     cursor("3.1").asDouble shouldBe Right(3.1)
+    cursor("21412415121234567L").asDouble should failWith(
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
 
     cursor("abc").asDouble should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
