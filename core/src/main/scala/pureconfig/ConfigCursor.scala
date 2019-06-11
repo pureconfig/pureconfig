@@ -106,7 +106,6 @@ sealed trait ConfigCursor {
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Long if i.shortValue().toLong == i => Right(i.shortValue())
       case i: java.lang.Integer if i.shortValue().toInt == i => Right(i.shortValue())
-      case i: java.lang.Short => Right(i)
       case i: java.lang.Double if i.shortValue().toDouble == i => Right(i.shortValue())
       case v => Left(CannotConvert(v.toString, "Short", "Unable to convert Number to Short"))
     })
@@ -136,7 +135,6 @@ sealed trait ConfigCursor {
       case i: java.lang.Long if i.floatValue().toLong == i => Right(i.floatValue())
       case i: java.lang.Integer if i.floatValue() == i => Right(i.floatValue())
       case i: java.lang.Double if i.floatValue() == i => Right(i.floatValue())
-      case i: java.lang.Float => Right(i)
       case v => Left(CannotConvert(v.toString, "Float", "Unable to convert Number to Float"))
     })
 
