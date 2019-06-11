@@ -1,34 +1,19 @@
 package pureconfig.module
 
-import java.io._
+import java.nio.charset.StandardCharsets.UTF_8
 
-import scala.concurrent.ExecutionContext
+import scala.collection.compat._
 import scala.language.higherKinds
 import scala.reflect.ClassTag
-
-import _root_.fs2.{ Stream, io, text }
-import cats.effect.{ Concurrent, Sync, ContextShift }
+import _root_.fs2.{ Stream, text }
+import cats.effect.Sync
 import cats.implicits._
-import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
+import com.typesafe.config.ConfigRenderOptions
+import pureconfig.backend.ConfigFactoryWrapper
 import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
 import pureconfig.error.ConfigReaderException
 
 package object fs2 {
-
-  private def parseStream[F[_], A](inputStream: InputStream)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
-    val streamReader = new InputStreamReader(inputStream)
-    val config = F.delay { ConfigFactory.parseReader(streamReader) }
-    config.flatMap { c =>
-      val loadedConfig = pureconfig.loadConfig(c).leftMap(ConfigReaderException[A])
-      F.fromEither(loadedConfig)
-    }
-  }
-
-  private def pipedStreams[F[_]](implicit F: Sync[F]): F[(InputStream, OutputStream)] = F.delay {
-    val output = new PipedOutputStream()
-    val input = new PipedInputStream(output)
-    (input, output)
-  }
 
   /**
    * Load a configuration of type `A` from the given byte stream.
@@ -37,19 +22,19 @@ package object fs2 {
    * @return The returned action will complete with `A` if it is possible to create an instance of type
    *         `A` from the configuration stream, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
+   *         It can also raise any exception that the stream can raise.
    */
-  def streamConfig[F[_], A](configStream: Stream[F, Byte], blockingExecutionContext: ExecutionContext)(
+  def streamConfig[F[_], A](configStream: Stream[F, Byte])(
     implicit
-    F: Concurrent[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A], CS: ContextShift[F]): F[A] = {
-    pipedStreams.flatMap {
-      case (in, out) =>
-        val outputSink = io.writeOutputStream[F](out.pure[F], blockingExecutionContext)
-        val sunkStream = configStream.to(outputSink)
-
-        val parseConfig = parseStream(in)
-
-        Concurrent[F].start(sunkStream.compile.drain) >> parseConfig
-    }
+    F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+    for {
+      bytes <- configStream.compile.to[Array]
+      string = new String(bytes, UTF_8)
+      configOrError <- F.delay(ConfigFactoryWrapper.parseString(string))
+      config <- F.fromEither(configOrError.leftMap(ConfigReaderException[A]))
+      aOrError <- F.delay(pureconfig.loadConfig[A](config))
+      a <- F.fromEither(aOrError.leftMap(ConfigReaderException[A]))
+    } yield a
   }
 
   /**

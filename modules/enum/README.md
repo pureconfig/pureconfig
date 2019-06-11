@@ -11,7 +11,7 @@ Automatically create a converter to read [enum](https://github.com/julienrf/enum
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-enum" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-enum" % "0.11.0"
 ```
 
 ## Example
@@ -51,7 +51,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"ShoutGoodBye","start":"WhisperHello"}))
 
 loadConfig[GreetingConf](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,GreetingConf] = Right(GreetingConf(WhisperHello,ShoutGoodBye))
+// res0: pureconfig.ConfigReader.Result[GreetingConf] = Right(GreetingConf(WhisperHello,ShoutGoodBye))
 ```
 
 ## Can I configure how the elements are read?

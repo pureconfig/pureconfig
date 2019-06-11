@@ -4,17 +4,13 @@
 
 [![Build Status](https://travis-ci.org/pureconfig/pureconfig.svg?branch=master)](https://travis-ci.org/pureconfig/pureconfig)
 [![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.12)
-[![Scaladoc](https://javadoc.io/badge/com.github.pureconfig/pureconfig_2.12.svg)](https://javadoc.io/page/com.github.pureconfig/pureconfig_2.12/latest/pureconfig/index.html)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.12/badge.svg)](https://search.maven.org/artifact/com.github.pureconfig/pureconfig_2.12)
+[![Scaladoc](https://javadoc.io/badge/com.github.pureconfig/pureconfig-core_2.12.svg)](https://javadoc.io/page/com.github.pureconfig/pureconfig-core_2.12/latest/pureconfig/index.html)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/typesafehub/config) configurations written in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](https://pureconfig.github.io/docs/built-in-supported-types.html). Users also have many ways to [add support for custom types](https://pureconfig.github.io/docs/supporting-new-types.html) or [customize existing ones](https://pureconfig.github.io/docs/overriding-behavior-for-types.html).
+PureConfig is a Scala library for loading configuration files. It reads [Typesafe Config](https://github.com/lightbend/config) configurations written in [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), Java `.properties`, or JSON to native Scala classes in a boilerplate-free way. Sealed traits, case classes, collections, optional values, and many other [types are all supported out-of-the-box](https://pureconfig.github.io/docs/built-in-supported-types.html). Users also have many ways to [add support for custom types](https://pureconfig.github.io/docs/supporting-new-types.html) or [customize existing ones](https://pureconfig.github.io/docs/overriding-behavior-for-types.html).
 
-Click on the demo gif below to see how PureConfig effortlessly translates your configuration files to well-typed objects without error-prone boilerplate.
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
-
-![](http://i.imgur.com/P6sda06.gif)
-
 
 ## Why
 
@@ -37,7 +33,7 @@ To use PureConfig in an existing SBT project with Scala 2.11 or a later version,
 `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.11.0"
 ```
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).
@@ -71,22 +67,25 @@ Finally, load the configuration:
 
 ```scala
 pureconfig.loadConfig[MyClass]
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+// res0: pureconfig.ConfigReader.Result[MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 
+`ConfigReader.Result[MyClass]` is just an alias for `Either[ConfigReaderFailures, MyClass]`, so you can handle it just like you
+would handle an `Either` value.
+
 The various `loadConfig` methods defer to Typesafe Config's
-[`ConfigFactory`](https://typesafehub.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
+[`ConfigFactory`](https://lightbend.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
 select where to load the config files from. Typesafe Config has [well-documented rules for configuration
-loading](https://github.com/typesafehub/config#standard-behavior) which we'll not repeat. Please see Typesafe
+loading](https://github.com/lightbend/config#standard-behavior) which we'll not repeat. Please see Typesafe
 Config's documentation for a full telling of the subtleties.
 
 Alternatively, PureConfig also provides a `loadConfigFromFiles` method that builds a configuration from
 an explicit list of files. Files earlier in the list have greater precedence than later ones. Each file can
 include a partial configuration as long as the whole list produces a complete configuration. For an example,
 see the test of `loadConfigFromFiles` in
-[`ApiSuite.scala`](https://github.com/pureconfig/pureconfig/blob/master/core/src/test/scala/pureconfig/ApiSuite.scala).
+[`ApiSuite.scala`](https://github.com/pureconfig/pureconfig/blob/master/tests/src/test/scala/pureconfig/ApiSuite.scala).
 
-Because PureConfig uses Typesafe Config to load configurations, it supports reading files in [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/typesafehub/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
+Because PureConfig uses Typesafe Config to load configurations, it supports reading files in [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/lightbend/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.
 
 
 ## Documentation
@@ -123,5 +122,5 @@ welcoming environments for everyone.
 
 ## Special Thanks
 
-To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/typesafehub/config)
+To the [Shapeless](https://github.com/milessabin/shapeless) and to the [Typesafe Config](https://github.com/lightbend/config)
 developers.

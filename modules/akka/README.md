@@ -7,7 +7,7 @@ Adds support for selected [Akka](http://akka.io/) classes to PureConfig.
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.11.0"
 ```
 
 ## Example
@@ -34,7 +34,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"actor-path":"akka://my-sys/user/service-a/worker1","timeout":"5 seconds"}))
 
 loadConfig[MyConfig](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(Timeout(5 seconds),akka://my-sys/user/service-a/worker1))
+// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(Timeout(5 seconds),akka://my-sys/user/service-a/worker1))
 ```
 
 

@@ -1,11 +1,6 @@
 package pureconfig
 
-import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
 import scala.language.higherKinds
-
-import pureconfig.ConvertHelpers._
-import pureconfig.error._
 
 /**
  * A marker trait signaling that a `ConfigReader` accepts missing (undefined) values.
@@ -23,7 +18,7 @@ trait CollectionReaders {
 
   implicit def optionReader[T](implicit conv: Derivation[ConfigReader[T]]): ConfigReader[Option[T]] =
     new ConfigReader[Option[T]] with ReadsMissingKeys {
-      override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Option[T]] = {
+      override def from(cur: ConfigCursor): ConfigReader.Result[Option[T]] = {
         if (cur.isUndefined || cur.isNull) Right(None)
         else conv.value.from(cur).right.map(Some(_))
       }
@@ -32,27 +27,19 @@ trait CollectionReaders {
   implicit def traversableReader[T, F[T] <: TraversableOnce[T]](
     implicit
     configConvert: Derivation[ConfigReader[T]],
-    cbf: CanBuildFrom[F[T], T, F[T]]) = new ConfigReader[F[T]] {
+    cbf: FactoryCompat[T, F[T]]) = new ConfigReader[F[T]] {
 
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, F[T]] = {
-      cur.asListCursor.right.flatMap { listCur =>
-        // we called all the failures in the list
-        listCur.list.foldLeft[Either[ConfigReaderFailures, mutable.Builder[T, F[T]]]](Right(cbf())) {
-          case (acc, valueCur) =>
-            combineResults(acc, configConvert.value.from(valueCur))(_ += _)
-        }.right.map(_.result())
+    override def from(cur: ConfigCursor): ConfigReader.Result[F[T]] = {
+      cur.fluent.mapList { valueCur => configConvert.value.from(valueCur) }.right.map { coll =>
+        val builder = cbf.newBuilder()
+        (builder ++= coll).result()
       }
     }
   }
 
   implicit def mapReader[T](implicit reader: Derivation[ConfigReader[T]]) = new ConfigReader[Map[String, T]] {
-    override def from(cur: ConfigCursor): Either[ConfigReaderFailures, Map[String, T]] = {
-      cur.asMap.right.flatMap { map =>
-        map.foldLeft[Either[ConfigReaderFailures, Map[String, T]]](Right(Map())) {
-          case (acc, (key, valueConf)) =>
-            combineResults(acc, reader.value.from(valueConf)) { (map, value) => map + (key -> value) }
-        }
-      }
+    override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, T]] = {
+      cur.fluent.mapObject { valueCur => reader.value.from(valueCur) }
     }
   }
 }

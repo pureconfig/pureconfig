@@ -11,7 +11,7 @@ Automatically create a converters to read [Enumeratum](https://github.com/lloydm
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.11.0"
 ```
 
 ## Example
@@ -53,7 +53,7 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"SHOUT_GOOD_BYE","start":"hello"}))
 
 loadConfig[GreetingConf](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,GreetingConf] = Right(GreetingConf(Hello,ShoutGoodBye))
+// res0: pureconfig.ConfigReader.Result[GreetingConf] = Right(GreetingConf(Hello,ShoutGoodBye))
 ```
 
 Note that Enumeratum has a variety of [other ways to define enums](https://github.com/lloydmeta/enumeratum#more-examples) which are [also supported by `pureconfig-enumeratum`](src/test/scala/pureconfig/module/enumeratum/EnumeratumConvertTest.scala). If you need to read integers, another numeric type, or arbitrary strings to specify your enum values, Enumeratum and Pureconfig have you covered.

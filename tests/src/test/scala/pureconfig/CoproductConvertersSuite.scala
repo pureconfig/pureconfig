@@ -18,14 +18,14 @@ class CoproductConvertersSuite extends BaseSuite {
   checkArbitrary[AnimalConfig]
 
   it should "read disambiguation information on sealed families by default" in {
-    val conf = ConfigFactory.parseString("{ type = dogconfig, age = 2 }")
+    val conf = ConfigFactory.parseString("{ type = dog-config, age = 2 }")
     ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(DogConfig(2))
   }
 
   it should "write disambiguation information on sealed families by default" in {
     val conf = ConfigConvert[AnimalConfig].to(DogConfig(2))
     conf shouldBe a[ConfigObject]
-    conf.asInstanceOf[ConfigObject].get("type") shouldEqual ConfigValueFactory.fromAnyRef("dogconfig")
+    conf.asInstanceOf[ConfigObject].get("type") shouldEqual ConfigValueFactory.fromAnyRef("dog-config")
   }
 
   it should "return a proper ConfigReaderFailure if the hint field in a coproduct is missing" in {

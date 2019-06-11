@@ -1,17 +1,16 @@
 package pureconfig.module.squants
 
 import scala.reflect.ClassTag
+
+import com.typesafe.config.ConfigFactory
 import org.scalacheck.{ Arbitrary, Gen }
-import org.scalatest.{ EitherValues, FlatSpec, Matchers }
-import org.scalatest.prop.PropertyChecks
-import pureconfig.ConfigConvert
+import pureconfig.{ BaseSuite, ConfigConvert }
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 import _root_.squants._
 import _root_.squants.market._
-import com.typesafe.config.ConfigFactory
 
-class SquantsConvertTest extends FlatSpec with Matchers with EitherValues with PropertyChecks {
+class SquantsConvertTest extends BaseSuite {
 
   checkDimension(electro.Capacitance)
   checkDimension(electro.Conductivity)
@@ -95,7 +94,7 @@ class SquantsConvertTest extends FlatSpec with Matchers with EitherValues with P
 
   def checkConfig[T](config: SquantConfig[T])(implicit cc: ConfigConvert[T]) = {
     val configString = s"""{value:"${config.value.toString}"}"""
-    ConfigFactory.parseString(configString).to[SquantConfig[T]].right.value shouldEqual config
+    ConfigFactory.parseString(configString).to[SquantConfig[T]] shouldEqual Right(config)
   }
 
   def quantityAbitrary[T <: Quantity[T]](dim: Dimension[T]): Arbitrary[T] = {

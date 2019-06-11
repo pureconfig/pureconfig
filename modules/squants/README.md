@@ -11,7 +11,7 @@ Automatically create a converter to read [Squants](http://www.squants.com/)'s be
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-squants" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-squants" % "0.11.0"
 ```
 
 ## Example
@@ -39,5 +39,5 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"far":"42.195 km","hot":"56.7° C"}))
 
 loadConfig[HowConfiguration](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,HowConfiguration] = Right(HowConfiguration(42.195 km,56.7°C))
+// res0: pureconfig.ConfigReader.Result[HowConfiguration] = Right(HowConfiguration(42.195 km,56.7°C))
 ```

@@ -9,7 +9,7 @@ When a `ConfigReader` needs to be created from scratch, users need to implement 
 signature:
 
 ```scala
-def from(cur: ConfigCursor): Either[ConfigReaderFailures, A]
+def from(cur: ConfigCursor): ConfigReader.Result[A]
 ```
 
 The `ConfigCursor` class is a wrapper for the raw `ConfigValue` provided by Typesafe Config. It provides an idiomatic,
@@ -58,8 +58,12 @@ implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
 }
 ```
 
+```tut:invisible
+assert(loadConfig[Conf](conf).isRight)
+```
+
 The factory method `ConfigReader.fromCursor` allows us to create a `ConfigReader` without much boilerplate by providing
-the required `ConfigCursor => Either[ConfigReaderFailures, A]` function. Since most methods in the cursor API return
+the required `ConfigCursor => ConfigReader.Result[A]` function. Since most methods in the cursor API return
 `Either` values with failures at their left side,
 [for comprehensions](https://docs.scala-lang.org/tour/for-comprehensions.html) are a natural fit (note that on Scala
 2.11 and below you need to add `.right` projections at the end of each `Either` result). Let's analyze the lines
@@ -72,7 +76,17 @@ access a non-existing key results in an error, stopping the for comprehension;
 3. having a cursor for the `name` key we want, `asString` tries to cast the config value pointed to by the cursor to a
 string.
 
-Loading a well-formed config will now work correctly:
+You can use the fluent cursor API, an alternative interface focused on easy navigation over error handling, to achieve the same effect:
+
+```tut:silent
+implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
+  cur.fluent.at("name").asString.map { name =>
+    new Person(firstNameOf(name), lastNamesOf(name))
+  }
+}
+```
+
+Either way, a well-formed config will now work correctly:
 
 ```tut:book
 loadConfig[Conf](conf)

@@ -6,7 +6,7 @@ title: Combinators
 ## {{page.title}}
 
 The combinators defined in
-[`ConfigReader`](https://www.javadoc.io/page/com.github.pureconfig/pureconfig_2.12/latest/pureconfig/ConfigReader.html)
+[`ConfigReader`](https://www.javadoc.io/page/com.github.pureconfig/pureconfig-core_2.12/latest/pureconfig/ConfigReader.html)
 provide an easy way to create new `ConfigReader` instances by transforming existing ones. They are the simplest solution
 for supporting new simple types and for slightly modifying existing implementations, since the amount of boilerplate
 required is very small. This section contains some examples of combinators and shows how to work with them in

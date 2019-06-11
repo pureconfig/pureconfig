@@ -7,7 +7,7 @@ Adds support for XML via [Scala XML](https://github.com/scala/scala-xml) to Pure
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-scala-xml" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-scala-xml" % "0.11.0"
 ```
 
 ## Example
@@ -36,7 +36,7 @@ val conf = parseString(
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"people":"<people>\n      <person firstName=\"A\" lastName=\"Person\" />\n      <person firstName=\"Another\" lastName=\"Person\" />\n    </people>"}))
 
 loadConfig[Config](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,Config] =
+// res0: pureconfig.ConfigReader.Result[Config] =
 // Right(Config(<people>
 //       <person lastName="Person" firstName="A"/>
 //       <person lastName="Person" firstName="Another"/>

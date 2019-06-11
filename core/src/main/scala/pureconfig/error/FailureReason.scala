@@ -3,7 +3,7 @@ package pureconfig.error
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-import com.typesafe.config.{ ConfigRenderOptions, ConfigValue, ConfigValueType }
+import com.typesafe.config.{ ConfigValue, ConfigValueType }
 
 /**
  * A representation of a reason why a value failed to be converted.
@@ -126,6 +126,7 @@ final case class EmptyStringFound(typ: String) extends FailureReason {
  *
  * @param typ the type for which a non-empty object was attempted to be written
  */
+@deprecated("`EnumCoproductHint` is deprecated in favor of the `pureconfig.generic.semiauto.deriveEnumeration(Reader|Writer|Convert)[T]` methods", "0.11.0")
 final case class NonEmptyObjectFound(typ: String) extends FailureReason {
   def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
 }
@@ -148,13 +149,4 @@ final case class WrongSizeList(expected: Int, found: Int) extends FailureReason 
  */
 final case class WrongSizeString(expected: Int, found: Int) extends FailureReason {
   def description = s"String of wrong size found. Expected $expected characters. Found $found characters instead."
-}
-
-/**
- * A failure reason given when a valid choice for a coproduct cannot be found.
- *
- * @param value the ConfigValue that was unable to be mapped to a coproduct choice
- */
-final case class NoValidCoproductChoiceFound(value: ConfigValue) extends FailureReason {
-  def description = s"No valid coproduct choice found for '${value.render(ConfigRenderOptions.concise())}'."
 }

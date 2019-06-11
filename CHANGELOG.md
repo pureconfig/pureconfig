@@ -1,3 +1,34 @@
+### 0.11.0 (May 9, 2019)
+
+- Breaking changes
+  - The default transformation in `FieldCoproductHint` changed from converting class names to lower case to converting
+    them to kebab case (e.g. `ConfigOption` is converted to `config-option`). The old behavior can be retained by
+    putting in scope an `implicit def coproductHint[T] = new FieldCoproductHint[T]("type") { override def
+    fieldValue(name: String): String = name.toLowerCase }`.
+
+- New features
+  - Added support for Scala 2.13.0-RC1;
+  - Added `deriveEnumerationReader`, `deriveEnumerationWriter` and `deriveEnumerationConvert` to the
+    `pureconfig.generic.semiauto` package, allowing the derivation of readers and writers for enumerations encoded as
+    sealed traits of case objects. As a consequence, the `EnumCoproductHint` is now deprecated in favor of these new
+    methods;
+  - `CoproductHint` now exposes a `noOptionFound` method allowing implementations to configure the failure reasons given
+    when no option for a sealed family was able to be read.
+
+### 0.10.2 (Feb 5, 2019)
+
+- New features
+  - Added `ConfigReader.Result[A]` as an alias for `Either[ConfigReaderFailures, A]`;
+  - Introduced `FluentConfigCursor`, an alternative API to `ConfigCursor` focused on config navigation over error handling.
+
+### 0.10.1 (Nov 30, 2018)
+
+- New features
+  - `loadConfigFromFiles` now accepts a `namespace` parameter like the other `loadConfig*` varieties. (#437)
+
+- Bug fixes
+  - `scala-compiler` and `scala-reflect` dependencies are now `provided`, rather than regular, dependencies. (#434)
+
 ### 0.10.0 (Oct 30, 2018)
 
 - Breaking changes

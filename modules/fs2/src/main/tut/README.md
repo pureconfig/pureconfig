@@ -7,7 +7,7 @@ Adds support for loading and saving configurations from [fs2](https://github.com
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.11.0"
 ```
 
 ## Example
@@ -44,7 +44,7 @@ val blockingEc: ExecutionContext = ExecutionContext.fromExecutorService(Executor
 
 val configStream = file.readAll[IO](somePath, blockingEc, chunkSize)
 
-val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream, blockingEc)
+val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream)
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:
@@ -74,5 +74,5 @@ val configStream: fs2.Stream[IO, Byte] = saveConfigToStream(someConfig)
 And to confirm the stream has the values we expect:
 
 ```tut:book
-configStream.through(text.utf8Decode).to(fs2.Sink.showLinesStdOut).compile.drain.unsafeRunSync
+configStream.through(text.utf8Decode).showLinesStdOut.compile.drain.unsafeRunSync
 ```

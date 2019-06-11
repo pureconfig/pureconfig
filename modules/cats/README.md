@@ -9,7 +9,7 @@ classes.
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.11.0"
 ```
 
 ## Example
@@ -18,7 +18,8 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats" % "0.10.0"
 
 The following cats data structures are supported: 
 
-* `NonEmptyList`, `NonEmptyVector`, `NonEmptySet`
+* Cats data types with `Foldable` and `Alternative` (i.e. non-reducible) typeclass instances, e.g. `Chain`.
+* `NonEmptyList`, `NonEmptyVector`, `NonEmptySet`, `NonEmptyChain`
 * `NonEmptyMap[K, V]` implicits of `ConfigReader[Map[K, V]]` and `Order[K]` should be in the scope.
 For example, if your key is a `String` then `Order[String]` can be imported from `cats.instances.string._`
 
@@ -28,7 +29,7 @@ Custom collection readers, if any, may affect the behavior of these too.
 Here is an example of usage:
 
 ```scala
-import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap}
+import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap, NonEmptyChain}
 import cats.instances.string._
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
@@ -39,27 +40,29 @@ case class MyConfig(
   numberList: NonEmptyList[Int],
   numberSet: NonEmptySet[Int],
   numberVector: NonEmptyVector[Int],
-  numberMap: NonEmptyMap[String, Int]
+  numberMap: NonEmptyMap[String, Int],
+  numberChain: NonEmptyChain[Int]
 )
 ```
 
 We can read a `MyConfig` like:
 ```scala
-val conf = parseString("""{ 
+val conf = parseString("""{
   number-list: [1,2,3],
   number-set: [1,2,3],
   number-vector: [1,2,3],
-  number-map { "one": 1, "two": 2, "three": 3 }     
+  number-map { "one": 1, "two": 2, "three": 3 },
+  number-chain: [1,2,3]
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-list":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-set":[1,2,3],"number-vector":[1,2,3]}))
+// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-chain":[1,2,3],"number-list":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-set":[1,2,3],"number-vector":[1,2,3]}))
 
 loadConfig[MyConfig](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3),TreeSet(1, 2, 3),NonEmptyVector(1, 2, 3),Map(one -> 1, three -> 3, two -> 2)))
+// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3),TreeSet(1, 2, 3),NonEmptyVector(1, 2, 3),Map(one -> 1, three -> 3, two -> 2),Chain(1, 2, 3)))
 ```
 
 ### Using cats type class instances for readers and writers
 
-In order to to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
+In order to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
 operations provided by `cats`, we need some extra imports:
 
 ```scala
@@ -85,16 +88,16 @@ And we can finally put them to use:
 
 ```scala
 constIntReader.from(conf.root())
-// res4: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(42)
+// res4: pureconfig.ConfigReader.Result[Int] = Right(42)
 
 safeIntReader.from(conf.root())
-// res5: Either[pureconfig.error.ConfigReaderFailures,Int] = Right(-1)
+// res5: pureconfig.ConfigReader.Result[Int] = Right(-1)
 
 someWriter[String].to(Some("abc"))
 // res6: com.typesafe.config.ConfigValue = Quoted("abc")
 ```
 
-### Extra syntatic sugar
+### Extra syntactic sugar
 
 We can provide some useful extension methods by importing:
 

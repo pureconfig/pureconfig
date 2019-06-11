@@ -7,7 +7,7 @@ Adds support for selected [Hadoop](http://hadoop.apache.org/) classes to PureCon
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-hadoop" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-hadoop" % "0.11.0"
 ```
 
 Also, `pureconfig-hadoop` depends on `hadoop-common` with `provided` scope. This means that you should explicitly add a dependency on `hadoop-common` or any other Hadoop library which depends on `hadoop-common`. Usually it would be something like this:
@@ -47,5 +47,5 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"path":"hdfs://some.domain/foo/bar.gz"}))
 
 loadConfig[MyConfig](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(hdfs://some.domain/foo/bar.gz))
+// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(hdfs://some.domain/foo/bar.gz))
 ```

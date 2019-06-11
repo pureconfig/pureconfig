@@ -7,7 +7,7 @@ Adds support for selected javax classes to PureConfig.
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-javax" % "0.10.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-javax" % "0.11.0"
 ```
 
 ## Example
@@ -30,7 +30,7 @@ val conf = parseString("""{ principal: "userid@tld.REALM" }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"principal":"userid@tld.REALM"}))
 
 loadConfig[MyConfig](conf)
-// res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(userid@tld.REALM))
+// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(userid@tld.REALM))
 ```
 
 
