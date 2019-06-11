@@ -2,7 +2,7 @@ import Dependencies._
 
 name := "pureconfig-tests"
 
-crossScalaVersions ~= { _ :+ "2.13.0-RC1" }
+// crossScalaVersions ~= { _ :+ "2.13.0-RC1" }
 
 libraryDependencies ++= Seq(
   scalaTest,
