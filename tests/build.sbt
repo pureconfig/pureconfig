@@ -6,7 +6,7 @@ crossScalaVersions ~= { _ :+ "2.13.0" }
 
 libraryDependencies ++= Seq(
   scalaTest,
-  scalaCheck,
-  scalaCheckShapeless)
+  scalaCheck.value,
+  scalaCheckShapeless.value)
 
 skip in publish := true
