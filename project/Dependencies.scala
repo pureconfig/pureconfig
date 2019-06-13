@@ -3,13 +3,12 @@ import sbt.Keys._
 
 object Dependencies {
 
-  private[this] def onScala213(onScala213: String, onOthers: String) =
-    Def.setting {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 13)) => onScala213
-        case _             => onOthers
-      }
+  private[this] def onScala213(onScala213: String, onOthers: String) = Def.setting {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 13)) => onScala213
+      case _ => onOthers
     }
+  }
 
   object Version {
     val shapeless           = "2.3.3"
@@ -17,6 +16,7 @@ object Dependencies {
 
     val scalaTest           = "3.0.8"
 
+    // cats will only be compatible with scalacheck 1.14 on 2.x
     val scalaCheck          = onScala213("1.14.0", "1.13.5")
     val scalaCheckShapeless = onScala213("1.2.3", "1.1.8")
   }
@@ -26,9 +26,7 @@ object Dependencies {
 
   // testing libraries
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test"
-  val scalaCheck = Def.setting {
-    "org.scalacheck" %% "scalacheck" % Version.scalaCheck.value % "test"
-  }
+  val scalaCheck = Def.setting { "org.scalacheck" %% "scalacheck" % Version.scalaCheck.value % "test" }
   val scalaCheckShapeless = Def.setting {
     "com.github.alexarchambault" %%
       s"scalacheck-shapeless_${onScala213("1.14", "1.13").value}" % Version.scalaCheckShapeless.value % "test"
