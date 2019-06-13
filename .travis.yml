@@ -4,16 +4,17 @@ language: scala
 scala:
   - 2.11.12
   - 2.12.8
-  - 2.13.0-RC1
+  - 2.13.0
 jdk:
   - oraclejdk8
 env:
   # marker environment variable to make the build matrix more readable in the UI
   - JOB=test
 
+    # sbt coverage TODO: Enable coverage again after scoverage is published for 2.13 https://github.com/scoverage/scalac-scoverage-plugin/pull/260
 script:
   - >
-    sbt coverage
+    sbt
     "++$TRAVIS_SCALA_VERSION test"
     "++$TRAVIS_SCALA_VERSION tut"
     "++$TRAVIS_SCALA_VERSION doc"
@@ -27,8 +28,9 @@ script:
       git diff --exit-code;
       fi
 
-after_success:
-  - sbt ++$TRAVIS_SCALA_VERSION "++$TRAVIS_SCALA_VERSION coverageReport" coverageAggregate coveralls
+# TODO: Enable coverage again after scoverage is published for 2.13 https://github.com/scoverage/scalac-scoverage-plugin/pull/260
+# after_success:
+#   - sbt ++$TRAVIS_SCALA_VERSION "++$TRAVIS_SCALA_VERSION coverageReport" coverageAggregate coveralls
 
 jobs:
   include:
