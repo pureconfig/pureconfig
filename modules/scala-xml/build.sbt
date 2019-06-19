@@ -1,7 +1,7 @@
 name := "pureconfig-scala-xml"
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml" % "1.1.1")
+  "org.scala-lang.modules" %% "scala-xml" % "1.2.0")
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")))
