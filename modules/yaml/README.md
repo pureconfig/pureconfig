@@ -52,4 +52,5 @@ We can also load a particular namespace inside the YAML file:
 
 ```scala
 loadYaml[List[Person]](yamlFile, "children")
+// res2: pureconfig.ConfigReader.Result[List[Person]] = Right(List(Person(Sarah,7,List()), Person(Andy,10,List())))
 ```
