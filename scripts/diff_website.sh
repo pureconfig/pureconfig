@@ -40,7 +40,7 @@ if ! git -c color.ui=always diff --no-index "$TMP_DIR/$WEBSITE_OUTPUT_DIR" "$WEB
       Warning: the content of the PureConfig website changed with this pull request. This may be \
       intentional (as is the case when sbt-microsites is updated or some breaking change occurs) \
       or may be an unexpected change in the library's behavior. Please check the logs of the \
-      diff_website job in the Travis build to see the diff." | \
+      [\`diff_website\` job]($TRAVIS_JOB_WEB_URL) in the Travis build to see the differences." | \
         sed -E 's/ +/ /g')
 
     curl -f -H "Authorization: Token ${GITHUB_TOKEN}" -XPOST \
