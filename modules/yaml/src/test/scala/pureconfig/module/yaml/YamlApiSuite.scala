@@ -4,12 +4,13 @@ import java.net.URLDecoder
 import java.nio.file.{ Files, Path, Paths }
 
 import com.typesafe.config.ConfigValue
+import org.scalatest.EitherValues
 import pureconfig.BaseSuite
-import pureconfig.error.{ CannotParse, CannotReadFile, ConfigReaderException, ConfigValueLocation }
+import pureconfig.error.{ CannotParse, CannotReadFile, ConfigReaderException, ConfigReaderFailures, ConfigValueLocation, ConvertFailure, KeyNotFound }
 import pureconfig.generic.auto._
 import pureconfig.module.yaml.error.NonStringKeyFound
 
-class YamlApiSuite extends BaseSuite {
+class YamlApiSuite extends BaseSuite with EitherValues {
 
   def resourcePath(path: String): Path =
     Paths.get(URLDecoder.decode(getClass.getResource("/" + path).getFile, "UTF-8"))
@@ -55,6 +56,66 @@ class YamlApiSuite extends BaseSuite {
       List(10L, 10000L, 10000000L, 10000000000L),
       Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
       InnerConf(42, "def")))
+  }
+
+  it should "loadYaml from string content with empty namespace" in {
+    loadYaml[Conf](resourceContents("basic.yaml"), "") shouldBe Right(Conf(
+      "abc",
+      true,
+      BigInt("1234567890123456789012345678901234567890"),
+      "dGhpcyBpcyBhIG1lc3NhZ2U=",
+      None,
+      Set(4, 6, 8),
+      List(10L, 10000L, 10000000L, 10000000000L),
+      Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+      InnerConf(42, "def")))
+  }
+
+  it should "fail to loadYaml from string content with non existent namespace" in {
+    loadYaml[Conf](resourceContents("basic.yaml"), "foo") shouldBe Left(
+      ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), None, "")))
+  }
+
+  it should "fail to loadYaml from path with non existent namespace" in {
+    loadYaml[Conf](resourcePath("basic.yaml"), "foo") shouldBe Left(
+      ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), None, "")))
+  }
+
+  it should "loadYaml from a path with empty namespace" in {
+    loadYaml[Conf](resourcePath("basic.yaml"), "") shouldBe Right(Conf(
+      "abc",
+      true,
+      BigInt("1234567890123456789012345678901234567890"),
+      "dGhpcyBpcyBhIG1lc3NhZ2U=",
+      None,
+      Set(4, 6, 8),
+      List(10L, 10000L, 10000000L, 10000000000L),
+      Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+      InnerConf(42, "def")))
+  }
+
+  it should "loadYaml from string content with a specific namespace of a Map" in {
+    loadYaml[Map[String, String]](resourceContents("basic.yaml"), "map")
+      .right
+      .value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
+  }
+
+  it should "loadYaml from string content with a specific namespace of a BigInt" in {
+    loadYaml[BigInt](resourceContents("basic.yaml"), "n")
+      .right
+      .value shouldBe BigInt("1234567890123456789012345678901234567890")
+  }
+
+  it should "loadYaml from a path with a specific namespace of a Map" in {
+    loadYaml[Map[String, String]](resourcePath("basic.yaml"), "map")
+      .right
+      .value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
+  }
+
+  it should "loadYaml from a path with a specific namespace of a BigInt" in {
+    loadYaml[BigInt](resourceContents("basic.yaml"), "n")
+      .right
+      .value shouldBe BigInt("1234567890123456789012345678901234567890")
   }
 
   it should "loadYamlOrThrow from a simple YAML file" in {
