@@ -1,7 +1,7 @@
 name := "pureconfig-cats-effect"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-effect" % "1.3.1")
+  "org.typelevel" %% "cats-effect" % "1.4.0")
 
 developers := List(
   Developer("keirlawson", "Keir Lawson", "keirlawson@gmail.com", url("https://github.com/keirlawson")))
