@@ -1,5 +1,7 @@
 name := "pureconfig-circe"
 
+crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
+
 libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % "0.11.1",
   "io.circe" %% "circe-literal" % "0.11.1" % Test,
