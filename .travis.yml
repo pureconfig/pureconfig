@@ -3,7 +3,7 @@ language: scala
 
 scala:
   - 2.11.12
-  - 2.12.8
+  - 2.12.9
   - 2.13.0
 jdk:
   - openjdk8
@@ -33,7 +33,7 @@ after_success:
 jobs:
   include:
     - env: JOB=build_website
-      scala: 2.12.8
+      scala: 2.12.9
       addons:
         apt:
           packages:
@@ -55,7 +55,7 @@ jobs:
       after_success: ignore
     - env: JOB=diff_website
       if: type = pull_request AND branch = master
-      scala: 2.12.8
+      scala: 2.12.9
       install:
         - rvm use 2.4 --install --fuzzy
         - gem update --system
