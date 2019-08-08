@@ -15,15 +15,18 @@ script:
   - >
     sbt coverage
     "++$TRAVIS_SCALA_VERSION test"
-    "++$TRAVIS_SCALA_VERSION tut"
     "++$TRAVIS_SCALA_VERSION doc"
     "++$TRAVIS_SCALA_VERSION publishLocal"
 
   # Compile example project
   - (cd example; sbt ++$TRAVIS_SCALA_VERSION test)
 
-  # check if there are no changes after `tut` runs
+  # Run tut and check if there are no changes in docs.
+  #
+  # We're running tut only in Scala 2.12 because it fails the compile step in
+  # the presence of comments in 2.13: https://github.com/tpolecat/tut/issues/246
   - if [[ $TRAVIS_SCALA_VERSION =~ ^2\.12.* ]]; then
+      sbt "++$TRAVIS_SCALA_VERSION tut";
       git diff --exit-code;
       fi
 
