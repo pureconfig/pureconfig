@@ -3,10 +3,10 @@ package pureconfig.module.yaml
 import java.net.URLDecoder
 import java.nio.file.{ Files, Path, Paths }
 
-import com.typesafe.config.ConfigValue
+import com.typesafe.config.{ ConfigValue, ConfigValueType }
 import org.scalatest.EitherValues
 import pureconfig.BaseSuite
-import pureconfig.error.{ CannotParse, CannotReadFile, ConfigReaderException, ConfigReaderFailures, ConfigValueLocation, ConvertFailure, KeyNotFound }
+import pureconfig.error._
 import pureconfig.generic.auto._
 import pureconfig.module.yaml.error.NonStringKeyFound
 
@@ -104,6 +104,11 @@ class YamlApiSuite extends BaseSuite with EitherValues {
     loadYaml[BigInt](resourceContents("basic.yaml"), "n")
       .right
       .value shouldBe BigInt("1234567890123456789012345678901234567890")
+  }
+
+  it should "fail to loadYaml of an array from string content with a non existent specific namespace" in {
+    loadYaml[BigInt](resourceContents("array.yaml"), "n") shouldBe Left(
+      ConfigReaderFailures(ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.OBJECT)), None, "")))
   }
 
   it should "loadYaml from a path with a specific namespace of a Map" in {

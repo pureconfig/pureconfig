@@ -105,9 +105,7 @@ package object yaml {
         val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](ioReader)
 
         yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
-          getValue(cv, namespace, reader.isInstanceOf[ReadsMissingKeys])
-            .right
-            .flatMap(reader.value.from(_))
+          loadValue(cv, namespace)
         }
       }
     }
@@ -131,9 +129,8 @@ package object yaml {
       val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](content)
 
       yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
-          getValue(cv, namespace, reader.isInstanceOf[ReadsMissingKeys]).right
-            .flatMap(reader.value.from(_))
-        }
+        loadValue(cv, namespace)
+      }
     }
   }
 
@@ -161,7 +158,7 @@ package object yaml {
   @throws[ConfigReaderException[_]]
   def loadYamlOrThrow[Config: ClassTag](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     loadYaml(path, namespace) match {
-      case Right(config)  => config
+      case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[Config](failures)
     }
   }
@@ -175,7 +172,7 @@ package object yaml {
   @throws[ConfigReaderException[_]]
   def loadYamlOrThrow[Config: ClassTag](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     loadYaml(content) match {
-      case Right(config)  => config
+      case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[Config](failures)
     }
   }
@@ -190,7 +187,7 @@ package object yaml {
   @throws[ConfigReaderException[_]]
   def loadYamlOrThrow[Config: ClassTag](content: String, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     loadYaml(content, namespace) match {
-      case Right(config)  => config
+      case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[Config](failures)
     }
   }
