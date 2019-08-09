@@ -1,5 +1,7 @@
 name := "pureconfig-cats-effect"
 
+crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
+
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-effect" % "1.4.0")
 
