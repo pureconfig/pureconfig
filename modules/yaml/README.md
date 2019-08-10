@@ -47,3 +47,10 @@ We can load the configuration to a `MyConf` instance using `loadYaml`:
 loadYaml[Person](yamlFile)
 // res1: pureconfig.ConfigReader.Result[Person] = Right(Person(John,42,List(Person(Sarah,7,List()), Person(Andy,10,List()))))
 ```
+
+We can also load a particular namespace inside the YAML file:
+
+```scala
+loadYaml[Int](yamlFile, "age")
+// res2: pureconfig.ConfigReader.Result[Int] = Right(42)
+```
