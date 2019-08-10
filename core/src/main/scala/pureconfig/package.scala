@@ -218,7 +218,7 @@ package object pureconfig {
     printOutputStream.close()
   }
 
-  private[this] def filesReduceFunc(failOnReadError: Boolean)(cs1: ConfigObjectSource, cs2: ConfigObjectSource): ConfigObjectSource =
+  private[pureconfig] def filesReduceFunc(failOnReadError: Boolean = false)(cs1: ConfigObjectSource, cs2: ConfigObjectSource): ConfigObjectSource =
     if (failOnReadError) cs1.withFallback(cs2)
     else cs1.withFallback(cs2.recoverWith {
       case failures if failures.toList.exists(_.isInstanceOf[CannotReadFile]) => Right(ConfigFactory.empty)
@@ -248,6 +248,6 @@ package object pureconfig {
    */
   @throws[ConfigReaderException[_]]
   def loadConfigFromFilesOrThrow[Config: ClassTag](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Config = {
-    files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(filesReduceFunc(false)).loadOrThrow[Config]
+    files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(filesReduceFunc()).loadOrThrow[Config]
   }
 }

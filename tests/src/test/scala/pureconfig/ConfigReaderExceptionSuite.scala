@@ -204,7 +204,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     val file = "conf/malformed/a.conf"
 
     val exception = intercept[ConfigReaderException[_]] {
-      loadConfigOrThrow[Conf](Paths.get(workingDir, file))
+      ConfigSource.file(Paths.get(workingDir, file)).loadOrThrow[Conf]
     }
 
     exception.getMessage shouldBe
@@ -218,7 +218,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
     val file = "conf/nonexisting"
 
     val exception = intercept[ConfigReaderException[_]] {
-      loadConfigOrThrow[Conf](Paths.get(workingDir, file))
+      ConfigSource.file(Paths.get(workingDir, file)).loadOrThrow[Conf]
     }
 
     exception.getMessage shouldBe

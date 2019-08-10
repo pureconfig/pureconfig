@@ -15,13 +15,18 @@ import pureconfig.error.ConfigReaderException
 
 package object catseffect {
 
-  private val defaultNameSpace = ""
+  val defaultNameSpace = ""
 
   private def configToF[F[_], A](getConfig: () => ConfigReader.Result[A])(implicit F: Sync[F], ct: ClassTag[A]): F[A] = {
     val delayedLoad = F.delay {
       getConfig().leftMap[Throwable](ConfigReaderException[A])
     }
     delayedLoad.rethrow
+  }
+
+  implicit class CatsEffectConfigSource(val cs: ConfigSource) extends AnyVal {
+    def loadF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+      configToF(() => cs.load[A])
   }
 
   /**
@@ -32,7 +37,7 @@ package object catseffect {
    *         details on why it isn't possible
    */
   def loadConfigF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadConfigF[F, A](defaultNameSpace)
+    ConfigSource.default.loadF[F, A]
 
   /**
    * Load a configuration of type `A` from the standard configuration files
@@ -42,9 +47,8 @@ package object catseffect {
    *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def loadConfigF[F[_], A](namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
-    configToF(() => pureconfig.loadConfig[A](namespace))
-  }
+  def loadConfigF[F[_], A](namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    ConfigSource.default.at(namespace).loadF[F, A]
 
   /**
    * Load a configuration of type `A` from the given file. Note that standard configuration
@@ -56,7 +60,7 @@ package object catseffect {
    *         details on why it isn't possible
    */
   def loadConfigF[F[_], A](path: Path)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadConfigF[F, A](path, defaultNameSpace)
+    ConfigSource.file(path).loadF[F, A]
 
   /**
    * Load a configuration of type `A` from the given file. Note that standard configuration
@@ -68,9 +72,8 @@ package object catseffect {
    *         `A` from the configuration file, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def loadConfigF[F[_], A](path: Path, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
-    configToF(() => pureconfig.loadConfig[A](path, namespace))
-  }
+  def loadConfigF[F[_], A](path: Path, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    ConfigSource.file(path).at(namespace).loadF[F, A]
 
   /**
    * Load a configuration of type `A` from the given `Config`
@@ -78,9 +81,8 @@ package object catseffect {
    *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def loadConfigF[F[_], A](conf: TypesafeConfig)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
-    configToF(() => pureconfig.loadConfig[A](conf))
-  }
+  def loadConfigF[F[_], A](conf: TypesafeConfig)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    ConfigSource.fromConfig(conf).loadF[F, A]
 
   /**
    * Load a configuration of type `A` from the given `Config`
@@ -88,9 +90,8 @@ package object catseffect {
    *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def loadConfigF[F[_], A](conf: TypesafeConfig, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
-    configToF(() => pureconfig.loadConfig[A](conf, namespace))
-  }
+  def loadConfigF[F[_], A](conf: TypesafeConfig, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    ConfigSource.fromConfig(conf).at(namespace).loadF[F, A]
 
   /**
    * Save the given configuration into a property file
@@ -134,5 +135,5 @@ package object catseffect {
    * @param files Files ordered in decreasing priority containing part or all of a `A`. Must not be empty.
    */
   def loadConfigFromFilesF[F[_], A](files: NonEmptyList[Path])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    configToF(() => pureconfig.loadConfigFromFiles(files.toList))
+    files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(pureconfig.filesReduceFunc()).loadF[F, A]
 }

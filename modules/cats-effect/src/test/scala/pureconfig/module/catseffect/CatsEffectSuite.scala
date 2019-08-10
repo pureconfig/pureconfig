@@ -3,12 +3,11 @@ package pureconfig.module.catseffect
 import java.io._
 
 import cats.effect.IO
-import pureconfig.BaseSuite
+import pureconfig.{ BaseSuite, ConfigSource }
 import pureconfig.error.{ ConfigReaderException, ConvertFailure }
 import pureconfig.generic.auto._
 import java.nio.file.{ Path, Paths }
 
-import cats.data.NonEmptyList
 import com.typesafe.config.ConfigFactory
 
 class CatsEffectSuite extends BaseSuite {
@@ -26,8 +25,8 @@ class CatsEffectSuite extends BaseSuite {
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
 
-  it should "fail when the expected file is not present" in {
-    val load = loadConfigF[IO, SomeCaseClass]("non-existent-namespace")
+  "ConfigSource#loadF" should "fail when the expected file is not present" in {
+    val load = ConfigSource.default.at("non-existent-namespace").loadF[IO, SomeCaseClass]
 
     a[ConfigReaderException[SomeCaseClass]] should be thrownBy load.unsafeRunSync()
   }
@@ -35,7 +34,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "run successfully when correctly formatted file is specified as path" in {
     val propertiesPath = getPath("application.properties")
 
-    val load = loadConfigF[IO, SomeCaseClass](propertiesPath)
+    val load = ConfigSource.file(propertiesPath).loadF[IO, SomeCaseClass]
 
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
@@ -43,7 +42,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "fail when a file does not specify required keys" in {
     val propertiesPath = getPath("wrong.properties")
 
-    val load = loadConfigF[IO, SomeCaseClass](propertiesPath)
+    val load = ConfigSource.file(propertiesPath).loadF[IO, SomeCaseClass]
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]
@@ -52,7 +51,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "run successfully from a Typesafe Config object" in {
     val config = ConfigFactory.load("application.properties")
 
-    val load = loadConfigF[IO, SomeCaseClass](config)
+    val load = ConfigSource.fromConfig(config).loadF[IO, SomeCaseClass]
 
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
@@ -60,7 +59,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "run successfully from a Typesafe Config object with a namespace" in {
     val config = ConfigFactory.load("namespaced.properties")
 
-    val load = loadConfigF[IO, SomeCaseClass](config, "somecaseclass")
+    val load = ConfigSource.fromConfig(config).at("somecaseclass").loadF[IO, SomeCaseClass]
 
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
@@ -68,7 +67,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "fail when ran with a Typesafe Config object that doesn't match the format" in {
     val config = ConfigFactory.load("wrong.properties")
 
-    val load = loadConfigF[IO, SomeCaseClass](config)
+    val load = ConfigSource.fromConfig(config).loadF[IO, SomeCaseClass]
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]
@@ -77,7 +76,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "fail if the Typesafe config object doesn't have the required field in a namespace" in {
     val config = ConfigFactory.load("namespaced-wrong.properties")
 
-    val load = loadConfigF[IO, SomeCaseClass](config, "somecaseclass")
+    val load = ConfigSource.fromConfig(config).at("somecaseclass").loadF[IO, SomeCaseClass]
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]
@@ -95,19 +94,5 @@ class CatsEffectSuite extends BaseSuite {
     save.unsafeRunSync()
 
     pipeInput.available should be > 0
-  }
-
-  "loadConfigFromFilesF" should "combine multiple config files" in {
-    val paths = NonEmptyList.of(getPath("multiple/one.properties"), getPath("multiple/two.properties"))
-
-    val load = loadConfigFromFilesF[IO, SomeCaseClass](paths)
-
-    load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
-  }
-
-  it should "fail when not all fields can be read" in {
-    val load = loadConfigFromFilesF[IO, SomeCaseClass](NonEmptyList.of(getPath("multiple/one.properties")))
-
-    a[ConfigReaderException[SomeCaseClass]] should be thrownBy load.unsafeRunSync()
   }
 }
