@@ -40,27 +40,35 @@ object ConfigFactoryWrapper {
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(file: File): ConfigReader.Result[Config] =
-    unsafeToReaderResult(ConfigFactory.parseFile(file, strictSettings), Some(file.toPath))
+    unsafeToReaderResult(
+      ConfigFactory.parseFile(file, strictSettings),
+      onIOFailure = Some(CannotReadFile(file.toPath, _)))
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): ConfigReader.Result[Config] =
-    unsafeToReaderResult(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
+    unsafeToReaderResult(
+      ConfigFactory.parseFile(path.toFile, strictSettings),
+      onIOFailure = Some(CannotReadFile(path, _)))
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseResources(resource: String): ConfigReader.Result[Config] =
-    unsafeToReaderResult(ConfigFactory.parseResources(resource, strictSettings)) // TODO
+    unsafeToReaderResult(
+      ConfigFactory.parseResources(resource, strictSettings),
+      onIOFailure = Some(CannotReadResource(resource, _)))
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseURL(url: URL): ConfigReader.Result[Config] =
-    unsafeToReaderResult(ConfigFactory.parseURL(url, strictSettings)) // TODO
+    unsafeToReaderResult(
+      ConfigFactory.parseURL(url, strictSettings),
+      onIOFailure = Some(CannotReadUrl(url, _)))
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =
     parseFile(path.toFile).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
 
-  private def unsafeToReaderResult[A](f: => A, path: Option[Path] = None): ConfigReader.Result[A] = {
+  private def unsafeToReaderResult[A](f: => A, onIOFailure: Option[Option[Throwable] => CannotRead] = None): ConfigReader.Result[A] = {
     try Right(f) catch {
-      case e: ConfigException.IO if path.nonEmpty => ConfigReader.Result.fail(CannotReadFile(path.get, Option(e.getCause)))
+      case e: ConfigException.IO if onIOFailure.nonEmpty => ConfigReader.Result.fail(onIOFailure.get(Option(e.getCause)))
       case e: ConfigException.Parse =>
         val msg = (if (e.origin != null)
           // Removing the error origin from the exception message since origin is stored and used separately:
