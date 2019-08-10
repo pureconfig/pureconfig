@@ -2,8 +2,6 @@ import Dependencies._
 
 name := "pureconfig-macros"
 
-crossScalaVersions ~= { _ :+ "2.13.0" }
-
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided)

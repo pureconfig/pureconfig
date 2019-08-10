@@ -1,5 +1,7 @@
 name := "pureconfig-cats"
 
+crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
+
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "1.6.1",
   "org.typelevel" %% "cats-laws" % "1.6.1" % "test")

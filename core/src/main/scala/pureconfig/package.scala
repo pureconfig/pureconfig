@@ -21,7 +21,7 @@ package object pureconfig {
   // retrieves a value from a namespace, returning a failure if:
   //   - one of the parent keys doesn't exist or isn't an object;
   //   - `allowNullLeaf` is false and the leaf key doesn't exist.
-  private[this] def getValue(conf: TypesafeConfig, namespace: String, allowNullLeaf: Boolean): ConfigReader.Result[ConfigCursor] = {
+  private[pureconfig] def getValue(confValue: ConfigValue, namespace: String, allowNullLeaf: Boolean): ConfigReader.Result[ConfigCursor] = {
     def getValue(cur: ConfigCursor, path: List[String]): ConfigReader.Result[ConfigCursor] = path match {
       case Nil => Right(cur)
       case key :: remaining => for {
@@ -32,15 +32,15 @@ package object pureconfig {
     }
 
     // we're not expecting any exception here, this `try` is just for extra safety
-    try getValue(ConfigCursor(conf.root(), Nil), splitPath(namespace)) catch {
+    try getValue(ConfigCursor(confValue, Nil), splitPath(namespace)) catch {
       case ex: ConfigException => ConfigReader.Result.fail(ThrowableFailure(ex, ConfigValueLocation(ex.origin())))
     }
   }
 
   // loads a value from a config in a given namespace. All `loadConfig` methods _must_ use this method to get correct
   // namespace handling, both in the values to load and in the error messages.
-  private[this] def loadValue[A](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] = {
-    getValue(conf, namespace, reader.value.isInstanceOf[ReadsMissingKeys]).right.flatMap(reader.value.from)
+  private[pureconfig] def loadValue[A](configValue: ConfigValue, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] = {
+    getValue(configValue, namespace, reader.value.isInstanceOf[ReadsMissingKeys]).right.flatMap(reader.value.from)
   }
 
   /**
@@ -65,7 +65,7 @@ package object pureconfig {
     for {
       _ <- invalidateCaches().right
       rawConfig <- load().right
-      config <- loadValue[Config](rawConfig, namespace).right
+      config <- loadValue[Config](rawConfig.root(), namespace).right
     } yield config
   }
 
@@ -93,17 +93,17 @@ package object pureconfig {
     for {
       _ <- invalidateCaches().right
       rawConfig <- loadFile(path).right
-      config <- loadValue[Config](rawConfig, namespace).right
+      config <- loadValue[Config](rawConfig.root(), namespace).right
     } yield config
   }
 
   /** Load a configuration of type `Config` from the given `Config` */
   def loadConfig[Config](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
-    loadValue(conf, "")
+    loadValue(conf.root(), "")
 
   /** Load a configuration of type `Config` from the given `Config` */
   def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
-    loadValue(conf, namespace)
+    loadValue(conf.root(), namespace)
 
   /**
    * Load a configuration of type `Config` from the given `Config`, falling back to the default configuration

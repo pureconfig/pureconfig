@@ -38,5 +38,5 @@ class ScalazLawsSuite extends FunSuite with Checkers {
 }
 
 object ScalazLawsSuite {
-  def properties2prop(ps: Properties): Prop = Prop.all(ps.properties.map(_._2): _*)
+  def properties2prop(ps: Properties): Prop = Prop.all(ps.properties.map(_._2).toSeq: _*)
 }
