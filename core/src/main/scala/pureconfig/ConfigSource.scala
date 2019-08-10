@@ -11,7 +11,7 @@ import pureconfig.ConfigReader.Result
 import pureconfig.backend.{ ConfigFactoryWrapper, PathUtil }
 import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
 
-trait ConfigSource { outer =>
+trait ConfigSource {
   def value: Result[ConfigValue]
 
   def cursor: Result[ConfigCursor] =
@@ -63,7 +63,7 @@ object ConfigSource {
   val defaultReference = ConfigObjectSource(ConfigFactoryWrapper.defaultReference())
   val defaultApplication = ConfigObjectSource(ConfigFactoryWrapper.defaultApplication())
 
-  val defaultReferenceUnresolved = ConfigObjectSource(ConfigFactoryWrapper.parseResources("reference.conf"))
+  val defaultReferenceUnresolved = resources("reference.conf")
 
   def file(path: String) = ConfigObjectSource(ConfigFactoryWrapper.parseFile(new File(path)))
   def file(path: Path) = ConfigObjectSource(ConfigFactoryWrapper.parseFile(path.toFile))
