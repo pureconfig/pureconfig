@@ -34,6 +34,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
+  @deprecated("Use `ConfigSource.default.at(namespace).load[Config]` instead", "0.12.0")
   def loadConfig[Config](namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.default.at(namespace).load[Config]
 
@@ -45,6 +46,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
+  @deprecated("Use `ConfigSource.file(path).load[Config]` instead", "0.12.0")
   def loadConfig[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.file(path).load[Config]
 
@@ -57,14 +59,17 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
+  @deprecated("Use `ConfigSource.file(path).at(namespace).load[Config]` instead", "0.12.0")
   def loadConfig[Config](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.file(path).at(namespace).load[Config]
 
   /** Load a configuration of type `Config` from the given `Config` */
+  @deprecated("Use `ConfigSource.fromConfig(conf).load[Config]` instead", "0.12.0")
   def loadConfig[Config](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.fromConfig(conf).load[Config]
 
   /** Load a configuration of type `Config` from the given `Config` */
+  @deprecated("Use `ConfigSource.fromConfig(conf).at(namespace).load[Config]` instead", "0.12.0")
   def loadConfig[Config](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.fromConfig(conf).at(namespace).load[Config]
 
@@ -76,6 +81,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
+  @deprecated("Use `ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).load[Config]` instead", "0.12.0")
   def loadConfigWithFallback[Config](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).load[Config]
 
@@ -88,6 +94,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
+  @deprecated("Use `ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).load[Config]` instead", "0.12.0")
   def loadConfigWithFallback[Config](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).load[Config]
 
@@ -107,6 +114,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.default.at(namespace).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.default.at(namespace).loadOrThrow[Config]
 
@@ -117,6 +125,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.file(path).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.file(path).loadOrThrow[Config]
 
@@ -128,6 +137,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.file(path).at(namespace).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.file(path).at(namespace).loadOrThrow[Config]
 
@@ -138,6 +148,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.fromConfig(conf).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.fromConfig(conf).loadOrThrow[Config]
 
@@ -149,6 +160,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.fromConfig(conf).at(namespace).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.fromConfig(conf).at(namespace).loadOrThrow[Config]
 
@@ -159,6 +171,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigWithFallbackOrThrow[Config: ClassTag](conf: TypesafeConfig)(implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).loadOrThrow[Config]
 
@@ -170,6 +183,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigWithFallbackOrThrow[Config: ClassTag](conf: TypesafeConfig, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).loadOrThrow[Config]
 
@@ -238,6 +252,7 @@ package object pureconfig {
    * @param failOnReadError Where to return an error if any files fail to read
    * @param namespace       the base namespace from which the configuration should be load
    */
+  @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFiles[Config](files: Traversable[Path], failOnReadError: Boolean = false, namespace: String = "")(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
     files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(filesReduceFunc(failOnReadError)).at(namespace).load[Config]
   }
@@ -247,6 +262,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesOrThrow[Config: ClassTag](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(filesReduceFunc()).loadOrThrow[Config]
   }

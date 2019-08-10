@@ -14,6 +14,9 @@ import pureconfig.error._
 import pureconfig.generic.ProductHint
 import pureconfig.generic.auto._
 
+// We are testing deprecated methods, but we want to keep this in place to prevent regressions
+// until we delete them. We need the annotation here to silence compiler warnings.
+@deprecated("Construct a `ConfigSource` pipeline instead", "0.12.0")
 class ApiSuite extends BaseSuite {
 
   behavior of "pureconfig"
