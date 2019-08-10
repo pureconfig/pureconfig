@@ -1,5 +1,7 @@
 package pureconfig.backend
 
+import java.io.File
+import java.net.URL
 import java.nio.file.Path
 
 import scala.util.control.NonFatal
@@ -23,17 +25,38 @@ object ConfigFactoryWrapper {
   def load(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.load())
 
+  def defaultReference(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.defaultReference())
+
+  def defaultApplication(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.defaultApplication())
+
+  def systemProperties(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.systemProperties())
+
   /** @see `com.typesafe.config.ConfigFactory.parseString()` */
   def parseString(s: String): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.parseString(s))
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
+  def parseFile(file: File): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.parseFile(file, strictSettings), Some(file.toPath))
+
+  /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
 
+  /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
+  def parseResources(resource: String): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.parseResources(resource, strictSettings)) // TODO
+
+  /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
+  def parseURL(url: URL): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.parseURL(url, strictSettings)) // TODO
+
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =
-    parseFile(path).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
+    parseFile(path.toFile).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
 
   private def unsafeToReaderResult[A](f: => A, path: Option[Path] = None): ConfigReader.Result[A] = {
     try Right(f) catch {

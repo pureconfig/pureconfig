@@ -57,7 +57,11 @@ class ApiSuite extends BaseSuite {
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0F))
 
-    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
+    // With the introduction of `ConfigSource`s we dropped support for reading missing
+    // keys as `None` when an `Option[A]` is loaded as a root value
+    // loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") should failWith(
+      KeyNotFound("h", Set.empty), "foo.bar")
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(
       WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
