@@ -1,5 +1,7 @@
 name := "pureconfig-fs2"
 
+crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
+
 libraryDependencies ++= Seq(
   "co.fs2" %% "fs2-core" % "1.0.5",
   "co.fs2" %% "fs2-io" % "1.0.5")

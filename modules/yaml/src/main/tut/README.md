@@ -46,3 +46,9 @@ We can load the configuration to a `MyConf` instance using `loadYaml`:
 ```tut:book
 loadYaml[Person](yamlFile)
 ```
+
+We can also load a particular namespace inside the YAML file:
+
+```tut:book
+loadYaml[Int](yamlFile, "age")
+```
