@@ -28,23 +28,23 @@ trait ConfigSource {
    *
    * @return a `ConfigValue` retrieved from this source.
    */
-  def value: Result[ConfigValue]
+  def value(): Result[ConfigValue]
 
   /**
    * Returns a cursor for a `ConfigValue` retrieved from this source.
    *
    * @return a cursor for a `ConfigValue` retrieved from this source.
    */
-  def cursor: Result[ConfigCursor] =
-    value.right.map(ConfigCursor(_, Nil))
+  def cursor(): Result[ConfigCursor] =
+    value().right.map(ConfigCursor(_, Nil))
 
   /**
    * Returns a fluent cursor for a `ConfigValue` retrieved from this source.
    *
    * @return a fluent cursor for a `ConfigValue` retrieved from this source.
    */
-  def fluentCursor: FluentConfigCursor =
-    FluentConfigCursor(cursor)
+  def fluentCursor(): FluentConfigCursor =
+    FluentConfigCursor(cursor())
 
   /**
    * Navigates through the config to focus on a namespace.
@@ -53,7 +53,7 @@ trait ConfigSource {
    * @return a new `ConfigSource` focused on the given namespace.
    */
   def at(namespace: String): ConfigSource =
-    ConfigSource.fromCursor(fluentCursor.at(PathUtil.splitPath(namespace).map(p => p: PathSegment): _*))
+    ConfigSource.fromCursor(fluentCursor().at(PathUtil.splitPath(namespace).map(p => p: PathSegment): _*))
 
   /**
    * Loads a configuration of type `A` from this source.
@@ -63,7 +63,7 @@ trait ConfigSource {
    *         `A` from this source, a `Failure` with details on why it isn't possible otherwise
    */
   def load[A](implicit reader: Derivation[ConfigReader[A]]): Result[A] =
-    cursor.right.flatMap(reader.value.from)
+    cursor().right.flatMap(reader.value.from)
 
   /**
    * Loads a configuration of type `A` from this source. If it is not possible to create an
@@ -89,7 +89,7 @@ trait ConfigSource {
  */
 final class ConfigObjectSource private (config: => Result[Config]) extends ConfigSource {
 
-  def value: Result[ConfigObject] =
+  def value(): Result[ConfigObject] =
     config.right.map(_.resolve.root)
 
   /**
@@ -102,7 +102,7 @@ final class ConfigObjectSource private (config: => Result[Config]) extends Confi
    *         fallback for this source
    */
   def withFallback(cs: ConfigObjectSource): ConfigObjectSource =
-    new ConfigObjectSource(Result.zipWith(config, cs.value.right.map(_.toConfig))(_.withFallback(_)))
+    new ConfigObjectSource(Result.zipWith(config, cs.value().right.map(_.toConfig))(_.withFallback(_)))
 
   /**
    * Returns a `ConfigObjectSource` that provides the same config as this one, but falls back to
@@ -268,7 +268,7 @@ object ConfigSource {
    * @return a `ConfigSource` providing the given cursor.
    */
   def fromCursor(cur: ConfigCursor): ConfigSource = new ConfigSource {
-    def value: Result[ConfigValue] = Right(cur.value)
+    def value(): Result[ConfigValue] = Right(cur.value)
   }
 
   /**
@@ -278,6 +278,6 @@ object ConfigSource {
    * @return a `ConfigSource` providing the given cursor.
    */
   def fromCursor(cur: FluentConfigCursor): ConfigSource = new ConfigSource {
-    def value: Result[ConfigValue] = cur.cursor.right.map(_.value)
+    def value(): Result[ConfigValue] = cur.cursor.right.map(_.value)
   }
 }

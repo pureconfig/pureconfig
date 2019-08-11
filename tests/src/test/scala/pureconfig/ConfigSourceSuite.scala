@@ -186,8 +186,8 @@ class ConfigSourceSuite extends BaseSuite {
     val cursor = ConfigCursor(conf.root(), Nil)
 
     ConfigSource.fromCursor(cursor).load[Conf] shouldBe Right(Conf(0.5D, 10))
-    ConfigSource.fromCursor(cursor).cursor shouldBe Right(cursor)
-    ConfigSource.fromCursor(cursor.fluent).fluentCursor shouldBe cursor.fluent
+    ConfigSource.fromCursor(cursor).cursor() shouldBe Right(cursor)
+    ConfigSource.fromCursor(cursor.fluent).fluentCursor() shouldBe cursor.fluent
   }
 
   it should "define an empty source" in {
