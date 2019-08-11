@@ -89,18 +89,18 @@ class ApiSuite extends BaseSuite {
   }
 
   it should "loadConfig from a configuration file" in {
-    case class Conf(s: String, b: Boolean)
+    case class Conf(s: String, b: Boolean, sref: String) // sref defined in reference.conf
     val path = createTempFile("""{ b: true, s: "str" }""")
-    loadConfig[Conf](path = path) shouldBe Right(Conf("str", true))
+    loadConfig[Conf](path = path) shouldBe Right(Conf("str", true, "wow"))
     loadConfig[Conf](path = nonExistingPath) should failLike {
       case CannotReadFile(path, _) => be(path)(nonExistingPath)
     }
   }
 
   it should "loadConfig from a configuration file with a namespace" in {
-    case class Conf(s: String, b: Boolean)
+    case class Conf(s: String, b: Boolean, sref: String) // foo.bar.sref defined in reference.conf
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
-    loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true))
+    loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true, "foowow"))
     loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failLike {
       case CannotReadFile(path, _) => be(path)(nonExistingPath)
     }
@@ -172,6 +172,12 @@ class ApiSuite extends BaseSuite {
     case class Conf(f: Float)
     val files = Set.empty[Path]
     loadConfigFromFiles[Conf](files) should failWithType[KeyNotFound] // f is missing
+  }
+
+  it should "merge reference.conf with the provided files" in {
+    case class Conf(b: Boolean, d: Double, sref: String) // sref defined in reference.conf
+    val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf")
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D, "wow"))
   }
 
   it should "ignore files that don't exist when failOnReadError is false" in {

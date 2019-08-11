@@ -61,9 +61,9 @@ package object catseffect {
    *         `A` from the configuration file, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  @deprecated("Use `ConfigSource.file(path).loadF[F, A]` instead", "0.12.0")
+  @deprecated("Use `ConfigSource.applicationConf(ConfigSource.file(path)).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](path: Path)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.file(path).loadF[F, A]
+    ConfigSource.applicationConf(ConfigSource.file(path)).loadF[F, A]
 
   /**
    * Load a configuration of type `A` from the given file. Note that standard configuration
@@ -75,9 +75,9 @@ package object catseffect {
    *         `A` from the configuration file, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  @deprecated("Use `ConfigSource.file(path).at(namespace).loadF[F, A]` instead", "0.12.0")
+  @deprecated("Use `ConfigSource.applicationConf(ConfigSource.file(path)).at(namespace).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](path: Path, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.file(path).at(namespace).loadF[F, A]
+    ConfigSource.applicationConf(ConfigSource.file(path)).at(namespace).loadF[F, A]
 
   /**
    * Load a configuration of type `A` from the given `Config`
@@ -142,7 +142,8 @@ package object catseffect {
    */
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesF[F[_], A](files: NonEmptyList[Path])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    files.map(ConfigSource.file(_).optional)
-      .foldLeft(ConfigSource.empty)(_.withFallback(_))
+    ConfigSource.applicationConf(
+      files.map(ConfigSource.file(_).optional)
+        .foldLeft(ConfigSource.empty)(_.withFallback(_)))
       .loadF[F, A]
 }
