@@ -87,7 +87,7 @@ trait ConfigSource {
  * @param config the thunk to generate a `Config` instance. This parameter won't be memoized so it
  *               can be used with dynamic sources (e.g. URLs)
  */
-class ConfigObjectSource(config: => Result[Config]) extends ConfigSource {
+final class ConfigObjectSource private (config: => Result[Config]) extends ConfigSource {
 
   def value: Result[ConfigObject] =
     config.right.map(_.resolve.root)
