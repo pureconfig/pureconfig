@@ -25,7 +25,7 @@ In order to read an instance of a given type `T` from a config, PureConfig needs
 of `ConfigReader[T]`. This won't compile because there's no `ConfigReader` instance for `MyInt`:
 
 ```tut:book:fail
-loadConfig[Conf](ConfigFactory.parseString("{ n: 1 }"))
+ConfigSource.string("{ n: 1 }").load[Conf]
 ```
 
 PureConfig can be extended to support those types. To do so, an instance for the `ConfigReader` type class must be
@@ -70,7 +70,7 @@ list of errors. You can read more about cursors at [Config Cursors](config-curso
 Using any of the approaches above would now make `loadConfig` work:
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("{ n: 1 }"))
+ConfigSource.string("{ n: 1 }").load[Conf]
 ```
 
 The case above serves as an example for most simple types. While for those types it is straightforward to create a

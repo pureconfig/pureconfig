@@ -33,7 +33,7 @@ val conf = parseString(
     |      <person firstName="Another" lastName="Person" />
     |    </people>\"\"\"
     |}""".stripMargin)
-loadConfig[Config](conf)
+ConfigSource.fromConfig(conf).load[Config]
 ```
 
 ## Notes

@@ -45,5 +45,5 @@ val conf = parseString("""{
   path: "hdfs://some.domain/foo/bar.gz"
 }""")
 
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 ```

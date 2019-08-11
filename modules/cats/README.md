@@ -56,7 +56,7 @@ val conf = parseString("""{
 }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-chain":[1,2,3],"number-list":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-set":[1,2,3],"number-vector":[1,2,3]}))
 
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 // res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3),TreeSet(1, 2, 3),NonEmptyVector(1, 2, 3),Map(one -> 1, three -> 3, two -> 2),Chain(1, 2, 3)))
 ```
 
@@ -114,7 +114,7 @@ case class MyConfig2(a: Int, b: String)
 val conf = parseString("{}")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
 
-val res = loadConfig[MyConfig2](conf).left.map(_.toNonEmptyList)
+val res = ConfigSource.fromConfig(conf).load[MyConfig2].left.map(_.toNonEmptyList)
 // res: scala.util.Either[cats.data.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig2] = Left(NonEmptyList(ConvertFailure(KeyNotFound(a,Set()),None,), ConvertFailure(KeyNotFound(b,Set()),None,)))
 ```
 

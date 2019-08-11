@@ -30,5 +30,5 @@ We can read a `MyConfig` with the following code:
 ```tut:book
 val conf = parseString("""{ schedule: "10-35 2,4,6 * ? * *" }""")
 
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 ```

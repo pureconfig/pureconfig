@@ -25,7 +25,7 @@ case class BirdConf(canFly: Boolean) extends AnimalConf
 This will load a `DogConf` instance:
 
 ```tut:book
-loadConfig[AnimalConf](ConfigFactory.parseString("{ type: dog-conf, age: 4 }"))
+ConfigSource.string("{ type: dog-conf, age: 4 }").load[AnimalConf]
 ```
 
 For sealed families, PureConfig provides a way to customize the conversion
@@ -45,7 +45,7 @@ implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
 Then load the config:
 
 ```tut:book
-loadConfig[AnimalConf](ConfigFactory.parseString("{ kind: dog-conf, age: 4 }"))
+ConfigSource.string("{ kind: dog-conf, age: 4 }").load[AnimalConf]
 ```
 
 `FieldCoproductHint` can also be adapted to write class names in a different
@@ -60,7 +60,7 @@ implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
 Then load the config:
 
 ```tut:book
-loadConfig[AnimalConf](ConfigFactory.parseString("{ type: Bird, can-fly: true }"))
+ConfigSource.string("{ type: Bird, can-fly: true }").load[AnimalConf]
 ```
 
 If you encode enumerations using sealed traits of case objects, you can use the
@@ -84,7 +84,7 @@ case class MyConf(list: List[Season])
 We can load seasons by specifying them by class name:
 
 ```tut:book
-loadConfig[MyConf](ConfigFactory.parseString("{ list: [spring, summer, autumn, winter] }"))
+ConfigSource.string("{ list: [spring, summer, autumn, winter] }").load[MyConf]
 ```
 
 By default, enumerations will be encoded as strings with the `kebab-case`
@@ -102,5 +102,5 @@ case class ColorList(colors: List[Color])
 ```
 
 ```tut:book
-loadConfig[ColorList](ConfigFactory.parseString("{ colors: [rainy_blue, sunny_yellow] }"))
+ConfigSource.string("{ colors: [rainy_blue, sunny_yellow] }").load[ColorList]
 ```

@@ -85,11 +85,11 @@ case class SuperSecretConfig(
 Then when we print out the `SuperSecretConfig` after loading it via PureConfig, the sensitive values are masked:
 
 ```tut:book
-val secret = loadConfigOrThrow[SuperSecretConfig](ConfigFactory.parseString("""{
+val secret = ConfigSource.string("""{
   username: john.smith
   password: password123
   api-key: 8ef72f48-2143-48af-9573-3b519bbcb777
-}"""))
+}""").loadOrThrow[SuperSecretConfig]
 ```
 
 But, of course, the values we need are still there:

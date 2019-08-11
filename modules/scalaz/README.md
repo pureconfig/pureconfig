@@ -53,7 +53,7 @@ val scalazConf = parseString("""{
 }""")
 // scalazConf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-lst":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-maybe":1,"number-nel":[1,2,3],"number-set":[1,2,3]}))
 
-loadConfig[ScalazConfig](scalazConf)
+ConfigSource.fromConfig(scalazConf).load[ScalazConfig]
 // res0: pureconfig.ConfigReader.Result[ScalazConfig] = Right(ScalazConfig([1,2,3],Bin(2,Bin(1,Tip(),Tip()),Bin(3,Tip(),Tip())),NonEmpty[1,2,3],Bin(three,3,Bin(one,1,Tip,Tip),Bin(two,2,Tip,Tip)),Just(1)))
 ```
 
@@ -131,7 +131,7 @@ case class MyConfig(i: Int, s: String)
 val myConf = parseString("{}")
 // myConf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
 
-val res = loadConfig[MyConfig](myConf).left.map(_.toNel)
+val res = ConfigSource.fromConfig(myConf).load[MyConfig].left.map(_.toNel)
 // res: scala.util.Either[scalaz.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig] = Left(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),None,),ConvertFailure(KeyNotFound(s,Set()),None,)])
 ```
 

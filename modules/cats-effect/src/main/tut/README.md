@@ -33,7 +33,7 @@ import cats.effect.IO
 
 case class MyConfig(somefield: Int, anotherfield: String)
 
-val load: IO[MyConfig] = loadConfigF[IO, MyConfig](somePath)
+val load: IO[MyConfig] = ConfigSource.file(somePath).loadF[IO, MyConfig]
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:

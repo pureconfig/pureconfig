@@ -19,6 +19,7 @@ First, let's define an example case class and a config for us to load:
 
 ```tut:silent
 import com.typesafe.config.ConfigFactory
+import pureconfig._
 
 case class Person(name: String, surname: String)
 
@@ -35,7 +36,7 @@ import pureconfig.generic.auto._
 This import provides `ConfigReader` instances for all supported classes out-of-the-box:
 
 ```tut:book
-pureconfig.loadConfig[Person](conf)
+ConfigSource.fromConfig(conf).load[Person]
 ```
 
 Internally, derivation is made through the use of [shapeless](https://github.com/milessabin/shapeless), a generic
@@ -55,6 +56,7 @@ reader for `Person` by calling `deriveReader`:
 
 ```tut:invisible:reset
 import com.typesafe.config.ConfigFactory
+import pureconfig._
 
 case class Person(name: String, surname: String)
 
@@ -70,7 +72,7 @@ implicit val personReader = deriveReader[Person]
 We are now ready to read `Person` configs:
 
 ```tut:book
-pureconfig.loadConfig[Person](conf)
+ConfigSource.fromConfig(conf).load[Person]
 ```
 
 ### Manual
@@ -94,7 +96,7 @@ implicit val personReader = ConfigReader.forProduct2("name", "surname")(Person(_
 ```
 
 ```tut:book
-pureconfig.loadConfig[Person](conf)
+ConfigSource.fromConfig(conf).load[Person]
 ```
 
 If you don't need reader or writer derivation anywhere in your project, you can replace the `pureconfig` Maven

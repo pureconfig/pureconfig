@@ -32,5 +32,5 @@ implicit val intMapReader = genericMapReader[Int, Int](catchReadError(_.toInt))
 Then load the configuration:
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("{ date: 2011-12-03, int-map: { 2: 4, 4: 16 } }"))
+ConfigSource.string("{ date: 2011-12-03, int-map: { 2: 4, 4: 16 } }").load[Conf]
 ```

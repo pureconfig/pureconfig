@@ -52,7 +52,7 @@ val conf = parseString("""{
 }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"SHOUT_GOOD_BYE","start":"hello"}))
 
-loadConfig[GreetingConf](conf)
+ConfigSource.fromConfig(conf).load[GreetingConf]
 // res0: pureconfig.ConfigReader.Result[GreetingConf] = Right(GreetingConf(Hello,ShoutGoodBye))
 ```
 

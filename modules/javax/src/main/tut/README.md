@@ -27,7 +27,7 @@ case class MyConfig(principal: KerberosPrincipal)
 We can read a `MyConfig` like:
 ```tut:book
 val conf = parseString("""{ principal: "userid@tld.REALM" }""")
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 ```
 
 
