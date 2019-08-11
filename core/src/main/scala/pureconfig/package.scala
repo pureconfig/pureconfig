@@ -232,12 +232,6 @@ package object pureconfig {
     printOutputStream.close()
   }
 
-  private[pureconfig] def filesReduceFunc(failOnReadError: Boolean = false)(cs1: ConfigObjectSource, cs2: ConfigObjectSource): ConfigObjectSource =
-    if (failOnReadError) cs1.withFallback(cs2)
-    else cs1.withFallback(cs2.recoverWith {
-      case failures if failures.toList.exists(_.isInstanceOf[CannotReadFile]) => Right(ConfigFactory.empty)
-    })
-
   /**
    * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them
    * into a `Config`.
@@ -254,7 +248,11 @@ package object pureconfig {
    */
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFiles[Config](files: Traversable[Path], failOnReadError: Boolean = false, namespace: String = "")(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
-    files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(filesReduceFunc(failOnReadError)).at(namespace).load[Config]
+    files.map(ConfigSource.file)
+      .map(cs => if (failOnReadError) cs else cs.optional)
+      .foldLeft(ConfigSource.empty)(_.withFallback(_))
+      .at(namespace)
+      .load[Config]
   }
 
   /**
@@ -264,6 +262,8 @@ package object pureconfig {
   @throws[ConfigReaderException[_]]
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesOrThrow[Config: ClassTag](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Config = {
-    files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(filesReduceFunc()).loadOrThrow[Config]
+    files.map(ConfigSource.file(_).optional)
+      .foldLeft(ConfigSource.empty)(_.withFallback(_))
+      .loadOrThrow[Config]
   }
 }

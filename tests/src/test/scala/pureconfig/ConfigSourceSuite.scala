@@ -150,25 +150,25 @@ class ConfigSourceSuite extends BaseSuite {
     val overrides = ConfigSource.resources("conf/configSource/overrides.conf")
     val main = ConfigSource.resources("conf/configSource/main.conf")
 
-    overrides.
-      withOptionalFallback(main).
-      withOptionalFallback(defaults).
+    overrides.optional.
+      withFallback(main.optional).
+      withFallback(defaults.optional).
       at("my-service").load[MyService] shouldBe Right(MyService("example.com", 8081, true))
 
     val nonExisting1 = ConfigSource.resources("nonExistingResource1")
     val nonExisting2 = ConfigSource.resources("nonExistingResource2")
 
-    overrides.
-      withOptionalFallback(nonExisting1).
-      withOptionalFallback(main).
-      withOptionalFallback(defaults).
+    overrides.optional.
+      withFallback(nonExisting1.optional).
+      withFallback(main.optional).
+      withFallback(defaults.optional).
       at("my-service").load[MyService] shouldBe Right(MyService("example.com", 8081, true))
 
-    overrides.
-      withOptionalFallback(nonExisting1).
-      withOptionalFallback(main).
-      withOptionalFallback(nonExisting2).
-      withOptionalFallback(defaults).
+    overrides.optional.
+      withFallback(nonExisting1.optional).
+      withFallback(main.optional).
+      withFallback(nonExisting2.optional).
+      withFallback(defaults.optional).
       at("my-service").load[MyService] shouldBe Right(MyService("example.com", 8081, true))
   }
 

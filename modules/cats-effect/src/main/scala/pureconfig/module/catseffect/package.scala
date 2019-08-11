@@ -142,5 +142,7 @@ package object catseffect {
    */
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesF[F[_], A](files: NonEmptyList[Path])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    files.map(ConfigSource.file).foldLeft(ConfigSource.empty)(pureconfig.filesReduceFunc()).loadF[F, A]
+    files.map(ConfigSource.file(_).optional)
+      .foldLeft(ConfigSource.empty)(_.withFallback(_))
+      .loadF[F, A]
 }

@@ -9,7 +9,7 @@ import scala.reflect.ClassTag
 import com.typesafe.config._
 import pureconfig.ConfigReader.Result
 import pureconfig.backend.{ ConfigFactoryWrapper, PathUtil }
-import pureconfig.error.{ ConfigReaderException, ConfigReaderFailures }
+import pureconfig.error.{ CannotRead, ConfigReaderException, ConfigReaderFailures }
 
 /**
  * A representation of a source from which `ConfigValue`s can be loaded, such as a file or a URL.
@@ -105,16 +105,15 @@ class ConfigObjectSource(config: => Result[Config]) extends ConfigSource {
     new ConfigObjectSource(Result.zipWith(config, cs.value.right.map(_.toConfig))(_.withFallback(_)))
 
   /**
-   * Merges this source with another one, with the latter being used as a fallback (e.g. the
-   * source on which this method is called takes priority). If the provided source fails to produce
-   * a config it is ignored.
+   * Returns a `ConfigObjectSource` that provides the same config as this one, but falls back to
+   * providing an empty config when the source cannot be read. It can be used together with
+   * `.withFallback` to specify optional config files to be merged (like `reference.conf`).
    *
-   * @param cs the config source to use as fallback
-   * @return a new `ConfigObjectSource` that loads configs from both sources and uses `cs` as a
-   *         fallback for this source
+   * @return a new `ConfigObjectSource` that provides the same config as this one, but falls back
+   *         to an empty config if it cannot be read.
    */
-  def withOptionalFallback(cs: ConfigObjectSource): ConfigObjectSource =
-    withFallback(cs.recoverWith({ case _ => Right(ConfigFactory.empty) }))
+  def optional: ConfigObjectSource =
+    recoverWith { case ConfigReaderFailures(_: CannotRead, Nil) => Right(ConfigFactory.empty) }
 
   /**
    * Applies a function `f` if this source returns a failure, returning an alternative config in
