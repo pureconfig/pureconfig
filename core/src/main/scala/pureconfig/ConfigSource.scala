@@ -164,7 +164,8 @@ object ConfigSource {
    * A config source for the default loading process in Typesafe Config. Typesafe Config stacks
    * `reference.conf` resources provided by libraries, application configs (by default
    * `application.conf` in resources) and system property overrides, resolves them and merges them
-   * into a single config.
+   * into a single config. This source is equivalent to
+   * `defaultOverrides.withFallback(defaultApplication).withDefault(defaultReference)`.
    */
   val default = ConfigObjectSource(ConfigFactoryWrapper.load())
 
@@ -175,7 +176,8 @@ object ConfigSource {
 
   /**
    * A config source for the default reference config in Typesafe Config (`reference.conf`
-   * resources provided by libraries).
+   * resources provided by libraries). Like Typesafe Config, it provides an empty object if
+   * `reference.conf` files are not found.
    *
    * As required by
    * [[https://github.com/lightbend/config/blob/master/HOCON.md#conventional-configuration-files-for-jvm-apps the HOCON spec]],
@@ -188,13 +190,15 @@ object ConfigSource {
    * A config source for the default reference config in Typesafe Config (`reference.conf`
    * resources provided by libraries) before being resolved. This can be used as an alternative
    * to `defaultReference` for use cases that require `reference.conf` to depend on
-   * `application.conf`.
+   * `application.conf`. Like Typesafe Config, it provides an empty object if `reference.conf`
+   * files are not found.
    */
-  val defaultReferenceUnresolved = resources("reference.conf")
+  val defaultReferenceUnresolved = resources("reference.conf").optional
 
   /**
    * A config source for the default application config in Typesafe Config (by default
-   * `application.conf` in resources).
+   * `application.conf` in resources). Like Typesafe Config, it provides an empty object if
+   * application config files are not found.
    */
   val defaultApplication = ConfigObjectSource(ConfigFactoryWrapper.defaultApplication())
 
