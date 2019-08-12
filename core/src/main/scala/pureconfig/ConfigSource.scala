@@ -174,11 +174,6 @@ object ConfigSource {
   val empty = ConfigObjectSource(Right(ConfigFactory.empty))
 
   /**
-   * A config source for Java system properties.
-   */
-  val systemProperties = ConfigObjectSource(ConfigFactoryWrapper.systemProperties())
-
-  /**
    * A config source for the default reference config in Typesafe Config (`reference.conf`
    * resources provided by libraries).
    *
@@ -204,6 +199,17 @@ object ConfigSource {
   val defaultApplication = ConfigObjectSource(ConfigFactoryWrapper.defaultApplication())
 
   /**
+   * A config source for the default overrides in Typesafe Config (by default a map of system
+   * properties).
+   */
+  val defaultOverrides = ConfigObjectSource(ConfigFactoryWrapper.defaultOverrides())
+
+  /**
+   * A config source for Java system properties.
+   */
+  val systemProperties = ConfigObjectSource(ConfigFactoryWrapper.systemProperties())
+
+  /**
    * A config source for the default loading process in Typesafe Config with a custom application
    * config source. Typesafe Config stacks `reference.conf` resources provided by libraries, the
    * given file and system property overrides, resolves them and merges them into a single config.
@@ -217,7 +223,7 @@ object ConfigSource {
    *         custom application config source.
    */
   def applicationConf(appSource: ConfigObjectSource): ConfigObjectSource =
-    systemProperties.withFallback(appSource).withFallback(defaultReference)
+    defaultOverrides.withFallback(appSource).withFallback(defaultReference)
 
   /**
    * Returns a config source that provides configs read from a file.

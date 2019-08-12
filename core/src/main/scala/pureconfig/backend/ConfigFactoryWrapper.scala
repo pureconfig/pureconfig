@@ -31,6 +31,9 @@ object ConfigFactoryWrapper {
   def defaultApplication(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.defaultApplication())
 
+  def defaultOverrides(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.defaultOverrides())
+
   def systemProperties(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.systemProperties())
 
