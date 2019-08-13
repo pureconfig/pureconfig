@@ -170,6 +170,22 @@ object ConfigSource {
   val default = ConfigObjectSource(ConfigFactoryWrapper.load())
 
   /**
+   * A config source for the default loading process in Typesafe Config with a custom application
+   * config source. Typesafe Config stacks `reference.conf` resources provided by libraries, the
+   * given file and system property overrides, resolves them and merges them into a single config.
+   *
+   * This method is provided here to support use cases that previously depended on
+   * `ConfigFactory.load(config)`. Creating a custom source by merging the layers manually is
+   * usually recommended as it makes the config priorities more transparent.
+   *
+   * @param appSource the source providing the application config
+   * @return a `ConfigObjectSource` for the default loading process in Typesafe Config with a
+   *         custom application config source.
+   */
+  def default(appSource: ConfigObjectSource): ConfigObjectSource =
+    ConfigObjectSource(appSource.value().right.flatMap { cv => ConfigFactoryWrapper.load(cv.toConfig) })
+
+  /**
    * A config source that always provides empty configs.
    */
   val empty = ConfigObjectSource(Right(ConfigFactory.empty))
@@ -212,22 +228,6 @@ object ConfigSource {
    * A config source for Java system properties.
    */
   val systemProperties = ConfigObjectSource(ConfigFactoryWrapper.systemProperties())
-
-  /**
-   * A config source for the default loading process in Typesafe Config with a custom application
-   * config source. Typesafe Config stacks `reference.conf` resources provided by libraries, the
-   * given file and system property overrides, resolves them and merges them into a single config.
-   *
-   * This method is provided here to support use cases that previously depended on
-   * `ConfigFactory.load(config)`. Creating a custom source by merging the layers manually is
-   * usually recommended as it makes the config priorities more transparent.
-   *
-   * @param appSource the source providing the application config
-   * @return a `ConfigObjectSource` for the default loading process in Typesafe Config with a
-   *         custom application config source.
-   */
-  def applicationConf(appSource: ConfigObjectSource): ConfigObjectSource =
-    defaultOverrides.withFallback(appSource).withFallback(defaultReference)
 
   /**
    * Returns a config source that provides configs read from a file.

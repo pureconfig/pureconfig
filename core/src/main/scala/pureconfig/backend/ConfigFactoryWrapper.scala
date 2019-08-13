@@ -25,6 +25,10 @@ object ConfigFactoryWrapper {
   def load(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.load())
 
+  /** @see `com.typesafe.config.ConfigFactory.load(Config)` */
+  def load(conf: Config): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.load(conf))
+
   def defaultReference(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.defaultReference())
 

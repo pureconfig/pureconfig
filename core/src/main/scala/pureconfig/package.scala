@@ -46,9 +46,9 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  @deprecated("Use `ConfigSource.applicationConf(ConfigSource.file(path)).load[Config]` instead", "0.12.0")
+  @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).load[Config]` instead", "0.12.0")
   def loadConfig[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
-    ConfigSource.applicationConf(ConfigSource.file(path)).load[Config]
+    ConfigSource.default(ConfigSource.file(path)).load[Config]
 
   /**
    * Load a configuration of type `Config` from the given file. Note that standard configuration
@@ -59,9 +59,9 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
-  @deprecated("Use `ConfigSource.applicationConf(ConfigSource.file(path)).at(namespace).load[Config]` instead", "0.12.0")
+  @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).at(namespace).load[Config]` instead", "0.12.0")
   def loadConfig[Config](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
-    ConfigSource.applicationConf(ConfigSource.file(path)).at(namespace).load[Config]
+    ConfigSource.default(ConfigSource.file(path)).at(namespace).load[Config]
 
   /** Load a configuration of type `Config` from the given `Config` */
   @deprecated("Use `ConfigSource.fromConfig(conf).load[Config]` instead", "0.12.0")
@@ -125,9 +125,9 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  @deprecated("Use `ConfigSource.applicationConf(ConfigSource.file(path)).loadOrThrow[Config]` instead", "0.12.0")
+  @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Config =
-    ConfigSource.applicationConf(ConfigSource.file(path)).loadOrThrow[Config]
+    ConfigSource.default(ConfigSource.file(path)).loadOrThrow[Config]
 
   /**
    * Load a configuration of type `Config` from the given file. Note that standard configuration
@@ -137,9 +137,9 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
-  @deprecated("Use `ConfigSource.applicationConf(ConfigSource.file(path)).at(namespace).loadOrThrow[Config]` instead", "0.12.0")
+  @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).at(namespace).loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config =
-    ConfigSource.applicationConf(ConfigSource.file(path)).at(namespace).loadOrThrow[Config]
+    ConfigSource.default(ConfigSource.file(path)).at(namespace).loadOrThrow[Config]
 
   /**
    * Load a configuration of type `Config` from the given `Config`
@@ -248,7 +248,7 @@ package object pureconfig {
    */
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFiles[Config](files: Traversable[Path], failOnReadError: Boolean = false, namespace: String = "")(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
-    ConfigSource.applicationConf(
+    ConfigSource.default(
       files.map(ConfigSource.file)
         .map(cs => if (failOnReadError) cs else cs.optional)
         .foldLeft(ConfigSource.empty)(_.withFallback(_)))
@@ -263,7 +263,7 @@ package object pureconfig {
   @throws[ConfigReaderException[_]]
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesOrThrow[Config: ClassTag](files: Traversable[Path])(implicit reader: Derivation[ConfigReader[Config]]): Config = {
-    ConfigSource.applicationConf(
+    ConfigSource.default(
       files.map(ConfigSource.file(_).optional)
         .foldLeft(ConfigSource.empty)(_.withFallback(_)))
       .loadOrThrow[Config]
