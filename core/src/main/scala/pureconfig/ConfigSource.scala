@@ -158,6 +158,17 @@ object ConfigObjectSource {
     new ConfigObjectSource(cur.asObjectCursor.right.map(_.value.toConfig))
 }
 
+/**
+ * Object containing factory methods for building `ConfigSource`s.
+ *
+ * The sources provided here use Typesafe Config configs created from files, resources, URLs or
+ * strings. It also provides sources that delegate the loading component to Typesafe Config, to
+ * leverage reference configs and overrides, making it easy to switch from using `ConfigFactory`
+ * to `ConfigSource`.
+ *
+ * Other PureConfig modules may provide other ways or building config sources (e.g. for different
+ * config formats or data sources).
+ */
 object ConfigSource {
 
   /**
