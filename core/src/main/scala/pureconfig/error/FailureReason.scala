@@ -89,7 +89,7 @@ object KeyNotFound {
  * @param key the unknown key
  */
 final case class UnknownKey(key: String) extends FailureReason {
-  def description = s"Unknown key."
+  def description = s"Unknown key: $key"
 }
 
 /**
