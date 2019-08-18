@@ -29,15 +29,19 @@ object ConfigFactoryWrapper {
   def load(conf: Config): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.load(conf))
 
+  /** @see `com.typesafe.config.ConfigFactory.defaultReference()` */
   def defaultReference(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.defaultReference())
 
+  /** @see `com.typesafe.config.ConfigFactory.defaultApplication()` */
   def defaultApplication(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.defaultApplication())
 
+  /** @see `com.typesafe.config.ConfigFactory.defaultOverrides()` */
   def defaultOverrides(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.defaultOverrides())
 
+  /** @see `com.typesafe.config.ConfigFactory.systemProperties()` */
   def systemProperties(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.systemProperties())
 
@@ -57,13 +61,13 @@ object ConfigFactoryWrapper {
       ConfigFactory.parseFile(path.toFile, strictSettings),
       onIOFailure = Some(CannotReadFile(path, _)))
 
-  /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
+  /** @see `com.typesafe.config.ConfigFactory.parseResources()` */
   def parseResources(resource: String): ConfigReader.Result[Config] =
     unsafeToReaderResult(
       ConfigFactory.parseResources(resource, strictSettings),
       onIOFailure = Some(CannotReadResource(resource, _)))
 
-  /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
+  /** @see `com.typesafe.config.ConfigFactory.parseURL()` */
   def parseURL(url: URL): ConfigReader.Result[Config] =
     unsafeToReaderResult(
       ConfigFactory.parseURL(url, strictSettings),

@@ -75,14 +75,24 @@ final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigV
 }
 
 /**
- * A failure occurred due to the inability to read a requested file.
- *
- * @param path the file system path of the file that couldn't be read
- * @param reason an optional exception thrown when trying to read the file
+ * A failure occurred due to the inability to read a requested source (such as a file, a resource or a network
+ * location).
  */
 trait CannotRead extends ConfigReaderFailure {
+
+  /**
+   * The source name (like a file path or a URL)
+   */
   def sourceName: String
+
+  /**
+   * The source type
+   */
   def sourceType: String
+
+  /**
+   * An optional exception thrown when trying to read the source
+   */
   def reason: Option[Throwable]
 
   def description = reason match {

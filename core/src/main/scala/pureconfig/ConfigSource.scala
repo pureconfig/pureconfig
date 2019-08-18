@@ -176,7 +176,7 @@ object ConfigSource {
    * `reference.conf` resources provided by libraries, application configs (by default
    * `application.conf` in resources) and system property overrides, resolves them and merges them
    * into a single config. This source is equivalent to
-   * `defaultOverrides.withFallback(defaultApplication).withDefault(defaultReference)`.
+   * `defaultOverrides.withFallback(defaultApplication).withFallback(defaultReference)`.
    */
   val default = ConfigObjectSource(ConfigFactoryWrapper.load())
 
@@ -269,7 +269,7 @@ object ConfigSource {
    * local file or to a remote HTTP location.
    *
    * @param url the URL
-   * @return a config source that provides configs read from a file.
+   * @return a config source that provides configs read from a URL.
    */
   def url(url: URL) = ConfigObjectSource(ConfigFactoryWrapper.parseURL(url))
 
