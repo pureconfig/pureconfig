@@ -25,7 +25,7 @@ import pureconfig.error.{ CannotRead, ConfigReaderException, ConfigReaderFailure
 trait ConfigSource {
 
   /**
-   * Retrieves a `ConfigValue` from this source.
+   * Retrieves a `ConfigValue` from this source. This forces the config to be resolved, if needed.
    *
    * @return a `ConfigValue` retrieved from this source.
    */
@@ -85,13 +85,22 @@ trait ConfigSource {
 /**
  * A `ConfigSource` which is guaranteed to generate config objects (maps) as root values.
  *
- * @param config the thunk to generate a `Config` instance. This parameter won't be memoized so it
- *               can be used with dynamic sources (e.g. URLs)
+ * @param getConf the thunk to generate a `Config` instance. This parameter won't be memoized so it
+ *                can be used with dynamic sources (e.g. URLs)
  */
-final class ConfigObjectSource private (config: => Result[Config]) extends ConfigSource {
+final class ConfigObjectSource private (getConf: () => Result[Config]) extends ConfigSource {
 
   def value(): Result[ConfigObject] =
     config.right.flatMap(_.resolveSafe()).right.map(_.root)
+
+  /**
+   * Reads a `Config` from this config source. The returned config is usually unresolved, unless
+   * the source forces it otherwise.
+   *
+   * @return a `Config` provided by this source.
+   */
+  def config(): Result[Config] =
+    getConf()
 
   /**
    * Merges this source with another one, with the latter being used as a fallback (e.g. the
@@ -103,7 +112,7 @@ final class ConfigObjectSource private (config: => Result[Config]) extends Confi
    *         fallback for this source
    */
   def withFallback(cs: ConfigObjectSource): ConfigObjectSource =
-    new ConfigObjectSource(Result.zipWith(config, cs.value().right.map(_.toConfig))(_.withFallback(_)))
+    ConfigObjectSource(Result.zipWith(config(), cs.config())(_.withFallback(_)))
 
   /**
    * Returns a `ConfigObjectSource` that provides the same config as this one, but falls back to
@@ -125,7 +134,7 @@ final class ConfigObjectSource private (config: => Result[Config]) extends Confi
    *         fails
    */
   def recoverWith(f: PartialFunction[ConfigReaderFailures, Result[Config]]): ConfigObjectSource =
-    new ConfigObjectSource(config.left.flatMap(f))
+    ConfigObjectSource(getConf().left.flatMap(f))
 }
 
 object ConfigObjectSource {
@@ -138,7 +147,7 @@ object ConfigObjectSource {
    * @return a `ConfigObjectSource` providing the given config.
    */
   def apply(conf: => Result[Config]): ConfigObjectSource =
-    new ConfigObjectSource(conf)
+    new ConfigObjectSource(() => conf)
 
   /**
    * Creates a `ConfigObjectSource` from a `ConfigObjectCursor`.
@@ -147,7 +156,7 @@ object ConfigObjectSource {
    * @return a `ConfigObjectSource` providing the given cursor.
    */
   def fromCursor(cur: ConfigObjectCursor): ConfigObjectSource =
-    new ConfigObjectSource(Right(cur.value.toConfig))
+    new ConfigObjectSource(() => Right(cur.value.toConfig))
 
   /**
    * Creates a `ConfigObjectSource` from a `FluentConfigCursor`.
@@ -156,7 +165,7 @@ object ConfigObjectSource {
    * @return a `ConfigObjectSource` providing the given cursor.
    */
   def fromCursor(cur: FluentConfigCursor): ConfigObjectSource =
-    new ConfigObjectSource(cur.asObjectCursor.right.map(_.value.toConfig))
+    new ConfigObjectSource(() => cur.asObjectCursor.right.map(_.value.toConfig))
 }
 
 /**
@@ -195,7 +204,7 @@ object ConfigSource {
    *         custom application config source.
    */
   def default(appSource: ConfigObjectSource): ConfigObjectSource =
-    ConfigObjectSource(appSource.value().right.flatMap { cv => ConfigFactoryWrapper.load(cv.toConfig) })
+    ConfigObjectSource(appSource.config().right.flatMap(ConfigFactoryWrapper.load))
 
   /**
    * A config source that always provides empty configs.
