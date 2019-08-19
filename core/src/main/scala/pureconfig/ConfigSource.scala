@@ -8,6 +8,7 @@ import scala.reflect.ClassTag
 
 import com.typesafe.config._
 import pureconfig.ConfigReader.Result
+import pureconfig.backend.ConfigWrapper._
 import pureconfig.backend.{ ConfigFactoryWrapper, PathUtil }
 import pureconfig.error.{ CannotRead, ConfigReaderException, ConfigReaderFailures }
 
@@ -90,7 +91,7 @@ trait ConfigSource {
 final class ConfigObjectSource private (config: => Result[Config]) extends ConfigSource {
 
   def value(): Result[ConfigObject] =
-    config.right.map(_.resolve.root)
+    config.right.flatMap(_.resolveSafe()).right.map(_.root)
 
   /**
    * Merges this source with another one, with the latter being used as a fallback (e.g. the

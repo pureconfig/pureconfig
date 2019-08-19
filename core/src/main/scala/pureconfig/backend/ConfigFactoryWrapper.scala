@@ -4,10 +4,9 @@ import java.io.File
 import java.net.URL
 import java.nio.file.Path
 
-import scala.util.control.NonFatal
-
 import com.typesafe.config._
 import pureconfig._
+import pureconfig.backend.ErrorUtil._
 import pureconfig.error._
 
 /**
@@ -76,19 +75,4 @@ object ConfigFactoryWrapper {
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =
     parseFile(path.toFile).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
-
-  private def unsafeToReaderResult[A](f: => A, onIOFailure: Option[Option[Throwable] => CannotRead] = None): ConfigReader.Result[A] = {
-    try Right(f) catch {
-      case e: ConfigException.IO if onIOFailure.nonEmpty => ConfigReader.Result.fail(onIOFailure.get(Option(e.getCause)))
-      case e: ConfigException.Parse =>
-        val msg = (if (e.origin != null)
-          // Removing the error origin from the exception message since origin is stored and used separately:
-          e.getMessage.stripPrefix(s"${e.origin.description}: ")
-        else
-          e.getMessage).stripSuffix(".")
-        ConfigReader.Result.fail(CannotParse(msg, ConfigValueLocation(e.origin())))
-      case e: ConfigException => ConfigReader.Result.fail(ThrowableFailure(e, ConfigValueLocation(e.origin())))
-      case NonFatal(e) => ConfigReader.Result.fail(ThrowableFailure(e, None))
-    }
-  }
 }
