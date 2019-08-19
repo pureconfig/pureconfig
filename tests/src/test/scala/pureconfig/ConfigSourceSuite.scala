@@ -177,7 +177,16 @@ class ConfigSourceSuite extends BaseSuite {
     val resolve1 = ConfigSource.resources("conf/configSource/resolve1.conf")
     val resolve2 = ConfigSource.resources("conf/configSource/resolve2.conf")
 
-    resolve1.withFallback(resolve2).load[Conf] shouldBe Right(Conf("myhost2.example.com"))
+    resolve1.withFallback(resolve2).load[Conf] shouldBe Right(Conf("myhost1.example.com"))
+  }
+
+  it should "fail safely when a substitution can't be resolved" in {
+    case class Conf(hostOverride: String)
+    val resolve1 = ConfigSource.resources("conf/configSource/resolve1.conf")
+
+    resolve1.load[Conf] should failLike {
+      case CannotParse(msg, _) => be(msg)(s"Could not resolve substitution to a value: $${host-suffix}")
+    }
   }
 
   it should "allow reading to and from a cursor" in {
