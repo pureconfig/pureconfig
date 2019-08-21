@@ -76,7 +76,9 @@ sealed trait ConfigCursor {
    */
   def asLong: ConfigReader.Result[Long] =
     castOrFail(NUMBER, _.unwrapped match {
-      case i: java.lang.Number if i.longValue() == i => Right(i.longValue())
+      case i: java.lang.Long => Right(i)
+      case i: java.lang.Integer => Right(i.longValue())
+      case i: java.lang.Double if i.longValue().toDouble == i => Right(i.longValue())
       case v => Left(CannotConvert(v.toString, "Long", "Unable to convert Number to Long"))
     })
 
@@ -88,7 +90,9 @@ sealed trait ConfigCursor {
    */
   def asInt: ConfigReader.Result[Int] =
     castOrFail(NUMBER, _.unwrapped match {
-      case i: java.lang.Number if i.intValue() == i => Right(i.intValue())
+      case i: java.lang.Long if i.intValue().toLong == i => Right(i.intValue())
+      case i: java.lang.Integer => Right(i)
+      case i: java.lang.Double if i.intValue().toDouble == i => Right(i.intValue())
       case v => Left(CannotConvert(v.toString, "Int", "Unable to convert Number to Int"))
     })
 
@@ -100,7 +104,9 @@ sealed trait ConfigCursor {
    */
   def asShort: ConfigReader.Result[Short] =
     castOrFail(NUMBER, _.unwrapped match {
-      case i: java.lang.Number if i.shortValue() == i => Right(i.shortValue())
+      case i: java.lang.Long if i.shortValue().toLong == i => Right(i.shortValue())
+      case i: java.lang.Integer if i.shortValue().toInt == i => Right(i.shortValue())
+      case i: java.lang.Double if i.shortValue().toDouble == i => Right(i.shortValue())
       case v => Left(CannotConvert(v.toString, "Short", "Unable to convert Number to Short"))
     })
 
@@ -112,7 +118,9 @@ sealed trait ConfigCursor {
    */
   def asDouble: ConfigReader.Result[Double] =
     castOrFail(NUMBER, _.unwrapped match {
-      case i: java.lang.Number if i.doubleValue() == i => Right(i.doubleValue())
+      case i: java.lang.Long if i.doubleValue().toLong == i => Right(i.doubleValue())
+      case i: java.lang.Integer if i.doubleValue().toInt == i => Right(i.doubleValue())
+      case i: java.lang.Double => Right(i)
       case v => Left(CannotConvert(v.toString, "Double", "Unable to convert Number to Double"))
     })
 
@@ -124,7 +132,9 @@ sealed trait ConfigCursor {
    */
   def asFloat: ConfigReader.Result[Float] =
     castOrFail(NUMBER, _.unwrapped match {
-      case i: java.lang.Number if i.floatValue() == i => Right(i.floatValue())
+      case i: java.lang.Long if i.floatValue().toLong == i => Right(i.floatValue())
+      case i: java.lang.Integer if i.floatValue().toInt == i => Right(i.floatValue())
+      case i: java.lang.Double => Right(i.floatValue())
       case v => Left(CannotConvert(v.toString, "Float", "Unable to convert Number to Float"))
     })
 
