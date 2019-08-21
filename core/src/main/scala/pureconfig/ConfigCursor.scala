@@ -134,7 +134,7 @@ sealed trait ConfigCursor {
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Long if i.floatValue().toLong == i => Right(i.floatValue())
       case i: java.lang.Integer if i.floatValue().toInt == i => Right(i.floatValue())
-      case i: java.lang.Double if i.floatValue().toDouble == i => Right(i.floatValue())
+      case i: java.lang.Double => Right(i.floatValue())
       case v => Left(CannotConvert(v.toString, "Float", "Unable to convert Number to Float"))
     })
 

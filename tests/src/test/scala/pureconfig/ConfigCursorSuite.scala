@@ -96,13 +96,12 @@ class ConfigCursorSuite extends BaseSuite {
 
   it should "allow being cast to float in a safe way" in {
     cursor("3").asFloat shouldBe Right(3.0)
+    cursor("1.1").asFloat shouldBe Right(1.1f)
 
     cursor("abc").asFloat should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
     cursor("true").asFloat should failWith(
       WrongType(ConfigValueType.BOOLEAN, Set(ConfigValueType.NUMBER)))
-    cursor("1.1").asFloat should failWith(
-      CannotConvert("1.1", "Float", "Unable to convert Number to Float"))
   }
 
   it should "allow being casted to a list cursor in a safe way" in {
