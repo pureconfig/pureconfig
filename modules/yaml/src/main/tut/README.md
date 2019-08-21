@@ -8,7 +8,7 @@ of `ConfigReader`s and hints to read configurations to domain objects without bo
 In addition to the [PureConfig core](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-yaml" % "0.11.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-yaml" % "0.11.1"
 ```
 
 ## Example
@@ -45,4 +45,10 @@ We can load the configuration to a `MyConf` instance using `loadYaml`:
 
 ```tut:book
 loadYaml[Person](yamlFile)
+```
+
+We can also load a particular namespace inside the YAML file:
+
+```tut:book
+loadYaml[Int](yamlFile, "age")
 ```

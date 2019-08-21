@@ -1,6 +1,6 @@
 package pureconfig.module
 
-import com.softwaremill.sttp._
+import com.softwaremill.sttp.{ sttp => _, _ }
 import pureconfig.ConfigReader
 import pureconfig.error.CannotConvert
 

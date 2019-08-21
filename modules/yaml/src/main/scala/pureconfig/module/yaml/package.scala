@@ -86,6 +86,18 @@ package object yaml {
    *         `Config` from the YAML file, else a `Failure` with details on why it isn't possible
    */
   def loadYaml[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
+    loadYaml(path, "")
+  }
+
+  /**
+   * Loads a configuration of type `Config` from the given YAML file.
+   *
+   * @param path the path of the YAML file to read
+   * @param namespace the base namespace from which the configuration should be load
+   * @return A `Success` with the configuration if it is possible to create an instance of type
+   *         `Config` from the YAML file, else a `Failure` with details on why it isn't possible
+   */
+  def loadYaml[Config](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
     handleYamlErrors(Some(path)) {
       using(Files.newBufferedReader(path)) { ioReader =>
         // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
@@ -93,7 +105,7 @@ package object yaml {
         val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](ioReader)
 
         yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
-          reader.value.from(ConfigCursor(cv, Nil))
+          loadValue(cv, namespace)
         }
       }
     }
@@ -107,13 +119,17 @@ package object yaml {
    *         `Config` from `content`, else a `Failure` with details on why it isn't possible
    */
   def loadYaml[Config](content: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
+    loadYaml(content, "")
+  }
+
+  def loadYaml[Config](content: String, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
     handleYamlErrors(None) {
       // we are using `SafeConstructor` in order to avoid creating custom Java instances, leaking the PureConfig
       // abstraction over SnakeYAML
       val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](content)
 
       yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
-        reader.value.from(ConfigCursor(cv, Nil))
+        loadValue(cv, namespace)
       }
     }
   }
@@ -133,6 +149,21 @@ package object yaml {
   }
 
   /**
+   * Loads a configuration of type `Config` from the given YAML file.
+   *
+   * @param path the path of the YAML file to read
+   * @param namespace the base namespace from which the configuration should be load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadYamlOrThrow[Config: ClassTag](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+    loadYaml(path, namespace) match {
+      case Right(config) => config
+      case Left(failures) => throw new ConfigReaderException[Config](failures)
+    }
+  }
+
+  /**
    * Loads a configuration of type `Config` from the given string.
    *
    * @param content the string containing the YAML document
@@ -141,6 +172,21 @@ package object yaml {
   @throws[ConfigReaderException[_]]
   def loadYamlOrThrow[Config: ClassTag](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
     loadYaml(content) match {
+      case Right(config) => config
+      case Left(failures) => throw new ConfigReaderException[Config](failures)
+    }
+  }
+
+  /**
+   * Loads a configuration of type `Config` from the given string.
+   *
+   * @param content the string containing the YAML document
+   * @param namespace the base namespace from which the configuration should be load
+   * @return the configuration
+   */
+  @throws[ConfigReaderException[_]]
+  def loadYamlOrThrow[Config: ClassTag](content: String, namespace: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+    loadYaml(content, namespace) match {
       case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[Config](failures)
     }
@@ -191,7 +237,7 @@ package object yaml {
         .foldRight(Right(Nil): ConfigReader.Result[List[AnyRef]])(ConfigReader.Result.zipWith(_, _)(_ :: _))
         .right.flatMap { cvs =>
           val cl = ConfigValueFactory.fromAnyRef(cvs.asJava)
-          reader.value.from(ConfigCursor(cl, Nil))
+          reader.value.from(cl)
         }
     }
   }

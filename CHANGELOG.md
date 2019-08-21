@@ -1,3 +1,8 @@
+### 0.11.1 (Jun 14, 2019)
+
+- New features
+  - Added support for Scala 2.13.
+
 ### 0.11.0 (May 9, 2019)
 
 - Breaking changes
