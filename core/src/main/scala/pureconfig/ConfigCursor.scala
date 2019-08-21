@@ -77,7 +77,7 @@ sealed trait ConfigCursor {
   def asLong: ConfigReader.Result[Long] =
     castOrFail(NUMBER, _.unwrapped match {
       case i: java.lang.Long => Right(i)
-      case i: java.lang.Integer if i.longValue().toInt == i => Right(i.longValue())
+      case i: java.lang.Integer => Right(i.longValue())
       case i: java.lang.Double if i.longValue().toDouble == i => Right(i.longValue())
       case v => Left(CannotConvert(v.toString, "Long", "Unable to convert Number to Long"))
     })
