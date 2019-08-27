@@ -23,6 +23,7 @@ package object pureconfig {
    *         `Config` from the configuration files, else a `Failure` with details on why it
    *         isn't possible
    */
+  @deprecated("Use `ConfigSource.default.load[Config]` instead", "0.12.0")
   def loadConfig[Config](implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] =
     ConfigSource.default.load[Config]
 
@@ -104,6 +105,7 @@ package object pureconfig {
    * @return the configuration
    */
   @throws[ConfigReaderException[_]]
+  @deprecated("Use `ConfigSource.default.loadOrThrow[Config]` instead", "0.12.0")
   def loadConfigOrThrow[Config: ClassTag](implicit reader: Derivation[ConfigReader[Config]]): Config =
     ConfigSource.default.loadOrThrow[Config]
 

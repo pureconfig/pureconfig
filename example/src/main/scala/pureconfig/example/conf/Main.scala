@@ -35,7 +35,7 @@ object Main extends App {
   case class DirWatchConfig(path: Path, filter: String, email: EmailConfig)
   case class EmailConfig(host: String, port: Int, message: String, recipients: Set[Email], sender: Email)
 
-  val config = loadConfigOrThrow[Config]
+  val config = ConfigSource.default.loadOrThrow[Config]
 
   println("dirwatch.path: " + config.dirwatch.path)
   println("dirwatch.filter: " + config.dirwatch.filter)

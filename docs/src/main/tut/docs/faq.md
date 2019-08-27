@@ -123,7 +123,7 @@ case class ConfC(a: Option[Custom], b: Custom2) extends Conf
 When we try to load a `Conf` from a config, we'll simply get this error message:
 
 ```tut:book:fail
-loadConfig[Conf]
+ConfigSource.default.load[Conf]
 ```
 
 In PureConfig, the derivation of config readers and writers is done by chaining implicits - the converters of larger
@@ -141,14 +141,14 @@ When code using PureConfig derived converters is compiled using the compiler fla
 the dependencies between converters and show a much more helpful message in case of an error:
 
 ```scala
-loadConfig[Conf]
+ConfigSource.default.load[Conf]
 // <console>:18: error: could not derive a ConfigReader instance for type Conf, because:
 //   - missing a ConfigReader instance for type ConfC, because:
 //     - missing a ConfigReader instance for type Option[Custom], because:
 //       - missing a ConfigReader instance for type Custom
 //     - missing a ConfigReader instance for type Custom2
 // 
-//        loadConfig[Conf]
+//        ConfigSource.default.load[Conf]
 //  
 ```
 
