@@ -184,6 +184,10 @@ class ConfigSourceSuite extends BaseSuite {
     case class Conf(hostOverride: String)
     val resolve1 = ConfigSource.resources("conf/configSource/resolve1.conf")
 
+    resolve1.value() should failLike {
+      case CannotParse(msg, _) => be(msg)(s"Could not resolve substitution to a value: $${host-suffix}")
+    }
+
     resolve1.load[Conf] should failLike {
       case CannotParse(msg, _) => be(msg)(s"Could not resolve substitution to a value: $${host-suffix}")
     }
