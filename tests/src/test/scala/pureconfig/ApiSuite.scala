@@ -23,7 +23,7 @@ class ApiSuite extends BaseSuite {
 
   it should "loadConfig from reference.conf" in {
     case class Conf(d: Double, i: Int, s: String)
-    loadConfig[Conf] shouldBe Right(Conf(0D, 0, "default"))
+    loadConfig[Conf] shouldBe Right(Conf(0D, 0, "app_value"))
   }
 
   it should "loadConfig from reference.conf with a namespace" in {
