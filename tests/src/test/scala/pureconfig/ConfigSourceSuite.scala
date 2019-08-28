@@ -11,9 +11,9 @@ class ConfigSourceSuite extends BaseSuite {
 
   behavior of "ConfigSource"
 
-  it should "load from reference.conf by default" in {
+  it should "load from application.conf and reference.conf by default" in {
     case class Conf(d: Double, i: Int, s: String)
-    ConfigSource.default.load[Conf] shouldBe Right(Conf(0D, 0, "default"))
+    ConfigSource.default.load[Conf] shouldBe Right(Conf(0D, 0, "app_value"))
   }
 
   it should "allow reading at a namespace" in {
