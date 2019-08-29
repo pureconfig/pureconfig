@@ -148,24 +148,6 @@ object ConfigObjectSource {
    */
   def apply(conf: => Result[Config]): ConfigObjectSource =
     new ConfigObjectSource(() => conf)
-
-  /**
-   * Creates a `ConfigObjectSource` from a `ConfigObjectCursor`.
-   *
-   * @param cur the cursor to be provided by this source
-   * @return a `ConfigObjectSource` providing the given cursor.
-   */
-  def fromCursor(cur: ConfigObjectCursor): ConfigObjectSource =
-    new ConfigObjectSource(() => Right(cur.value.toConfig))
-
-  /**
-   * Creates a `ConfigObjectSource` from a `FluentConfigCursor`.
-   *
-   * @param cur the cursor to be provided by this source
-   * @return a `ConfigObjectSource` providing the given cursor.
-   */
-  def fromCursor(cur: FluentConfigCursor): ConfigObjectSource =
-    new ConfigObjectSource(() => cur.asObjectCursor.right.map(_.value.toConfig))
 }
 
 /**
@@ -314,8 +296,9 @@ object ConfigSource {
    * @param cur the cursor to be provided by this source
    * @return a `ConfigSource` providing the given cursor.
    */
-  def fromCursor(cur: ConfigCursor): ConfigSource = new ConfigSource {
+  private[pureconfig] def fromCursor(cur: ConfigCursor): ConfigSource = new ConfigSource {
     def value(): Result[ConfigValue] = Right(cur.value)
+    override def cursor() = Right(cur)
   }
 
   /**
@@ -324,7 +307,9 @@ object ConfigSource {
    * @param cur the cursor to be provided by this source
    * @return a `ConfigSource` providing the given cursor.
    */
-  def fromCursor(cur: FluentConfigCursor): ConfigSource = new ConfigSource {
+  private[pureconfig] def fromCursor(cur: FluentConfigCursor): ConfigSource = new ConfigSource {
     def value(): Result[ConfigValue] = cur.cursor.right.map(_.value)
+    override def cursor() = cur.cursor
+    override def fluentCursor() = cur
   }
 }

@@ -193,16 +193,6 @@ class ConfigSourceSuite extends BaseSuite {
     }
   }
 
-  it should "allow reading to and from a cursor" in {
-    case class Conf(d: Double, i: Int)
-    val conf = ConfigFactory.parseString("{ d: 0.5, i: 10 }")
-    val cursor = ConfigCursor(conf.root(), Nil)
-
-    ConfigSource.fromCursor(cursor).load[Conf] shouldBe Right(Conf(0.5D, 10))
-    ConfigSource.fromCursor(cursor).cursor() shouldBe Right(cursor)
-    ConfigSource.fromCursor(cursor.fluent).fluentCursor() shouldBe cursor.fluent
-  }
-
   it should "define an empty source" in {
     ConfigSource.empty.load[Config] shouldBe Right(ConfigFactory.empty)
   }
