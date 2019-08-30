@@ -49,6 +49,8 @@ class ConfigSourceSuite extends BaseSuite {
     source.at("bar.foo.f").load[Option[Float]] should failWith(KeyNotFound("bar", Set.empty), "")
     source.at("foo.baz.f").load[Option[Float]] should failWith(
       WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
+    source.at("foo").at("baz").at("f").load[Option[Float]] should failWith(
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
   }
 
   it should "handle correctly namespaces with special chars" in {
