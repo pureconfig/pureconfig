@@ -4,12 +4,13 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
+
 import _root_.fs2.{ Stream, text }
 import cats.effect.Sync
 import cats.implicits._
 import com.typesafe.config.ConfigRenderOptions
 import pureconfig.backend.ConfigFactoryWrapper
-import pureconfig.{ ConfigReader, ConfigWriter, Derivation }
+import pureconfig.{ ConfigReader, ConfigSource, ConfigWriter, Derivation }
 import pureconfig.error.ConfigReaderException
 
 package object fs2 {
@@ -31,7 +32,7 @@ package object fs2 {
       string = new String(bytes, UTF_8)
       configOrError <- F.delay(ConfigFactoryWrapper.parseString(string))
       config <- F.fromEither(configOrError.leftMap(ConfigReaderException[A]))
-      aOrError <- F.delay(pureconfig.loadConfig[A](config))
+      aOrError <- F.delay(ConfigSource.fromConfig(config).load[A])
       a <- F.fromEither(aOrError.leftMap(ConfigReaderException[A]))
     } yield a
   }

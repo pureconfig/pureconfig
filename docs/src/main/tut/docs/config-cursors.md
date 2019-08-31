@@ -59,7 +59,7 @@ implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
 ```
 
 ```tut:invisible
-assert(loadConfig[Conf](conf).isRight)
+assert(ConfigSource.fromConfig(conf).load[Conf].isRight)
 ```
 
 The factory method `ConfigReader.fromCursor` allows us to create a `ConfigReader` without much boilerplate by providing
@@ -89,15 +89,15 @@ implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
 Either way, a well-formed config will now work correctly:
 
 ```tut:book
-loadConfig[Conf](conf)
+ConfigSource.fromConfig(conf).load[Conf]
 ```
 
 While malformed configs will fail to load with appropriate errors:
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("person = 45"))
-loadConfig[Conf](ConfigFactory.parseString("person.eman = John Doe"))
-loadConfig[Conf](ConfigFactory.parseString("person.name = [1, 2]"))
+ConfigSource.string("person = 45").load[Conf]
+ConfigSource.string("person.eman = John Doe").load[Conf]
+ConfigSource.string("person.name = [1, 2]").load[Conf]
 ```
 
 By using the appropriate `ConfigCursor` methods, all error handling was taken care of by PureConfig. That makes

@@ -14,13 +14,16 @@ import pureconfig.error._
 import pureconfig.generic.ProductHint
 import pureconfig.generic.auto._
 
+// We are testing deprecated methods, but we want to keep this in place to prevent regressions
+// until we delete them. We need the annotation here to silence compiler warnings.
+@deprecated("Construct a `ConfigSource` pipeline instead", "0.12.0")
 class ApiSuite extends BaseSuite {
 
   behavior of "pureconfig"
 
   it should "loadConfig from reference.conf" in {
     case class Conf(d: Double, i: Int, s: String)
-    loadConfig[Conf] shouldBe Right(Conf(0D, 0, "default"))
+    loadConfig[Conf] shouldBe Right(Conf(0D, 0, "app_value"))
   }
 
   it should "loadConfig from reference.conf with a namespace" in {
@@ -57,7 +60,11 @@ class ApiSuite extends BaseSuite {
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0F))
 
-    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
+    // With the introduction of `ConfigSource`s we dropped support for reading missing
+    // keys as `None` when an `Option[A]` is loaded as a root value
+    // loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") should failWith(
+      KeyNotFound("h", Set.empty), "foo.bar")
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(
       WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
@@ -82,17 +89,21 @@ class ApiSuite extends BaseSuite {
   }
 
   it should "loadConfig from a configuration file" in {
-    case class Conf(s: String, b: Boolean)
+    case class Conf(s: String, b: Boolean, sref: String) // sref defined in reference.conf
     val path = createTempFile("""{ b: true, s: "str" }""")
-    loadConfig[Conf](path = path) shouldBe Right(Conf("str", true))
-    loadConfig[Conf](path = nonExistingPath) should failWithType[CannotReadFile]
+    loadConfig[Conf](path = path) shouldBe Right(Conf("str", true, "wow"))
+    loadConfig[Conf](path = nonExistingPath) should failLike {
+      case CannotReadFile(path, _) => be(path)(nonExistingPath)
+    }
   }
 
   it should "loadConfig from a configuration file with a namespace" in {
-    case class Conf(s: String, b: Boolean)
+    case class Conf(s: String, b: Boolean, sref: String) // foo.bar.sref defined in reference.conf
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
-    loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true))
-    loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failWithType[CannotReadFile]
+    loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true, "foowow"))
+    loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failLike {
+      case CannotReadFile(path, _) => be(path)(nonExistingPath)
+    }
     loadConfig[Conf](path = path, namespace = "bar.foo") should failWith(KeyNotFound("bar", Set.empty))
   }
 
@@ -161,6 +172,12 @@ class ApiSuite extends BaseSuite {
     case class Conf(f: Float)
     val files = Set.empty[Path]
     loadConfigFromFiles[Conf](files) should failWithType[KeyNotFound] // f is missing
+  }
+
+  it should "merge reference.conf with the provided files" in {
+    case class Conf(b: Boolean, d: Double, sref: String) // sref defined in reference.conf
+    val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf")
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D, "wow"))
   }
 
   it should "ignore files that don't exist when failOnReadError is false" in {

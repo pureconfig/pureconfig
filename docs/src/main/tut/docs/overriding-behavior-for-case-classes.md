@@ -53,7 +53,7 @@ implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
 
 Then load a config:
 ```tut:book
-loadConfig[SampleConf](ConfigFactory.parseString("{ FOO: 2, BAR: two }"))
+ConfigSource.string("{ FOO: 2, BAR: two }").load[SampleConf]
 ```
 
 PureConfig provides a way to create a `ConfigFieldMapping` by defining the
@@ -100,16 +100,16 @@ We can load configurations using default values:
 
 ```tut:book
 // Defaulting `where`
-loadConfig[Holiday](ConfigFactory.parseString("{ how-long: 21 days }"))
+ConfigSource.string("{ how-long: 21 days }").load[Holiday]
 
 // Defaulting `howLong`
-loadConfig[Holiday](ConfigFactory.parseString("{ where: Zürich }"))
+ConfigSource.string("{ where: Zürich }").load[Holiday]
 
 // Defaulting both arguments
-loadConfig[Holiday](ConfigFactory.parseString("{}"))
+ConfigSource.string("{}").load[Holiday]
 
 // Specifying both arguments
-loadConfig[Holiday](ConfigFactory.parseString("{ where: Texas, how-long: 3 hours }"))
+ConfigSource.string("{ where: Texas, how-long: 3 hours }").load[Holiday]
 ```
 
 A `ProductHint` can make the conversion fail if a key is missing from the
@@ -120,7 +120,7 @@ implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
 ```
 
 ```tut:book
-loadConfig[Holiday](ConfigFactory.parseString("{ how-long: 21 days }"))
+ConfigSource.string("{ how-long: 21 days }").load[Holiday]
 ```
 
 ### Unknown keys
@@ -140,7 +140,7 @@ case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
 ```
 
 ```tut:book
-loadConfig[Holiday](ConfigFactory.parseString("{ wher: Texas, how-long: 21 days }"))
+ConfigSource.string("{ wher: Texas, how-long: 21 days }").load[Holiday]
 ```
 
 With a `ProductHint`, one can tell the converter to fail if an unknown key is
@@ -149,7 +149,7 @@ found:
 ```tut:book
 implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
 
-loadConfig[Holiday](ConfigFactory.parseString("{ wher: Texas, how-long: 21 days }"))
+ConfigSource.string("{ wher: Texas, how-long: 21 days }").load[Holiday]
 ```
 
 ### Missing keys
@@ -171,8 +171,8 @@ case class FooOpt(a: Option[Int])
 Loading a `Foo` results in a `Left` because of missing keys, but loading a `FooOpt` produces a `Right`:
 
 ```tut:book
-loadConfig[Foo](ConfigFactory.empty)
-loadConfig[FooOpt](ConfigFactory.empty)
+ConfigSource.empty.load[Foo]
+ConfigSource.empty.load[FooOpt]
 ```
 
 However, if you want to allow your custom `ConfigReader`s to handle missing keys, you can extend the `ReadsMissingKeys`
@@ -191,5 +191,5 @@ implicit val maybeIntReader = new ConfigReader[Int] with ReadsMissingKeys {
 You can load an empty configuration and get a `Right`:
 
 ```tut:book
-loadConfig[Foo](ConfigFactory.empty)
+ConfigSource.empty.load[Foo]
 ```

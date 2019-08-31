@@ -52,7 +52,7 @@ val scalazConf = parseString("""{
   number-maybe: 1
 }""")
 
-loadConfig[ScalazConfig](scalazConf)
+ConfigSource.fromConfig(scalazConf).load[ScalazConfig]
 ```
 
 ### Using `scalaz` type class instances for readers
@@ -120,7 +120,7 @@ case class MyConfig(i: Int, s: String)
 ```tut:book
 val myConf = parseString("{}")
 
-val res = loadConfig[MyConfig](myConf).left.map(_.toNel)
+val res = ConfigSource.fromConfig(myConf).load[MyConfig].left.map(_.toNel)
 ```
 
 This allows `scalaz` users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:

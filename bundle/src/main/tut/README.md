@@ -44,6 +44,7 @@ As a result we recommend only using the latest Scala versions within the minor s
 In your code, import `pureconfig.generic.auto` and define data types and a case class to hold the configuration:
 
 ```scala
+import pureconfig._
 import pureconfig.generic.auto._
 
 sealed trait MyAdt
@@ -66,7 +67,7 @@ resource file of your application (with SBT, they are usually placed in `src/mai
 Finally, load the configuration:
 
 ```scala
-pureconfig.loadConfig[MyClass]
+ConfigSource.default.load[MyClass]
 // res0: pureconfig.ConfigReader.Result[MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
 ```
 

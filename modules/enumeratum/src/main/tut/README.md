@@ -50,7 +50,7 @@ val conf = parseString("""{
   start: hello
   end: SHOUT_GOOD_BYE
 }""")
-loadConfig[GreetingConf](conf)
+ConfigSource.fromConfig(conf).load[GreetingConf]
 ```
 
 Note that Enumeratum has a variety of [other ways to define enums](https://github.com/lloydmeta/enumeratum#more-examples) which are [also supported by `pureconfig-enumeratum`](src/test/scala/pureconfig/module/enumeratum/EnumeratumConvertTest.scala). If you need to read integers, another numeric type, or arbitrary strings to specify your enum values, Enumeratum and Pureconfig have you covered.

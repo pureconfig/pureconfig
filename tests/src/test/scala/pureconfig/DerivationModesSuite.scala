@@ -43,7 +43,7 @@ class DerivationModesSuite extends BaseSuite {
     implicit val placeReader = deriveReader[Place]
     implicit val entityReader = deriveReader[Entity]
 
-    loadConfig[Entity](conf) shouldBe Right(person)
+    ConfigReader[Entity].from(conf.root) shouldBe Right(person)
   }
 
   it should "provide methods to derive writers on demand" in {
@@ -63,7 +63,7 @@ class DerivationModesSuite extends BaseSuite {
     implicit val placeConvert = deriveConvert[Place]
     implicit val entityConvert = deriveConvert[Entity]
 
-    loadConfig[Entity](conf) shouldBe Right(person)
+    ConfigReader[Entity].from(conf.root) shouldBe Right(person)
     ConfigWriter[Entity].to(person) shouldBe conf.root()
   }
 
@@ -142,7 +142,7 @@ class DerivationModesSuite extends BaseSuite {
   it should "provide instance derivation for products and coproducts out-of-the-box" in {
     import pureconfig.generic.auto._
 
-    loadConfig[Entity](conf) shouldBe Right(person)
+    ConfigReader[Entity].from(conf.root) shouldBe Right(person)
     ConfigWriter[Entity].to(person) shouldBe conf.root()
   }
 }

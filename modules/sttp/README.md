@@ -30,6 +30,6 @@ Now, we can load the configuration with the following code:
 val config = parseString("""{uri: "https://sttp.readthedocs.io" }""")
 // config: com.typesafe.config.Config = Config(SimpleConfigObject({"uri":"https://sttp.readthedocs.io"}))
 
-loadConfig[AppConfig](config)
+ConfigSource.fromConfig(config).load[AppConfig]
 // res0: pureconfig.ConfigReader.Result[AppConfig] = Right(AppConfig(https://sttp.readthedocs.io))
 ```

@@ -157,7 +157,7 @@ class ProductHintSuite extends BaseSuite {
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
-    loadConfig[Conf](conf1).left.value.toList should contain theSameElementsAs Seq(
+    conf1.to[Conf].left.value.toList should contain theSameElementsAs Seq(
       ConvertFailure(KeyNotFound("b"), None, ""),
       ConvertFailure(KeyNotFound("c"), None, ""),
       ConvertFailure(KeyNotFound("d"), None, ""))

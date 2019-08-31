@@ -31,6 +31,6 @@ We can read a `MyConfig` with the following code:
 val conf = parseString("""{ schedule: "10-35 2,4,6 * ? * *" }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"schedule":"10-35 2,4,6 * ? * *"}))
 
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 // res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(10-35 2,4,6 * ? * *))
 ```

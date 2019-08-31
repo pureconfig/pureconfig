@@ -48,7 +48,7 @@ val conf = parseString("""{
   start: WhisperHello
   end: ShoutGoodBye
 }""")
-loadConfig[GreetingConf](conf)
+ConfigSource.fromConfig(conf).load[GreetingConf]
 ```
 
 ## Can I configure how the elements are read?

@@ -41,6 +41,6 @@ val conf = ConfigFactory.parseString("""{
   }
 }""")
 
-loadConfig[UserConfig](conf)
+ConfigSource.fromConfig(conf).load[UserConfig]
 ```
 

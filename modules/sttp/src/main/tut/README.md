@@ -29,5 +29,5 @@ Now, we can load the configuration with the following code:
 ```tut:book
 val config = parseString("""{uri: "https://sttp.readthedocs.io" }""")
 
-loadConfig[AppConfig](config)
+ConfigSource.fromConfig(config).load[AppConfig]
 ```

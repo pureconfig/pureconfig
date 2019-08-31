@@ -27,7 +27,7 @@ class ConfigFactoryWrapperSpec extends BaseSuite {
   behavior of "ConfigFactoryWrapper.loadFile"
 
   it should "return a Left when a file does not exist" in {
-    ConfigFactory.load(ConfigFactory.parseFile(nonExistingPath.toFile)) shouldEqual ConfigFactory.load
+    ConfigFactory.load(ConfigFactory.parseFile(nonExistingPath.toFile)) shouldEqual ConfigFactory.load(ConfigFactory.empty)
     ConfigFactoryWrapper.loadFile(nonExistingPath) should failLike {
       case CannotReadFile(`nonExistingPath`, Some(reason)) => be(a[FileNotFoundException])(reason)
     }

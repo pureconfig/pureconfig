@@ -1,11 +1,12 @@
 package pureconfig.backend
 
+import java.io.File
+import java.net.URL
 import java.nio.file.Path
-
-import scala.util.control.NonFatal
 
 import com.typesafe.config._
 import pureconfig._
+import pureconfig.backend.ErrorUtil._
 import pureconfig.error._
 
 /**
@@ -23,30 +24,55 @@ object ConfigFactoryWrapper {
   def load(): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.load())
 
+  /** @see `com.typesafe.config.ConfigFactory.load(Config)` */
+  def load(conf: Config): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.load(conf))
+
+  /** @see `com.typesafe.config.ConfigFactory.defaultReference()` */
+  def defaultReference(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.defaultReference())
+
+  /** @see `com.typesafe.config.ConfigFactory.defaultApplication()` */
+  def defaultApplication(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.defaultApplication())
+
+  /** @see `com.typesafe.config.ConfigFactory.defaultOverrides()` */
+  def defaultOverrides(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.defaultOverrides())
+
+  /** @see `com.typesafe.config.ConfigFactory.systemProperties()` */
+  def systemProperties(): ConfigReader.Result[Config] =
+    unsafeToReaderResult(ConfigFactory.systemProperties())
+
   /** @see `com.typesafe.config.ConfigFactory.parseString()` */
   def parseString(s: String): ConfigReader.Result[Config] =
     unsafeToReaderResult(ConfigFactory.parseString(s))
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
+  def parseFile(file: File): ConfigReader.Result[Config] =
+    unsafeToReaderResult(
+      ConfigFactory.parseFile(file, strictSettings),
+      onIOFailure = Some(CannotReadFile(file.toPath, _)))
+
+  /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): ConfigReader.Result[Config] =
-    unsafeToReaderResult(ConfigFactory.parseFile(path.toFile, strictSettings), Some(path))
+    unsafeToReaderResult(
+      ConfigFactory.parseFile(path.toFile, strictSettings),
+      onIOFailure = Some(CannotReadFile(path, _)))
+
+  /** @see `com.typesafe.config.ConfigFactory.parseResources()` */
+  def parseResources(resource: String): ConfigReader.Result[Config] =
+    unsafeToReaderResult(
+      ConfigFactory.parseResources(resource, strictSettings),
+      onIOFailure = Some(CannotReadResource(resource, _)))
+
+  /** @see `com.typesafe.config.ConfigFactory.parseURL()` */
+  def parseURL(url: URL): ConfigReader.Result[Config] =
+    unsafeToReaderResult(
+      ConfigFactory.parseURL(url, strictSettings),
+      onIOFailure = Some(CannotReadUrl(url, _)))
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =
-    parseFile(path).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
-
-  private def unsafeToReaderResult[A](f: => A, path: Option[Path] = None): ConfigReader.Result[A] = {
-    try Right(f) catch {
-      case e: ConfigException.IO if path.nonEmpty => ConfigReader.Result.fail(CannotReadFile(path.get, Option(e.getCause)))
-      case e: ConfigException.Parse =>
-        val msg = (if (e.origin != null)
-          // Removing the error origin from the exception message since origin is stored and used separately:
-          e.getMessage.stripPrefix(s"${e.origin.description}: ")
-        else
-          e.getMessage).stripSuffix(".")
-        ConfigReader.Result.fail(CannotParse(msg, ConfigValueLocation(e.origin())))
-      case e: ConfigException => ConfigReader.Result.fail(ThrowableFailure(e, ConfigValueLocation(e.origin())))
-      case NonFatal(e) => ConfigReader.Result.fail(ThrowableFailure(e, None))
-    }
-  }
+    parseFile(path.toFile).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
 }

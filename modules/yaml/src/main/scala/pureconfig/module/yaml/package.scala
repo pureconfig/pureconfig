@@ -105,7 +105,7 @@ package object yaml {
         val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](ioReader)
 
         yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
-          loadValue(cv, namespace)
+          ConfigSource.fromCursor(ConfigCursor(cv, Nil)).at(namespace).load[Config]
         }
       }
     }
@@ -129,7 +129,7 @@ package object yaml {
       val yamlObj = new Yaml(new SafeConstructor()).load[AnyRef](content)
 
       yamlObjToConfigValue(yamlObj).right.flatMap { cv =>
-        loadValue(cv, namespace)
+        ConfigSource.fromCursor(ConfigCursor(cv, Nil)).at(namespace).load[Config]
       }
     }
   }

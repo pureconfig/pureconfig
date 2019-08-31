@@ -4,6 +4,7 @@
 package pureconfig.error
 
 import java.io.FileNotFoundException
+import java.net.URL
 import java.nio.file.Path
 
 import pureconfig.ConfigCursor
@@ -74,19 +75,66 @@ final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigV
 }
 
 /**
+ * A failure occurred due to the inability to read a requested source (such as a file, a resource or a network
+ * location).
+ */
+trait CannotRead extends ConfigReaderFailure {
+
+  /**
+   * The source name (like a file path or a URL)
+   */
+  def sourceName: String
+
+  /**
+   * The source type
+   */
+  def sourceType: String
+
+  /**
+   * An optional exception thrown when trying to read the source
+   */
+  def reason: Option[Throwable]
+
+  def description = reason match {
+    case Some(ex: FileNotFoundException) => s"Unable to read $sourceType ${ex.getMessage}." // a FileNotFoundException already includes the path
+    case Some(ex) => s"Unable to read $sourceType $sourceName (${ex.getMessage})."
+    case None => s"Unable to read $sourceType $sourceName."
+  }
+
+  def location = None
+}
+
+/**
  * A failure occurred due to the inability to read a requested file.
  *
  * @param path the file system path of the file that couldn't be read
  * @param reason an optional exception thrown when trying to read the file
  */
-final case class CannotReadFile(path: Path, reason: Option[Throwable]) extends ConfigReaderFailure {
-  def description = reason match {
-    case Some(ex: FileNotFoundException) => s"Unable to read file ${ex.getMessage}." // a FileNotFoundException already includes the path
-    case Some(ex) => s"Unable to read file $path (${ex.getMessage})."
-    case None => s"Unable to read file $path."
-  }
+final case class CannotReadFile(path: Path, reason: Option[Throwable]) extends CannotRead {
+  val sourceType = "file"
+  def sourceName = path.toString
+}
 
-  def location = None
+/**
+ * A failure occurred due to the inability to read a requested URL.
+ *
+ * @param url the URL that couldn't be read
+ * @param reason an optional exception thrown when trying to read the URL
+ */
+final case class CannotReadUrl(url: URL, reason: Option[Throwable]) extends CannotRead {
+  val sourceType = "URL"
+  def sourceName = url.toString
+}
+
+/**
+ * A failure occurred due to the inability to read a requested resource.
+ *
+ * @param resourceName the resource that couldn't be read
+ * @param reason an optional exception thrown when trying to read the resource
+ */
+final case class CannotReadResource(resourceName: String, reason: Option[Throwable]) extends CannotRead {
+  val sourceType = "resource"
+  def sourceName = resourceName
 }
 
 /**

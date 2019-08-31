@@ -27,7 +27,7 @@ implicit val byteVectorReader: ConfigReader[Vector[Byte]] =
 ```
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("""{ bytes = "Hello world" }"""))
+ConfigSource.string("""{ bytes = "Hello world" }""").load[Conf]
 ```
 
 `emap` allows users to validate the inputs and provide detailed failures:
@@ -46,8 +46,8 @@ implicit val portReader = ConfigReader[Int].emap {
 ```
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("{ port = 8080 }"))
-loadConfig[Conf](ConfigFactory.parseString("{ port = -1 }"))
+ConfigSource.string("{ port = 8080 }").load[Conf]
+ConfigSource.string("{ port = -1 }").load[Conf]
 ```
 
 `orElse` can be used to provide alternative ways to load a config:
@@ -60,6 +60,6 @@ case class Conf(list: List[Int])
 ```
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("""{ list = [1,2,3] }"""))
-loadConfig[Conf](ConfigFactory.parseString("""{ list = "4,5,6" }"""))
+ConfigSource.string("""{ list = [1,2,3] }""").load[Conf]
+ConfigSource.string("""{ list = "4,5,6" }""").load[Conf]
 ```

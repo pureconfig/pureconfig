@@ -55,7 +55,7 @@ val conf = parseString("""{
   number-chain: [1,2,3]
 }""")
 
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 ```
 
 ### Using cats type class instances for readers and writers
@@ -106,7 +106,7 @@ For example, you can easily convert a `ConfigReaderFailures` to a `NonEmptyList[
 case class MyConfig2(a: Int, b: String)
 
 val conf = parseString("{}")
-val res = loadConfig[MyConfig2](conf).left.map(_.toNonEmptyList)
+val res = ConfigSource.fromConfig(conf).load[MyConfig2].left.map(_.toNonEmptyList)
 ```
 
 This allows cats users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:

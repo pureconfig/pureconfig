@@ -36,5 +36,5 @@ val conf = parseString("""{
   far: 42.195 km
   hot: 56.7° C
 }""")
-loadConfig[HowConfiguration](conf)
+ConfigSource.fromConfig(conf).load[HowConfiguration]
 ```

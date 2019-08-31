@@ -34,7 +34,7 @@ case class Conf(person: Person)
 Trying to load it with a string instead of an object at `name` results in a `ConvertFailure` because of a `WrongType`:
 
 ```tut:book
-val res = loadConfig[Conf](ConfigFactory.parseString("{ person: { name: John Doe, age: 35 } }"))
+val res = ConfigSource.string("{ person: { name: John Doe, age: 35 } }").load[Conf]
 ```
 
 All error-related classes are present in the `pureconfig.error` package.
@@ -67,9 +67,9 @@ case class Conf(n: PositiveInt)
 ```
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("{ n: 23 }"))
-loadConfig[Conf](ConfigFactory.parseString("{ n: -23 }"))
-loadConfig[Conf](ConfigFactory.parseString("{ n: abc }"))
+ConfigSource.string("{ n: 23 }").load[Conf]
+ConfigSource.string("{ n: -23 }").load[Conf]
+ConfigSource.string("{ n: abc }").load[Conf]
 ```
 
 ### Custom failure reasons
@@ -94,7 +94,7 @@ implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
 ```
 
 ```tut:book
-loadConfig[Conf](ConfigFactory.parseString("{ n: -23 }"))
+ConfigSource.string("{ n: -23 }").load[Conf]
 ```
 
 ### Throwing an exception instead of returning `Either`
@@ -104,11 +104,11 @@ in an application is to load the whole config with PureConfig at initialization 
 fast in case of a malformed config. For those cases, the `loadConfigOrThrow` method can be used instead of `loadConfig`:
 
 ```tut:book
-loadConfigOrThrow[Conf](ConfigFactory.parseString("{ n: 23 }"))
+ConfigSource.string("{ n: 23 }").loadOrThrow[Conf]
 ```
 
 ```tut:book:fail
-loadConfigOrThrow[Conf](ConfigFactory.parseString("{ n: -23 }"))
+ConfigSource.string("{ n: -23 }").loadOrThrow[Conf]
 ```
 
 The message of the thrown exception contains human-readable information of all the errors found by PureConfig, with the

@@ -31,7 +31,5 @@ val conf = parseString("""{
   timeout: 5 seconds,
   actor-path:  "akka://my-sys/user/service-a/worker1"
 }""")
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 ```
-
-

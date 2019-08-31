@@ -32,6 +32,6 @@ We can read a `MyConfig` with the following code:
 val conf = parseString("""{ uri: "http://http4s.org/" }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"uri":"http://http4s.org/"}))
 
-loadConfig[MyConfig](conf)
+ConfigSource.fromConfig(conf).load[MyConfig]
 // res0: Either[pureconfig.error.ConfigReaderFailures,MyConfig] = Right(MyConfig(http://http4s.org/))
 ```
