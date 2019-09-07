@@ -174,6 +174,23 @@ class ConfigSourceSuite extends BaseSuite {
       at("my-service").load[MyService] shouldBe Right(MyService("example.com", 8081, true))
   }
 
+  it should "fail when an optional source exists but has syntax errors" in {
+    ConfigSource.file("non-existing-file.conf").optional.load[Config] shouldBe Right(ConfigFactory.empty)
+    ConfigSource.string("4}{2").optional.load[Config] should failWithType[CannotParse]
+  }
+
+  it should "allow recovering a failed source with another one" in {
+    val appSource = ConfigSource.file("non-existing-file.conf")
+    val otherSource = ConfigSource.string("{ name = John, age = 33 }")
+
+    case class Conf(name: String, age: Int)
+
+    appSource.recoverWith { case ConfigReaderFailures(_: CannotRead, _) => otherSource }.load[Conf] shouldBe
+      Right(Conf("John", 33))
+    appSource.recoverWith { case ConfigReaderFailures(_: CannotParse, _) => otherSource }.load[Conf] should
+      failWithType[CannotReadFile]
+  }
+
   it should "defer config resolution until all fallbacks are merged" in {
     case class Conf(host: String)
     val resolve1 = ConfigSource.resources("conf/configSource/resolve1.conf")

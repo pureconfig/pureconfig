@@ -91,7 +91,7 @@ trait ConfigSource {
 final class ConfigObjectSource private (getConf: () => Result[Config]) extends ConfigSource {
 
   def value(): Result[ConfigObject] =
-    config.right.flatMap(_.resolveSafe()).right.map(_.root)
+    config().right.flatMap(_.resolveSafe()).right.map(_.root)
 
   /**
    * Reads a `Config` from this config source. The returned config is usually unresolved, unless
@@ -123,18 +123,23 @@ final class ConfigObjectSource private (getConf: () => Result[Config]) extends C
    *         to an empty config if it cannot be read.
    */
   def optional: ConfigObjectSource =
-    recoverWith { case ConfigReaderFailures(_: CannotRead, Nil) => Right(ConfigFactory.empty) }
+    recoverWith { case ConfigReaderFailures(_: CannotRead, Nil) => ConfigSource.empty }
 
   /**
-   * Applies a function `f` if this source returns a failure, returning an alternative config in
-   * those cases.
+   * Applies a function `f` if this source returns a failure, returning an alternative config
+   * source in those cases.
    *
    * @param f the function to apply if this source returns a failure
    * @return a new `ConfigObjectSource` that provides an alternative config in case this source
    *         fails
    */
-  def recoverWith(f: PartialFunction[ConfigReaderFailures, Result[Config]]): ConfigObjectSource =
-    ConfigObjectSource(getConf().left.flatMap(f))
+  def recoverWith(f: PartialFunction[ConfigReaderFailures, ConfigObjectSource]): ConfigObjectSource =
+    ConfigObjectSource(getConf().left.flatMap { failures =>
+      f.lift(failures) match {
+        case None => Left(failures)
+        case Some(source) => source.config()
+      }
+    })
 }
 
 object ConfigObjectSource {
