@@ -45,6 +45,6 @@ if ! git -c color.ui=always diff --no-index "$TMP_DIR/$WEBSITE_OUTPUT_DIR" "$WEB
 
     curl -f -H "Authorization: Token ${GITHUB_TOKEN}" -XPOST \
       -d "{\"body\": \"$COMMENT_CONTENT\"}" \
-      "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+      "https://api.github.com/repos/pureconfig/pureconfig/issues/${TRAVIS_PULL_REQUEST}/comments"
   fi
 fi
