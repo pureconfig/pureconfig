@@ -3,6 +3,9 @@ options:
     - title: Quick Start
       url: docs/index.html
 
+    - title: Loading a Config
+      url: docs/loading-a-config.html
+
     - title: Built-in Supported Types
       url: docs/built-in-supported-types.html
 
