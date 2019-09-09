@@ -27,7 +27,7 @@ val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 ```
 
 Automatic reader derivation is used throughout all the documentation pages. It is activated simply by importing
-`pureconfig.generic.auto._` everywhere readers are needed (for example, where `loadConfig` is used):
+`pureconfig.generic.auto._` everywhere readers are needed (for example, where `ConfigSource#load` is used):
 
 ```tut:silent
 import pureconfig.generic.auto._

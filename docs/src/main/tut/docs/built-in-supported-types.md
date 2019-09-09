@@ -6,7 +6,7 @@ title: Built-in Supported Types
 ## {{page.title}}
 
 PureConfig comes with baked-in support for many types, most of them from the standard Java and Scala libraries. When
-using those types, users don't have to provide anything else in order to be able to use `loadConfig`.
+using those types, users don't have to provide anything else in order to be able to load a config.
 
 The currently supported basic types are:
 
