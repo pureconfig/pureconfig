@@ -3,8 +3,8 @@ name := "pureconfig-cats"
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "1.6.1",
-  "org.typelevel" %% "cats-laws" % "1.6.1" % "test")
+  "org.typelevel" %% "cats-core" % "2.0.0",
+  "org.typelevel" %% "cats-laws" % "2.0.0" % "test")
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")),
