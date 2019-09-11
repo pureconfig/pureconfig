@@ -11,33 +11,26 @@ import pureconfig.module.cats.instances._
 
 package object eq {
 
-  implicit def configReaderEq[A: Eq](implicit arbCV: Arbitrary[ConfigValue]): Eq[ConfigReader[A]] = new Eq[ConfigReader[A]] {
-    val nSamples = 50
-    val resultEq = Eq[ConfigReader.Result[A]]
+  // This is the old implementation (pre-2.0.0) of Eq for functions in Cats. The new implementation requires an instance
+  // of ExhaustiveCheck (see https://github.com/typelevel/cats/pull/2577), which we are unable to provide for the types
+  // we use in tests. For our use case, it's OK to go with Arbitrary values.
+  private implicit def catsLawsEqForFn1[A, B](implicit A: Arbitrary[A], B: Eq[B]): Eq[A => B] = new Eq[A => B] {
+    val sampleCnt: Int = 50
 
-    def eqv(x: ConfigReader[A], y: ConfigReader[A]): Boolean = {
-      val samples = List.fill(nSamples)(arbCV.arbitrary.sample).collect {
+    def eqv(f: A => B, g: A => B): Boolean = {
+      val samples = List.fill(sampleCnt)(A.arbitrary.sample).collect {
         case Some(a) => a
-        case None => sys.error("Could not generate arbitrary values to compare two ConfigReaders")
+        case None => sys.error("Could not generate arbitrary values to compare two functions")
       }
-
-      samples.forall(s => resultEq.eqv(x.from(s), y.from(s)))
+      samples.forall(s => B.eqv(f(s), g(s)))
     }
   }
 
-  implicit def configWriterEq[A](implicit arbA: Arbitrary[A]): Eq[ConfigWriter[A]] = new Eq[ConfigWriter[A]] {
-    val nSamples = 50
-    val resultEq = Eq[ConfigValue]
+  implicit def configReaderEq[A: Eq]: Eq[ConfigReader[A]] =
+    Eq.by[ConfigReader[A], ConfigValue => ConfigReader.Result[A]](_.from)
 
-    def eqv(x: ConfigWriter[A], y: ConfigWriter[A]): Boolean = {
-      val samples = List.fill(nSamples)(arbA.arbitrary.sample).collect {
-        case Some(a) => a
-        case None => sys.error("Could not generate arbitrary values to compare two ConfigWriters")
-      }
-
-      samples.forall(s => resultEq.eqv(x.to(s), y.to(s)))
-    }
-  }
+  implicit def configWriterEq[A: Arbitrary]: Eq[ConfigWriter[A]] =
+    Eq.by[ConfigWriter[A], A => ConfigValue](_.to)
 
   implicit def configConvertEq[A: Eq: Arbitrary]: Eq[ConfigConvert[A]] =
     Eq.by[ConfigConvert[A], (ConfigReader[A], ConfigWriter[A])] { cc => (cc, cc) }
