@@ -32,7 +32,7 @@ sbt "set siteDirectory in docs := file(\"$WEBSITE_DIR\")" \
     makeMicrosite
 
 # generate the website pages for this version
-rm -rf 'docs/target/streams/$global/makeSite'
+rm -rf 'docs/target/streams/_global/makeSite'
 sbt "set siteDirectory in docs := file(\"$WEBSITE_DIR/v$VERSION\")" \
     "set micrositeBaseUrl in docs := \"v$VERSION\"" \
     makeMicrosite
