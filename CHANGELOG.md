@@ -1,3 +1,10 @@
+### 0.12.0 (Sep 12, 2019)
+
+- New features
+  - Introduced the new [`ConfigSource` API](https://pureconfig.github.io/v0.12.0/docs/loading-a-config.html), a new way
+    of specifying how and from where configs should be read and merged. All `loadConfig*` methods in `pureconfig` are
+    now deprecated in favor of config sources.
+
 ### 0.11.1 (Jun 14, 2019)
 
 - New features

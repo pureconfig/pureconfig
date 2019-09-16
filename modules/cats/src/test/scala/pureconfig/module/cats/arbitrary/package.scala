@@ -1,11 +1,11 @@
 package pureconfig.module.cats
 
-import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
-import org.scalacheck.{ Arbitrary, Cogen, Gen }
-import org.scalacheck.Arbitrary.{ arbitrary => arb }
-import pureconfig._
 import scala.collection.JavaConverters._
 
+import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
+import org.scalacheck.Arbitrary.{ arbitrary => arb }
+import org.scalacheck.{ Arbitrary, Cogen, Gen }
+import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, ConvertFailure }
 
 package object arbitrary {
@@ -16,6 +16,7 @@ package object arbitrary {
   private[this] def genAnyForConfig(maxDepth: Int): Gen[Any] = {
     val genScalar: Gen[Any] = Gen.oneOf(
       Gen.oneOf(true, false),
+      Gen.choose(Int.MinValue, Int.MaxValue),
       Gen.choose(Double.MinValue, Double.MaxValue),
       Gen.alphaStr)
 
