@@ -1,11 +1,16 @@
 name := "pureconfig-circe"
 
-crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
+def onScala211(onScala211: String, onOthers: String) = Def.setting {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 11)) => onScala211
+    case _ => onOthers
+  }
+}
 
 libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core" % "0.11.1",
-  "io.circe" %% "circe-literal" % "0.11.1" % Test,
-  "org.typelevel" %% "jawn-parser" % "0.14.2" % Test
+  "io.circe"      %% "circe-core"     % onScala211("0.11.1", "0.12.1").value,
+  "io.circe"      %% "circe-literal"  % onScala211("0.11.1", "0.12.1").value % Test,
+  "org.typelevel" %% "jawn-parser"    % "0.14.2" % Test
 )
 
 developers := List(
