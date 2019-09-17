@@ -5,13 +5,12 @@ import java.nio.file.{ Files, Path, Paths }
 
 import com.typesafe.config.{ ConfigValue, ConfigValueType }
 import org.scalatest.EitherValues
-import pureconfig.BaseSuite
+import pureconfig.{ BaseSuite, ConfigSource }
 import pureconfig.error._
 import pureconfig.generic.auto._
 import pureconfig.module.yaml.error.NonStringKeyFound
 
-@deprecated("Construct a `YamlConfigSource` pipeline instead", "0.12.1")
-class YamlApiSuite extends BaseSuite with EitherValues {
+class YamlConfigSourceSuite extends BaseSuite with EitherValues {
 
   def resourcePath(path: String): Path =
     Paths.get(URLDecoder.decode(getClass.getResource("/" + path).getFile, "UTF-8"))
@@ -34,7 +33,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   behavior of "YAML loading"
 
   it should "loadYaml from a simple YAML file" in {
-    loadYaml[Conf](resourcePath("basic.yaml")) shouldBe Right(Conf(
+    YamlConfigSource.file(resourcePath("basic.yaml")).load[Conf] shouldBe Right(Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -47,7 +46,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYaml from a string" in {
-    loadYaml[Conf](resourceContents("basic.yaml")) shouldBe Right(Conf(
+    YamlConfigSource.string(resourceContents("basic.yaml")).load[Conf] shouldBe Right(Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -60,7 +59,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYaml from string content with empty namespace" in {
-    loadYaml[Conf](resourceContents("basic.yaml"), "") shouldBe Right(Conf(
+    YamlConfigSource.string(resourceContents("basic.yaml")).at("").load[Conf] shouldBe Right(Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -73,17 +72,17 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "fail to loadYaml from string content with non existent namespace" in {
-    loadYaml[Conf](resourceContents("basic.yaml"), "foo") shouldBe Left(
+    YamlConfigSource.string(resourceContents("basic.yaml")).at("foo").load[Conf] shouldBe Left(
       ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), None, "")))
   }
 
   it should "fail to loadYaml from path with non existent namespace" in {
-    loadYaml[Conf](resourcePath("basic.yaml"), "foo") shouldBe Left(
+    YamlConfigSource.file(resourcePath("basic.yaml")).at("foo").load[Conf] shouldBe Left(
       ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), None, "")))
   }
 
   it should "loadYaml from a path with empty namespace" in {
-    loadYaml[Conf](resourcePath("basic.yaml"), "") shouldBe Right(Conf(
+    YamlConfigSource.file(resourcePath("basic.yaml")).at("").load[Conf] shouldBe Right(Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -96,36 +95,36 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYaml from string content with a specific namespace of a Map" in {
-    loadYaml[Map[String, String]](resourceContents("basic.yaml"), "map")
+    YamlConfigSource.string(resourceContents("basic.yaml")).at("map").load[Map[String, String]]
       .right
       .value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
   }
 
   it should "loadYaml from string content with a specific namespace of a BigInt" in {
-    loadYaml[BigInt](resourceContents("basic.yaml"), "n")
+    YamlConfigSource.string(resourceContents("basic.yaml")).at("n").load[BigInt]
       .right
       .value shouldBe BigInt("1234567890123456789012345678901234567890")
   }
 
   it should "fail to loadYaml of an array from string content with a non existent specific namespace" in {
-    loadYaml[BigInt](resourceContents("array.yaml"), "n") shouldBe Left(
+    YamlConfigSource.string(resourceContents("array.yaml")).at("n").load[BigInt] shouldBe Left(
       ConfigReaderFailures(ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.OBJECT)), None, "")))
   }
 
   it should "loadYaml from a path with a specific namespace of a Map" in {
-    loadYaml[Map[String, String]](resourcePath("basic.yaml"), "map")
+    YamlConfigSource.file(resourcePath("basic.yaml")).at("map").load[Map[String, String]]
       .right
       .value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
   }
 
   it should "loadYaml from a path with a specific namespace of a BigInt" in {
-    loadYaml[BigInt](resourceContents("basic.yaml"), "n")
+    YamlConfigSource.string(resourceContents("basic.yaml")).at("n").load[BigInt]
       .right
       .value shouldBe BigInt("1234567890123456789012345678901234567890")
   }
 
   it should "loadYamlOrThrow from a simple YAML file" in {
-    loadYamlOrThrow[Conf](resourcePath("basic.yaml")) shouldBe Conf(
+    YamlConfigSource.file(resourcePath("basic.yaml")).loadOrThrow[Conf] shouldBe Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -138,7 +137,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYamlOrThrow from a string" in {
-    loadYamlOrThrow[Conf](resourceContents("basic.yaml")) shouldBe Conf(
+    YamlConfigSource.string(resourceContents("basic.yaml")).loadOrThrow[Conf] shouldBe Conf(
       "abc",
       true,
       BigInt("1234567890123456789012345678901234567890"),
@@ -151,12 +150,12 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYamls from a multi-document YAML file" in {
-    loadYamls[List[InnerConf]](resourcePath("multi.yaml")) shouldBe Right(List(
+    YamlConfigSource.file(resourcePath("multi.yaml")).multiDoc.load[List[InnerConf]] shouldBe Right(List(
       InnerConf(1, "abc"),
       InnerConf(2, "def"),
       InnerConf(3, "ghi")))
 
-    loadYamls[(InnerConf, Conf)](resourcePath("multi2.yaml")) shouldBe Right((
+    YamlConfigSource.file(resourcePath("multi2.yaml")).multiDoc.load[(InnerConf, Conf)] shouldBe Right((
       InnerConf(1, "abc"),
       Conf(
         "abc",
@@ -171,7 +170,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYamls from a string" in {
-    loadYamls[(InnerConf, Conf)](resourceContents("multi2.yaml")) shouldBe Right((
+    YamlConfigSource.string(resourceContents("multi2.yaml")).multiDoc.load[(InnerConf, Conf)] shouldBe Right((
       InnerConf(1, "abc"),
       Conf(
         "abc",
@@ -186,12 +185,12 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYamlsOrThrow from a multi-document YAML file" in {
-    loadYamlsOrThrow[List[InnerConf]](resourcePath("multi.yaml")) shouldBe List(
+    YamlConfigSource.file(resourcePath("multi.yaml")).multiDoc.loadOrThrow[List[InnerConf]] shouldBe List(
       InnerConf(1, "abc"),
       InnerConf(2, "def"),
       InnerConf(3, "ghi"))
 
-    loadYamlsOrThrow[(InnerConf, Conf)](resourcePath("multi2.yaml")) shouldBe ((
+    YamlConfigSource.file(resourcePath("multi2.yaml")).multiDoc.loadOrThrow[(InnerConf, Conf)] shouldBe ((
       InnerConf(1, "abc"),
       Conf(
         "abc",
@@ -208,7 +207,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   it should "loadYamlsOrThrow from a string" in {
     val content = new String(Files.readAllBytes(resourcePath("multi2.yaml")))
 
-    loadYamlsOrThrow[(InnerConf, Conf)](content) shouldBe ((
+    YamlConfigSource.string(content).multiDoc.loadOrThrow[(InnerConf, Conf)] shouldBe ((
       InnerConf(1, "abc"),
       Conf(
         "abc",
@@ -223,23 +222,45 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "fail with a domain error when a file does not exist" in {
-    loadYaml[ConfigValue](Paths.get("nonexisting.yaml")) should failWithType[CannotReadFile]
-    loadYamls[List[ConfigValue]](Paths.get("nonexisting.yaml")) should failWithType[CannotReadFile]
-    a[ConfigReaderException[_]] should be thrownBy loadYamlOrThrow[ConfigValue](Paths.get("nonexisting.yaml"))
-    a[ConfigReaderException[_]] should be thrownBy loadYamlsOrThrow[List[ConfigValue]](Paths.get("nonexisting.yaml"))
+    YamlConfigSource.file(Paths.get("nonexisting.yaml")).load[ConfigValue] should failWithType[CannotReadFile]
+    YamlConfigSource.file(Paths.get("nonexisting.yaml")).multiDoc.load[List[ConfigValue]] should failWithType[CannotReadFile]
+    a[ConfigReaderException[_]] should be thrownBy YamlConfigSource.file(Paths.get("nonexisting.yaml")).loadOrThrow[ConfigValue]
+    a[ConfigReaderException[_]] should be thrownBy YamlConfigSource.file(Paths.get("nonexisting.yaml")).multiDoc.loadOrThrow[List[ConfigValue]]
   }
 
   it should "fail with a domain error when a non-string key is found" in {
-    loadYaml[ConfigValue](resourcePath("non_string_keys.yaml")) should failWithType[NonStringKeyFound]
-    loadYaml[ConfigValue](resourceContents("non_string_keys.yaml")) should failWithType[NonStringKeyFound]
+    YamlConfigSource.file(resourcePath("non_string_keys.yaml")).load[ConfigValue] should failWithType[NonStringKeyFound]
+    YamlConfigSource.string(resourceContents("non_string_keys.yaml")).load[ConfigValue] should failWithType[NonStringKeyFound]
   }
 
   it should "fail with the correct config location filled when a YAML fails to be parsed" in {
-    loadYaml[ConfigValue](resourcePath("illegal.yaml")) should failWith(CannotParse(
+    YamlConfigSource.file(resourcePath("illegal.yaml")).load[ConfigValue] should failWith(CannotParse(
       "mapping values are not allowed here",
       Some(ConfigValueLocation(resourcePath("illegal.yaml").toUri.toURL, 3))))
 
-    loadYaml[ConfigValue](resourceContents("illegal.yaml")) should failWith(CannotParse(
+    YamlConfigSource.string(resourceContents("illegal.yaml")).load[ConfigValue] should failWith(CannotParse(
       "mapping values are not allowed here", None))
+  }
+
+  it should "allow being converted to an object source" in {
+    YamlConfigSource.file(resourcePath("basic.yaml")).load[Conf] shouldBe
+      YamlConfigSource.file(resourcePath("basic.yaml")).asObjectSource.load[Conf]
+
+    YamlConfigSource.file(resourcePath("array.yaml")).asObjectSource.load[Conf] should failWithType[WrongType]
+  }
+
+  it should "be mergeable with non-YAML configs" in {
+    ConfigSource.string(s"{ str: bcd, map { a: 0.5, b: $${map.c} } }")
+      .withFallback(YamlConfigSource.file(resourcePath("basic.yaml")).asObjectSource)
+      .load[Conf] shouldBe Right(Conf(
+        "bcd",
+        true,
+        BigInt("1234567890123456789012345678901234567890"),
+        "dGhpcyBpcyBhIG1lc3NhZ2U=",
+        None,
+        Set(4, 6, 8),
+        List(10L, 10000L, 10000000L, 10000000000L),
+        Map("a" -> 0.5, "b" -> 3.5, "c" -> 3.5),
+        InnerConf(42, "def")))
   }
 }
