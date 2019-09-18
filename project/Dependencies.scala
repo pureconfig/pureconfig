@@ -17,7 +17,7 @@ object Dependencies {
     val scalaTest           = "3.0.8"
 
     // cats will only be compatible with scalacheck 1.14 on 2.x
-    val scalaCheck          = onScala213("1.14.0", "1.13.5")
+    val scalaCheck          = onScala213("1.14.0", "1.14.1")
     val scalaCheckShapeless = onScala213("1.2.3", "1.1.8")
   }
 
