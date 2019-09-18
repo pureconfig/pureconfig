@@ -10,8 +10,8 @@ import cats.effect.Sync
 import cats.implicits._
 import com.typesafe.config.ConfigRenderOptions
 import pureconfig.backend.ConfigFactoryWrapper
-import pureconfig.{ ConfigReader, ConfigSource, ConfigWriter, Derivation }
 import pureconfig.error.ConfigReaderException
+import pureconfig.{ ConfigReader, ConfigSource, ConfigWriter, Derivation }
 
 package object fs2 {
 
