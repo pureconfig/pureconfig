@@ -1,11 +1,11 @@
+import Utilities._
+
 name := "pureconfig-circe"
 
-crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
-
 libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core" % "0.11.1",
-  "io.circe" %% "circe-literal" % "0.11.1" % Test,
-  "org.typelevel" %% "jawn-parser" % "0.14.2" % Test
+  "io.circe"      %% "circe-core"    % forScalaVersions { case (2, 11) => "0.11.1"; case _ => "0.12.1" }.value,
+  "io.circe"      %% "circe-literal" % forScalaVersions { case (2, 11) => "0.11.1"; case _ => "0.12.1" }.value % Test,
+  "org.typelevel" %% "jawn-parser"   % "0.14.2" % Test
 )
 
 developers := List(
