@@ -5,8 +5,8 @@ name := "pureconfig-tests"
 crossScalaVersions ~= { _ :+ "2.13.0" }
 
 libraryDependencies ++= Seq(
-  scalaTest.withConfigurations(Some("compile")),
-  scalaCheck.value.withConfigurations(Some("compile")),
-  scalaCheckShapeless.value.withConfigurations(Some("compile")))
+  scalaTest,
+  scalaCheck.value,
+  scalaCheckShapeless.value % "test")
 
 skip in publish := true
