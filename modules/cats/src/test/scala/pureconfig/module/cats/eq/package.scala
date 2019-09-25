@@ -1,8 +1,8 @@
 package pureconfig.module.cats
 
 import cats.Eq
-import cats.instances.either._
-import cats.instances.tuple._
+import cats.kernel.instances.either._
+import cats.kernel.instances.tuple._
 import com.typesafe.config.ConfigValue
 import org.scalacheck.Arbitrary
 import pureconfig._

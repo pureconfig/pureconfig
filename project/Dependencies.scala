@@ -9,9 +9,8 @@ object Dependencies {
 
     val scalaTest           = "3.0.8"
 
-    // cats will only be compatible with scalacheck 1.14 on 2.x
-    val scalaCheck          = forScalaVersions { case (2, 13) => "1.14.0"; case _ => "1.13.5" }
-    val scalaCheckShapeless = forScalaVersions { case (2, 13) => "1.2.3"; case _ => "1.1.8" }
+    val scalaCheck          = "1.14.1"
+    val scalaCheckShapeless = "1.2.3"
   }
 
   val shapeless = "com.chuusai" %% "shapeless" % Version.shapeless
@@ -19,10 +18,7 @@ object Dependencies {
 
   // testing libraries
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test"
-  val scalaCheck = Def.setting { "org.scalacheck" %% "scalacheck" % Version.scalaCheck.value % "test" }
-  val scalaCheckShapeless = Def.setting {
-    "com.github.alexarchambault" %%
-      s"scalacheck-shapeless_${forScalaVersions { case (2, 13) => "1.14"; case _ => "1.13" }.value}" %
-      Version.scalaCheckShapeless.value % "test"
-  }
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck % "test"
+  val scalaCheckShapeless =
+    "com.github.alexarchambault" %% s"scalacheck-shapeless_1.14" % Version.scalaCheckShapeless % "test"
 }
