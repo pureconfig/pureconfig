@@ -78,8 +78,11 @@ class SquantsConvertTest extends BaseSuite {
   checkDimension(time.Frequency)
   checkDimension(time.Time)
 
-  it should "parse Money" in forAll { (m: Money) =>
-    checkConfig(SquantConfig(m))
+  it should "parse Money" in {
+    implicit val mc: MoneyContext = defaultMoneyContext
+    forAll { m: Money =>
+      checkConfig(SquantConfig(m))
+    }
   }
 
   case class SquantConfig[T](value: T)

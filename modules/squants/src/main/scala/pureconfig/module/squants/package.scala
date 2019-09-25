@@ -71,7 +71,7 @@ package object squants {
     viaNonEmptyStringTry[DataRate](DataRate.apply, _.toString)
 
   // market
-  implicit val moneyDensityConfigConvert =
+  implicit def moneyDensityConfigConvert(implicit mc: MoneyContext) =
     viaNonEmptyStringTry[Money](Money.apply, _.toString)
 
   // mass
