@@ -1,13 +1,8 @@
 name := "pureconfig-cron4s"
 
-libraryDependencies += {
-  val cron4sVersion = CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, n)) if n < 12 => "0.5.0"
-    case _                      => "0.6.0"
-  }
-  
-  "com.github.alonsodomin.cron4s" %% "cron4s-core" % cron4sVersion
-}
+crossScalaVersions := List("2.13.1", "2.12.9")
+
+libraryDependencies += "com.github.alonsodomin.cron4s" %% "cron4s-core" % "0.6.0"
 
 developers := List(
   Developer("bardurdam", "Bárður Viberg Dam", "bardurdam@gmail.com", url("https://github.com/bardurdam")))
