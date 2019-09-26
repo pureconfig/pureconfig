@@ -1,5 +1,6 @@
+import Utilities._
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import scalariform.formatter.preferences._
-import ReleaseTransformations._
 
 lazy val core = (project in file("core")).
   enablePlugins(BoilerplatePlugin, SbtOsgi, TutPlugin).
@@ -73,7 +74,7 @@ lazy val commonSettings = Seq(
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))),
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.12.9", "2.13.0", "2.11.12"),
+  crossScalaVersions := Seq("2.12.10", "2.13.0", "2.11.12"),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -82,12 +83,7 @@ lazy val commonSettings = Seq(
   crossVersionSharedSources(unmanagedSourceDirectories in Compile),
   crossVersionSharedSources(unmanagedSourceDirectories in Test),
 
-  scalacOptions ++= allVersionLintFlags ++ {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some(v) => lintFlags.getOrElse(v, Nil)
-      case _ => Nil
-    }
-  },
+  scalacOptions ++= lintFlags.value,
 
   scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
@@ -146,28 +142,42 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   }
 }
 
-lazy val allVersionLintFlags = List(
-  "-encoding", "UTF-8", // yes, this is 2 args
-  "-feature",
-  "-unchecked",
-  "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen")
+lazy val lintFlags = {
+  lazy val allVersionLintFlags = List(
+    "-encoding", "UTF-8", // yes, this is 2 args
+    "-feature",
+    "-unchecked",
+    "-Ywarn-dead-code",
+    "-Ywarn-numeric-widen")
 
-lazy val lintFlags = Map(
-  (2L, 11L) -> List(
-    "-deprecation",
-    "-Xlint",
-    "-Xfatal-warnings",
-    "-Yno-adapted-args",
-    "-Ywarn-unused-import"),
-  (2, 12) -> List(
-    "-deprecation",                 // Either#right is deprecated on Scala 2.13
-    "-Xlint:_,-unused",
-    "-Xfatal-warnings",
-    "-Yno-adapted-args",
-    "-Ywarn-unused:_,-implicits"),  // Some implicits are intentionally used just as evidences, triggering warnings
-  (2, 13) -> List(
-    "-Ywarn-unused:_,-implicits"))
+  def withCommon(flags: String*) =
+    allVersionLintFlags ++ flags
+
+  forScalaVersions {
+    case (2, 11) =>
+      withCommon(
+        "-deprecation",
+        "-Xlint",
+        "-Xfatal-warnings",
+        "-Yno-adapted-args",
+        "-Ywarn-unused-import")
+
+    case (2, 12) =>
+      withCommon(
+        "-deprecation",                // Either#right is deprecated on Scala 2.13
+        "-Xlint:_,-unused",
+        "-Xfatal-warnings",
+        "-Yno-adapted-args",
+        "-Ywarn-unused:_,-implicits")  // Some implicits are intentionally used just as evidences, triggering warnings
+
+    case (2, 13) =>
+      withCommon(
+        "-Ywarn-unused:_,-implicits")
+
+    case _ =>
+      withCommon()
+  }
+}
 
 // do not publish the root project
 skip in publish := true

@@ -101,7 +101,7 @@ ConfigSource.string("{ n: -23 }").load[Conf]
 
 In some usage patterns, there isn't a need to deal with errors as values. For example, a good practice to handle configs
 in an application is to load the whole config with PureConfig at initialization time, causing the application to fail
-fast in case of a malformed config. For those cases, the `loadConfigOrThrow` method can be used instead of `loadConfig`:
+fast in case of a malformed config. For those cases, the `loadOrThrow` method can be used instead of `load`:
 
 ```tut:book
 ConfigSource.string("{ n: 23 }").loadOrThrow[Conf]

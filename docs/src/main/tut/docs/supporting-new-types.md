@@ -67,7 +67,7 @@ implicit object MyIntReader extends ConfigReader[MyInt] {
 The inteface consists of a single `from` method that takes a `ConfigCursor` and returns an `Either` of a `MyInt` or a
 list of errors. You can read more about cursors at [Config Cursors](config-cursors.html).
 
-Using any of the approaches above would now make `loadConfig` work:
+Using any of the approaches above would now make the config be loaded successfully:
 
 ```tut:book
 ConfigSource.string("{ n: 1 }").load[Conf]

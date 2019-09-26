@@ -39,9 +39,9 @@ package object cats {
     writer.contramap(_.toSortedMap)
 
   // For emptiable foldables not covered by TraversableOnce reader/writer, e.g. Chain.
-  implicit def lowPriorityNonReducibleReader[T, F[_]: Foldable: Alternative](implicit reader: ConfigReader[TraversableOnce[T]]): Exported[ConfigReader[F[T]]] =
-    Exported(reader.map(to => (to :\ Alternative[F].empty[T])(_.pure[F] <+> _)))
-  implicit def lowPriorityNonReducibleWriter[T, F[_]: Foldable: Alternative](implicit writer: ConfigWriter[TraversableOnce[T]]): Exported[ConfigWriter[F[T]]] =
+  implicit def lowPriorityNonReducibleReader[T, F[_]: Foldable: Alternative](implicit reader: ConfigReader[List[T]]): Exported[ConfigReader[F[T]]] =
+    Exported(reader.map(to => (to foldRight Alternative[F].empty[T])(_.pure[F] <+> _)))
+  implicit def lowPriorityNonReducibleWriter[T, F[_]: Foldable: Alternative](implicit writer: ConfigWriter[List[T]]): Exported[ConfigWriter[F[T]]] =
     Exported(writer.contramap(_.toList))
 
   implicit def nonEmptyChainReader[T](implicit reader: ConfigReader[Chain[T]]): ConfigReader[NonEmptyChain[T]] =

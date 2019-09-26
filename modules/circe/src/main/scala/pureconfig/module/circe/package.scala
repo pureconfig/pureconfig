@@ -45,7 +45,7 @@ package object circe {
       },
       str => ConfigValueFactory.fromAnyRef(str),
       arr => ConfigValueFactory.fromIterable(arr.map(jsonToCv).asJava),
-      obj => ConfigValueFactory.fromMap(obj.toMap.mapValues(jsonToCv).asJava))
+      obj => ConfigValueFactory.fromMap(obj.toMap.map { case (k, v) => k -> jsonToCv(v) }.asJava))
   }
 
   implicit val circeJsonReader: ConfigReader[Json] =

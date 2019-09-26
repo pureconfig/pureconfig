@@ -7,7 +7,7 @@ Adds support for loading and saving configurations from [fs2](https://github.com
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.11.1"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.12.0"
 ```
 
 ## Example
@@ -21,7 +21,7 @@ To load a configuration file from a path using cats-effect's `IO`:
 ```scala
 import pureconfig.generic.auto._
 import pureconfig.module.fs2._
-import cats.effect.{IO, ContextShift}
+import cats.effect.{Blocker, IO, ContextShift}
 import fs2.io.file
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,9 +34,9 @@ case class MyConfig(somefield: Int, anotherfield: String)
 val chunkSize = 4096
 
 implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
-val blockingEc: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newCachedThreadPool())
+val blocker: Blocker = Blocker.liftExecutorService(Executors.newCachedThreadPool())
 
-val configStream = file.readAll[IO](somePath, blockingEc, chunkSize)
+val configStream = file.readAll[IO](somePath, blocker, chunkSize)
 
 val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream)
 ```
