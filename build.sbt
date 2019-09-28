@@ -101,11 +101,7 @@ lazy val commonSettings = Seq(
 
   publishMavenStyle := true,
   publishArtifact in Test := false,
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  })
+  publishTo := sonatypePublishToBundle.value)
 
 lazy val micrositesSettings = Seq(
   micrositeName := "PureConfig",
@@ -197,7 +193,7 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
   commitNextVersion,
-  pushChanges,
-  releaseStepCommandAndRemaining("sonatypeReleaseAll"))
+  pushChanges)
