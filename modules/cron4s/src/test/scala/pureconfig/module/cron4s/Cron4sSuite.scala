@@ -24,7 +24,7 @@ class Cron4sSuite extends BaseSuite {
 
     val errors = ConfigReaderFailures(
       ConvertFailure(
-        CannotConvert("10-65 * * * * *", "CronExpr", "Expected '\" \" | 0-59' at position 2 but found '\"-65 * * * * *\"'"),
+        CannotConvert("10-65 * * * * *", "CronExpr", "blank expected at position 3 but found '-'"),
         None,
         "schedule"))
 
