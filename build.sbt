@@ -7,12 +7,18 @@ lazy val core = (project in file("core")).
   settings(commonSettings).
   dependsOn(macros)
 
-// A special module for now, since `tests` depend on it. We should improve this organization later by separating the
-// test helpers (which all projects' tests should depend on) from the core+generic test implementations.
-lazy val generic = (project in file("modules/generic")).
+// Two special modules for now, since `tests` depend on them. We should improve this organization later by separating
+// the test helpers (which all projects' tests should depend on) from the core+generic test implementations.
+lazy val `generic-base` = (project in file("modules/generic-base")).
   enablePlugins(SbtOsgi, TutPlugin).
   dependsOn(core).
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+
+lazy val generic = (project in file("modules/generic")).
+  enablePlugins(SbtOsgi, TutPlugin).
+  dependsOn(core, `generic-base`).
+  settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+// -----
 
 lazy val macros = (project in file("macros")).
   enablePlugins(TutPlugin).
