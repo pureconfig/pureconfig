@@ -1,7 +1,7 @@
 
 # Cron4s module for PureConfig
 
-Adds support for [Cron4s](https://alonsodomin.github.io/cron4s/)'s CronExpr class to PureConfig.
+Adds support for [Cron4s](https://github.com/alonsodomin/cron4s)'s CronExpr class to PureConfig.
 
 ## Add pureconfig-cron4s to your project
 

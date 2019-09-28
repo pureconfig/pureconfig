@@ -36,21 +36,12 @@ package object gen {
   val genInstant: Gen[Instant] =
     Gen.choose(Instant.MIN.getEpochSecond, Instant.MAX.getEpochSecond).map(Instant.ofEpochSecond)
 
-  val genZoneId: Gen[ZoneId] =
-    Gen.oneOf(ZoneId.getAvailableZoneIds.asScala.toSeq).map(ZoneId.of)
-
-  val genZoneOffset: Gen[ZoneOffset] =
-    Gen.choose(ZoneOffset.MIN.getTotalSeconds, ZoneOffset.MAX.getTotalSeconds).map(ZoneOffset.ofTotalSeconds)
-
   val genPeriod: Gen[Period] =
     for {
       years <- Arbitrary.arbInt.arbitrary
       months <- Arbitrary.arbInt.arbitrary
       days <- Arbitrary.arbInt.arbitrary
     } yield Period.of(years, months, days)
-
-  val genYear: Gen[Year] =
-    Gen.choose(Year.MIN_VALUE, Year.MAX_VALUE).map(Year.of)
 
   val genPath: Gen[Path] =
     Gen.nonEmptyListOf(Gen.alphaNumStr).map(parts => parts.map(str => Paths.get(str)).reduce(_ resolve _))
@@ -64,4 +55,61 @@ package object gen {
   val genJavaBigDecimal: Gen[JavaBigDecimal] = Arbitrary.arbitrary[BigDecimal].map(_.bigDecimal)
 
   val genBigInt: Gen[BigInteger] = Arbitrary.arbitrary[BigInt].map(_.bigInteger)
+
+  val genHour: Gen[Int] = Gen.chooseNum(0, 23)
+  val genMinute: Gen[Int] = Gen.chooseNum(0, 59)
+  val genSecond: Gen[Int] = Gen.chooseNum(0, 59)
+  val genNano: Gen[Int] = Gen.chooseNum(0, 999999999)
+  val genYearInt: Gen[Int] = Gen.chooseNum(1970, 2999)
+  val genMonth: Gen[Int] = Gen.chooseNum(1, 12)
+
+  val genLocalTime: Gen[LocalTime] = for {
+    hour <- genHour
+    minute <- genMinute
+    second <- genSecond
+    nano <- genNano
+  } yield LocalTime.of(hour, minute, second, nano)
+
+  val genLocalDate: Gen[LocalDate] = for {
+    year <- genYearInt
+    month <- genMonth
+    day <- Gen.chooseNum(1, java.time.YearMonth.of(year, month).lengthOfMonth())
+  } yield LocalDate.of(year, month, day)
+
+  val genLocalDateTime: Gen[LocalDateTime] = for {
+    date <- genLocalDate
+    time <- genLocalTime
+  } yield date.atTime(time)
+
+  val genMonthDay: Gen[MonthDay] =
+    genLocalDate.map(date => MonthDay.of(date.getMonthValue, date.getDayOfMonth))
+
+  val genZoneOffset: Gen[ZoneOffset] =
+    Gen.choose(ZoneOffset.MIN.getTotalSeconds, ZoneOffset.MAX.getTotalSeconds).map(ZoneOffset.ofTotalSeconds)
+
+  val genOffsetDateTime: Gen[OffsetDateTime] = for {
+    localDateTime <- genLocalDateTime
+    offset <- genZoneOffset
+  } yield OffsetDateTime.of(localDateTime, offset)
+
+  val genOffsetTime: Gen[OffsetTime] = for {
+    localTime <- genLocalTime
+    offset <- genZoneOffset
+  } yield OffsetTime.of(localTime, offset)
+
+  val genYear: Gen[Year] =
+    Gen.choose(Year.MIN_VALUE, Year.MAX_VALUE).map(Year.of)
+
+  val genYearMonth: Gen[YearMonth] = for {
+    year <- genYearInt
+    month <- genMonth
+  } yield YearMonth.of(year, month)
+
+  val genZoneId: Gen[ZoneId] =
+    Gen.oneOf(ZoneId.getAvailableZoneIds.asScala.toSeq).map(ZoneId.of)
+
+  val genZonedDateTime: Gen[ZonedDateTime] = for {
+    localDateTime <- genLocalDateTime
+    zoneId <- genZoneId.suchThat(_ != ZoneId.of("GMT0")) // Avoid JDK-8138664
+  } yield ZonedDateTime.of(localDateTime, zoneId)
 }

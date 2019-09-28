@@ -39,7 +39,7 @@ lazy val docs = (project in file("docs")).
 def module(proj: Project) = proj.
   enablePlugins(SbtOsgi, TutPlugin).
   dependsOn(core).
-  dependsOn(tests % "test->test"). // In order to reuse thDerivationSuite scalacheck generators
+  dependsOn(tests % "test").
   dependsOn(generic % "Tut"). // Allow auto-derivation in documentation
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
