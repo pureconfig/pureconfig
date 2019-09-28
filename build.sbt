@@ -182,6 +182,7 @@ lazy val lintFlags = {
 
 // Use common settings for Scala versions in the root project
 commonScalaVersionSettings
+crossScalaVersions ~= { versions => Seq(versions.head) }
 
 // do not publish the root project
 skip in publish := true
