@@ -1,3 +1,4 @@
+import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import scalariform.formatter.preferences._
@@ -61,11 +62,7 @@ lazy val squants = module(project) in file("modules/squants")
 lazy val sttp = module(project) in file("modules/sttp")
 lazy val yaml = module(project) in file("modules/yaml")
 
-lazy val commonScalaVersionSettings = Seq(
-  crossScalaVersions := Seq("2.12.10", "2.13.0", "2.11.12"),
-  scalaVersion := crossScalaVersions.value.head)
-
-lazy val commonSettings = commonScalaVersionSettings ++ Seq(
+lazy val commonSettings = Seq(
   organization := "com.github.pureconfig",
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
@@ -76,6 +73,9 @@ lazy val commonSettings = commonScalaVersionSettings ++ Seq(
     Developer("jcazevedo", "Joao Azevedo", "joao.c.azevedo@gmail.com", url("https://github.com/jcazevedo")),
     Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")),
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))),
+
+  crossScalaVersions := Seq(scala212, scala213, scala211),
+  scalaVersion := crossScalaVersions.value.head,
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -180,9 +180,8 @@ lazy val lintFlags = {
   }
 }
 
-// Use common settings for Scala versions in the root project
-commonScalaVersionSettings
-crossScalaVersions ~= { versions => Seq(versions.head) }
+// Use the same Scala 2.12 version in the root project as in subprojects
+scalaVersion := scala212
 
 // do not publish the root project
 skip in publish := true
