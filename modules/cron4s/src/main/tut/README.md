@@ -1,14 +1,14 @@
 
 # Cron4s module for PureConfig
 
-Adds support for [Cron4s](https://alonsodomin.github.io/cron4s/)'s CronExpr class to PureConfig.
+Adds support for [Cron4s](https://github.com/alonsodomin/cron4s)'s CronExpr class to PureConfig.
 
 ## Add pureconfig-cron4s to your project
 
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cron4s" % "0.12.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cron4s" % "0.12.1"
 ```
 
 ## Example

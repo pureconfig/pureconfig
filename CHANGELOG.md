@@ -1,3 +1,9 @@
+### 0.12.1 (Sep 28, 2019)
+
+- New features
+  - Added support for Scala 2.13 in the `pureconfig-cats`, `pureconfig-cats-effect` and `pureconfig-circe` modules;
+  - Added a `ConfigSource` that reads configs from YAML documents in the `pureconfig-yaml` module.
+
 ### 0.12.0 (Sep 12, 2019)
 
 - New features
@@ -104,7 +110,7 @@
     of `ConfigReaderFailures`;
   - The `CannotConvertNull` failure was removed, being superseeded by `KeyNotFound`;
   - Methods deprecated in previous versions were removed.
-  
+
 - Bug fixes
   - Fixed a bug where some or all `Derivation` cases outside the `pureconfig` package were not showing the full error
     description.
@@ -123,10 +129,10 @@
   - Added an experimental way to debug when a converter fails to be derived because an implicit is not found. See
     [the documentation](https://pureconfig.github.io/docs/debugging-implicits-not-found.html) for
     more information on how to enable it.
-  
+
 - Breaking changes
   - `ConfigWriter` for tuples now writes them as `ConfigList`s, instead of a `ConfigObject` with keys `_1`, `_2`, and so on.
-  
+
 - Bug fixes
   - A breaking change introduced in v0.7.1 where `loadConfigFromFiles` stopped allowing missing files was reverted;
   - `loadConfig` methods no longer throw an exception when passed a namespace where one of the keys is not a config
@@ -242,7 +248,7 @@
 
 - New features
   - Sealed families are now converted to and from configs unambiguously by using an extra `type` field (customizable) in
-    their config representation; 
+    their config representation;
   - New `CoproductHint` trait which allows customization of the derived `ConfigConvert` for sealed families;
 - Breaking changes
   - The default config representation for sealed families has changed:
