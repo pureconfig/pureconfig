@@ -5,6 +5,6 @@ name := "pureconfig-tests"
 libraryDependencies ++= Seq(
   scalaTest,
   scalaCheck,
-  scalaCheckShapeless)
+  scalaCheckShapeless % "test")
 
 skip in publish := true

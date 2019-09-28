@@ -20,8 +20,8 @@ object Dependencies {
   val typesafeConfig = "com.typesafe" % "config" % Version.typesafeConfig
 
   // testing libraries
-  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test"
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck % "test"
+  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
   val scalaCheckShapeless =
-    "com.github.alexarchambault" %% s"scalacheck-shapeless_1.14" % Version.scalaCheckShapeless % "test"
+    "com.github.alexarchambault" %% s"scalacheck-shapeless_1.14" % Version.scalaCheckShapeless
 }
