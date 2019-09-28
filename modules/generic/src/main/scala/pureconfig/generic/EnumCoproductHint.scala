@@ -4,6 +4,7 @@ import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigVal
 import pureconfig._
 import pureconfig.error._
 import pureconfig.syntax._
+
 /**
  * Hint applicable to sealed families of case objects where objects are written and read as strings with their type
  * names. Trying to read or write values that are not case objects results in failure.
