@@ -39,7 +39,7 @@ lazy val docs = (project in file("docs")).
 def module(proj: Project) = proj.
   enablePlugins(SbtOsgi, TutPlugin).
   dependsOn(core).
-  dependsOn(tests % "test->test"). // In order to reuse thDerivationSuite scalacheck generators
+  dependsOn(tests % "test->test"). // In order to reuse the DerivationSuite scalacheck generators
   dependsOn(generic % "Tut"). // Allow auto-derivation in documentation
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
@@ -137,8 +137,8 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
     List(
-      if(minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
-      if(minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
+      if (minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
+      if (minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
     ).flatten
   }
 }
