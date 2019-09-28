@@ -75,7 +75,7 @@ lazy val commonSettings = Seq(
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))),
 
   crossScalaVersions := Seq(scala212, scala213, scala211),
-  scalaVersion := crossScalaVersions.value.head,
+  scalaVersion := scala212,
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
