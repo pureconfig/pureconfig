@@ -1,6 +1,6 @@
 name := "pureconfig-cron4s"
 
-crossScalaVersions := List("2.13.1", "2.12.9")
+crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
 
 libraryDependencies += "com.github.alonsodomin.cron4s" %% "cron4s-core" % "0.6.0"
 
