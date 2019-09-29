@@ -1,0 +1,1 @@
+name := "pureconfig-generic-base"
