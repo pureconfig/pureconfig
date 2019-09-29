@@ -23,8 +23,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with ScalaCheckDrivenPr
    * Note that this method doesn't check all the values but only the values that can be created by `Arbitrary[T]` and
    * only the `ConfigValue` created by `ConfigConvert[T].to`. While `Arbitrary[T]` is usually comprehensive,
    * `ConfigConvert[T].from` could support different kind of values that `ConfigConvert[T].to` doesn't produce
-   * because, for instance, multiple representation of `t: T` are possible. Use [[checkRead()]] for those
-   * representations.
+   * because, for instance, multiple representation of `t: T` are possible. Use [[checkRead]] for those representations.
    */
   def checkArbitrary[T](implicit cc: Derivation[ConfigConvert[T]], arb: Arbitrary[T], tpe: TypeTag[T], equality: Equality[T]): Unit =
     it should s"read an arbitrary ${tpe.tpe}" in forAll { t: T =>
@@ -65,7 +64,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with ScalaCheckDrivenPr
       }
     }
 
-  /** Similar to [[checkRead()]] but work on ConfigValues of type String */
+  /** Similar to [[checkRead]] but work on ConfigValues of type String */
   def checkReadString[T: ConfigReader: TypeTag: Equality](strsToValues: (String, T)*): Unit =
     checkRead[T](strsToValues.map { case (s, t) => ConfigValueFactory.fromAnyRef(s) -> t }: _*)
 
@@ -80,7 +79,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with ScalaCheckDrivenPr
       }
     }
 
-  /** Similar to [[checkWrite()]] but work on ConfigValues of type String */
+  /** Similar to [[checkWrite]] but work on ConfigValues of type String */
   def checkWriteString[T: ConfigWriter: TypeTag: Equality](valuesToStrs: (T, String)*): Unit =
     checkWrite[T](valuesToStrs.map { case (t, s) => t -> ConfigValueFactory.fromAnyRef(s) }: _*)
 
@@ -94,7 +93,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with ScalaCheckDrivenPr
     checkWrite[T](reprsValues.map(_.swap): _*)
   }
 
-  /** Similar to [[checkReadWrite()]] but work on ConfigValues of type String */
+  /** Similar to [[checkReadWrite]] but work on ConfigValues of type String */
   def checkReadWriteString[T: ConfigReader: ConfigWriter: TypeTag: Equality](strsValues: (String, T)*): Unit = {
     checkReadString[T](strsValues: _*)
     checkWriteString[T](strsValues.map(_.swap): _*)
@@ -104,7 +103,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with ScalaCheckDrivenPr
    * Check that `cc` returns error of type `E` when trying to read each value passed with `values`
    *
    * @param values the values that should not be conver
-   * @param cr the [[ConfigConvert]] to test
+   * @param cr the `ConfigConvert` to test
    */
   def checkFailure[T, E <: FailureReason](values: ConfigValue*)(implicit cr: ConfigReader[T], tpe: TypeTag[T], eTag: ClassTag[E]): Unit =
     for (value <- values) {
