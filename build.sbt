@@ -1,3 +1,4 @@
+import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import scalariform.formatter.preferences._
@@ -79,8 +80,8 @@ lazy val commonSettings = Seq(
     Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")),
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))),
 
-  scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.12.10", "2.13.0", "2.11.12"),
+  crossScalaVersions := Seq(scala211, scala212, scala213),
+  scalaVersion := scala212,
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -142,8 +143,8 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
     List(
-      if(minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
-      if(minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
+      if (minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
+      if (minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
     ).flatten
   }
 }
@@ -184,6 +185,9 @@ lazy val lintFlags = {
       withCommon()
   }
 }
+
+// Use the same Scala 2.12 version in the root project as in subprojects
+scalaVersion := scala212
 
 // do not publish the root project
 skip in publish := true
