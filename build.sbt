@@ -80,7 +80,7 @@ lazy val commonSettings = Seq(
     Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")),
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))),
 
-  crossScalaVersions := Seq(scala212, scala213, scala211),
+  crossScalaVersions := Seq(scala211, scala212, scala213),
   scalaVersion := scala212,
 
   resolvers ++= Seq(
