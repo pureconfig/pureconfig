@@ -62,6 +62,7 @@ lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s")
 lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")
+lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val scalaz = module(project) in file("modules/scalaz")
 lazy val squants = module(project) in file("modules/squants")
