@@ -1,7 +1,7 @@
 name := "pureconfig-sttp"
 
 libraryDependencies ++= Seq(
-  "com.softwaremill.sttp" %% "core" % "1.7.0")
+  "com.softwaremill.sttp" %% "core" % "1.7.1")
 
 developers := List(
   Developer("bszwej", "Bartlomiej Szwej", "bszwej@gmail.com", url("https://github.com/bszwej")))
