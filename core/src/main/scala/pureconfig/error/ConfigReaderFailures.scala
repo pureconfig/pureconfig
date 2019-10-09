@@ -18,8 +18,8 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
   def ++(that: ConfigReaderFailures): ConfigReaderFailures =
     new ConfigReaderFailures(head, tail ++ that.toList)
 
-  def prettyPrint(identLevel: Int = 0, tabSize: Int = 2): String = {
-    def tabs(n: Int): String = " " * ((identLevel + n) * tabSize)
+  def prettyPrint(identLevel: Int = 0, identSize: Int = 2): String = {
+    def tabs(n: Int): String = " " * ((identLevel + n) * identSize)
     def descriptionWithLocation(failure: ConfigReaderFailure, ident: Int): String = {
       val failureLines = failure.description.split("\n")
       (failure.location.fold(s"${tabs(ident)}- ${failureLines.head}")(f => s"${tabs(ident)}- ${f.description} ${failureLines.head}") ::
