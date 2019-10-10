@@ -277,7 +277,8 @@ object ConfigSource {
    * @param name the resource name
    * @return a config source that provides configs read from JVM resource files.
    */
-  def resources(name: String) = ConfigObjectSource(ConfigFactoryWrapper.parseResources(name))
+  def resources(name: String, classLoader: ClassLoader = null) =
+    ConfigObjectSource(ConfigFactoryWrapper.parseResources(name, classLoader))
 
   /**
    * Returns a config source that provides a config parsed from a string.
