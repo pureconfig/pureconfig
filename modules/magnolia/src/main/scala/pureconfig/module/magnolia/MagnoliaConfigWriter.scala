@@ -19,7 +19,7 @@ object MagnoliaConfigWriter {
     else if (ctx.isValueClass) combineValueClass(ctx)
     else combineCaseClass(ctx)
 
-  def combineCaseClass[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
+  private def combineCaseClass[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
     def to(a: A): ConfigValue = {
       val fieldValues = ctx.parameters.map { param =>
         param.typeclass match {
@@ -33,12 +33,12 @@ object MagnoliaConfigWriter {
     }
   }
 
-  def combineTuple[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] = new ConfigWriter[A] {
+  private def combineTuple[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] = new ConfigWriter[A] {
     override def to(a: A): ConfigValue = ConfigValueFactory.fromIterable(
       ctx.parameters.map { param => param.typeclass.to(param.dereference(a)) }.asJava)
   }
 
-  def combineValueClass[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] = new ConfigWriter[A] {
+  private def combineValueClass[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] = new ConfigWriter[A] {
     override def to(a: A): ConfigValue =
       ctx.parameters.map { param => param.typeclass.to(param.dereference(a)) }.head
   }

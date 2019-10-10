@@ -3,8 +3,8 @@ package pureconfig.module.magnolia
 import scala.language.higherKinds
 
 import pureconfig._
-import pureconfig.module.magnolia.reader.auto._
-import pureconfig.module.magnolia.writer.auto._
+import pureconfig.module.magnolia.auto.reader._
+import pureconfig.module.magnolia.auto.writer._
 import shapeless.test.illTyped
 
 // NOTE: behavior differs from pureconfig.generic (value classes also need to be case classes)

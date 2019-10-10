@@ -7,8 +7,8 @@ import pureconfig._
 import pureconfig.error._
 import pureconfig.generic._
 import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
-import pureconfig.module.magnolia.reader.auto._
-import pureconfig.module.magnolia.writer.auto._
+import pureconfig.module.magnolia.auto.reader._
+import pureconfig.module.magnolia.auto.writer._
 
 class CoproductHintSuite extends BaseSuite {
 

@@ -7,8 +7,8 @@ import com.typesafe.config.{ ConfigValueFactory, ConfigValueType }
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig._
 import pureconfig.error._
-import pureconfig.module.magnolia.reader.auto._
-import pureconfig.module.magnolia.writer.auto._
+import pureconfig.module.magnolia.auto.reader._
+import pureconfig.module.magnolia.auto.writer._
 
 class TupleConvertersSuite extends BaseSuite {
 

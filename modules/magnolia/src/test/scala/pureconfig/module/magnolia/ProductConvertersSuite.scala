@@ -9,8 +9,8 @@ import org.scalacheck.ScalacheckShapeless._
 import pureconfig._
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig.error.{ KeyNotFound, WrongType }
-import pureconfig.module.magnolia.reader.auto._
-import pureconfig.module.magnolia.writer.auto._
+import pureconfig.module.magnolia.auto.reader._
+import pureconfig.module.magnolia.auto.writer._
 
 class ProductConvertersSuite extends BaseSuite {
 

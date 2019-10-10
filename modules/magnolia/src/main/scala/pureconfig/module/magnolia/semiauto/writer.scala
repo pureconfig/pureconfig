@@ -1,4 +1,4 @@
-package pureconfig.module.magnolia.writer
+package pureconfig.module.magnolia.semiauto
 
 import scala.language.experimental.macros
 import scala.reflect.ClassTag
@@ -12,7 +12,7 @@ import pureconfig.module.magnolia.MagnoliaConfigWriter
  * An object that, when imported, provides methods for deriving `ConfigWriter` instances on demand for value classes,
  * tuples, case classes and sealed traits. The generation of `ConfigWriter`s is done by Magnolia.
  */
-object semiauto {
+object writer {
   type Typeclass[A] = ConfigWriter[A]
 
   def combine[A: ProductHint](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =

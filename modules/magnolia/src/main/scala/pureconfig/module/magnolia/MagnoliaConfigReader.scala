@@ -16,7 +16,7 @@ object MagnoliaConfigReader {
     else if (ctx.isValueClass) combineValueClass(ctx)
     else combineCaseClass(ctx)
 
-  def combineCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] = new ConfigReader[A] {
+  private def combineCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): Result[A] = {
       cur.asObjectCursor.flatMap { objCur =>
         val res = ctx.constructMonadic[Result, Param[ConfigReader, A]#PType] { param =>
@@ -24,7 +24,7 @@ object MagnoliaConfigReader {
           objCur.atKeyOrUndefined(keyStr) match {
             case keyCur if keyCur.isUndefined =>
               param.default match {
-                case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue): Result[param.PType]
+                case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue)
                 case _ if param.typeclass.isInstanceOf[ReadsMissingKeys] => param.typeclass.from(keyCur)
                 case _ => cur.failed(KeyNotFound.forKeys(keyStr, objCur.keys))
               }
@@ -46,13 +46,13 @@ object MagnoliaConfigReader {
     }
   }
 
-  def combineTuple[A](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] = new ConfigReader[A] {
+  private def combineTuple[A: ProductHint](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): Result[A] = {
       val collCur = cur.asListCursor.map(Right.apply).left.flatMap(failure =>
         cur.asObjectCursor.map(Left.apply).left.map(_ => failure))
 
       collCur.flatMap {
-        case Left(_) => combineCaseClass(ctx).from(cur)
+        case Left(objCur) => combineCaseClass(ctx).from(objCur)
         case Right(listCur) =>
           if (listCur.size != ctx.parameters.length) {
             cur.failed(WrongSizeList(ctx.parameters.length, listCur.size))
@@ -66,7 +66,7 @@ object MagnoliaConfigReader {
     }
   }
 
-  def combineValueClass[A](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] = new ConfigReader[A] {
+  private def combineValueClass[A](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): Result[A] =
       ctx.constructMonadic[Result, Param[ConfigReader, A]#PType](_.typeclass.from(cur))
   }

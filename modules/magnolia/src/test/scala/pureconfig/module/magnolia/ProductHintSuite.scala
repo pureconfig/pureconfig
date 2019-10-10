@@ -7,8 +7,8 @@ import com.typesafe.config.{ ConfigFactory, ConfigObject }
 import pureconfig._
 import pureconfig.error.{ ConvertFailure, KeyNotFound, UnknownKey }
 import pureconfig.generic.ProductHint
-import pureconfig.module.magnolia.reader.auto._
-import pureconfig.module.magnolia.writer.auto._
+import pureconfig.module.magnolia.auto.reader._
+import pureconfig.module.magnolia.auto.writer._
 import pureconfig.syntax._
 
 class ProductHintSuite extends BaseSuite {
