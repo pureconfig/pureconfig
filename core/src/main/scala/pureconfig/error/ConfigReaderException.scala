@@ -11,38 +11,9 @@ final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implic
   override def getMessage: String = {
     val linesBuffer = mutable.Buffer.empty[String]
     linesBuffer += s"Cannot convert configuration to a ${ct.runtimeClass.getName}. Failures are:"
-
-    val failuresList = failures.toList
-    val (convertFailures, otherFailures) = failuresList.partition(_.isInstanceOf[ConvertFailure])
-
-    val failuresByPath = convertFailures.asInstanceOf[List[ConvertFailure]].groupBy(_.path).toList.sortBy(_._1)
-
-    otherFailures.foreach { failure =>
-      linesBuffer += s"${ConfigReaderException.descriptionWithLocation(failure, "  ")}"
-    }
-
-    if (otherFailures.nonEmpty && convertFailures.nonEmpty) {
-      linesBuffer += ""
-    }
-
-    failuresByPath.foreach {
-      case (p, failures) =>
-        linesBuffer += (if (p.isEmpty) s"  at the root:" else s"  at '$p':")
-        failures.foreach { failure =>
-          linesBuffer += s"${ConfigReaderException.descriptionWithLocation(failure, "    ")}"
-        }
-    }
-
+    linesBuffer += failures.prettyPrint(1, 2)
     linesBuffer += ""
     linesBuffer.mkString(System.lineSeparator())
   }
 
-}
-
-object ConfigReaderException {
-  private[ConfigReaderException] def descriptionWithLocation(failure: ConfigReaderFailure, prefix: String): String = {
-    val failureLines = failure.description.split("\n")
-    (failure.location.fold(s"${prefix}- ${failureLines.head}")(f => s"${prefix}- ${f.description} ${failureLines.head}") ::
-      failureLines.tail.map(l => s"$prefix  $l").toList).mkString("\n")
-  }
 }
