@@ -61,7 +61,7 @@ object MapShapedReader {
         case keyCur => headReader.from(keyCur)
       }
       // for performance reasons only, we shouldn't clone the config object unless necessary
-      val tailCur = if (hint.allowUnknownKeys) cur.withoutKey(keyStr) else cur.withoutKey(keyStr)
+      val tailCur = if (hint.allowUnknownKeys) cur else cur.withoutKey(keyStr)
       val tailResult = tConfigReader.value.fromWithDefault(tailCur, default.tail)
       ConfigReader.Result.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }
