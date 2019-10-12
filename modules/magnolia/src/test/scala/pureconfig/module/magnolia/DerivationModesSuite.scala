@@ -1,6 +1,9 @@
-package pureconfig
+package pureconfig.module.magnolia
+
+import scala.language.higherKinds
 
 import com.typesafe.config.ConfigFactory
+import pureconfig._
 import shapeless.test.illTyped
 
 class DerivationModesSuite extends BaseSuite {
@@ -22,12 +25,12 @@ class DerivationModesSuite extends BaseSuite {
   behavior of "semiauto"
 
   it should "not provide instance derivation for products and coproducts out-of-the-box" in {
-    illTyped("{ import pureconfig.generic.semiauto._; loadConfig[Entity](conf) }")
-    illTyped("{ import pureconfig.generic.semiauto._; ConfigWriter[Entity] }")
+    illTyped("{ import pureconfig.module.magnolia.reader.semiauto._; loadConfig[Entity](conf) }")
+    illTyped("{ import pureconfig.module.magnolia.reader.semiauto._; ConfigWriter[Entity] }")
   }
 
   it should "provide methods to derive readers on demand" in {
-    import pureconfig.generic.semiauto._
+    import pureconfig.module.magnolia.semiauto.reader._
 
     implicit val personReader = deriveReader[Person]
     implicit val placeReader = deriveReader[Place]
@@ -37,7 +40,7 @@ class DerivationModesSuite extends BaseSuite {
   }
 
   it should "provide methods to derive writers on demand" in {
-    import pureconfig.generic.semiauto._
+    import pureconfig.module.magnolia.semiauto.writer._
 
     implicit val personWriter = deriveWriter[Person]
     implicit val placeWriter = deriveWriter[Place]
@@ -46,21 +49,11 @@ class DerivationModesSuite extends BaseSuite {
     ConfigWriter[Entity].to(person) shouldBe conf.root()
   }
 
-  it should "provide methods to derive full converters on demand" in {
-    import pureconfig.generic.semiauto._
-
-    implicit val personConvert = deriveConvert[Person]
-    implicit val placeConvert = deriveConvert[Place]
-    implicit val entityConvert = deriveConvert[Entity]
-
-    ConfigReader[Entity].from(conf.root) shouldBe Right(person)
-    ConfigWriter[Entity].to(person) shouldBe conf.root()
-  }
-
   behavior of "auto"
 
   it should "provide instance derivation for products and coproducts out-of-the-box" in {
-    import pureconfig.generic.auto._
+    import pureconfig.module.magnolia.auto.reader._
+    import pureconfig.module.magnolia.auto.writer._
 
     ConfigReader[Entity].from(conf.root) shouldBe Right(person)
     ConfigWriter[Entity].to(person) shouldBe conf.root()
