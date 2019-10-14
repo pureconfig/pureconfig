@@ -272,12 +272,25 @@ object ConfigSource {
 
   /**
    * Returns a config source that provides configs read from JVM resource files. If multiple files
-   * are found, they are merged in no specific order.
+   * are found, they are merged in no specific order. This method uses Typesafe Config's default
+   * class loader (`Thread.currentThread().getContextClassLoader()`).
    *
    * @param name the resource name
    * @return a config source that provides configs read from JVM resource files.
    */
-  def resources(name: String, classLoader: ClassLoader = null) =
+  def resources(name: String) =
+    ConfigObjectSource(ConfigFactoryWrapper.parseResources(name, null))
+
+  /**
+   * Returns a config source that provides configs read from JVM resource files. If multiple files
+   * are found, they are merged in no specific order. The given class loader will be used to look
+   * for resources.
+   *
+   * @param name the resource name
+   * @param classLoader the class loader to use to look for resources
+   * @return a config source that provides configs read from JVM resource files.
+   */
+  def resources(name: String, classLoader: ClassLoader) =
     ConfigObjectSource(ConfigFactoryWrapper.parseResources(name, classLoader))
 
   /**
