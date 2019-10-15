@@ -1,21 +1,21 @@
 package pureconfig.module.cats
 
+import scala.collection.immutable.{ SortedMap, SortedSet }
+import scala.reflect.runtime.universe._
+
 import cats.data._
 import cats.implicits._
 import com.typesafe.config.ConfigFactory.parseString
+import com.typesafe.config.{ ConfigRenderOptions, ConfigValue }
+import org.scalactic.Equality
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.Matcher
+import org.scalatest.matchers.should.Matchers
+import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation, ConvertFailure, FailureReason }
 import pureconfig.generic.auto._
 import pureconfig.syntax._
-import pureconfig.{ BaseSuite, ConfigConvertChecks, ConfigReader, ConfigWriter }
-import scala.collection.immutable.{ SortedMap, SortedSet }
-
-import com.typesafe.config.{ ConfigRenderOptions, ConfigValue }
-import org.scalatest.flatspec.AnyFlatSpec
-import scala.reflect.runtime.universe._
-
-import org.scalactic.Equality
-import org.scalatest.matchers.Matcher
-import org.scalatest.{ EitherValues, Matchers }
-import pureconfig.error.{ ConfigReaderFailures, ConfigValueLocation, ConvertFailure, FailureReason }
+import pureconfig.{ ConfigReader, ConfigWriter }
 
 class CatsSuite extends AnyFlatSpec with Matchers with EitherValues {
 

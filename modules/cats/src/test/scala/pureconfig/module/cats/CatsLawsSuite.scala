@@ -7,8 +7,8 @@ import cats.instances.unit._
 import cats.kernel.laws.discipline.SemigroupTests
 import cats.laws.discipline._
 import com.typesafe.config.ConfigValue
-import org.scalatest.Matchers
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import org.typelevel.discipline.scalatest.Discipline
 import pureconfig._
 import pureconfig.error.ConfigReaderFailures
