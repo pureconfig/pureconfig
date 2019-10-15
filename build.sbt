@@ -62,6 +62,7 @@ lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s")
 lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")
+lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val scalaz = module(project) in file("modules/scalaz")
 lazy val squants = module(project) in file("modules/squants")
@@ -95,7 +96,7 @@ lazy val commonSettings = Seq(
   scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
-  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import"),
+  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 

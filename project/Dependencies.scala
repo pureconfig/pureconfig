@@ -8,7 +8,7 @@ object Dependencies {
     val scala213            = "2.13.0"
 
     val shapeless           = "2.3.3"
-    val typesafeConfig      = "1.3.4"
+    val typesafeConfig      = "1.4.0"
 
     val scalaTest           = "3.0.8"
 

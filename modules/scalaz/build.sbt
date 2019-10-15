@@ -1,8 +1,8 @@
 name := "pureconfig-scalaz"
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.28",
-  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.2.28-scalacheck-1.14" % "test"
+  "org.scalaz" %% "scalaz-core" % "7.2.29",
+  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.2.29-scalacheck-1.14" % "test"
 )
 
 developers := List(

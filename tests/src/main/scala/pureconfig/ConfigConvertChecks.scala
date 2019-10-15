@@ -124,10 +124,7 @@ trait ConfigConvertChecks { this: FlatSpec with Matchers with ScalaCheckDrivenPr
     for ((value, errors) <- valuesToErrors) {
       it should s"fail when it tries to read a value of type ${tpe.tpe} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
-          val result = cr.from(value)
-          val errorList = errors.toList
-          result.left.value.toList.size shouldEqual errorList.size
-          result.left.value.toList should contain theSameElementsAs errorList
+          cr.from(value).left.value.toList should contain theSameElementsAs errors.toList
         }
     }
 }
