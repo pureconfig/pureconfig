@@ -2,7 +2,7 @@ name := "pureconfig-cats"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core"            % "2.0.0",
-  "org.typelevel" %% "cats-laws"            % "2.0.0"    % "test",
+  "org.typelevel" %% "cats-laws"            % "2.0.0"     % "test",
   "org.typelevel" %% "discipline-scalatest" % "1.0.0-RC1" % "test")
 
 developers := List(
