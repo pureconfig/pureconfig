@@ -1,9 +1,11 @@
 package pureconfig.module.magnolia
 
+import scala.collection.mutable
+
 import _root_.magnolia._
 import pureconfig.ConfigReader.Result
 import pureconfig._
-import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, UnknownKey, WrongSizeList }
+import pureconfig.error.WrongSizeList
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -19,29 +21,13 @@ object MagnoliaConfigReader {
   private def combineCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): Result[A] = {
       cur.asObjectCursor.flatMap { objCur =>
-        val res = ctx.constructMonadic[Result, Param[ConfigReader, A]#PType] { param =>
-          val keyStr = hint.configKey(param.label)
-          objCur.atKeyOrUndefined(keyStr) match {
-            case keyCur if keyCur.isUndefined =>
-              param.default match {
-                case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue)
-                case _ if param.typeclass.isInstanceOf[ReadsMissingKeys] => param.typeclass.from(keyCur)
-                case _ => cur.failed(KeyNotFound.forKeys(keyStr, objCur.keys))
-              }
-            case keyCur =>
-              param.typeclass.from(keyCur)
-          }
+        val (res, obj) = ctx.parameters.foldLeft[(ConfigReader.Result[mutable.Builder[Any, List[Any]]], ConfigObjectCursor)]((Right(List.newBuilder[Any]), objCur)) {
+          case ((res, cur), param) =>
+            val (paramRes, nextCur) = hint.from(cur, param.typeclass, param.label, param.default)
+            (Result.zipWith(res, paramRes)(_ += _), nextCur)
         }
-        if (hint.allowUnknownKeys || res.isLeft) res
-        else {
-          val usedKeys = ctx.parameters.map { param => hint.configKey(param.label) }.toSet
-          val unknownKeyFailures = objCur.map.collect {
-            case (k, keyCur) if !usedKeys(k) => keyCur.failureFor(UnknownKey(k))
-          }.toList
 
-          if (unknownKeyFailures.isEmpty) res
-          else Left(ConfigReaderFailures(unknownKeyFailures.head, unknownKeyFailures.tail))
-        }
+        res.right.flatMap(values => hint.bottom(obj).fold[Result[A]](Right(ctx.rawConstruct(values.result())))(Left.apply))
       }
     }
   }

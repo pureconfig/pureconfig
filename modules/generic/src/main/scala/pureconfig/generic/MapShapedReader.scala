@@ -1,7 +1,6 @@
 package pureconfig.generic
 
 import pureconfig._
-import pureconfig.error._
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
 
@@ -29,14 +28,8 @@ object MapShapedReader {
     implicit
     hint: ProductHint[Wrapped]): WithDefaults[Wrapped, HNil, HNil] = new WithDefaults[Wrapped, HNil, HNil] {
 
-    def fromWithDefault(cur: ConfigObjectCursor, default: HNil): ConfigReader.Result[HNil] = {
-      if (!hint.allowUnknownKeys && cur.keys.nonEmpty) {
-        val keys = cur.map.toList.map { case (k, keyCur) => keyCur.failureFor(UnknownKey(k)) }
-        Left(new ConfigReaderFailures(keys.head, keys.tail))
-      } else {
-        Right(HNil)
-      }
-    }
+    def fromWithDefault(cur: ConfigObjectCursor, default: HNil): ConfigReader.Result[HNil] =
+      hint.bottom(cur).fold[ConfigReader.Result[HNil]](Right(HNil))(Left.apply)
   }
 
   final implicit def labelledHConsReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
@@ -48,21 +41,8 @@ object MapShapedReader {
 
     def fromWithDefault(cur: ConfigObjectCursor, default: Option[V] :: U): ConfigReader.Result[FieldType[K, V] :: T] = {
       val fieldName = key.value.name
-      val keyStr = hint.configKey(fieldName)
-
-      val headReader = vFieldReader.value.value
-      val headResult = cur.atKeyOrUndefined(keyStr) match {
-        case keyCur if keyCur.isUndefined =>
-          default.head match {
-            case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue)
-            case _ if headReader.isInstanceOf[ReadsMissingKeys] => headReader.from(keyCur)
-            case _ => cur.failed(KeyNotFound.forKeys(keyStr, cur.keys))
-          }
-        case keyCur => headReader.from(keyCur)
-      }
-      // for performance reasons only, we shouldn't clone the config object unless necessary
-      val tailCur = if (hint.allowUnknownKeys) cur else cur.withoutKey(keyStr)
-      val tailResult = tConfigReader.value.fromWithDefault(tailCur, default.tail)
+      val (headResult, nextCur) = hint.from(cur, vFieldReader.value.value, fieldName, default.head)
+      val tailResult = tConfigReader.value.fromWithDefault(nextCur, default.tail)
       ConfigReader.Result.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }
   }

@@ -56,9 +56,9 @@ class ProductHintSuite extends BaseSuite {
       }""").root()
 
     case class SampleConf(a: Int, b: String)
-    // NOTE: behavior differs from pureconfig.generic (only the first error is reported)
     ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(
-      ConvertFailure(KeyNotFound("a", Set("A")), None, ""))
+      ConvertFailure(KeyNotFound("a", Set("A")), None, ""),
+      ConvertFailure(KeyNotFound("b", Set("B")), None, ""))
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
     ConfigConvert[SampleConf].from(conf) shouldBe Right(SampleConf(2, "two"))
@@ -161,8 +161,9 @@ class ProductHintSuite extends BaseSuite {
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
-    // NOTE: behavior differs from pureconfig.generic (only the first error is reported)
     conf1.to[Conf].left.value.toList should contain theSameElementsAs Seq(
-      ConvertFailure(KeyNotFound("b"), None, ""))
+      ConvertFailure(KeyNotFound("b"), None, ""),
+      ConvertFailure(KeyNotFound("c"), None, ""),
+      ConvertFailure(KeyNotFound("d"), None, ""))
   }
 }
