@@ -161,6 +161,11 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
      * Returns a `Result` containing a single failure.
      */
     def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
+
+    /**
+     * Returns a `Result` with a successful value.
+     */
+    def success[A](value: A): ConfigReader.Result[A] = Right(value)
   }
 
   def apply[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[A] = reader.value
