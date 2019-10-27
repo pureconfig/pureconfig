@@ -70,14 +70,15 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = FieldCoproductHint.defaultMapping(name)
 
-  def from[A <: T](cur: ConfigCursor, reader: ConfigReader[A], name: String, rest: => ConfigReader.Result[T]): ConfigReader.Result[T] =
-    for {
+  def from[A <: T](cur: ConfigCursor, reader: ConfigReader[A], name: String, rest: => ConfigReader.Result[T]): ConfigReader.Result[T] = {
+    val curOpt = for {
       objCur <- cur.asObjectCursor.right
       valueCur <- objCur.atKey(key).right
       valueStr <- valueCur.asString.right
-      cur = if (valueStr == fieldValue(name)) Some(objCur.withoutKey(key)) else None
-      result <- cur.fold(rest)(value => reader.from(value).right.map(identity[T]))
-    } yield result
+    } yield if (valueStr == fieldValue(name)) Some(objCur.withoutKey(key)) else None
+
+    curOpt.right.flatMap(_.fold(rest)(value => reader.from(value).right.map(identity[T])))
+  }
 
   override def noOptionFound(cur: ConfigCursor): ConfigReaderFailures =
     cur.fluent.at(key).cursor.fold(
