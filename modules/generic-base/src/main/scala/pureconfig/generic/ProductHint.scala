@@ -36,8 +36,8 @@ trait ProductHint[T] {
   def bottom(cur: ConfigObjectCursor): Option[ConfigReaderFailures]
 
   /**
-   * Produces an optional key-value pair that should be used for the field with name `fieldName` in its `ConfigObject`
-   * representation.
+   * Produces an optional key-value pair that should be used for the field with name `fieldName` in the `ConfigObject`
+   * representation of `T`.
    *
    * @param writer the `ConfigWriter` currently in scope for `A`
    * @param fieldName the name of the field of type `A` in `T`
