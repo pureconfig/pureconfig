@@ -59,21 +59,9 @@ object MagnoliaConfigReader {
 
   def dispatch[A](ctx: SealedTrait[ConfigReader, A])(implicit hint: CoproductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): Result[A] = {
-      val res = ctx.subtypes.foldLeft(Right(None): Result[Option[A]]) {
-        case (Right(None), subtype) =>
-          hint.from(cur, subtype.typeName.short) match {
-            case Right(Some(optCur)) =>
-              subtype.typeclass.from(optCur).map(Some.apply) match {
-                case Left(_) if hint.tryNextOnFail(subtype.typeName.short) => Right(None)
-                case res => res
-              }
-            case res => res.asInstanceOf[Result[Option[A]]]
-          }
-        case (res, _) => res
-      }
-      res.flatMap {
-        case Some(a) => Right(a)
-        case None => Left(hint.noOptionFound(cur))
+      ctx.subtypes.foldRight[Result[A]](Left(hint.noOptionFound(cur))) {
+        case (subtype, rest) =>
+          hint.from(cur, subtype.typeclass, subtype.typeName.short, rest)
       }
     }
   }

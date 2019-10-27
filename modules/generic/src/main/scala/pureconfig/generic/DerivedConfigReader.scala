@@ -77,7 +77,7 @@ trait DerivedConfigReader1 {
     cc: Lazy[MapShapedReader[F, Repr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
 
     override def from(cur: ConfigCursor): ConfigReader.Result[F] = {
-      cc.value.from(cur).right.map(gen.from)
+      cc.value.from(cur)
     }
   }
 }

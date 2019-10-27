@@ -46,21 +46,19 @@ object MapShapedWriter {
       throw new IllegalStateException("Cannot encode CNil. This is likely a bug in PureConfig.")
   }
 
-  final implicit def cConsWriter[Wrapped, Name <: Symbol, V, T <: Coproduct](
+  final implicit def cConsWriter[Wrapped, Name <: Symbol, V <: Wrapped, T <: Coproduct](
     implicit
     coproductHint: CoproductHint[Wrapped],
     vName: Witness.Aux[Name],
-    vFieldConvert: Derivation[Lazy[ConfigWriter[V]]],
+    vConfigWriter: Derivation[Lazy[ConfigWriter[V]]],
     tConfigWriter: Lazy[MapShapedWriter[Wrapped, T]]): MapShapedWriter[Wrapped, FieldType[Name, V] :+: T] =
     new MapShapedWriter[Wrapped, FieldType[Name, V] :+: T] {
 
       override def to(t: FieldType[Name, V] :+: T): ConfigValue = t match {
         case Inl(l) =>
           // Writing a coproduct to a config can fail. Is it worth it to make `to` return a `Try`?
-          coproductHint.to(vFieldConvert.value.value.to(l), vName.value.name) match {
-            case Left(failures) => throw new ConfigReaderException[FieldType[Name, V] :+: T](failures)
-            case Right(r) => r
-          }
+          coproductHint.to(vConfigWriter.value.value, vName.value.name, l)
+            .fold(fs => throw new ConfigReaderException[FieldType[Name, V] :+: T](fs), identity)
 
         case Inr(r) =>
           tConfigWriter.value.to(r)

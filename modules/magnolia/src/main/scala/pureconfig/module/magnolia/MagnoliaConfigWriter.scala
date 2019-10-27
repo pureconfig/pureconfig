@@ -38,7 +38,7 @@ object MagnoliaConfigWriter {
 
   def dispatch[A: ClassTag](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
     def to(a: A): ConfigValue = ctx.dispatch(a) { subtype =>
-      hint.to(subtype.typeclass.to(subtype.cast(a)), subtype.typeName.short)
+      hint.to(subtype.typeclass, subtype.typeName.short, subtype.cast(a))
         .fold(fs => throw new ConfigReaderException[A](fs), identity)
     }
   }

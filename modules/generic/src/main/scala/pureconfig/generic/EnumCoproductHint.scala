@@ -22,18 +22,18 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cur: ConfigCursor, name: String) = cur.asString.right.map { str =>
-    if (str == fieldValue(name)) Some(ConfigCursor(ConfigFactory.empty.root, cur.pathElems)) else None
-  }
+  def from[A <: T](cur: ConfigCursor, reader: ConfigReader[A], name: String, rest: => ConfigReader.Result[T]): ConfigReader.Result[T] =
+    cur.asString.right.flatMap { str =>
+      if (str == fieldValue(name)) reader.from(ConfigCursor(ConfigFactory.empty.root, cur.pathElems)) else rest
+    }
 
   // TODO: improve handling of failures on the write side
-  def to(cv: ConfigValue, name: String) = cv match {
-    case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
-    case _: ConfigObject => Left(ConfigReaderFailures(ConvertFailure(
-      NonEmptyObjectFound(name), ConfigValueLocation(cv), "")))
-    case _ => Left(ConfigReaderFailures(ConvertFailure(
-      WrongType(cv.valueType, Set(ConfigValueType.OBJECT)), ConfigValueLocation(cv), "")))
-  }
-
-  def tryNextOnFail(name: String) = false
+  def to[A <: T](writer: ConfigWriter[A], name: String, value: A): ConfigReader.Result[ConfigValue] =
+    writer.to(value) match {
+      case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
+      case cv: ConfigObject => Left(ConfigReaderFailures(ConvertFailure(
+        NonEmptyObjectFound(name), ConfigValueLocation(cv), "")))
+      case cv => Left(ConfigReaderFailures(ConvertFailure(
+        WrongType(cv.valueType, Set(ConfigValueType.OBJECT)), ConfigValueLocation(cv), "")))
+    }
 }

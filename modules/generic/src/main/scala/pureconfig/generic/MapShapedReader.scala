@@ -10,7 +10,7 @@ import shapeless.labelled.{ FieldType, field }
  * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
  * @tparam Repr the generic representation
  */
-trait MapShapedReader[Wrapped, Repr] extends ConfigReader[Repr]
+trait MapShapedReader[Wrapped, Repr] extends ConfigReader[Wrapped]
 
 object MapShapedReader {
 
@@ -51,30 +51,19 @@ object MapShapedReader {
     implicit
     coproductHint: CoproductHint[Wrapped]): MapShapedReader[Wrapped, CNil] =
     new MapShapedReader[Wrapped, CNil] {
-      override def from(cur: ConfigCursor): ConfigReader.Result[CNil] =
+      override def from(cur: ConfigCursor): ConfigReader.Result[Wrapped] =
         Left(coproductHint.noOptionFound(cur))
     }
 
-  final implicit def cConsReader[Wrapped, Name <: Symbol, V, T <: Coproduct](
+  final implicit def cConsReader[Wrapped, Name <: Symbol, V <: Wrapped, T <: Coproduct](
     implicit
     coproductHint: CoproductHint[Wrapped],
     vName: Witness.Aux[Name],
-    vFieldConvert: Derivation[Lazy[ConfigReader[V]]],
+    vConfigReader: Derivation[Lazy[ConfigReader[V]]],
     tConfigReader: Lazy[MapShapedReader[Wrapped, T]]): MapShapedReader[Wrapped, FieldType[Name, V] :+: T] =
     new MapShapedReader[Wrapped, FieldType[Name, V] :+: T] {
 
-      override def from(cur: ConfigCursor): ConfigReader.Result[FieldType[Name, V] :+: T] =
-        coproductHint.from(cur, vName.value.name) match {
-          case Right(Some(optCur)) =>
-            vFieldConvert.value.value.from(optCur) match {
-              case Left(_) if coproductHint.tryNextOnFail(vName.value.name) =>
-                tConfigReader.value.from(cur).right.map(s => Inr(s))
-
-              case vTry => vTry.right.map(v => Inl(field[Name](v)))
-            }
-
-          case Right(None) => tConfigReader.value.from(cur).right.map(s => Inr(s))
-          case l: Left[_, _] => l.asInstanceOf[ConfigReader.Result[FieldType[Name, V] :+: T]]
-        }
+      override def from(cur: ConfigCursor): ConfigReader.Result[Wrapped] =
+        coproductHint.from(cur, vConfigReader.value.value, vName.value.name, tConfigReader.value.from(cur))
     }
 }

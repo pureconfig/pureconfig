@@ -14,39 +14,18 @@ import pureconfig.syntax._
 trait CoproductHint[T] {
 
   /**
-   * Given a `ConfigValue` for the sealed family, disambiguate and extract the `ConfigValue` associated to the
-   * implementation for the given class or coproduct option name.
-   *
-   * If `cv` is a config for the given class name, this method returns `Right(Some(v))`, where `v` is the config
-   * related to the specific class (possibly the same as `cv`). If it determines that `cv` is a config for a different
-   * class, it returns `Right(None)`. If `cv` is missing information for disambiguation or has a wrong type, a
-   * `Left` containing a `Failure` is returned.
+   * Given a `ConfigCursor` for the sealed family, disambiguate and return the result of either reading the cursor as an
+   * `A` (for which the `ConfigReader` in scope is provided), or defer to a different reader, whose result of reading a
+   * `T` is (lazily) provided.
    *
    * @param cur a `ConfigCursor` at the sealed family option
+   * @param reader the `ConfigReader` in scope for type `A`
    * @param name the name of the class or coproduct option to try
-   * @return a `Either[ConfigReaderFailure, Option[ConfigValue]]` as defined above.
+   * @param rest the result of deferring the reading of `T` as a different coproduct option
+   * @tparam A the type of the current class or coproduct option being considered
+   * @return the result of attempting to read the provided cursor as a `T`.
    */
-  def from(cur: ConfigCursor, name: String): ConfigReader.Result[Option[ConfigCursor]]
-
-  /**
-   * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
-   * config for the sealed family or coproduct.
-   *
-   * @param cv the `ConfigValue` of the class or coproduct option
-   * @param name the name of the class or coproduct option
-   * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some error
-   *         occurred.
-   */
-  def to(cv: ConfigValue, name: String): ConfigReader.Result[ConfigValue]
-
-  /**
-   * Defines what to do if `from` returns `Success(Some(_))` for a class or coproduct option, but its `ConfigConvert`
-   * fails to deserialize the config.
-   *
-   * @param name the name of the class or coproduct option
-   * @return `true` if the next class or coproduct option should be tried, `false` otherwise.
-   */
-  def tryNextOnFail(name: String): Boolean
+  def from[A <: T](cur: ConfigCursor, reader: ConfigReader[A], name: String, rest: => ConfigReader.Result[T]): ConfigReader.Result[T]
 
   /**
    * Returns a non empty list of failures scoped into the context of a `ConfigCursor`, representing the failure to read
@@ -57,6 +36,19 @@ trait CoproductHint[T] {
    */
   def noOptionFound(cur: ConfigCursor): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
+
+  /**
+   * Given the current value of the coproduct option and the writer currently in scope for it, return the `ConfigValue`
+   * with its representation, possibly encoded with disambiguation information.
+   *
+   * @param writer the `ConfigWriter` in scope for type `A`
+   * @param name the name of the class or coproduct option
+   * @param value the value of the coproduct option
+   * @tparam A the type of the class or coproduct option
+   * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some
+   *         error occurred.
+   */
+  def to[A <: T](writer: ConfigWriter[A], name: String, value: A): ConfigReader.Result[ConfigValue]
 }
 
 /**
@@ -78,34 +70,35 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = FieldCoproductHint.defaultMapping(name)
 
-  def from(cur: ConfigCursor, name: String): ConfigReader.Result[Option[ConfigCursor]] = {
+  def from[A <: T](cur: ConfigCursor, reader: ConfigReader[A], name: String, rest: => ConfigReader.Result[T]): ConfigReader.Result[T] =
     for {
       objCur <- cur.asObjectCursor.right
       valueCur <- objCur.atKey(key).right
       valueStr <- valueCur.asString.right
-    } yield if (valueStr == fieldValue(name)) Some(objCur.withoutKey(key)) else None
-  }
-
-  // TODO: improve handling of failures on the write side
-  def to(cv: ConfigValue, name: String): ConfigReader.Result[ConfigValue] = cv match {
-    case co: ConfigObject =>
-      if (co.containsKey(key)) {
-        Left(ConfigReaderFailures(ConvertFailure(CollidingKeys(key, co.get(key)), ConfigValueLocation(co), "")))
-      } else {
-        Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
-      }
-    case _ =>
-      Left(ConfigReaderFailures(ConvertFailure(
-        WrongType(cv.valueType, Set(ConfigValueType.OBJECT)),
-        ConfigValueLocation(cv), "")))
-  }
-
-  def tryNextOnFail(name: String) = false
+      cur = if (valueStr == fieldValue(name)) Some(objCur.withoutKey(key)) else None
+      result <- cur.fold(rest)(value => reader.from(value).right.map(identity[T]))
+    } yield result
 
   override def noOptionFound(cur: ConfigCursor): ConfigReaderFailures =
     cur.fluent.at(key).cursor.fold(
       identity,
       cur => ConfigReaderFailures(cur.failureFor(UnexpectedValueForFieldCoproductHint(cur.value))))
+
+  // TODO: improve handling of failures on the write side
+  def to[A <: T](writer: ConfigWriter[A], name: String, value: A): ConfigReader.Result[ConfigValue] = {
+    writer.to(value) match {
+      case co: ConfigObject =>
+        if (co.containsKey(key)) {
+          Left(ConfigReaderFailures(ConvertFailure(CollidingKeys(key, co.get(key)), ConfigValueLocation(co), "")))
+        } else {
+          Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
+        }
+      case cv =>
+        Left(ConfigReaderFailures(ConvertFailure(
+          WrongType(cv.valueType, Set(ConfigValueType.OBJECT)),
+          ConfigValueLocation(cv), "")))
+    }
+  }
 }
 
 object FieldCoproductHint {
@@ -117,9 +110,11 @@ object FieldCoproductHint {
  * the config without errors, while `to` will write the config as is, with no disambiguation information.
  */
 class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
-  def from(cur: ConfigCursor, name: String) = Right(Some(cur))
-  def to(cv: ConfigValue, name: String) = Right(cv)
-  def tryNextOnFail(name: String) = true
+  def from[A <: T](cur: ConfigCursor, reader: ConfigReader[A], name: String, rest: => ConfigReader.Result[T]): ConfigReader.Result[T] =
+    reader.from(cur).right.map(identity[T]).left.flatMap(_ => rest)
+
+  def to[A <: T](writer: ConfigWriter[A], name: String, value: A) =
+    Right(writer.to(value))
 }
 
 object CoproductHint {
