@@ -63,6 +63,5 @@ certain types, writing configs and using semi-auto derivation. Please refer to t
 
 ## Differences in Behavior
 
-- When loading case classes and multiple fields cause failures, only the first error is reported;
 - Value classes that are not case classes are not supported (other value classes have the same reading behavior);
 - The Scala compiler may emit a warning unless `scala.language.higherKinds` is imported.
