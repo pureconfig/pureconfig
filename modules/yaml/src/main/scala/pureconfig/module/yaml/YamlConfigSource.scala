@@ -13,6 +13,7 @@ import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.error.{ Mark, MarkedYAMLException, YAMLException }
+import org.yaml.snakeyaml.nodes.Tag
 import pureconfig.ConfigReader.Result
 import pureconfig.error._
 import pureconfig.module.yaml.error.{ NonStringKeyFound, UnsupportedYamlType }
@@ -33,7 +34,7 @@ final class YamlConfigSource private (
     onIOFailure: Option[Option[Throwable] => CannotRead] = None) extends ConfigSource {
 
   // instances of `Yaml` are not thread safe
-  private[this] def loader = new Yaml(new SafeConstructor())
+  private[this] def loader = new Yaml(new CustomConstructor())
 
   def value(): Result[ConfigValue] = {
     usingReader { reader =>
@@ -67,6 +68,13 @@ final class YamlConfigSource private (
     }
   }
 
+  // YAML has special support for timestamps and the built-in `SafeConstructor` parses values into Java `Date`
+  // instances. However, date readers are expecting strings and the original format may matter to them. This class
+  // specifies the string parser as the one to use for dates.
+  private[this] class CustomConstructor extends SafeConstructor {
+    yamlConstructors.put(Tag.TIMESTAMP, new ConstructYamlStr())
+  }
+
   // Converts an object created by SnakeYAML to a Typesafe `ConfigValue`.
   // (https://bitbucket.org/asomov/snakeyaml/wiki/Documentation#markdown-header-loading-yaml)
   private[this] def yamlObjToConfigValue(obj: AnyRef): Result[ConfigValue] = {
@@ -88,7 +96,7 @@ final class YamlConfigSource private (
       case _: java.lang.Integer | _: java.lang.Long | _: java.lang.Double | _: java.lang.String | _: java.lang.Boolean =>
         Right(obj) // these types are supported directly by `ConfigValueFactory.fromAnyRef`
 
-      case _: java.util.Date | _: java.sql.Date | _: java.sql.Timestamp | _: java.math.BigInteger =>
+      case _: java.math.BigInteger =>
         Right(obj.toString)
 
       case ba: Array[Byte] =>

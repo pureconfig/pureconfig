@@ -2,6 +2,7 @@ package pureconfig.module.yaml
 
 import java.net.URLDecoder
 import java.nio.file.{ Files, Path, Paths }
+import java.time.Instant
 
 import com.typesafe.config.{ ConfigValue, ConfigValueType }
 import org.scalatest.EitherValues
@@ -121,6 +122,16 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
     YamlConfigSource.string(resourceContents("basic.yaml")).at("n").load[BigInt]
       .right
       .value shouldBe BigInt("1234567890123456789012345678901234567890")
+  }
+
+  it should "not change date formats when parsing YAML documents" in {
+    case class MyConf(myInstant: Instant)
+
+    val yaml = """
+      | my-instant: 2019-01-01T00:00:00Z
+      |""".stripMargin
+
+    YamlConfigSource.string(yaml).load[MyConf] shouldBe Right(MyConf(Instant.parse("2019-01-01T00:00:00Z")))
   }
 
   it should "loadYamlOrThrow from a simple YAML file" in {
