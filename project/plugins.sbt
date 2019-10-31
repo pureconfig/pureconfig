@@ -9,4 +9,4 @@ addSbtPlugin("org.scoverage"     % "sbt-scoverage"   % "1.6.0")
 addSbtPlugin("org.tpolecat"      % "tut-plugin"      % "0.6.13")
 addSbtPlugin("org.xerial.sbt"    % "sbt-sonatype"    % "3.8")
 
-libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.28"
+libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.29"
