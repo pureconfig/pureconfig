@@ -29,9 +29,8 @@ package object catseffect {
     def loadF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
       configToF(() => cs.load[A])
 
-  
-    def configF[F[_]](implicit F: Sync[F]): F[Config] =
-      F.delay(cs.config().leftMap(ConfigReaderException[Config])).rethrow
+      def configF[F[_]](implicit F: Sync[F]): F[TypesafeConfig] =
+      F.delay(cs.config().leftMap(ConfigReaderException[TypesafeConfig])).rethrow
 }
 
   /**
