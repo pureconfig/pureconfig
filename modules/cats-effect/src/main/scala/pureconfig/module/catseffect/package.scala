@@ -28,7 +28,11 @@ package object catseffect {
   implicit class CatsEffectConfigSource(val cs: ConfigSource) extends AnyVal {
     def loadF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
       configToF(() => cs.load[A])
-  }
+
+  
+    def configF[F[_]](implicit F: Sync[F]): F[Config] =
+      F.delay(cs.config().leftMap(ConfigReaderException[Config])).rethrow
+}
 
   /**
    * Load a configuration of type `A` from the standard configuration files
