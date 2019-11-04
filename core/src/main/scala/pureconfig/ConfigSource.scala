@@ -93,6 +93,10 @@ final class ConfigObjectSource private (getConf: () => Result[Config]) extends C
   def value(): Result[ConfigObject] =
     config().right.flatMap(_.resolveSafe()).right.map(_.root)
 
+  // Avoids unnecessary cast on `ConfigCursor#asObjectCursor`.
+  override def cursor(): Result[ConfigCursor] =
+    value().right.map(ConfigObjectCursor(_, Nil))
+
   /**
    * Reads a `Config` from this config source. The returned config is usually unresolved, unless
    * the source forces it otherwise.
