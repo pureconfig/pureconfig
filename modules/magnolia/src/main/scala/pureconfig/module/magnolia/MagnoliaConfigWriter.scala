@@ -21,7 +21,15 @@ object MagnoliaConfigWriter {
 
   private def combineCaseClass[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
     def to(a: A): ConfigValue = {
-      val fieldValues = ctx.parameters.map(param => hint.to(param.typeclass, param.label, param.dereference(a)))
+      val fieldValues = ctx.parameters.map { param =>
+        val valueOpt = param.typeclass match {
+          case w: WritesMissingKeys[param.PType @unchecked] =>
+            w.toOpt(param.dereference(a))
+          case w =>
+            Some(w.to(param.dereference(a)))
+        }
+        hint.to(param.label, valueOpt)
+      }
       ConfigValueFactory.fromMap(fieldValues.flatten.toMap.asJava)
     }
   }

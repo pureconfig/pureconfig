@@ -1,6 +1,8 @@
 package pureconfig.generic
 
 import pureconfig._
+import pureconfig.error.KeyNotFound
+import pureconfig.generic.ProductHint.FieldHint
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
 
@@ -41,7 +43,18 @@ object MapShapedReader {
 
     def fromWithDefault(cur: ConfigObjectCursor, default: Option[V] :: U): ConfigReader.Result[FieldType[K, V] :: T] = {
       val fieldName = key.value.name
-      val (headResult, nextCur) = hint.from(cur, vFieldReader.value.value, fieldName, default.head)
+      val fieldHint = hint.from(cur, fieldName)
+      lazy val reader = vFieldReader.value.value
+      lazy val keyNotFoundFailure = cur.failed[V](KeyNotFound.forKeys(fieldHint.field, cur.keys))
+      val headResult = (fieldHint, default.head) match {
+        case (FieldHint(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
+          Right(defaultValue)
+        case (FieldHint(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
+          reader.from(cursor)
+        case _ =>
+          keyNotFoundFailure
+      }
+      val nextCur = if (fieldHint.remove) cur.withoutKey(fieldHint.field) else cur
       val tailResult = tConfigReader.value.fromWithDefault(nextCur, default.tail)
       ConfigReader.Result.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }

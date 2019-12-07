@@ -4,7 +4,8 @@ import scala.collection.mutable
 
 import _root_.magnolia._
 import pureconfig._
-import pureconfig.error.WrongSizeList
+import pureconfig.error.{ KeyNotFound, WrongSizeList }
+import pureconfig.generic.ProductHint.FieldHint
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -22,7 +23,19 @@ object MagnoliaConfigReader {
       cur.asObjectCursor.flatMap { objCur =>
         val (res, obj) = ctx.parameters.foldLeft[(ConfigReader.Result[mutable.Builder[Any, List[Any]]], ConfigObjectCursor)]((Right(List.newBuilder[Any]), objCur)) {
           case ((res, cur), param) =>
-            val (paramRes, nextCur) = hint.from(cur, param.typeclass, param.label, param.default)
+            val fieldName = param.label
+            val fieldHint = hint.from(cur, fieldName)
+            lazy val reader = param.typeclass
+            lazy val keyNotFoundFailure = cur.failed[A](KeyNotFound.forKeys(fieldHint.field, cur.keys))
+            val paramRes = (fieldHint, param.default) match {
+              case (FieldHint(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
+                Right(defaultValue)
+              case (FieldHint(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
+                reader.from(cursor)
+              case _ =>
+                keyNotFoundFailure
+            }
+            val nextCur = if (fieldHint.remove) cur.withoutKey(fieldHint.field) else cur
             (ConfigReader.Result.zipWith(res, paramRes)(_ += _), nextCur)
         }
 

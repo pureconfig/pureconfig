@@ -2,7 +2,8 @@ package pureconfig.generic
 
 import com.typesafe.config.ConfigValue
 import pureconfig._
-import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, UnknownKey }
+import pureconfig.error.{ ConfigReaderFailures, UnknownKey }
+import pureconfig.generic.ProductHint.FieldHint
 
 /**
  * A trait that can be implemented to customize how case classes are read from and written to a config.
@@ -12,18 +13,16 @@ import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, UnknownKey }
 trait ProductHint[T] {
 
   /**
-   * Reads a field of type `A` from the provided `ConfigObjectCursor` given a `ConfigReader` that is in scope for `A`.
-   * This method returns both the result of attempting to read an `A` from the provided cursor as well as the new cursor
-   * that should be used to read subsequent fields.
+   * Returns what should be used when attempting to read a case class field with name `fieldName` from the provided
+   * `ConfigObjectCursor`.
    *
    * @param cur the cursor from which to read a value
-   * @param reader the `ConfigReader` currently in scope for `A`
-   * @param fieldName the name of the field of type `A` in `T`
-   * @param default the default value for the field with name `fieldName` in `T`
-   * @tparam A the type of the field to be read
-   * @return a tuple with both the result of reading the field and the cursor to supply to subsequent reads.
+   * @param fieldName the name of the field in `T`
+   * @return a [[ProductHint.FieldHint]] object that signals which cursor to use in order to read this field, the name
+   *         of the corresponding field in the config object, whether the field should be removed from the object after
+   *         read, and whether to use default values for this particular field.
    */
-  def from[A](cur: ConfigObjectCursor, reader: ConfigReader[A], fieldName: String, default: Option[A]): (ConfigReader.Result[A], ConfigObjectCursor)
+  def from(cur: ConfigObjectCursor, fieldName: String): FieldHint
 
   /**
    * Returns optional failures if the provided `ConfigObjectCursor` resulted from reading all fields necessary to
@@ -36,17 +35,15 @@ trait ProductHint[T] {
   def bottom(cur: ConfigObjectCursor): Option[ConfigReaderFailures]
 
   /**
-   * Produces an optional key-value pair that should be used for the field with name `fieldName` in the `ConfigObject`
+   * Returns an optional key-value pair that should be used for the field with name `fieldName` in the `ConfigObject`
    * representation of `T`.
    *
-   * @param writer the `ConfigWriter` currently in scope for `A`
-   * @param fieldName the name of the field of type `A` in `T`
-   * @param value the current value of `fieldName`
-   * @tparam A the type of the field to be written
+   * @param fieldName the name of the field in `T`
+   * @param value the optional serialized value of the field
    * @return an optional key-value pair to be used in the `ConfigObject` representation of `T`. If `None`, the field is
    *         omitted from the `ConfigObject` representation.
    */
-  def to[A](writer: ConfigWriter[A], fieldName: String, value: A): Option[(String, ConfigValue)]
+  def to(fieldName: String, value: Option[ConfigValue]): Option[(String, ConfigValue)]
 }
 
 private[pureconfig] case class ProductHintImpl[T](
@@ -54,19 +51,10 @@ private[pureconfig] case class ProductHintImpl[T](
     useDefaultArgs: Boolean,
     allowUnknownKeys: Boolean) extends ProductHint[T] {
 
-  def from[A](cur: ConfigObjectCursor, reader: ConfigReader[A], fieldName: String, default: Option[A]): (ConfigReader.Result[A], ConfigObjectCursor) = {
+  def from(cur: ConfigObjectCursor, fieldName: String): FieldHint = {
     val keyStr = fieldMapping(fieldName)
-    val result = cur.atKeyOrUndefined(keyStr) match {
-      case keyCur if keyCur.isUndefined =>
-        default match {
-          case Some(defaultValue) if useDefaultArgs => Right(defaultValue)
-          case _ if reader.isInstanceOf[ReadsMissingKeys] => reader.from(keyCur)
-          case _ => cur.failed(KeyNotFound.forKeys(keyStr, cur.keys))
-        }
-      case keyCur => reader.from(keyCur)
-    }
-    val nextCur = if (allowUnknownKeys) cur else cur.withoutKey(keyStr)
-    (result, nextCur)
+    val keyCur = cur.atKeyOrUndefined(keyStr)
+    FieldHint(keyCur, keyStr, !allowUnknownKeys, useDefaultArgs)
   }
 
   def bottom(cur: ConfigObjectCursor): Option[ConfigReaderFailures] = {
@@ -77,18 +65,21 @@ private[pureconfig] case class ProductHintImpl[T](
       None
   }
 
-  def to[A](writer: ConfigWriter[A], fieldName: String, value: A): Option[(String, ConfigValue)] = {
-    val keyStr = fieldMapping(fieldName)
-    writer match {
-      case w: WritesMissingKeys[A @unchecked] =>
-        w.toOpt(value).map(keyStr -> _)
-      case w =>
-        Some((keyStr, w.to(value)))
-    }
-  }
+  def to(fieldName: String, value: Option[ConfigValue]): Option[(String, ConfigValue)] =
+    value.map(fieldMapping(fieldName) -> _)
 }
 
 object ProductHint {
+
+  /**
+   * An hint on what should be used when attempting to read a given field from a product.
+   *
+   * @param cursor the cursor to use when reading the field
+   * @param field the name of the field in the `ConfigObject` representation of the product
+   * @param remove whether the field should be removed from the object after read
+   * @param useDefault whether to use default values when reading this field if the cursor is undefined
+   */
+  case class FieldHint(cursor: ConfigCursor, field: String, remove: Boolean, useDefault: Boolean)
 
   def apply[T](
     fieldMapping: ConfigFieldMapping = ConfigFieldMapping(CamelCase, KebabCase),

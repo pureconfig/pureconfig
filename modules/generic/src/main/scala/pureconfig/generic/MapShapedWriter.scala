@@ -31,7 +31,13 @@ object MapShapedWriter {
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
       val rem = tConfigWriter.value.to(t.tail)
-      val kv = hint.to(vFieldWriter.value.value, key.value.name, t.head)
+      val valueOpt = vFieldWriter.value.value match {
+        case w: WritesMissingKeys[V @unchecked] =>
+          w.toOpt(t.head)
+        case w =>
+          Some(w.to(t.head))
+      }
+      val kv = hint.to(key.value.name, valueOpt)
 
       // TODO check that all keys are unique
       kv.fold(rem) {
