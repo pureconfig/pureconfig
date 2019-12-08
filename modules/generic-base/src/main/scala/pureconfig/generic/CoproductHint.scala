@@ -15,10 +15,10 @@ import pureconfig.syntax._
 trait CoproductHint[T] {
 
   /**
-   * Given a [[ConfigCursor]] for the sealed family, disambiguate and return what should be performed when trying to read
+   * Given a `ConfigCursor` for the sealed family, disambiguate and return what should be performed when trying to read
    * a coproduct option named `name`. This method can decide either to:
-   *   - use the [[ConfigCursor]] and disregard other coproduct options ([[CoproductHint.Use]]);
-   *   - attempt to use the [[ConfigCursor]] but try other coproduct options if reading fails ([[CoproductHint.Attempt]];
+   *   - use the `ConfigCursor` and disregard other coproduct options ([[CoproductHint.Use]]);
+   *   - attempt to use the `ConfigCursor` but try other coproduct options if reading fails ([[CoproductHint.Attempt]];
    *   - skip the current coproduct option ([[CoproductHint.Skip]].
    *
    * @param cur a `ConfigCursor` at the sealed family option
@@ -126,17 +126,17 @@ object CoproductHint {
   sealed trait ChoiceHint
 
   /**
-   * A hint to only use the provided [[ConfigCursor]] and not try other coproduct option.
+   * A hint to only use the provided `ConfigCursor` and not try other coproduct option.
    *
-   * @param cur the [[ConfigCursor]] to use when reading the coproduct option.
+   * @param cur the `ConfigCursor` to use when reading the coproduct option.
    */
   case class Use(cur: ConfigCursor) extends ChoiceHint
 
   /**
-   * A hint to attempt to use the provided [[ConfigCursor]], but try other coproduct options if the current one fails to
+   * A hint to attempt to use the provided `ConfigCursor`, but try other coproduct options if the current one fails to
    * read.
    *
-   * @param cur the [[ConfigCursor]] to use when reading the coproduct option.
+   * @param cur the `ConfigCursor` to use when reading the coproduct option.
    */
   case class Attempt(cur: ConfigCursor) extends ChoiceHint
 
