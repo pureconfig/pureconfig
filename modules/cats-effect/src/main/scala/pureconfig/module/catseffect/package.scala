@@ -18,16 +18,11 @@ package object catseffect {
   @deprecated("Root will be treated as the default namespace", "0.12.0")
   val defaultNameSpace = ""
 
-  private def configToF[F[_], A](getConfig: () => ConfigReader.Result[A])(implicit F: Sync[F], ct: ClassTag[A]): F[A] = {
+  def loadF[F[_], A](cs: ConfigSource)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     val delayedLoad = F.delay {
-      getConfig().leftMap[Throwable](ConfigReaderException[A])
+      cs.load[A].leftMap[Throwable](ConfigReaderException[A])
     }
     delayedLoad.rethrow
-  }
-
-  implicit class CatsEffectConfigSource(val cs: ConfigSource) extends AnyVal {
-    def loadF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-      configToF(() => cs.load[A])
   }
 
   /**
@@ -38,7 +33,7 @@ package object catseffect {
    *         details on why it isn't possible
    */
   def loadConfigF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.default.loadF[F, A]
+    loadF[F, A](ConfigSource.default)
 
   /**
    * Load a configuration of type `A` from the standard configuration files
@@ -50,7 +45,7 @@ package object catseffect {
    */
   @deprecated("Use `ConfigSource.default.at(namespace).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.default.at(namespace).loadF[F, A]
+    loadF[F, A](ConfigSource.default.at(namespace))
 
   /**
    * Load a configuration of type `A` from the given file. Note that standard configuration
@@ -63,7 +58,7 @@ package object catseffect {
    */
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](path: Path)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.default(ConfigSource.file(path)).loadF[F, A]
+    loadF[F, A](ConfigSource.default(ConfigSource.file(path)))
 
   /**
    * Load a configuration of type `A` from the given file. Note that standard configuration
@@ -77,7 +72,7 @@ package object catseffect {
    */
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).at(namespace).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](path: Path, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.default(ConfigSource.file(path)).at(namespace).loadF[F, A]
+    loadF[F, A](ConfigSource.default(ConfigSource.file(path)).at(namespace))
 
   /**
    * Load a configuration of type `A` from the given `Config`
@@ -87,7 +82,7 @@ package object catseffect {
    */
   @deprecated("Use `ConfigSource.fromConfig(conf).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](conf: TypesafeConfig)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.fromConfig(conf).loadF[F, A]
+    loadF[F, A](ConfigSource.fromConfig(conf))
 
   /**
    * Load a configuration of type `A` from the given `Config`
@@ -97,7 +92,7 @@ package object catseffect {
    */
   @deprecated("Use `ConfigSource.fromConfig(conf).at(namespace).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](conf: TypesafeConfig, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.fromConfig(conf).at(namespace).loadF[F, A]
+    loadF[F, A](ConfigSource.fromConfig(conf).at(namespace))
 
   /**
    * Save the given configuration into a property file
@@ -142,8 +137,7 @@ package object catseffect {
    */
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesF[F[_], A](files: NonEmptyList[Path])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    ConfigSource.default(
+    loadF[F, A](ConfigSource.default(
       files.map(ConfigSource.file(_).optional)
-        .foldLeft(ConfigSource.empty)(_.withFallback(_)))
-      .loadF[F, A]
+        .foldLeft(ConfigSource.empty)(_.withFallback(_))))
 }
