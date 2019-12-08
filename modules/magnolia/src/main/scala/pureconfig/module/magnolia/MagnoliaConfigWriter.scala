@@ -6,7 +6,6 @@ import scala.reflect.ClassTag
 import _root_.magnolia._
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
 import pureconfig._
-import pureconfig.error.ConfigReaderException
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -47,7 +46,6 @@ object MagnoliaConfigWriter {
   def dispatch[A: ClassTag](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
     def to(a: A): ConfigValue = ctx.dispatch(a) { subtype =>
       hint.to(subtype.typeName.short, subtype.typeclass.to(subtype.cast(a)))
-        .fold(fs => throw new ConfigReaderException[A](fs), identity)
     }
   }
 }

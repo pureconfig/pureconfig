@@ -4,7 +4,6 @@ import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue }
 import pureconfig._
-import pureconfig.error.ConfigReaderException
 import shapeless._
 import shapeless.labelled.FieldType
 
@@ -62,11 +61,7 @@ object MapShapedWriter {
 
       override def to(t: FieldType[Name, V] :+: T): ConfigValue = t match {
         case Inl(l) =>
-          // Writing a coproduct to a config can fail. Is it worth it to make `to` return a `Try`?
-          coproductHint.to(vName.value.name, vConfigWriter.value.value.to(l)) match {
-            case Left(failures) => throw new ConfigReaderException[FieldType[Name, V] :+: T](failures)
-            case Right(r) => r
-          }
+          coproductHint.to(vName.value.name, vConfigWriter.value.value.to(l))
 
         case Inr(r) =>
           tConfigWriter.value.to(r)

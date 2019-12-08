@@ -4,7 +4,7 @@ import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.{ Skip, Use }
-import pureconfig.generic.error.NoValidCoproductChoiceFound
+import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductChoiceFound }
 import pureconfig.syntax._
 
 /**
@@ -32,12 +32,12 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
   def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
 
-  def to(name: String, cv: ConfigValue): ConfigReader.Result[ConfigValue] =
+  def to(name: String, cv: ConfigValue): ConfigValue =
     cv match {
-      case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
-      case cv: ConfigObject => Left(ConfigReaderFailures(ConvertFailure(
-        NonEmptyObjectFound(name), ConfigValueLocation(cv), "")))
-      case cv => Left(ConfigReaderFailures(ConvertFailure(
-        WrongType(cv.valueType, Set(ConfigValueType.OBJECT)), ConfigValueLocation(cv), "")))
+      case co: ConfigObject if co.isEmpty => fieldValue(name).toConfig
+      case _: ConfigObject =>
+        throw new CoproductHintException(NonEmptyObjectFound(name))
+      case cv =>
+        throw new CoproductHintException(WrongType(cv.valueType, Set(ConfigValueType.OBJECT)))
     }
 }

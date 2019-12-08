@@ -4,7 +4,7 @@ import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
-import pureconfig.generic.error.{ NoValidCoproductChoiceFound, UnexpectedValueForFieldCoproductHint }
+import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductChoiceFound, UnexpectedValueForFieldCoproductHint }
 import pureconfig.syntax._
 
 /**
@@ -46,7 +46,7 @@ trait CoproductHint[T] {
    * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some error
    *         occurred.
    */
-  def to(name: String, cv: ConfigValue): ConfigReader.Result[ConfigValue]
+  def to(name: String, cv: ConfigValue): ConfigValue
 }
 
 /**
@@ -86,19 +86,15 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
       } yield ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.value)))).fold(identity, identity)
     }
 
-  def to(name: String, cv: ConfigValue): ConfigReader.Result[ConfigValue] = {
+  def to(name: String, cv: ConfigValue): ConfigValue = {
     cv match {
       case co: ConfigObject =>
-        if (co.containsKey(key)) {
-          Left(ConfigReaderFailures(ConvertFailure(
-            CollidingKeys(key, co.get(key)), ConfigValueLocation(co), "")))
-        } else {
-          Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
-        }
+        if (co.containsKey(key))
+          throw new CoproductHintException(CollidingKeys(key, co.get(key)))
+        else
+          Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig)
       case _ =>
-        Left(ConfigReaderFailures(ConvertFailure(
-          WrongType(cv.valueType, Set(ConfigValueType.OBJECT)),
-          ConfigValueLocation(cv), "")))
+        throw new CoproductHintException(WrongType(cv.valueType, Set(ConfigValueType.OBJECT)))
     }
   }
 }
@@ -118,8 +114,8 @@ class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
   def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
 
-  def to(name: String, cv: ConfigValue): ConfigReader.Result[ConfigValue] =
-    Right(cv)
+  def to(name: String, cv: ConfigValue): ConfigValue =
+    cv
 }
 
 object CoproductHint {
