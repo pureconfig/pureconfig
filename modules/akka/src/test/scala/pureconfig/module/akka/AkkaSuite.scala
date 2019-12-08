@@ -5,11 +5,13 @@ import scala.concurrent.duration._
 import akka.actor.ActorPath
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import org.scalatest._
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 
-class AkkaSuite extends FlatSpec with Matchers with EitherValues {
+class AkkaSuite extends AnyFlatSpec with Matchers with EitherValues {
 
   case class TimeoutConf(timeout: Timeout)
   case class PathConf(path: ActorPath)
