@@ -25,8 +25,7 @@ trait ProductHint[T] {
   def from(cur: ConfigObjectCursor, fieldName: String): FieldHint
 
   /**
-   * Returns optional failures if the provided `ConfigObjectCursor` resulted from reading all fields necessary to
-   * produce an instance of type `T`.
+   * Returns optional failures given the provided `ConfigObjectCursor`.
    *
    * @param cur the `ConfigObjectCursor` that resulted from reading all fields required to produce an instance of type
    *            `T`
