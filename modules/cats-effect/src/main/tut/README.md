@@ -28,7 +28,7 @@ Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
 ```tut:silent
 import pureconfig._
 import pureconfig.generic.auto._
-import pureconfig.module.catseffect._
+import pureconfig.module.catseffect.syntax._
 import cats.effect.IO
 
 case class MyConfig(somefield: Int, anotherfield: String)
