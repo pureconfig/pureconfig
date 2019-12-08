@@ -1,7 +1,5 @@
 package pureconfig.module.magnolia
 
-import scala.collection.mutable
-
 import _root_.magnolia._
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongSizeList }
@@ -22,25 +20,36 @@ object MagnoliaConfigReader {
   private def combineCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): ConfigReader.Result[A] = {
       cur.asObjectCursor.flatMap { objCur =>
-        val (res, obj) = ctx.parameters.foldLeft[(ConfigReader.Result[mutable.Builder[Any, List[Any]]], ConfigObjectCursor)]((Right(List.newBuilder[Any]), objCur)) {
-          case ((res, cur), param) =>
-            val fieldName = param.label
-            val fieldHint = hint.from(cur, fieldName)
-            lazy val reader = param.typeclass
-            lazy val keyNotFoundFailure = cur.failed[A](KeyNotFound.forKeys(fieldHint.field, cur.keys))
-            val paramRes = (fieldHint, param.default) match {
-              case (FieldHint(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
-                Right(defaultValue)
-              case (FieldHint(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
-                reader.from(cursor)
-              case _ =>
-                keyNotFoundFailure
-            }
-            val nextCur = if (fieldHint.remove) cur.withoutKey(fieldHint.field) else cur
-            (ConfigReader.Result.zipWith(res, paramRes)(_ += _), nextCur)
+        val hints = ctx.parameters.map { param => param.label -> hint.from(objCur, param.label) }.toMap
+
+        val res = ctx.constructEither[ConfigReaderFailures, Param[ConfigReader, A]#PType] { param =>
+          val fieldHint = hints(param.label)
+          lazy val reader = param.typeclass
+          lazy val keyNotFoundFailure = cur.failed(KeyNotFound.forKeys(fieldHint.field, objCur.keys))
+          (fieldHint, param.default) match {
+            case (FieldHint(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
+              Right(defaultValue)
+            case (FieldHint(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
+              reader.from(cursor)
+            case _ =>
+              keyNotFoundFailure
+          }
+        }.left.map(_.reduce(_ ++ _))
+
+        val filteredObj = hints.foldLeft(objCur) {
+          case (currObj, (_, FieldHint(_, field, true, _))) =>
+            currObj.withoutKey(field)
+          case (currObj, _) =>
+            currObj
         }
 
-        res.right.flatMap(values => hint.bottom(obj).fold[ConfigReader.Result[A]](Right(ctx.rawConstruct(values.result())))(Left.apply))
+        hint.bottom(filteredObj).fold(
+          res)(
+          bottomFailures =>
+            res match {
+              case Left(failures) => Left(failures ++ bottomFailures)
+              case _ => Left(bottomFailures)
+            })
       }
     }
   }
