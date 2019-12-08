@@ -6,14 +6,16 @@ package pureconfig
 import java.net.URL
 
 import com.typesafe.config.{ ConfigFactory, ConfigValueType }
-import org.scalatest._
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
 import pureconfig.generic.auto._
 
 /**
  * Suite of tests related to the location of ConfigValues that raised failures.
  */
-class ConfigReaderFailureLocationSuite extends FlatSpec with Matchers with EitherValues {
+class ConfigReaderFailureLocationSuite extends AnyFlatSpec with Matchers with EitherValues {
   "Loading configuration from files" should "show proper error locations when loading a single file" in {
     import pureconfig.syntax._
     case class Conf(a: Int, b: String, c: Int)

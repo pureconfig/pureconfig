@@ -3,19 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import com.typesafe.config._
 import java.net.URL
 import java.nio.file.Paths
-import org.scalatest._
-import shapeless._
 
+import com.typesafe.config._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
 import pureconfig.generic.auto._
 import pureconfig.generic.error._
 import pureconfig.generic.hlist._
 import pureconfig.syntax._
+import shapeless._
 
-class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
+class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
   behavior of "ConfigReaderException"
 
   case class Conf(a: Int, b: String, c: Int)
