@@ -13,7 +13,7 @@ import shapeless.labelled.FieldType
  * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
  * @tparam Repr the generic representation
  */
-trait MapShapedWriter[Wrapped, Repr] extends ConfigWriter[Repr]
+private[generic] trait MapShapedWriter[Wrapped, Repr] extends ConfigWriter[Repr]
 
 object MapShapedWriter {
 

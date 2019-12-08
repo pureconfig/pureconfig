@@ -13,7 +13,7 @@ import shapeless.labelled.{ FieldType, field }
  * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
  * @tparam Repr the generic representation
  */
-trait MapShapedReader[Wrapped, Repr] {
+private[generic] trait MapShapedReader[Wrapped, Repr] {
   def from(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReader.Result[Repr]
 }
 
