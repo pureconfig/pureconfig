@@ -4,7 +4,8 @@ import scala.collection.mutable
 
 import _root_.magnolia._
 import pureconfig._
-import pureconfig.error.{ KeyNotFound, WrongSizeList }
+import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongSizeList }
+import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
 import pureconfig.generic.ProductHint.FieldHint
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
@@ -71,10 +72,27 @@ object MagnoliaConfigReader {
 
   def dispatch[A](ctx: SealedTrait[ConfigReader, A])(implicit hint: CoproductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): ConfigReader.Result[A] = {
-      ctx.subtypes.foldRight[ConfigReader.Result[A]](Left(hint.noOptionFound(cur))) {
-        case (subtype, rest) =>
-          hint.from(cur, subtype.typeclass, subtype.typeName.short, rest)
+      val (_, res) = ctx.subtypes.foldLeft[(Boolean, Either[List[(String, ConfigReaderFailures)], A])]((true, Left(Nil))) {
+        case (acc, subtype) =>
+          acc match {
+            case (false, _) => acc
+            case (true, Right(_)) => acc
+            case (true, Left(attempts)) =>
+              val typeName = subtype.typeName.short
+              hint.from(cur, typeName) match {
+                case Use(cur) =>
+                  subtype.typeclass.from(cur).fold(
+                    failures => (false, Left(attempts :+ (typeName -> failures))),
+                    res => (false, Right(res)))
+                case Attempt(cur) =>
+                  subtype.typeclass.from(cur).fold(
+                    failures => (true, Left(attempts :+ (typeName -> failures))),
+                    res => (false, Right(res)))
+                case Skip => acc
+              }
+          }
       }
+      res.left.map(hint.bottom(cur, _))
     }
   }
 }

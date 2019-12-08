@@ -63,8 +63,10 @@ object MapShapedWriter {
       override def to(t: FieldType[Name, V] :+: T): ConfigValue = t match {
         case Inl(l) =>
           // Writing a coproduct to a config can fail. Is it worth it to make `to` return a `Try`?
-          coproductHint.to(vConfigWriter.value.value, vName.value.name, l)
-            .fold(fs => throw new ConfigReaderException[FieldType[Name, V] :+: T](fs), identity)
+          coproductHint.to(vName.value.name, vConfigWriter.value.value.to(l)) match {
+            case Left(failures) => throw new ConfigReaderException[FieldType[Name, V] :+: T](failures)
+            case Right(r) => r
+          }
 
         case Inr(r) =>
           tConfigWriter.value.to(r)

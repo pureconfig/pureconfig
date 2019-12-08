@@ -1,8 +1,10 @@
 package pureconfig.generic
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueType }
+import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig._
 import pureconfig.error._
+import pureconfig.generic.CoproductHint.{ Skip, Use }
+import pureconfig.generic.error.NoValidCoproductChoiceFound
 import pureconfig.syntax._
 
 /**
@@ -22,14 +24,16 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from[A <: T](cur: ConfigCursor, reader: ConfigReader[A], name: String, rest: => ConfigReader.Result[T]): ConfigReader.Result[T] =
-    cur.asString.right.flatMap { str =>
-      if (str == fieldValue(name)) reader.from(ConfigCursor(ConfigFactory.empty.root, cur.pathElems)) else rest
-    }
+  def from(cur: ConfigCursor, name: String): CoproductHint.ChoiceHint =
+    cur.asString.right.map { str =>
+      if (str == fieldValue(name)) Use(cur) else Skip
+    }.right.getOrElse(Skip)
 
-  // TODO: improve handling of failures on the write side
-  def to[A <: T](writer: ConfigWriter[A], name: String, value: A): ConfigReader.Result[ConfigValue] =
-    writer.to(value) match {
+  def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
+    ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
+
+  def to(name: String, cv: ConfigValue): ConfigReader.Result[ConfigValue] =
+    cv match {
       case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
       case cv: ConfigObject => Left(ConfigReaderFailures(ConvertFailure(
         NonEmptyObjectFound(name), ConfigValueLocation(cv), "")))

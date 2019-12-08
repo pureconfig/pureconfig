@@ -1,7 +1,8 @@
 package pureconfig.generic
 
 import pureconfig._
-import pureconfig.error.KeyNotFound
+import pureconfig.error.{ ConfigReaderFailures, KeyNotFound }
+import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
 import pureconfig.generic.ProductHint.FieldHint
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
@@ -12,7 +13,9 @@ import shapeless.labelled.{ FieldType, field }
  * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
  * @tparam Repr the generic representation
  */
-trait MapShapedReader[Wrapped, Repr] extends ConfigReader[Wrapped]
+trait MapShapedReader[Wrapped, Repr] {
+  def from(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReader.Result[Repr]
+}
 
 object MapShapedReader {
 
@@ -64,8 +67,8 @@ object MapShapedReader {
     implicit
     coproductHint: CoproductHint[Wrapped]): MapShapedReader[Wrapped, CNil] =
     new MapShapedReader[Wrapped, CNil] {
-      override def from(cur: ConfigCursor): ConfigReader.Result[Wrapped] =
-        Left(coproductHint.noOptionFound(cur))
+      override def from(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReader.Result[CNil] =
+        Left(coproductHint.bottom(cur, attempts))
     }
 
   final implicit def cConsReader[Wrapped, Name <: Symbol, V <: Wrapped, T <: Coproduct](
@@ -76,7 +79,22 @@ object MapShapedReader {
     tConfigReader: Lazy[MapShapedReader[Wrapped, T]]): MapShapedReader[Wrapped, FieldType[Name, V] :+: T] =
     new MapShapedReader[Wrapped, FieldType[Name, V] :+: T] {
 
-      override def from(cur: ConfigCursor): ConfigReader.Result[Wrapped] =
-        coproductHint.from(cur, vConfigReader.value.value, vName.value.name, tConfigReader.value.from(cur))
+      override def from(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReader.Result[FieldType[Name, V] :+: T] = {
+        lazy val vReader = vConfigReader.value.value
+        lazy val tReader = tConfigReader.value
+
+        coproductHint.from(cur, vName.value.name) match {
+          case Use(optCur) =>
+            vReader.from(optCur)
+              .right.map(v => Inl(field[Name](v)))
+              .left.map(failures => coproductHint.bottom(cur, attempts :+ (vName.value.name -> failures)))
+          case Attempt(optCur) =>
+            vReader.from(optCur)
+              .right.map(v => Inl(field[Name](v)))
+              .left.flatMap(failures => tReader.from(optCur, attempts :+ (vName.value.name -> failures)).right.map(Inr.apply))
+          case Skip =>
+            tReader.from(cur, attempts).right.map(Inr.apply)
+        }
+      }
     }
 }

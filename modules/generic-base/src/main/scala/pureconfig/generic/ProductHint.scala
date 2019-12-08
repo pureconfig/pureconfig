@@ -72,7 +72,7 @@ private[pureconfig] case class ProductHintImpl[T](
 object ProductHint {
 
   /**
-   * An hint on what should be used when attempting to read a given field from a product.
+   * A hint on what should be used when attempting to read a given field from a product.
    *
    * @param cursor the cursor to use when reading the field
    * @param field the name of the field in the `ConfigObject` representation of the product
