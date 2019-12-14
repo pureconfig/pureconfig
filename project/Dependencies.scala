@@ -3,9 +3,9 @@ import sbt._
 object Dependencies {
 
   object Version {
-    val scala211            = "2.11.12"
-    val scala212            = "2.12.10"
-    val scala213            = "2.13.1"
+    val scala211                = "2.11.12"
+    val scala212                = "2.12.10"
+    val scala213                = "2.13.1"
 
     val shapeless               = "2.3.3"
     val typesafeConfig          = "1.4.0"
