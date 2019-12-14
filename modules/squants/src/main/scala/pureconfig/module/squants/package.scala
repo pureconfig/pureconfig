@@ -71,8 +71,9 @@ package object squants {
     viaNonEmptyStringTry[DataRate](DataRate.apply, _.toString)
 
   // market
-  implicit val moneyDensityConfigConvert =
-    viaNonEmptyStringTry[Money](Money.apply, _.toString)
+  // Using own string representation due to https://github.com/typelevel/squants/issues/321
+  implicit def moneyDensityConfigConvert(implicit mc: MoneyContext) =
+    viaNonEmptyStringTry[Money](Money.apply, { m => m.amount.underlying.toPlainString + " " + m.currency.code })
 
   // mass
   implicit val areaDensityConfigConvert =

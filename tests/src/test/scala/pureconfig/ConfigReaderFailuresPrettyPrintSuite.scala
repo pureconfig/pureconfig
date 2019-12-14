@@ -3,18 +3,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import com.typesafe.config._
 import java.net.URL
-import org.scalatest._
 
+import com.typesafe.config._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
 import pureconfig.generic.error._
-import java.nio.file.Path
 
 /**
  * Suite of tests related to the pretty printing of config reader failures.
  */
-class ConfigReaderFailuresPrettyPrintSuite extends FlatSpec with Matchers {
+class ConfigReaderFailuresPrettyPrintSuite extends AnyFlatSpec with Matchers {
   "A ConfigReaderFailures prettyPrint method" should "print errors with a configurable identation" in {
 
     def location(line: Int) = ConfigValueLocation(new URL("file:///tmp/config"), line)

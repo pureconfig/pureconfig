@@ -5,8 +5,10 @@ import scala.reflect.ClassTag
 import org.scalatest._
 import org.scalatest.matchers.{ MatchResult, Matcher }
 import pureconfig.error._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-trait ConfigReaderMatchers { this: FlatSpec with Matchers =>
+trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
 
   def failWith(reason: FailureReason): Matcher[ConfigReader.Result[Any]] =
     matchPattern { case Left(ConfigReaderFailures(ConvertFailure(`reason`, _, _), Nil)) => }
