@@ -6,6 +6,7 @@ import cats.effect.IO
 import pureconfig.{ BaseSuite, ConfigSource }
 import pureconfig.error.{ ConfigReaderException, ConvertFailure }
 import pureconfig.generic.auto._
+import pureconfig.module.catseffect.syntax._
 import java.nio.file.{ Path, Paths }
 
 import com.typesafe.config.ConfigFactory

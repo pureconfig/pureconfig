@@ -3,11 +3,13 @@ package pureconfig.module.scalaxml
 import scala.xml.Elem
 
 import com.typesafe.config.ConfigFactory.parseString
-import org.scalatest._
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 
-class ScalaXMLSuite extends FlatSpec with Matchers with EitherValues {
+class ScalaXMLSuite extends AnyFlatSpec with Matchers with EitherValues {
 
   case class Config(people: Elem)
 

@@ -10,7 +10,7 @@ import scalaz.scalacheck.ScalazArbitrary._
 import scalaz.std.anyVal.intInstance
 import scalaz.std.string._
 
-class ScalazSuite extends BaseSuite with ConfigConvertChecks {
+class ScalazSuite extends BaseSuite {
   import ScalazSuite._
 
   checkArbitrary[Maybe[Int]]

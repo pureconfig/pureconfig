@@ -1,13 +1,14 @@
 package pureconfig.syntax
 
+import scala.collection.immutable.{ List, Map }
+
 import com.typesafe.config.ConfigFactory
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.error.ConfigReaderException
 import pureconfig.generic.auto._
 
-import scala.collection.immutable.{ List, Map }
-
-class SyntaxSpec extends FlatSpec with Matchers {
+class SyntaxSpec extends AnyFlatSpec with Matchers {
 
   behavior of "pureconfig.syntax._"
 
