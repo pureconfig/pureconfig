@@ -1,8 +1,9 @@
 package pureconfig
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class NamingConventionSuite extends FlatSpec with Matchers {
+class NamingConventionSuite extends AnyFlatSpec with Matchers {
   "CamelCase" should "properly tokenize words" in {
     CamelCase.toTokens("lowercase") shouldBe Seq("lowercase")
     CamelCase.toTokens("Class") shouldBe Seq("class")

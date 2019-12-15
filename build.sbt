@@ -124,6 +124,8 @@ lazy val micrositesSettings = Seq(
   micrositeDocumentationUrl := "docs/",
   micrositeGithubOwner := "pureconfig",
   micrositeGithubRepo := "pureconfig",
+  micrositeTheme := "pattern",
+  micrositeHighlightTheme := "default",
   micrositePalette := Map(
         "brand-primary"   /* link color       */  -> "#ab4b4b",
         "brand-secondary" /* nav/sidebar back */  -> "#4b4b4b",
@@ -133,7 +135,8 @@ lazy val micrositesSettings = Seq(
         "gray-light"      /* star back        */  -> "#E3E2E3",
         "gray-lighter"    /* code back        */  -> "#F4F3F4",
         "white-color"                             -> "#FFFFFF"),
-  micrositeGitterChannel := false // ugly
+  micrositeGitterChannel := false, // ugly
+  micrositeCompilingDocsTool := WithTut // TODO: this is deprecated, migrate to mdoc
 )
 
 // add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as

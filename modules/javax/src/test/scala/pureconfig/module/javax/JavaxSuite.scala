@@ -1,14 +1,15 @@
 package pureconfig.module.javax
 
 import _root_.javax.security.auth.kerberos.KerberosPrincipal
-import javax.security.auth.x500.X500Principal
-
 import com.typesafe.config.ConfigFactory
-import org.scalatest._
+import javax.security.auth.x500.X500Principal
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 
-class JavaxSuite extends FlatSpec with Matchers with EitherValues {
+class JavaxSuite extends AnyFlatSpec with Matchers with EitherValues {
 
   case class K5Conf(principal: KerberosPrincipal)
 

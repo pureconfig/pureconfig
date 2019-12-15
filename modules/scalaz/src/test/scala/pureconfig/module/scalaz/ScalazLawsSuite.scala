@@ -2,18 +2,17 @@ package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
 import org.scalacheck.{ Prop, Properties }
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.Checkers
-import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter }
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.module.scalaz.arbitrary._
 import pureconfig.module.scalaz.equal._
 import pureconfig.module.scalaz.instances._
-
+import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter }
 import scalaz.scalacheck.ScalazProperties._
 import scalaz.std.anyVal.intInstance
 
-class ScalazLawsSuite extends FunSuite with Checkers {
+class ScalazLawsSuite extends AnyFunSuite with Checkers {
   import ScalazLawsSuite._
 
   test("contravariant.laws[ConfigWriter]") {

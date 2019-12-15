@@ -1,18 +1,19 @@
 package pureconfig.module
 
-import cats.effect.{ IO, Timer }
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+
 import _root_.fs2.{ Stream, text }
+import cats.effect.{ IO, Timer }
+import cats.implicits._
+import org.scalatest.EitherValues._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import pureconfig.error.ConfigReaderException
 import pureconfig.generic.auto._
 import pureconfig.module.{ fs2 => testee }
-import org.scalatest.{ FlatSpec, Matchers }
-import pureconfig.error.ConfigReaderException
-import org.scalatest.EitherValues._
-import scala.concurrent.duration._
-import cats.implicits._
 
-import scala.concurrent.ExecutionContext
-
-class fs2Suite extends FlatSpec with Matchers {
+class fs2Suite extends AnyFlatSpec with Matchers {
 
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 

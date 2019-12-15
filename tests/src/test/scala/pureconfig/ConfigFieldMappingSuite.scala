@@ -1,8 +1,9 @@
 package pureconfig
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConfigFieldMappingSuite extends FlatSpec with Matchers {
+class ConfigFieldMappingSuite extends AnyFlatSpec with Matchers {
 
   behavior of "ConfigFieldMapping"
 

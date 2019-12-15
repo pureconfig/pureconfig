@@ -1,8 +1,8 @@
 package pureconfig.module
 
 import org.http4s.Uri
-import pureconfig.ConfigReader
 import pureconfig.error.CannotConvert
+import pureconfig.{ ConfigReader, ConfigWriter }
 
 package object http4s {
 
@@ -11,4 +11,6 @@ package object http4s {
       Uri.fromString(str).fold(
         err => Left(CannotConvert(str, "Uri", err.sanitized)),
         uri => Right(uri)))
+
+  implicit val uriWriter: ConfigWriter[Uri] = ConfigWriter[String].contramap(_.renderString)
 }
