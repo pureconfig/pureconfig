@@ -32,5 +32,5 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 
 A non-comprehensive list of other libraries which have integrated with PureConfig to provide a richer experience include:
 
-- `refined-pureconfig` allows PureConfig to play nicely with [`refined`](https://github.com/fthomas/refined/)'s type refinements. Viktor Lövgren's blog post gleefully explains how [PureConfig and refined work together](https://blog.vlovgr.se/posts/2016-12-24-refined-configuration.html).
+- `refined-pureconfig` allows PureConfig to play nicely with [`refined`](https://github.com/fthomas/refined/#internal-modules)'s type refinements;
 - `coulomb-pureconfig` enables PureConfig configurations to include [`coulomb`](https://github.com/erikerlandson/coulomb/tree/develop/coulomb-pureconfig#integration-with-pureconfig) `Quantity` values.

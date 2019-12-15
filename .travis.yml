@@ -45,9 +45,9 @@ jobs:
         - export PATH=${PATH}:./vendor/bundle
         - export NOKOGIRI_USE_SYSTEM_LIBRARIES=true
       install:
-        - rvm use 2.4 --install --fuzzy
+        - rvm use 2.6 --install --fuzzy
         - gem update --system
-        - gem install sass jekyll:3.2.1 html-proofer:3.9.3
+        - gem install sass jekyll:4.0.0 html-proofer:3.9.3
       script:
         - sbt makeMicrosite
         - htmlproofer
@@ -60,9 +60,9 @@ jobs:
       if: type = pull_request AND branch = master
       scala: 2.12.10
       install:
-        - rvm use 2.4 --install --fuzzy
+        - rvm use 2.6 --install --fuzzy
         - gem update --system
-        - gem install sass jekyll:3.2.1
+        - gem install sass jekyll:4.0.0
       script:
         - ./scripts/diff_website.sh
 
