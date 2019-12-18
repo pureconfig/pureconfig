@@ -1,7 +1,7 @@
 package pureconfig.module.cats
 
 import cats._
-import com.typesafe.config.ConfigValue
+import com.typesafe.config.{ Config, ConfigValue }
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures }
 
@@ -58,6 +58,7 @@ package object instances {
     }
 
   implicit val configValueEq: Eq[ConfigValue] = Eq.fromUniversalEquals
+  implicit val configEq: Eq[Config] = Eq.fromUniversalEquals
   implicit val configReaderFailureEq: Eq[ConfigReaderFailure] = Eq.fromUniversalEquals
   implicit val configReaderFailuresEq: Eq[ConfigReaderFailures] = Eq.fromUniversalEquals
 
@@ -66,4 +67,7 @@ package object instances {
 
   implicit val configValueCatsSemigroup: Semigroup[ConfigValue] =
     Semigroup.instance((a, b) => b.withFallback(a))
+
+  implicit val configObjectSourceCatsMonoid: Monoid[ConfigObjectSource] =
+    Monoid.instance(ConfigSource.empty, (a, b) => b.withFallback(a))
 }
