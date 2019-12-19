@@ -4,9 +4,9 @@ import cats.instances.either._
 import cats.instances.int._
 import cats.instances.tuple._
 import cats.instances.unit._
-import cats.kernel.laws.discipline.SemigroupTests
+import cats.kernel.laws.discipline.{ MonoidTests, SemigroupTests }
 import cats.laws.discipline._
-import com.typesafe.config.ConfigValue
+import com.typesafe.config.{ Config, ConfigValue }
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.typelevel.discipline.scalatest.Discipline
@@ -22,5 +22,7 @@ class CatsLawsSuite extends AnyFunSuite with Matchers with Discipline {
   checkAll("ConfigConvert[Int]", InvariantSemigroupalTests[ConfigConvert].invariantSemigroupal[Int, Int, Int])
 
   checkAll("ConfigValue", SemigroupTests[ConfigValue].semigroup)
+  checkAll("Config", MonoidTests[Config].monoid)
   checkAll("ConfigReaderFailures", SemigroupTests[ConfigReaderFailures].semigroup)
+  checkAll("ConfigObjectSource", MonoidTests[ConfigObjectSource].monoid)
 }
