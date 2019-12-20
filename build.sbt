@@ -3,7 +3,7 @@ import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import scalariform.formatter.preferences._
 
-organization := "com.github.pureconfig"
+organization in ThisBuild := "com.github.pureconfig"
 
 lazy val core = (project in file("core")).
   enablePlugins(BoilerplatePlugin, SbtOsgi, TutPlugin).
