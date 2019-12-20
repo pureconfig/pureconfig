@@ -3,6 +3,8 @@ import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import scalariform.formatter.preferences._
 
+organization in ThisBuild := "com.github.pureconfig"
+
 lazy val core = (project in file("core")).
   enablePlugins(BoilerplatePlugin, SbtOsgi, TutPlugin).
   settings(commonSettings).
@@ -70,7 +72,6 @@ lazy val sttp = module(project) in file("modules/sttp")
 lazy val yaml = module(project) in file("modules/yaml")
 
 lazy val commonSettings = Seq(
-  organization := "com.github.pureconfig",
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
 
@@ -109,11 +110,7 @@ lazy val commonSettings = Seq(
 
   publishMavenStyle := true,
   publishArtifact in Test := false,
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  })
+  publishTo := sonatypePublishToBundle.value)
 
 lazy val micrositesSettings = Seq(
   micrositeName := "PureConfig",
@@ -211,7 +208,7 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
   commitNextVersion,
-  pushChanges,
-  releaseStepCommandAndRemaining("sonatypeReleaseAll"))
+  pushChanges)
