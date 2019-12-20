@@ -61,9 +61,9 @@ object ConfigFactoryWrapper {
       onIOFailure = Some(CannotReadFile(path, _)))
 
   /** @see `com.typesafe.config.ConfigFactory.parseResources()` */
-  def parseResources(resource: String): ConfigReader.Result[Config] =
+  def parseResources(resource: String, classLoader: ClassLoader = null): ConfigReader.Result[Config] =
     unsafeToReaderResult(
-      ConfigFactory.parseResources(resource, strictSettings),
+      ConfigFactory.parseResources(resource, strictSettings.setClassLoader(classLoader)),
       onIOFailure = Some(CannotReadResource(resource, _)))
 
   /** @see `com.typesafe.config.ConfigFactory.parseURL()` */

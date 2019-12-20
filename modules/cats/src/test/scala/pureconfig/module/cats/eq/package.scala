@@ -34,4 +34,7 @@ package object eq {
 
   implicit def configConvertEq[A: Eq: Arbitrary]: Eq[ConfigConvert[A]] =
     Eq.by[ConfigConvert[A], (ConfigReader[A], ConfigWriter[A])] { cc => (cc, cc) }
+
+  implicit val configObjectSourceEq: Eq[ConfigObjectSource] =
+    Eq.by { cs => cs.config() }
 }

@@ -5,7 +5,7 @@ name := "pureconfig-circe"
 libraryDependencies ++= Seq(
   "io.circe"      %% "circe-core"    % forScalaVersions { case (2, 11) => "0.11.1"; case _ => "0.12.1" }.value,
   "io.circe"      %% "circe-literal" % forScalaVersions { case (2, 11) => "0.11.1"; case _ => "0.12.1" }.value % Test,
-  "org.typelevel" %% "jawn-parser"   % "0.14.2" % Test
+  "org.typelevel" %% "jawn-parser"   % "0.14.3" % Test
 )
 
 developers := List(

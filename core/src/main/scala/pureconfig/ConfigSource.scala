@@ -93,6 +93,10 @@ final class ConfigObjectSource private (getConf: () => Result[Config]) extends C
   def value(): Result[ConfigObject] =
     config().right.flatMap(_.resolveSafe()).right.map(_.root)
 
+  // Avoids unnecessary cast on `ConfigCursor#asObjectCursor`.
+  override def cursor(): Result[ConfigCursor] =
+    value().right.map(ConfigObjectCursor(_, Nil))
+
   /**
    * Reads a `Config` from this config source. The returned config is usually unresolved, unless
    * the source forces it otherwise.
@@ -272,12 +276,26 @@ object ConfigSource {
 
   /**
    * Returns a config source that provides configs read from JVM resource files. If multiple files
-   * are found, they are merged in no specific order.
+   * are found, they are merged in no specific order. This method uses Typesafe Config's default
+   * class loader (`Thread.currentThread().getContextClassLoader()`).
    *
    * @param name the resource name
    * @return a config source that provides configs read from JVM resource files.
    */
-  def resources(name: String) = ConfigObjectSource(ConfigFactoryWrapper.parseResources(name))
+  def resources(name: String) =
+    ConfigObjectSource(ConfigFactoryWrapper.parseResources(name, null))
+
+  /**
+   * Returns a config source that provides configs read from JVM resource files. If multiple files
+   * are found, they are merged in no specific order. The given class loader will be used to look
+   * for resources.
+   *
+   * @param name the resource name
+   * @param classLoader the class loader to use to look for resources
+   * @return a config source that provides configs read from JVM resource files.
+   */
+  def resources(name: String, classLoader: ClassLoader) =
+    ConfigObjectSource(ConfigFactoryWrapper.parseResources(name, classLoader))
 
   /**
    * Returns a config source that provides a config parsed from a string.

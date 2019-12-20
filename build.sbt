@@ -1,3 +1,4 @@
+import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import scalariform.formatter.preferences._
@@ -63,6 +64,7 @@ lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s")
 lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")
+lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val scalaz = module(project) in file("modules/scalaz")
 lazy val squants = module(project) in file("modules/squants")
@@ -80,8 +82,8 @@ lazy val commonSettings = Seq(
     Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")),
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))),
 
-  scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.12.10", "2.13.0", "2.11.12"),
+  crossScalaVersions := Seq(scala211, scala212, scala213),
+  scalaVersion := scala212,
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -95,7 +97,7 @@ lazy val commonSettings = Seq(
   scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
-  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import"),
+  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 
@@ -119,6 +121,8 @@ lazy val micrositesSettings = Seq(
   micrositeDocumentationUrl := "docs/",
   micrositeGithubOwner := "pureconfig",
   micrositeGithubRepo := "pureconfig",
+  micrositeTheme := "pattern",
+  micrositeHighlightTheme := "default",
   micrositePalette := Map(
         "brand-primary"   /* link color       */  -> "#ab4b4b",
         "brand-secondary" /* nav/sidebar back */  -> "#4b4b4b",
@@ -128,7 +132,8 @@ lazy val micrositesSettings = Seq(
         "gray-light"      /* star back        */  -> "#E3E2E3",
         "gray-lighter"    /* code back        */  -> "#F4F3F4",
         "white-color"                             -> "#FFFFFF"),
-  micrositeGitterChannel := false // ugly
+  micrositeGitterChannel := false, // ugly
+  micrositeCompilingDocsTool := WithTut // TODO: this is deprecated, migrate to mdoc
 )
 
 // add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as
@@ -139,8 +144,8 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
     List(
-      if(minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
-      if(minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
+      if (minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
+      if (minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
     ).flatten
   }
 }
@@ -181,6 +186,9 @@ lazy val lintFlags = {
       withCommon()
   }
 }
+
+// Use the same Scala 2.12 version in the root project as in subprojects
+scalaVersion := scala212
 
 // do not publish the root project
 skip in publish := true

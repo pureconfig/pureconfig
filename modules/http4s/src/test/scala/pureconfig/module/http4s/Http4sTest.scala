@@ -2,7 +2,7 @@ package pureconfig.module.http4s
 
 import com.typesafe.config.ConfigFactory
 import org.http4s.Uri
-import pureconfig.BaseSuite
+import pureconfig.{ BaseSuite, ConfigReader, ConfigWriter }
 import pureconfig.error.{ CannotConvert, ConfigReaderFailures, ConvertFailure }
 import pureconfig.generic.auto._
 import pureconfig.syntax._
@@ -23,5 +23,15 @@ class Http4sTest extends BaseSuite {
     val errors = ConfigReaderFailures(ConvertFailure(CannotConvert("\\", "Uri", "Invalid URI"), None, "uri"))
 
     conf.to[ServerConfig].left.value shouldEqual errors
+  }
+
+  "Uri ConfigReader and ConfigWriter" should "be able to round-trip reading/writing of Uri" in {
+    val expectedComplexUri =
+      Uri.unsafeFromString("http://www.google.ps/search?hl=en&client=firefox-a&hs=42F&rls=org.mozilla%3Aen-US%3Aofficial&q=The+type+%27Microsoft.Practices.ObjectBuilder.Locator%27+is+defined+in+an+assembly+that+is+not+referenced.+You+must+add+a+reference+to+assembly+&aq=f&aqi=&aql=&oq=")
+
+    val configValue = ConfigWriter[Uri].to(expectedComplexUri)
+    val Right(actualUri) = ConfigReader[Uri].from(configValue)
+
+    actualUri shouldEqual expectedComplexUri
   }
 }

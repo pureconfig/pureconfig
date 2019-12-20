@@ -3,17 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import com.typesafe.config._
+import java.net.URL
 import java.nio.file.Paths
-import org.scalatest._
-import shapeless._
 
+import com.typesafe.config._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
 import pureconfig.generic.auto._
+import pureconfig.generic.error._
 import pureconfig.generic.hlist._
 import pureconfig.syntax._
+import shapeless._
 
-class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
+class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
   behavior of "ConfigReaderException"
 
   case class Conf(a: Int, b: String, c: Int)
@@ -29,6 +32,11 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       conf.toOrThrow[Conf]
     }
 
+    exception.failures.toList.toSet shouldBe Set(
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "a"),
+      ConvertFailure(KeyNotFound("b", Set()), None, ""),
+      ConvertFailure(KeyNotFound("c", Set()), None, ""))
+
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
           |  at the root:
@@ -41,7 +49,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
 
   case class ParentConf(conf: Conf)
 
-  it should "have a message displaying errors that occur at the root of the configuration" in {
+  it should "include failures that occur at the root of the configuration" in {
     val conf = ConfigFactory.parseString("""
       {
         conf = 2
@@ -52,26 +60,20 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       conf.root().get("conf").toOrThrow[Conf]
     }
 
-    exception1.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  at the root:
-          |    - Expected type OBJECT. Found NUMBER instead.
-          |""".stripMargin
+    exception1.failures.toList.toSet shouldBe Set(
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, ""))
 
     val exception2 = intercept[ConfigReaderException[_]] {
       conf.root().toOrThrow[ParentConf]
     }
 
-    exception2.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$ParentConf. Failures are:
-          |  at 'conf':
-          |    - Expected type OBJECT. Found NUMBER instead.
-          |""".stripMargin
+    exception2.failures.toList.toSet shouldBe Set(
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "conf"))
   }
 
   case class MapConf(values: Map[String, MapConf])
 
-  it should "have a message showing the full path to errors" in {
+  it should "include failures with the full error path" in {
     val conf = ConfigFactory.parseString("""
       {
         values {
@@ -92,13 +94,9 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       conf.root().toOrThrow[MapConf]
     }
 
-    exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$MapConf. Failures are:
-          |  at 'values.a.values.c':
-          |    - Expected type OBJECT. Found NUMBER instead.
-          |  at 'values.b':
-          |    - Expected type OBJECT. Found STRING instead.
-          |""".stripMargin
+    exception.failures.toList.toSet shouldBe Set(
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)), None, "values.b"),
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "values.a.values.c"))
   }
 
   sealed trait A
@@ -106,7 +104,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
   case class A2(a: String) extends A
   case class EnclosingA(values: Map[String, A])
 
-  it should "have a message displaying relevant errors for coproduct derivation" in {
+  it should "include failures relevant for coproduct derivation" in {
     val conf = ConfigFactory.parseString("""
       {
         values {
@@ -129,13 +127,9 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       conf.root().toOrThrow[EnclosingA]
     }
 
-    exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingA. Failures are:
-          |  at 'values.v1.type':
-          |    - Unexpected value "unexpected" found. Note that the default transformation for representing class names in config values changed from converting to lower case to converting to kebab case in version 0.11.0 of PureConfig. See https://pureconfig.github.io/docs/overriding-behavior-for-sealed-families.html for more details on how to use a different transformation.
-          |  at 'values.v3':
-          |    - Key not found: 'type'.
-          |""".stripMargin
+    exception.failures.toList.toSet shouldBe Set(
+      ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), None, "values.v1.type"),
+      ConvertFailure(KeyNotFound("type", Set()), None, "values.v3"))
   }
 
   case class CamelCaseConf(camelCaseInt: Int, camelCaseString: String)
@@ -146,7 +140,7 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       kebabCaseConf: KebabCaseConf,
       snakeCaseConf: SnakeCaseConf)
 
-  it should "have a message displaying candidate keys in case of a suspected misconfigured ProductHint" in {
+  it should "include candidate keys in case of a suspected misconfigured ProductHint" in {
     val conf = ConfigFactory.parseString("""{
       camel-case-conf {
         camelCaseInt = 2
@@ -166,54 +160,42 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       conf.root().toOrThrow[EnclosingConf]
     }
 
-    exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$EnclosingConf. Failures are:
-          |  at 'camel-case-conf':
-          |    - Key not found: 'camel-case-int'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'camelCaseInt'
-          |    - Key not found: 'camel-case-string'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'camelCaseString'
-          |  at 'snake-case-conf':
-          |    - Key not found: 'snake-case-int'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'snake_case_int'
-          |    - Key not found: 'snake-case-string'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |       - 'snake_case_string'
-          |""".stripMargin
+    exception.failures.toList.toSet shouldBe Set(
+      ConvertFailure(KeyNotFound("camel-case-int", Set("camelCaseInt")), None, "camel-case-conf"),
+      ConvertFailure(KeyNotFound("camel-case-string", Set("camelCaseString")), None, "camel-case-conf"),
+      ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), None, "snake-case-conf"),
+      ConvertFailure(KeyNotFound("snake-case-string", Set("snake_case_string")), None, "snake-case-conf"))
   }
 
-  it should "have a message displaying the proper file system location of the values that raised errors, if available" in {
+  it should "have failures with the proper file system location of the values that raised errors, if available" in {
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/configFailureLocation/single/a.conf"
+    val url = new URL("file://" + workingDir + file)
     val conf = ConfigFactory.load(file).root()
 
     val exception = intercept[ConfigReaderException[_]] {
       conf.get("conf").toOrThrow[Conf]
     }
 
-    exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  at the root:
-          |    - (file:${workingDir}${file}:1) Key not found: 'a'.
-          |  at 'c':
-          |    - (file:${workingDir}${file}:3) Expected type NUMBER. Found STRING instead.
-          |""".stripMargin
+    exception.failures.toList.toSet shouldBe Set(
+      ConvertFailure(KeyNotFound("a", Set()), Some(ConfigValueLocation(url, 1)), ""),
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), Some(ConfigValueLocation(url, 3)), "c"))
   }
 
-  it should "have a message displaying the inability to parse a given configuration" in {
+  it should "include failures regarding the inability to parse a given configuration" in {
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/malformed/a.conf"
+    val url = new URL("file://" + workingDir + file)
 
     val exception = intercept[ConfigReaderException[_]] {
       ConfigSource.file(Paths.get(workingDir, file)).loadOrThrow[Conf]
     }
 
-    exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  - (file:${workingDir}${file}:2) Unable to parse the configuration: Expecting close brace } or a comma, got end of file.
-          |""".stripMargin
+    exception.failures.toList.toSet shouldBe Set(
+      CannotParse("Expecting close brace } or a comma, got end of file", Some(ConfigValueLocation(url, 2))))
   }
 
-  it should "have a message indicating that a given file does not exist" in {
+  it should "include failures indicating that a given file does not exist" in {
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/nonexisting"
 
@@ -221,15 +203,14 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       ConfigSource.file(Paths.get(workingDir, file)).loadOrThrow[Conf]
     }
 
-    exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
-          |  - Unable to read file ${workingDir}${file} (No such file or directory).
-          |""".stripMargin
+    // Note: exceptions can't be compared for equality
+    exception.failures.toList.toString shouldBe
+      s"List(CannotReadFile(${workingDir}${file},Some(java.io.FileNotFoundException: ${workingDir}${file} (No such file or directory))))"
   }
 
   case class HListAndTupleConf(hlist: Int :: Int :: String :: HNil, tuple: (Int, Int, String))
 
-  it should "have a message showing lists of wrong size" in {
+  it should "include failures showing lists of wrong size" in {
     val conf = ConfigFactory.parseString("""
       {
         hlist = [1, 2, "three", 4]
@@ -241,12 +222,8 @@ class ConfigReaderExceptionSuite extends FlatSpec with Matchers {
       conf.root().toOrThrow[HListAndTupleConf]
     }
 
-    exception.getMessage shouldBe
-      s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$HListAndTupleConf. Failures are:
-          |  at 'hlist':
-          |    - List of wrong size found. Expected 3 elements. Found 4 elements instead.
-          |  at 'tuple':
-          |    - List of wrong size found. Expected 3 elements. Found 6 elements instead.
-          |""".stripMargin
+    exception.failures.toList.toSet shouldBe Set(
+      ConvertFailure(WrongSizeList(3, 4), None, "hlist"),
+      ConvertFailure(WrongSizeList(3, 6), None, "tuple"))
   }
 }
