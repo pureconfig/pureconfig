@@ -1,0 +1,116 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk: [8]
+        scala: [2.11.12, 2.12.10, 2.13.1]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.jdk }}
+
+      - name: Compile
+        run: sbt coverage "++${{ matrix.scala }} compile"
+
+      - name: Run tests
+        run: sbt coverage "++${{ matrix.scala }} test"
+
+      - name: Build Scaladoc
+        run: sbt "++${{ matrix.scala }} doc"
+
+      - name: Publish artifact locally
+        run: sbt "++${{ matrix.scala }} publishLocal"
+
+      - name: Compile example project
+        run: cd example && sbt "++${{ matrix.scala }} test"
+
+      - name: Check tut output
+        run: >
+          if [[ "${{ matrix.scala }}" =~ ^2\.12.* ]]; then
+            sbt "++${{ matrix.scala }} tut" &&
+            git diff --exit-code;
+            fi
+
+# TODO: enable this once either sbt-coveralls starts supporting GitHub Actions
+# (https://github.com/scoverage/sbt-coveralls/issues/126) or coverallsapp/github-action starts
+# supporting cobertura.xml format (https://github.com/coverallsapp/github-action/issues/30)
+#
+#      - name: Compile coverage data
+#        run: sbt ++${{ matrix.scala }} coverageAggregate
+#
+#      - name: Upload coverage data to Coveralls
+#        uses: coverallsapp/github-action@master
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build_website:
+    name: Build Website
+    runs-on: ubuntu-latest
+    env:
+      NOKOGIRI_USE_SYSTEM_LIBRARIES: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+
+      - name: Install dependencies
+        run: >
+          sudo apt install libcurl4-openssl-dev libxslt-dev &&
+          gem install sass jekyll:4.0.0 html-proofer:3.9.3
+
+      - name: Build website
+        run: sbt makeMicrosite
+
+      - name: Verify website
+        run: >
+          htmlproofer
+          --allow-hash-href
+          --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
+          --url-ignore "/search.maven.org/"
+          docs/target/site
+
+  diff_website:
+    name: Diff Website
+    runs-on: ubuntu-latest
+    if: github.ref != 'master'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+
+      - name: Install dependencies
+        run: gem install sass jekyll:4.0.0
+
+      - name: Build and compare website
+        run: ./scripts/diff_website.sh
