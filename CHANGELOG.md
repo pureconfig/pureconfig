@@ -1,3 +1,10 @@
+### 0.12.2 (Dec 21, 2019)
+
+- New features
+  - Created an alternative generic derivation module that uses Magnolia instead of Shapeless (`pureconfig-magnolia`);
+  - `ConfigSource.resources` now allows users to specify the class loader to use;
+  - Added a `prettyPrint` method to `ConfigReaderFailures`.
+
 ### 0.12.1 (Sep 28, 2019)
 
 - New features
