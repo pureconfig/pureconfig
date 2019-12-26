@@ -37,12 +37,12 @@ trait ProductHint[T] {
    * Returns an optional key-value pair that should be used for the field with name `fieldName` in the `ConfigObject`
    * representation of `T`.
    *
-   * @param fieldName the name of the field in `T`
    * @param value the optional serialized value of the field
+   * @param fieldName the name of the field in `T`
    * @return an optional key-value pair to be used in the `ConfigObject` representation of `T`. If `None`, the field is
    *         omitted from the `ConfigObject` representation.
    */
-  def to(fieldName: String, value: Option[ConfigValue]): Option[(String, ConfigValue)]
+  def to(value: Option[ConfigValue], fieldName: String): Option[(String, ConfigValue)]
 }
 
 private[pureconfig] case class ProductHintImpl[T](
@@ -64,7 +64,7 @@ private[pureconfig] case class ProductHintImpl[T](
       None
   }
 
-  def to(fieldName: String, value: Option[ConfigValue]): Option[(String, ConfigValue)] =
+  def to(value: Option[ConfigValue], fieldName: String): Option[(String, ConfigValue)] =
     value.map(fieldMapping(fieldName) -> _)
 }
 

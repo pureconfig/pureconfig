@@ -41,12 +41,12 @@ trait CoproductHint[T] {
    * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
    * config for the sealed family or coproduct.
    *
-   * @param name the name of the class or coproduct option
    * @param cv the `ConfigValue` of the class or coproduct option
-   * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some error
-   *         occurred.
+   * @param name the name of the class or coproduct option
+   * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some
+   *         error occurred.
    */
-  def to(name: String, cv: ConfigValue): ConfigValue
+  def to(cv: ConfigValue, name: String): ConfigValue
 }
 
 /**
@@ -86,7 +86,7 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
       } yield ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.value)))).fold(identity, identity)
     }
 
-  def to(name: String, cv: ConfigValue): ConfigValue = {
+  def to(cv: ConfigValue, name: String): ConfigValue = {
     cv match {
       case co: ConfigObject =>
         if (co.containsKey(key))
@@ -114,7 +114,7 @@ class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
   def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
 
-  def to(name: String, cv: ConfigValue): ConfigValue =
+  def to(cv: ConfigValue, name: String): ConfigValue =
     cv
 }
 

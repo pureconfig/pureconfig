@@ -27,7 +27,7 @@ object MagnoliaConfigWriter {
           case w =>
             Some(w.to(param.dereference(a)))
         }
-        hint.to(param.label, valueOpt)
+        hint.to(valueOpt, param.label)
       }
       ConfigValueFactory.fromMap(fieldValues.flatten.toMap.asJava)
     }
@@ -45,7 +45,7 @@ object MagnoliaConfigWriter {
 
   def dispatch[A: ClassTag](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
     def to(a: A): ConfigValue = ctx.dispatch(a) { subtype =>
-      hint.to(subtype.typeName.short, subtype.typeclass.to(subtype.cast(a)))
+      hint.to(subtype.typeclass.to(subtype.cast(a)), subtype.typeName.short)
     }
   }
 }

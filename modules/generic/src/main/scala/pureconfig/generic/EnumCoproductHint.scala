@@ -32,7 +32,7 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
   def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
 
-  def to(name: String, cv: ConfigValue): ConfigValue =
+  def to(cv: ConfigValue, name: String): ConfigValue =
     cv match {
       case co: ConfigObject if co.isEmpty => fieldValue(name).toConfig
       case _: ConfigObject =>

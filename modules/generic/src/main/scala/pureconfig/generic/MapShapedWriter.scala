@@ -36,7 +36,7 @@ object MapShapedWriter {
         case w =>
           Some(w.to(t.head))
       }
-      val kv = hint.to(key.value.name, valueOpt)
+      val kv = hint.to(valueOpt, key.value.name)
 
       // TODO check that all keys are unique
       kv.fold(rem) {
@@ -61,7 +61,7 @@ object MapShapedWriter {
 
       override def to(t: FieldType[Name, V] :+: T): ConfigValue = t match {
         case Inl(l) =>
-          coproductHint.to(vName.value.name, vConfigWriter.value.value.to(l))
+          coproductHint.to(vConfigWriter.value.value.to(l), vName.value.name)
 
         case Inr(r) =>
           tConfigWriter.value.to(r)
