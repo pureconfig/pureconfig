@@ -1,8 +1,10 @@
 package pureconfig.module.reflect
 
+import com.typesafe.config.ConfigFactory
 import pureconfig.{BaseSuite, ConfigConvert, ConfigReader}
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
+import pureconfig.error.KeyNotFound
 
 class ProductConvertersSuite
     extends BaseSuite {
@@ -41,6 +43,15 @@ class ProductConvertersSuite
       implicit val flatConfigWriter = ReflectConfigWriters.configWriter7((FlatConfig.unapply _).andThen(_.get))
       val cc = ConfigConvert[FlatConfig]
       cc.from(cc.to(config)) shouldBe Right(FlatConfig(false, 1D, 2F, 3, 4L, "foobar", None))
+  }
+
+  val emptyConf = ConfigFactory.empty().root()
+
+  it should s"return a ${classOf[KeyNotFound]} when a key is not in the configuration" in {
+    case class Foo(i: Int)
+    implicit val reader = ReflectConfigReaders.configReader1(Foo)
+    implicit val writer = ReflectConfigWriters.configWriter1((Foo.unapply _).andThen(_.get))
+    ConfigConvert[Foo].from(emptyConf) should failWith(KeyNotFound("i"))
   }
 
 }
