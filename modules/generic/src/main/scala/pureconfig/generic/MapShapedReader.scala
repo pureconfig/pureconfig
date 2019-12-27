@@ -82,15 +82,23 @@ object MapShapedReader {
         lazy val vReader = vConfigReader.value.value
         lazy val tReader = tConfigReader.value
 
+        def readAsInl(optCur: ConfigCursor): ConfigReader.Result[Inl[FieldType[Name, V], T]] =
+          vReader.from(optCur).right.map(v => Inl(field[Name](v)))
+
+        def withAttempt(name: String, failures: ConfigReaderFailures): List[(String, ConfigReaderFailures)] =
+          attempts :+ (name -> failures)
+
         coproductHint.from(cur, vName.value.name).right.flatMap {
           case Use(optCur) =>
-            vReader.from(optCur)
-              .right.map(v => Inl(field[Name](v)))
-              .left.map(failures => coproductHint.bottom(cur, attempts :+ (vName.value.name -> failures)))
+            readAsInl(optCur)
+              .left.map { failures =>
+                coproductHint.bottom(cur, withAttempt(vName.value.name, failures))
+              }
           case Attempt(optCur) =>
-            vReader.from(optCur)
-              .right.map(v => Inl(field[Name](v)))
-              .left.flatMap(failures => tReader.from(optCur, attempts :+ (vName.value.name -> failures)).right.map(Inr.apply))
+            readAsInl(optCur)
+              .left.flatMap { failures =>
+                tReader.from(optCur, withAttempt(vName.value.name, failures)).right.map(Inr.apply)
+              }
           case Skip =>
             tReader.from(cur, attempts).right.map(Inr.apply)
         }
