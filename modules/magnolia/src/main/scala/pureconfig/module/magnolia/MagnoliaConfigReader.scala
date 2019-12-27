@@ -4,7 +4,7 @@ import _root_.magnolia._
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongSizeList }
 import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
-import pureconfig.generic.ProductHint.FieldHint
+import pureconfig.generic.ProductHint.Action
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -27,9 +27,9 @@ object MagnoliaConfigReader {
           lazy val reader = param.typeclass
           lazy val keyNotFoundFailure = cur.failed(KeyNotFound.forKeys(fieldHint.field, objCur.keys))
           (fieldHint, param.default) match {
-            case (FieldHint(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
+            case (Action(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
               Right(defaultValue)
-            case (FieldHint(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
+            case (Action(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
               reader.from(cursor)
             case _ =>
               keyNotFoundFailure
@@ -37,7 +37,7 @@ object MagnoliaConfigReader {
         }.left.map(_.reduce(_ ++ _))
 
         val filteredObj = hints.foldLeft(objCur) {
-          case (currObj, (_, FieldHint(_, field, true, _))) =>
+          case (currObj, (_, Action(_, field, true, _))) =>
             currObj.withoutKey(field)
           case (currObj, _) =>
             currObj

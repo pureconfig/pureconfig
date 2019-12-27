@@ -3,7 +3,7 @@ package pureconfig.generic
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound }
 import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
-import pureconfig.generic.ProductHint.FieldHint
+import pureconfig.generic.ProductHint.Action
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
 
@@ -50,9 +50,9 @@ object MapShapedReader {
       lazy val reader = vFieldReader.value.value
       lazy val keyNotFoundFailure = cur.failed[V](KeyNotFound.forKeys(fieldHint.field, cur.keys))
       val headResult = (fieldHint, default.head) match {
-        case (FieldHint(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
+        case (Action(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
           Right(defaultValue)
-        case (FieldHint(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
+        case (Action(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
           reader.from(cursor)
         case _ =>
           keyNotFoundFailure

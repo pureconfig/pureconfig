@@ -3,7 +3,7 @@ package pureconfig.generic
 import com.typesafe.config.ConfigValue
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, UnknownKey }
-import pureconfig.generic.ProductHint.FieldHint
+import pureconfig.generic.ProductHint.Action
 
 /**
  * A trait that can be implemented to customize how case classes are read from and written to a config.
@@ -18,11 +18,11 @@ trait ProductHint[T] {
    *
    * @param cur the cursor from which to read a value
    * @param fieldName the name of the field in `T`
-   * @return a [[ProductHint.FieldHint]] object that signals which cursor to use in order to read this field, the name
+   * @return a [[ProductHint.Action]] object that signals which cursor to use in order to read this field, the name
    *         of the corresponding field in the config object, whether the field should be removed from the object after
    *         read, and whether to use default values for this particular field.
    */
-  def from(cur: ConfigObjectCursor, fieldName: String): FieldHint
+  def from(cur: ConfigObjectCursor, fieldName: String): Action
 
   /**
    * Returns optional failures given the provided `ConfigObjectCursor`.
@@ -50,10 +50,10 @@ private[pureconfig] case class ProductHintImpl[T](
     useDefaultArgs: Boolean,
     allowUnknownKeys: Boolean) extends ProductHint[T] {
 
-  def from(cur: ConfigObjectCursor, fieldName: String): FieldHint = {
+  def from(cur: ConfigObjectCursor, fieldName: String): Action = {
     val keyStr = fieldMapping(fieldName)
     val keyCur = cur.atKeyOrUndefined(keyStr)
-    FieldHint(keyCur, keyStr, !allowUnknownKeys, useDefaultArgs)
+    Action(keyCur, keyStr, !allowUnknownKeys, useDefaultArgs)
   }
 
   def bottom(cur: ConfigObjectCursor): Option[ConfigReaderFailures] = {
@@ -78,7 +78,7 @@ object ProductHint {
    * @param remove whether the field should be removed from the object after read
    * @param useDefault whether to use default values when reading this field if the cursor is undefined
    */
-  case class FieldHint(cursor: ConfigCursor, field: String, remove: Boolean, useDefault: Boolean)
+  case class Action(cursor: ConfigCursor, field: String, remove: Boolean, useDefault: Boolean)
 
   def apply[T](
     fieldMapping: ConfigFieldMapping = ConfigFieldMapping(CamelCase, KebabCase),
