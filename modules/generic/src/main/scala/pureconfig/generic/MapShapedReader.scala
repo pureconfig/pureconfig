@@ -3,7 +3,7 @@ package pureconfig.generic
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound }
 import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
-import pureconfig.generic.ProductHint.Action
+import pureconfig.generic.ProductHint.UseOrDefault
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
 
@@ -25,16 +25,16 @@ object MapShapedReader {
    * @tparam Repr the generic representation
    * @tparam DefaultRepr the generic representation of the default arguments
    */
-  trait WithDefaults[Wrapped, Repr, DefaultRepr] {
-    def fromWithDefault(cur: ConfigObjectCursor, default: DefaultRepr): ConfigReader.Result[Repr]
+  private[generic] trait WithDefaults[Wrapped, Repr, DefaultRepr] {
+    def fromWithDefault(cur: ConfigObjectCursor, default: DefaultRepr, usedFields: Set[String]): ConfigReader.Result[Repr]
   }
 
   implicit def labelledHNilReader[Wrapped](
     implicit
     hint: ProductHint[Wrapped]): WithDefaults[Wrapped, HNil, HNil] = new WithDefaults[Wrapped, HNil, HNil] {
 
-    def fromWithDefault(cur: ConfigObjectCursor, default: HNil): ConfigReader.Result[HNil] =
-      hint.bottom(cur).fold[ConfigReader.Result[HNil]](Right(HNil))(Left.apply)
+    def fromWithDefault(cur: ConfigObjectCursor, default: HNil, usedFields: Set[String]): ConfigReader.Result[HNil] =
+      hint.bottom(cur, usedFields).fold[ConfigReader.Result[HNil]](Right(HNil))(Left.apply)
   }
 
   final implicit def labelledHConsReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
@@ -44,21 +44,20 @@ object MapShapedReader {
     tConfigReader: Lazy[WithDefaults[Wrapped, T, U]],
     hint: ProductHint[Wrapped]): WithDefaults[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WithDefaults[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
-    def fromWithDefault(cur: ConfigObjectCursor, default: Option[V] :: U): ConfigReader.Result[FieldType[K, V] :: T] = {
+    def fromWithDefault(cur: ConfigObjectCursor, default: Option[V] :: U, usedFields: Set[String]): ConfigReader.Result[FieldType[K, V] :: T] = {
       val fieldName = key.value.name
-      val fieldHint = hint.from(cur, fieldName)
+      val fieldAction = hint.from(cur, fieldName)
       lazy val reader = vFieldReader.value.value
-      lazy val keyNotFoundFailure = cur.failed[V](KeyNotFound.forKeys(fieldHint.field, cur.keys))
-      val headResult = (fieldHint, default.head) match {
-        case (Action(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
+      lazy val keyNotFoundFailure = cur.failed[V](KeyNotFound.forKeys(fieldAction.field, cur.keys))
+      val headResult = (fieldAction, default.head) match {
+        case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
           Right(defaultValue)
-        case (Action(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
-          reader.from(cursor)
+        case (action, _) if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined =>
+          reader.from(action.cursor)
         case _ =>
           keyNotFoundFailure
       }
-      val nextCur = if (fieldHint.remove) cur.withoutKey(fieldHint.field) else cur
-      val tailResult = tConfigReader.value.fromWithDefault(nextCur, default.tail)
+      val tailResult = tConfigReader.value.fromWithDefault(cur, default.tail, usedFields + fieldAction.field)
       ConfigReader.Result.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }
   }

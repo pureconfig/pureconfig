@@ -4,7 +4,7 @@ import _root_.magnolia._
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongSizeList }
 import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
-import pureconfig.generic.ProductHint.Action
+import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -20,30 +20,24 @@ object MagnoliaConfigReader {
   private def combineCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): ConfigReader.Result[A] = {
       cur.asObjectCursor.flatMap { objCur =>
-        val hints = ctx.parameters.map { param => param.label -> hint.from(objCur, param.label) }.toMap
+        val actions = ctx.parameters.map { param => param.label -> hint.from(objCur, param.label) }.toMap
 
         val res = ctx.constructEither[ConfigReaderFailures, Param[ConfigReader, A]#PType] { param =>
-          val fieldHint = hints(param.label)
+          val fieldHint = actions(param.label)
           lazy val reader = param.typeclass
           lazy val keyNotFoundFailure = cur.failed(KeyNotFound.forKeys(fieldHint.field, objCur.keys))
           (fieldHint, param.default) match {
-            case (Action(cursor, _, _, true), Some(defaultValue)) if cursor.isUndefined =>
+            case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
               Right(defaultValue)
-            case (Action(cursor, _, _, _), _) if reader.isInstanceOf[ReadsMissingKeys] || !cursor.isUndefined =>
-              reader.from(cursor)
+            case (action, _) if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined =>
+              reader.from(action.cursor)
             case _ =>
               keyNotFoundFailure
           }
         }.left.map(_.reduce(_ ++ _))
 
-        val filteredObj = hints.foldLeft(objCur) {
-          case (currObj, (_, Action(_, field, true, _))) =>
-            currObj.withoutKey(field)
-          case (currObj, _) =>
-            currObj
-        }
-
-        hint.bottom(filteredObj).fold(
+        val usedFields = actions.map(_._2.field).toSet
+        hint.bottom(objCur, usedFields).fold(
           res)(
           bottomFailures =>
             res match {

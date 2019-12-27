@@ -55,7 +55,7 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     gen: LabelledGeneric.Aux[F, Repr],
     default: Default.AsOptions.Aux[F, DefaultRepr],
     cr: MapShapedReader.WithDefaults[F, Repr, DefaultRepr]): ConfigReader.Result[F] =
-    cr.fromWithDefault(cur, default()).right.map(gen.from)
+    cr.fromWithDefault(cur, default(), Set.empty).right.map(gen.from)
 }
 
 trait DerivedConfigReader1 {
@@ -67,7 +67,7 @@ trait DerivedConfigReader1 {
     cc: Lazy[MapShapedReader.WithDefaults[F, Repr, DefaultRepr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
 
     override def from(cur: ConfigCursor): ConfigReader.Result[F] = {
-      cur.asObjectCursor.right.flatMap(cc.value.fromWithDefault(_, default())).right.map(gen.from)
+      cur.asObjectCursor.right.flatMap(cc.value.fromWithDefault(_, default(), Set.empty)).right.map(gen.from)
     }
   }
 

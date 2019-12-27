@@ -3,7 +3,6 @@ package pureconfig.generic
 import com.typesafe.config.ConfigValue
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, UnknownKey }
-import pureconfig.generic.ProductHint.Action
 
 /**
  * A trait that can be implemented to customize how case classes are read from and written to a config.
@@ -16,22 +15,22 @@ trait ProductHint[T] {
    * Returns what should be used when attempting to read a case class field with name `fieldName` from the provided
    * `ConfigObjectCursor`.
    *
-   * @param cur the cursor from which to read a value
+   * @param cursor the cursor from which to read a value
    * @param fieldName the name of the field in `T`
    * @return a [[ProductHint.Action]] object that signals which cursor to use in order to read this field, the name
    *         of the corresponding field in the config object, whether the field should be removed from the object after
    *         read, and whether to use default values for this particular field.
    */
-  def from(cur: ConfigObjectCursor, fieldName: String): Action
+  def from(cursor: ConfigObjectCursor, fieldName: String): ProductHint.Action
 
   /**
    * Returns optional failures given the provided `ConfigObjectCursor`.
    *
-   * @param cur the `ConfigObjectCursor` that resulted from reading all fields required to produce an instance of type
-   *            `T`
+   * @param cursor a `ConfigObjectCursor` at the configuration root from where the product was read
+   * @param usedFields a set of all the used fields when reading the product
    * @return an optional non-empty list of failures.
    */
-  def bottom(cur: ConfigObjectCursor): Option[ConfigReaderFailures]
+  def bottom(cursor: ConfigObjectCursor, usedFields: Set[String]): Option[ConfigReaderFailures]
 
   /**
    * Returns an optional key-value pair that should be used for the field with name `fieldName` in the `ConfigObject`
@@ -50,18 +49,24 @@ private[pureconfig] case class ProductHintImpl[T](
     useDefaultArgs: Boolean,
     allowUnknownKeys: Boolean) extends ProductHint[T] {
 
-  def from(cur: ConfigObjectCursor, fieldName: String): Action = {
+  def from(cursor: ConfigObjectCursor, fieldName: String): ProductHint.Action = {
     val keyStr = fieldMapping(fieldName)
-    val keyCur = cur.atKeyOrUndefined(keyStr)
-    Action(keyCur, keyStr, !allowUnknownKeys, useDefaultArgs)
+    val keyCur = cursor.atKeyOrUndefined(keyStr)
+    if (useDefaultArgs)
+      ProductHint.UseOrDefault(keyCur, keyStr)
+    else
+      ProductHint.Use(keyCur, keyStr)
   }
 
-  def bottom(cur: ConfigObjectCursor): Option[ConfigReaderFailures] = {
-    if (!allowUnknownKeys && cur.keys.nonEmpty) {
-      val keys = cur.map.toList.map { case (k, keyCur) => keyCur.failureFor(UnknownKey(k)) }
-      Some(new ConfigReaderFailures(keys.head, keys.tail))
-    } else
+  def bottom(cursor: ConfigObjectCursor, usedFields: Set[String]): Option[ConfigReaderFailures] = {
+    lazy val unknownKeys = cursor.map.toList.collect {
+      case (k, keyCur) if !usedFields.contains(k) =>
+        keyCur.failureFor(UnknownKey(k))
+    }
+    if (allowUnknownKeys || unknownKeys.isEmpty)
       None
+    else
+      Some(new ConfigReaderFailures(unknownKeys.head, unknownKeys.tail))
   }
 
   def to(value: Option[ConfigValue], fieldName: String): Option[(String, ConfigValue)] =
@@ -71,14 +76,36 @@ private[pureconfig] case class ProductHintImpl[T](
 object ProductHint {
 
   /**
-   * A hint on what should be used when attempting to read a given field from a product.
-   *
-   * @param cursor the cursor to use when reading the field
-   * @param field the name of the field in the `ConfigObject` representation of the product
-   * @param remove whether the field should be removed from the object after read
-   * @param useDefault whether to use default values when reading this field if the cursor is undefined
+   * What should be done when attempting to read a given field from a product.
    */
-  case class Action(cursor: ConfigCursor, field: String, remove: Boolean, useDefault: Boolean)
+  sealed trait Action {
+    /**
+     * The `ConfigCursor` to use when trying to read the field.
+     */
+    def cursor: ConfigCursor
+
+    /**
+     * The name of the field in the `ConfigObject` representation of the product.
+     */
+    def field: String
+  }
+
+  /**
+   * An action to use the provided `ConfigCursor` when trying to read a given field.
+   *
+   * @param cursor the `ConfigCursor` to use when trying to read the field
+   * @param field the name of the field in the `ConfigObject` representation of the product
+   */
+  case class Use(cursor: ConfigCursor, field: String) extends Action
+
+  /**
+   * An action to either use the provided `ConfigCursor` (if it isn't null nor undefined) or fallback to the default
+   * value in the product's constructor.
+   *
+   * @param cursor the `ConfigCursor` to use when trying to read the field
+   * @param field the name of the field in the `ConfigObject` representation of the product
+   */
+  case class UseOrDefault(cursor: ConfigCursor, field: String) extends Action
 
   def apply[T](
     fieldMapping: ConfigFieldMapping = ConfigFieldMapping(CamelCase, KebabCase),
