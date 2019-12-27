@@ -24,7 +24,7 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.ChoiceHint] =
+  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] =
     cur.asString.right.map { str =>
       if (str == fieldValue(name)) Use(cur) else Skip
     }
