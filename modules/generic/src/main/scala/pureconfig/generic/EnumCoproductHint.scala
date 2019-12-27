@@ -24,16 +24,16 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] =
-    cur.asString.right.map { str =>
-      if (str == fieldValue(name)) Use(cur) else Skip
+  def from(cursor: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] =
+    cursor.asString.right.map { str =>
+      if (str == fieldValue(name)) Use(cursor) else Skip
     }
 
-  def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
-    ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
+  def bottom(cursor: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
+    ConfigReaderFailures(cursor.failureFor(NoValidCoproductChoiceFound(cursor.value)))
 
-  def to(cv: ConfigValue, name: String): ConfigValue =
-    cv match {
+  def to(value: ConfigValue, name: String): ConfigValue =
+    value match {
       case co: ConfigObject if co.isEmpty => fieldValue(name).toConfig
       case _: ConfigObject =>
         throw new CoproductHintException(NonEmptyObjectFound(name))

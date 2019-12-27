@@ -22,32 +22,32 @@ trait CoproductHint[T] {
    *   - skip the current coproduct option ([[CoproductHint.Skip]]).
    * This method can return a `Left` if the hint fails to produce a valid [[CoproductHint.Action]].
    *
-   * @param cur a `ConfigCursor` at the sealed family option
+   * @param cursor a `ConfigCursor` at the sealed family option
    * @param name the name of the class or coproduct option to try
    * @return a [[ConfigReader.Result]] of [[CoproductHint.Action]] as defined above.
    */
-  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action]
+  def from(cursor: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action]
 
   /**
    * Returns a non empty list of failures scoped into the context of a `ConfigCursor`, representing the failure to read
    * an option from the config value.
    *
-   * @param cur a `ConfigCursor` at the sealed family option
+   * @param cursor a `ConfigCursor` at the sealed family option
    * @param attempts the list of attempted reads, in order, for each coproduct option
    * @return a non empty list of reader failures.
    */
-  def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures
+  def bottom(cursor: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures
 
   /**
    * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
    * config for the sealed family or coproduct.
    *
-   * @param cv the `ConfigValue` of the class or coproduct option
+   * @param value the `ConfigValue` of the class or coproduct option
    * @param name the name of the class or coproduct option
    * @return the config for the sealed family or coproduct wrapped in a `Right`, or a `Left` with the failure if some
    *         error occurred.
    */
-  def to(cv: ConfigValue, name: String): ConfigValue
+  def to(value: ConfigValue, name: String): ConfigValue
 }
 
 /**
@@ -69,34 +69,34 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = FieldCoproductHint.defaultMapping(name)
 
-  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] = {
+  def from(cursor: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] = {
     for {
-      objCur <- cur.asObjectCursor.right
+      objCur <- cursor.asObjectCursor.right
       valueCur <- objCur.atKey(key).right
       valueStr <- valueCur.asString.right
     } yield if (valueStr == fieldValue(name)) Use(objCur.withoutKey(key)) else Skip
   }
 
-  def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
+  def bottom(cursor: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     attempts match {
       case h :: _ => h._2
       case _ =>
         val valueAtKey = for {
-          objCur <- cur.asObjectCursor.right
+          objCur <- cursor.asObjectCursor.right
           valueCur <- objCur.atKey(key).right
         } yield valueCur
 
         valueAtKey.fold(identity, cur => ConfigReaderFailures(cur.failureFor(UnexpectedValueForFieldCoproductHint(cur.value))))
     }
 
-  def to(cv: ConfigValue, name: String): ConfigValue = {
-    cv match {
+  def to(value: ConfigValue, name: String): ConfigValue = {
+    value match {
       case co: ConfigObject if co.containsKey(key) =>
         throw new CoproductHintException(CollidingKeys(key, co.get(key)))
       case co: ConfigObject =>
         Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig)
       case _ =>
-        throw new CoproductHintException(WrongType(cv.valueType, Set(ConfigValueType.OBJECT)))
+        throw new CoproductHintException(WrongType(value.valueType, Set(ConfigValueType.OBJECT)))
     }
   }
 }
@@ -110,14 +110,14 @@ object FieldCoproductHint {
  * the config without errors, while `to` will write the config as is, with no disambiguation information.
  */
 class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
-  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] =
-    Right(Attempt(cur))
+  def from(cursor: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] =
+    Right(Attempt(cursor))
 
-  def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
-    ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))
+  def bottom(cursor: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
+    ConfigReaderFailures(cursor.failureFor(NoValidCoproductChoiceFound(cursor.value)))
 
-  def to(cv: ConfigValue, name: String): ConfigValue =
-    cv
+  def to(value: ConfigValue, name: String): ConfigValue =
+    value
 }
 
 object CoproductHint {
@@ -130,17 +130,17 @@ object CoproductHint {
   /**
    * An action to only use the provided `ConfigCursor` and not try other coproduct option.
    *
-   * @param cur the `ConfigCursor` to use when reading the coproduct option.
+   * @param cursor the `ConfigCursor` to use when reading the coproduct option.
    */
-  case class Use(cur: ConfigCursor) extends Action
+  case class Use(cursor: ConfigCursor) extends Action
 
   /**
    * An action to attempt to use the provided `ConfigCursor`, but try other coproduct options if the current one fails
    * to read.
    *
-   * @param cur the `ConfigCursor` to use when reading the coproduct option.
+   * @param cursor the `ConfigCursor` to use when reading the coproduct option.
    */
-  case class Attempt(cur: ConfigCursor) extends Action
+  case class Attempt(cursor: ConfigCursor) extends Action
 
   /**
    * A hint to skip the current coproduct option.
