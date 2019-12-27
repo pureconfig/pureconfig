@@ -8,13 +8,13 @@ trait ReflectConfigWriters extends ProductWriters {
     import ReflectSupport._
     private type CW[T] = ConfigWriter[T]
 
-    def forProduct1[A1: CW,  T <: Product: ClassTag](deconstruct: T => A1)(implicit ph: ReflectProductHint[T]): ConfigWriter[T] = {
+    def configWriter1[A1: CW,  T <: Product: ClassTag](deconstruct: T => A1)(implicit ph: ReflectProductHint[T]): ConfigWriter[T] = {
         val Array(p1) = extractFieldNames(classTag[T])
         forProduct1(ph.configKey(p1))(deconstruct)
     }
 
 [2..22#  // Case classes with 1 parameters
-    def forProduct1[[#A1 :CW#], T <: Product: ClassTag](deconstruct: T => ([#A1#]) )(implicit ph: ReflectProductHint[T]): ConfigWriter[T] = {
+    def configWriter1[[#A1 :CW#], T <: Product: ClassTag](deconstruct: T => ([#A1#]) )(implicit ph: ReflectProductHint[T]): ConfigWriter[T] = {
         val Array([#a1#]) = extractFieldNames(classTag[T])
         forProduct1([#ph.configKey(a1)#])(deconstruct)
     }#

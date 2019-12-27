@@ -8,7 +8,7 @@ trait ReflectConfigReaders extends ProductReaders {
     import ReflectSupport._
     private type CR[T] = ConfigReader[T]
 [#  // Case classes with 1 parameters
-    def forProduct1[[#A1 :CR#], T <: Product: ClassTag](construct: ([#A1#]) => T)(implicit ph: ReflectProductHint[T]): ConfigReader[T] = {
+    def configReader1[[#A1 :CR#], T <: Product: ClassTag](construct: ([#A1#]) => T)(implicit ph: ReflectProductHint[T]): ConfigReader[T] = {
         val Array([#a1#]) = extractFieldNames(classTag[T])
         forProduct1([#ph.configKey(a1)#])(construct)
     }#
