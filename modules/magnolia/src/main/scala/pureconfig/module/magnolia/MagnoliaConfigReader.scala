@@ -36,13 +36,7 @@ object MagnoliaConfigReader {
         }.left.map(_.reduce(_ ++ _))
 
         val usedFields = actions.map(_._2.field).toSet
-        hint.bottom(objCur, usedFields).fold(
-          res)(
-          bottomFailures =>
-            res match {
-              case Left(failures) => Left(failures ++ bottomFailures)
-              case _ => Left(bottomFailures)
-            })
+        ConfigReader.Result.zipWith(res, hint.bottom(objCur, usedFields).toLeft(()))((r, _) => r)
       }
     }
   }
