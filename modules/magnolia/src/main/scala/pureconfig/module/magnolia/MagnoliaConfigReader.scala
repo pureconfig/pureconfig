@@ -81,7 +81,7 @@ object MagnoliaConfigReader {
 
   def dispatch[A](ctx: SealedTrait[ConfigReader, A])(implicit hint: CoproductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): ConfigReader.Result[A] = {
-      val (_, res) = ctx.subtypes.foldLeft[(Boolean, Either[List[(String, ConfigReaderFailures)], A])]((true, Left(Nil))) {
+      val (_, res) = ctx.subtypes.foldLeft[(Boolean, Either[List[(String, ConfigReaderFailures)], ConfigReader.Result[A]])]((true, Left(Nil))) {
         case (acc, subtype) =>
           acc match {
             case (false, _) => acc
@@ -89,19 +89,20 @@ object MagnoliaConfigReader {
             case (true, Left(attempts)) =>
               val typeName = subtype.typeName.short
               hint.from(cur, typeName) match {
-                case Use(cur) =>
+                case Right(Use(cur)) =>
                   subtype.typeclass.from(cur).fold(
                     failures => (false, Left(attempts :+ (typeName -> failures))),
-                    res => (false, Right(res)))
-                case Attempt(cur) =>
+                    res => (false, Right(Right(res))))
+                case Right(Attempt(cur)) =>
                   subtype.typeclass.from(cur).fold(
                     failures => (true, Left(attempts :+ (typeName -> failures))),
-                    res => (false, Right(res)))
-                case Skip => acc
+                    res => (false, Right(Right(res))))
+                case Right(Skip) => acc
+                case l @ Left(_) => (false, Right(l.asInstanceOf[ConfigReader.Result[A]]))
               }
           }
       }
-      res.left.map(hint.bottom(cur, _))
+      res.left.map(hint.bottom(cur, _)).right.flatMap(identity)
     }
   }
 }

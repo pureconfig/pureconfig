@@ -18,14 +18,15 @@ trait CoproductHint[T] {
    * Given a `ConfigCursor` for the sealed family, disambiguate and return what should be performed when trying to read
    * a coproduct option named `name`. This method can decide either to:
    *   - use the `ConfigCursor` and disregard other coproduct options ([[CoproductHint.Use]]);
-   *   - attempt to use the `ConfigCursor` but try other coproduct options if reading fails ([[CoproductHint.Attempt]];
-   *   - skip the current coproduct option ([[CoproductHint.Skip]].
+   *   - attempt to use the `ConfigCursor` but try other coproduct options if reading fails ([[CoproductHint.Attempt]]);
+   *   - skip the current coproduct option ([[CoproductHint.Skip]]).
+   * This method can return a `Left` if the hint fails to produce a valid [[CoproductHint.ChoiceHint]].
    *
    * @param cur a `ConfigCursor` at the sealed family option
    * @param name the name of the class or coproduct option to try
-   * @return a [[CoproductHint.ChoiceHint]] as defined above.
+   * @return a [[ConfigReader.Result]] of [[CoproductHint.ChoiceHint]] as defined above.
    */
-  def from(cur: ConfigCursor, name: String): CoproductHint.ChoiceHint
+  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.ChoiceHint]
 
   /**
    * Returns a non empty list of failures scoped into the context of a `ConfigCursor`, representing the failure to read
@@ -68,31 +69,32 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = FieldCoproductHint.defaultMapping(name)
 
-  def from(cur: ConfigCursor, name: String): CoproductHint.ChoiceHint = {
-    (for {
+  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.ChoiceHint] = {
+    for {
       objCur <- cur.asObjectCursor.right
       valueCur <- objCur.atKey(key).right
       valueStr <- valueCur.asString.right
-    } yield if (valueStr == fieldValue(name)) Use(objCur.withoutKey(key)) else Skip).right.getOrElse(Skip)
+    } yield if (valueStr == fieldValue(name)) Use(objCur.withoutKey(key)) else Skip
   }
 
-  override def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
+  def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     attempts match {
       case h :: _ => h._2
-      case _ => (for {
-        objCur <- cur.asObjectCursor.right
-        valueCur <- objCur.atKey(key).right
-        _ <- valueCur.asString.right
-      } yield ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.value)))).fold(identity, identity)
+      case _ =>
+        val valueAtKey = for {
+          objCur <- cur.asObjectCursor.right
+          valueCur <- objCur.atKey(key).right
+        } yield valueCur
+
+        valueAtKey.fold(identity, cur => ConfigReaderFailures(cur.failureFor(UnexpectedValueForFieldCoproductHint(cur.value))))
     }
 
   def to(cv: ConfigValue, name: String): ConfigValue = {
     cv match {
+      case co: ConfigObject if co.containsKey(key) =>
+        throw new CoproductHintException(CollidingKeys(key, co.get(key)))
       case co: ConfigObject =>
-        if (co.containsKey(key))
-          throw new CoproductHintException(CollidingKeys(key, co.get(key)))
-        else
-          Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig)
+        Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig)
       case _ =>
         throw new CoproductHintException(WrongType(cv.valueType, Set(ConfigValueType.OBJECT)))
     }
@@ -108,8 +110,8 @@ object FieldCoproductHint {
  * the config without errors, while `to` will write the config as is, with no disambiguation information.
  */
 class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
-  def from(cur: ConfigCursor, name: String): CoproductHint.ChoiceHint =
-    Attempt(cur)
+  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.ChoiceHint] =
+    Right(Attempt(cur))
 
   def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))

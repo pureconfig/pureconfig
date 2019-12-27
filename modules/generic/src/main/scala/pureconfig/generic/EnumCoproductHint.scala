@@ -24,10 +24,10 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cur: ConfigCursor, name: String): CoproductHint.ChoiceHint =
+  def from(cur: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.ChoiceHint] =
     cur.asString.right.map { str =>
       if (str == fieldValue(name)) Use(cur) else Skip
-    }.right.getOrElse(Skip)
+    }
 
   def bottom(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
     ConfigReaderFailures(cur.failureFor(NoValidCoproductChoiceFound(cur.value)))

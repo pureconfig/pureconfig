@@ -83,7 +83,7 @@ object MapShapedReader {
         lazy val vReader = vConfigReader.value.value
         lazy val tReader = tConfigReader.value
 
-        coproductHint.from(cur, vName.value.name) match {
+        coproductHint.from(cur, vName.value.name).right.flatMap {
           case Use(optCur) =>
             vReader.from(optCur)
               .right.map(v => Inl(field[Name](v)))
