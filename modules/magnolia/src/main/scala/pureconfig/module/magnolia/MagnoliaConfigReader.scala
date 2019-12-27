@@ -25,14 +25,13 @@ object MagnoliaConfigReader {
         val res = ctx.constructEither[ConfigReaderFailures, Param[ConfigReader, A]#PType] { param =>
           val fieldHint = actions(param.label)
           lazy val reader = param.typeclass
-          lazy val keyNotFoundFailure = cur.failed(KeyNotFound.forKeys(fieldHint.field, objCur.keys))
           (fieldHint, param.default) match {
             case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
               Right(defaultValue)
             case (action, _) if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined =>
               reader.from(action.cursor)
             case _ =>
-              keyNotFoundFailure
+              cur.failed(KeyNotFound.forKeys(fieldHint.field, objCur.keys))
           }
         }.left.map(_.reduce(_ ++ _))
 
