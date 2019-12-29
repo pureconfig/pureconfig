@@ -1,6 +1,6 @@
 import Dependencies._
 
-name := "pureconfig-magnolia"
+name := "pureconfig-reflect"
 
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
 
