@@ -7,6 +7,8 @@ import scala.reflect.ClassTag
 import scala.util.control.NonFatal
 
 private[reflect] object ReflectSupport {
+  //Code here is taken from https://github.com/spray/spray-json/blob/release/1.3.x/src/main/scala/spray/json/ProductFormats.scala
+  //Reflection is used to discover case class properties and then names are 'unmangeled'
 
   def extractFieldNames(tag: ClassTag[_]): Array[String] = {
     val clazz = tag.runtimeClass
