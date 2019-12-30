@@ -1,7 +1,7 @@
 package pureconfig.module.reflect
 
-import com.typesafe.config.ConfigFactory
-import pureconfig.{BaseSuite, ConfigConvert, ConfigReader}
+import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
+import pureconfig.{BaseSuite, ConfigConvert, ConfigCursor, ConfigReader, ConfigWriter, ReadsMissingKeys}
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig.error.KeyNotFound
@@ -49,9 +49,47 @@ class ProductConvertersSuite
 
   it should s"return a ${classOf[KeyNotFound]} when a key is not in the configuration" in {
     case class Foo(i: Int)
-    implicit val reader = ReflectConfigReaders.configReader1(Foo)
-    implicit val writer = ReflectConfigWriters.configWriter1((Foo.unapply _).andThen(_.get))
+    implicit val reader: ConfigReader[Foo] = ReflectConfigReaders.configReader1(Foo)
+    implicit val writer: ConfigWriter[Foo] = ReflectConfigWriters.configWriter1((Foo.unapply _).andThen(_.get))
     ConfigConvert[Foo].from(emptyConf) should failWith(KeyNotFound("i"))
+  }
+
+  it should s"return a ${classOf[KeyNotFound]} when a custom convert is used and when a key is not in the configuration" in {
+    case class InnerConf(v: Int)
+    case class EnclosingConf(conf: InnerConf)
+
+    implicit val conv = new ConfigConvert[InnerConf] {
+      def from(cv: ConfigCursor) = Right(InnerConf(42))
+      def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
+    }
+
+    implicit val reader: ConfigReader[EnclosingConf] = ReflectConfigReaders.configReader1(EnclosingConf)
+    implicit val writer: ConfigWriter[EnclosingConf] = ReflectConfigWriters.configWriter1((EnclosingConf.unapply _).andThen(_.get))
+
+    ConfigConvert[EnclosingConf].from(emptyConf) should failWith(KeyNotFound("conf"))
+  }
+
+  it should "allow custom ConfigReaders to handle missing keys" in {
+    case class Conf(a: Int, b: Int)
+    val conf = ConfigFactory.parseString("""{ a: 1 }""").root()
+
+    {
+      implicit val reader = ReflectConfigReaders.configReader2(Conf)
+      ConfigReader[Conf].from(conf) should failWith(KeyNotFound("b"))
+    }
+
+    implicit val defaultInt = new ConfigReader[Int] with ReadsMissingKeys {
+      def from(cur: ConfigCursor) =
+        if (cur.isUndefined) Right(42) else {
+          val s = cur.value.render(ConfigRenderOptions.concise)
+          cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
+        }
+    }
+
+    {
+      implicit val reader = ReflectConfigReaders.configReader2(Conf)
+      ConfigReader[Conf].from(conf).right.value shouldBe Conf(1, 42)
+    }
   }
 
 }
