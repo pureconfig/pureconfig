@@ -2,7 +2,7 @@ package pureconfig.module.reflect
 
 import java.lang.reflect.Modifier
 
-import scala.reflect.{ClassTag, NameTransformer}
+import scala.reflect.{ ClassTag, NameTransformer }
 import scala.util.control.NonFatal
 
 private[reflect] object ReflectSupport {
