@@ -1,11 +1,13 @@
 package pureconfig.module.reflect
 
+import scala.collection.JavaConverters._
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
 import pureconfig.{BaseSuite, ConfigConvert, ConfigCursor, ConfigReader, ConfigWriter, ReadsMissingKeys}
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
-import pureconfig.error.KeyNotFound
+import pureconfig.error.{KeyNotFound, WrongType}
 
+//noinspection TypeAnnotation
 class ProductConvertersSuite
     extends BaseSuite {
   behavior of "ConfigConvert"
@@ -63,8 +65,8 @@ class ProductConvertersSuite
       def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
     }
 
-    implicit val reader: ConfigReader[EnclosingConf] = ReflectConfigReaders.configReader1(EnclosingConf)
-    implicit val writer: ConfigWriter[EnclosingConf] = ReflectConfigWriters.configWriter1((EnclosingConf.unapply _).andThen(_.get))
+    implicit val reader = ReflectConfigReaders.configReader1(EnclosingConf)
+    implicit val writer = ReflectConfigWriters.configWriter1((EnclosingConf.unapply _).andThen(_.get))
 
     ConfigConvert[EnclosingConf].from(emptyConf) should failWith(KeyNotFound("conf"))
   }
@@ -90,6 +92,29 @@ class ProductConvertersSuite
       implicit val reader = ReflectConfigReaders.configReader2(Conf)
       ConfigReader[Conf].from(conf).right.value shouldBe Conf(1, 42)
     }
+  }
+
+  it should "not write empty option fields" in {
+    case class Conf(a: Int, b: Option[Int])
+
+    implicit val reader = ReflectConfigReaders.configReader2(Conf)
+    implicit val writer = ReflectConfigWriters.configWriter2((Conf.unapply _).andThen(_.get))
+
+    ConfigConvert[Conf].to(Conf(42, Some(1))) shouldBe ConfigFactory.parseString("""{ a: 42, b: 1 }""").root()
+    ConfigConvert[Conf].to(Conf(42, None)) shouldBe ConfigFactory.parseString("""{ a: 42 }""").root()
+  }
+
+  it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {
+    case class Foo(i: Int)
+    case class Bar(foo: Foo)
+    case class FooBar(foo: Foo, bar: Bar)
+
+    implicit val readerFoo = ReflectConfigReaders.configReader1(Foo)
+    implicit val readerBar = ReflectConfigReaders.configReader1(Bar)
+    implicit val readerFooBar = ReflectConfigReaders.configReader2(FooBar)
+
+    val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava).root()
+    ConfigReader[FooBar].from(conf) should failWithType[WrongType]
   }
 
 }
