@@ -1,8 +1,8 @@
 package pureconfig.module.reflect
 
-import com.typesafe.config.{ConfigFactory, ConfigObject}
+import com.typesafe.config.{ ConfigFactory, ConfigObject }
 import pureconfig._
-import pureconfig.error.{ConvertFailure, KeyNotFound, UnknownKey}
+import pureconfig.error.{ ConvertFailure, KeyNotFound, UnknownKey }
 import pureconfig.syntax._
 import pureconfig.module.reflect.ReflectConfigReaders._
 import pureconfig.module.reflect.ReflectConfigWriters._

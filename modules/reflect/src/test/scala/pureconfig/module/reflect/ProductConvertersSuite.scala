@@ -1,27 +1,26 @@
 package pureconfig.module.reflect
 
 import scala.collection.JavaConverters._
-import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
-import pureconfig.{BaseSuite, ConfigConvert, ConfigCursor, ConfigReader, ConfigWriter, ReadsMissingKeys}
+import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions }
+import pureconfig.{ BaseSuite, ConfigConvert, ConfigCursor, ConfigReader, ConfigWriter, ReadsMissingKeys }
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig.ConfigConvert.catchReadError
-import pureconfig.error.{KeyNotFound, WrongType}
+import pureconfig.error.{ KeyNotFound, WrongType }
 
 //noinspection TypeAnnotation
 class ProductConvertersSuite
-    extends BaseSuite {
+  extends BaseSuite {
   behavior of "ConfigConvert"
 
   /* A configuration with only simple values and `Option` */
-  case class FlatConfig(b: Boolean,
-                        d: Double,
-                        f: Float,
-                        i: Int,
-                        l: Long,
-                        s: String,
-                        o: Option[String])
-
-
+  case class FlatConfig(
+      b: Boolean,
+      d: Double,
+      f: Float,
+      i: Int,
+      l: Long,
+      s: String,
+      o: Option[String])
 
   // tests
   {
