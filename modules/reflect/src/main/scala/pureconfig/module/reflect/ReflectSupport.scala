@@ -28,7 +28,7 @@ private[reflect] object ReflectSupport {
       fields.map(f => unmangle(f.getName))
     } catch {
       case NonFatal(ex) => throw new RuntimeException("Cannot automatically determine case class field names and order " +
-        "for '" + clazz.getName + "', please use the 'jsonFormat' overload with explicit field name specification", ex)
+        "for '" + clazz.getName + "', please use the 'forProduct' overload with explicit field name specification", ex)
     }
   }
 
