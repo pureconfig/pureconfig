@@ -116,4 +116,11 @@ class ProductConvertersSuite
     ConfigReader[FooBar].from(conf) should failWithType[WrongType]
   }
 
+  it should "handled mangled key names" in {
+    case class Foo(`foo-bar!`: Int, `User-ID`: String)
+    implicit val readerFoo = ReflectConfigReaders.configReader2(Foo)
+    val conf = ConfigFactory.parseMap(Map("\"foo--bar-!\"" -> 1, "\"user---id\"" -> "test").asJava).root()
+    ConfigReader[Foo].from(conf) shouldBe Right(Foo(1, "test"))
+  }
+
 }
