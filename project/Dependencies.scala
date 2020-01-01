@@ -11,7 +11,7 @@ object Dependencies {
     val typesafeConfig          = "1.4.0"
 
     val scalaTest               = "3.1.0"
-    val scalaTestPlusScalaCheck = "3.1.0.0"
+    val scalaTestPlusScalaCheck = "3.1.0.1"
 
     val scalaCheck              = "1.14.3"
     val scalaCheckShapeless     = "1.2.3"
