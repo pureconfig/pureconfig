@@ -11,7 +11,7 @@ import shapeless.labelled._
  *
  * @tparam A the type of objects capable of being written as an enumeration
  */
-trait EnumerationConfigWriterBuilder[A] {
+private[generic] trait EnumerationConfigWriterBuilder[A] {
   def build(transformName: String => String): ConfigWriter[A]
 }
 

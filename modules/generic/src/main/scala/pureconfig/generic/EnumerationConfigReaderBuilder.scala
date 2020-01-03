@@ -12,7 +12,7 @@ import shapeless.labelled._
  *
  * @tparam A the type of objects capable of being read as an enumeration
  */
-trait EnumerationConfigReaderBuilder[A] {
+private[generic] trait EnumerationConfigReaderBuilder[A] {
   def build(transformName: String => String): ConfigReader[A]
 }
 
