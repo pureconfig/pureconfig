@@ -71,15 +71,15 @@ object MagnoliaConfigReader {
       val (_, res) = ctx.subtypes.foldLeft[(Boolean, Either[List[(String, ConfigReaderFailures)], ConfigReader.Result[A]])]((true, Left(Nil))) {
         case ((true, Left(attempts)), subtype) =>
           val typeName = subtype.typeName.short
+
+          def attemptRead(cursor: ConfigCursor, tryOtherOnFail: Boolean) =
+            subtype.typeclass.from(cursor).fold(
+              failures => (tryOtherOnFail, Left(attempts :+ (typeName -> failures))),
+              res => (false, Right(Right(res))))
+
           hint.from(cur, typeName) match {
-            case Right(Use(cur)) =>
-              subtype.typeclass.from(cur).fold(
-                failures => (false, Left(attempts :+ (typeName -> failures))),
-                res => (false, Right(Right(res))))
-            case Right(Attempt(cur)) =>
-              subtype.typeclass.from(cur).fold(
-                failures => (true, Left(attempts :+ (typeName -> failures))),
-                res => (false, Right(Right(res))))
+            case Right(Use(cur)) => attemptRead(cur, false)
+            case Right(Attempt(cur)) => attemptRead(cur, true)
             case Right(Skip) => (true, Left(attempts))
             case l @ Left(_) => (false, Right(l.asInstanceOf[ConfigReader.Result[A]]))
           }
