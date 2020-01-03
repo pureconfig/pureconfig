@@ -22,10 +22,10 @@ object MagnoliaConfigWriter {
     def to(a: A): ConfigValue = {
       val fieldValues = ctx.parameters.map { param =>
         val valueOpt = param.typeclass match {
-          case w: WritesMissingKeys[param.PType @unchecked] =>
-            w.toOpt(param.dereference(a))
-          case w =>
-            Some(w.to(param.dereference(a)))
+          case tc: WritesMissingKeys[param.PType @unchecked] =>
+            tc.toOpt(param.dereference(a))
+          case tc =>
+            Some(tc.to(param.dereference(a)))
         }
         hint.to(valueOpt, param.label)
       }
