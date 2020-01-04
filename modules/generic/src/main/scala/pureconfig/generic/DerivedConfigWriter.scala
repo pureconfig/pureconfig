@@ -9,7 +9,7 @@ import shapeless._
  *
  * @tparam A the type of objects writable by this `ConfigWriter`
  */
-private[generic] trait DerivedConfigWriter[A] extends ConfigWriter[A]
+trait DerivedConfigWriter[A] extends ConfigWriter[A]
 
 object DerivedConfigWriter extends DerivedConfigWriter1 {
 

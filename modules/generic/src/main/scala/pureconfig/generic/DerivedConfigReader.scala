@@ -8,7 +8,7 @@ import shapeless._
  *
  * @tparam A the type of objects readable by this `ConfigReader`
  */
-private[generic] trait DerivedConfigReader[A] extends ConfigReader[A]
+trait DerivedConfigReader[A] extends ConfigReader[A]
 
 object DerivedConfigReader extends DerivedConfigReader1 {
 
