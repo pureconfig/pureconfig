@@ -19,7 +19,7 @@ As a result we recommend only using the latest Scala versions within the minor s
 
 In your code, import `pureconfig.generic.auto` and define data types and a case class to hold the configuration:
 
-```tut:silent
+```scala mdoc:reset-object
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -42,7 +42,7 @@ resource file of your application (with SBT, they are usually placed in `src/mai
 
 Finally, load the configuration:
 
-```tut:book
+```scala mdoc
 ConfigSource.default.load[MyClass]
 ```
 
@@ -53,7 +53,7 @@ would handle an `Either` value.
 [`ConfigFactory`](https://lightbend.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
 select where to load the config files from. Typesafe Config has [well-documented rules for configuration
 loading](https://github.com/lightbend/config#standard-behavior) which we'll not repeat. Please see Typesafe
-Config's documentation for a full telling of the subtleties and see [Loading a Config](loading-a-config.html) for
+Config's documentation for a full telling of the subtleties and see [Loading a Config](loading-a-config.md) for
 alternative sources for configuration files.
 
 Because PureConfig uses Typesafe Config to load configurations, it supports reading files in [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/lightbend/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.

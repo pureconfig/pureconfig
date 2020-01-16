@@ -14,8 +14,7 @@ For those types, PureConfig provides a way to create readers from the necessary 
 
 Define a case class to hold your configuration, and create a configurable reader:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import pureconfig._
@@ -31,6 +30,6 @@ implicit val intMapReader = genericMapReader[Int, Int](catchReadError(_.toInt))
 
 Then load the configuration:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ date: 2011-12-03, int-map: { 2: 4, 4: 16 } }").load[Conf]
 ```

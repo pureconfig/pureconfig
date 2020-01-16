@@ -38,8 +38,7 @@ example where the configuration file has all keys in upper case and we're
 loading it into a type whose fields are all in lower case. First, define a `ProductHint`
 instance in implicit scope:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.generic.ProductHint
@@ -52,7 +51,7 @@ implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
 ```
 
 Then load a config:
-```tut:book
+```scala mdoc
 ConfigSource.string("{ FOO: 2, BAR: two }").load[SampleConf]
 ```
 
@@ -73,7 +72,7 @@ names and your configuration files in `camelCase`. In order to support it, you
 can make sure the following implicit is in scope before loading or writing
 configuration files:
 
-```tut:silent
+```scala mdoc:silent
 implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 ```
 
@@ -86,8 +85,7 @@ configuration.
 
 For example, with this setup:
 
-```tut:reset:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:reset:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.generic.ProductHint
@@ -98,7 +96,7 @@ case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
 
 We can load configurations using default values:
 
-```tut:book
+```scala mdoc
 // Defaulting `where`
 ConfigSource.string("{ how-long: 21 days }").load[Holiday]
 
@@ -115,11 +113,11 @@ ConfigSource.string("{ where: Texas, how-long: 3 hours }").load[Holiday]
 A `ProductHint` can make the conversion fail if a key is missing from the
 config regardless of whether a default value exists or not:
 
-```tut:silent
+```scala mdoc:silent
 implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
 ```
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ how-long: 21 days }").load[Holiday]
 ```
 
@@ -128,9 +126,8 @@ ConfigSource.string("{ how-long: 21 days }").load[Holiday]
 By default, PureConfig ignores keys in the config that do not map to any
 case class field, leading to potential bugs due to misspellings:
 
-```tut:reset:invisible
+```scala mdoc:reset:invisible
 // reset tut's REPL session to remove the implicit ProductHint defined above.
-import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.generic.ProductHint
@@ -139,14 +136,14 @@ import scala.concurrent.duration._
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
 ```
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ wher: Texas, how-long: 21 days }").load[Holiday]
 ```
 
 With a `ProductHint`, one can tell the converter to fail if an unknown key is
 found:
 
-```tut:book
+```scala mdoc
 implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
 
 ConfigSource.string("{ wher: Texas, how-long: 21 days }").load[Holiday]
@@ -159,8 +156,7 @@ required key is missing unless its type is an `Option`, in which case it is read
 
 Consider this configuration:
 
-```tut:reset:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:reset:silent
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -170,18 +166,18 @@ case class FooOpt(a: Option[Int])
 
 Loading a `Foo` results in a `Left` because of missing keys, but loading a `FooOpt` produces a `Right`:
 
-```tut:book
+```scala mdoc
 ConfigSource.empty.load[Foo]
 ConfigSource.empty.load[FooOpt]
 ```
 
 However, if you want to allow your custom `ConfigReader`s to handle missing keys, you can extend the `ReadsMissingKeys`
 trait. For `ConfigReader`s extending `ReadsMissingKeys`, a missing key will issue a call to the `from` method of the
-available `ConfigReader` for that type with a [cursor](config-cursors.html) to an undefined value.
+available `ConfigReader` for that type with a [cursor](config-cursors.md) to an undefined value.
 
 Under this setup:
 
-```tut:silent
+```scala mdoc:silent
 implicit val maybeIntReader = new ConfigReader[Int] with ReadsMissingKeys {
   override def from(cur: ConfigCursor) =
     if (cur.isUndefined) Right(42) else ConfigReader[Int].from(cur)
@@ -190,6 +186,6 @@ implicit val maybeIntReader = new ConfigReader[Int] with ReadsMissingKeys {
 
 You can load an empty configuration and get a `Right`:
 
-```tut:book
+```scala mdoc
 ConfigSource.empty.load[Foo]
 ```

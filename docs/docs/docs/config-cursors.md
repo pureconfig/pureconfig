@@ -14,12 +14,12 @@ def from(cur: ConfigCursor): ConfigReader.Result[A]
 
 The `ConfigCursor` class is a wrapper for the raw `ConfigValue` provided by Typesafe Config. It provides an idiomatic,
 typesafe API for the most common operations needed while reading a config. In particular, it provides cast operations
-and key accesses that integrate neatly with the [PureConfig errors API](error-handling.html). When using cursors
+and key accesses that integrate neatly with the [PureConfig errors API](error-handling.md). When using cursors
 properly, most errors are automatically handled and filled with rich information about the location of the failure.
 
 We'll show how to implement our own `ConfigReader` for the following class:
 
-```tut:silent
+```scala mdoc:silent
 class Person(firstName: String, lastNames: Array[String]) {
   override def toString = s"Person($firstName ${lastNames.mkString(" ")})"
 }
@@ -29,7 +29,7 @@ case class Conf(person: Person)
 
 We intend our config to look like this:
 
-```tut:silent
+```scala mdoc:silent
 import com.typesafe.config.ConfigFactory
 
 val conf = ConfigFactory.parseString("person.name: John Doe")
@@ -39,7 +39,7 @@ For the purposes of this example, we'll assume the provided `name` will always h
 
 An implementation of the `ConfigReader` using the cursors API is shown below:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -58,7 +58,7 @@ implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
 }
 ```
 
-```tut:invisible
+```scala mdoc:invisible
 assert(ConfigSource.fromConfig(conf).load[Conf].isRight)
 ```
 
@@ -78,7 +78,7 @@ string.
 
 You can use the fluent cursor API, an alternative interface focused on easy navigation over error handling, to achieve the same effect:
 
-```tut:silent
+```scala mdoc:nest:silent
 implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
   cur.fluent.at("name").asString.map { name =>
     new Person(firstNameOf(name), lastNamesOf(name))
@@ -88,13 +88,13 @@ implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
 
 Either way, a well-formed config will now work correctly:
 
-```tut:book
+```scala mdoc
 ConfigSource.fromConfig(conf).load[Conf]
 ```
 
 While malformed configs will fail to load with appropriate errors:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("person = 45").load[Conf]
 ConfigSource.string("person.eman = John Doe").load[Conf]
 ConfigSource.string("person.name = [1, 2]").load[Conf]

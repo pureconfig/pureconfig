@@ -8,11 +8,9 @@ title: Supporting New Types
 Not all types are supported automatically by PureConfig. For instance, classes that are not case classes are not
 supported out-of-the-box:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
-import pureconfig.syntax._
 
 class MyInt(value: Int) {
   override def toString: String = s"MyInt($value)"
@@ -24,7 +22,7 @@ case class Conf(n: MyInt)
 In order to read an instance of a given type `T` from a config, PureConfig needs to have in scope in implicit instance
 of `ConfigReader[T]`. This won't compile because there's no `ConfigReader` instance for `MyInt`:
 
-```tut:book:fail
+```scala mdoc:fail
 ConfigSource.string("{ n: 1 }").load[Conf]
 ```
 
@@ -38,42 +36,42 @@ provided. There are three main ways to build such an instance:
 For the `MyInt` type above, we could create a `ConfigReader[MyInt]` by mapping the result of `ConfigReader[Int]` like
 this:
 
-```tut:book:silent
+```scala mdoc:silent
 implicit val myIntReader = ConfigReader[Int].map(n => new MyInt(n))
 ```
 
 Note that the `ConfigReader[Int]` expression "summons" an existing implicit instance, being syntatic sugar for `implicitly[ConfigReader[Int]]`. This is usually the easiest way to create a `ConfigReader` for simple types. See
-[Combinators](combinators.html) for more examples.
+[Combinators](combinators.md) for more examples.
 
 As an example for the second approach, we could read the required integer by parsing it from a string form like this:
 
-```tut:book:silent
+```scala mdoc:nest:silent
 implicit val myIntReader = ConfigReader.fromString[MyInt](
   ConvertHelpers.catchReadError(s => new MyInt(s.toInt)))
 ```
 
 The `fromString` factory method allows users to easily read data from string representations in the config.
 `catchReadError` is a convenience function that catches exceptions thrown by the parsing code and transforms them into
-[PureConfig errors](error-handling.html).
+[PureConfig errors](error-handling.md).
 
 Finally, we could simply implement the `ConfigReader` interface by hand:
 
-```tut:book:silent
-implicit object MyIntReader extends ConfigReader[MyInt] {
+```scala mdoc:nest:silent
+implicit val myIntReader = new ConfigReader[MyInt] {
   def from(cur: ConfigCursor) = cur.asString.map(s => new MyInt(s.toInt))
 }
 ```
 
 The inteface consists of a single `from` method that takes a `ConfigCursor` and returns an `Either` of a `MyInt` or a
-list of errors. You can read more about cursors at [Config Cursors](config-cursors.html).
+list of errors. You can read more about cursors at [Config Cursors](config-cursors.md).
 
 Using any of the approaches above would now make the config be loaded successfully:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ n: 1 }").load[Conf]
 ```
 
 The case above serves as an example for most simple types. While for those types it is straightforward to create a
 `ConfigReader`, complex types that require access to an entire sub-tree of the configuration to be read can make
-implementing an appropriate `ConfigReader` non-trivial. The [Complex Types](complex-types.html) section presents
+implementing an appropriate `ConfigReader` non-trivial. The [Complex Types](complex-types.md) section presents
 different approaches for doing that, along with their advantages and disadvantages.
