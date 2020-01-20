@@ -147,7 +147,7 @@ import shapeless._
 import shapeless.labelled._
 
 // create the singleton idw for the field id
-val idw = Witness('id)
+val idw = Witness(Symbol("id"))
 
 implicit val class1Generic = new LabelledGeneric[Class1] {
   // the generic representation of Class1 is the field id of type String
@@ -159,7 +159,7 @@ implicit val class1Generic = new LabelledGeneric[Class1] {
 }
 
 // create the singleton valuew for the field value
-val valuew = Witness('value)
+val valuew = Witness(Symbol("value"))
 
 implicit val class2Generic = new LabelledGeneric[Class2] {
   // the generic representation of Class2 is the fields id of type String and value of type Int
@@ -191,8 +191,8 @@ The second and final part of this method is to add the generic representation of
 as a sealed family of `Class1` and `Class2`, or a coproduct of them if you want:
 
 ```scala mdoc:silent
-val class1w = Witness('Class1)
-val class2w = Witness('Class2)
+val class1w = Witness(Symbol("Class1"))
+val class2w = Witness(Symbol("Class2"))
 
 implicit val identifiableGeneric = new LabelledGeneric[Identifiable] {
   override type Repr =
