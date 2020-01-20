@@ -20,6 +20,9 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
 
+      - name: Configure SBT
+        run: echo "-Dsbt.color=true\n-Dsbt.supershell=false" > .sbtopts
+
       - name: Compile
         run: sbt coverage "++${{ matrix.scala }} compile"
 
