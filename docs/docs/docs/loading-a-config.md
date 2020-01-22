@@ -5,7 +5,7 @@ title: Loading a Config
 
 ## {{page.title}}
 
-In [Quick Start](index.md) we used `ConfigSource.default.load[MyClass]` to read a config from an `application.conf`
+In [Quick Start](index.html) we used `ConfigSource.default.load[MyClass]` to read a config from an `application.conf`
 resource and convert it to a case class. `ConfigSource.default` is an instance of `ConfigSource` - a trait representing
 sources from which we can load configuration data. This `ConfigSource` in particular reads and builds a config according
 to Typesafe Config's [standard behavior](https://github.com/lightbend/config#standard-behavior), which means it can be

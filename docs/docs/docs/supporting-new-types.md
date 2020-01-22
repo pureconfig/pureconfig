@@ -41,7 +41,7 @@ implicit val myIntReader = ConfigReader[Int].map(n => new MyInt(n))
 ```
 
 Note that the `ConfigReader[Int]` expression "summons" an existing implicit instance, being syntatic sugar for `implicitly[ConfigReader[Int]]`. This is usually the easiest way to create a `ConfigReader` for simple types. See
-[Combinators](combinators.md) for more examples.
+[Combinators](combinators.html) for more examples.
 
 As an example for the second approach, we could read the required integer by parsing it from a string form like this:
 
@@ -52,7 +52,7 @@ implicit val myIntReader = ConfigReader.fromString[MyInt](
 
 The `fromString` factory method allows users to easily read data from string representations in the config.
 `catchReadError` is a convenience function that catches exceptions thrown by the parsing code and transforms them into
-[PureConfig errors](error-handling.md).
+[PureConfig errors](error-handling.html).
 
 Finally, we could simply implement the `ConfigReader` interface by hand:
 
@@ -63,7 +63,7 @@ implicit val myIntReader = new ConfigReader[MyInt] {
 ```
 
 The inteface consists of a single `from` method that takes a `ConfigCursor` and returns an `Either` of a `MyInt` or a
-list of errors. You can read more about cursors at [Config Cursors](config-cursors.md).
+list of errors. You can read more about cursors at [Config Cursors](config-cursors.html).
 
 Using any of the approaches above would now make the config be loaded successfully:
 
@@ -73,5 +73,5 @@ ConfigSource.string("{ n: 1 }").load[Conf]
 
 The case above serves as an example for most simple types. While for those types it is straightforward to create a
 `ConfigReader`, complex types that require access to an entire sub-tree of the configuration to be read can make
-implementing an appropriate `ConfigReader` non-trivial. The [Complex Types](complex-types.md) section presents
+implementing an appropriate `ConfigReader` non-trivial. The [Complex Types](complex-types.html) section presents
 different approaches for doing that, along with their advantages and disadvantages.

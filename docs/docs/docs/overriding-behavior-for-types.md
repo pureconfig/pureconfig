@@ -36,9 +36,9 @@ PureConfig will now use the custom `overrideStrReader` instance:
 ConfigReader[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
 ```
 
-All the techniques described in [Supporting New Types](supporting-new-types.md) can be used to define the higher
+All the techniques described in [Supporting New Types](supporting-new-types.html) can be used to define the higher
 priority reader.
 
 PureConfig has more fine-grained ways to configure the default readers for case classes and sealed families.
-The [Case Classes](overriding-behavior-for-case-classes.md) and
-[Sealed Families](overriding-behavior-for-sealed-families.md) subsections show how to do that.
+The [Case Classes](overriding-behavior-for-case-classes.html) and
+[Sealed Families](overriding-behavior-for-sealed-families.html) subsections show how to do that.

@@ -173,7 +173,7 @@ ConfigSource.empty.load[FooOpt]
 
 However, if you want to allow your custom `ConfigReader`s to handle missing keys, you can extend the `ReadsMissingKeys`
 trait. For `ConfigReader`s extending `ReadsMissingKeys`, a missing key will issue a call to the `from` method of the
-available `ConfigReader` for that type with a [cursor](config-cursors.md) to an undefined value.
+available `ConfigReader` for that type with a [cursor](config-cursors.html) to an undefined value.
 
 Under this setup:
 

@@ -53,7 +53,7 @@ would handle an `Either` value.
 [`ConfigFactory`](https://lightbend.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html) to
 select where to load the config files from. Typesafe Config has [well-documented rules for configuration
 loading](https://github.com/lightbend/config#standard-behavior) which we'll not repeat. Please see Typesafe
-Config's documentation for a full telling of the subtleties and see [Loading a Config](loading-a-config.md) for
+Config's documentation for a full telling of the subtleties and see [Loading a Config](loading-a-config.html) for
 alternative sources for configuration files.
 
 Because PureConfig uses Typesafe Config to load configurations, it supports reading files in [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md#hocon-human-optimized-config-object-notation), JSON, and Java `.properties` formats. HOCON is a delightful superset of both JSON and `.properties` that is highly recommended. As an added bonus it supports [advanced features](https://github.com/lightbend/config/blob/master/README.md#features-of-hocon) like variable substitution and file sourcing.

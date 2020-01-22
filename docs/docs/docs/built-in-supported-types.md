@@ -14,7 +14,7 @@ The currently supported basic types are:
   `Int`, `Long`, `Short`, `Char`, `URL`, `URI`, `Duration`, `FiniteDuration`;
 - [`java.lang.Enum`](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html);
 - everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
-  configured first - see [Configurable Converters](configurable-converters.md));
+  configured first - see [Configurable Converters](configurable-converters.html));
 - [`java.io.File`](https://docs.oracle.com/javase/8/docs/api/java/io/File.html);
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
@@ -33,13 +33,13 @@ Additionally, PureConfig also handles the following collections and composite Sc
 - collections implementing the `TraversableOnce` trait, where the type of the elements is on this list;
 - `Map`s from `String` keys to any value type that is on this list;
 - `Map`s from types convertible to `String` to any value type that is on this list (must be configured first - see
-  [Configurable Converters](configurable-converters.md));
+  [Configurable Converters](configurable-converters.html));
 - `shapeless.HList`s of elements whose type is on this list;
 - case classes;
 - classes with only public `val` and `var` parameters in their constructor (Scala 2.11+);
 - sealed families of case classes (ADTs).
 
-The support for these types already covers most simple cases, such as the one shown in [Quick Start](index.md). See
-[Supporting New Types](supporting-new-types.md) to see how to support types that are not on those lists and
-[Overriding Behavior for Types](overriding-behavior-for-types.md) to change how PureConfig reads the built-in types
+The support for these types already covers most simple cases, such as the one shown in [Quick Start](index.html). See
+[Supporting New Types](supporting-new-types.html) to see how to support types that are not on those lists and
+[Overriding Behavior for Types](overriding-behavior-for-types.html) to change how PureConfig reads the built-in types
 above.

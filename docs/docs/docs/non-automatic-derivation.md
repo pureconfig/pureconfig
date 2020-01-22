@@ -78,7 +78,7 @@ ConfigSource.fromConfig(conf).load[Person]
 ### Manual
 
 When case class and sealed trait derivation is not needed or wanted, we can simply not import anything and define our
-reader using any of ways explained in [Supporting New Types](supporting-new-types.md). The `forProductN` helper
+reader using any of ways explained in [Supporting New Types](supporting-new-types.html). The `forProductN` helper
 methods are convenient for creating readers and writers for case class-like types without generic derivation:
 
 ```scala mdoc:invisible:reset

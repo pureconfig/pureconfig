@@ -13,7 +13,7 @@ in-app.
 Just as PureConfig provides a `ConfigReader` interface for reading configurations, it also provides a `ConfigWriter` for
 writing configs.
 
-All types mentioned at [Built-in Supported Types](built-in-supported-types.md) are supported both in reading and in
+All types mentioned at [Built-in Supported Types](built-in-supported-types.html) are supported both in reading and in
 writing operations:
 
 ```scala mdoc:silent:reset-object
@@ -40,8 +40,8 @@ ConfigWriter[MyClass].to(confObj)
 ```
 
 The mechanisms with which PureConfig finds out how to write a type to a config are the same as ones used with
-`ConfigReader`. Therefore, you can use most tutorials and tips at [Supporting New Types](supporting-new-types.md)
-and [Overriding Behavior for Types](overriding-behavior-for-types.md) for creating `ConfigWriter` instances, too.
+`ConfigReader`. Therefore, you can use most tutorials and tips at [Supporting New Types](supporting-new-types.html)
+and [Overriding Behavior for Types](overriding-behavior-for-types.html) for creating `ConfigWriter` instances, too.
 `ConfigWriter` also has useful combinators and factory methods to simplify new implementations:
 
 ```scala mdoc:silent

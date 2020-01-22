@@ -14,7 +14,7 @@ def from(cur: ConfigCursor): ConfigReader.Result[A]
 
 The `ConfigCursor` class is a wrapper for the raw `ConfigValue` provided by Typesafe Config. It provides an idiomatic,
 typesafe API for the most common operations needed while reading a config. In particular, it provides cast operations
-and key accesses that integrate neatly with the [PureConfig errors API](error-handling.md). When using cursors
+and key accesses that integrate neatly with the [PureConfig errors API](error-handling.html). When using cursors
 properly, most errors are automatically handled and filled with rich information about the location of the failure.
 
 We'll show how to implement our own `ConfigReader` for the following class:

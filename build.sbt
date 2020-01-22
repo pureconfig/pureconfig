@@ -132,7 +132,8 @@ lazy val docsSettings = Seq(
         "gray-light"      /* star back        */  -> "#E3E2E3",
         "gray-lighter"    /* code back        */  -> "#F4F3F4",
         "white-color"                             -> "#FFFFFF"),
-  micrositeGitterChannel := false // ugly
+  micrositeGitterChannel := false, // ugly
+  mdocExtraArguments += "--no-link-hygiene"
 )
 
 // add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as
