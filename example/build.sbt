@@ -4,8 +4,16 @@ version := "1.0"
 
 scalaVersion := "2.12.10"
 
+val VersionPattern = """version in ThisBuild := "([^"]*)"""".r
+val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
+  case VersionPattern(ver) => ver
+  case ex =>
+    println(s"""'$ex'""")
+    throw new Exception("Could not parse PureConfig version")
+}
+
 libraryDependencies ++= Seq(
-  "com.github.pureconfig" %% "pureconfig" % "0.12.2-SNAPSHOT")
+  "com.github.pureconfig" %% "pureconfig" % pureconfigVersion)
 
 crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.1")
 
