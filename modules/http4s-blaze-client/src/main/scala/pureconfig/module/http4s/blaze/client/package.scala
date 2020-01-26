@@ -27,9 +27,22 @@ package object client {
   implicit val uriWriter: ConfigWriter[Uri] =
     ConfigWriter[String].contramap(_.renderString)
 
-  implicit def blazeClientBuilderReader[F[_]: ConcurrentEffect]: ConfigReader[
-    (ExecutionContext, Option[SSLContext]) => BlazeClientBuilder[F]
-  ] = {
+  class BlazeClientBuilderConstructor[F[_]] private[client] (
+    private val transformations: List[
+      BlazeClientBuilder[F] => BlazeClientBuilder[F]
+    ]
+  ) {
+    def construct(ec: ExecutionContext, ssl: Option[SSLContext])(
+      implicit F: ConcurrentEffect[F]
+    ): BlazeClientBuilder[F] = {
+      transformations.foldl(BlazeClientBuilder[F](ec, ssl)) {
+        case (b, f) => f(b)
+      }
+    }
+  }
+
+  implicit def blazeClientBuilderReader[F[_]: ConcurrentEffect]
+    : ConfigReader[BlazeClientBuilderConstructor[F]] = {
     def withField(map: (String, ConfigCursor)) = map match {
       case ("bufferSize", crs) =>
         crs.asInt.map { bufferSize =>
@@ -37,27 +50,19 @@ package object client {
         }
       case _ => Right(None)
     }
-    ConfigReader
-      .fromCursor[(ExecutionContext, Option[SSLContext]) => BlazeClientBuilder[
-        F
-      ]] { cur =>
-        for {
-          objCur <- cur.asObjectCursor
-          transformations <- objCur.map.toList
-            .map(withField)
-            .map {
-              _.leftMap(crfs => NonEmptyChain(crfs.head, crfs.tail: _*))
-            }
-            .sequence
-            .leftMap(nec => ConfigReaderFailures(nec.head, nec.tail.toList))
-            .map(_.flattenOption)
-          constructor = { (ec: ExecutionContext, ssl: Option[SSLContext]) =>
-            transformations.foldl(BlazeClientBuilder[F](ec, ssl)) {
-              case (b, f) => f(b)
-            }
+    ConfigReader.fromCursor[BlazeClientBuilderConstructor[F]] { cur =>
+      for {
+        objCur <- cur.asObjectCursor
+        transformations <- objCur.map.toList
+          .map(withField)
+          .map {
+            _.leftMap(crfs => NonEmptyChain(crfs.head, crfs.tail: _*))
           }
-        } yield constructor
-      }
+          .sequence
+          .leftMap(nec => ConfigReaderFailures(nec.head, nec.tail.toList))
+          .map(_.flattenOption)
+      } yield new BlazeClientBuilderConstructor[F](transformations)
+    }
   }
 
 }
