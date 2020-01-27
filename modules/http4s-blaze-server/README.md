@@ -24,13 +24,13 @@ import pureconfig.syntax._
 import scala.concurrent.ExecutionContext.global
 ```
 
-We can read a `BlazeServerBuilderConstructor` and create a server with the following code:
+We can read a `BlazeServerBuilderConfig` and create a server with the following code:
 
 ```scala
 implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
 implicit val timer: Timer[IO] = IO.timer(global)
 
-val res = conf.to[BlazeServerBuilderConfig]
+val config = conf.to[BlazeServerBuilderConfig].right.value
 
-val server = res.right.value.configure[IO]().resource
+val server = config.configure[IO]().resource
 ```

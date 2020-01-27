@@ -14,7 +14,7 @@ class Http4sBlazeClientTest extends BaseSuite {
 
   implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
 
-  "reading the BlazeClientBuilder config" should "create the BlazeClientBuilderConstructor" in {
+  "reading a BlazeClientBuilderConfig" should "allow creating a BlazeClientBuilder" in {
     val conf =
       ConfigFactory.parseString(s"""{ responseHeaderTimeout: "60 s" }""")
 

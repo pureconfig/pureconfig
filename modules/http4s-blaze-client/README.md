@@ -27,13 +27,13 @@ import scala.concurrent.ExecutionContext.global
 import scala.concurrent.duration.Duration
 ```
 
-We can read a `BlazeClientBuilderConstructor` and create a client with the following code:
+We can read a `BlazeServerBuilderConfig` and create a client with the following code:
 
 ```scala
 implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
 
 val conf = ConfigFactory.parseString(s"""{ responseHeaderTimeout: "60 s" }""")
-val constructor = conf.to[BlazeClientBuilderConfig]
+val config = conf.to[BlazeClientBuilderConfig].right.value
 
-val client = constructor.right.value.configure[IO](global).resource
+val client = config.configure[IO](global).resource
 ```
