@@ -10,6 +10,5 @@ import scala.language.higherKinds
 trait BlazeClientBuilderConfig {
   def configure[F[_]: ConcurrentEffect](
     ec: ExecutionContext,
-    ssl: Option[SSLContext] = None
-  ): BlazeClientBuilder[F]
+    ssl: Option[SSLContext] = None): BlazeClientBuilder[F]
 }

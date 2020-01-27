@@ -2,7 +2,7 @@ name := "pureconfig-http4s-blaze-server"
 
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
 
-libraryDependencies ++= Seq("org.http4s" %% "http4s-blaze-server" % "0.20.16")
+libraryDependencies ++= Seq("org.http4s" %% "http4s-blaze-server" % "0.20.17")
 
 developers := List(
   Developer(

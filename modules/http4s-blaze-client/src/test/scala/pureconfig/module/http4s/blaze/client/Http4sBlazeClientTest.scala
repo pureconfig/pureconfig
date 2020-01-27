@@ -2,7 +2,7 @@ package pureconfig.module.http4s.blaze.client
 
 import java.util.concurrent.TimeUnit
 
-import cats.effect.{ContextShift, IO}
+import cats.effect.{ ContextShift, IO }
 import com.typesafe.config.ConfigFactory
 import pureconfig.BaseSuite
 import pureconfig.syntax._

@@ -1,6 +1,6 @@
 package pureconfig.module.http4s.blaze.server
 
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.{ ContextShift, IO, Timer }
 import com.typesafe.config.ConfigFactory
 import pureconfig.BaseSuite
 import pureconfig.syntax._
@@ -14,8 +14,7 @@ class Http4sBlazeServerTest extends BaseSuite {
 
   "reading a BlazeServerBuilderConfig" should "allow creating a BlazeServerBuilder" in {
     val conf = ConfigFactory.parseString(
-      s"""{ host: "127.0.0.123", port: 1234, banner: ["a", "b"] }"""
-    )
+      s"""{ host: "127.0.0.123", port: 1234, banner: ["a", "b"] }""")
 
     val res = conf.to[BlazeServerBuilderConfig]
 

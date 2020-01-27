@@ -25,7 +25,10 @@ lazy val generic = (project in file("modules/generic")).
 
 lazy val macros = (project in file("macros")).
   enablePlugins(TutPlugin).
-  settings(commonSettings)
+  settings(commonSettings).
+  settings(
+    scalacOptions -= "-Ypartial-unification"
+  )
 
 lazy val tests = (project in file("tests")).
   enablePlugins(BoilerplatePlugin).
@@ -62,7 +65,7 @@ lazy val enumeratum = module(project) in file("modules/enumeratum")
 lazy val fs2 = module(project) in file("modules/fs2")
 lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s")
-lazy val http4sBlazeClient = module(project).in(file("modules/http4s-blaze-client")).withId("http4s-blaze-client")
+lazy val http4sBlazeClient = module(project).in(file("modules/http4s-blaze-client")).withId("http4s-blaze-client").dependsOn(generic)
 lazy val http4sBlazeServer = module(project).in(file("modules/http4s-blaze-server")).withId("http4s-blaze-server").dependsOn(generic)
 lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")

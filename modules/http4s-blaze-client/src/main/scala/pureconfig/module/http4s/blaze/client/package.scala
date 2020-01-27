@@ -3,10 +3,10 @@ package pureconfig.module.http4s.blaze
 import cats.effect.ConcurrentEffect
 import cats.implicits._
 import javax.net.ssl.SSLContext
-import org.http4s.client.blaze.{BlazeClientBuilder, ParserMode}
+import org.http4s.client.blaze.{ BlazeClientBuilder, ParserMode }
 import org.http4s.headers.`User-Agent`
 import pureconfig.error.ConfigReaderFailures
-import pureconfig.{ConfigCursor, ConfigReader}
+import pureconfig.{ ConfigCursor, ConfigReader }
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
@@ -14,30 +14,41 @@ import scala.language.higherKinds
 
 package object client {
 
-  implicit val configReaderBlazeClientBuilderConfig
-    : ConfigReader[BlazeClientBuilderConfig] =
+  implicit val configReaderParserMode: ConfigReader[ParserMode] = {
+    import pureconfig.generic.auto._
+    pureconfig.generic.semiauto.deriveReader[ParserMode]
+  }
+
+  implicit val configReaderUserAgent: ConfigReader[`User-Agent`] = {
+    import pureconfig.generic.auto._
+    pureconfig.generic.semiauto.deriveReader[`User-Agent`]
+  }
+
+  implicit def configReaderBlazeClientBuilderConfig(
+    implicit
+    PM: ConfigReader[ParserMode],
+    UA: ConfigReader[`User-Agent`]): ConfigReader[BlazeClientBuilderConfig] =
     ConfigReader.fromCursor[BlazeClientBuilderConfig] { cur =>
       for {
         objCur <- cur.asObjectCursor
         transformations <- objCur.map.toList
-          .traverse(parseField)
+          .traverse(parseField(PM, UA))
           .map(_.flattenOption)
-      } yield
-        new BlazeClientBuilderConfig {
-          def configure[F[_]: ConcurrentEffect](
-            ec: ExecutionContext,
-            ssl: Option[SSLContext] = None
-          ): BlazeClientBuilder[F] = {
-            transformations.foldl(BlazeClientBuilder[F](ec, ssl)) {
-              case (b, f) => f.apply(b)
-            }
+      } yield new BlazeClientBuilderConfig {
+        def configure[F[_]: ConcurrentEffect](
+          ec: ExecutionContext,
+          ssl: Option[SSLContext] = None): BlazeClientBuilder[F] = {
+          transformations.foldl(BlazeClientBuilder[F](ec, ssl)) {
+            case (b, f) => f.apply(b)
           }
         }
+      }
     }
 
   private def parseField(
-    map: (String, ConfigCursor)
-  ): Either[ConfigReaderFailures, Option[BlazeClientBuilderTransformer]] =
+    PM: ConfigReader[ParserMode],
+    UA: ConfigReader[`User-Agent`])(
+    map: (String, ConfigCursor)): Either[ConfigReaderFailures, Option[BlazeClientBuilderTransformer]] =
     map match {
       case ("responseHeaderTimeout", crs) =>
         ConfigReader[Duration].from(crs).map { value =>
@@ -100,7 +111,7 @@ package object client {
           })
         }
       case ("parserMode", crs) =>
-        ConfigReader[ParserMode].from(crs).map { value =>
+        PM.from(crs).map { value =>
           Some(new BlazeClientBuilderTransformer {
             override def apply[F[_]] = _.withParserMode(value)
           })
@@ -112,7 +123,7 @@ package object client {
           })
         }
       case ("userAgent", crs) =>
-        ConfigReader[`User-Agent`].from(crs).map { value =>
+        UA.from(crs).map { value =>
           Some(new BlazeClientBuilderTransformer {
             override def apply[F[_]] = _.withUserAgent(value)
           })
