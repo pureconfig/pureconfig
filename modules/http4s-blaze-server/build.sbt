@@ -1,8 +1,8 @@
-name := "pureconfig-http4s-blaze-client"
+name := "pureconfig-http4s-blaze-server"
 
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
 
-libraryDependencies ++= Seq("org.http4s" %% "http4s-blaze-client" % "0.20.16")
+libraryDependencies ++= Seq("org.http4s" %% "http4s-blaze-server" % "0.20.16")
 
 developers := List(
   Developer(
@@ -15,7 +15,7 @@ developers := List(
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig.module.http4s.blaze.client.*")
+OsgiKeys.exportPackage := Seq("pureconfig.module.http4s.blaze.server.*")
 OsgiKeys.privatePackage := Seq()
 OsgiKeys.importPackage := Seq(
   s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""",

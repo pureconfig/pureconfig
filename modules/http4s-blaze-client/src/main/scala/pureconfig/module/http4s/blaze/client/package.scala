@@ -1,68 +1,123 @@
 package pureconfig.module.http4s.blaze
 
-import cats.data.NonEmptyChain
 import cats.effect.ConcurrentEffect
 import cats.implicits._
 import javax.net.ssl.SSLContext
-import org.http4s.Uri
-import org.http4s.client.blaze.BlazeClientBuilder
-import pureconfig.error.{CannotConvert, ConfigReaderFailures}
-import pureconfig.{ConfigCursor, ConfigReader, ConfigWriter}
+import org.http4s.client.blaze.{BlazeClientBuilder, ParserMode}
+import org.http4s.headers.`User-Agent`
+import pureconfig.error.ConfigReaderFailures
+import pureconfig.{ConfigCursor, ConfigReader}
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.language.higherKinds
 
 package object client {
 
-  implicit val uriReader: ConfigReader[Uri] =
-    ConfigReader.fromString(
-      str =>
-        Uri
-          .fromString(str)
-          .fold(
-            err => Left(CannotConvert(str, "Uri", err.sanitized)),
-            uri => Right(uri)
-        )
-    )
-
-  implicit val uriWriter: ConfigWriter[Uri] =
-    ConfigWriter[String].contramap(_.renderString)
-
-  class BlazeClientBuilderConstructor[F[_]] private[client] (
-    private val transformations: List[
-      BlazeClientBuilder[F] => BlazeClientBuilder[F]
-    ]
-  ) {
-    def construct(ec: ExecutionContext, ssl: Option[SSLContext])(
-      implicit F: ConcurrentEffect[F]
-    ): BlazeClientBuilder[F] = {
-      transformations.foldl(BlazeClientBuilder[F](ec, ssl)) {
-        case (b, f) => f(b)
-      }
-    }
-  }
-
-  implicit def blazeClientBuilderReader[F[_]: ConcurrentEffect]
-    : ConfigReader[BlazeClientBuilderConstructor[F]] = {
-    def withField(map: (String, ConfigCursor)) = map match {
-      case ("bufferSize", crs) =>
-        crs.asInt.map { bufferSize =>
-          Some((b: BlazeClientBuilder[F]) => b.withBufferSize(bufferSize))
-        }
-      case _ => Right(None)
-    }
-    ConfigReader.fromCursor[BlazeClientBuilderConstructor[F]] { cur =>
+  implicit val configReaderBlazeClientBuilderConfig
+    : ConfigReader[BlazeClientBuilderConfig] =
+    ConfigReader.fromCursor[BlazeClientBuilderConfig] { cur =>
       for {
         objCur <- cur.asObjectCursor
         transformations <- objCur.map.toList
-          .map(withField)
-          .map {
-            _.leftMap(crfs => NonEmptyChain(crfs.head, crfs.tail: _*))
-          }
-          .sequence
-          .leftMap(nec => ConfigReaderFailures(nec.head, nec.tail.toList))
+          .traverse(parseField)
           .map(_.flattenOption)
-      } yield new BlazeClientBuilderConstructor[F](transformations)
+      } yield
+        new BlazeClientBuilderConfig {
+          def configure[F[_]: ConcurrentEffect](
+            ec: ExecutionContext,
+            ssl: Option[SSLContext] = None
+          ): BlazeClientBuilder[F] = {
+            transformations.foldl(BlazeClientBuilder[F](ec, ssl)) {
+              case (b, f) => f.apply(b)
+            }
+          }
+        }
     }
-  }
+
+  private def parseField(
+    map: (String, ConfigCursor)
+  ): Either[ConfigReaderFailures, Option[BlazeClientBuilderTransformer]] =
+    map match {
+      case ("responseHeaderTimeout", crs) =>
+        ConfigReader[Duration].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withResponseHeaderTimeout(value)
+          })
+        }
+      case ("idleTimeout", crs) =>
+        ConfigReader[Duration].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withIdleTimeout(value)
+          })
+        }
+      case ("requestTimeout", crs) =>
+        ConfigReader[Duration].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withRequestTimeout(value)
+          })
+        }
+      case ("maxTotalConnections", crs) =>
+        ConfigReader[Int].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withMaxTotalConnections(value)
+          })
+        }
+      case ("maxWaitQueueLimit", crs) =>
+        ConfigReader[Int].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withMaxWaitQueueLimit(value)
+          })
+        }
+      case ("checkEndpointAuthentication", crs) =>
+        ConfigReader[Boolean].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withCheckEndpointAuthentication(value)
+          })
+        }
+      case ("maxResponseLineSize", crs) =>
+        ConfigReader[Int].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withMaxResponseLineSize(value)
+          })
+        }
+      case ("maxHeaderLength", crs) =>
+        ConfigReader[Int].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withMaxHeaderLength(value)
+          })
+        }
+      case ("maxChunkSize", crs) =>
+        ConfigReader[Int].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withMaxChunkSize(value)
+          })
+        }
+      case ("chunkBufferMaxSize", crs) =>
+        ConfigReader[Int].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withChunkBufferMaxSize(value)
+          })
+        }
+      case ("parserMode", crs) =>
+        ConfigReader[ParserMode].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withParserMode(value)
+          })
+        }
+      case ("bufferSize", crs) =>
+        ConfigReader[Int].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withBufferSize(value)
+          })
+        }
+      case ("userAgent", crs) =>
+        ConfigReader[`User-Agent`].from(crs).map { value =>
+          Some(new BlazeClientBuilderTransformer {
+            override def apply[F[_]] = _.withUserAgent(value)
+          })
+        }
+      case _ => Right(None)
+    }
 
 }
