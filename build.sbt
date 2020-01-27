@@ -25,10 +25,7 @@ lazy val generic = (project in file("modules/generic")).
 
 lazy val macros = (project in file("macros")).
   enablePlugins(TutPlugin).
-  settings(commonSettings).
-  settings(
-    scalacOptions -= "-Ypartial-unification"
-  )
+  settings(commonSettings)
 
 lazy val tests = (project in file("tests")).
   enablePlugins(BoilerplatePlugin).
@@ -98,7 +95,6 @@ lazy val commonSettings = Seq(
   crossVersionSharedSources(unmanagedSourceDirectories in Test),
 
   scalacOptions ++= lintFlags.value,
-  scalacOptions += "-Ypartial-unification",
 
   scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",

@@ -2,6 +2,8 @@ name := "pureconfig-http4s-blaze-client"
 
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.13")) }
 
+scalacOptions += "-Ypartial-unification"
+
 libraryDependencies ++= Seq("org.http4s" %% "http4s-blaze-client" % "0.20.17")
 
 developers := List(
