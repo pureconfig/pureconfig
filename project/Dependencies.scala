@@ -14,7 +14,7 @@ object Dependencies {
     val scalaTestPlusScalaCheck = "3.1.0.1"
 
     val scalaCheck              = "1.14.3"
-    val scalaCheckShapeless     = "1.2.3"
+    val scalaCheckShapeless     = "1.2.4"
   }
 
   val shapeless = "com.chuusai" %% "shapeless" % Version.shapeless
