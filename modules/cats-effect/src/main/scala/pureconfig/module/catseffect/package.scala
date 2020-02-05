@@ -6,24 +6,19 @@ import java.nio.file.Path
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-import cats.data.NonEmptyList
-import cats.effect.Sync
+import cats.effect.{ Blocker, ContextShift, Sync }
 import cats.implicits._
-import com.typesafe.config.{ ConfigRenderOptions, Config => TypesafeConfig }
+import com.typesafe.config.ConfigRenderOptions
 import pureconfig._
 import pureconfig.error.ConfigReaderException
 
 package object catseffect {
 
-  @deprecated("Root will be treated as the default namespace", "0.12.0")
-  val defaultNameSpace = ""
+  private[catseffect] type ConfReader[A] = Derivation[ConfigReader[A]]
+  private[catseffect] type ConfWriter[A] = Derivation[ConfigWriter[A]]
 
-  def loadF[F[_], A](cs: ConfigSource)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
-    val delayedLoad = F.delay {
-      cs.load[A].leftMap[Throwable](ConfigReaderException[A])
-    }
-    delayedLoad.rethrow
-  }
+  def loadF[F[_]: Sync: ContextShift, A: ConfReader: ClassTag](cs: ConfigSource, blocker: Blocker): F[A] =
+    blocker.delay(cs.load[A].leftMap[Throwable](ConfigReaderException[A])).rethrow
 
   /**
    * Load a configuration of type `A` from the standard configuration files
@@ -32,67 +27,8 @@ package object catseffect {
    *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def loadConfigF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.default)
-
-  /**
-   * Load a configuration of type `A` from the standard configuration files
-   *
-   * @param namespace the base namespace from which the configuration should be load
-   * @return The returned action will complete with `A` if it is possible to create an instance of type
-   *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
-   *         details on why it isn't possible
-   */
-  @deprecated("Use `ConfigSource.default.at(namespace).loadF[F, A]` instead", "0.12.0")
-  def loadConfigF[F[_], A](namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.default.at(namespace))
-
-  /**
-   * Load a configuration of type `A` from the given file. Note that standard configuration
-   * files are still loaded but can be overridden from the given configuration file
-   *
-   * @param path the path of the configuration file from which to load
-   * @return The returned action will complete with `A` if it is possible to create an instance of type
-   *         `A` from the configuration file, or fail with a ConfigReaderException which in turn contains
-   *         details on why it isn't possible
-   */
-  @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).loadF[F, A]` instead", "0.12.0")
-  def loadConfigF[F[_], A](path: Path)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.default(ConfigSource.file(path)))
-
-  /**
-   * Load a configuration of type `A` from the given file. Note that standard configuration
-   * files are still loaded but can be overridden from the given configuration file
-   *
-   * @param path the path of the configuration file from which to load
-   * @param namespace the base namespace from which the configuration should be load
-   * @return The returned action will complete with `A` if it is possible to create an instance of type
-   *         `A` from the configuration file, or fail with a ConfigReaderException which in turn contains
-   *         details on why it isn't possible
-   */
-  @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).at(namespace).loadF[F, A]` instead", "0.12.0")
-  def loadConfigF[F[_], A](path: Path, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.default(ConfigSource.file(path)).at(namespace))
-
-  /**
-   * Load a configuration of type `A` from the given `Config`
-   * @return The returned action will complete with `A` if it is possible to create an instance of type
-   *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
-   *         details on why it isn't possible
-   */
-  @deprecated("Use `ConfigSource.fromConfig(conf).loadF[F, A]` instead", "0.12.0")
-  def loadConfigF[F[_], A](conf: TypesafeConfig)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.fromConfig(conf))
-
-  /**
-   * Load a configuration of type `A` from the given `Config`
-   * @return The returned action will complete with `A` if it is possible to create an instance of type
-   *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
-   *         details on why it isn't possible
-   */
-  @deprecated("Use `ConfigSource.fromConfig(conf).at(namespace).loadF[F, A]` instead", "0.12.0")
-  def loadConfigF[F[_], A](conf: TypesafeConfig, namespace: String)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.fromConfig(conf).at(namespace))
+  def loadConfigF[F[_]: Sync: ContextShift, A: ConfReader: ClassTag](blocker: Blocker): F[A] =
+    loadF[F, A](ConfigSource.default, blocker)
 
   /**
    * Save the given configuration into a property file
@@ -103,13 +39,13 @@ package object catseffect {
    * @param options the config rendering options
    * @return The return action will save out the supplied configuration upon invocation
    */
-  def saveConfigAsPropertyFileF[F[_], A](
+  def saveConfigAsPropertyFileF[F[_]: Sync: ContextShift, A: ConfWriter](
     conf: A,
     outputPath: Path,
+    blocker: Blocker,
     overrideOutputPath: Boolean = false,
-    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = F.delay {
-    pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options)
-  }
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults()): F[Unit] =
+    blocker.delay(pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options))
 
   /**
    * Writes the configuration to the output stream and closes the stream
@@ -119,25 +55,10 @@ package object catseffect {
    * @param options the config rendering options
    * @return The return action will save out the supplied configuration upon invocation
    */
-  def saveConfigToStreamF[F[_], A](
+  def saveConfigToStreamF[F[_]: Sync: ContextShift, A: ConfWriter](
     conf: A,
     outputStream: OutputStream,
-    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = F.delay {
-    pureconfig.saveConfigToStream(conf, outputStream, options)
-  }
-
-  /**
-   * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them into a `A`.
-   *
-   * This is a convenience method which enables having default configuration which backstops local configuration.
-   *
-   * Note: If an element of `files` references a file which doesn't exist or can't be read, it will silently be ignored.
-   *
-   * @param files Files ordered in decreasing priority containing part or all of a `A`. Must not be empty.
-   */
-  @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
-  def loadConfigFromFilesF[F[_], A](files: NonEmptyList[Path])(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.default(
-      files.map(ConfigSource.file(_).optional)
-        .foldLeft(ConfigSource.empty)(_.withFallback(_))))
+    blocker: Blocker,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults()): F[Unit] =
+    blocker.delay(pureconfig.saveConfigToStream(conf, outputStream, options))
 }

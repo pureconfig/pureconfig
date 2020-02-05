@@ -23,11 +23,13 @@ To load a configuration file from a path using cats-effect's `IO`:
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
-import cats.effect.IO
+import cats.effect.{ Blocker, IO }
 
-case class MyConfig(somefield: Int, anotherfield: String)
+final case class MyConfig(somefield: Int, anotherfield: String)
 
-val load: IO[MyConfig] = ConfigSource.file(somePath).loadF[IO, MyConfig]
+val load: IO[MyConfig] = Blocker[IO].use { blocker =>
+  ConfigSource.file(somePath).loadF[IO, MyConfig](blocker)
+}
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:
@@ -48,8 +50,11 @@ To create an IO that writes out a configuration file, do as follows:
 
 ```scala
 import pureconfig.module.catseffect._
-import cats.effect.IO
+import cats.effect.{ Blocker, IO }
 
 val someConfig = MyConfig(1234, "some string")
-val save: IO[Unit] = saveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath)
+
+val save: IO[Unit] = Blocker[IO].use { blocker =>
+  saveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
+}
 ```

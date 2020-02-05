@@ -2,7 +2,7 @@ package pureconfig.module.catseffect
 
 import java.io._
 
-import cats.effect.IO
+import cats.effect.{ Blocker, ContextShift, IO }
 import pureconfig.{ BaseSuite, ConfigSource }
 import pureconfig.error.{ ConfigReaderException, ConvertFailure }
 import pureconfig.generic.auto._
@@ -11,9 +11,11 @@ import java.nio.file.{ Path, Paths }
 
 import com.typesafe.config.ConfigFactory
 
-class CatsEffectSuite extends BaseSuite {
+final class CatsEffectSuite extends BaseSuite {
 
-  case class SomeCaseClass(somefield: Int, anotherfield: String)
+  private case class SomeCaseClass(somefield: Int, anotherfield: String)
+
+  private implicit val ioCS = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
   private def getPath(classPathPath: String): Path = {
     val resource = getClass.getClassLoader.getResource(classPathPath)
@@ -21,13 +23,13 @@ class CatsEffectSuite extends BaseSuite {
   }
 
   "loadConfigF" should "run successfully when correctly formatted file is in place" in {
-    val load = loadConfigF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(loadConfigF[IO, SomeCaseClass])
 
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
 
   "ConfigSource#loadF" should "fail when the expected file is not present" in {
-    val load = ConfigSource.default.at("non-existent-namespace").loadF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(ConfigSource.default.at("non-existent-namespace").loadF[IO, SomeCaseClass])
 
     a[ConfigReaderException[SomeCaseClass]] should be thrownBy load.unsafeRunSync()
   }
@@ -35,7 +37,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "run successfully when correctly formatted file is specified as path" in {
     val propertiesPath = getPath("application.properties")
 
-    val load = ConfigSource.file(propertiesPath).loadF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(ConfigSource.file(propertiesPath).loadF[IO, SomeCaseClass])
 
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
@@ -43,7 +45,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "fail when a file does not specify required keys" in {
     val propertiesPath = getPath("wrong.properties")
 
-    val load = ConfigSource.file(propertiesPath).loadF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(ConfigSource.file(propertiesPath).loadF[IO, SomeCaseClass])
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]
@@ -52,7 +54,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "run successfully from a Typesafe Config object" in {
     val config = ConfigFactory.load("application.properties")
 
-    val load = ConfigSource.fromConfig(config).loadF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(ConfigSource.fromConfig(config).loadF[IO, SomeCaseClass])
 
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
@@ -60,7 +62,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "run successfully from a Typesafe Config object with a namespace" in {
     val config = ConfigFactory.load("namespaced.properties")
 
-    val load = ConfigSource.fromConfig(config).at("somecaseclass").loadF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(ConfigSource.fromConfig(config).at("somecaseclass").loadF[IO, SomeCaseClass])
 
     load.unsafeRunSync() shouldBe SomeCaseClass(1234, "some string")
   }
@@ -68,7 +70,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "fail when ran with a Typesafe Config object that doesn't match the format" in {
     val config = ConfigFactory.load("wrong.properties")
 
-    val load = ConfigSource.fromConfig(config).loadF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(ConfigSource.fromConfig(config).loadF[IO, SomeCaseClass])
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]
@@ -77,7 +79,7 @@ class CatsEffectSuite extends BaseSuite {
   it should "fail if the Typesafe config object doesn't have the required field in a namespace" in {
     val config = ConfigFactory.load("namespaced-wrong.properties")
 
-    val load = ConfigSource.fromConfig(config).at("somecaseclass").loadF[IO, SomeCaseClass]
+    val load = Blocker[IO].use(ConfigSource.fromConfig(config).at("somecaseclass").loadF[IO, SomeCaseClass])
 
     val thrown = the[ConfigReaderException[SomeCaseClass]] thrownBy load.unsafeRunSync()
     thrown.failures.head shouldBe a[ConvertFailure]
@@ -88,7 +90,7 @@ class CatsEffectSuite extends BaseSuite {
     val outputStream = new BufferedOutputStream(new PipedOutputStream(pipeInput))
 
     val someConfig = SomeCaseClass(1234, "some string")
-    val save = saveConfigToStreamF[IO, SomeCaseClass](someConfig, outputStream)
+    val save = Blocker[IO].use(saveConfigToStreamF[IO, SomeCaseClass](someConfig, outputStream, _))
 
     pipeInput.available shouldBe 0
 
