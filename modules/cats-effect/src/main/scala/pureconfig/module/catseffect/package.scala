@@ -44,8 +44,7 @@ package object catseffect {
    *         `A` from the configuration source, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def loadF[F[_], A](cs: ConfigSource, blocker: Blocker)
-                    (implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  def loadF[F[_], A](cs: ConfigSource, blocker: Blocker)(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     EitherT(blocker.delay(cs.cursor()))
       .subflatMap(reader.value.from)
       .leftMap(ConfigReaderException[A])
@@ -70,8 +69,7 @@ package object catseffect {
    *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
-  def loadConfigF[F[_], A](blocker: Blocker)
-                          (implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  def loadConfigF[F[_], A](blocker: Blocker)(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default, blocker)
 
   /**
@@ -166,16 +164,13 @@ package object catseffect {
     outputPath: Path,
     blocker: Blocker,
     overrideOutputPath: Boolean = false,
-    options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = {
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = {
     if (!overrideOutputPath && Files.isRegularFile(outputPath))
       F.raiseError(
-        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
-      )
+        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists"))
     else if (Files.isDirectory(outputPath))
       F.raiseError(
-        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it is a directory")
-      )
+        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it is a directory"))
     else
       Resource.fromAutoCloseable(F.delay(Files.newOutputStream(outputPath))).use { outputStream =>
         blockingSaveConfigToStreamF(conf, outputStream, blocker, options)
@@ -211,8 +206,7 @@ package object catseffect {
     conf: A,
     outputStream: OutputStream,
     blocker: Blocker,
-    options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
     F.delay(writer.value.to(conf)).map { rawConf =>
       // HOCON requires UTF-8:
       // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json
