@@ -1,13 +1,14 @@
 package pureconfig.module
 
 import java.io.OutputStream
-import java.nio.file.Path
+import java.nio.charset.StandardCharsets
+import java.nio.file.{ Files, Path }
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-import cats.data.NonEmptyList
-import cats.effect.{ Blocker, ContextShift, Sync }
+import cats.data.{ EitherT, NonEmptyList }
+import cats.effect.{ Blocker, ContextShift, Resource, Sync }
 import cats.implicits._
 import com.typesafe.config.{ ConfigRenderOptions, Config => TypesafeConfig }
 import pureconfig._
@@ -45,7 +46,10 @@ package object catseffect {
    */
   def loadF[F[_], A](cs: ConfigSource, blocker: Blocker)
                     (implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    blocker.delay(cs.load[A].leftMap[Throwable](ConfigReaderException[A])).rethrow
+    EitherT(blocker.delay(cs.cursor()))
+      .subflatMap(reader.value.from)
+      .leftMap(ConfigReaderException[A])
+      .rethrowT
 
   /**
    * Load a configuration of type `A` from the standard configuration files
@@ -163,8 +167,20 @@ package object catseffect {
     blocker: Blocker,
     overrideOutputPath: Boolean = false,
     options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
-    blocker.delay(pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options))
+  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = {
+    if (!overrideOutputPath && Files.isRegularFile(outputPath))
+      F.raiseError(
+        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
+      )
+    else if (Files.isDirectory(outputPath))
+      F.raiseError(
+        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it is a directory")
+      )
+    else
+      Resource.fromAutoCloseable(F.delay(Files.newOutputStream(outputPath))).use { outputStream =>
+        blockingSaveConfigToStreamF(conf, outputStream, blocker, options)
+      }
+  }
 
   /**
    * Writes the configuration to the output stream and closes the stream
@@ -197,7 +213,16 @@ package object catseffect {
     blocker: Blocker,
     options: ConfigRenderOptions = ConfigRenderOptions.defaults()
   )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
-    blocker.delay(pureconfig.saveConfigToStream(conf, outputStream, options))
+    F.delay(writer.value.to(conf)).map { rawConf =>
+      // HOCON requires UTF-8:
+      // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json
+      StandardCharsets.UTF_8.encode(rawConf.render(options)).array
+    } flatMap { bytes =>
+      blocker.delay {
+        outputStream.write(bytes)
+        outputStream.flush()
+      }
+    }
 
   /**
    * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them into a `A`.
