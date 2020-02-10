@@ -7,7 +7,7 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import cats.data.NonEmptyList
-import cats.effect.Sync
+import cats.effect.{ Blocker, ContextShift, Sync }
 import cats.implicits._
 import com.typesafe.config.{ ConfigRenderOptions, Config => TypesafeConfig }
 import pureconfig._
@@ -18,6 +18,15 @@ package object catseffect {
   @deprecated("Root will be treated as the default namespace", "0.12.0")
   val defaultNameSpace = ""
 
+  /**
+   * Load a configuration of type `A` from a config source
+   *
+   * @param cs the config source from where the configuration will be loaded
+   * @return The returned action will complete with `A` if it is possible to create an instance of type
+   *         `A` from the configuration source, or fail with a ConfigReaderException which in turn contains
+   *         details on why it isn't possible
+   */
+  @deprecated("Use `loadF[F, A](cs, blocker)` instead", "0.12.3")
   def loadF[F[_], A](cs: ConfigSource)(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     val delayedLoad = F.delay {
       cs.load[A].leftMap[Throwable](ConfigReaderException[A])
@@ -26,14 +35,40 @@ package object catseffect {
   }
 
   /**
+   * Load a configuration of type `A` from a config source
+   *
+   * @param cs the config source from where the configuration will be loaded
+   * @param blocker the blocking context which will be used to load the configuration.
+   * @return The returned action will complete with `A` if it is possible to create an instance of type
+   *         `A` from the configuration source, or fail with a ConfigReaderException which in turn contains
+   *         details on why it isn't possible
+   */
+  def loadF[F[_], A](cs: ConfigSource, blocker: Blocker)
+                    (implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    blocker.delay(cs.load[A].leftMap[Throwable](ConfigReaderException[A])).rethrow
+
+  /**
    * Load a configuration of type `A` from the standard configuration files
    *
    * @return The returned action will complete with `A` if it is possible to create an instance of type
    *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
    *         details on why it isn't possible
    */
+  @deprecated("Use `loadConfigF[F, A](blocker)` instead", "0.12.3")
   def loadConfigF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default)
+
+  /**
+   * Load a configuration of type `A` from the standard configuration files
+   *
+   * @param blocker the blocking context which will be used to load the configuration.
+   * @return The returned action will complete with `A` if it is possible to create an instance of type
+   *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
+   *         details on why it isn't possible
+   */
+  def loadConfigF[F[_], A](blocker: Blocker)
+                          (implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    loadF[F, A](ConfigSource.default, blocker)
 
   /**
    * Load a configuration of type `A` from the standard configuration files
@@ -103,6 +138,7 @@ package object catseffect {
    * @param options the config rendering options
    * @return The return action will save out the supplied configuration upon invocation
    */
+  @deprecated("Use `blockingSaveConfigAsPropertyFileF[IO, A](conf, outputPat, blocker, overrideOutputPath, options)` instead", "0.12.3")
   def saveConfigAsPropertyFileF[F[_], A](
     conf: A,
     outputPath: Path,
@@ -112,6 +148,25 @@ package object catseffect {
   }
 
   /**
+   * Save the given configuration into a property file
+   *
+   * @param conf The configuration to save
+   * @param outputPath Where to write the configuration
+   * @param blocker the blocking context which will be used to load the configuration.
+   * @param overrideOutputPath Override the path if it already exists
+   * @param options the config rendering options
+   * @return The return action will save out the supplied configuration upon invocation
+   */
+  def blockingSaveConfigAsPropertyFileF[F[_], A](
+    conf: A,
+    outputPath: Path,
+    blocker: Blocker,
+    overrideOutputPath: Boolean = false,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults()
+  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
+    blocker.delay(pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options))
+
+  /**
    * Writes the configuration to the output stream and closes the stream
    *
    * @param conf The configuration to write
@@ -119,12 +174,30 @@ package object catseffect {
    * @param options the config rendering options
    * @return The return action will save out the supplied configuration upon invocation
    */
+  @deprecated("Use `blockingSaveConfigToStreamF[IO, A](conf, outputStream, blocker, options)` instead", "0.12.3")
   def saveConfigToStreamF[F[_], A](
     conf: A,
     outputStream: OutputStream,
     options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = F.delay {
     pureconfig.saveConfigToStream(conf, outputStream, options)
   }
+
+  /**
+   * Writes the configuration to the output stream and closes the stream
+   *
+   * @param conf The configuration to write
+   * @param outputStream The stream in which the configuration should be written
+   * @param blocker the blocking context which will be used to load the configuration.
+   * @param options the config rendering options
+   * @return The return action will save out the supplied configuration upon invocation
+   */
+  def blockingSaveConfigToStreamF[F[_], A](
+    conf: A,
+    outputStream: OutputStream,
+    blocker: Blocker,
+    options: ConfigRenderOptions = ConfigRenderOptions.defaults()
+  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
+    blocker.delay(pureconfig.saveConfigToStream(conf, outputStream, options))
 
   /**
    * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them into a `A`.
