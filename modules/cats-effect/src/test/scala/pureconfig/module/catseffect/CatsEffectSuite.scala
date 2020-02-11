@@ -1,22 +1,26 @@
 package pureconfig.module.catseffect
 
-import java.io._
+import java.io.{ BufferedOutputStream, PipedInputStream, PipedOutputStream }
+import java.nio.file.{ Path, Paths }
+import java.util.concurrent.Executors
+
+import scala.concurrent.ExecutionContext
 
 import cats.effect.{ Blocker, ContextShift, IO }
+import com.typesafe.config.ConfigFactory
 import pureconfig.{ BaseSuite, ConfigSource }
 import pureconfig.error.{ ConfigReaderException, ConvertFailure }
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
-import java.nio.file.{ Path, Paths }
-
-import com.typesafe.config.ConfigFactory
 
 final class CatsEffectSuite extends BaseSuite {
 
   private case class SomeCaseClass(somefield: Int, anotherfield: String)
 
+  private val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+
   private val blocker: Blocker =
-    Blocker.liftExecutionContext(scala.concurrent.ExecutionContext.global)
+    Blocker.liftExecutionContext(ec)
 
   private implicit val ioCS = IO.contextShift(scala.concurrent.ExecutionContext.global)
 

@@ -70,7 +70,7 @@ package object catseffect {
    *         details on why it isn't possible
    */
   def loadConfigF[F[_], A](blocker: Blocker)(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    loadF[F, A](ConfigSource.default, blocker)
+    F.delay(ConfigSource.default).flatMap(cs => loadF(cs, blocker))
 
   /**
    * Load a configuration of type `A` from the standard configuration files
