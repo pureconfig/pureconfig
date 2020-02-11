@@ -70,7 +70,7 @@ package object catseffect {
    *         details on why it isn't possible
    */
   def loadConfigF[F[_], A](blocker: Blocker)(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
-    F.delay(ConfigSource.default).flatMap(cs => loadF(cs, blocker))
+    loadF(ConfigSource.default, blocker)
 
   /**
    * Load a configuration of type `A` from the standard configuration files
@@ -165,16 +165,27 @@ package object catseffect {
     blocker: Blocker,
     overrideOutputPath: Boolean = false,
     options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = {
-    if (!overrideOutputPath && Files.isRegularFile(outputPath))
-      F.raiseError(
-        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists"))
-    else if (Files.isDirectory(outputPath))
-      F.raiseError(
-        new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it is a directory"))
-    else
-      Resource.fromAutoCloseable(F.delay(Files.newOutputStream(outputPath))).use { outputStream =>
-        blockingSaveConfigToStreamF(conf, outputStream, blocker, options)
+    val fileAlreadyExists =
+      F.raiseError(new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists"))
+
+    val fileIsDirectory =
+      F.raiseError(new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it is a directory"))
+
+    val check =
+      F.suspend {
+        if (!overrideOutputPath && Files.isRegularFile(outputPath)) fileAlreadyExists
+        else if (Files.isDirectory(outputPath)) fileIsDirectory
+        else F.unit
       }
+
+    val outputStream =
+      Resource.make(blocker.delay(Files.newOutputStream(outputPath))) { os =>
+        blocker.delay(os.close())
+      }
+
+    blocker.blockOn(check) >> outputStream.use { os =>
+      blockingSaveConfigToStreamF(conf, os, blocker, options)
+    }
   }
 
   /**

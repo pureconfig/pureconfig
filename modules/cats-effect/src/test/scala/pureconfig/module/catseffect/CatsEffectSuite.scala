@@ -17,12 +17,9 @@ final class CatsEffectSuite extends BaseSuite {
 
   private case class SomeCaseClass(somefield: Int, anotherfield: String)
 
-  private val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+  private val blocker: Blocker = Blocker.liftExecutorService(Executors.newCachedThreadPool())
 
-  private val blocker: Blocker =
-    Blocker.liftExecutionContext(ec)
-
-  private implicit val ioCS = IO.contextShift(scala.concurrent.ExecutionContext.global)
+  private implicit val ioCS = IO.contextShift(ExecutionContext.global)
 
   private def getPath(classPathPath: String): Path = {
     val resource = getClass.getClassLoader.getResource(classPathPath)
