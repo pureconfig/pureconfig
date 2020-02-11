@@ -17,48 +17,60 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.
 To load a configuration file from a path using cats-effect's `IO`:
 
 ```tut:invisible
-import java.nio.file.{Paths, Files}
+import java.nio.file.Files
 import java.nio.charset.StandardCharsets
 
 val somePath = Files.createTempFile("config", ".properties")
 val fileContents = "somefield=1234\nanotherfield=some string"
 Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
-
-implicit val ioCS = cats.effect.IO.contextShift(scala.concurrent.ExecutionContext.global)
 ```
 
 ```tut:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
-import cats.effect.{ Blocker, IO }
+import cats.effect.{ Blocker, ContextShift, IO }
 
-final case class MyConfig(somefield: Int, anotherfield: String)
+case class MyConfig(somefield: Int, anotherfield: String)
 
-val load: IO[MyConfig] = Blocker[IO].use { blocker =>
+def load(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[MyConfig] = {
   ConfigSource.file(somePath).loadF[IO, MyConfig](blocker)
 }
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:
+
+```tut:invisible
+implicit val ioCS: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+```
+
 ```tut:book
 //Show the contents of the file
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
 
-load.unsafeRunSync().equals(MyConfig(1234, "some string"))
+Blocker[IO].use(load).unsafeRunSync().equals(MyConfig(1234, "some string"))
 ```
 
 ### Writing configuration
 
 To create an IO that writes out a configuration file, do as follows:
 
+```tut:reset:invisible
+import java.nio.file.Files
+
+val somePath = Files.createTempFile("config", ".properties")
+
+case class MyConfig(somefield: Int, anotherfield: String)
+```
+
 ```tut:silent
 import pureconfig.module.catseffect._
-import cats.effect.{ Blocker, IO }
+import pureconfig.generic.auto._
+import cats.effect.{ Blocker, ContextShift, IO }
 
 val someConfig = MyConfig(1234, "some string")
 
-val save: IO[Unit] = Blocker[IO].use { blocker =>
-  saveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
+def save(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[Unit] = {
+  blockingSaveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
 }
 ```

@@ -23,16 +23,20 @@ To load a configuration file from a path using cats-effect's `IO`:
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
-import cats.effect.{ Blocker, IO }
+import cats.effect.{ Blocker, ContextShift, IO }
 
-final case class MyConfig(somefield: Int, anotherfield: String)
+case class MyConfig(somefield: Int, anotherfield: String)
 
-val load: IO[MyConfig] = Blocker[IO].use { blocker =>
+def load(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[MyConfig] = {
   ConfigSource.file(somePath).loadF[IO, MyConfig](blocker)
 }
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:
+
+
+
+
 ```scala
 //Show the contents of the file
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
@@ -40,7 +44,7 @@ new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
 // somefield=1234
 // anotherfield=some string
 
-load.unsafeRunSync().equals(MyConfig(1234, "some string"))
+Blocker[IO].use(load).unsafeRunSync().equals(MyConfig(1234, "some string"))
 // res3: Boolean = true
 ```
 
@@ -48,13 +52,17 @@ load.unsafeRunSync().equals(MyConfig(1234, "some string"))
 
 To create an IO that writes out a configuration file, do as follows:
 
+
+
+
 ```scala
 import pureconfig.module.catseffect._
-import cats.effect.{ Blocker, IO }
+import pureconfig.generic.auto._
+import cats.effect.{ Blocker, ContextShift, IO }
 
 val someConfig = MyConfig(1234, "some string")
 
-val save: IO[Unit] = Blocker[IO].use { blocker =>
-  saveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
+def save(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[Unit] = {
+  blockingSaveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
 }
 ```
