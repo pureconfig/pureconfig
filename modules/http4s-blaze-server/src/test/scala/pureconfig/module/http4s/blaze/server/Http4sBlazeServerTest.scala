@@ -13,14 +13,21 @@ class Http4sBlazeServerTest extends BaseSuite {
   implicit val timer: Timer[IO] = IO.timer(global)
 
   "reading a BlazeServerBuilderConfig" should "allow creating a BlazeServerBuilder" in {
-    val conf = ConfigFactory.parseString(
-      s"""{ host: "127.0.0.123", port: 1234, banner: ["a", "b"] }""")
+    val conf = ConfigFactory.parseString(s"""
+         |{
+         |  host: "127.0.0.123"
+         |  port: 1234
+         |  banner: ["a", "b"]
+         |  responseHeaderTimeout: "1 s"
+         |  idleTimeout: "2 s"
+         |  maxHeaderLength: 8
+         |}
+         |""".stripMargin)
 
     val res = conf.to[BlazeServerBuilderConfig]
+    val serverBuilder = res.right.value.configure[IO]()
 
-    res.right.value
-      .configure[IO]()
-      .resource
+    serverBuilder.resource
       .use { server =>
         server.address.getAddress.getHostAddress should ===("127.0.0.123")
         server.address.getPort should ===(1234)
