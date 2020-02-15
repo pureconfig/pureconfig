@@ -20,6 +20,7 @@ import cats.effect.{ContextShift, IO, Timer}
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.syntax._
+import pureconfig.module.http4s.blaze.server._
 
 import scala.concurrent.ExecutionContext.global
 ```

@@ -22,6 +22,7 @@ import cats.effect.{ContextShift, IO}
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.syntax._
+import pureconfig.module.http4s.blaze.client._
 
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.duration.Duration
