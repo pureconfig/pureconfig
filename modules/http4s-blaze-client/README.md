@@ -36,5 +36,5 @@ implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
 val conf = ConfigFactory.parseString(s"""{ responseHeaderTimeout: "60 s" }""")
 val config = conf.to[BlazeClientBuilderConfig].right.value
 
-val client = config.configure[IO](global).resource
+val client = config.toBuilder[IO](global).resource
 ```

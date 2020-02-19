@@ -33,5 +33,5 @@ implicit val timer: Timer[IO] = IO.timer(global)
 
 val config = conf.to[BlazeServerBuilderConfig].right.value
 
-val server = config.configure[IO]().resource
+val server = config.toBuilder[IO]().resource
 ```

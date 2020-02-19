@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import cats.effect.{ ContextShift, IO }
 import com.typesafe.config.ConfigFactory
+import org.http4s.client.blaze.BlazeClientBuilder
 import pureconfig.BaseSuite
 import pureconfig.syntax._
 
@@ -18,21 +19,22 @@ class Http4sBlazeClientTest extends BaseSuite {
     val conf =
       ConfigFactory.parseString(s"""
            |{ 
-           |  responseHeaderTimeout: "1 s"
-           |  idleTimeout: "2 s"
-           |  requestTimeout: "3 s"
-           |  maxTotalConnections: 4
-           |  maxWaitQueueLimit: 5
-           |  checkEndpointAuthentication: true
-           |  maxResponseLineSize: 7
-           |  maxHeaderLength: 8
-           |  maxChunkSize: 9
-           |  chunkBufferMaxSize: 10
+           |  response-header-timeout: "1 s"
+           |  idle-timeout: "2 s"
+           |  request-timeout: "3 s"
+           |  max-total-connections: 4
+           |  max-wait-queue-limit: 5
+           |  check-endpoint-authentication: true
+           |  max-response-line-size: 7
+           |  max-header-length: 8
+           |  max-chunk-size: 9
+           |  chunk-buffer-max-size: 10
+           |  buffer-size: 11
            |}
            |""".stripMargin)
 
-    val res = conf.to[BlazeClientBuilderConfig]
-    val clientBuilder = res.right.value.configure[IO](global)
+    val Right(res) = conf.to[BlazeClientBuilderConfig]
+    val clientBuilder = res.toBuilder[IO](global)
 
     clientBuilder.responseHeaderTimeout should === {
       Duration.create(1, TimeUnit.SECONDS)
@@ -49,11 +51,9 @@ class Http4sBlazeClientTest extends BaseSuite {
     clientBuilder.maxWaitQueueLimit should === {
       5
     }
-    res.right.value
-      .configure[IO](global)
-      .checkEndpointIdentification should === {
-        true
-      }
+    clientBuilder.checkEndpointIdentification should === {
+      true
+    }
     clientBuilder.maxResponseLineSize should === {
       7
     }
@@ -66,12 +66,37 @@ class Http4sBlazeClientTest extends BaseSuite {
     clientBuilder.chunkBufferMaxSize should === {
       10
     }
+    clientBuilder.bufferSize should === {
+      11
+    }
 
     clientBuilder.resource
       .use { _ =>
         IO.unit
       }
       .unsafeRunSync()
+  }
+
+  "Default" should "be the same as unmodified BlazeClientBuilder" in {
+
+    val actual = BlazeClientBuilderConfig().toBuilder[IO](global)
+    val expected = BlazeClientBuilder[IO](global)
+
+    actual.responseHeaderTimeout should ===(expected.responseHeaderTimeout)
+    actual.idleTimeout should ===(expected.idleTimeout)
+    actual.requestTimeout should ===(expected.requestTimeout)
+    actual.connectTimeout should ===(expected.connectTimeout)
+    actual.userAgent should ===(expected.userAgent)
+    actual.maxTotalConnections should ===(expected.maxTotalConnections)
+    actual.maxWaitQueueLimit should ===(expected.maxWaitQueueLimit)
+    actual.checkEndpointIdentification should ===(
+      expected.checkEndpointIdentification)
+    actual.maxResponseLineSize should ===(expected.maxResponseLineSize)
+    actual.maxHeaderLength should ===(expected.maxHeaderLength)
+    actual.maxChunkSize should ===(expected.maxChunkSize)
+    actual.chunkBufferMaxSize should ===(expected.chunkBufferMaxSize)
+    actual.parserMode should ===(expected.parserMode)
+    actual.bufferSize should ===(expected.bufferSize)
   }
 
 }
