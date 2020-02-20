@@ -1,7 +1,6 @@
 package pureconfig.module.magnolia
 
 import scala.language.higherKinds
-
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 import shapeless.test.illTyped
@@ -14,6 +13,32 @@ class DerivationModesSuite extends BaseSuite {
 
   val person = Person("John", "Doe")
   val conf = ConfigFactory.parseString("{ type: person, name: John, surname: Doe }")
+
+  case class CustomCaseClass(customObject: CustomObject, mapCustomObject: Map[String, CustomObject], mapListCustomObject: Map[String, List[CustomObject]])
+  case class CustomObject(value: Int)
+  object CustomObject {
+    implicit val pureconfigReader: ConfigReader[CustomObject] = ConfigReader.fromStringOpt {
+      case "eaaxacaca" => Some(CustomObject(453))
+      case "a" => Some(CustomObject(45))
+      case _ => Some(CustomObject(1))
+    }
+    implicit val pureconfigWriter: ConfigWriter[CustomObject] = ConfigWriter.toString {
+      case CustomObject(453) => "eaaxacaca"
+      case CustomObject(45) => "a"
+      case _ => "cvbc"
+    }
+  }
+
+  val customCaseClass = CustomCaseClass(
+    CustomObject(453),
+    Map("a" -> CustomObject(453), "b" -> CustomObject(45)),
+    Map("x" -> List(CustomObject(45), CustomObject(453), CustomObject(1))))
+  val customConf = ConfigFactory.parseString(
+    """{
+      |  custom-object = "eaaxacaca"
+      |  map-custom-object { a = "eaaxacaca", b = "a" }
+      |  map-list-custom-object { x = ["a", "eaaxacaca", "cvbc"]}
+      |}""".stripMargin)
 
   behavior of "default"
 
@@ -57,5 +82,13 @@ class DerivationModesSuite extends BaseSuite {
 
     ConfigReader[Entity].from(conf.root) shouldBe Right(person)
     ConfigWriter[Entity].to(person) shouldBe conf.root()
+  }
+
+  it should "use existing reader and writer instances when they exist" in {
+    import pureconfig.module.magnolia.auto.reader._
+    import pureconfig.module.magnolia.auto.writer._
+
+    ConfigReader[CustomCaseClass].from(customConf.root) shouldBe Right(customCaseClass)
+    ConfigWriter[CustomCaseClass].to(customCaseClass) shouldBe customConf.root()
   }
 }
