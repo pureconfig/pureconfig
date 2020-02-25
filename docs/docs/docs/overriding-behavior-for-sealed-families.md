@@ -12,8 +12,7 @@ concrete class represented in the configuration.
 
 Given an `AnimalConf` sealed trait:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -24,7 +23,7 @@ case class BirdConf(canFly: Boolean) extends AnimalConf
 
 This will load a `DogConf` instance:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ type: dog-conf, age: 4 }").load[AnimalConf]
 ```
 
@@ -36,7 +35,7 @@ of a case class option, we can use another field.
 
 First, define a `CoproductHint` in implicit scope:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig.generic.FieldCoproductHint
 
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
@@ -44,14 +43,14 @@ implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
 
 Then load the config:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ kind: dog-conf, age: 4 }").load[AnimalConf]
 ```
 
 `FieldCoproductHint` can also be adapted to write class names in a different
 way. First, define a new `FieldCoproductHint` in implicit scope:
 
-```tut:silent
+```scala mdoc:nest:silent
 implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
   override def fieldValue(name: String) = name.dropRight("Conf".length)
 }
@@ -59,7 +58,7 @@ implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
 
 Then load the config:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ type: Bird, can-fly: true }").load[AnimalConf]
 ```
 
@@ -67,7 +66,9 @@ If you encode enumerations using sealed traits of case objects, you can use the
 `deriveEnumerationReader` method from the `pureconfig.generic.semiauto` package
 to derive `ConfigReader` instances for your sealed trait.
 
-```tut:silent
+```scala mdoc:reset:silent
+import pureconfig._
+import pureconfig.generic.auto._
 import pureconfig.generic.semiauto._
 
 sealed trait Season
@@ -83,7 +84,7 @@ case class MyConf(list: List[Season])
 
 We can load seasons by specifying them by class name:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ list: [spring, summer, autumn, winter] }").load[MyConf]
 ```
 
@@ -91,7 +92,7 @@ By default, enumerations will be encoded as strings with the `kebab-case`
 representation of the class name, but that behavior can be overridden by
 specifying a different transformation function.
 
-```tut:silent
+```scala mdoc:silent
 sealed trait Color
 case object RainyBlue extends Color
 case object SunnyYellow extends Color
@@ -101,6 +102,6 @@ implicit val colorReader: ConfigReader[Color] = deriveEnumerationReader[Color](C
 case class ColorList(colors: List[Color])
 ```
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ colors: [rainy_blue, sunny_yellow] }").load[ColorList]
 ```
