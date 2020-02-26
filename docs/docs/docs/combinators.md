@@ -14,29 +14,28 @@ PureConfig.
 
 The simplest combinator is `map`, which simply transforms the result of an existing reader:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 
-case class Conf(bytes: Vector[Byte])
+case class BytesConf(bytes: Vector[Byte])
 
 // reads an array of bytes from a string
 implicit val byteVectorReader: ConfigReader[Vector[Byte]] =
   ConfigReader[String].map(_.getBytes.toVector)
 ```
 
-```tut:book
-ConfigSource.string("""{ bytes = "Hello world" }""").load[Conf]
+```scala mdoc
+ConfigSource.string("""{ bytes = "Hello world" }""").load[BytesConf]
 ```
 
 `emap` allows users to validate the inputs and provide detailed failures:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig.error._
 
 case class Port(number: Int)
-case class Conf(port: Port)
+case class PortConf(port: Port)
 
 // reads a TCP port, validating the number range
 implicit val portReader = ConfigReader[Int].emap {
@@ -45,21 +44,21 @@ implicit val portReader = ConfigReader[Int].emap {
 }
 ```
 
-```tut:book
-ConfigSource.string("{ port = 8080 }").load[Conf]
-ConfigSource.string("{ port = -1 }").load[Conf]
+```scala mdoc
+ConfigSource.string("{ port = 8080 }").load[PortConf]
+ConfigSource.string("{ port = -1 }").load[PortConf]
 ```
 
 `orElse` can be used to provide alternative ways to load a config:
 
-```tut:silent
+```scala mdoc:silent
 val csvIntListReader = ConfigReader[String].map(_.split(",").map(_.toInt).toList)
 implicit val intListReader = ConfigReader[List[Int]].orElse(csvIntListReader)
 
-case class Conf(list: List[Int])
+case class IntListConf(list: List[Int])
 ```
 
-```tut:book
-ConfigSource.string("""{ list = [1,2,3] }""").load[Conf]
-ConfigSource.string("""{ list = "4,5,6" }""").load[Conf]
+```scala mdoc
+ConfigSource.string("""{ list = [1,2,3] }""").load[IntListConf]
+ConfigSource.string("""{ list = "4,5,6" }""").load[IntListConf]
 ```

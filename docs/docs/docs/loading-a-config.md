@@ -20,7 +20,7 @@ The `ConfigSource` companion object defines many other ready-to-use sources, lik
 
 After you have a config source you can load your config using several methods:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -29,7 +29,7 @@ case class Conf(name: String, age: Int)
 val source = ConfigSource.string("{ name = John, age = 33 }")
 ```
 
-```tut:book
+```scala mdoc
 // reads a config and loads it into a `Either[ConfigReaderFailures, Conf]`
 source.load[Conf]
 
@@ -56,23 +56,23 @@ Most `ConfigSource` instances are also instances of `ConfigObjectSource` - a mor
 guaranteed to produce a config object (instead of say, an array or a scalar value). `ConfigObjectSource` instances are
 equipped with an `.withFallback` method you can use to merge configs:
 
-```tut:silent
+```scala mdoc:silent
 val appSource = ConfigSource.string("{ age = 33 }")
 val defaultsSource = ConfigSource.string("{ name = Admin, age = -1 }")
 ```
 
-```tut:book
+```scala mdoc
 appSource.withFallback(defaultsSource).load[Conf]
 ```
 
 Sometimes you want some of the sources in your chain to be optional. You can call `.optional` on any
 `ConfigObjectSource` to make it produce an empty config if the underlying source cannot be read:
 
-```tut:silent
+```scala mdoc:silent
 val otherAppSource = ConfigSource.file("non-existing-file.conf")
 ```
 
-```tut:book
+```scala mdoc
 otherAppSource.withFallback(defaultsSource).load[Conf]
 
 otherAppSource.optional.withFallback(defaultsSource).load[Conf]
@@ -80,7 +80,7 @@ otherAppSource.optional.withFallback(defaultsSource).load[Conf]
 
 You also have the option to use an alternative source in case your primary source can't be read by using `.recoverWith`:
 
-```tut:book
+```scala mdoc
 otherAppSource.recoverWith { case _ => defaultsSource }.load[Conf]
 ```
 
@@ -90,7 +90,7 @@ You may want your application config to be loaded from a specific path in the co
 configs for multiple apps in the same sources. `ConfigSource` instances have an `.at` method you can use to specify
 where you want the config to be read from:
 
-```tut:silent
+```scala mdoc:silent
 val multiAppSource = ConfigSource.string("""
     app-a: {
         timeout: 5s
@@ -105,7 +105,7 @@ val multiAppSource = ConfigSource.string("""
 case class MyAppConf(host: String, port: Int)
 ```
 
-```tut:book
+```scala mdoc
 multiAppSource.at("app-b").load[MyAppConf]
 ```
 

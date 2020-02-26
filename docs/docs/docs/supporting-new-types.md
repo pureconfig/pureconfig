@@ -8,11 +8,9 @@ title: Supporting New Types
 Not all types are supported automatically by PureConfig. For instance, classes that are not case classes are not
 supported out-of-the-box:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
-import pureconfig.syntax._
 
 class MyInt(value: Int) {
   override def toString: String = s"MyInt($value)"
@@ -24,7 +22,7 @@ case class Conf(n: MyInt)
 In order to read an instance of a given type `T` from a config, PureConfig needs to have in scope in implicit instance
 of `ConfigReader[T]`. This won't compile because there's no `ConfigReader` instance for `MyInt`:
 
-```tut:book:fail
+```scala mdoc:fail
 ConfigSource.string("{ n: 1 }").load[Conf]
 ```
 
@@ -38,7 +36,7 @@ provided. There are three main ways to build such an instance:
 For the `MyInt` type above, we could create a `ConfigReader[MyInt]` by mapping the result of `ConfigReader[Int]` like
 this:
 
-```tut:book:silent
+```scala mdoc:silent
 implicit val myIntReader = ConfigReader[Int].map(n => new MyInt(n))
 ```
 
@@ -47,7 +45,7 @@ Note that the `ConfigReader[Int]` expression "summons" an existing implicit inst
 
 As an example for the second approach, we could read the required integer by parsing it from a string form like this:
 
-```tut:book:silent
+```scala mdoc:nest:silent
 implicit val myIntReader = ConfigReader.fromString[MyInt](
   ConvertHelpers.catchReadError(s => new MyInt(s.toInt)))
 ```
@@ -58,8 +56,8 @@ The `fromString` factory method allows users to easily read data from string rep
 
 Finally, we could simply implement the `ConfigReader` interface by hand:
 
-```tut:book:silent
-implicit object MyIntReader extends ConfigReader[MyInt] {
+```scala mdoc:nest:silent
+implicit val myIntReader = new ConfigReader[MyInt] {
   def from(cur: ConfigCursor) = cur.asString.map(s => new MyInt(s.toInt))
 }
 ```
@@ -69,7 +67,7 @@ list of errors. You can read more about cursors at [Config Cursors](config-curso
 
 Using any of the approaches above would now make the config be loaded successfully:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ n: 1 }").load[Conf]
 ```
 
