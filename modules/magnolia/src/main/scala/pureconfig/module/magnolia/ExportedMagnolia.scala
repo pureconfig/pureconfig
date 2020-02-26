@@ -4,7 +4,7 @@ import magnolia.Magnolia
 import pureconfig.Exported
 
 import scala.language.higherKinds
-import scala.reflect.macros.{ blackbox, whitebox }
+import scala.reflect.macros.whitebox
 
 // Wrap the output of Magnolia in an Exported to force it to a lower priority.
 // This seems to work, despite magnolia hardcode checks for `macroApplication` symbol
