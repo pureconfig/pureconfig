@@ -3,7 +3,7 @@ package pureconfig.module.magnolia.semiauto
 import magnolia._
 import pureconfig.ConfigWriter
 import pureconfig.generic.{ CoproductHint, ProductHint }
-import pureconfig.module.magnolia.{ ExportedMagnolia, MagnoliaConfigWriter }
+import pureconfig.module.magnolia.MagnoliaConfigWriter
 
 import scala.language.experimental.macros
 import scala.reflect.ClassTag
@@ -21,5 +21,5 @@ object writer {
   def dispatch[A: ClassTag: CoproductHint](ctx: SealedTrait[ConfigWriter, A]): ConfigWriter[A] =
     MagnoliaConfigWriter.dispatch(ctx)
 
-  def deriveWriter[A]: ConfigWriter[A] = macro ExportedMagnolia.forcedBlackboxMagnolia[ConfigWriter, A]
+  def deriveWriter[A]: ConfigWriter[A] = macro Magnolia.gen[A]
 }

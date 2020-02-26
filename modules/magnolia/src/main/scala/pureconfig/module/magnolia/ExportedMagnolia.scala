@@ -11,14 +11,8 @@ import scala.reflect.macros.{ blackbox, whitebox }
 // and relying on getting an diverging implicit expansion error for auto-mode.
 // Thankfully at least it doesn't check the output type of its `macroApplication`
 object ExportedMagnolia {
-  def exportedMagnolia[TC[_], A](c: blackbox.Context)(implicit t: c.WeakTypeTag[A]): c.Expr[Exported[TC[A]]] = {
-    val magnoliaTree = forcedBlackboxMagnolia[TC, A](c)
+  def exportedMagnolia[TC[_], A: c.WeakTypeTag](c: whitebox.Context): c.Expr[Exported[TC[A]]] = {
+    val magnoliaTree = c.Expr[TC[A]](Magnolia.gen[A](c))
     c.universe.reify(Exported(magnoliaTree.splice))
-  }
-
-  // if i TELL you it's whitebox, you BETTER believe me
-  def forcedBlackboxMagnolia[TC[_], A](c: blackbox.Context)(implicit t: c.WeakTypeTag[A]): c.Expr[TC[A]] = {
-    val c0 = c.asInstanceOf[whitebox.Context]
-    c.Expr[TC[A]](Magnolia.gen[A](c.asInstanceOf[c0.type])(t.asInstanceOf[c0.WeakTypeTag[A]]).asInstanceOf[c.Tree])
   }
 }
