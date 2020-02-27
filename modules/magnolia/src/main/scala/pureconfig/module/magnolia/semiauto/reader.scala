@@ -1,6 +1,7 @@
 package pureconfig.module.magnolia.semiauto
 
 import scala.language.experimental.macros
+
 import magnolia._
 import pureconfig.ConfigReader
 import pureconfig.generic.{ CoproductHint, ProductHint }

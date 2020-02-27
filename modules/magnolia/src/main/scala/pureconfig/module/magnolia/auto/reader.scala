@@ -1,11 +1,11 @@
 package pureconfig.module.magnolia.auto
 
+import scala.language.experimental.macros
+
 import magnolia._
+import pureconfig.{ ConfigReader, Exported }
 import pureconfig.generic.{ CoproductHint, ProductHint }
 import pureconfig.module.magnolia.{ ExportedMagnolia, MagnoliaConfigReader }
-import pureconfig.{ ConfigReader, Exported }
-
-import scala.language.experimental.macros
 
 /**
  * An object that, when imported, provides implicit `ConfigReader` instances for value classes, tuples, case classes and

@@ -1,12 +1,12 @@
 package pureconfig.module.magnolia.auto
 
+import scala.language.experimental.macros
+import scala.reflect.ClassTag
+
 import magnolia._
 import pureconfig.{ ConfigWriter, Exported }
 import pureconfig.generic.{ CoproductHint, ProductHint }
 import pureconfig.module.magnolia.{ ExportedMagnolia, MagnoliaConfigWriter }
-
-import scala.language.experimental.macros
-import scala.reflect.ClassTag
 
 /**
  * An object that, when imported, provides implicit `ConfigWriter` instances for value classes, tuples, case classes and
