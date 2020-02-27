@@ -3,9 +3,9 @@ package pureconfig.module.magnolia.auto
 import scala.language.experimental.macros
 
 import magnolia._
-import pureconfig.ConfigReader
+import pureconfig.{ ConfigReader, Exported }
 import pureconfig.generic.{ CoproductHint, ProductHint }
-import pureconfig.module.magnolia.MagnoliaConfigReader
+import pureconfig.module.magnolia.{ ExportedMagnolia, MagnoliaConfigReader }
 
 /**
  * An object that, when imported, provides implicit `ConfigReader` instances for value classes, tuples, case classes and
@@ -20,5 +20,5 @@ object reader {
   def dispatch[A: CoproductHint](ctx: SealedTrait[ConfigReader, A]): ConfigReader[A] =
     MagnoliaConfigReader.dispatch(ctx)
 
-  implicit def exportReader[A]: ConfigReader[A] = macro Magnolia.gen[A]
+  implicit def exportReader[A]: Exported[ConfigReader[A]] = macro ExportedMagnolia.exportedMagnolia[ConfigReader, A]
 }
