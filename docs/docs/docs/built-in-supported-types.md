@@ -10,8 +10,8 @@ using those types, users don't have to provide anything else in order to be able
 
 The currently supported basic types are:
 
-- `String`, `Boolean`, `Byte`, `Double` (standard and percentage format ending with `%`), `Float` (also supporting percentage),
-  `Int`, `Long`, `Short`, `Char`, `URL`, `URI`, `Duration`, `FiniteDuration`;
+- `String`, `Boolean`, `Double` (standard and percentage format ending with `%`), `Float` (also supporting percentage),
+  `Int`, `Long`, `Short`, `Byte`, `Char`, `URL`, `URI`, `Duration`, `FiniteDuration`;
 - [`java.lang.Enum`](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html);
 - everything in [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) (must be
   configured first - see [Configurable Converters](configurable-converters.html));

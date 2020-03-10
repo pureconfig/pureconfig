@@ -33,8 +33,6 @@ trait PrimitiveReaders {
 
   implicit val booleanConfigReader = ConfigReader.fromCursor(_.asBoolean)
 
-  implicit val byteConfigReader = ConfigReader.fromCursor(_.asByte)
-
   implicit val doubleConfigReader = ConfigReader.fromCursor({ cur =>
     val asStringReader = catchReadError({
       case v if v.last == '%' => v.dropRight(1).toDouble / 100f
@@ -60,6 +58,8 @@ trait PrimitiveReaders {
   implicit val longConfigReader = ConfigReader.fromCursor(_.asLong)
 
   implicit val shortConfigReader = ConfigReader.fromCursor(_.asShort)
+
+  implicit val byteConfigReader = ConfigReader.fromCursor(_.asByte)
 }
 
 /**
