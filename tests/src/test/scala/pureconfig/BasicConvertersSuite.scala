@@ -94,8 +94,6 @@ class BasicConvertersSuite extends BaseSuite {
     ConfigValueFactory.fromAnyRef("no") -> false,
     ConfigValueFactory.fromAnyRef("off") -> false)
 
-  checkArbitrary[Byte]
-
   checkArbitrary[Double]
   checkArbitrary2[Double, Percentage](_.toDoubleFraction)
   checkFailures[Double](
@@ -117,6 +115,8 @@ class BasicConvertersSuite extends BaseSuite {
   checkArbitrary[Long]
 
   checkArbitrary[Short]
+
+  checkArbitrary[Byte]
 
   checkArbitrary[BigInt]
   checkArbitrary[BigDecimal]
