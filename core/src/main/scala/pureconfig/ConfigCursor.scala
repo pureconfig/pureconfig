@@ -69,6 +69,20 @@ sealed trait ConfigCursor {
     castOrFail(BOOLEAN, v => Right(v.unwrapped.asInstanceOf[Boolean]))
 
   /**
+   * Casts this cursor to a byte.
+   *
+   * @return a `Right` with the byte value pointed to by this cursor if the cast can be done, `Left` with a list of
+   *         failures otherwise.
+   */
+  def asByte: ConfigReader.Result[Byte] =
+    castOrFail(NUMBER, _.unwrapped match {
+      case i: java.lang.Long if i.byteValue().toLong == i => Right(i.byteValue())
+      case i: java.lang.Integer if i.byteValue().toInt == i => Right(i.byteValue())
+      case i: java.lang.Double if i.byteValue().toDouble == i => Right(i.byteValue())
+      case v => Left(CannotConvert(v.toString, "Byte", "Unable to convert Number to Byte"))
+    })
+
+  /**
    * Casts this cursor to a long.
    *
    * @return a `Right` with the long value pointed to by this cursor if the cast can be done, `Left` with a list of
