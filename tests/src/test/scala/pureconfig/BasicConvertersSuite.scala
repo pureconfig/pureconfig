@@ -116,6 +116,8 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Short]
 
+  checkArbitrary[Byte]
+
   checkArbitrary[BigInt]
   checkArbitrary[BigDecimal]
   checkArbitrary[BigInteger]
