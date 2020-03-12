@@ -1,7 +1,7 @@
 name := "pureconfig-akka"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.5.29")
+  "com.typesafe.akka" %% "akka-actor" % "2.5.30")
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")),
