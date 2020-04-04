@@ -46,8 +46,12 @@ object ConfigValueLocation {
    */
   def apply(co: ConfigOrigin): Option[ConfigValueLocation] =
     Option(co).flatMap { origin =>
-      if (origin.url != null && origin.lineNumber != -1)
-        Some(ConfigValueLocation(origin.url, origin.lineNumber))
+      // the `description` method will append the line number by default, which
+      // we don't want here. But it won't do that for negative line numbers,
+      // hence the `withLineNumber(-1)`.
+      val description = origin.withLineNumber(-1).description
+      if (origin.lineNumber != -1)
+        Some(ConfigValueLocation(description, origin.lineNumber))
       else
         None
     }
