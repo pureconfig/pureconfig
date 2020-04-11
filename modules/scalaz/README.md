@@ -111,7 +111,7 @@ val anotherInvalidConf = parseString("""{ i: false }""")
 List(validConf, invalidConf, anotherInvalidConf).traverseU { c =>
   Validation.fromEither(implicitly[ConfigReader[SimpleConfig]].from(c.root))
 }
-// res7: scalaz.Validation[pureconfig.error.ConfigReaderFailures,List[SimpleConfig]] = Failure(ConfigReaderFailures(ConvertFailure(KeyNotFound(i,Set()),None,),List(ConvertFailure(WrongType(BOOLEAN,Set(NUMBER)),None,i))))
+// res7: scalaz.Validation[pureconfig.error.ConfigReaderFailures,List[SimpleConfig]] = Failure(ConfigReaderFailures(ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),List(ConvertFailure(WrongType(BOOLEAN,Set(NUMBER)),Some(ConfigOrigin(String)),i))))
 ```
 
 ### Extra syntactic sugar
@@ -132,7 +132,7 @@ val myConf = parseString("{}")
 // myConf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
 
 val res = ConfigSource.fromConfig(myConf).load[MyConfig].left.map(_.toNel)
-// res: scala.util.Either[scalaz.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig] = Left(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),None,),ConvertFailure(KeyNotFound(s,Set()),None,)])
+// res: scala.util.Either[scalaz.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig] = Left(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)])
 ```
 
 This allows `scalaz` users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
@@ -145,7 +145,7 @@ import pureconfig.error._
 ```scala
 val result: ValidationNel[ConfigReaderFailure, MyConfig] =
   Validation.fromEither(res)
-// result: scalaz.ValidationNel[pureconfig.error.ConfigReaderFailure,MyConfig] = Failure(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),None,),ConvertFailure(KeyNotFound(s,Set()),None,)])
+// result: scalaz.ValidationNel[pureconfig.error.ConfigReaderFailure,MyConfig] = Failure(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)])
 ```
 
 Also, you could create `ConfigReader`s using `scalaz` types:

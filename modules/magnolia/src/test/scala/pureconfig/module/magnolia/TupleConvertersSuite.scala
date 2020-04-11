@@ -36,21 +36,21 @@ class TupleConvertersSuite extends BaseSuite {
   // Check errors
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> "two").asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "_2")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_2")))
   checkFailures[(String, Int)](
     ConfigValueFactory.fromIterable(List("one", "two").asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "1")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "1")))
 
   checkFailures[(Int, Int, Int)](
     ConfigValueFactory.fromIterable(List(1, "one").asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongSizeList(3, 2), None, "")))
+      ConvertFailure(WrongSizeList(3, 2), emptyConfigOrigin, "")))
 
   // NOTE: behavior differs from pureconfig.generic (only the first error is reported)
   checkFailures[(Int, Int, Int)](
     ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "_1")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_1")))
 
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef("str") -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), None, "")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), emptyConfigOrigin, "")))
 }

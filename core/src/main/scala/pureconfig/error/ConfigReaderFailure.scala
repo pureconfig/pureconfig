@@ -7,6 +7,7 @@ import java.io.FileNotFoundException
 import java.net.URL
 import java.nio.file.Path
 
+import com.typesafe.config.ConfigOrigin
 import pureconfig.ConfigCursor
 
 /**
@@ -21,9 +22,9 @@ trait ConfigReaderFailure {
   def description: String
 
   /**
-   * The optional location of the failure.
+   * The optional origin of the failure.
    */
-  def location: Option[ConfigValueLocation]
+  def origin: Option[ConfigOrigin]
 }
 
 /**
@@ -31,10 +32,10 @@ trait ConfigReaderFailure {
  * `ConfigValue` that raised the error.
  *
  * @param reason the reason for the conversion failure
- * @param location the optional location of the failure
+ * @param origin the optional origin of the failure
  * @param path the path to the `ConfigValue` that raised the error
  */
-case class ConvertFailure(reason: FailureReason, location: Option[ConfigValueLocation], path: String)
+case class ConvertFailure(reason: FailureReason, origin: Option[ConfigOrigin], path: String)
   extends ConfigReaderFailure {
 
   def description = reason.description
@@ -50,7 +51,7 @@ object ConvertFailure {
    * @return a `ConvertFailure` for the given reason at the given cursor.
    */
   def apply(reason: FailureReason, cur: ConfigCursor): ConvertFailure =
-    ConvertFailure(reason, cur.location, cur.path)
+    ConvertFailure(reason, cur.origin, cur.path)
 }
 
 /**
@@ -59,16 +60,16 @@ object ConvertFailure {
 @deprecated("`loadConfigFromFiles` won't return this failure anymore", "0.10.1")
 case object NoFilesToRead extends ConfigReaderFailure {
   def description = "The config files to load must not be empty."
-  def location = None
+  def origin = None
 }
 
 /**
  * A failure occurred because an exception was thrown during the reading process.
  *
  * @param throwable the exception thrown
- * @param location the optional location of the failure
+ * @param origin the optional origin of the failure
  */
-final case class ThrowableFailure(throwable: Throwable, location: Option[ConfigValueLocation])
+final case class ThrowableFailure(throwable: Throwable, origin: Option[ConfigOrigin])
   extends ConfigReaderFailure {
 
   def description = s"${throwable.getMessage}."
@@ -101,7 +102,7 @@ trait CannotRead extends ConfigReaderFailure {
     case None => s"Unable to read $sourceType $sourceName."
   }
 
-  def location = None
+  def origin = None
 }
 
 /**
@@ -141,8 +142,8 @@ final case class CannotReadResource(resourceName: String, reason: Option[Throwab
  * A failure occurred due to the inability to parse the configuration.
  *
  * @param msg the error message from the parser
- * @param location the optional location of the failure
+ * @param origin the optional origin of the failure
  */
-final case class CannotParse(msg: String, location: Option[ConfigValueLocation]) extends ConfigReaderFailure {
+final case class CannotParse(msg: String, origin: Option[ConfigOrigin]) extends ConfigReaderFailure {
   def description = s"Unable to parse the configuration: $msg."
 }

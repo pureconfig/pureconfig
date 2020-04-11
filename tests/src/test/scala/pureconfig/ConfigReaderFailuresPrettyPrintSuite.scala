@@ -14,33 +14,33 @@ import pureconfig.generic.error._
 /**
  * Suite of tests related to the pretty printing of config reader failures.
  */
-class ConfigReaderFailuresPrettyPrintSuite extends AnyFlatSpec with Matchers {
+class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
   "A ConfigReaderFailures prettyPrint method" should "print errors with a configurable identation" in {
 
-    def location(line: Int) = ConfigValueLocation(new URL("file:///tmp/config"), line)
+    def origin(line: Int) = urlConfigOrigin(new URL("file:///tmp/config"), line)
 
     val failures = ConfigReaderFailures(
-      ThrowableFailure(new Exception("Throwable error"), Some(location(12))),
+      ThrowableFailure(new Exception("Throwable error"), origin(12)),
       List(
         ConvertFailure(KeyNotFound("unknown_key"), None, "path"),
         CannotReadResource("resourceName", None)))
 
     failures.prettyPrint(0, 2) shouldBe
-      s"""|- (file:/tmp/config:12) Throwable error.
+      s"""|- (file:/tmp/config: 12) Throwable error.
           |- Unable to read resource resourceName.
           |
           |at 'path':
           |  - Key not found: 'unknown_key'.""".stripMargin
 
     failures.prettyPrint(1, 2) shouldBe
-      s"""|  - (file:/tmp/config:12) Throwable error.
+      s"""|  - (file:/tmp/config: 12) Throwable error.
           |  - Unable to read resource resourceName.
           |
           |  at 'path':
           |    - Key not found: 'unknown_key'.""".stripMargin
 
     failures.prettyPrint(1, 4) shouldBe
-      s"""|    - (file:/tmp/config:12) Throwable error.
+      s"""|    - (file:/tmp/config: 12) Throwable error.
           |    - Unable to read resource resourceName.
           |
           |    at 'path':
@@ -128,18 +128,18 @@ class ConfigReaderFailuresPrettyPrintSuite extends AnyFlatSpec with Matchers {
 
   it should "print a message displaying the proper file system location of the values that raised errors, if available" in {
     val workingDir = getClass.getResource("/").getFile
-    val file = "conf/configFailureLocation/single/a.conf"
+    val file = "conf/configFailureOrigin/single/a.conf"
     val url = new URL("file://" + workingDir + file)
 
     val failures = ConfigReaderFailures(
-      ConvertFailure(KeyNotFound("a", Set()), Some(ConfigValueLocation(url, 1)), ""),
-      List(ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), Some(ConfigValueLocation(url, 3)), "c")))
+      ConvertFailure(KeyNotFound("a", Set()), urlConfigOrigin(url, 1), ""),
+      List(ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), urlConfigOrigin(url, 3), "c")))
 
     failures.prettyPrint() shouldBe
       s"""|at the root:
-          |  - (file:${workingDir}${file}:1) Key not found: 'a'.
+          |  - (file:${workingDir}${file}: 1) Key not found: 'a'.
           |at 'c':
-          |  - (file:${workingDir}${file}:3) Expected type NUMBER. Found STRING instead.""".stripMargin
+          |  - (file:${workingDir}${file}: 3) Expected type NUMBER. Found STRING instead.""".stripMargin
   }
 
   it should "print a message displaying the inability to parse a given configuration" in {
@@ -148,10 +148,10 @@ class ConfigReaderFailuresPrettyPrintSuite extends AnyFlatSpec with Matchers {
     val url = new URL("file://" + workingDir + file)
 
     val failures = ConfigReaderFailures(
-      CannotParse("Expecting close brace } or a comma, got end of file", Some(ConfigValueLocation(url, 2))), List())
+      CannotParse("Expecting close brace } or a comma, got end of file", urlConfigOrigin(url, 2)), List())
 
     failures.prettyPrint() shouldBe
-      s"""|- (file:${workingDir}${file}:2) Unable to parse the configuration: Expecting close brace } or a comma, got end of file.""".stripMargin
+      s"""|- (file:${workingDir}${file}: 2) Unable to parse the configuration: Expecting close brace } or a comma, got end of file.""".stripMargin
   }
 
   it should "print a message indicating that a given file does not exist" in {

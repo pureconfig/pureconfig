@@ -115,7 +115,7 @@ val conf = parseString("{}")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
 
 val res = ConfigSource.fromConfig(conf).load[MyConfig2].left.map(_.toNonEmptyList)
-// res: scala.util.Either[cats.data.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig2] = Left(NonEmptyList(ConvertFailure(KeyNotFound(a,Set()),None,), ConvertFailure(KeyNotFound(b,Set()),None,)))
+// res: scala.util.Either[cats.data.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig2] = Left(NonEmptyList(ConvertFailure(KeyNotFound(a,Set()),Some(ConfigOrigin(String)),), ConvertFailure(KeyNotFound(b,Set()),Some(ConfigOrigin(String)),)))
 ```
 
 This allows cats users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
@@ -128,5 +128,5 @@ import pureconfig.error.ConfigReaderFailure
 ```scala
 val catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] =
   Validated.fromEither(res)
-// catsRes: cats.data.ValidatedNel[pureconfig.error.ConfigReaderFailure,MyConfig2] = Invalid(NonEmptyList(ConvertFailure(KeyNotFound(a,Set()),None,), ConvertFailure(KeyNotFound(b,Set()),None,)))
+// catsRes: cats.data.ValidatedNel[pureconfig.error.ConfigReaderFailure,MyConfig2] = Invalid(NonEmptyList(ConvertFailure(KeyNotFound(a,Set()),Some(ConfigOrigin(String)),), ConvertFailure(KeyNotFound(b,Set()),Some(ConfigOrigin(String)),)))
 ```

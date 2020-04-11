@@ -22,10 +22,10 @@ object ErrorUtil {
           e.getMessage.stripPrefix(s"${e.origin.description}: ")
         else
           e.getMessage).stripSuffix(".")
-        ConfigReader.Result.fail(CannotParse(msg, ConfigValueLocation(e.origin())))
+        ConfigReader.Result.fail(CannotParse(msg, Some(e.origin())))
 
       case e: ConfigException =>
-        ConfigReader.Result.fail(ThrowableFailure(e, ConfigValueLocation(e.origin())))
+        ConfigReader.Result.fail(ThrowableFailure(e, Some(e.origin())))
 
       case NonFatal(e) =>
         ConfigReader.Result.fail(ThrowableFailure(e, None))

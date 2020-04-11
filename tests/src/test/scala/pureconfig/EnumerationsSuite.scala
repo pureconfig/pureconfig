@@ -23,8 +23,8 @@ class EnumerationsSuite extends BaseSuite {
     ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("sunny-yellow")) shouldBe Right(SunnyYellow)
 
     val unknownValue = ConfigValueFactory.fromAnyRef("blue")
-    ConfigReader[Color].from(unknownValue) should failWith(NoValidCoproductChoiceFound(unknownValue), "")
-    ConfigReader[Color].from(conf.root()) should failWith(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), "")
+    ConfigReader[Color].from(unknownValue) should failWith(NoValidCoproductChoiceFound(unknownValue), "", emptyConfigOrigin)
+    ConfigReader[Color].from(conf.root()) should failWith(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), "", stringConfigOrigin(1))
   }
 
   it should "provide methods to derive writers for enumerations encoded as sealed traits" in {

@@ -1,6 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueFactory }
+import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigOriginFactory, ConfigParseOptions, ConfigValue, ConfigValueFactory }
 import org.scalacheck.{ Arbitrary, Gen }
 import pureconfig.error._
 
@@ -84,7 +84,7 @@ class ConfigReaderSuite extends BaseSuite {
   }
 
   it should "have a correct contramapConfig method" in forAll { conf: ConfigValue =>
-    val wrappedConf = ConfigFactory.parseString(s"{ value: ${conf.render} }").root()
+    val wrappedConf = conf.atKey("value").root()
     val unwrap = { cv: ConfigValue => cv.asInstanceOf[ConfigObject].get("value") }
 
     intReader.contramapConfig(unwrap).from(wrappedConf) shouldEqual intReader.from(conf)

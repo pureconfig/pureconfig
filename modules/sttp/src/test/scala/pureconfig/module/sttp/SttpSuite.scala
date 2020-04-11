@@ -28,7 +28,7 @@ class SttpSuite extends BaseSuite {
           value = "https!!://wrong.io",
           toType = "com.softwaremill.sttp.Uri",
           because = "requirement failed: Scheme can only contain alphanumeric characters, +, - and ."),
-        location = None,
+        origin = stringConfigOrigin(1),
         path = "uri")
 
     config.to[AppConfig].left.value shouldBe ConfigReaderFailures(failure)

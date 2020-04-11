@@ -20,7 +20,7 @@ class Http4sTest extends BaseSuite {
   "reading the uri config" should "get a CannotConvert error" in {
     val conf = ConfigFactory.parseString(s"""{uri:"\\\\"}""")
 
-    val errors = ConfigReaderFailures(ConvertFailure(CannotConvert("\\", "Uri", "Invalid URI"), None, "uri"))
+    val errors = ConfigReaderFailures(ConvertFailure(CannotConvert("\\", "Uri", "Invalid URI"), stringConfigOrigin(1), "uri"))
 
     conf.to[ServerConfig].left.value shouldEqual errors
   }

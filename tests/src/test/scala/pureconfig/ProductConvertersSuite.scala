@@ -122,7 +122,7 @@ class ProductConvertersSuite extends BaseSuite {
     ConfigConvert[Conf].from(conf3) should failWith(KeyNotFound("a"))
 
     val conf4 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5).asJava).root()
-    ConfigConvert[Conf].from(conf4) should failWith(KeyNotFound("g"), "d")
+    ConfigConvert[Conf].from(conf4) should failWith(KeyNotFound("g"), "d", emptyConfigOrigin)
 
     val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava).root()
     ConfigConvert[Conf].from(conf5).right.value shouldBe Conf(2, "default", 42, InnerConf(5, 6), Some(45))
