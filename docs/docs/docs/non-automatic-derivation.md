@@ -75,6 +75,39 @@ We are now ready to read `Person` configs:
 ConfigSource.fromConfig(conf).load[Person]
 ```
 
+### Semi-Automatic for Sealed Families
+
+To support a sealed family with semi-automatic derivation, you'll need to provide a derivation for every member of the family.
+
+```scala mdoc:silent
+sealed trait Occupation extends Product with Serializable
+
+object Occupation {
+  case class Employed(job: String) extends Occupation
+  object Employed {
+    implicit val reader = deriveReader[Employed]
+  }
+  case object Unemployed extends Occupation {
+    implicit val reader = deriveReader[Unemployed.type]
+  }
+  case object Student extends Occupation {
+    implicit val reader = deriveReader[Student.type]
+  }
+  implicit val reader = deriveReader[Occupation]
+}
+
+case class WorkingPerson(name: String, surname: String, occuation: Occupation)
+
+object WorkingPerson {
+  implicit val reader = deriveReader[WorkingPerson]
+}
+```
+
+```scala mdoc
+ConfigSource.string("{ name: Isaac, surname: Newton, occuation.type: student }").load[WorkingPerson]
+ConfigSource.string("""{ name: David, surname: Shingy, occuation: { type: employed, job: Digital Prophet } }""").load[WorkingPerson]
+```
+
 ### Manual
 
 When case class and sealed trait derivation is not needed or wanted, we can simply not import anything and define our
