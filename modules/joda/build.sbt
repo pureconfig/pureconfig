@@ -1,7 +1,7 @@
 name := "pureconfig-joda"
 
 libraryDependencies ++= Seq(
-  "joda-time" % "joda-time" % "2.10.5",
+  "joda-time" % "joda-time" % "2.10.6",
   "org.joda" % "joda-convert" % "2.2.1")
 
 developers := List(
