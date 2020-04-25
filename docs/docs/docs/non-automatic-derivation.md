@@ -75,7 +75,7 @@ We are now ready to read `Person` configs:
 ConfigSource.fromConfig(conf).load[Person]
 ```
 
-### Semi-Automatic for Sealed Families
+#### Semi-Automatic for Sealed Families
 
 To support a sealed family with semi-automatic derivation, you'll need to provide a derivation for every concrete member of the family and the base of the family.
 
