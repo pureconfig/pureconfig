@@ -27,7 +27,7 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
     cursor.asString.right.flatMap { str =>
       options.find(str == fieldValue(_)) match {
-        case Some(opt) => ConfigReader.Result.succeed(Use(cursor, opt))
+        case Some(opt) => Right(Use(cursor, opt))
         case None => cursor.failed[CoproductHint.Action](NoValidCoproductChoiceFound(cursor.value))
       }
     }
