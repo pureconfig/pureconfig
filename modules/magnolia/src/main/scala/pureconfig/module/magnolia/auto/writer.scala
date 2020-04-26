@@ -4,9 +4,9 @@ import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 import magnolia._
-import pureconfig.ConfigWriter
+import pureconfig.{ ConfigWriter, Exported }
 import pureconfig.generic.{ CoproductHint, ProductHint }
-import pureconfig.module.magnolia.MagnoliaConfigWriter
+import pureconfig.module.magnolia.{ ExportedMagnolia, MagnoliaConfigWriter }
 
 /**
  * An object that, when imported, provides implicit `ConfigWriter` instances for value classes, tuples, case classes and
@@ -21,5 +21,5 @@ object writer {
   def dispatch[A: ClassTag: CoproductHint](ctx: SealedTrait[ConfigWriter, A]): ConfigWriter[A] =
     MagnoliaConfigWriter.dispatch(ctx)
 
-  implicit def exportWriter[A]: ConfigWriter[A] = macro Magnolia.gen[A]
+  implicit def exportWriter[A]: Exported[ConfigWriter[A]] = macro ExportedMagnolia.exportedMagnolia[ConfigWriter, A]
 }

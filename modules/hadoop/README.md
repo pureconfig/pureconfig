@@ -7,7 +7,7 @@ Adds support for selected [Hadoop](http://hadoop.apache.org/) classes to PureCon
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-hadoop" % "0.12.2"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-hadoop" % "0.12.3"
 ```
 
 Also, `pureconfig-hadoop` depends on `hadoop-common` with `provided` scope. This means that you should explicitly add a dependency on `hadoop-common` or any other Hadoop library which depends on `hadoop-common`. Usually it would be something like this:

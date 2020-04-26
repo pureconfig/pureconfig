@@ -16,7 +16,7 @@ writing configs.
 All types mentioned at [Built-in Supported Types](built-in-supported-types.html) are supported both in reading and in
 writing operations:
 
-```tut:silent
+```scala mdoc:silent:reset-object
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -35,7 +35,7 @@ case class MyClass(
 val confObj = MyClass(true, Port(8080), AdtB(1), List(1.0, 0.2), Map("key" -> "value"), None)
 ```
 
-```tut:book
+```scala mdoc
 ConfigWriter[MyClass].to(confObj)
 ```
 
@@ -44,7 +44,7 @@ The mechanisms with which PureConfig finds out how to write a type to a config a
 and [Overriding Behavior for Types](overriding-behavior-for-types.html) for creating `ConfigWriter` instances, too.
 `ConfigWriter` also has useful combinators and factory methods to simplify new implementations:
 
-```tut:silent
+```scala mdoc:silent
 class MyInt(value: Int) {
   def getValue: Int = value
   override def toString: String = s"MyInt($value)"
@@ -53,17 +53,17 @@ class MyInt(value: Int) {
 implicit val myIntWriter = ConfigWriter[Int].contramap[MyInt](_.getValue)
 ```
 
-```tut:book
+```scala mdoc
 ConfigWriter[MyInt].to(new MyInt(1))
 ```
 
 Finally, if you need both the reading and the writing part for a custom type, you can implement a `ConfigConvert`:
 
-```tut:silent
+```scala mdoc:silent
 implicit val myIntConvert = ConfigConvert[Int].xmap[MyInt](new MyInt(_), _.getValue)
 ```
 
-```tut:book
+```scala mdoc
 val conf = ConfigWriter[MyInt].to(new MyInt(1))
 ConfigReader[MyInt].from(conf)
 ```

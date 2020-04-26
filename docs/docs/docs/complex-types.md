@@ -17,7 +17,7 @@ support, the [second part](#add-support-for-identifiable) provides the three met
 First of all, let's start with the data type that we want to support. 
 The example is composed of one interface and two implementations:
 
-```tut:silent
+```scala mdoc:reset-object:silent
 trait Identifiable {
   def getId: String
 }
@@ -47,7 +47,7 @@ to support unsupported complex types is to:
 
 In the case above, we could do:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.auto._
@@ -77,7 +77,7 @@ implicit val identifiableCoproductHint = new FieldCoproductHint[IdentifiableDumm
 
 // we tell PureConfig that to read Identifiable, it has to read IdentifiableDummy first
 // and then maps it to Identifiable
-implicit val identifiableConfigReader: ConfigReader[Identifiable] =
+implicit val identifiableConfigReader1: ConfigReader[Identifiable] =
   ConfigReader[IdentifiableDummy].map(_.toIdentifiable)
 ```
 
@@ -94,7 +94,7 @@ steps to read it.
 Similarly to adding support for simple types, it is possible to manually create a
 `ConfigReader[Identifiable]`:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 
 val class1Reader = ConfigReader.forProduct1("id")(new Class1(_))
@@ -108,7 +108,7 @@ def extractByType(typ: String, objCur: ConfigObjectCursor): ConfigReader.Result[
       s"type has value $t instead of class1 or class2"))
 }
 
-implicit val identifiableConfigReader = ConfigReader.fromCursor { cur =>
+implicit val identifiableConfigReader2 = ConfigReader.fromCursor { cur =>
   for {
     objCur <- cur.asObjectCursor
     typeCur <- objCur.atKey("type")
@@ -142,12 +142,12 @@ two things in order to read them:
 
 The first item is solved by the code:
 
-```tut:silent
+```scala mdoc:silent
 import shapeless._
 import shapeless.labelled._
 
 // create the singleton idw for the field id
-val idw = Witness('id)
+val idw = Witness(Symbol("id"))
 
 implicit val class1Generic = new LabelledGeneric[Class1] {
   // the generic representation of Class1 is the field id of type String
@@ -159,7 +159,7 @@ implicit val class1Generic = new LabelledGeneric[Class1] {
 }
 
 // create the singleton valuew for the field value
-val valuew = Witness('value)
+val valuew = Witness(Symbol("value"))
 
 implicit val class2Generic = new LabelledGeneric[Class2] {
   // the generic representation of Class2 is the fields id of type String and value of type Int
@@ -174,7 +174,7 @@ implicit val class2Generic = new LabelledGeneric[Class2] {
 
 The second item is trivial because neither `Class1` nor `Class2` have default values for fields:
 
-```tut:silent
+```scala mdoc:silent
 implicit val class1Default = new Default.AsOptions[Class1] {
   override type Out = Option[String] :: HNil
   override def apply(): Out = None :: HNil
@@ -190,9 +190,9 @@ After we add this, PureConfig is able to load `Class1` and `Class2` from configu
 The second and final part of this method is to add the generic representation of `Identifiable`
 as a sealed family of `Class1` and `Class2`, or a coproduct of them if you want:
 
-```tut:silent
-val class1w = Witness('Class1)
-val class2w = Witness('Class2)
+```scala mdoc:silent
+val class1w = Witness(Symbol("Class1"))
+val class2w = Witness(Symbol("Class2"))
 
 implicit val identifiableGeneric = new LabelledGeneric[Identifiable] {
   override type Repr =

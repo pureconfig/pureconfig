@@ -17,7 +17,7 @@ three ways of setting up reader derivation, which are presented in the next sect
 
 First, let's define an example case class and a config for us to load:
 
-```tut:silent
+```scala mdoc:silent
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 
@@ -29,13 +29,13 @@ val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 Automatic reader derivation is used throughout all the documentation pages. It is activated simply by importing
 `pureconfig.generic.auto._` everywhere readers are needed (for example, where `ConfigSource#load` is used):
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig.generic.auto._
 ```
 
 This import provides `ConfigReader` instances for all supported classes out-of-the-box:
 
-```tut:book
+```scala mdoc
 ConfigSource.fromConfig(conf).load[Person]
 ```
 
@@ -54,7 +54,7 @@ create derived instances, which you must put somewhere on the implicit scope.
 Semi-automatic derivation is enabled by importing `pureconfig.generic.semiauto._`. We can now explicitly define the
 reader for `Person` by calling `deriveReader`:
 
-```tut:invisible:reset
+```scala mdoc:invisible:reset
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 
@@ -63,7 +63,7 @@ case class Person(name: String, surname: String)
 val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 ```
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig.generic.semiauto._
 
 implicit val personReader = deriveReader[Person]
@@ -71,8 +71,41 @@ implicit val personReader = deriveReader[Person]
 
 We are now ready to read `Person` configs:
 
-```tut:book
+```scala mdoc
 ConfigSource.fromConfig(conf).load[Person]
+```
+
+#### Semi-Automatic for Sealed Families
+
+To support a sealed family with semi-automatic derivation, you'll need to provide a derivation for every concrete member of the family and the base of the family.
+
+```scala mdoc:silent
+sealed trait Occupation extends Product with Serializable
+
+object Occupation {
+  case class Employed(job: String) extends Occupation
+  object Employed {
+    implicit val reader = deriveReader[Employed]
+  }
+  case object Unemployed extends Occupation {
+    implicit val reader = deriveReader[Unemployed.type]
+  }
+  case object Student extends Occupation {
+    implicit val reader = deriveReader[Student.type]
+  }
+  implicit val reader = deriveReader[Occupation]
+}
+
+case class WorkingPerson(name: String, surname: String, occuation: Occupation)
+
+object WorkingPerson {
+  implicit val reader = deriveReader[WorkingPerson]
+}
+```
+
+```scala mdoc
+ConfigSource.string("{ name: Isaac, surname: Newton, occuation.type: student }").load[WorkingPerson]
+ConfigSource.string("""{ name: David, surname: Shingy, occuation: { type: employed, job: Digital Prophet } }""").load[WorkingPerson]
 ```
 
 ### Manual
@@ -81,7 +114,7 @@ When case class and sealed trait derivation is not needed or wanted, we can simp
 reader using any of ways explained in [Supporting New Types](supporting-new-types.html). The `forProductN` helper
 methods are convenient for creating readers and writers for case class-like types without generic derivation:
 
-```tut:invisible:reset
+```scala mdoc:invisible:reset
 import com.typesafe.config.ConfigFactory
 
 case class Person(name: String, surname: String)
@@ -89,13 +122,13 @@ case class Person(name: String, surname: String)
 val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 ```
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 
 implicit val personReader = ConfigReader.forProduct2("name", "surname")(Person(_, _))
 ```
 
-```tut:book
+```scala mdoc
 ConfigSource.fromConfig(conf).load[Person]
 ```
 

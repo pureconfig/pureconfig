@@ -1,3 +1,8 @@
+### 0.12.3 (Feb 29, 2020)
+
+- Bug fixes
+    - `pureconfig-magnolia` now uses existing `ConfigReader` instances in auto-derivation mode.
+
 ### 0.12.2 (Dec 21, 2019)
 
 - New features

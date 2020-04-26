@@ -28,6 +28,7 @@ trait PrimitiveWriters {
   implicit val intConfigWriter = ConfigWriter.forPrimitive[Int]
   implicit val longConfigWriter = ConfigWriter.forPrimitive[Long]
   implicit val shortConfigWriter = ConfigWriter.forPrimitive[Short]
+  implicit val byteConfigWriter = ConfigWriter.forPrimitive[Byte]
 }
 
 /**

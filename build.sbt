@@ -42,7 +42,7 @@ lazy val bundle = (project in file("bundle")).
 lazy val docs = (project in file("docs")).
   enablePlugins(MicrositesPlugin).
   settings(commonSettings, publishArtifact := false).
-  settings(micrositesSettings).
+  settings(docsSettings).
   dependsOn(bundle)
 
 def module(proj: Project) = proj.
@@ -112,7 +112,7 @@ lazy val commonSettings = Seq(
   publishArtifact in Test := false,
   publishTo := sonatypePublishToBundle.value)
 
-lazy val micrositesSettings = Seq(
+lazy val docsSettings = Seq(
   micrositeName := "PureConfig",
   micrositeDescription := "A boilerplate-free library for loading configuration files",
   micrositeAuthor := "com.github.pureconfig",
@@ -133,7 +133,7 @@ lazy val micrositesSettings = Seq(
         "gray-lighter"    /* code back        */  -> "#F4F3F4",
         "white-color"                             -> "#FFFFFF"),
   micrositeGitterChannel := false, // ugly
-  micrositeCompilingDocsTool := WithTut // TODO: this is deprecated, migrate to mdoc
+  mdocExtraArguments += "--no-link-hygiene"
 )
 
 // add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as

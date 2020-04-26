@@ -7,7 +7,7 @@ Adds support for selected [Akka](http://akka.io/) classes to PureConfig.
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.12.2"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.12.3"
 ```
 
 ## Example

@@ -21,20 +21,19 @@ There are several possible `FailureReason`s, the most common being:
 
 For example, given a config like this:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 
 case class Name(firstName: String, lastName: String)
 case class Person(name: Name, age: Int)
-case class Conf(person: Person)
+case class PersonConf(person: Person)
 ```
 
 Trying to load it with a string instead of an object at `name` results in a `ConvertFailure` because of a `WrongType`:
 
-```tut:book
-val res = ConfigSource.string("{ person: { name: John Doe, age: 35 } }").load[Conf]
+```scala mdoc
+val res = ConfigSource.string("{ person: { name: John Doe, age: 35 } }").load[PersonConf]
 ```
 
 All error-related classes are present in the `pureconfig.error` package.
@@ -44,7 +43,7 @@ All error-related classes are present in the `pureconfig.error` package.
 When implementing custom readers, the cursor API already deals with the most common reasons for a reader to fail.
 However, it also provides a `failed` method for users to do validations on their side, too:
 
-```tut:silent
+```scala mdoc:silent
 import com.typesafe.config.ConfigValueType._
 import scala.util.{Try, Success, Failure}
 import pureconfig.error._
@@ -66,7 +65,7 @@ implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
 case class Conf(n: PositiveInt)
 ```
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ n: 23 }").load[Conf]
 ConfigSource.string("{ n: -23 }").load[Conf]
 ConfigSource.string("{ n: abc }").load[Conf]
@@ -77,7 +76,7 @@ ConfigSource.string("{ n: abc }").load[Conf]
 Users are not restricted to the failure reasons provided by PureConfig. If we wanted to use a domain-specific failure
 reason for our `PositiveInt`, for example, we could create it like this:
 
-```tut:silent
+```scala mdoc:nest:silent
 case class NonPositiveInt(value: Int) extends FailureReason {
   def description = s"$value is not positive"
 }
@@ -93,7 +92,7 @@ implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
 }
 ```
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ n: -23 }").load[Conf]
 ```
 
@@ -103,11 +102,11 @@ In some usage patterns, there isn't a need to deal with errors as values. For ex
 in an application is to load the whole config with PureConfig at initialization time, causing the application to fail
 fast in case of a malformed config. For those cases, the `loadOrThrow` method can be used instead of `load`:
 
-```tut:book
+```scala mdoc
 ConfigSource.string("{ n: 23 }").loadOrThrow[Conf]
 ```
 
-```tut:book:fail
+```scala mdoc:crash
 ConfigSource.string("{ n: -23 }").loadOrThrow[Conf]
 ```
 

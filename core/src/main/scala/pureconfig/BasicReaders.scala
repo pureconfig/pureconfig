@@ -58,6 +58,8 @@ trait PrimitiveReaders {
   implicit val longConfigReader = ConfigReader.fromCursor(_.asLong)
 
   implicit val shortConfigReader = ConfigReader.fromCursor(_.asShort)
+
+  implicit val byteConfigReader = ConfigReader.fromCursor(_.asByte)
 }
 
 /**

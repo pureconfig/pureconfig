@@ -67,8 +67,7 @@ Unfortunately this means that Scala's typically helpful behavior of generating t
 
 A solution we've seen address this concern is to wrap the sensitive field in an [`AnyVal` new type](https://docs.scala-lang.org/overviews/core/value-classes.html) which simply redefines `toString`. Please see the example below:
 
-```tut:silent
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent:reset-object
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -84,17 +83,19 @@ case class SuperSecretConfig(
 
 Then when we print out the `SuperSecretConfig` after loading it via PureConfig, the sensitive values are masked:
 
-```tut:book
+```scala mdoc
 val secret = ConfigSource.string("""{
   username: john.smith
   password: password123
   api-key: 8ef72f48-2143-48af-9573-3b519bbcb777
 }""").loadOrThrow[SuperSecretConfig]
+
+println(secret)
 ```
 
 But, of course, the values we need are still there:
 
-```tut:book
+```scala mdoc
 secret.password.value 
 secret.apiKey.value
 ``` 
@@ -104,13 +105,18 @@ secret.apiKey.value
 When we want to load a config with a large structure and Scala refuses to compile a reader for it, it can be difficult
 to understand the reason of the failure. Consider the following example:
 
-```tut:silent:reset
-import com.typesafe.config.ConfigFactory
+```scala mdoc:silent:reset
 import pureconfig._
 import pureconfig.generic.auto._
 
-class Custom(x: Int, s: String) // not a case class
-class Custom2(x: Int, s: String) // not a case class
+// not a case class
+class Custom(x: Int, s: String) {
+  def asString = s"x = $x, s = $s"
+}
+// not a case class
+class Custom2(x: Int, s: String) {
+  def asString = s"x: $x, s: $s"
+}
 
 sealed trait Conf
 case class ConfA(a: Boolean, b: Option[Boolean]) extends Conf
@@ -120,9 +126,14 @@ case class ConfB2(a: String) extends ConfB
 case class ConfC(a: Option[Custom], b: Custom2) extends Conf
 ```
 
+```scala mdoc:invisible
+// if we don't have this mdoc considers pureconfig imports unused and fails the build
+ConfigSource.default.load[ConfA]
+```
+
 When we try to load a `Conf` from a config, we'll simply get this error message:
 
-```tut:book:fail
+```scala mdoc:fail
 ConfigSource.default.load[Conf]
 ```
 

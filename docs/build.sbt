@@ -1,1 +1,1 @@
-crossScalaVersions ~= { oldVersions => oldVersions.filter(_.startsWith("2.12")) }
+crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.11")) }
