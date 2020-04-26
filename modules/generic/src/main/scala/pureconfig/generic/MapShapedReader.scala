@@ -1,39 +1,28 @@
 package pureconfig.generic
 
 import pureconfig._
-import pureconfig.error.{ ConfigReaderFailures, KeyNotFound }
-import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
+import pureconfig.error.KeyNotFound
 import pureconfig.generic.ProductHint.UseOrDefault
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
 
 /**
- * A `ConfigReader` for generic representations that reads values in the shape of a config object.
+ * A specialized reader for generic representations that reads values in the shape of a config object, and is capable
+ * of handling default values.
  *
  * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
  * @tparam Repr the generic representation
+ * @tparam DefaultRepr the default representation of the original type
  */
-private[generic] trait MapShapedReader[Wrapped, Repr] {
-  def from(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReader.Result[Repr]
+private[generic] trait MapShapedReader[Wrapped, Repr, DefaultRepr] {
+  def from(cur: ConfigObjectCursor, default: DefaultRepr, usedFields: Set[String]): ConfigReader.Result[Repr]
 }
 
 object MapShapedReader {
 
-  /**
-   * A special form of `MapShapedReader` that includes usage of the field's default values.
-   * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
-   * @tparam Repr the generic representation
-   * @tparam DefaultRepr the generic representation of the default arguments
-   */
-  private[generic] trait WithDefaults[Wrapped, Repr, DefaultRepr] {
-    def fromWithDefault(cur: ConfigObjectCursor, default: DefaultRepr, usedFields: Set[String]): ConfigReader.Result[Repr]
-  }
+  implicit def labelledHNilReader[Wrapped](implicit hint: ProductHint[Wrapped]): MapShapedReader[Wrapped, HNil, HNil] = new MapShapedReader[Wrapped, HNil, HNil] {
 
-  implicit def labelledHNilReader[Wrapped](
-    implicit
-    hint: ProductHint[Wrapped]): WithDefaults[Wrapped, HNil, HNil] = new WithDefaults[Wrapped, HNil, HNil] {
-
-    def fromWithDefault(cur: ConfigObjectCursor, default: HNil, usedFields: Set[String]): ConfigReader.Result[HNil] =
+    def from(cur: ConfigObjectCursor, default: HNil, usedFields: Set[String]): ConfigReader.Result[HNil] =
       hint.bottom(cur, usedFields).fold[ConfigReader.Result[HNil]](Right(HNil))(Left.apply)
   }
 
@@ -41,10 +30,10 @@ object MapShapedReader {
     implicit
     key: Witness.Aux[K],
     vFieldReader: Derivation[Lazy[ConfigReader[V]]],
-    tConfigReader: Lazy[WithDefaults[Wrapped, T, U]],
-    hint: ProductHint[Wrapped]): WithDefaults[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WithDefaults[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
+    tConfigReader: Lazy[MapShapedReader[Wrapped, T, U]],
+    hint: ProductHint[Wrapped]): MapShapedReader[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new MapShapedReader[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
 
-    def fromWithDefault(cur: ConfigObjectCursor, default: Option[V] :: U, usedFields: Set[String]): ConfigReader.Result[FieldType[K, V] :: T] = {
+    def from(cur: ConfigObjectCursor, default: Option[V] :: U, usedFields: Set[String]): ConfigReader.Result[FieldType[K, V] :: T] = {
       val fieldName = key.value.name
       val fieldAction = hint.from(cur, fieldName)
       lazy val reader = vFieldReader.value.value
@@ -57,51 +46,8 @@ object MapShapedReader {
         case _ =>
           keyNotFoundFailure
       }
-      val tailResult = tConfigReader.value.fromWithDefault(cur, default.tail, usedFields + fieldAction.field)
+      val tailResult = tConfigReader.value.from(cur, default.tail, usedFields + fieldAction.field)
       ConfigReader.Result.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
     }
   }
-
-  implicit def cNilReader[Wrapped](
-    implicit
-    coproductHint: CoproductHint[Wrapped]): MapShapedReader[Wrapped, CNil] =
-    new MapShapedReader[Wrapped, CNil] {
-      override def from(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReader.Result[CNil] =
-        Left(coproductHint.bottom(cur, attempts))
-    }
-
-  final implicit def cConsReader[Wrapped, Name <: Symbol, V <: Wrapped, T <: Coproduct](
-    implicit
-    coproductHint: CoproductHint[Wrapped],
-    vName: Witness.Aux[Name],
-    vConfigReader: Derivation[Lazy[ConfigReader[V]]],
-    tConfigReader: Lazy[MapShapedReader[Wrapped, T]]): MapShapedReader[Wrapped, FieldType[Name, V] :+: T] =
-    new MapShapedReader[Wrapped, FieldType[Name, V] :+: T] {
-
-      override def from(cur: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReader.Result[FieldType[Name, V] :+: T] = {
-        lazy val vReader = vConfigReader.value.value
-        lazy val tReader = tConfigReader.value
-
-        def readAsInl(optCur: ConfigCursor): ConfigReader.Result[Inl[FieldType[Name, V], T]] =
-          vReader.from(optCur).right.map(v => Inl(field[Name](v)))
-
-        def withAttempt(name: String, failures: ConfigReaderFailures): List[(String, ConfigReaderFailures)] =
-          attempts :+ (name -> failures)
-
-        coproductHint.from(cur, vName.value.name).right.flatMap {
-          case Use(optCur) =>
-            readAsInl(optCur)
-              .left.map { failures =>
-                coproductHint.bottom(cur, withAttempt(vName.value.name, failures))
-              }
-          case Attempt(optCur) =>
-            readAsInl(optCur)
-              .left.flatMap { failures =>
-                tReader.from(optCur, withAttempt(vName.value.name, failures)).right.map(Inr.apply)
-              }
-          case Skip =>
-            tReader.from(cur, attempts).right.map(Inr.apply)
-        }
-      }
-    }
 }

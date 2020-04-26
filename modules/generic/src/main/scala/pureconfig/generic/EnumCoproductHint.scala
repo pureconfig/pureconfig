@@ -3,7 +3,7 @@ package pureconfig.generic
 import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig._
 import pureconfig.error._
-import pureconfig.generic.CoproductHint.{ Skip, Use }
+import pureconfig.generic.CoproductHint.Use
 import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductChoiceFound }
 import pureconfig.syntax._
 
@@ -24,13 +24,13 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cursor: ConfigCursor, name: String): ConfigReader.Result[CoproductHint.Action] =
-    cursor.asString.right.map { str =>
-      if (str == fieldValue(name)) Use(cursor) else Skip
+  def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
+    cursor.asString.right.flatMap { str =>
+      options.find(str == fieldValue(_)) match {
+        case Some(opt) => ConfigReader.Result.succeed(Use(cursor, opt))
+        case None => cursor.failed[CoproductHint.Action](NoValidCoproductChoiceFound(cursor.value))
+      }
     }
-
-  def bottom(cursor: ConfigCursor, attempts: List[(String, ConfigReaderFailures)]): ConfigReaderFailures =
-    ConfigReaderFailures(cursor.failureFor(NoValidCoproductChoiceFound(cursor.value)))
 
   def to(value: ConfigValue, name: String): ConfigValue =
     value match {

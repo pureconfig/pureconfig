@@ -3,8 +3,8 @@ package pureconfig.module.magnolia
 import _root_.magnolia._
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongSizeList }
-import pureconfig.generic.CoproductHint.{ Attempt, Skip, Use }
 import pureconfig.generic.ProductHint.UseOrDefault
+import pureconfig.generic.error.MissingCoproductChoice
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -68,24 +68,28 @@ object MagnoliaConfigReader {
 
   def dispatch[A](ctx: SealedTrait[ConfigReader, A])(implicit hint: CoproductHint[A]): ConfigReader[A] = new ConfigReader[A] {
     def from(cur: ConfigCursor): ConfigReader.Result[A] = {
-      val (_, res) = ctx.subtypes.foldLeft[(Boolean, Either[List[(String, ConfigReaderFailures)], ConfigReader.Result[A]])]((true, Left(Nil))) {
-        case ((true, Left(attempts)), subtype) =>
-          val typeName = subtype.typeName.short
+      def readerFor(option: String) =
+        ctx.subtypes.find(_.typeName.short == option).map(_.typeclass)
 
-          def attemptRead(cursor: ConfigCursor, tryOtherOnFail: Boolean) =
-            subtype.typeclass.from(cursor).fold(
-              failures => (tryOtherOnFail, Left(attempts :+ (typeName -> failures))),
-              res => (false, Right(Right(res))))
-
-          hint.from(cur, typeName) match {
-            case Right(Use(cur)) => attemptRead(cur, false)
-            case Right(Attempt(cur)) => attemptRead(cur, true)
-            case Right(Skip) => (true, Left(attempts))
-            case l @ Left(_) => (false, Right(l.asInstanceOf[ConfigReader.Result[A]]))
+      hint.from(cur, ctx.subtypes.map(_.typeName.short)).right.flatMap {
+        case CoproductHint.Use(cur, option) =>
+          readerFor(option) match {
+            case Some(value) => value.from(cur)
+            case None => ConfigReader.Result.fail[A](cur.failureFor(MissingCoproductChoice(option)))
           }
-        case (acc, _) => acc
+
+        case CoproductHint.Attempt(cur, options, combineF) =>
+          val initial: Either[List[(String, ConfigReaderFailures)], A] = Left(List.empty)
+          val res = options.foldLeft(initial) { (curr, option) =>
+            curr.left.flatMap { currentFailures =>
+              readerFor(option) match {
+                case Some(value) => value.from(cur).left.map(f => currentFailures :+ (option -> f))
+                case None => Left(currentFailures :+ (option -> ConfigReaderFailures(cur.failureFor(MissingCoproductChoice(option)))))
+              }
+            }
+          }
+          res.left.map(combineF)
       }
-      res.left.map(hint.bottom(cur, _)).right.flatMap(identity)
     }
   }
 }
