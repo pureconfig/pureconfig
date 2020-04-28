@@ -91,7 +91,7 @@ trait DerivedConfigReader1 {
           }
 
         case CoproductHint.Attempt(cursor, options, combineF) =>
-          val initial: Either[List[(String, ConfigReaderFailures)], F] = Left(List.empty)
+          val initial: Either[Vector[(String, ConfigReaderFailures)], F] = Left(Vector.empty)
           val res = options.foldLeft(initial) { (curr, option) =>
             curr.left.flatMap { currentFailures =>
               readerFor(option) match {

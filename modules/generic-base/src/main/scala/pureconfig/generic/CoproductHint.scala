@@ -125,7 +125,7 @@ object CoproductHint {
    * @param options the coproduct options to attempt reading, in order
    * @param combineFailures the function to combine all failures in case all attempts to read fail
    */
-  case class Attempt(cursor: ConfigCursor, options: Seq[String], combineFailures: List[(String, ConfigReaderFailures)] => ConfigReaderFailures) extends Action
+  case class Attempt(cursor: ConfigCursor, options: Seq[String], combineFailures: Seq[(String, ConfigReaderFailures)] => ConfigReaderFailures) extends Action
 
   implicit def default[T]: CoproductHint[T] = new FieldCoproductHint[T]("type")
 }

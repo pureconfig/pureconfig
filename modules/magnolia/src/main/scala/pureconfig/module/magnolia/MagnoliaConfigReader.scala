@@ -79,7 +79,7 @@ object MagnoliaConfigReader {
           }
 
         case CoproductHint.Attempt(cur, options, combineF) =>
-          val initial: Either[List[(String, ConfigReaderFailures)], A] = Left(List.empty)
+          val initial: Either[Vector[(String, ConfigReaderFailures)], A] = Left(Vector.empty)
           val res = options.foldLeft(initial) { (curr, option) =>
             curr.left.flatMap { currentFailures =>
               readerFor(option) match {
