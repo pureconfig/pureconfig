@@ -64,7 +64,8 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
       objCur <- cursor.asObjectCursor.right
       valueCur <- objCur.atKey(key).right
       valueStr <- valueCur.asString.right
-      option <- options.find(valueStr == fieldValue(_)).toRight(ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.value))))
+      option <- options.find(valueStr == fieldValue(_))
+        .toRight(ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.value)))).right
     } yield Use(objCur.withoutKey(key), option)
   }
 
