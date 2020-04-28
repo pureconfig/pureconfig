@@ -23,7 +23,7 @@ object CoproductReaderOptions {
     hConfigReader: Derivation[Lazy[ConfigReader[H]]],
     tConfigReaderOptions: Lazy[CoproductReaderOptions[T]]): CoproductReaderOptions[FieldType[Name, H] :+: T] =
     new CoproductReaderOptions[FieldType[Name, H] :+: T] {
-      val options = {
+      lazy val options = {
         val optionName = hName.value.name
         val optionReader = hConfigReader.value.value.map[FieldType[Name, H] :+: T](v => Inl(field[Name](v)))
         val remaining = tConfigReaderOptions.value.options.map {
