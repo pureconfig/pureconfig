@@ -34,14 +34,22 @@ object DerivedConfigWriter extends DerivedConfigWriter1 {
 
 trait DerivedConfigWriter1 {
 
-  // used for both products and coproducts
-  final implicit def labelledGenericWriter[F, Repr](
+  final implicit def productWriter[F, Repr <: HList](
     implicit
     gen: LabelledGeneric.Aux[F, Repr],
     cc: Lazy[MapShapedWriter[F, Repr]]): DerivedConfigWriter[F] = new DerivedConfigWriter[F] {
 
     override def to(t: F): ConfigValue = {
       cc.value.to(gen.to(t))
+    }
+  }
+
+  final implicit def coproductWriter[F, Repr <: Coproduct](
+    implicit
+    gen: LabelledGeneric.Aux[F, Repr],
+    cw: Lazy[CoproductConfigWriter[F, Repr]]): DerivedConfigWriter[F] = new DerivedConfigWriter[F] {
+    def to(t: F): ConfigValue = {
+      cw.value.to(gen.to(t))
     }
   }
 }
