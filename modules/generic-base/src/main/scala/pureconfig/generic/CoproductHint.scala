@@ -24,7 +24,7 @@ trait CoproductHint[T] {
    *
    * @param cursor a `ConfigCursor` at the sealed family option
    * @param options the names of the coproduct options for the given type
-   * @return a [[ConfigReader.Result]] of [[CoproductHint.Action]] as defined above.
+   * @return a `ConfigReader.Result` of [[CoproductHint.Action]] as defined above.
    */
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action]
 
