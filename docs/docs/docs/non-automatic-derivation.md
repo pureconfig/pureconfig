@@ -85,21 +85,21 @@ sealed trait Occupation extends Product with Serializable
 object Occupation {
   case class Employed(job: String) extends Occupation
   object Employed {
-    implicit val reader = deriveReader[Employed]
+    implicit val employedReader = deriveReader[Employed]
   }
   case object Unemployed extends Occupation {
-    implicit val reader = deriveReader[Unemployed.type]
+    implicit val unemployedReader = deriveReader[Unemployed.type]
   }
   case object Student extends Occupation {
-    implicit val reader = deriveReader[Student.type]
+    implicit val studentReader = deriveReader[Student.type]
   }
-  implicit val reader = deriveReader[Occupation]
+  implicit val occupationReader = deriveReader[Occupation]
 }
 
 case class WorkingPerson(name: String, surname: String, occupation: Occupation)
 
 object WorkingPerson {
-  implicit val reader = deriveReader[WorkingPerson]
+  implicit val workingPersonReader = deriveReader[WorkingPerson]
 }
 ```
 
