@@ -96,7 +96,7 @@ object Occupation {
   implicit val reader = deriveReader[Occupation]
 }
 
-case class WorkingPerson(name: String, surname: String, occuation: Occupation)
+case class WorkingPerson(name: String, surname: String, occupation: Occupation)
 
 object WorkingPerson {
   implicit val reader = deriveReader[WorkingPerson]
@@ -104,8 +104,8 @@ object WorkingPerson {
 ```
 
 ```scala mdoc
-ConfigSource.string("{ name: Isaac, surname: Newton, occuation.type: student }").load[WorkingPerson]
-ConfigSource.string("""{ name: David, surname: Shingy, occuation: { type: employed, job: Digital Prophet } }""").load[WorkingPerson]
+ConfigSource.string("{ name: Isaac, surname: Newton, occupation.type: student }").load[WorkingPerson]
+ConfigSource.string("""{ name: David, surname: Shingy, occupation: { type: employed, job: Digital Prophet } }""").load[WorkingPerson]
 ```
 
 ### Manual
