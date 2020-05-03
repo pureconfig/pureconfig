@@ -99,7 +99,7 @@ In case there's a necessity to parse multiple configs and accumulate errors, you
 ```tut:book
 val anotherInvalidConf = parseString("""{ i: false }""")
 
-List(validConf, invalidConf, anotherInvalidConf).traverseU { c =>
+List(validConf, invalidConf, anotherInvalidConf).traverse { c =>
   Validation.fromEither(implicitly[ConfigReader[SimpleConfig]].from(c.root))
 }
 ```
