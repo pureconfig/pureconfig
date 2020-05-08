@@ -2,7 +2,7 @@ name := "example"
 
 version := "1.0"
 
-scalaVersion := "2.12.10"
+scalaVersion := "2.12.11"
 
 val VersionPattern = """version in ThisBuild := "([^"]*)"""".r
 val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
@@ -15,7 +15,7 @@ val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
 libraryDependencies ++= Seq(
   "com.github.pureconfig" %% "pureconfig" % pureconfigVersion)
 
-crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.1")
+crossScalaVersions := Seq("2.11.12", "2.12.11", "2.13.2")
 
 scalacOptions ++= Seq(
   "-deprecation",

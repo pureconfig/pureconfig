@@ -28,7 +28,7 @@ package object syntax {
   }
 
   implicit final class ConfigReaderFailuresOps(val failures: ConfigReaderFailures) extends AnyVal {
-    def toNel: NonEmptyList[ConfigReaderFailure] = NonEmptyList(failures.head, failures.tail: _*)
+    def toNel: NonEmptyList[ConfigReaderFailure] = NonEmptyList.fromSeq(failures.head, failures.tail)
   }
 
   implicit final class ConfigReaderCompanionObjectOps(val co: ConfigReader.type) extends AnyVal {
