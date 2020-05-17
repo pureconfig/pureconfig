@@ -1,7 +1,7 @@
 name := "pureconfig-enumeratum"
 
 libraryDependencies ++= Seq(
-  "com.beachape" %% "enumeratum" % "1.6.0")
+  "com.beachape" %% "enumeratum" % "1.6.1")
 
 developers := List(
   Developer("aeons", "Bjørn Madsen", "bm@aeons.dk", url("https://github.com/aeons")))
