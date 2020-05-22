@@ -4,14 +4,14 @@ object Dependencies {
 
   object Version {
     val scala211                = "2.11.12"
-    val scala212                = "2.12.10"
-    val scala213                = "2.13.1"
+    val scala212                = "2.12.11"
+    val scala213                = "2.13.2"
 
     val shapeless               = "2.3.3"
     val typesafeConfig          = "1.4.0"
 
-    val scalaTest               = "3.1.1"
-    val scalaTestPlusScalaCheck = "3.1.1.1"
+    val scalaTest               = "3.1.2"
+    val scalaTestPlusScalaCheck = "3.1.2.0"
 
     val scalaCheck              = "1.14.3"
     val scalaCheckShapeless     = "1.2.5"

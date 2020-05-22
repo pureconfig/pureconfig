@@ -1,6 +1,7 @@
 package pureconfig.module.sttp
 
-import com.softwaremill.sttp._
+import sttp.model.Uri
+import sttp.model.Uri._
 import com.typesafe.config.ConfigFactory
 import pureconfig.BaseSuite
 import pureconfig.error.{ CannotConvert, ConfigReaderFailures, ConvertFailure }
@@ -20,14 +21,14 @@ class SttpSuite extends BaseSuite {
   }
 
   it should "handle error when reading uri" in {
-    val config = ConfigFactory.parseString("""{uri = "https!!://wrong.io"}""")
+    val config = ConfigFactory.parseString("""{uri = "sttp.readthedocs.io"}""")
 
     val failure =
       ConvertFailure(
         reason = CannotConvert(
-          value = "https!!://wrong.io",
-          toType = "com.softwaremill.sttp.Uri",
-          because = "requirement failed: Scheme can only contain alphanumeric characters, +, - and ."),
+          value = "sttp.readthedocs.io",
+          toType = "sttp.model.Uri",
+          because = "missing scheme"),
         origin = stringConfigOrigin(1),
         path = "uri")
 

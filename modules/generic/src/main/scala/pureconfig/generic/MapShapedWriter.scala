@@ -30,7 +30,7 @@ object MapShapedWriter {
     hint: ProductHint[Wrapped]): MapShapedWriter[Wrapped, FieldType[K, V] :: T] = new MapShapedWriter[Wrapped, FieldType[K, V] :: T] {
 
     override def to(t: FieldType[K, V] :: T): ConfigValue = {
-      val keyStr = hint.configKey(key.value.toString().tail)
+      val keyStr = hint.configKey(key.value.name)
       val rem = tConfigWriter.value.to(t.tail)
       // TODO check that all keys are unique
       vFieldConvert.value.value match {

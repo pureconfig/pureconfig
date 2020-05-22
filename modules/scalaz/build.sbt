@@ -1,9 +1,11 @@
 name := "pureconfig-scalaz"
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.30",
-  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.2.30-scalacheck-1.14" % "test"
+  "org.scalaz" %% "scalaz-core" % "7.3.1",
+  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.1" % "test"
 )
+
+scalacOptions in Tut += "-Ypartial-unification"
 
 developers := List(
   Developer("ChernikovP", "Pavel Chernikov", "chernikov.pavel92@gmail.com", url("https://github.com/ChernikovP"))
