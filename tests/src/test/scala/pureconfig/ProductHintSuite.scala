@@ -53,8 +53,8 @@ class ProductHintSuite extends BaseSuite {
 
     case class SampleConf(a: Int, b: String)
     ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(
-      ConvertFailure(KeyNotFound("a", Set("A")), None, ""),
-      ConvertFailure(KeyNotFound("b", Set("B")), None, ""))
+      ConvertFailure(KeyNotFound("a", Set("A")), stringConfigOrigin(1), ""),
+      ConvertFailure(KeyNotFound("b", Set("B")), stringConfigOrigin(1), ""))
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
     ConfigConvert[SampleConf].from(conf) shouldBe Right(SampleConf(2, "two"))
@@ -147,7 +147,7 @@ class ProductHintSuite extends BaseSuite {
     }""")
 
     conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
-    conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b")
+    conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4))
   }
 
   it should "not use default arguments if specified through a product hint" in {
@@ -158,8 +158,8 @@ class ProductHintSuite extends BaseSuite {
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
     conf1.to[Conf].left.value.toList should contain theSameElementsAs Seq(
-      ConvertFailure(KeyNotFound("b"), None, ""),
-      ConvertFailure(KeyNotFound("c"), None, ""),
-      ConvertFailure(KeyNotFound("d"), None, ""))
+      ConvertFailure(KeyNotFound("b"), emptyConfigOrigin, ""),
+      ConvertFailure(KeyNotFound("c"), emptyConfigOrigin, ""),
+      ConvertFailure(KeyNotFound("d"), emptyConfigOrigin, ""))
   }
 }

@@ -30,9 +30,9 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
   def to(cv: ConfigValue, name: String) = cv match {
     case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
     case _: ConfigObject => Left(ConfigReaderFailures(ConvertFailure(
-      NonEmptyObjectFound(name), ConfigValueLocation(cv), "")))
+      NonEmptyObjectFound(name), Some(cv.origin()), "")))
     case _ => Left(ConfigReaderFailures(ConvertFailure(
-      WrongType(cv.valueType, Set(ConfigValueType.OBJECT)), ConfigValueLocation(cv), "")))
+      WrongType(cv.valueType, Set(ConfigValueType.OBJECT)), Some(cv.origin), "")))
   }
 
   def tryNextOnFail(name: String) = false

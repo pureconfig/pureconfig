@@ -7,6 +7,7 @@ import java.net.URL
 import java.nio.file.Paths
 
 import com.typesafe.config._
+import org.scalatest.Inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
@@ -16,7 +17,7 @@ import pureconfig.generic.hlist._
 import pureconfig.syntax._
 import shapeless._
 
-class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
+class ConfigReaderExceptionSuite extends BaseSuite with Inside {
   behavior of "ConfigReaderException"
 
   case class Conf(a: Int, b: String, c: Int)
@@ -33,17 +34,17 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
     }
 
     exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "a"),
-      ConvertFailure(KeyNotFound("b", Set()), None, ""),
-      ConvertFailure(KeyNotFound("c", Set()), None, ""))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), stringConfigOrigin(3), "a"),
+      ConvertFailure(KeyNotFound("b", Set()), stringConfigOrigin(2), ""),
+      ConvertFailure(KeyNotFound("c", Set()), stringConfigOrigin(2), ""))
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
           |  at the root:
-          |    - Key not found: 'b'.
-          |    - Key not found: 'c'.
+          |    - (String: 2) Key not found: 'b'.
+          |    - (String: 2) Key not found: 'c'.
           |  at 'a':
-          |    - Expected type NUMBER. Found STRING instead.
+          |    - (String: 3) Expected type NUMBER. Found STRING instead.
           |""".stripMargin
   }
 
@@ -61,14 +62,14 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
     }
 
     exception1.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, ""))
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(3), ""))
 
     val exception2 = intercept[ConfigReaderException[_]] {
       conf.root().toOrThrow[ParentConf]
     }
 
     exception2.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "conf"))
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(3), "conf"))
   }
 
   case class MapConf(values: Map[String, MapConf])
@@ -95,13 +96,13 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
     }
 
     exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)), None, "values.b"),
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "values.a.values.c"))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)), stringConfigOrigin(12), "values.b"),
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(6), "values.a.values.c"))
   }
 
   sealed trait A
-  case class A1(a: Int) extends A
-  case class A2(a: String) extends A
+  case class AA1(a: Int) extends A
+  case class AA2(a: String) extends A
   case class EnclosingA(values: Map[String, A])
 
   it should "include failures relevant for coproduct derivation" in {
@@ -113,7 +114,7 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
             a = 2
           }
           v2 {
-            type = "a-2"
+            type = "aa-2"
             a = "val"
           }
           v3 {
@@ -128,8 +129,8 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
     }
 
     exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), None, "values.v1.type"),
-      ConvertFailure(KeyNotFound("type", Set()), None, "values.v3"))
+      ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), stringConfigOrigin(5), "values.v1.type"),
+      ConvertFailure(KeyNotFound("type", Set()), stringConfigOrigin(12), "values.v3"))
   }
 
   case class CamelCaseConf(camelCaseInt: Int, camelCaseString: String)
@@ -161,15 +162,15 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
     }
 
     exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(KeyNotFound("camel-case-int", Set("camelCaseInt")), None, "camel-case-conf"),
-      ConvertFailure(KeyNotFound("camel-case-string", Set("camelCaseString")), None, "camel-case-conf"),
-      ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), None, "snake-case-conf"),
-      ConvertFailure(KeyNotFound("snake-case-string", Set("snake_case_string")), None, "snake-case-conf"))
+      ConvertFailure(KeyNotFound("camel-case-int", Set("camelCaseInt")), stringConfigOrigin(2), "camel-case-conf"),
+      ConvertFailure(KeyNotFound("camel-case-string", Set("camelCaseString")), stringConfigOrigin(2), "camel-case-conf"),
+      ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), stringConfigOrigin(10), "snake-case-conf"),
+      ConvertFailure(KeyNotFound("snake-case-string", Set("snake_case_string")), stringConfigOrigin(10), "snake-case-conf"))
   }
 
   it should "have failures with the proper file system location of the values that raised errors, if available" in {
     val workingDir = getClass.getResource("/").getFile
-    val file = "conf/configFailureLocation/single/a.conf"
+    val file = "conf/configFailureOrigin/single/a.conf"
     val url = new URL("file://" + workingDir + file)
     val conf = ConfigFactory.load(file).root()
 
@@ -177,9 +178,18 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
       conf.get("conf").toOrThrow[Conf]
     }
 
-    exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(KeyNotFound("a", Set()), Some(ConfigValueLocation(url, 1)), ""),
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), Some(ConfigValueLocation(url, 3)), "c"))
+    inside(exception.failures.toList) {
+      case List(
+        ConvertFailure(KeyNotFound("a", _), Some(origin1), ""),
+        ConvertFailure(WrongType(ConfigValueType.STRING, types), Some(origin2), "c")
+        ) =>
+        origin1.url shouldBe url
+        origin1.lineNumber shouldBe 1
+        types should contain only ConfigValueType.NUMBER
+        origin2.url shouldBe url
+        origin2.lineNumber shouldBe 3
+
+    }
   }
 
   it should "include failures regarding the inability to parse a given configuration" in {
@@ -191,8 +201,11 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
       ConfigSource.file(Paths.get(workingDir, file)).loadOrThrow[Conf]
     }
 
-    exception.failures.toList.toSet shouldBe Set(
-      CannotParse("Expecting close brace } or a comma, got end of file", Some(ConfigValueLocation(url, 2))))
+    inside(exception.failures.toList) {
+      case List(CannotParse("Expecting close brace } or a comma, got end of file", Some(origin))) =>
+        origin.url() shouldBe url
+        origin.lineNumber() shouldBe 2
+    }
   }
 
   it should "include failures indicating that a given file does not exist" in {
@@ -223,7 +236,7 @@ class ConfigReaderExceptionSuite extends AnyFlatSpec with Matchers {
     }
 
     exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongSizeList(3, 4), None, "hlist"),
-      ConvertFailure(WrongSizeList(3, 6), None, "tuple"))
+      ConvertFailure(WrongSizeList(3, 4), stringConfigOrigin(3), "hlist"),
+      ConvertFailure(WrongSizeList(3, 6), stringConfigOrigin(4), "tuple"))
   }
 }

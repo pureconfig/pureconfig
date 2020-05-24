@@ -25,7 +25,7 @@ class ScalazSuite extends BaseSuite {
 
   it should "return an EmptyIListFound when reading empty list into NonEmptyList" in {
     val config = parseString("{ numbers: [] }")
-    config.to[Numbers] should failWith(EmptyIListFound, "numbers")
+    config.to[Numbers] should failWith(EmptyIListFound, "numbers", stringConfigOrigin(1))
   }
 }
 

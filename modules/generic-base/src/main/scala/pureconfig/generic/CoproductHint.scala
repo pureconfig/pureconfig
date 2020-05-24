@@ -90,14 +90,14 @@ class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
   def to(cv: ConfigValue, name: String): ConfigReader.Result[ConfigValue] = cv match {
     case co: ConfigObject =>
       if (co.containsKey(key)) {
-        Left(ConfigReaderFailures(ConvertFailure(CollidingKeys(key, co.get(key)), ConfigValueLocation(co), "")))
+        Left(ConfigReaderFailures(ConvertFailure(CollidingKeys(key, co.get(key)), Some(co.origin()), "")))
       } else {
         Right(Map(key -> fieldValue(name)).toConfig.withFallback(co.toConfig))
       }
     case _ =>
       Left(ConfigReaderFailures(ConvertFailure(
         WrongType(cv.valueType, Set(ConfigValueType.OBJECT)),
-        ConfigValueLocation(cv), "")))
+        Some(cv.origin()), "")))
   }
 
   def tryNextOnFail(name: String) = false

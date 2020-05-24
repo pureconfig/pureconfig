@@ -36,14 +36,14 @@ class CoproductHintSuite extends BaseSuite {
       val conf = ConfigFactory.parseString("{ which-animal { type = Dog }, age = 2 }")
       ConfigConvert[AnimalConfig].from(conf.root()) should be(Left(
         ConfigReaderFailures(
-          ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), None, "which-animal"))))
+          ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), stringConfigOrigin(1), "which-animal"))))
     }
 
     it should "fail with an appropriate reason if an unexpected value is found at the discriminating field when using a FieldCoproductHint" in {
       val conf = ConfigFactory.parseString("{ which-animal = unexpected, age = 2 }")
       ConfigConvert[AnimalConfig].from(conf.root()) should be(Left(
         ConfigReaderFailures(
-          ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), None, "which-animal"))))
+          ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), stringConfigOrigin(1), "which-animal"))))
     }
 
     it should "fail to read when the hint field conflicts with a field of an option when using a FieldCoproductHint" in {
@@ -58,7 +58,7 @@ class CoproductHintSuite extends BaseSuite {
 
       val ex = the[ConfigReaderException[_]] thrownBy cc.to(AmbiguousConf("ambiguous-conf"))
       ex.failures.toList shouldEqual List(ConvertFailure(
-        CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguous-conf")), None, ""))
+        CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguous-conf")), emptyConfigOrigin, ""))
     }
   }
 

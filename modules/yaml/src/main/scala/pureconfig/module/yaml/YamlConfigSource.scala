@@ -8,8 +8,7 @@ import java.util.Base64
 import scala.collection.JavaConverters._
 import scala.util.Try
 import scala.util.control.NonFatal
-
-import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
+import com.typesafe.config.{ ConfigOrigin, ConfigOriginFactory, ConfigValue, ConfigValueFactory }
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.error.{ Mark, MarkedYAMLException, YAMLException }
@@ -122,7 +121,7 @@ final class YamlConfigSource private (
       case e: IOException if onIOFailure.nonEmpty =>
         Result.fail(onIOFailure.get(Some(e)))
       case e: MarkedYAMLException =>
-        Result.fail(CannotParse(e.getProblem, uri.map { uri => toConfigValueLocation(uri.toURL, e.getProblemMark) }))
+        Result.fail(CannotParse(e.getProblem, uri.map { uri => toConfigOrigin(uri.toURL, e.getProblemMark) }))
       case e: YAMLException =>
         Result.fail(CannotParse(e.getMessage, None))
       case NonFatal(e) =>
@@ -130,9 +129,9 @@ final class YamlConfigSource private (
     }
   }
 
-  // Converts a SnakeYAML `Mark` to a `ConfigValueLocation`, provided the file path.
-  private[this] def toConfigValueLocation(path: URL, mark: Mark): ConfigValueLocation = {
-    ConfigValueLocation(path, mark.getLine + 1)
+  // Converts a SnakeYAML `Mark` to a `ConfigOrigin`, provided the file path.
+  private[this] def toConfigOrigin(path: URL, mark: Mark): ConfigOrigin = {
+    ConfigOriginFactory.newURL(path).withLineNumber(mark.getLine + 1)
   }
 }
 

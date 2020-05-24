@@ -74,12 +74,12 @@ class YamlApiSuite extends BaseSuite with EitherValues {
 
   it should "fail to loadYaml from string content with non existent namespace" in {
     loadYaml[Conf](resourceContents("basic.yaml"), "foo") shouldBe Left(
-      ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), None, "")))
+      ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), emptyConfigOrigin, "")))
   }
 
   it should "fail to loadYaml from path with non existent namespace" in {
     loadYaml[Conf](resourcePath("basic.yaml"), "foo") shouldBe Left(
-      ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), None, "")))
+      ConfigReaderFailures(ConvertFailure(KeyNotFound("foo", Set.empty), emptyConfigOrigin, "")))
   }
 
   it should "loadYaml from a path with empty namespace" in {
@@ -109,7 +109,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
 
   it should "fail to loadYaml of an array from string content with a non existent specific namespace" in {
     loadYaml[BigInt](resourceContents("array.yaml"), "n") shouldBe Left(
-      ConfigReaderFailures(ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.OBJECT)), None, "")))
+      ConfigReaderFailures(ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.OBJECT)), emptyConfigOrigin, "")))
   }
 
   it should "loadYaml from a path with a specific namespace of a Map" in {
@@ -234,10 +234,10 @@ class YamlApiSuite extends BaseSuite with EitherValues {
     loadYaml[ConfigValue](resourceContents("non_string_keys.yaml")) should failWithType[NonStringKeyFound]
   }
 
-  it should "fail with the correct config location filled when a YAML fails to be parsed" in {
+  it should "fail with the correct config origin filled when a YAML fails to be parsed" in {
     loadYaml[ConfigValue](resourcePath("illegal.yaml")) should failWith(CannotParse(
       "mapping values are not allowed here",
-      Some(ConfigValueLocation(resourcePath("illegal.yaml").toUri.toURL, 3))))
+      urlConfigOrigin(resourcePath("illegal.yaml").toUri.toURL, 3)))
 
     loadYaml[ConfigValue](resourceContents("illegal.yaml")) should failWith(CannotParse(
       "mapping values are not allowed here", None))

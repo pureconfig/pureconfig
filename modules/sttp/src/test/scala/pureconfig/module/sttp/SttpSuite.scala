@@ -29,7 +29,7 @@ class SttpSuite extends BaseSuite {
           value = "sttp.readthedocs.io",
           toType = "sttp.model.Uri",
           because = "missing scheme"),
-        location = None,
+        origin = stringConfigOrigin(1),
         path = "uri")
 
     config.to[AppConfig].left.value shouldBe ConfigReaderFailures(failure)

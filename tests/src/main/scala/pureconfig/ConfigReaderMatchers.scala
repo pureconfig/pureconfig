@@ -1,7 +1,10 @@
 package pureconfig
 
-import scala.reflect.ClassTag
+import java.net.URL
 
+import com.typesafe.config.{ ConfigOrigin, ConfigOriginFactory }
+
+import scala.reflect.ClassTag
 import org.scalatest._
 import org.scalatest.matchers.{ MatchResult, Matcher }
 import pureconfig.error._
@@ -16,8 +19,8 @@ trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
   def failWith(
     reason: FailureReason,
     path: String,
-    location: Option[ConfigValueLocation] = None): Matcher[ConfigReader.Result[Any]] =
-    be(Left(ConfigReaderFailures(ConvertFailure(reason, location, path), Nil)))
+    origin: Option[ConfigOrigin] = None): Matcher[ConfigReader.Result[Any]] =
+    be(Left(ConfigReaderFailures(ConvertFailure(reason, origin, path), Nil)))
 
   def failWith(failure: ConfigReaderFailure): Matcher[ConfigReader.Result[Any]] =
     be(Left(ConfigReaderFailures(failure, Nil)))
@@ -35,4 +38,13 @@ trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
         inside(left) { case Left(ConfigReaderFailures(failure, Nil)) => pf.valueAt(failure) }
       }
     }
+
+  def stringConfigOrigin(line: Int) =
+    Some(ConfigOriginFactory.newSimple("String").withLineNumber(line))
+
+  def urlConfigOrigin(url: URL, line: Int): Option[ConfigOrigin] =
+    Some(ConfigOriginFactory.newURL(url).withLineNumber(line))
+
+  val emptyConfigOrigin: Option[ConfigOrigin] =
+    Some(ConfigOriginFactory.newSimple())
 }

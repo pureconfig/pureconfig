@@ -25,7 +25,7 @@ class ForProductNSuite extends BaseSuite {
     val conf = foo.toConfig
     val missingKeys = Foo1.keys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
     val confWithMissingKeys = missingKeys.foldLeft(conf.asInstanceOf[ConfigObject])(_.withoutKey(_))
-    val failures = missingKeys.map(k => ConvertFailure(KeyNotFound(k, Set.empty), None, ""))
+    val failures = missingKeys.map(k => ConvertFailure(KeyNotFound(k, Set.empty), Some(ConfigOriginFactory.newSimple("empty config")), ""))
     val result = confWithMissingKeys.to[Foo1]
     result.left.value.toList.size shouldEqual failures.size
     result.left.value.toList should contain theSameElementsAs failures
