@@ -103,7 +103,7 @@ object ProductHint {
   case class Use(cursor: ConfigCursor, field: String) extends Action
 
   /**
-   * An action to either use the provided `ConfigCursor` (if it isn't null nor undefined) or fallback to the default
+   * An action to either use the provided `ConfigCursor` (if it isn't null or undefined) or fallback to the default
    * value in the product's constructor.
    *
    * @param cursor the `ConfigCursor` to use when trying to read the field
