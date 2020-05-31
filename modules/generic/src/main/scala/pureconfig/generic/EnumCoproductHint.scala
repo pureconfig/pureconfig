@@ -1,8 +1,10 @@
 package pureconfig.generic
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue, ConfigValueType }
+import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig._
 import pureconfig.error._
+import pureconfig.generic.CoproductHint.Use
+import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductOptionFound }
 import pureconfig.syntax._
 
 /**
@@ -22,18 +24,20 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
    */
   protected def fieldValue(name: String): String = name.toLowerCase
 
-  def from(cur: ConfigCursor, name: String) = cur.asString.right.map { str =>
-    if (str == fieldValue(name)) Some(ConfigCursor(ConfigFactory.empty.root, cur.pathElems)) else None
-  }
+  def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
+    cursor.asString.right.flatMap { str =>
+      options.find(str == fieldValue(_)) match {
+        case Some(opt) => Right(Use(cursor, opt))
+        case None => cursor.failed[CoproductHint.Action](NoValidCoproductOptionFound(cursor.value))
+      }
+    }
 
-  // TODO: improve handling of failures on the write side
-  def to(cv: ConfigValue, name: String) = cv match {
-    case co: ConfigObject if co.isEmpty => Right(fieldValue(name).toConfig)
-    case _: ConfigObject => Left(ConfigReaderFailures(ConvertFailure(
-      NonEmptyObjectFound(name), Some(cv.origin()), "")))
-    case _ => Left(ConfigReaderFailures(ConvertFailure(
-      WrongType(cv.valueType, Set(ConfigValueType.OBJECT)), Some(cv.origin), "")))
-  }
-
-  def tryNextOnFail(name: String) = false
+  def to(value: ConfigValue, name: String): ConfigValue =
+    value match {
+      case co: ConfigObject if co.isEmpty => fieldValue(name).toConfig
+      case _: ConfigObject =>
+        throw CoproductHintException(NonEmptyObjectFound(name))
+      case cv =>
+        throw CoproductHintException(WrongType(cv.valueType, Set(ConfigValueType.OBJECT)))
+    }
 }

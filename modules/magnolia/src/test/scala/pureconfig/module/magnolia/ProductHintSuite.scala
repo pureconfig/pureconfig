@@ -3,9 +3,9 @@ package pureconfig.module.magnolia
 import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject }
+import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueType }
 import pureconfig._
-import pureconfig.error.{ ConvertFailure, KeyNotFound, UnknownKey }
+import pureconfig.error._
 import pureconfig.generic.ProductHint
 import pureconfig.module.magnolia.auto.reader._
 import pureconfig.module.magnolia.auto.writer._
@@ -56,9 +56,9 @@ class ProductHintSuite extends BaseSuite {
       }""").root()
 
     case class SampleConf(a: Int, b: String)
-    // NOTE: behavior differs from pureconfig.generic (only the first error is reported)
     ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(
-      ConvertFailure(KeyNotFound("a", Set("A")), stringConfigOrigin(1), ""))
+      ConvertFailure(KeyNotFound("a", Set("A")), stringConfigOrigin(1), ""),
+      ConvertFailure(KeyNotFound("b", Set("B")), stringConfigOrigin(1), ""))
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
     ConfigConvert[SampleConf].from(conf) shouldBe Right(SampleConf(2, "two"))
@@ -154,6 +154,24 @@ class ProductHintSuite extends BaseSuite {
     conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4))
   }
 
+  it should "accumulate all failures if the product hint doesn't allow unknown keys" in {
+    case class Conf(a: Int)
+
+    implicit val productHint = ProductHint[Conf](allowUnknownKeys = false)
+
+    val conf = ConfigFactory.parseString("""{
+      conf {
+        a = "hello"
+        b = 1
+      }
+    }""".stripMargin)
+
+    conf.getConfig("conf").to[Conf] shouldBe Left(
+      ConfigReaderFailures(
+        ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), stringConfigOrigin(3), "a"),
+        List(ConvertFailure(UnknownKey("b"), stringConfigOrigin(4), "b"))))
+  }
+
   it should "not use default arguments if specified through a product hint" in {
     case class InnerConf(e: Int, g: Int)
     case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44), e: Option[Int] = Some(45))
@@ -161,8 +179,9 @@ class ProductHintSuite extends BaseSuite {
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava)
-    // NOTE: behavior differs from pureconfig.generic (only the first error is reported)
     conf1.to[Conf].left.value.toList should contain theSameElementsAs Seq(
-      ConvertFailure(KeyNotFound("b"), emptyConfigOrigin, ""))
+      ConvertFailure(KeyNotFound("b"), emptyConfigOrigin, ""),
+      ConvertFailure(KeyNotFound("c"), emptyConfigOrigin, ""),
+      ConvertFailure(KeyNotFound("d"), emptyConfigOrigin, ""))
   }
 }

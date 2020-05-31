@@ -11,7 +11,7 @@ import shapeless._
  *
  * @tparam Repr the generic representation
  */
-trait SeqShapedWriter[Repr] extends ConfigWriter[Repr]
+private[generic] trait SeqShapedWriter[Repr] extends ConfigWriter[Repr]
 
 object SeqShapedWriter {
 

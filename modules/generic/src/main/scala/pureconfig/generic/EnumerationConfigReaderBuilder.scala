@@ -1,7 +1,7 @@
 package pureconfig.generic
 
 import pureconfig.ConfigReader.Result
-import pureconfig.generic.error.NoValidCoproductChoiceFound
+import pureconfig.generic.error.NoValidCoproductOptionFound
 import pureconfig.{ ConfigCursor, ConfigReader }
 import shapeless._
 import shapeless.labelled._
@@ -21,7 +21,7 @@ object EnumerationConfigReaderBuilder {
     new EnumerationConfigReaderBuilder[CNil] {
       def build(transformName: String => String): ConfigReader[CNil] =
         new ConfigReader[CNil] {
-          def from(cur: ConfigCursor): Result[CNil] = cur.failed(NoValidCoproductChoiceFound(cur.value))
+          def from(cur: ConfigCursor): Result[CNil] = cur.failed(NoValidCoproductOptionFound(cur.value))
         }
     }
 
