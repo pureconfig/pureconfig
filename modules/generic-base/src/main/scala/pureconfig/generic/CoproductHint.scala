@@ -4,7 +4,7 @@ import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.{ Attempt, Use }
-import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductChoiceFound, UnexpectedValueForFieldCoproductHint }
+import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductOptionFound, UnexpectedValueForFieldCoproductHint }
 import pureconfig.syntax._
 
 /**
@@ -91,7 +91,7 @@ object FieldCoproductHint {
  */
 class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
-    Right(Attempt(cursor, options, _ => ConfigReaderFailures(cursor.failureFor(NoValidCoproductChoiceFound(cursor.value)))))
+    Right(Attempt(cursor, options, _ => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(cursor.value)))))
 
   def to(value: ConfigValue, name: String): ConfigValue =
     value

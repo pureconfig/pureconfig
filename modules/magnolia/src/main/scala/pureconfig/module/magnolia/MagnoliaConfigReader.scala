@@ -4,7 +4,7 @@ import _root_.magnolia._
 import pureconfig._
 import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongSizeList }
 import pureconfig.generic.ProductHint.UseOrDefault
-import pureconfig.generic.error.MissingCoproductChoice
+import pureconfig.generic.error.InvalidCoproductOption
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -75,7 +75,7 @@ object MagnoliaConfigReader {
         case CoproductHint.Use(cur, option) =>
           readerFor(option) match {
             case Some(value) => value.from(cur)
-            case None => ConfigReader.Result.fail[A](cur.failureFor(MissingCoproductChoice(option)))
+            case None => ConfigReader.Result.fail[A](cur.failureFor(InvalidCoproductOption(option)))
           }
 
         case CoproductHint.Attempt(cur, options, combineF) =>
@@ -84,7 +84,8 @@ object MagnoliaConfigReader {
             curr.left.flatMap { currentFailures =>
               readerFor(option) match {
                 case Some(value) => value.from(cur).left.map(f => currentFailures :+ (option -> f))
-                case None => Left(currentFailures :+ (option -> ConfigReaderFailures(cur.failureFor(MissingCoproductChoice(option)))))
+                case None => Left(currentFailures :+
+                  (option -> ConfigReaderFailures(cur.failureFor(InvalidCoproductOption(option)))))
               }
             }
           }

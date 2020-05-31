@@ -4,7 +4,7 @@ import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.Use
-import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductChoiceFound }
+import pureconfig.generic.error.{ CoproductHintException, NoValidCoproductOptionFound }
 import pureconfig.syntax._
 
 /**
@@ -28,7 +28,7 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
     cursor.asString.right.flatMap { str =>
       options.find(str == fieldValue(_)) match {
         case Some(opt) => Right(Use(cursor, opt))
-        case None => cursor.failed[CoproductHint.Action](NoValidCoproductChoiceFound(cursor.value))
+        case None => cursor.failed[CoproductHint.Action](NoValidCoproductOptionFound(cursor.value))
       }
     }
 

@@ -2,7 +2,7 @@ package pureconfig.generic
 
 import pureconfig._
 import pureconfig.error.ConfigReaderFailures
-import pureconfig.generic.error.MissingCoproductChoice
+import pureconfig.generic.error.InvalidCoproductOption
 import shapeless._
 
 /**
@@ -87,7 +87,7 @@ trait DerivedConfigReader1 {
         case CoproductHint.Use(cursor, option) =>
           readerFor(option) match {
             case Some(value) => value.from(cursor)
-            case None => ConfigReader.Result.fail[F](cursor.failureFor(MissingCoproductChoice(option)))
+            case None => ConfigReader.Result.fail[F](cursor.failureFor(InvalidCoproductOption(option)))
           }
 
         case CoproductHint.Attempt(cursor, options, combineF) =>
@@ -96,7 +96,8 @@ trait DerivedConfigReader1 {
             curr.left.flatMap { currentFailures =>
               readerFor(option) match {
                 case Some(value) => value.from(cursor).left.map(f => currentFailures :+ (option -> f))
-                case None => Left(currentFailures :+ (option -> ConfigReaderFailures(cursor.failureFor(MissingCoproductChoice(option)))))
+                case None => Left(currentFailures :+
+                  (option -> ConfigReaderFailures(cursor.failureFor(InvalidCoproductOption(option)))))
               }
             }
           }
