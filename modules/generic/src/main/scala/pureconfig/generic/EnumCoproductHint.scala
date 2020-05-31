@@ -36,8 +36,8 @@ class EnumCoproductHint[T] extends CoproductHint[T] {
     value match {
       case co: ConfigObject if co.isEmpty => fieldValue(name).toConfig
       case _: ConfigObject =>
-        throw new CoproductHintException(NonEmptyObjectFound(name))
+        throw CoproductHintException(NonEmptyObjectFound(name))
       case cv =>
-        throw new CoproductHintException(WrongType(cv.valueType, Set(ConfigValueType.OBJECT)))
+        throw CoproductHintException(WrongType(cv.valueType, Set(ConfigValueType.OBJECT)))
     }
 }
