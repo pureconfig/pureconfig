@@ -31,7 +31,7 @@ class ConfigSourceSuite extends BaseSuite {
     case class Conf(f: Float)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
     ConfigSource.fromConfig(conf).at("foo.bar").load[Conf] shouldBe Right(Conf(1.0F))
-    ConfigSource.fromConfig(conf).at("bar.foo").load[Conf] should failWith(KeyNotFound("bar", Set.empty), "")
+    ConfigSource.fromConfig(conf).at("bar.foo").load[Conf] should failWith(KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
   }
 
   it should "allow reading scalar values from a config object at a namespace" in {
@@ -39,18 +39,18 @@ class ConfigSourceSuite extends BaseSuite {
     val source = ConfigSource.fromConfig(conf)
 
     source.at("foo.bar.f").load[Float] shouldBe Right(1.0F)
-    source.at("foo.bar.h").load[Float] should failWith(KeyNotFound("h", Set.empty), "foo.bar")
-    source.at("bar.foo.f").load[Float] should failWith(KeyNotFound("bar", Set.empty), "")
+    source.at("foo.bar.h").load[Float] should failWith(KeyNotFound("h", Set.empty), "foo.bar", stringConfigOrigin(1))
+    source.at("bar.foo.f").load[Float] should failWith(KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
     source.at("foo.baz.f").load[Float] should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz", stringConfigOrigin(1))
 
     source.at("foo.bar.f").load[Option[Float]] shouldBe Right(Some(1.0F))
-    source.at("foo.bar.h").load[Option[Float]] should failWith(KeyNotFound("h", Set.empty), "foo.bar")
-    source.at("bar.foo.f").load[Option[Float]] should failWith(KeyNotFound("bar", Set.empty), "")
+    source.at("foo.bar.h").load[Option[Float]] should failWith(KeyNotFound("h", Set.empty), "foo.bar", stringConfigOrigin(1))
+    source.at("bar.foo.f").load[Option[Float]] should failWith(KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
     source.at("foo.baz.f").load[Option[Float]] should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz", stringConfigOrigin(1))
     source.at("foo").at("baz").at("f").load[Option[Float]] should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz", stringConfigOrigin(1))
   }
 
   it should "handle correctly namespaces with special chars" in {
@@ -60,13 +60,13 @@ class ConfigSourceSuite extends BaseSuite {
     source.at("\"fo.o\".\"ba r\".f").load[Float] shouldBe Right(1.0F)
 
     source.at("\"fo.o\".\"ba r\".h").load[Float] should failWith(
-      KeyNotFound("h", Set.empty), "\"fo.o\".\"ba r\"")
+      KeyNotFound("h", Set.empty), "\"fo.o\".\"ba r\"", stringConfigOrigin(1))
 
     source.at("\"fo.o\".\"ba z\".h").load[Float] should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "\"fo.o\".\"ba z\"")
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "\"fo.o\".\"ba z\"", stringConfigOrigin(1))
 
     source.at("\"b.a.r\".foo.f").load[Float] should failWith(
-      KeyNotFound("b.a.r", Set.empty), "")
+      KeyNotFound("b.a.r", Set.empty), "", stringConfigOrigin(1))
   }
 
   it should "allow reading from a configuration file" in {

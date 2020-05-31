@@ -20,9 +20,9 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
 
   def prettyPrint(identLevel: Int = 0, identSize: Int = 2): String = {
     def tabs(n: Int): String = " " * ((identLevel + n) * identSize)
-    def descriptionWithLocation(failure: ConfigReaderFailure, ident: Int): String = {
+    def descriptionWithOrigin(failure: ConfigReaderFailure, ident: Int): String = {
       val failureLines = failure.description.split("\n")
-      (failure.location.fold(s"${tabs(ident)}- ${failureLines.head}")(f => s"${tabs(ident)}- ${f.description} ${failureLines.head}") ::
+      (failure.origin.fold(s"${tabs(ident)}- ${failureLines.head}")(f => s"${tabs(ident)}- (${f.description}) ${failureLines.head}") ::
         failureLines.tail.map(l => s"${tabs(ident + 1)}$l").toList).mkString("\n")
     }
 
@@ -32,7 +32,7 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
     val failuresByPath = convertFailures.asInstanceOf[List[ConvertFailure]].groupBy(_.path).toList.sortBy(_._1)
 
     otherFailures.foreach { failure =>
-      linesBuffer += descriptionWithLocation(failure, 0)
+      linesBuffer += descriptionWithOrigin(failure, 0)
     }
 
     if (otherFailures.nonEmpty && convertFailures.nonEmpty) {
@@ -43,7 +43,7 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
       case (p, failures) =>
         linesBuffer += (tabs(0) + (if (p.isEmpty) s"at the root:" else s"at '$p':"))
         failures.foreach { failure =>
-          linesBuffer += descriptionWithLocation(failure, 1)
+          linesBuffer += descriptionWithOrigin(failure, 1)
         }
     }
     linesBuffer.mkString(System.lineSeparator())

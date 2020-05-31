@@ -27,26 +27,26 @@ class CatsSuite extends BaseSuite {
 
   it should "return an EmptyTraversableFound when reading empty lists into NonEmptyList" in {
     val config = parseString("{ numbers: [] }")
-    config.to[Numbers] should failWith(EmptyTraversableFound("scala.collection.immutable.List"), "numbers")
+    config.to[Numbers] should failWith(EmptyTraversableFound("scala.collection.immutable.List"), "numbers", stringConfigOrigin(1))
   }
 
   it should "return an EmptyTraversableFound when reading empty vector into NonEmptyVector" in {
     val config = parseString("{ numbers: [] }")
-    config.to[NumVec] should failWith(EmptyTraversableFound("scala.collection.immutable.Vector"), "numbers")
+    config.to[NumVec] should failWith(EmptyTraversableFound("scala.collection.immutable.Vector"), "numbers", stringConfigOrigin(1))
   }
 
   it should "return an EmptyTraversableFound when reading empty set into NonEmptySet" in {
     val config = parseString("{ numbers: [] }")
-    config.to[NumSet] should failWith(EmptyTraversableFound("scala.collection.immutable.SortedSet"), "numbers")
+    config.to[NumSet] should failWith(EmptyTraversableFound("scala.collection.immutable.SortedSet"), "numbers", stringConfigOrigin(1))
   }
 
   it should "return an EmptyTraversableFound when reading empty map into NonEmptyMap" in {
     val config = parseString("{ numbers{} }")
-    config.to[NumMap] should failWith(EmptyTraversableFound("scala.collection.immutable.Map"), "numbers")
+    config.to[NumMap] should failWith(EmptyTraversableFound("scala.collection.immutable.Map"), "numbers", stringConfigOrigin(1))
   }
 
   it should "return an EmptyTraversableFound when reading empty chain into NonEmptyChain" in {
     val config = parseString("{ numbers: [] }")
-    config.to[NumChain] should failWith(EmptyTraversableFound("cats.data.Chain"), "numbers")
+    config.to[NumChain] should failWith(EmptyTraversableFound("cats.data.Chain"), "numbers", stringConfigOrigin(1))
   }
 }

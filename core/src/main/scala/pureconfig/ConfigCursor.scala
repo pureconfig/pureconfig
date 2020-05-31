@@ -32,7 +32,7 @@ sealed trait ConfigCursor {
   /**
    * The file system location of the config to which this cursor points.
    */
-  def location: Option[ConfigValueLocation] = ConfigValueLocation(value)
+  def origin: Option[ConfigOrigin] = Option(value).map(_.origin())
 
   /**
    * Returns whether this cursor points to an undefined value. A cursor can point to an undefined value when a missing

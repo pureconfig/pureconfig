@@ -15,7 +15,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-sttp" % "0.12.3"
 To load an sttp `Uri` into a configuration, create a new class:
 
 ```scala
-import com.softwaremill.sttp.Uri
+import sttp.model.Uri
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import pureconfig.generic.auto._

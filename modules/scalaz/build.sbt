@@ -1,8 +1,8 @@
 name := "pureconfig-scalaz"
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.3.0",
-  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.0" % "test"
+  "org.scalaz" %% "scalaz-core" % "7.3.1",
+  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.1" % "test"
 )
 
 scalacOptions in Tut += "-Ypartial-unification"

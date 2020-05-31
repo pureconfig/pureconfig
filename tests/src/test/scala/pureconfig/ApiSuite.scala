@@ -41,7 +41,7 @@ class ApiSuite extends BaseSuite {
     case class Conf(f: Float)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
     loadConfig[Conf](conf = conf, namespace = "foo.bar") shouldBe Right(Conf(1.0F))
-    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar", Set.empty), "")
+    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
   }
 
   it should "loadConfig other values from a Typesafe Config with a namespace" in {
@@ -50,13 +50,13 @@ class ApiSuite extends BaseSuite {
     loadConfig[Float](conf = conf, namespace = "foo.bar.f") shouldBe Right(1.0F)
 
     loadConfig[Float](conf = conf, namespace = "foo.bar.h") should failWith(
-      KeyNotFound("h", Set.empty), "foo.bar")
+      KeyNotFound("h", Set.empty), "foo.bar", stringConfigOrigin(1))
 
     loadConfig[Float](conf = conf, namespace = "foo.baz.f") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz", stringConfigOrigin(1))
 
     loadConfig[Float](conf = conf, namespace = "bar.foo.f") should failWith(
-      KeyNotFound("bar", Set.empty), "")
+      KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0F))
 
@@ -64,13 +64,13 @@ class ApiSuite extends BaseSuite {
     // keys as `None` when an `Option[A]` is loaded as a root value
     // loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") should failWith(
-      KeyNotFound("h", Set.empty), "foo.bar")
+      KeyNotFound("h", Set.empty), "foo.bar", stringConfigOrigin(1))
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz")
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz", stringConfigOrigin(1))
 
     loadConfig[Option[Float]](conf = conf, namespace = "bar.foo.f") should failWith(
-      KeyNotFound("bar", Set.empty), "")
+      KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
   }
 
   it should "handle correctly namespaces with special chars" in {
@@ -79,13 +79,13 @@ class ApiSuite extends BaseSuite {
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".f") shouldBe Right(1.0F)
 
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".h") should failWith(
-      KeyNotFound("h", Set.empty), "\"fo.o\".\"ba r\"")
+      KeyNotFound("h", Set.empty), "\"fo.o\".\"ba r\"", stringConfigOrigin(1))
 
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba z\".h") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "\"fo.o\".\"ba z\"")
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "\"fo.o\".\"ba z\"", stringConfigOrigin(1))
 
     loadConfig[Float](conf = conf, namespace = "\"b.a.r\".foo.f") should failWith(
-      KeyNotFound("b.a.r", Set.empty), "")
+      KeyNotFound("b.a.r", Set.empty), "", stringConfigOrigin(1))
   }
 
   it should "loadConfig from a configuration file" in {
