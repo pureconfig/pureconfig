@@ -39,14 +39,13 @@ object MapShapedReader {
         val fieldName = key.value.name
         val fieldAction = hint.from(cur, fieldName)
         lazy val reader = vConfigReader.value.value
-        lazy val keyNotFoundFailure = cur.failed[V](KeyNotFound.forKeys(fieldAction.field, cur.keys))
         val headResult = (fieldAction, default.head) match {
           case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
             Right(defaultValue)
-          case (action, _) if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined =>
+          case (action, _) if !action.cursor.isUndefined || reader.isInstanceOf[ReadsMissingKeys] =>
             reader.from(action.cursor)
           case _ =>
-            keyNotFoundFailure
+            cur.failed[V](KeyNotFound.forKeys(fieldAction.field, cur.keys))
         }
         val tailResult = tConfigReader.value.from(cur, default.tail, usedFields + fieldAction.field)
         ConfigReader.Result.zipWith(headResult, tailResult)((head, tail) => field[K](head) :: tail)
