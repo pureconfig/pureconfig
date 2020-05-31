@@ -59,14 +59,18 @@ private[pureconfig] case class ProductHintImpl[T](
   }
 
   def bottom(cursor: ConfigObjectCursor, usedFields: Set[String]): Option[ConfigReaderFailures] = {
-    lazy val unknownKeys = cursor.map.toList.collect {
-      case (k, keyCur) if !usedFields.contains(k) =>
-        keyCur.failureFor(UnknownKey(k))
-    }
-    if (allowUnknownKeys || unknownKeys.isEmpty)
+    if (allowUnknownKeys)
       None
-    else
-      Some(new ConfigReaderFailures(unknownKeys.head, unknownKeys.tail))
+    else {
+      val unknownKeys = cursor.map.toList.collect {
+        case (k, keyCur) if !usedFields.contains(k) =>
+          keyCur.failureFor(UnknownKey(k))
+      }
+      unknownKeys match {
+        case h :: t => Some(new ConfigReaderFailures(h, t))
+        case Nil => None
+      }
+    }
   }
 
   def to(value: Option[ConfigValue], fieldName: String): Option[(String, ConfigValue)] =
