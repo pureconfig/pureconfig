@@ -20,27 +20,27 @@ trait WritesMissingKeys[A] { this: ConfigWriter[A] =>
  */
 trait CollectionWriters {
 
-  implicit def optionWriter[T](implicit conv: Derivation[ConfigWriter[T]]): ConfigWriter[Option[T]] =
-    new ConfigWriter[Option[T]] with WritesMissingKeys[Option[T]] {
-      override def to(t: Option[T]): ConfigValue = t match {
+  implicit def optionWriter[A](implicit conv: Derivation[ConfigWriter[A]]): ConfigWriter[Option[A]] =
+    new ConfigWriter[Option[A]] with WritesMissingKeys[Option[A]] {
+      override def to(t: Option[A]): ConfigValue = t match {
         case Some(v) => conv.value.to(v)
         case None => ConfigValueFactory.fromAnyRef(null)
       }
 
-      def toOpt(t: Option[T]): Option[ConfigValue] = t.map(conv.value.to)
+      def toOpt(t: Option[A]): Option[ConfigValue] = t.map(conv.value.to)
     }
 
-  implicit def traversableWriter[T, F[T] <: TraversableOnce[T]](
+  implicit def traversableWriter[A, F[A] <: TraversableOnce[A]](
     implicit
-    configConvert: Derivation[ConfigWriter[T]]) = new ConfigWriter[F[T]] {
+    configConvert: Derivation[ConfigWriter[A]]) = new ConfigWriter[F[A]] {
 
-    override def to(ts: F[T]): ConfigValue = {
+    override def to(ts: F[A]): ConfigValue = {
       ConfigValueFactory.fromIterable(ts.toList.map(configConvert.value.to).asJava)
     }
   }
 
-  implicit def mapWriter[T](implicit configConvert: Derivation[ConfigWriter[T]]) = new ConfigWriter[Map[String, T]] {
-    override def to(keyVals: Map[String, T]): ConfigValue = {
+  implicit def mapWriter[A](implicit configConvert: Derivation[ConfigWriter[A]]) = new ConfigWriter[Map[String, A]] {
+    override def to(keyVals: Map[String, A]): ConfigValue = {
       ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).toMap.asJava)
     }
   }

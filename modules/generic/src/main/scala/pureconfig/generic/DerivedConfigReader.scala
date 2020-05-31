@@ -12,24 +12,24 @@ trait DerivedConfigReader[A] extends ConfigReader[A]
 
 object DerivedConfigReader extends DerivedConfigReader1 {
 
-  implicit def anyValReader[T, U](
+  implicit def anyValReader[A, Wrapped](
     implicit
-    ev: T <:< AnyVal,
-    generic: Generic[T],
-    unwrapped: Unwrapped.Aux[T, U],
-    reader: ConfigReader[U]): DerivedConfigReader[T] = new DerivedConfigReader[T] {
+    ev: A <:< AnyVal,
+    generic: Generic[A],
+    unwrapped: Unwrapped.Aux[A, Wrapped],
+    reader: ConfigReader[Wrapped]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
 
-    def from(value: ConfigCursor): ConfigReader.Result[T] =
+    def from(value: ConfigCursor): ConfigReader.Result[A] =
       reader.from(value).right.map(unwrapped.wrap)
   }
 
-  implicit def tupleReader[F: IsTuple, Repr <: HList, LRepr <: HList, DefaultRepr <: HList](
+  implicit def tupleReader[A: IsTuple, Repr <: HList, LabelledRepr <: HList, DefaultRepr <: HList](
     implicit
-    g: Generic.Aux[F, Repr],
+    g: Generic.Aux[A, Repr],
     gcr: SeqShapedReader[Repr],
-    lg: LabelledGeneric.Aux[F, LRepr],
-    default: Default.AsOptions.Aux[F, DefaultRepr],
-    pr: MapShapedReader.WithDefaults[F, LRepr, DefaultRepr]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
+    lg: LabelledGeneric.Aux[A, LabelledRepr],
+    default: Default.AsOptions.Aux[A, DefaultRepr],
+    pr: MapShapedReader.WithDefaults[A, LabelledRepr, DefaultRepr]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
 
     def from(cur: ConfigCursor) = {
       // Try to read first as the list representation and afterwards as the product representation (i.e. ConfigObject
@@ -44,39 +44,39 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     }
   }
 
-  private[pureconfig] def tupleAsListReader[F: IsTuple, Repr <: HList](cur: ConfigListCursor)(
+  private[pureconfig] def tupleAsListReader[A: IsTuple, Repr <: HList](cur: ConfigListCursor)(
     implicit
-    gen: Generic.Aux[F, Repr],
-    cr: SeqShapedReader[Repr]): ConfigReader.Result[F] =
+    gen: Generic.Aux[A, Repr],
+    cr: SeqShapedReader[Repr]): ConfigReader.Result[A] =
     cr.from(cur).right.map(gen.from)
 
-  private[pureconfig] def tupleAsObjectReader[F: IsTuple, Repr <: HList, DefaultRepr <: HList](cur: ConfigObjectCursor)(
+  private[pureconfig] def tupleAsObjectReader[A: IsTuple, Repr <: HList, DefaultRepr <: HList](cur: ConfigObjectCursor)(
     implicit
-    gen: LabelledGeneric.Aux[F, Repr],
-    default: Default.AsOptions.Aux[F, DefaultRepr],
-    cr: MapShapedReader.WithDefaults[F, Repr, DefaultRepr]): ConfigReader.Result[F] =
+    gen: LabelledGeneric.Aux[A, Repr],
+    default: Default.AsOptions.Aux[A, DefaultRepr],
+    cr: MapShapedReader.WithDefaults[A, Repr, DefaultRepr]): ConfigReader.Result[A] =
     cr.fromWithDefault(cur, default()).right.map(gen.from)
 }
 
 trait DerivedConfigReader1 {
 
-  final implicit def productReader[F, Repr <: HList, DefaultRepr <: HList](
+  final implicit def productReader[A, Repr <: HList, DefaultRepr <: HList](
     implicit
-    gen: LabelledGeneric.Aux[F, Repr],
-    default: Default.AsOptions.Aux[F, DefaultRepr],
-    cc: Lazy[MapShapedReader.WithDefaults[F, Repr, DefaultRepr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
+    gen: LabelledGeneric.Aux[A, Repr],
+    default: Default.AsOptions.Aux[A, DefaultRepr],
+    cc: Lazy[MapShapedReader.WithDefaults[A, Repr, DefaultRepr]]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
 
-    override def from(cur: ConfigCursor): ConfigReader.Result[F] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[A] = {
       cur.asObjectCursor.right.flatMap(cc.value.fromWithDefault(_, default())).right.map(gen.from)
     }
   }
 
-  final implicit def coproductReader[F, Repr <: Coproduct](
+  final implicit def coproductReader[A, Repr <: Coproduct](
     implicit
-    gen: LabelledGeneric.Aux[F, Repr],
-    cc: Lazy[MapShapedReader[F, Repr]]): DerivedConfigReader[F] = new DerivedConfigReader[F] {
+    gen: LabelledGeneric.Aux[A, Repr],
+    cc: Lazy[MapShapedReader[A, Repr]]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
 
-    override def from(cur: ConfigCursor): ConfigReader.Result[F] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[A] = {
       cc.value.from(cur).right.map(gen.from)
     }
   }

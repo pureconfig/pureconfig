@@ -5,9 +5,9 @@ import pureconfig._
 /**
  * A trait that can be implemented to customize how case classes are read from and written to a config.
  *
- * @tparam T the type of case class for which this hint applies
+ * @tparam A the type of case class for which this hint applies
  */
-trait ProductHint[T] {
+trait ProductHint[A] {
 
   /**
    * Returns the key in the config object associated with a given case class field.
@@ -28,21 +28,21 @@ trait ProductHint[T] {
   def allowUnknownKeys: Boolean
 }
 
-private[pureconfig] case class ProductHintImpl[T](
+private[pureconfig] case class ProductHintImpl[A](
     fieldMapping: ConfigFieldMapping,
     useDefaultArgs: Boolean,
-    allowUnknownKeys: Boolean) extends ProductHint[T] {
+    allowUnknownKeys: Boolean) extends ProductHint[A] {
 
   def configKey(fieldName: String) = fieldMapping(fieldName)
 }
 
 object ProductHint {
 
-  def apply[T](
+  def apply[A](
     fieldMapping: ConfigFieldMapping = ConfigFieldMapping(CamelCase, KebabCase),
     useDefaultArgs: Boolean = true,
-    allowUnknownKeys: Boolean = true): ProductHint[T] =
-    ProductHintImpl[T](fieldMapping, useDefaultArgs, allowUnknownKeys)
+    allowUnknownKeys: Boolean = true): ProductHint[A] =
+    ProductHintImpl[A](fieldMapping, useDefaultArgs, allowUnknownKeys)
 
-  implicit def default[T]: ProductHint[T] = apply()
+  implicit def default[A]: ProductHint[A] = apply()
 }

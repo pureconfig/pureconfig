@@ -15,22 +15,22 @@ import scala.reflect.ClassTag
  */
 package object cats {
 
-  private[pureconfig] def fromNonEmpty[X, Y](reader: ConfigReader[X])(fromX: X => Option[Y])(implicit ct: ClassTag[X]): ConfigReader[Y] =
+  private[pureconfig] def fromNonEmpty[A, B](reader: ConfigReader[A])(fromX: A => Option[B])(implicit ct: ClassTag[A]): ConfigReader[B] =
     reader.emap(x => fromX(x).toRight(EmptyTraversableFound(ct.toString)))
 
-  implicit def nonEmptyListReader[T](implicit reader: ConfigReader[List[T]]): ConfigReader[NonEmptyList[T]] =
+  implicit def nonEmptyListReader[A](implicit reader: ConfigReader[List[A]]): ConfigReader[NonEmptyList[A]] =
     fromNonEmpty(reader)(NonEmptyList.fromList)
-  implicit def nonEmptyListWriter[T](implicit writer: ConfigWriter[List[T]]): ConfigWriter[NonEmptyList[T]] =
+  implicit def nonEmptyListWriter[A](implicit writer: ConfigWriter[List[A]]): ConfigWriter[NonEmptyList[A]] =
     writer.contramap(_.toList)
 
-  implicit def nonEmptyVectorReader[T](implicit reader: ConfigReader[Vector[T]]): ConfigReader[NonEmptyVector[T]] =
+  implicit def nonEmptyVectorReader[A](implicit reader: ConfigReader[Vector[A]]): ConfigReader[NonEmptyVector[A]] =
     fromNonEmpty(reader)(NonEmptyVector.fromVector)
-  implicit def nonEmptyVectorWriter[T](implicit writer: ConfigWriter[Vector[T]]): ConfigWriter[NonEmptyVector[T]] =
+  implicit def nonEmptyVectorWriter[A](implicit writer: ConfigWriter[Vector[A]]): ConfigWriter[NonEmptyVector[A]] =
     writer.contramap(_.toVector)
 
-  implicit def nonEmptySetReader[T](implicit reader: ConfigReader[SortedSet[T]]): ConfigReader[NonEmptySet[T]] =
+  implicit def nonEmptySetReader[A](implicit reader: ConfigReader[SortedSet[A]]): ConfigReader[NonEmptySet[A]] =
     fromNonEmpty(reader)(NonEmptySet.fromSet)
-  implicit def nonEmptySetWriter[T](implicit writer: ConfigWriter[SortedSet[T]]): ConfigWriter[NonEmptySet[T]] =
+  implicit def nonEmptySetWriter[A](implicit writer: ConfigWriter[SortedSet[A]]): ConfigWriter[NonEmptySet[A]] =
     writer.contramap(_.toSortedSet)
 
   implicit def nonEmptyMapReader[A, B](implicit reader: ConfigReader[Map[A, B]], ord: Order[A]): ConfigReader[NonEmptyMap[A, B]] =
@@ -39,13 +39,13 @@ package object cats {
     writer.contramap(_.toSortedMap)
 
   // For emptiable foldables not covered by TraversableOnce reader/writer, e.g. Chain.
-  implicit def lowPriorityNonReducibleReader[T, F[_]: Foldable: Alternative](implicit reader: ConfigReader[List[T]]): Exported[ConfigReader[F[T]]] =
-    Exported(reader.map(to => (to foldRight Alternative[F].empty[T])(_.pure[F] <+> _)))
-  implicit def lowPriorityNonReducibleWriter[T, F[_]: Foldable: Alternative](implicit writer: ConfigWriter[List[T]]): Exported[ConfigWriter[F[T]]] =
+  implicit def lowPriorityNonReducibleReader[A, F[_]: Foldable: Alternative](implicit reader: ConfigReader[List[A]]): Exported[ConfigReader[F[A]]] =
+    Exported(reader.map(to => (to foldRight Alternative[F].empty[A])(_.pure[F] <+> _)))
+  implicit def lowPriorityNonReducibleWriter[A, F[_]: Foldable: Alternative](implicit writer: ConfigWriter[List[A]]): Exported[ConfigWriter[F[A]]] =
     Exported(writer.contramap(_.toList))
 
-  implicit def nonEmptyChainReader[T](implicit reader: ConfigReader[Chain[T]]): ConfigReader[NonEmptyChain[T]] =
+  implicit def nonEmptyChainReader[A](implicit reader: ConfigReader[Chain[A]]): ConfigReader[NonEmptyChain[A]] =
     fromNonEmpty(reader)(NonEmptyChain.fromChain)
-  implicit def nonEmptyChainWriter[T](implicit writer: ConfigWriter[Chain[T]]): ConfigWriter[NonEmptyChain[T]] =
+  implicit def nonEmptyChainWriter[A](implicit writer: ConfigWriter[Chain[A]]): ConfigWriter[NonEmptyChain[A]] =
     writer.contramap(_.toChain)
 }

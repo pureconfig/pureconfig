@@ -9,9 +9,9 @@ import pureconfig.syntax._
 /**
  * A trait that can be implemented to disambiguate between the different options of a coproduct or sealed family.
  *
- * @tparam T the type of the coproduct or sealed family for which this hint applies
+ * @tparam A the type of the coproduct or sealed family for which this hint applies
  */
-trait CoproductHint[T] {
+trait CoproductHint[A] {
 
   /**
    * Given a `ConfigValue` for the sealed family, disambiguate and extract the `ConfigValue` associated to the
@@ -68,7 +68,7 @@ trait CoproductHint[T] {
  * By default, the field value written is the class or coproduct option name converted to kebab case. This mapping can
  * be changed by overriding the method `fieldValue` of this class.
  */
-class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
+class FieldCoproductHint[A](key: String) extends CoproductHint[A] {
 
   /**
    * Returns the field value for a class or coproduct option name.
@@ -116,12 +116,12 @@ object FieldCoproductHint {
  * Hint where all coproduct options are tried in order. `from` will choose the first option able to deserialize
  * the config without errors, while `to` will write the config as is, with no disambiguation information.
  */
-class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
+class FirstSuccessCoproductHint[A] extends CoproductHint[A] {
   def from(cur: ConfigCursor, name: String) = Right(Some(cur))
   def to(cv: ConfigValue, name: String) = Right(cv)
   def tryNextOnFail(name: String) = true
 }
 
 object CoproductHint {
-  implicit def default[T]: CoproductHint[T] = new FieldCoproductHint[T]("type")
+  implicit def default[A]: CoproductHint[A] = new FieldCoproductHint[A]("type")
 }

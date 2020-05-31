@@ -6,8 +6,8 @@ import pureconfig.error.ConfigReaderException
 import scala.reflect.ClassTag
 
 package object syntax {
-  implicit class AnyWriterOps[T](val any: T) extends AnyVal {
-    def toConfig(implicit writer: Derivation[ConfigWriter[T]]): ConfigValue = writer.value.to(any)
+  implicit class AnyWriterOps[A](val any: A) extends AnyVal {
+    def toConfig(implicit writer: Derivation[ConfigWriter[A]]): ConfigValue = writer.value.to(any)
   }
 
   private def getResultOrThrow[Config](failuresOrResult: ConfigReader.Result[Config])(implicit ct: ClassTag[Config]): Config = {
@@ -18,17 +18,17 @@ package object syntax {
   }
 
   implicit class ConfigValueReaderOps(val conf: ConfigValue) extends AnyVal {
-    def to[T](implicit reader: Derivation[ConfigReader[T]]): ConfigReader.Result[T] = reader.value.from(conf)
-    def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(reader.value.from(conf))(cl)
+    def to[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] = reader.value.from(conf)
+    def toOrThrow[A](implicit reader: Derivation[ConfigReader[A]], cl: ClassTag[A]): A = getResultOrThrow(reader.value.from(conf))(cl)
   }
 
   implicit class ConfigCursorReaderOps(val cur: ConfigCursor) extends AnyVal {
-    def to[T](implicit reader: Derivation[ConfigReader[T]]): ConfigReader.Result[T] = reader.value.from(cur)
-    def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(reader.value.from(cur))(cl)
+    def to[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] = reader.value.from(cur)
+    def toOrThrow[A](implicit reader: Derivation[ConfigReader[A]], cl: ClassTag[A]): A = getResultOrThrow(reader.value.from(cur))(cl)
   }
 
   implicit class ConfigReaderOps(val conf: TypesafeConfig) extends AnyVal {
-    def to[T](implicit reader: Derivation[ConfigReader[T]]): ConfigReader.Result[T] = conf.root().to[T]
-    def toOrThrow[T](implicit reader: Derivation[ConfigReader[T]], cl: ClassTag[T]): T = getResultOrThrow(conf.root().to[T])(cl)
+    def to[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] = conf.root().to[A]
+    def toOrThrow[A](implicit reader: Derivation[ConfigReader[A]], cl: ClassTag[A]): A = getResultOrThrow(conf.root().to[A])(cl)
   }
 }

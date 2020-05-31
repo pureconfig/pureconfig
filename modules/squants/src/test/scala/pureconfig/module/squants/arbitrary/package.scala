@@ -6,7 +6,7 @@ import squants.{ Dimension, Quantity }
 
 package object arbitrary {
 
-  def quantityAbitrary[T <: Quantity[T]](dim: Dimension[T]): Arbitrary[T] = {
+  def quantityAbitrary[A <: Quantity[A]](dim: Dimension[A]): Arbitrary[A] = {
     Arbitrary(
       for {
         n <- Arbitrary.arbitrary[Double]

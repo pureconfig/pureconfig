@@ -136,7 +136,7 @@ class ApiSuite extends BaseSuite {
         |// unused configuration
         |akka.loggers = ["akka.event.Logging$DefaultLogger"]""".stripMargin)
 
-    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+    implicit def productHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
     val configOrError = loadConfig[SparkRootConf](configFile)
 
     val config = configOrError match {

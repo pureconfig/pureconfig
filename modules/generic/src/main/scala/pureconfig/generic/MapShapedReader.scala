@@ -39,14 +39,14 @@ object MapShapedReader {
     }
   }
 
-  final implicit def labelledHConsReader[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
+  final implicit def labelledHConsReader[Wrapped, K <: Symbol, H, T <: HList, D <: HList](
     implicit
     key: Witness.Aux[K],
-    vFieldReader: Derivation[Lazy[ConfigReader[V]]],
-    tConfigReader: Lazy[WithDefaults[Wrapped, T, U]],
-    hint: ProductHint[Wrapped]): WithDefaults[Wrapped, FieldType[K, V] :: T, Option[V] :: U] = new WithDefaults[Wrapped, FieldType[K, V] :: T, Option[V] :: U] {
+    vFieldReader: Derivation[Lazy[ConfigReader[H]]],
+    tConfigReader: Lazy[WithDefaults[Wrapped, T, D]],
+    hint: ProductHint[Wrapped]): WithDefaults[Wrapped, FieldType[K, H] :: T, Option[H] :: D] = new WithDefaults[Wrapped, FieldType[K, H] :: T, Option[H] :: D] {
 
-    def fromWithDefault(cur: ConfigObjectCursor, default: Option[V] :: U): ConfigReader.Result[FieldType[K, V] :: T] = {
+    def fromWithDefault(cur: ConfigObjectCursor, default: Option[H] :: D): ConfigReader.Result[FieldType[K, H] :: T] = {
       val fieldName = key.value.name
       val keyStr = hint.configKey(fieldName)
 
@@ -75,26 +75,26 @@ object MapShapedReader {
         Left(coproductHint.noOptionFound(cur))
     }
 
-  final implicit def cConsReader[Wrapped, Name <: Symbol, V, T <: Coproduct](
+  final implicit def cConsReader[Wrapped, K <: Symbol, H, T <: Coproduct](
     implicit
     coproductHint: CoproductHint[Wrapped],
-    vName: Witness.Aux[Name],
-    vFieldConvert: Derivation[Lazy[ConfigReader[V]]],
-    tConfigReader: Lazy[MapShapedReader[Wrapped, T]]): MapShapedReader[Wrapped, FieldType[Name, V] :+: T] =
-    new MapShapedReader[Wrapped, FieldType[Name, V] :+: T] {
+    vName: Witness.Aux[K],
+    vFieldConvert: Derivation[Lazy[ConfigReader[H]]],
+    tConfigReader: Lazy[MapShapedReader[Wrapped, T]]): MapShapedReader[Wrapped, FieldType[K, H] :+: T] =
+    new MapShapedReader[Wrapped, FieldType[K, H] :+: T] {
 
-      override def from(cur: ConfigCursor): ConfigReader.Result[FieldType[Name, V] :+: T] =
+      override def from(cur: ConfigCursor): ConfigReader.Result[FieldType[K, H] :+: T] =
         coproductHint.from(cur, vName.value.name) match {
           case Right(Some(optCur)) =>
             vFieldConvert.value.value.from(optCur) match {
               case Left(_) if coproductHint.tryNextOnFail(vName.value.name) =>
                 tConfigReader.value.from(cur).right.map(s => Inr(s))
 
-              case vTry => vTry.right.map(v => Inl(field[Name](v)))
+              case vTry => vTry.right.map(v => Inl(field[K](v)))
             }
 
           case Right(None) => tConfigReader.value.from(cur).right.map(s => Inr(s))
-          case l: Left[_, _] => l.asInstanceOf[ConfigReader.Result[FieldType[Name, V] :+: T]]
+          case l: Left[_, _] => l.asInstanceOf[ConfigReader.Result[FieldType[K, H] :+: T]]
         }
     }
 }

@@ -62,7 +62,7 @@ class ProductHintSuite extends BaseSuite {
 
   it should "read camel case config keys to camel case fields when configured to do so" in {
 
-    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+    implicit def productHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
 
     val conf = ConfigFactory.parseString("""{
       camelCaseInt = 1
@@ -77,7 +77,7 @@ class ProductHintSuite extends BaseSuite {
   }
 
   it should "write camel case config keys to camel case fields when configured to do so" in {
-    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+    implicit def productHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
 
     val conf = confWithCamelCase.toConfig.asInstanceOf[ConfigObject]
     allKeys(conf) should contain theSameElementsAs Seq(
@@ -90,7 +90,7 @@ class ProductHintSuite extends BaseSuite {
 
   it should "read pascal case config keys to pascal case fields when configured to do so" in {
 
-    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, PascalCase))
+    implicit def productHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, PascalCase))
 
     val conf = ConfigFactory.parseString("""{
       CamelCaseInt = 1
@@ -105,7 +105,7 @@ class ProductHintSuite extends BaseSuite {
   }
 
   it should "write pascal case config keys to pascal case fields when configured to do so" in {
-    implicit def productHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, PascalCase))
+    implicit def productHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, PascalCase))
 
     val conf = ConfWithCamelCase(1, "foobar", ConfWithCamelCaseInner(2, 3)).toConfig.asInstanceOf[ConfigObject]
     allKeys(conf) should contain theSameElementsAs Seq(

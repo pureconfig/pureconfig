@@ -16,20 +16,20 @@ trait ReadsMissingKeys { this: ConfigReader[_] => }
  */
 trait CollectionReaders {
 
-  implicit def optionReader[T](implicit conv: Derivation[ConfigReader[T]]): ConfigReader[Option[T]] =
-    new ConfigReader[Option[T]] with ReadsMissingKeys {
-      override def from(cur: ConfigCursor): ConfigReader.Result[Option[T]] = {
+  implicit def optionReader[A](implicit conv: Derivation[ConfigReader[A]]): ConfigReader[Option[A]] =
+    new ConfigReader[Option[A]] with ReadsMissingKeys {
+      override def from(cur: ConfigCursor): ConfigReader.Result[Option[A]] = {
         if (cur.isUndefined || cur.isNull) Right(None)
         else conv.value.from(cur).right.map(Some(_))
       }
     }
 
-  implicit def traversableReader[T, F[T] <: TraversableOnce[T]](
+  implicit def traversableReader[A, F[A] <: TraversableOnce[A]](
     implicit
-    configConvert: Derivation[ConfigReader[T]],
-    cbf: FactoryCompat[T, F[T]]) = new ConfigReader[F[T]] {
+    configConvert: Derivation[ConfigReader[A]],
+    cbf: FactoryCompat[A, F[A]]) = new ConfigReader[F[A]] {
 
-    override def from(cur: ConfigCursor): ConfigReader.Result[F[T]] = {
+    override def from(cur: ConfigCursor): ConfigReader.Result[F[A]] = {
       cur.fluent.mapList { valueCur => configConvert.value.from(valueCur) }.right.map { coll =>
         val builder = cbf.newBuilder()
         (builder ++= coll).result()
@@ -37,8 +37,8 @@ trait CollectionReaders {
     }
   }
 
-  implicit def mapReader[T](implicit reader: Derivation[ConfigReader[T]]) = new ConfigReader[Map[String, T]] {
-    override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, T]] = {
+  implicit def mapReader[A](implicit reader: Derivation[ConfigReader[A]]) = new ConfigReader[Map[String, A]] {
+    override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, A]] = {
       cur.fluent.mapObject { valueCur => reader.value.from(valueCur) }
     }
   }

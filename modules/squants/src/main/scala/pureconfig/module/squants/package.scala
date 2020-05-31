@@ -22,8 +22,8 @@ import pureconfig.ConfigConvert._
  * like this should suffice:
  *
  * {{{
- *   implicit def dimensionConfigConvert[T <: Quantity[T]](dim: Dimension[T])(implicit tag: ClassTag[T]) =
- *     viaNonEmptyStringTry[T](dim.parse, _.toString)
+ *   implicit def dimensionConfigConvert[A <: Quantity[A]](dim: Dimension[A])(implicit tag: ClassTag[A]) =
+ *     viaNonEmptyStringTry[A](dim.parse, _.toString)
  * }}}
  */
 package object squants {

@@ -19,8 +19,8 @@ class MyInt(value: Int) {
 case class Conf(n: MyInt)
 ```
 
-In order to read an instance of a given type `T` from a config, PureConfig needs to have in scope in implicit instance
-of `ConfigReader[T]`. This won't compile because there's no `ConfigReader` instance for `MyInt`:
+In order to read an instance of a given type `A` from a config, PureConfig needs to have in scope in implicit instance
+of `ConfigReader[A]`. This won't compile because there's no `ConfigReader` instance for `MyInt`:
 
 ```scala mdoc:fail
 ConfigSource.string("{ n: 1 }").load[Conf]
