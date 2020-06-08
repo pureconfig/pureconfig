@@ -1,7 +1,7 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject }
-import pureconfig.error.{ ConvertFailure, KeyNotFound, UnknownKey }
+import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueType }
+import pureconfig.error.{ ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongType }
 import pureconfig.generic.auto._
 import pureconfig.generic.ProductHint
 import pureconfig.syntax._
@@ -148,6 +148,24 @@ class ProductHintSuite extends BaseSuite {
 
     conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
     conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4))
+  }
+
+  it should "accumulate all failures if the product hint doesn't allow unknown keys" in {
+    case class Conf(a: Int)
+
+    implicit val productHint = ProductHint[Conf](allowUnknownKeys = false)
+
+    val conf = ConfigFactory.parseString("""{
+      conf {
+        a = "hello"
+        b = 1
+      }
+    }""".stripMargin)
+
+    conf.getConfig("conf").to[Conf] shouldBe Left(
+      ConfigReaderFailures(
+        ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), stringConfigOrigin(3), "a"),
+        List(ConvertFailure(UnknownKey("b"), stringConfigOrigin(4), "b"))))
   }
 
   it should "not use default arguments if specified through a product hint" in {

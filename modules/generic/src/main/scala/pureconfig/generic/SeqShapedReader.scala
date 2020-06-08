@@ -10,7 +10,7 @@ import shapeless.ops.hlist.HKernelAux
  *
  * @tparam Repr the generic representation
  */
-trait SeqShapedReader[Repr] extends ConfigReader[Repr]
+private[generic] trait SeqShapedReader[Repr] extends ConfigReader[Repr]
 
 object SeqShapedReader {
 

@@ -4,7 +4,6 @@ import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValue }
 import pureconfig._
-import pureconfig.error.ConfigReaderException
 import shapeless._
 import shapeless.labelled.FieldType
 
@@ -14,7 +13,7 @@ import shapeless.labelled.FieldType
  * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
  * @tparam Repr the generic representation
  */
-trait MapShapedWriter[Wrapped, Repr] extends ConfigWriter[Repr]
+private[generic] trait MapShapedWriter[Wrapped, Repr] extends ConfigWriter[Repr]
 
 object MapShapedWriter {
 
@@ -25,52 +24,25 @@ object MapShapedWriter {
   final implicit def labelledHConsWriter[Wrapped, K <: Symbol, H, T <: HList](
     implicit
     key: Witness.Aux[K],
-    vFieldConvert: Derivation[Lazy[ConfigWriter[H]]],
+    hConfigWriter: Derivation[Lazy[ConfigWriter[H]]],
     tConfigWriter: Lazy[MapShapedWriter[Wrapped, T]],
-    hint: ProductHint[Wrapped]): MapShapedWriter[Wrapped, FieldType[K, H] :: T] = new MapShapedWriter[Wrapped, FieldType[K, H] :: T] {
+    hint: ProductHint[Wrapped]): MapShapedWriter[Wrapped, FieldType[K, H] :: T] =
+    new MapShapedWriter[Wrapped, FieldType[K, H] :: T] {
+      override def to(t: FieldType[K, H] :: T): ConfigValue = {
+        val rem = tConfigWriter.value.to(t.tail)
+        val valueOpt = hConfigWriter.value.value match {
+          case tc: WritesMissingKeys[H @unchecked] =>
+            tc.toOpt(t.head)
+          case w =>
+            Some(w.to(t.head))
+        }
+        val kv = hint.to(valueOpt, key.value.name)
 
-    override def to(t: FieldType[K, H] :: T): ConfigValue = {
-      val keyStr = hint.configKey(key.value.name)
-      val rem = tConfigWriter.value.to(t.tail)
-      // TODO check that all keys are unique
-      vFieldConvert.value.value match {
-        case f: WritesMissingKeys[H @unchecked] =>
-          f.toOpt(t.head) match {
-            case Some(v) =>
-              rem.asInstanceOf[ConfigObject].withValue(keyStr, v)
-            case None =>
-              rem
-          }
-        case f =>
-          val fieldEntry = f.to(t.head)
-          rem.asInstanceOf[ConfigObject].withValue(keyStr, fieldEntry)
-      }
-    }
-  }
-
-  implicit def cNilWriter[Wrapped]: MapShapedWriter[Wrapped, CNil] = new MapShapedWriter[Wrapped, CNil] {
-    override def to(t: CNil): ConfigValue =
-      throw new IllegalStateException("Cannot encode CNil. This is likely a bug in PureConfig.")
-  }
-
-  final implicit def cConsWriter[Wrapped, K <: Symbol, H, T <: Coproduct](
-    implicit
-    coproductHint: CoproductHint[Wrapped],
-    vName: Witness.Aux[K],
-    vFieldConvert: Derivation[Lazy[ConfigWriter[H]]],
-    tConfigWriter: Lazy[MapShapedWriter[Wrapped, T]]): MapShapedWriter[Wrapped, FieldType[K, H] :+: T] =
-    new MapShapedWriter[Wrapped, FieldType[K, H] :+: T] {
-
-      override def to(t: FieldType[K, H] :+: T): ConfigValue = t match {
-        case Inl(l) =>
-          // Writing a coproduct to a config can fail. Is it worth it to make `to` return a `Try`?
-          coproductHint.to(vFieldConvert.value.value.to(l), vName.value.name) match {
-            case Left(failures) => throw new ConfigReaderException[FieldType[K, H] :+: T](failures)
-            case Right(r) => r
-          }
-
-        case Inr(r) =>
-          tConfigWriter.value.to(r)
+        // TODO check that all keys are unique
+        kv.fold(rem) {
+          case (k, v) =>
+            rem.asInstanceOf[ConfigObject].withValue(k, v)
+        }
       }
     }
 }

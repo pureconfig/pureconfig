@@ -6,7 +6,6 @@ import scala.reflect.ClassTag
 import _root_.magnolia._
 import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
 import pureconfig._
-import pureconfig.error.ConfigReaderException
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -22,12 +21,13 @@ object MagnoliaConfigWriter {
   private def combineCaseClass[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
     def to(a: A): ConfigValue = {
       val fieldValues = ctx.parameters.map { param =>
-        param.typeclass match {
+        val valueOpt = param.typeclass match {
           case tc: WritesMissingKeys[param.PType @unchecked] =>
-            tc.toOpt(param.dereference(a)).map(hint.configKey(param.label) -> _)
+            tc.toOpt(param.dereference(a))
           case tc =>
-            Some(hint.configKey(param.label) -> tc.to(param.dereference(a)))
+            Some(tc.to(param.dereference(a)))
         }
+        hint.to(valueOpt, param.label)
       }
       ConfigValueFactory.fromMap(fieldValues.flatten.toMap.asJava)
     }
@@ -46,7 +46,6 @@ object MagnoliaConfigWriter {
   def dispatch[A: ClassTag](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] = new ConfigWriter[A] {
     def to(a: A): ConfigValue = ctx.dispatch(a) { subtype =>
       hint.to(subtype.typeclass.to(subtype.cast(a)), subtype.typeName.short)
-        .fold(fs => throw new ConfigReaderException[A](fs), identity)
     }
   }
 }

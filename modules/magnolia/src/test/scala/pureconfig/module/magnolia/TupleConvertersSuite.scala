@@ -45,10 +45,10 @@ class TupleConvertersSuite extends BaseSuite {
     ConfigValueFactory.fromIterable(List(1, "one").asJava) -> ConfigReaderFailures(
       ConvertFailure(WrongSizeList(3, 2), emptyConfigOrigin, "")))
 
-  // NOTE: behavior differs from pureconfig.generic (only the first error is reported)
   checkFailures[(Int, Int, Int)](
     ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_1")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_1"),
+      List(ConvertFailure(KeyNotFound("_3", Set()), emptyConfigOrigin, ""))))
 
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef("str") -> ConfigReaderFailures(

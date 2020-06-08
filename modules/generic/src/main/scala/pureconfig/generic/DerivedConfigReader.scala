@@ -1,6 +1,8 @@
 package pureconfig.generic
 
 import pureconfig._
+import pureconfig.error.ConfigReaderFailures
+import pureconfig.generic.error.InvalidCoproductOption
 import shapeless._
 
 /**
@@ -29,7 +31,7 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     gcr: SeqShapedReader[Repr],
     lg: LabelledGeneric.Aux[A, LabelledRepr],
     default: Default.AsOptions.Aux[A, DefaultRepr],
-    pr: MapShapedReader.WithDefaults[A, LabelledRepr, DefaultRepr]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
+    pr: MapShapedReader[A, LabelledRepr, DefaultRepr]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
 
     def from(cur: ConfigCursor) = {
       // Try to read first as the list representation and afterwards as the product representation (i.e. ConfigObject
@@ -54,8 +56,8 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     implicit
     gen: LabelledGeneric.Aux[A, Repr],
     default: Default.AsOptions.Aux[A, DefaultRepr],
-    cr: MapShapedReader.WithDefaults[A, Repr, DefaultRepr]): ConfigReader.Result[A] =
-    cr.fromWithDefault(cur, default()).right.map(gen.from)
+    cr: MapShapedReader[A, Repr, DefaultRepr]): ConfigReader.Result[A] =
+    cr.from(cur, default(), Set.empty).right.map(gen.from)
 }
 
 trait DerivedConfigReader1 {
@@ -64,20 +66,43 @@ trait DerivedConfigReader1 {
     implicit
     gen: LabelledGeneric.Aux[A, Repr],
     default: Default.AsOptions.Aux[A, DefaultRepr],
-    cc: Lazy[MapShapedReader.WithDefaults[A, Repr, DefaultRepr]]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
+    cc: Lazy[MapShapedReader[A, Repr, DefaultRepr]]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
 
     override def from(cur: ConfigCursor): ConfigReader.Result[A] = {
-      cur.asObjectCursor.right.flatMap(cc.value.fromWithDefault(_, default())).right.map(gen.from)
+      cur.asObjectCursor.right.flatMap(cc.value.from(_, default(), Set.empty)).right.map(gen.from)
     }
   }
 
   final implicit def coproductReader[A, Repr <: Coproduct](
     implicit
     gen: LabelledGeneric.Aux[A, Repr],
-    cc: Lazy[MapShapedReader[A, Repr]]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
+    hint: CoproductHint[A],
+    readerOptions: CoproductReaderOptions[Repr]): DerivedConfigReader[A] = new DerivedConfigReader[A] {
 
     override def from(cur: ConfigCursor): ConfigReader.Result[A] = {
-      cc.value.from(cur).right.map(gen.from)
+      def readerFor(option: String) =
+        readerOptions.options.get(option).map(_.map(gen.from))
+
+      hint.from(cur, readerOptions.options.keys.toList).right.flatMap {
+        case CoproductHint.Use(cursor, option) =>
+          readerFor(option) match {
+            case Some(value) => value.from(cursor)
+            case None => ConfigReader.Result.fail[A](cursor.failureFor(InvalidCoproductOption(option)))
+          }
+
+        case CoproductHint.Attempt(cursor, options, combineF) =>
+          val initial: Either[Vector[(String, ConfigReaderFailures)], A] = Left(Vector.empty)
+          val res = options.foldLeft(initial) { (curr, option) =>
+            curr.left.flatMap { currentFailures =>
+              readerFor(option) match {
+                case Some(value) => value.from(cursor).left.map(f => currentFailures :+ (option -> f))
+                case None => Left(currentFailures :+
+                  (option -> ConfigReaderFailures(cursor.failureFor(InvalidCoproductOption(option)))))
+              }
+            }
+          }
+          res.left.map(combineF)
+      }
     }
   }
 }

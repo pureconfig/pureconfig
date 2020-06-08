@@ -1,9 +1,10 @@
 package pureconfig.module.magnolia
 
 import _root_.magnolia._
-import pureconfig.ConfigReader.Result
 import pureconfig._
-import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, UnknownKey, WrongSizeList }
+import pureconfig.error.{ ConfigReaderFailures, KeyNotFound, WrongSizeList }
+import pureconfig.generic.ProductHint.UseOrDefault
+import pureconfig.generic.error.InvalidCoproductOption
 import pureconfig.generic.{ CoproductHint, ProductHint }
 
 /**
@@ -17,37 +18,31 @@ object MagnoliaConfigReader {
     else combineCaseClass(ctx)
 
   private def combineCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] = new ConfigReader[A] {
-    def from(cur: ConfigCursor): Result[A] = {
+    def from(cur: ConfigCursor): ConfigReader.Result[A] = {
       cur.asObjectCursor.flatMap { objCur =>
-        val res = ctx.constructMonadic[Result, Param[ConfigReader, A]#PType] { param =>
-          val keyStr = hint.configKey(param.label)
-          objCur.atKeyOrUndefined(keyStr) match {
-            case keyCur if keyCur.isUndefined =>
-              param.default match {
-                case Some(defaultValue) if hint.useDefaultArgs => Right(defaultValue)
-                case _ if param.typeclass.isInstanceOf[ReadsMissingKeys] => param.typeclass.from(keyCur)
-                case _ => cur.failed(KeyNotFound.forKeys(keyStr, objCur.keys))
-              }
-            case keyCur =>
-              param.typeclass.from(keyCur)
-          }
-        }
-        if (hint.allowUnknownKeys || res.isLeft) res
-        else {
-          val usedKeys = ctx.parameters.map { param => hint.configKey(param.label) }.toSet
-          val unknownKeyFailures = objCur.map.collect {
-            case (k, keyCur) if !usedKeys(k) => keyCur.failureFor(UnknownKey(k))
-          }.toList
+        val actions = ctx.parameters.map { param => param.label -> hint.from(objCur, param.label) }.toMap
 
-          if (unknownKeyFailures.isEmpty) res
-          else Left(ConfigReaderFailures(unknownKeyFailures.head, unknownKeyFailures.tail))
-        }
+        val res = ctx.constructEither[ConfigReaderFailures, Param[ConfigReader, A]#PType] { param =>
+          val fieldHint = actions(param.label)
+          lazy val reader = param.typeclass
+          (fieldHint, param.default) match {
+            case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
+              Right(defaultValue)
+            case (action, _) if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined =>
+              reader.from(action.cursor)
+            case _ =>
+              cur.failed(KeyNotFound.forKeys(fieldHint.field, objCur.keys))
+          }
+        }.left.map(_.reduce(_ ++ _))
+
+        val usedFields = actions.map(_._2.field).toSet
+        ConfigReader.Result.zipWith(res, hint.bottom(objCur, usedFields).toLeft(()))((r, _) => r)
       }
     }
   }
 
   private def combineTuple[A: ProductHint](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] = new ConfigReader[A] {
-    def from(cur: ConfigCursor): Result[A] = {
+    def from(cur: ConfigCursor): ConfigReader.Result[A] = {
       val collCur = cur.asListCursor.map(Right.apply).left.flatMap(failure =>
         cur.asObjectCursor.map(Left.apply).left.map(_ => failure))
 
@@ -57,7 +52,7 @@ object MagnoliaConfigReader {
           if (listCur.size != ctx.parameters.length) {
             cur.failed(WrongSizeList(ctx.parameters.length, listCur.size))
           } else {
-            val fields = Result.sequence(ctx.parameters.zip(listCur.list).map {
+            val fields = ConfigReader.Result.sequence(ctx.parameters.zip(listCur.list).map {
               case (param, cur) => param.typeclass.from(cur)
             })
             fields.map(ctx.rawConstruct)
@@ -67,27 +62,34 @@ object MagnoliaConfigReader {
   }
 
   private def combineValueClass[A](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] = new ConfigReader[A] {
-    def from(cur: ConfigCursor): Result[A] =
-      ctx.constructMonadic[Result, Param[ConfigReader, A]#PType](_.typeclass.from(cur))
+    def from(cur: ConfigCursor): ConfigReader.Result[A] =
+      ctx.constructMonadic[ConfigReader.Result, Param[ConfigReader, A]#PType](_.typeclass.from(cur))
   }
 
   def dispatch[A](ctx: SealedTrait[ConfigReader, A])(implicit hint: CoproductHint[A]): ConfigReader[A] = new ConfigReader[A] {
-    def from(cur: ConfigCursor): Result[A] = {
-      val res = ctx.subtypes.foldLeft(Right(None): Result[Option[A]]) {
-        case (Right(None), subtype) =>
-          hint.from(cur, subtype.typeName.short) match {
-            case Right(Some(optCur)) =>
-              subtype.typeclass.from(optCur).map(Some.apply) match {
-                case Left(_) if hint.tryNextOnFail(subtype.typeName.short) => Right(None)
-                case res => res
-              }
-            case res => res.asInstanceOf[Result[Option[A]]]
+    def from(cur: ConfigCursor): ConfigReader.Result[A] = {
+      def readerFor(option: String) =
+        ctx.subtypes.find(_.typeName.short == option).map(_.typeclass)
+
+      hint.from(cur, ctx.subtypes.map(_.typeName.short)).right.flatMap {
+        case CoproductHint.Use(cur, option) =>
+          readerFor(option) match {
+            case Some(value) => value.from(cur)
+            case None => ConfigReader.Result.fail[A](cur.failureFor(InvalidCoproductOption(option)))
           }
-        case (res, _) => res
-      }
-      res.flatMap {
-        case Some(a) => Right(a)
-        case None => Left(hint.noOptionFound(cur))
+
+        case CoproductHint.Attempt(cur, options, combineF) =>
+          val initial: Either[Vector[(String, ConfigReaderFailures)], A] = Left(Vector.empty)
+          val res = options.foldLeft(initial) { (curr, option) =>
+            curr.left.flatMap { currentFailures =>
+              readerFor(option) match {
+                case Some(value) => value.from(cur).left.map(f => currentFailures :+ (option -> f))
+                case None => Left(currentFailures :+
+                  (option -> ConfigReaderFailures(cur.failureFor(InvalidCoproductOption(option)))))
+              }
+            }
+          }
+          res.left.map(combineF)
       }
     }
   }

@@ -4,7 +4,7 @@ import com.typesafe.config._
 import pureconfig.error._
 import pureconfig.generic._
 import pureconfig.generic.auto._
-import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
+import pureconfig.generic.error.{ CoproductHintException, UnexpectedValueForFieldCoproductHint }
 
 class CoproductHintSuite extends BaseSuite {
 
@@ -56,9 +56,8 @@ class CoproductHintSuite extends BaseSuite {
       val conf = ConfigFactory.parseString("{ typ = ambiguous-conf }")
       cc.from(conf.root()) should failWithType[KeyNotFound] // "typ" should not be passed to the coproduct option
 
-      val ex = the[ConfigReaderException[_]] thrownBy cc.to(AmbiguousConf("ambiguous-conf"))
-      ex.failures.toList shouldEqual List(ConvertFailure(
-        CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguous-conf")), emptyConfigOrigin, ""))
+      val ex = the[CoproductHintException] thrownBy cc.to(AmbiguousConf("ambiguous-conf"))
+      ex.failure shouldEqual CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguous-conf"))
     }
   }
 
