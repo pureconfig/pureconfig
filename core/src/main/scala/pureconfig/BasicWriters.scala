@@ -36,7 +36,7 @@ trait PrimitiveWriters {
  */
 trait JavaEnumWriter {
 
-  implicit def javaEnumWriter[T <: Enum[T]]: ConfigWriter[T] = ConfigWriter.toDefaultString[T]
+  implicit def javaEnumWriter[A <: Enum[A]]: ConfigWriter[A] = ConfigWriter.toDefaultString[A]
 }
 
 /**

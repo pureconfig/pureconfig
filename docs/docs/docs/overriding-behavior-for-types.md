@@ -5,8 +5,8 @@ title: Overriding Behavior for Types
 
 ## {{page.title}}
 
-It is possible to override the behavior of PureConfig for a given type `T` just by putting another implicit instance
-of `ConfigReader[T]` in scope. This happens because the newly defined implicit value will have a higher priority than
+It is possible to override the behavior of PureConfig for a given type `A` just by putting another implicit instance
+of `ConfigReader[A]` in scope. This happens because the newly defined implicit value will have a higher priority than
 the ones defined by PureConfig, according to the Scala [implicit precedence rules](https://docs.scala-lang.org/tutorials/FAQ/finding-implicits.html#where-do-implicits-come-from).
 
 For instance, the default behavior of PureConfig for `String` is to return the string itself in the configuration:

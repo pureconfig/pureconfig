@@ -7,9 +7,9 @@ import pureconfig.error.{ ConfigReaderFailures, UnknownKey }
 /**
  * A trait that can be implemented to customize how case classes are read from and written to a config.
  *
- * @tparam T the type of case class for which this hint applies
+ * @tparam A the type of case class for which this hint applies
  */
-trait ProductHint[T] {
+trait ProductHint[A] {
 
   /**
    * Returns what should be used when attempting to read a case class field with name `fieldName` from the provided
@@ -44,10 +44,10 @@ trait ProductHint[T] {
   def to(value: Option[ConfigValue], fieldName: String): Option[(String, ConfigValue)]
 }
 
-private[pureconfig] case class ProductHintImpl[T](
+private[pureconfig] case class ProductHintImpl[A](
     fieldMapping: ConfigFieldMapping,
     useDefaultArgs: Boolean,
-    allowUnknownKeys: Boolean) extends ProductHint[T] {
+    allowUnknownKeys: Boolean) extends ProductHint[A] {
 
   def from(cursor: ConfigObjectCursor, fieldName: String): ProductHint.Action = {
     val keyStr = fieldMapping(fieldName)
@@ -111,11 +111,11 @@ object ProductHint {
    */
   case class UseOrDefault(cursor: ConfigCursor, field: String) extends Action
 
-  def apply[T](
+  def apply[A](
     fieldMapping: ConfigFieldMapping = ConfigFieldMapping(CamelCase, KebabCase),
     useDefaultArgs: Boolean = true,
-    allowUnknownKeys: Boolean = true): ProductHint[T] =
-    ProductHintImpl[T](fieldMapping, useDefaultArgs, allowUnknownKeys)
+    allowUnknownKeys: Boolean = true): ProductHint[A] =
+    ProductHintImpl[A](fieldMapping, useDefaultArgs, allowUnknownKeys)
 
-  implicit def default[T]: ProductHint[T] = apply()
+  implicit def default[A]: ProductHint[A] = apply()
 }

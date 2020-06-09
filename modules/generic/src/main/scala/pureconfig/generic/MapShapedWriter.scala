@@ -10,28 +10,28 @@ import shapeless.labelled.FieldType
 /**
  * A `ConfigWriter` for generic representations that writes values in the shape of a config object.
  *
- * @tparam Wrapped the original type for which `Repr` is a generic sub-representation
+ * @tparam Original the original type for which `Repr` is a generic sub-representation
  * @tparam Repr the generic representation
  */
-private[generic] trait MapShapedWriter[Wrapped, Repr] extends ConfigWriter[Repr]
+private[generic] trait MapShapedWriter[Original, Repr] extends ConfigWriter[Repr]
 
 object MapShapedWriter {
 
-  implicit def labelledHNilWriter[Wrapped]: MapShapedWriter[Wrapped, HNil] = new MapShapedWriter[Wrapped, HNil] {
+  implicit def labelledHNilWriter[Original]: MapShapedWriter[Original, HNil] = new MapShapedWriter[Original, HNil] {
     override def to(t: HNil): ConfigValue = ConfigFactory.parseMap(Map().asJava).root()
   }
 
-  final implicit def labelledHConsWriter[Wrapped, K <: Symbol, V, T <: HList, U <: HList](
+  final implicit def labelledHConsWriter[Original, K <: Symbol, H, T <: HList](
     implicit
     key: Witness.Aux[K],
-    vConfigWriter: Derivation[Lazy[ConfigWriter[V]]],
-    tConfigWriter: Lazy[MapShapedWriter[Wrapped, T]],
-    hint: ProductHint[Wrapped]): MapShapedWriter[Wrapped, FieldType[K, V] :: T] =
-    new MapShapedWriter[Wrapped, FieldType[K, V] :: T] {
-      override def to(t: FieldType[K, V] :: T): ConfigValue = {
+    hConfigWriter: Derivation[Lazy[ConfigWriter[H]]],
+    tConfigWriter: Lazy[MapShapedWriter[Original, T]],
+    hint: ProductHint[Original]): MapShapedWriter[Original, FieldType[K, H] :: T] =
+    new MapShapedWriter[Original, FieldType[K, H] :: T] {
+      override def to(t: FieldType[K, H] :: T): ConfigValue = {
         val rem = tConfigWriter.value.to(t.tail)
-        val valueOpt = vConfigWriter.value.value match {
-          case tc: WritesMissingKeys[V @unchecked] =>
+        val valueOpt = hConfigWriter.value.value match {
+          case tc: WritesMissingKeys[H @unchecked] =>
             tc.toOpt(t.head)
           case w =>
             Some(w.to(t.head))

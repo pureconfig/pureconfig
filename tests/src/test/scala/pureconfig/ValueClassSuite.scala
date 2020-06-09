@@ -9,20 +9,20 @@ final class IntWrapper(val inner: Int) extends AnyVal {
 
 final class PrivateFloatValue private (val value: Float) extends AnyVal
 
-final class GenericValue[T] private (val t: T) extends AnyVal {
+final class GenericValue[A] private (val t: A) extends AnyVal {
   override def toString: String = "GenericValue(" + t.toString + ")"
 }
 
 object GenericValue {
-  def from[T](t: T): GenericValue[T] = new GenericValue[T](t)
+  def from[A](t: A): GenericValue[A] = new GenericValue[A](t)
 }
 
-trait Read[T] {
-  def read(str: String): T
+trait Read[A] {
+  def read(str: String): A
 }
 
 object Read {
-  def apply[T](implicit readT: Read[T]): Read[T] = readT
+  def apply[A](implicit readT: Read[A]): Read[A] = readT
 
   implicit val badReadString = new Read[String] {
     override def read(str: String): String = ""
@@ -41,7 +41,7 @@ class ValueClassSuite extends BaseSuite {
   }
 
   {
-    implicit def genericValueReader[T](implicit readT: Read[T]): ConfigReader[GenericValue[T]] =
+    implicit def genericValueReader[A](implicit readT: Read[A]): ConfigReader[GenericValue[A]] =
       ConfigReader.fromString(s => Right(GenericValue.from(readT.read(s))))
 
     "ConfigReader" should " should be able to override value classes ConfigReader" in {

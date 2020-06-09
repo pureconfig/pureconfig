@@ -73,7 +73,7 @@ can make sure the following implicit is in scope before loading or writing
 configuration files:
 
 ```scala mdoc:silent
-implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+implicit def hint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
 ```
 
 ### Default field values

@@ -126,7 +126,7 @@ final case class EmptyStringFound(typ: String) extends FailureReason {
  *
  * @param typ the type for which a non-empty object was attempted to be written
  */
-@deprecated("`EnumCoproductHint` is deprecated in favor of the `pureconfig.generic.semiauto.deriveEnumeration(Reader|Writer|Convert)[T]` methods", "0.11.0")
+@deprecated("`EnumCoproductHint` is deprecated in favor of the `pureconfig.generic.semiauto.deriveEnumeration(Reader|Writer|Convert)[A]` methods", "0.11.0")
 final case class NonEmptyObjectFound(typ: String) extends FailureReason {
   def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
 }

@@ -10,9 +10,9 @@ import pureconfig.syntax._
 /**
  * A trait that can be implemented to disambiguate between the different options of a coproduct or sealed family.
  *
- * @tparam T the type of the coproduct or sealed family for which this hint applies
+ * @tparam A the type of the coproduct or sealed family for which this hint applies
  */
-trait CoproductHint[T] {
+trait CoproductHint[A] {
 
   /**
    * Given a `ConfigCursor` for the sealed family, disambiguate and return what should be performed when trying to read
@@ -49,7 +49,7 @@ trait CoproductHint[T] {
  * By default, the field value written is the class or coproduct option name converted to kebab case. This mapping can
  * be changed by overriding the method `fieldValue` of this class.
  */
-class FieldCoproductHint[T](key: String) extends CoproductHint[T] {
+class FieldCoproductHint[A](key: String) extends CoproductHint[A] {
 
   /**
    * Returns the field value for a class or coproduct option name.
@@ -89,7 +89,7 @@ object FieldCoproductHint {
  * Hint where all coproduct options are tried in order. `from` will choose the first option able to deserialize
  * the config without errors, while `to` will write the config as is, with no disambiguation information.
  */
-class FirstSuccessCoproductHint[T] extends CoproductHint[T] {
+class FirstSuccessCoproductHint[A] extends CoproductHint[A] {
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
     Right(Attempt(cursor, options, _ => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(cursor.value)))))
 
@@ -127,5 +127,5 @@ object CoproductHint {
    */
   case class Attempt(cursor: ConfigCursor, options: Seq[String], combineFailures: Seq[(String, ConfigReaderFailures)] => ConfigReaderFailures) extends Action
 
-  implicit def default[T]: CoproductHint[T] = new FieldCoproductHint[T]("type")
+  implicit def default[A]: CoproductHint[A] = new FieldCoproductHint[A]("type")
 }

@@ -37,39 +37,39 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
  */
 object ConfigConvert extends ConvertHelpers {
 
-  def apply[T](implicit conv: Derivation[ConfigConvert[T]]): ConfigConvert[T] = conv.value
+  def apply[A](implicit conv: Derivation[ConfigConvert[A]]): ConfigConvert[A] = conv.value
 
-  implicit def fromReaderAndWriter[T](
+  implicit def fromReaderAndWriter[A](
     implicit
-    reader: Derivation[ConfigReader[T]],
-    writer: Derivation[ConfigWriter[T]]) = new ConfigConvert[T] {
+    reader: Derivation[ConfigReader[A]],
+    writer: Derivation[ConfigWriter[A]]) = new ConfigConvert[A] {
 
     def from(cur: ConfigCursor) = reader.value.from(cur)
-    def to(t: T) = writer.value.to(t)
+    def to(t: A) = writer.value.to(t)
   }
 
-  def viaString[T](fromF: String => Either[FailureReason, T], toF: T => String): ConfigConvert[T] =
+  def viaString[A](fromF: String => Either[FailureReason, A], toF: A => String): ConfigConvert[A] =
     fromReaderAndWriter(
       Derivation.Successful(ConfigReader.fromString(fromF)),
       Derivation.Successful(ConfigWriter.toString(toF)))
 
-  def viaStringTry[T: ClassTag](fromF: String => Try[T], toF: T => String): ConfigConvert[T] = {
-    viaString[T](tryF(fromF), toF)
+  def viaStringTry[A: ClassTag](fromF: String => Try[A], toF: A => String): ConfigConvert[A] = {
+    viaString[A](tryF(fromF), toF)
   }
 
-  def viaStringOpt[T: ClassTag](fromF: String => Option[T], toF: T => String): ConfigConvert[T] = {
-    viaString[T](optF(fromF), toF)
+  def viaStringOpt[A: ClassTag](fromF: String => Option[A], toF: A => String): ConfigConvert[A] = {
+    viaString[A](optF(fromF), toF)
   }
 
-  def viaNonEmptyString[T](fromF: String => Either[FailureReason, T], toF: T => String)(implicit ct: ClassTag[T]): ConfigConvert[T] = {
-    viaString[T](string => ensureNonEmpty(ct)(string).right.flatMap(s => fromF(s)), toF)
+  def viaNonEmptyString[A](fromF: String => Either[FailureReason, A], toF: A => String)(implicit ct: ClassTag[A]): ConfigConvert[A] = {
+    viaString[A](string => ensureNonEmpty(ct)(string).right.flatMap(s => fromF(s)), toF)
   }
 
-  def viaNonEmptyStringTry[T: ClassTag](fromF: String => Try[T], toF: T => String): ConfigConvert[T] = {
-    viaNonEmptyString[T](tryF(fromF), toF)
+  def viaNonEmptyStringTry[A: ClassTag](fromF: String => Try[A], toF: A => String): ConfigConvert[A] = {
+    viaNonEmptyString[A](tryF(fromF), toF)
   }
 
-  def viaNonEmptyStringOpt[T: ClassTag](fromF: String => Option[T], toF: T => String): ConfigConvert[T] = {
-    viaNonEmptyString[T](optF(fromF), toF)
+  def viaNonEmptyStringOpt[A: ClassTag](fromF: String => Option[A], toF: A => String): ConfigConvert[A] = {
+    viaNonEmptyString[A](optF(fromF), toF)
   }
 }

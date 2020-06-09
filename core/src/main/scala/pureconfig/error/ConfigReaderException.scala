@@ -6,7 +6,7 @@ package pureconfig.error
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
-final case class ConfigReaderException[T](failures: ConfigReaderFailures)(implicit ct: ClassTag[T]) extends RuntimeException {
+final case class ConfigReaderException[A](failures: ConfigReaderFailures)(implicit ct: ClassTag[A]) extends RuntimeException {
 
   override def getMessage: String = {
     val linesBuffer = mutable.Buffer.empty[String]
