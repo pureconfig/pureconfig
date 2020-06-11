@@ -60,6 +60,14 @@ class ConfigCursorSuite extends BaseSuite {
       CannotConvert("1.1", "Long", "Unable to convert Number to Long"))
   }
 
+  it should "support asBytes on longs and properly formatted strings" in {
+    cursor("30").asBytes shouldBe Right(30)
+    cursor("30b").asBytes shouldBe Right(30)
+    cursor("30k").asBytes shouldBe Right(30 * 1024)
+    cursor("30m").asBytes shouldBe Right(30 * 1024 * 1024)
+    cursor("30MB").asBytes shouldBe Right(30 * 1000 * 1000)
+  }
+
   it should "allow being cast to int in a safe way" in {
     cursor("3").asInt shouldBe Right(3)
 
