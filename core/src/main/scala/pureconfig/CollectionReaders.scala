@@ -1,6 +1,7 @@
 package pureconfig
 
 import scala.language.higherKinds
+import scala.reflect.ClassTag
 
 /**
  * A marker trait signaling that a `ConfigReader` accepts missing (undefined) values.
@@ -41,6 +42,11 @@ trait CollectionReaders {
     override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, A]] = {
       cur.fluent.mapObject { valueCur => reader.value.from(valueCur) }
     }
+  }
+
+  implicit def arrayReader[A: ClassTag](implicit reader: Derivation[ConfigReader[A]]) = new ConfigReader[Array[A]] {
+    override def from(cur: ConfigCursor): ConfigReader.Result[Array[A]] =
+      cur.fluent.mapList(reader.value.from).right.map(_.toArray)
   }
 }
 

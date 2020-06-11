@@ -50,4 +50,6 @@ class CollectionConvertersSuite extends BaseSuite {
   checkArbitrary[Vector[Short]]
 
   checkArbitrary[Option[Int]]
+
+  checkArbitrary[Array[Int]]
 }
