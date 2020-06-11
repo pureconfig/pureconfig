@@ -82,6 +82,15 @@ sealed trait ConfigCursor {
       case v => Left(CannotConvert(v.toString, "Long", "Unable to convert Number to Long"))
     })
 
+  def asBytes: ConfigReader.Result[Long] = scopeFailure {
+    ConvertHelpers.tryToEither {
+      Try {
+        val wrapped = value.atKey("_")
+        wrapped.getBytes("_")
+      }
+    }
+  }
+
   /**
    * Casts this cursor to an int.
    *

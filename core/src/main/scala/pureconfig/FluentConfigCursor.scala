@@ -36,6 +36,8 @@ case class FluentConfigCursor(cursor: ConfigReader.Result[ConfigCursor]) {
    */
   def asLong: ConfigReader.Result[Long] = cursor.right.flatMap(_.asLong)
 
+  def asBytes: ConfigReader.Result[Long] = cursor.right.flatMap(_.asBytes)
+
   /**
    * Casts this cursor to an int.
    *
