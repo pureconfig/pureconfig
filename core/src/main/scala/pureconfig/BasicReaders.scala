@@ -174,6 +174,9 @@ trait TypesafeConfigReaders {
 
   implicit val configListConfigReader: ConfigReader[ConfigList] =
     ConfigReader.fromCursor(_.asListCursor.right.map(_.value))
+
+  implicit val configMemorySizeReader: ConfigReader[ConfigMemorySize] =
+    ConfigReader.fromCursor(_.asBytes).map(ConfigMemorySize.ofBytes _)
 }
 
 /**

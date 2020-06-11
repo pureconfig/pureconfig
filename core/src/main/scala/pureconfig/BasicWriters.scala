@@ -119,6 +119,10 @@ trait TypesafeConfigWriters {
   implicit val configListConfigWriter: ConfigWriter[ConfigList] = new ConfigWriter[ConfigList] {
     def to(t: ConfigList) = t
   }
+
+  implicit val configMemorySizeWriter: ConfigWriter[ConfigMemorySize] = {
+    ConfigWriter.longConfigWriter.contramap(_.toBytes)
+  }
 }
 
 /**
