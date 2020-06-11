@@ -78,7 +78,7 @@ reason for our `PositiveInt`, for example, we could create it like this:
 
 ```scala mdoc:nest:silent
 case class NonPositiveInt(value: Int) extends FailureReason {
-  def description = s"$value is not positive"
+  def description(indentSize: Int) = s"$value is not positive"
 }
 
 implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>

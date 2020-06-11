@@ -142,6 +142,6 @@ case class Tweet(msg: String)
 
 val tweetReader: ConfigReader[Tweet] = ConfigReader.fromNonEmptyStringDisjunction { s =>
   if (s.length <= 140) Tweet(s).right
-  else (new FailureReason { def description: String = "Too long to be a tweet!" }).left
+  else (new FailureReason { def description(indentSize: Int): String = "Too long to be a tweet!" }).left
 }
 ```
