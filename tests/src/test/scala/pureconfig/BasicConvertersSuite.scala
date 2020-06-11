@@ -150,6 +150,8 @@ class BasicConvertersSuite extends BaseSuite {
     ConfigValueFactory.fromMap(Map().asJava) -> ConfigReaderFailures(
       ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), emptyConfigOrigin, "")))
 
+  checkArbitrary[Array[Int]]
+
   checkArbitrary[immutable.ListSet[Int]]
 
   checkArbitrary[immutable.Map[String, Int]]
