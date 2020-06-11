@@ -44,6 +44,11 @@ trait CollectionWriters {
       ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).toMap.asJava)
     }
   }
+
+  implicit def arrayWriter[A](implicit writer: Derivation[ConfigWriter[A]]) = new ConfigWriter[Array[A]] {
+    override def to(a: Array[A]): ConfigValue =
+      ConfigValueFactory.fromIterable(a.toList.map(writer.value.to).asJava)
+  }
 }
 
 object CollectionWriters extends CollectionWriters
