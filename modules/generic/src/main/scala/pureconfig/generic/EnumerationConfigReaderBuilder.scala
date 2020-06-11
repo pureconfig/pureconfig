@@ -21,7 +21,7 @@ object EnumerationConfigReaderBuilder {
     new EnumerationConfigReaderBuilder[CNil] {
       def build(transformName: String => String): ConfigReader[CNil] =
         new ConfigReader[CNil] {
-          def from(cur: ConfigCursor): Result[CNil] = cur.failed(NoValidCoproductOptionFound(cur.value))
+          def from(cur: ConfigCursor): Result[CNil] = cur.failed(NoValidCoproductOptionFound(cur.value, Seq.empty))
         }
     }
 

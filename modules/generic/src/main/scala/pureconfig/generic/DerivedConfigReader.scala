@@ -83,7 +83,7 @@ trait DerivedConfigReader1 {
       def readerFor(option: String) =
         readerOptions.options.get(option).map(_.map(gen.from))
 
-      hint.from(cur, readerOptions.options.keys.toList).right.flatMap {
+      hint.from(cur, readerOptions.options.keys.toList.sorted).right.flatMap {
         case CoproductHint.Use(cursor, option) =>
           readerFor(option) match {
             case Some(value) => value.from(cursor)

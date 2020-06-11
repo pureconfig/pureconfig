@@ -8,5 +8,5 @@ import pureconfig.error.FailureReason
  * @param typ the type that was attempted to be converted to from an empty string
  */
 final case class EmptyTraversableFound(typ: String) extends FailureReason {
-  def description = s"Empty collection found when trying to convert to $typ."
+  def description(indentSize: Int) = s"Empty collection found when trying to convert to $typ."
 }

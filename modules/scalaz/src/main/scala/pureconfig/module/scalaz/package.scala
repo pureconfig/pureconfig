@@ -10,7 +10,7 @@ import pureconfig.error.FailureReason
 package object scalaz {
 
   case object EmptyIListFound extends FailureReason {
-    def description: String =
+    def description(indentSize: Int): String =
       "Empty scalaz.IList found when trying to convert to scalaz.NonEmptyList."
   }
 

@@ -12,8 +12,10 @@ trait FailureReason {
 
   /**
    * A human-readable description of the failure.
+   *
+   * @param indentSize the number of characters to use for any indentation applied inside the description
    */
-  def description: String
+  def description(indentSize: Int): String
 }
 
 /**
@@ -24,7 +26,7 @@ trait FailureReason {
  * @param because the reason why the conversion was not possible
  */
 final case class CannotConvert(value: String, toType: String, because: String) extends FailureReason {
-  def description = s"Cannot convert '$value' to $toType: $because."
+  def description(indentSize: Int) = s"Cannot convert '$value' to $toType: $because."
 }
 
 /**
@@ -35,7 +37,7 @@ final case class CannotConvert(value: String, toType: String, because: String) e
  * @param existingValue the value of the key
  */
 final case class CollidingKeys(key: String, existingValue: ConfigValue) extends FailureReason {
-  def description = s"Key with value '{$existingValue.render(ConfigRenderOptions.concise)}' collides with a key necessary to disambiguate a coproduct."
+  def description(indentSize: Int) = s"Key with value '{$existingValue.render(ConfigRenderOptions.concise)}' collides with a key necessary to disambiguate a coproduct."
 }
 
 /**
@@ -46,12 +48,13 @@ final case class CollidingKeys(key: String, existingValue: ConfigValue) extends 
  *                   desired key in case of a misconfigured ProductHint
  */
 final case class KeyNotFound(key: String, candidates: Set[String] = Set()) extends FailureReason {
-  def description = {
+  def description(indentSize: Int) = {
     if (candidates.nonEmpty) {
+      val tabs = " " * indentSize
       val descLines = mutable.ListBuffer[String]()
       descLines += s"Key not found: '$key'. You might have a misconfigured ProductHint, since the following similar keys were found:"
       candidates.foreach { candidate =>
-        descLines += s" - '$candidate'"
+        descLines += s"$tabs- '$candidate'"
       }
       descLines.mkString("\n")
     } else {
@@ -89,7 +92,7 @@ object KeyNotFound {
  * @param key the unknown key
  */
 final case class UnknownKey(key: String) extends FailureReason {
-  def description = s"Unknown key."
+  def description(indentSize: Int) = s"Unknown key."
 }
 
 /**
@@ -99,7 +102,7 @@ final case class UnknownKey(key: String) extends FailureReason {
  * @param expectedTypes the `ConfigValueType`s that were expected
  */
 final case class WrongType(foundType: ConfigValueType, expectedTypes: Set[ConfigValueType]) extends FailureReason {
-  def description = s"""Expected type ${expectedTypes.mkString(" or ")}. Found $foundType instead."""
+  def description(indentSize: Int) = s"""Expected type ${expectedTypes.mkString(" or ")}. Found $foundType instead."""
 }
 
 /**
@@ -108,7 +111,7 @@ final case class WrongType(foundType: ConfigValueType, expectedTypes: Set[Config
  * @param throwable the `Throwable` that was raised
  */
 final case class ExceptionThrown(throwable: Throwable) extends FailureReason {
-  def description = s"${throwable.getMessage}."
+  def description(indentSize: Int) = s"${throwable.getMessage}."
 }
 
 /**
@@ -117,7 +120,7 @@ final case class ExceptionThrown(throwable: Throwable) extends FailureReason {
  * @param typ the type that was attempted to be converted to from an empty string
  */
 final case class EmptyStringFound(typ: String) extends FailureReason {
-  def description = s"Empty string found when trying to convert to $typ."
+  def description(indentSize: Int) = s"Empty string found when trying to convert to $typ."
 }
 
 /**
@@ -128,7 +131,7 @@ final case class EmptyStringFound(typ: String) extends FailureReason {
  */
 @deprecated("`EnumCoproductHint` is deprecated in favor of the `pureconfig.generic.semiauto.deriveEnumeration(Reader|Writer|Convert)[A]` methods", "0.11.0")
 final case class NonEmptyObjectFound(typ: String) extends FailureReason {
-  def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
+  def description(indentSize: Int) = s"Non-empty object found when using EnumCoproductHint to write a $typ."
 }
 
 /**
@@ -138,7 +141,7 @@ final case class NonEmptyObjectFound(typ: String) extends FailureReason {
  * @param found the number of elements found
  */
 final case class WrongSizeList(expected: Int, found: Int) extends FailureReason {
-  def description = s"List of wrong size found. Expected $expected elements. Found $found elements instead."
+  def description(indentSize: Int) = s"List of wrong size found. Expected $expected elements. Found $found elements instead."
 }
 
 /**
@@ -148,5 +151,5 @@ final case class WrongSizeList(expected: Int, found: Int) extends FailureReason 
  * @param found the number of characters found
  */
 final case class WrongSizeString(expected: Int, found: Int) extends FailureReason {
-  def description = s"String of wrong size found. Expected $expected characters. Found $found characters instead."
+  def description(indentSize: Int) = s"String of wrong size found. Expected $expected characters. Found $found characters instead."
 }

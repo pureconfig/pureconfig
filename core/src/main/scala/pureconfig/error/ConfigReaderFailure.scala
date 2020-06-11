@@ -18,8 +18,10 @@ trait ConfigReaderFailure {
 
   /**
    * A human-readable description of the failure.
+   *
+   * @param indentSize the number of characters to use for any indentation applied inside the description
    */
-  def description: String
+  def description(indentSize: Int): String
 
   /**
    * The optional origin of the failure.
@@ -38,7 +40,7 @@ trait ConfigReaderFailure {
 case class ConvertFailure(reason: FailureReason, origin: Option[ConfigOrigin], path: String)
   extends ConfigReaderFailure {
 
-  def description = reason.description
+  def description(indentSize: Int) = reason.description(indentSize)
 }
 
 object ConvertFailure {
@@ -59,7 +61,7 @@ object ConvertFailure {
  */
 @deprecated("`loadConfigFromFiles` won't return this failure anymore", "0.10.1")
 case object NoFilesToRead extends ConfigReaderFailure {
-  def description = "The config files to load must not be empty."
+  def description(indentSize: Int) = "The config files to load must not be empty."
   def origin = None
 }
 
@@ -72,7 +74,7 @@ case object NoFilesToRead extends ConfigReaderFailure {
 final case class ThrowableFailure(throwable: Throwable, origin: Option[ConfigOrigin])
   extends ConfigReaderFailure {
 
-  def description = s"${throwable.getMessage}."
+  def description(indentSize: Int) = s"${throwable.getMessage}."
 }
 
 /**
@@ -96,7 +98,7 @@ trait CannotRead extends ConfigReaderFailure {
    */
   def reason: Option[Throwable]
 
-  def description = reason match {
+  def description(indentSize: Int) = reason match {
     case Some(ex: FileNotFoundException) => s"Unable to read $sourceType ${ex.getMessage}." // a FileNotFoundException already includes the path
     case Some(ex) => s"Unable to read $sourceType $sourceName (${ex.getMessage})."
     case None => s"Unable to read $sourceType $sourceName."
@@ -145,5 +147,5 @@ final case class CannotReadResource(resourceName: String, reason: Option[Throwab
  * @param origin the optional origin of the failure
  */
 final case class CannotParse(msg: String, origin: Option[ConfigOrigin]) extends ConfigReaderFailure {
-  def description = s"Unable to parse the configuration: $msg."
+  def description(indentSize: Int) = s"Unable to parse the configuration: $msg."
 }
