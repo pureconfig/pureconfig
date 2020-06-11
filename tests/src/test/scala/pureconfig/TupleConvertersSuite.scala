@@ -45,7 +45,7 @@ class TupleConvertersSuite extends BaseSuite {
   checkFailures[(Int, Int, Int)](
     ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava) -> ConfigReaderFailures(
       ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_1"),
-      List(ConvertFailure(KeyNotFound("_3", Set()), emptyConfigOrigin, ""))))
+      ConvertFailure(KeyNotFound("_3", Set()), emptyConfigOrigin, "")))
 
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef("str") -> ConfigReaderFailures(

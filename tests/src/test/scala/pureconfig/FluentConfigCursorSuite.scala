@@ -16,7 +16,7 @@ class FluentConfigCursorSuite extends BaseSuite {
     ConfigCursor(conf(confStr), pathElems).fluent
 
   def failedCursor(reason: FailureReason, path: String, origin: Option[ConfigOrigin] = stringConfigOrigin(1)): FluentConfigCursor =
-    FluentConfigCursor(Left(ConfigReaderFailures(ConvertFailure(reason, origin, path), Nil)))
+    FluentConfigCursor(Left(ConfigReaderFailures(ConvertFailure(reason, origin, path))))
 
   behavior of "FluentConfigCursor"
 
@@ -68,7 +68,7 @@ class FluentConfigCursorSuite extends BaseSuite {
     cursor("[true, notTrue, false, nay]").mapList(_.asBoolean) shouldBe Left(
       ConfigReaderFailures(
         ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)), stringConfigOrigin(1), s"$defaultPathStr.1"),
-        ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)), stringConfigOrigin(1), s"$defaultPathStr.3") :: Nil))
+        ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.BOOLEAN)), stringConfigOrigin(1), s"$defaultPathStr.3")))
 
     cursor("abc").mapList(_.asInt) should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), defaultPathStr, stringConfigOrigin(1))
@@ -80,7 +80,7 @@ class FluentConfigCursorSuite extends BaseSuite {
     cursor("{ a: abc, b: 5, c: [6] }").mapObject(_.asInt) shouldBe Left(
       ConfigReaderFailures(
         ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), stringConfigOrigin(1), s"$defaultPathStr.a"),
-        ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.NUMBER)), stringConfigOrigin(1), s"$defaultPathStr.c") :: Nil))
+        ConvertFailure(WrongType(ConfigValueType.LIST, Set(ConfigValueType.NUMBER)), stringConfigOrigin(1), s"$defaultPathStr.c")))
 
     cursor("abc").mapObject(_.asInt) should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)), defaultPathStr, stringConfigOrigin(1))

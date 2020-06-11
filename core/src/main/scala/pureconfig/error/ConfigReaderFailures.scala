@@ -52,6 +52,6 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
 
 object ConfigReaderFailures {
 
-  def apply(configReaderFailure: ConfigReaderFailure): ConfigReaderFailures =
-    new ConfigReaderFailures(configReaderFailure, List.empty[ConfigReaderFailure])
+  def apply(first: ConfigReaderFailure, rest: ConfigReaderFailure*): ConfigReaderFailures =
+    new ConfigReaderFailures(first, rest.toList)
 }

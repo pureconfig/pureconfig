@@ -21,9 +21,8 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
 
     val failures = ConfigReaderFailures(
       ThrowableFailure(new Exception("Throwable error"), origin(12)),
-      List(
-        ConvertFailure(KeyNotFound("unknown_key"), None, "path"),
-        CannotReadResource("resourceName", None)))
+      ConvertFailure(KeyNotFound("unknown_key"), None, "path"),
+      CannotReadResource("resourceName", None))
 
     failures.prettyPrint(0, 2) shouldBe
       s"""|- (file:/tmp/config: 12) Throwable error.
@@ -50,9 +49,8 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
   it should "be printable with failures organized by path" in {
     val failures = ConfigReaderFailures(
       ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), None, "a"),
-      List(
-        ConvertFailure(KeyNotFound("b", Set()), None, ""),
-        ConvertFailure(KeyNotFound("c", Set()), None, "")))
+      ConvertFailure(KeyNotFound("b", Set()), None, ""),
+      ConvertFailure(KeyNotFound("c", Set()), None, ""))
 
     failures.prettyPrint() shouldBe
       s"""|at the root:
@@ -64,16 +62,14 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
 
   it should "print errors that occur at the root of the config" in {
     val failures1 = ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, ""),
-      List())
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, ""))
 
     failures1.prettyPrint() shouldBe
       s"""|at the root:
           |  - Expected type OBJECT. Found NUMBER instead.""".stripMargin
 
     val failures2 = ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "conf"),
-      List())
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "conf"))
 
     failures2.prettyPrint() shouldBe
       s"""|at 'conf':
@@ -84,7 +80,7 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
     val failures = ConfigReaderFailures(
       ConvertFailure(
         WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)), None, "values.b"),
-      List(ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "values.a.values.c")))
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), None, "values.a.values.c"))
 
     failures.prettyPrint() shouldBe
       s"""|at 'values.a.values.c':
@@ -96,7 +92,7 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
   it should "print a message displaying relevant errors for coproduct derivation" in {
     val failures = ConfigReaderFailures(
       ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), None, "values.v1.type"),
-      List(ConvertFailure(KeyNotFound("type", Set()), None, "values.v3")))
+      ConvertFailure(KeyNotFound("type", Set()), None, "values.v3"))
 
     failures.prettyPrint() shouldBe
       s"""|at 'values.v1.type':
@@ -108,10 +104,9 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
   it should "print a message displaying candidate keys in case of a suspected misconfigured ProductHint" in {
     val failures = ConfigReaderFailures(
       ConvertFailure(KeyNotFound("camel-case-int", Set("camelCaseInt")), None, "camel-case-conf"),
-      List(
-        ConvertFailure(KeyNotFound("camel-case-string", Set("camelCaseString")), None, "camel-case-conf"),
-        ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), None, "snake-case-conf"),
-        ConvertFailure(KeyNotFound("snake-case-string", Set("snake_case_string")), None, "snake-case-conf")))
+      ConvertFailure(KeyNotFound("camel-case-string", Set("camelCaseString")), None, "camel-case-conf"),
+      ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), None, "snake-case-conf"),
+      ConvertFailure(KeyNotFound("snake-case-string", Set("snake_case_string")), None, "snake-case-conf"))
 
     failures.prettyPrint() shouldBe
       s"""|at 'camel-case-conf':
@@ -133,7 +128,7 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
 
     val failures = ConfigReaderFailures(
       ConvertFailure(KeyNotFound("a", Set()), urlConfigOrigin(url, 1), ""),
-      List(ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), urlConfigOrigin(url, 3), "c")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), urlConfigOrigin(url, 3), "c"))
 
     failures.prettyPrint() shouldBe
       s"""|at the root:
@@ -169,7 +164,7 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
   it should "print a message showing lists of wrong size" in {
     val failures = ConfigReaderFailures(
       ConvertFailure(WrongSizeList(3, 4), None, "hlist"),
-      List(ConvertFailure(WrongSizeList(3, 6), None, "tuple")))
+      ConvertFailure(WrongSizeList(3, 6), None, "tuple"))
 
     failures.prettyPrint() shouldBe
       s"""|at 'hlist':

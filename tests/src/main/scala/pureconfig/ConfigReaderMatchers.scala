@@ -20,10 +20,10 @@ trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
     reason: FailureReason,
     path: String,
     origin: Option[ConfigOrigin] = None): Matcher[ConfigReader.Result[Any]] =
-    be(Left(ConfigReaderFailures(ConvertFailure(reason, origin, path), Nil)))
+    be(Left(ConfigReaderFailures(ConvertFailure(reason, origin, path))))
 
   def failWith(failure: ConfigReaderFailure): Matcher[ConfigReader.Result[Any]] =
-    be(Left(ConfigReaderFailures(failure, Nil)))
+    be(Left(ConfigReaderFailures(failure)))
 
   def failWithType[Reason <: FailureReason: ClassTag]: Matcher[ConfigReader.Result[Any]] =
     matchPattern { case Left(ConfigReaderFailures(ConvertFailure(_: Reason, _, _), Nil)) => }

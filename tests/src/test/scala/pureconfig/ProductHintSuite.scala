@@ -165,7 +165,7 @@ class ProductHintSuite extends BaseSuite {
     conf.getConfig("conf").to[Conf] shouldBe Left(
       ConfigReaderFailures(
         ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), stringConfigOrigin(3), "a"),
-        List(ConvertFailure(UnknownKey("b"), stringConfigOrigin(4), "b"))))
+        ConvertFailure(UnknownKey("b"), stringConfigOrigin(4), "b")))
   }
 
   it should "not use default arguments if specified through a product hint" in {
