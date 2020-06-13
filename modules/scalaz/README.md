@@ -111,7 +111,7 @@ val anotherInvalidConf = parseString("""{ i: false }""")
 List(validConf, invalidConf, anotherInvalidConf).traverse { c =>
   Validation.fromEither(implicitly[ConfigReader[SimpleConfig]].from(c.root))
 }
-// res7: scalaz.Validation[pureconfig.error.ConfigReaderFailures,List[SimpleConfig]] = Failure(ConfigReaderFailures(ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),List(ConvertFailure(WrongType(BOOLEAN,Set(NUMBER)),Some(ConfigOrigin(String)),i))))
+// res7: scalaz.Validation[pureconfig.error.ConfigReaderFailures,List[SimpleConfig]] = Failure(ConfigReaderFailures(ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ArrayBuffer(ConvertFailure(WrongType(BOOLEAN,Set(NUMBER)),Some(ConfigOrigin(String)),i))))
 ```
 
 ### Extra syntactic sugar
