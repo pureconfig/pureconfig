@@ -143,7 +143,7 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
     val url = new URL("file://" + workingDir + file)
 
     val failures = ConfigReaderFailures(
-      CannotParse("Expecting close brace } or a comma, got end of file", urlConfigOrigin(url, 2)), List())
+      CannotParse("Expecting close brace } or a comma, got end of file", urlConfigOrigin(url, 2)))
 
     failures.prettyPrint() shouldBe
       s"""|- (file:${workingDir}${file}: 2) Unable to parse the configuration: Expecting close brace } or a comma, got end of file.""".stripMargin
@@ -155,7 +155,7 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
     val path = java.nio.file.Paths.get(workingDir + file)
 
     val failures = ConfigReaderFailures(
-      CannotReadFile(path, Some(new java.io.FileNotFoundException(workingDir + file + " (No such file or directory)"))), List())
+      CannotReadFile(path, Some(new java.io.FileNotFoundException(workingDir + file + " (No such file or directory)"))))
 
     failures.prettyPrint() shouldBe
       s"""|- Unable to read file ${workingDir}${file} (No such file or directory).""".stripMargin

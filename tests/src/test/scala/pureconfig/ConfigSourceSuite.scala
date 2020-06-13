@@ -132,7 +132,7 @@ class ConfigSourceSuite extends BaseSuite {
       withFallback(main).
       withFallback(defaults).
       at("my-service").load[MyService] should matchPattern {
-        case Left(ConfigReaderFailures(CannotReadResource("nonExistingResource1", _), Nil)) =>
+        case Left(ConfigReaderFailures(CannotReadResource("nonExistingResource1", _))) =>
       }
 
     overrides.
@@ -140,10 +140,10 @@ class ConfigSourceSuite extends BaseSuite {
       withFallback(main).
       withFallback(nonExisting2).
       withFallback(defaults).
-      at("my-service").load[MyService] should matchPattern {
-        case Left(ConfigReaderFailures(
+      at("my-service").load[MyService].left.map(_.toList) should matchPattern {
+        case Left(List(
           CannotReadResource("nonExistingResource1", _),
-          CannotReadResource("nonExistingResource2", _) :: Nil)) =>
+          CannotReadResource("nonExistingResource2", _))) =>
       }
   }
 
@@ -185,9 +185,9 @@ class ConfigSourceSuite extends BaseSuite {
 
     case class Conf(name: String, age: Int)
 
-    appSource.recoverWith { case ConfigReaderFailures(_: CannotRead, _) => otherSource }.load[Conf] shouldBe
+    appSource.recoverWith { case ConfigReaderFailures(_: CannotRead) => otherSource }.load[Conf] shouldBe
       Right(Conf("John", 33))
-    appSource.recoverWith { case ConfigReaderFailures(_: CannotParse, _) => otherSource }.load[Conf] should
+    appSource.recoverWith { case ConfigReaderFailures(_: CannotParse) => otherSource }.load[Conf] should
       failWithType[CannotReadFile]
   }
 

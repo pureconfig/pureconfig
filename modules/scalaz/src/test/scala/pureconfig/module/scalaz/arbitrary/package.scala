@@ -56,7 +56,7 @@ package object arbitrary {
       for {
         n <- Gen.choose(1, MaxCollectionLength)
         l <- Gen.listOfN(n, genFailureReason).map(_.map(r => ConvertFailure(r, None, "")))
-      } yield ConfigReaderFailures(l.head, l.tail)
+      } yield ConfigReaderFailures(l.head, l.tail: _*)
     }
 
   implicit val cogenConfigReaderFailures: Cogen[ConfigReaderFailures] =

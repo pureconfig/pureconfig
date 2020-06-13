@@ -127,7 +127,7 @@ final class ConfigObjectSource private (getConf: () => Result[Config]) extends C
    *         to an empty config if it cannot be read.
    */
   def optional: ConfigObjectSource =
-    recoverWith { case ConfigReaderFailures(_: CannotRead, Nil) => ConfigSource.empty }
+    recoverWith { case ConfigReaderFailures(_: CannotRead) => ConfigSource.empty }
 
   /**
    * Applies a function `f` if this source returns a failure, returning an alternative config

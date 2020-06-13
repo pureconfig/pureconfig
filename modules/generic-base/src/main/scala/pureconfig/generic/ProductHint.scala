@@ -67,7 +67,7 @@ private[pureconfig] case class ProductHintImpl[A](
           keyCur.failureFor(UnknownKey(k))
       }
       unknownKeys match {
-        case h :: t => Some(new ConfigReaderFailures(h, t))
+        case h :: t => Some(ConfigReaderFailures(h, t: _*))
         case Nil => None
       }
     }

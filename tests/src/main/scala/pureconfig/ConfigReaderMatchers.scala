@@ -14,7 +14,7 @@ import org.scalatest.matchers.should.Matchers
 trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
 
   def failWith(reason: FailureReason): Matcher[ConfigReader.Result[Any]] =
-    matchPattern { case Left(ConfigReaderFailures(ConvertFailure(`reason`, _, _), Nil)) => }
+    matchPattern { case Left(ConfigReaderFailures(ConvertFailure(`reason`, _, _))) => }
 
   def failWith(
     reason: FailureReason,
@@ -26,16 +26,16 @@ trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
     be(Left(ConfigReaderFailures(failure)))
 
   def failWithType[Reason <: FailureReason: ClassTag]: Matcher[ConfigReader.Result[Any]] =
-    matchPattern { case Left(ConfigReaderFailures(ConvertFailure(_: Reason, _, _), Nil)) => }
+    matchPattern { case Left(ConfigReaderFailures(ConvertFailure(_: Reason, _, _))) => }
 
   def failWithType[Failure <: ConfigReaderFailure: ClassTag](implicit dummy: DummyImplicit): Matcher[ConfigReader.Result[Any]] =
-    matchPattern { case Left(ConfigReaderFailures(_: Failure, Nil)) => }
+    matchPattern { case Left(ConfigReaderFailures(_: Failure)) => }
 
   def failLike(pf: PartialFunction[ConfigReaderFailure, MatchResult]) =
     new Matcher[ConfigReader.Result[Any]] with Inside with PartialFunctionValues {
 
       def apply(left: ConfigReader.Result[Any]): MatchResult = {
-        inside(left) { case Left(ConfigReaderFailures(failure, Nil)) => pf.valueAt(failure) }
+        inside(left) { case Left(ConfigReaderFailures(failure)) => pf.valueAt(failure) }
       }
     }
 

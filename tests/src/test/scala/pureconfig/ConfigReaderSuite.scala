@@ -39,7 +39,7 @@ class ConfigReaderSuite extends BaseSuite {
 
   it should "have a correct emap method" in forAll { (conf: ConfigValue, f: Int => Either[FailureReason, String]) =>
     def getReason[A](failures: ConfigReaderFailures): FailureReason = failures match {
-      case ConfigReaderFailures(ConvertFailure(reason, _, _), Nil) => reason
+      case ConfigReaderFailures(ConvertFailure(reason, _, _)) => reason
       case _ => throw new Exception(s"Unexpected value: $failures")
     }
     intReader.emap(f).from(conf).left.map(getReason) shouldEqual
