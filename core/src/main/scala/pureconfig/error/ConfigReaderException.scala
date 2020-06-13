@@ -11,7 +11,7 @@ final case class ConfigReaderException[A](failures: ConfigReaderFailures)(implic
   override def getMessage: String = {
     val linesBuffer = mutable.Buffer.empty[String]
     linesBuffer += s"Cannot convert configuration to a ${ct.runtimeClass.getName}. Failures are:"
-    linesBuffer += failures.prettyPrint(1, 2)
+    linesBuffer += failures.prettyPrint(1)
     linesBuffer += ""
     linesBuffer.mkString(System.lineSeparator())
   }

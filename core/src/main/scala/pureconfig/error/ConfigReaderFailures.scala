@@ -18,12 +18,12 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFai
   def ++(that: ConfigReaderFailures): ConfigReaderFailures =
     ConfigReaderFailures(head, (tail ++ that.toList): _*)
 
-  def prettyPrint(identLevel: Int = 0, identSize: Int = 2): String = {
-    def tabs(n: Int): String = " " * ((identLevel + n) * identSize)
-    def descriptionWithOrigin(failure: ConfigReaderFailure, ident: Int): String = {
+  def prettyPrint(indentLevel: Int = 0): String = {
+    def tabs(n: Int): String = " " * ((indentLevel + n) * 2)
+    def descriptionWithOrigin(failure: ConfigReaderFailure, indent: Int): String = {
       val failureLines = failure.description.split("\n")
-      (failure.origin.fold(s"${tabs(ident)}- ${failureLines.head}")(f => s"${tabs(ident)}- (${f.description}) ${failureLines.head}") ::
-        failureLines.tail.map(l => s"${tabs(ident + 1)}$l").toList).mkString("\n")
+      (failure.origin.fold(s"${tabs(indent)}- ${failureLines.head}")(f => s"${tabs(indent)}- (${f.description}) ${failureLines.head}") ::
+        failureLines.tail.map(l => s"${tabs(indent + 1)}$l").toList).mkString("\n")
     }
 
     val linesBuffer = mutable.Buffer.empty[String]

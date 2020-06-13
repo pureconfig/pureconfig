@@ -23,7 +23,7 @@ class EnumerationsSuite extends BaseSuite {
     ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("sunny-yellow")) shouldBe Right(SunnyYellow)
 
     val unknownValue = ConfigValueFactory.fromAnyRef("blue")
-    ConfigReader[Color].from(unknownValue) should failWith(NoValidCoproductOptionFound(unknownValue), "", emptyConfigOrigin)
+    ConfigReader[Color].from(unknownValue) should failWith(NoValidCoproductOptionFound(unknownValue, Seq.empty), "", emptyConfigOrigin)
     ConfigReader[Color].from(conf.root()) should failWith(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), "", stringConfigOrigin(1))
   }
 

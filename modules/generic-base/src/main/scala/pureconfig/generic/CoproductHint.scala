@@ -91,7 +91,7 @@ object FieldCoproductHint {
  */
 class FirstSuccessCoproductHint[A] extends CoproductHint[A] {
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
-    Right(Attempt(cursor, options, _ => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(cursor.value)))))
+    Right(Attempt(cursor, options, failures => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(cursor.value, failures)))))
 
   def to(value: ConfigValue, name: String): ConfigValue =
     value
