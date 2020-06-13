@@ -25,26 +25,19 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
         ConvertFailure(KeyNotFound("unknown_key"), None, "path"),
         CannotReadResource("resourceName", None)))
 
-    failures.prettyPrint(0, 2) shouldBe
+    failures.prettyPrint(0) shouldBe
       s"""|- (file:/tmp/config: 12) Throwable error.
           |- Unable to read resource resourceName.
           |
           |at 'path':
           |  - Key not found: 'unknown_key'.""".stripMargin
 
-    failures.prettyPrint(1, 2) shouldBe
+    failures.prettyPrint(1) shouldBe
       s"""|  - (file:/tmp/config: 12) Throwable error.
           |  - Unable to read resource resourceName.
           |
           |  at 'path':
           |    - Key not found: 'unknown_key'.""".stripMargin
-
-    failures.prettyPrint(1, 4) shouldBe
-      s"""|    - (file:/tmp/config: 12) Throwable error.
-          |    - Unable to read resource resourceName.
-          |
-          |    at 'path':
-          |        - Key not found: 'unknown_key'.""".stripMargin
   }
 
   it should "be printable with failures organized by path" in {
@@ -116,14 +109,14 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
     failures.prettyPrint() shouldBe
       s"""|at 'camel-case-conf':
           |  - Key not found: 'camel-case-int'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |     - 'camelCaseInt'
+          |      - 'camelCaseInt'
           |  - Key not found: 'camel-case-string'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |     - 'camelCaseString'
+          |      - 'camelCaseString'
           |at 'snake-case-conf':
           |  - Key not found: 'snake-case-int'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |     - 'snake_case_int'
+          |      - 'snake_case_int'
           |  - Key not found: 'snake-case-string'. You might have a misconfigured ProductHint, since the following similar keys were found:
-          |     - 'snake_case_string'""".stripMargin
+          |      - 'snake_case_string'""".stripMargin
   }
 
   it should "print a message displaying the proper file system location of the values that raised errors, if available" in {
@@ -176,5 +169,32 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
           |  - List of wrong size found. Expected 3 elements. Found 4 elements instead.
           |at 'tuple':
           |  - List of wrong size found. Expected 3 elements. Found 6 elements instead.""".stripMargin
+  }
+
+  it should "print a message showing the errors of the attempted options when no valid coproduct choice was found" in {
+    val failures = ConfigReaderFailures(
+      ConvertFailure(
+        NoValidCoproductOptionFound(
+          ConfigFactory.parseString("""{"a":{"C":4}}""").root(),
+          Seq(
+            "Option1" -> ConfigReaderFailures(
+              ConvertFailure(KeyNotFound("b", Set()), None, "a"),
+              List(ConvertFailure(UnknownKey("c"), None, "a.C"))),
+            "Option2" -> ConfigReaderFailures(
+              ConvertFailure(KeyNotFound("c", Set("C")), None, "a")))),
+        None, "a"))
+
+    failures.prettyPrint() shouldBe
+      s"""|at 'a':
+          |  - No valid coproduct option found for '{"a":{"C":4}}'.
+          |    Can't use coproduct option 'Option1':
+          |      at 'a':
+          |        - Key not found: 'b'.
+          |      at 'a.C':
+          |        - Unknown key.
+          |    Can't use coproduct option 'Option2':
+          |      at 'a':
+          |        - Key not found: 'c'. You might have a misconfigured ProductHint, since the following similar keys were found:
+          |            - 'C'""".stripMargin
   }
 }
