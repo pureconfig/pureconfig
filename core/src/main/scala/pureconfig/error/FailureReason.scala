@@ -51,7 +51,7 @@ final case class KeyNotFound(key: String, candidates: Set[String] = Set()) exten
       val descLines = mutable.ListBuffer[String]()
       descLines += s"Key not found: '$key'. You might have a misconfigured ProductHint, since the following similar keys were found:"
       candidates.foreach { candidate =>
-        descLines += s" - '$candidate'"
+        descLines += s"  - '$candidate'"
       }
       descLines.mkString("\n")
     } else {

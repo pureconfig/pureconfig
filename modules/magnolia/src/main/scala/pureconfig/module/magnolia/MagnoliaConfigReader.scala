@@ -71,7 +71,7 @@ object MagnoliaConfigReader {
       def readerFor(option: String) =
         ctx.subtypes.find(_.typeName.short == option).map(_.typeclass)
 
-      hint.from(cur, ctx.subtypes.map(_.typeName.short)).right.flatMap {
+      hint.from(cur, ctx.subtypes.map(_.typeName.short).sorted).right.flatMap {
         case CoproductHint.Use(cur, option) =>
           readerFor(option) match {
             case Some(value) => value.from(cur)

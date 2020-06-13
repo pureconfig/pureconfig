@@ -28,7 +28,7 @@ class EnumCoproductHint[A] extends CoproductHint[A] {
     cursor.asString.right.flatMap { str =>
       options.find(str == fieldValue(_)) match {
         case Some(opt) => Right(Use(cursor, opt))
-        case None => cursor.failed[CoproductHint.Action](NoValidCoproductOptionFound(cursor.value))
+        case None => cursor.failed[CoproductHint.Action](NoValidCoproductOptionFound(cursor.value, Seq.empty))
       }
     }
 
