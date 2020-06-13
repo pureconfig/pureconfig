@@ -9,7 +9,7 @@ import pureconfig.error.FailureReason
  * @param option the coproduct option that is invalid
  */
 final case class InvalidCoproductOption(option: String) extends FailureReason {
-  def description(indentSize: Int) =
+  def description =
     s"""|The provided option '$option' is invalid for the CoproductHint's type. There's likely a bug in the
         |CoproductHint implementation.""".stripMargin
 }

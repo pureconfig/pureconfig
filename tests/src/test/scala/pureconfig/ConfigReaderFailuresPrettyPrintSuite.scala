@@ -25,26 +25,19 @@ class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
         ConvertFailure(KeyNotFound("unknown_key"), None, "path"),
         CannotReadResource("resourceName", None)))
 
-    failures.prettyPrint(0, 2) shouldBe
+    failures.prettyPrint(0) shouldBe
       s"""|- (file:/tmp/config: 12) Throwable error.
           |- Unable to read resource resourceName.
           |
           |at 'path':
           |  - Key not found: 'unknown_key'.""".stripMargin
 
-    failures.prettyPrint(1, 2) shouldBe
+    failures.prettyPrint(1) shouldBe
       s"""|  - (file:/tmp/config: 12) Throwable error.
           |  - Unable to read resource resourceName.
           |
           |  at 'path':
           |    - Key not found: 'unknown_key'.""".stripMargin
-
-    failures.prettyPrint(1, 4) shouldBe
-      s"""|    - (file:/tmp/config: 12) Throwable error.
-          |    - Unable to read resource resourceName.
-          |
-          |    at 'path':
-          |        - Key not found: 'unknown_key'.""".stripMargin
   }
 
   it should "be printable with failures organized by path" in {

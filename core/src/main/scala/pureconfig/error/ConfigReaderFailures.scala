@@ -18,10 +18,10 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
   def ++(that: ConfigReaderFailures): ConfigReaderFailures =
     new ConfigReaderFailures(head, tail ++ that.toList)
 
-  def prettyPrint(indentLevel: Int = 0, indentSize: Int = 2): String = {
-    def tabs(n: Int): String = " " * ((indentLevel + n) * indentSize)
+  def prettyPrint(indentLevel: Int = 0): String = {
+    def tabs(n: Int): String = " " * ((indentLevel + n) * 2)
     def descriptionWithOrigin(failure: ConfigReaderFailure, indent: Int): String = {
-      val failureLines = failure.description(indentSize).split("\n")
+      val failureLines = failure.description.split("\n")
       (failure.origin.fold(s"${tabs(indent)}- ${failureLines.head}")(f => s"${tabs(indent)}- (${f.description}) ${failureLines.head}") ::
         failureLines.tail.map(l => s"${tabs(indent + 1)}$l").toList).mkString("\n")
     }

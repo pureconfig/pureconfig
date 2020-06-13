@@ -10,14 +10,14 @@ import pureconfig.error.{ ConfigReaderFailures, FailureReason }
  * @param optionFailures the failures produced when attempting to read coproduct options
  */
 final case class NoValidCoproductOptionFound(value: ConfigValue, optionFailures: Seq[(String, ConfigReaderFailures)]) extends FailureReason {
-  def description(indentSize: Int) = {
+  def description = {
     val baseDescription = s"No valid coproduct option found for '${value.render(ConfigRenderOptions.concise())}'."
     baseDescription + (
       if (optionFailures.isEmpty) ""
       else {
         "\n" + optionFailures.map {
           case (optionName, failures) =>
-            s"Can't use coproduct option '$optionName':\n" + failures.prettyPrint(1, indentSize)
+            s"Can't use coproduct option '$optionName':\n" + failures.prettyPrint(1)
         }.mkString("\n")
       })
   }

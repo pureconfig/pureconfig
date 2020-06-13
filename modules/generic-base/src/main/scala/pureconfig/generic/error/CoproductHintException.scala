@@ -8,5 +8,5 @@ import pureconfig.error.FailureReason
  * @param failure the reason for the exception
  */
 final case class CoproductHintException(failure: FailureReason) extends RuntimeException {
-  override def getMessage: String = failure.description(2)
+  override def getMessage: String = failure.description
 }
