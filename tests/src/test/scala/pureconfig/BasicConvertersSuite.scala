@@ -156,6 +156,18 @@ class BasicConvertersSuite extends BaseSuite {
     ConfigValueFactory.fromAnyRef("str") -> ConfigValueFactory.fromAnyRef("str"),
     ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava) -> ConfigValueFactory.fromAnyRef(List(1, 2, 3).asJava))
 
+  checkReadWrite[ConfigMemorySize](
+    ConfigValueFactory.fromAnyRef(400L) -> ConfigMemorySize.ofBytes(400L))
+  checkRead[ConfigMemorySize](
+    ConfigValueFactory.fromAnyRef("400b") -> ConfigMemorySize.ofBytes(400),
+    ConfigValueFactory.fromAnyRef("400k") -> ConfigMemorySize.ofBytes(400 * 1024),
+    ConfigValueFactory.fromAnyRef("400m") -> ConfigMemorySize.ofBytes(400 * 1024 * 1024),
+    ConfigValueFactory.fromAnyRef("400MB") -> ConfigMemorySize.ofBytes(400 * 1000 * 1000))
+  checkWrite[ConfigMemorySize](
+    ConfigMemorySize.ofBytes(400 * 1024 * 1024) -> ConfigValueFactory.fromAnyRef(400 * 1024 * 1024),
+    ConfigMemorySize.ofBytes(400 * 1000 * 1000) -> ConfigValueFactory.fromAnyRef(400 * 1000 * 1000))
+  checkFailure[ConfigMemorySize, ExceptionThrown](ConfigValueFactory.fromAnyRef("100noSuchUnit"))
+
   {
     val conf = ConfigFactory.parseString("""{ v1 = 3, v2 = 4 }""".stripMargin)
 
