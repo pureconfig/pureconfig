@@ -48,4 +48,6 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFai
     }
     linesBuffer.mkString(System.lineSeparator())
   }
+
+  override def toString = toList.map(_.toString).mkString("ConfigReaderFailures(", ",", ")")
 }
