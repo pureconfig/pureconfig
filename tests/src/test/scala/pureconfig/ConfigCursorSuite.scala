@@ -1,7 +1,7 @@
 package pureconfig
 
 import com.typesafe.config._
-import pureconfig.error.{ CannotConvert, KeyNotFound, WrongType }
+import pureconfig.error.{ CannotConvert, ConvertFailure, KeyNotFound, WrongType }
 
 class ConfigCursorSuite extends BaseSuite {
 
@@ -66,6 +66,23 @@ class ConfigCursorSuite extends BaseSuite {
     cursor("30k").asBytes shouldBe Right(30 * 1024)
     cursor("30m").asBytes shouldBe Right(30 * 1024 * 1024)
     cursor("30MB").asBytes shouldBe Right(30 * 1000 * 1000)
+  }
+
+  it should "fail asBytes on invalid value" in {
+    val failures = cursor("30unidentifiedUnits")
+      .asBytes
+      .left
+      .value
+    /**
+     * at 'key1.key2':
+     *   - (String: 1) String: 1: Invalid value at '_': Could not parse size-in-bytes unit 'unidentifiedUnits' (try k, K, kB, KiB, kilobytes, kibibytes).
+     */
+    //verify error includes the path
+    failures.prettyPrint() should include(defaultPathStr)
+    failures.head shouldBe a[ConvertFailure]
+    failures.head.asInstanceOf[ConvertFailure].path shouldEqual defaultPathStr
+    //verify error states the actual reason
+    failures.head.description should include("Could not parse size-in-bytes unit 'unidentifiedUnits'")
   }
 
   it should "allow being cast to int in a safe way" in {
