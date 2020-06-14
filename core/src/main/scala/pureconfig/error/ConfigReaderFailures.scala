@@ -10,7 +10,7 @@ import scala.collection.mutable
  */
 case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFailure*) {
 
-  lazy val toList: List[ConfigReaderFailure] = head :: tail.toList
+  def toList: List[ConfigReaderFailure] = head :: tail.toList
 
   def +:(failure: ConfigReaderFailure): ConfigReaderFailures =
     ConfigReaderFailures(failure, this.toList: _*)
