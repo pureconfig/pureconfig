@@ -37,14 +37,6 @@ case class FluentConfigCursor(cursor: ConfigReader.Result[ConfigCursor]) {
   def asLong: ConfigReader.Result[Long] = cursor.right.flatMap(_.asLong)
 
   /**
-   * Casts this cursor to a long representing a memory size according to the way com.typesafe.config.Config#getBytes(java.lang.String) does.
-   *
-   * @return a `Right` with the memory size value pointed to by this cursor if the cast can be done, `Left` with a list of
-   *         failures otherwise.
-   */
-  def asBytes: ConfigReader.Result[Long] = cursor.right.flatMap(_.asBytes)
-
-  /**
    * Casts this cursor to an int.
    *
    * @return a `Right` with the int value pointed to by this cursor if the cast can be done, `Left` with a list of

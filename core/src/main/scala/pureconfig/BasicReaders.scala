@@ -13,10 +13,11 @@ import scala.concurrent.duration.{ Duration, FiniteDuration }
 import scala.math.{ BigDecimal, BigInt }
 import scala.reflect.ClassTag
 import scala.util.matching.Regex
-
 import com.typesafe.config._
 import pureconfig.ConvertHelpers._
 import pureconfig.error._
+
+import scala.util.Try
 
 /**
  * Trait containing `ConfigReader` instances for primitive types.
@@ -176,7 +177,18 @@ trait TypesafeConfigReaders {
     ConfigReader.fromCursor(_.asListCursor.right.map(_.value))
 
   implicit val configMemorySizeReader: ConfigReader[ConfigMemorySize] =
-    ConfigReader.fromCursor(_.asBytes).map(ConfigMemorySize.ofBytes _)
+    ConfigReader
+      .fromCursor { cur =>
+        cur scopeFailure {
+          ConvertHelpers.tryToEither {
+            Try {
+              val wrapped = cur.value.atKey("_")
+              val bytes = wrapped.getBytes("_").longValue()
+              ConfigMemorySize ofBytes bytes
+            }
+          }
+        }
+      }
 }
 
 /**

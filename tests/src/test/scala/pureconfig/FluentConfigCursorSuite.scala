@@ -26,14 +26,6 @@ class FluentConfigCursorSuite extends BaseSuite {
     cursor("true").asBoolean shouldBe Right(true)
   }
 
-  it should "support asBytes" in {
-    cursor("30").asBytes shouldBe Right(30)
-    cursor("30b").asBytes shouldBe Right(30)
-    cursor("30k").asBytes shouldBe Right(30 * 1024)
-    cursor("30m").asBytes shouldBe Right(30 * 1024 * 1024)
-    cursor("30MB").asBytes shouldBe Right(30 * 1000 * 1000)
-  }
-
   it should "allow being casted to a list cursor in a safe way" in {
     cursor("abc").asListCursor should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), defaultPathStr, stringConfigOrigin(1))
