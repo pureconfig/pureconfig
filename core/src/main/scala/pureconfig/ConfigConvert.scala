@@ -9,7 +9,6 @@ package pureconfig
 import scala.reflect.ClassTag
 import scala.util.Try
 
-import pureconfig.ConvertHelpers._
 import pureconfig.error.FailureReason
 
 /**
@@ -20,16 +19,27 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
   /**
    * Transforms the values read and written by this `ConfigConvert` using two functions.
    *
+   * @param f the function applied to values after they are read; a thrown exception will be caught and converted to a pureconfig FailureReason
+   * @param g the function applied to values before they are written
+   * @tparam B the type of the returned `ConfigConvert`
+   * @return a `ConfigConvert` that reads and writes values of type `B` by applying `f` and `g` on read and write,
+   *         respectively.
+   */
+  def xmap[B](f: A => B, g: B => A): ConfigConvert[B] =
+    ConfigConvert(map(f), contramap(g))
+
+  /**
+   * Transforms the values read and written by this `ConfigConvert` using two functions where the reader may
+   * specify custom failure reason.
+   *
    * @param f the function applied to values after they are read
    * @param g the function applied to values before they are written
    * @tparam B the type of the returned `ConfigConvert`
    * @return a `ConfigConvert` that reads and writes values of type `B` by applying `f` and `g` on read and write,
    *         respectively.
    */
-  def xmap[B](f: A => B, g: B => A): ConfigConvert[B] = new ConfigConvert[B] {
-    def from(cur: ConfigCursor) = outer.from(cur).right.flatMap { v => cur.scopeFailure(toResult(f)(v)) }
-    def to(a: B) = outer.to(g(a))
-  }
+  def xemap[B](f: A => Either[FailureReason, B], g: B => A): ConfigConvert[B] =
+    ConfigConvert(emap(f), contramap(g))
 }
 
 /**
@@ -39,14 +49,13 @@ object ConfigConvert extends ConvertHelpers {
 
   def apply[A](implicit conv: Derivation[ConfigConvert[A]]): ConfigConvert[A] = conv.value
 
-  implicit def fromReaderAndWriter[A](
-    implicit
-    reader: Derivation[ConfigReader[A]],
-    writer: Derivation[ConfigWriter[A]]) = new ConfigConvert[A] {
-
-    def from(cur: ConfigCursor) = reader.value.from(cur)
-    def to(t: A) = writer.value.to(t)
+  def apply[A](reader: ConfigReader[A], writer: ConfigWriter[A]): ConfigConvert[A] = new ConfigConvert[A] {
+    def from(cur: ConfigCursor) = reader.from(cur)
+    def to(a: A) = writer.to(a)
   }
+
+  implicit def fromReaderAndWriter[A](implicit reader: Derivation[ConfigReader[A]], writer: Derivation[ConfigWriter[A]]) =
+    ConfigConvert(reader.value, writer.value)
 
   def viaString[A](fromF: String => Either[FailureReason, A], toF: A => String): ConfigConvert[A] =
     fromReaderAndWriter(
