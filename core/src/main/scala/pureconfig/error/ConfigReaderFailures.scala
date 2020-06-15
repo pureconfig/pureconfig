@@ -8,15 +8,15 @@ import scala.collection.mutable
 /**
  * A non-empty list of ConfigReader failures
  */
-case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigReaderFailure]) {
+case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFailure*) {
 
-  def toList: List[ConfigReaderFailure] = head +: tail
+  def toList: List[ConfigReaderFailure] = head :: tail.toList
 
   def +:(failure: ConfigReaderFailure): ConfigReaderFailures =
-    new ConfigReaderFailures(failure, this.toList)
+    ConfigReaderFailures(failure, this.toList: _*)
 
   def ++(that: ConfigReaderFailures): ConfigReaderFailures =
-    new ConfigReaderFailures(head, tail ++ that.toList)
+    ConfigReaderFailures(head, (tail ++ that.toList): _*)
 
   def prettyPrint(indentLevel: Int = 0): String = {
     def tabs(n: Int): String = " " * ((indentLevel + n) * 2)
@@ -48,10 +48,6 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: List[ConfigRead
     }
     linesBuffer.mkString(System.lineSeparator())
   }
-}
 
-object ConfigReaderFailures {
-
-  def apply(configReaderFailure: ConfigReaderFailure): ConfigReaderFailures =
-    new ConfigReaderFailures(configReaderFailure, List.empty[ConfigReaderFailure])
+  override def toString = toList.map(_.toString).mkString("ConfigReaderFailures(", ",", ")")
 }
