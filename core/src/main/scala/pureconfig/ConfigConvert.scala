@@ -58,9 +58,7 @@ object ConfigConvert extends ConvertHelpers {
     ConfigConvert(reader.value, writer.value)
 
   def viaString[A](fromF: String => Either[FailureReason, A], toF: A => String): ConfigConvert[A] =
-    fromReaderAndWriter(
-      Derivation.Successful(ConfigReader.fromString(fromF)),
-      Derivation.Successful(ConfigWriter.toString(toF)))
+    ConfigConvert(ConfigReader.fromString(fromF), ConfigWriter.toString(toF))
 
   def viaStringTry[A: ClassTag](fromF: String => Try[A], toF: A => String): ConfigConvert[A] = {
     viaString[A](tryF(fromF), toF)
