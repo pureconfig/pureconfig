@@ -3,7 +3,7 @@ name := "pureconfig-http4s"
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
 
 libraryDependencies ++= Seq(
-  "org.http4s" %% "http4s-core" % "0.21.4")
+  "org.http4s" %% "http4s-core" % "0.21.5")
 
 developers := List(
   Developer("jcranky", "Paulo Siqueira", "paulo.siqueira@gmail.com", url("https://github.com/jcranky")))
