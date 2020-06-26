@@ -75,7 +75,7 @@ jobs:
 
       - name: Install dependencies
         run: >
-          sudo apt install libcurl4-openssl-dev libxslt-dev &&
+          sudo apt install libxslt-dev &&
           gem install sass jekyll:4.0.0 html-proofer:3.9.3
 
       - name: Build website
