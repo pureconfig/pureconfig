@@ -7,7 +7,7 @@ Adds support for selected javax classes to PureConfig.
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-javax" % "0.12.3"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-javax" % "0.13.0"
 ```
 
 ## Example
