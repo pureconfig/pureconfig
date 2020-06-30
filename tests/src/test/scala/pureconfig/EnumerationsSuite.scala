@@ -5,6 +5,7 @@ import pureconfig.error.WrongType
 import pureconfig.generic.error.NoValidCoproductOptionFound
 import pureconfig.generic.semiauto._
 import shapeless.test.illTyped
+import pureconfig.error.{ KeyNotFound, ConvertFailure, ConfigReaderFailures }
 
 class EnumerationsSuite extends BaseSuite {
 
@@ -23,7 +24,8 @@ class EnumerationsSuite extends BaseSuite {
     ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("sunny-yellow")) shouldBe Right(SunnyYellow)
 
     val unknownValue = ConfigValueFactory.fromAnyRef("blue")
-    ConfigReader[Color].from(unknownValue) should failWith(NoValidCoproductOptionFound(unknownValue, Seq.empty), "", emptyConfigOrigin)
+    val optionFailures = List("\"blue\"" -> ConfigReaderFailures(ConvertFailure(KeyNotFound("\"blue\"", Set("rainy-blue", "sunny-yellow")), None, "")))
+    ConfigReader[Color].from(unknownValue) should failWith(NoValidCoproductOptionFound(unknownValue, optionFailures), "", emptyConfigOrigin)
     ConfigReader[Color].from(conf.root()) should failWith(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), "", stringConfigOrigin(1))
   }
 

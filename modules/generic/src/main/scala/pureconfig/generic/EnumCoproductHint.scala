@@ -1,6 +1,6 @@
 package pureconfig.generic
 
-import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType }
+import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueType, ConfigRenderOptions }
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.Use
@@ -28,7 +28,10 @@ class EnumCoproductHint[A] extends CoproductHint[A] {
     cursor.asString.right.flatMap { str =>
       options.find(str == fieldValue(_)) match {
         case Some(opt) => Right(Use(cursor, opt))
-        case None => cursor.failed[CoproductHint.Action](NoValidCoproductOptionFound(cursor.value, Seq.empty))
+        case None =>
+          val failure = ConvertFailure(KeyNotFound(cursor.value.render(ConfigRenderOptions.concise()), options.toSet), None, cursor.path)
+          val failures = Seq(cursor.value.render -> ConfigReaderFailures(failure))
+          cursor.failed[CoproductHint.Action](NoValidCoproductOptionFound(cursor.value, failures))
       }
     }
 

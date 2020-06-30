@@ -12,7 +12,7 @@ object semiauto {
   final def deriveWriter[A](implicit writer: Lazy[DerivedConfigWriter[A]]): ConfigWriter[A] = writer.value
 
   final def deriveConvert[A](implicit reader: Lazy[DerivedConfigReader[A]], writer: Lazy[DerivedConfigWriter[A]]): ConfigConvert[A] =
-    ConfigConvert.fromReaderAndWriter(Derivation.Successful(reader.value), Derivation.Successful(writer.value))
+    ConfigConvert(reader.value, writer.value)
 
   /**
    * Derive a `ConfigReader` for a sealed family of case objects where each type is encoded as the kebab-case
@@ -48,7 +48,7 @@ object semiauto {
    */
   final def deriveEnumerationReader[A](transformName: String => String)(
     implicit
-    readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]]): ConfigReader[A] = readerBuilder.value.build(transformName)
+    readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]]): ConfigReader[A] = readerBuilder.value.build(transformName, Set.empty)
 
   /**
    * Derive a `ConfigWriter` for a sealed family of case objects where each type is encoded with the `transformName`
@@ -66,7 +66,7 @@ object semiauto {
     implicit
     readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]],
     writerBuilder: Lazy[EnumerationConfigWriterBuilder[A]]): ConfigConvert[A] =
-    ConfigConvert.fromReaderAndWriter(
-      Derivation.Successful(readerBuilder.value.build(transformName)),
-      Derivation.Successful(writerBuilder.value.build(transformName)))
+    ConfigConvert(
+      readerBuilder.value.build(transformName, Set.empty),
+      writerBuilder.value.build(transformName))
 }
