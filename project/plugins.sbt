@@ -8,6 +8,6 @@ addSbtPlugin("org.scalariform"   % "sbt-scalariform" % "1.8.3")
 addSbtPlugin("org.scoverage"     % "sbt-coveralls"   % "1.2.7")
 addSbtPlugin("org.scoverage"     % "sbt-scoverage"   % "1.6.1")
 addSbtPlugin("org.tpolecat"      % "tut-plugin"      % "0.6.13")
-addSbtPlugin("org.xerial.sbt"    % "sbt-sonatype"    % "3.9.3")
+addSbtPlugin("org.xerial.sbt"    % "sbt-sonatype"    % "3.9.4")
 
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.30"
