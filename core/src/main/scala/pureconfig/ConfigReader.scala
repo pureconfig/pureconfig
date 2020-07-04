@@ -184,7 +184,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
    */
   def fromFunction[A](fromF: ConfigValue => ConfigReader.Result[A]) =
-    fromCursor(_.asConfigValue.flatMap(fromF))
+    fromCursor(_.asConfigValue.right.flatMap(fromF))
 
   def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] =
     ConfigReader.fromCursor(_.asString).emap(fromF)

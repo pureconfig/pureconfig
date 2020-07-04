@@ -219,7 +219,7 @@ sealed trait ConfigCursor {
    */
   @deprecated("Use `asListCursor` and/or `asObjectCursor` instead", "0.10.1")
   def asCollectionCursor: ConfigReader.Result[Either[ConfigListCursor, ConfigObjectCursor]] = {
-    asConfigValue.flatMap { value =>
+    asConfigValue.right.flatMap { value =>
       val listAtLeft = asListCursor.right.map(Left.apply)
       lazy val mapAtRight = asObjectCursor.right.map(Right.apply)
       listAtLeft
@@ -229,7 +229,7 @@ sealed trait ConfigCursor {
   }
 
   def fluent: FluentConfigCursor =
-    FluentConfigCursor(asConfigValue.map(_ => this))
+    FluentConfigCursor(asConfigValue.right.map(_ => this))
 
   /**
    * Returns a failed `ConfigReader` result resulting from scoping a `FailureReason` into the context of this cursor.
@@ -273,7 +273,7 @@ sealed trait ConfigCursor {
     expectedType: ConfigValueType,
     cast: ConfigValue => Either[FailureReason, A]): ConfigReader.Result[A] = {
 
-    asConfigValue.flatMap { value =>
+    asConfigValue.right.flatMap { value =>
       scopeFailure(ConfigCursor.transform(value, expectedType).right.flatMap(cast))
     }
   }

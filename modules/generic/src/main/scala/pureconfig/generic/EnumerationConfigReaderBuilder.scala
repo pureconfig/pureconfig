@@ -22,7 +22,7 @@ object EnumerationConfigReaderBuilder {
       def build(transformName: String => String): ConfigReader[CNil] =
         new ConfigReader[CNil] {
           def from(cur: ConfigCursor): Result[CNil] =
-            cur.asConfigValue.flatMap(v => cur.failed(NoValidCoproductOptionFound(v, Seq.empty)))
+            cur.asConfigValue.right.flatMap(v => cur.failed(NoValidCoproductOptionFound(v, Seq.empty)))
         }
     }
 
