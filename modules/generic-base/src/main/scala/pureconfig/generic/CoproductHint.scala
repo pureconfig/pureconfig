@@ -65,7 +65,7 @@ class FieldCoproductHint[A](key: String) extends CoproductHint[A] {
       valueCur <- objCur.atKey(key).right
       valueStr <- valueCur.asString.right
       option <- options.find(valueStr == fieldValue(_))
-        .toRight(ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.value)))).right
+        .toRight(ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.valueOpt.get)))).right
     } yield Use(objCur.withoutKey(key), option)
   }
 
@@ -91,7 +91,10 @@ object FieldCoproductHint {
  */
 class FirstSuccessCoproductHint[A] extends CoproductHint[A] {
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
-    Right(Attempt(cursor, options, failures => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(cursor.value, failures)))))
+    Right(Attempt(cursor, options, failures =>
+      cursor.asConfigValue.fold(
+        identity,
+        v => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(v, failures))))))
 
   def to(value: ConfigValue, name: String): ConfigValue =
     value

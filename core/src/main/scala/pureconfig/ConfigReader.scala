@@ -105,7 +105,7 @@ trait ConfigReader[A] {
    * @return a `ConfigReader` returning the results of this reader when the input configs are mapped using `f`.
    */
   def contramapConfig(f: ConfigValue => ConfigValue): ConfigReader[A] =
-    fromCursor[A] { cur => from(ConfigCursor(f(cur.value), cur.pathElems)) }
+    fromCursor[A] { cur => from(ConfigCursor(cur.valueOpt.map(f), cur.pathElems)) }
 
   /**
    * Applies a function to config cursors before passing them to this reader.
@@ -184,7 +184,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
    */
   def fromFunction[A](fromF: ConfigValue => ConfigReader.Result[A]) =
-    fromCursor(fromF.compose(_.value))
+    fromCursor(_.asConfigValue.flatMap(fromF))
 
   def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] =
     ConfigReader.fromCursor(_.asString).emap(fromF)

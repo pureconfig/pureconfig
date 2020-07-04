@@ -49,7 +49,7 @@ final class YamlConfigSource private (
    * @return a config object source that produces YAML object documents read by this source
    */
   def asObjectSource: ConfigObjectSource =
-    ConfigObjectSource(fluentCursor().asObjectCursor.right.map(_.value.toConfig))
+    ConfigObjectSource(fluentCursor().asObjectCursor.right.map(_.objValue.toConfig))
 
   /**
    * Returns a new source that produces a multi-document YAML read by this source as a config list.
