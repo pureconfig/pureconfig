@@ -2,6 +2,7 @@ package pureconfig.generic
 
 import pureconfig._
 import shapeless._
+import scala.reflect.ClassTag
 
 /**
  * An object that provides methods for deriving `ConfigReader` and `ConfigWriter` instances on demand for value
@@ -18,7 +19,7 @@ object semiauto {
    * Derive a `ConfigReader` for a sealed family of case objects where each type is encoded as the kebab-case
    * representation of the type name.
    */
-  final def deriveEnumerationReader[A](
+  final def deriveEnumerationReader[A: ClassTag](
     implicit
     readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]]): ConfigReader[A] =
     deriveEnumerationReader(ConfigFieldMapping(PascalCase, KebabCase))
@@ -36,7 +37,7 @@ object semiauto {
    * Derive a `ConfigConvert` for a sealed family of case objects where each type is encoded as the kebab-case
    * representation of the type name.
    */
-  final def deriveEnumerationConvert[A](
+  final def deriveEnumerationConvert[A: ClassTag](
     implicit
     readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]],
     writerBuilder: Lazy[EnumerationConfigWriterBuilder[A]]): ConfigConvert[A] =
@@ -48,7 +49,8 @@ object semiauto {
    */
   final def deriveEnumerationReader[A](transformName: String => String)(
     implicit
-    readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]]): ConfigReader[A] = readerBuilder.value.build(transformName, Set.empty)
+    readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]],
+    ct: ClassTag[A]): ConfigReader[A] = readerBuilder.value.build(transformName, Set.empty, ct.runtimeClass.getSimpleName)
 
   /**
    * Derive a `ConfigWriter` for a sealed family of case objects where each type is encoded with the `transformName`
@@ -65,8 +67,9 @@ object semiauto {
   final def deriveEnumerationConvert[A](transformName: String => String)(
     implicit
     readerBuilder: Lazy[EnumerationConfigReaderBuilder[A]],
-    writerBuilder: Lazy[EnumerationConfigWriterBuilder[A]]): ConfigConvert[A] =
+    writerBuilder: Lazy[EnumerationConfigWriterBuilder[A]],
+    ct: ClassTag[A]): ConfigConvert[A] =
     ConfigConvert(
-      readerBuilder.value.build(transformName, Set.empty),
+      readerBuilder.value.build(transformName, Set.empty, ct.runtimeClass.getSimpleName),
       writerBuilder.value.build(transformName))
 }

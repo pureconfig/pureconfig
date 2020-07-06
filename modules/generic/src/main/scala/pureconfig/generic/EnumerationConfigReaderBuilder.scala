@@ -1,9 +1,7 @@
 package pureconfig.generic
 
-import com.typesafe.config.ConfigRenderOptions
 import pureconfig.ConfigReader.Result
-import pureconfig.error.{ KeyNotFound, ConvertFailure, ConfigReaderFailures }
-import pureconfig.generic.error.NoValidCoproductOptionFound
+import pureconfig.generic.error.NoValidEnumOptionFound
 import pureconfig.{ ConfigCursor, ConfigReader }
 import shapeless._
 import shapeless.labelled._
@@ -15,19 +13,16 @@ import shapeless.labelled._
  * @tparam A the type of objects capable of being read as an enumeration
  */
 trait EnumerationConfigReaderBuilder[A] {
-  def build(transformName: String => String, validOptions: Set[String]): ConfigReader[A]
+  def build(transformName: String => String, validOptions: Set[String], enumType: String): ConfigReader[A]
 }
 
 object EnumerationConfigReaderBuilder {
   implicit val deriveEnumerationReaderBuilderCNil: EnumerationConfigReaderBuilder[CNil] =
     new EnumerationConfigReaderBuilder[CNil] {
-      def build(transformName: String => String, validOptions: Set[String]): ConfigReader[CNil] =
+      def build(transformName: String => String, validOptions: Set[String], enumType: String): ConfigReader[CNil] =
         new ConfigReader[CNil] {
-          def from(cur: ConfigCursor): Result[CNil] = {
-            val failure = ConvertFailure(KeyNotFound(cur.value.render(ConfigRenderOptions.concise()), validOptions), None, cur.path)
-            val failures = Seq(cur.value.render -> ConfigReaderFailures(failure))
-            cur.failed(NoValidCoproductOptionFound(cur.value, failures))
-          }
+          def from(cur: ConfigCursor): Result[CNil] =
+            cur.failed(NoValidEnumOptionFound(cur.value, validOptions, enumType))
         }
     }
 
@@ -37,9 +32,9 @@ object EnumerationConfigReaderBuilder {
     hGen: LabelledGeneric.Aux[H, HNil],
     tReaderBuilder: EnumerationConfigReaderBuilder[T]): EnumerationConfigReaderBuilder[FieldType[K, H] :+: T] =
     new EnumerationConfigReaderBuilder[FieldType[K, H] :+: T] {
-      def build(transformName: String => String, validOptions: Set[String]): ConfigReader[FieldType[K, H] :+: T] = {
+      def build(transformName: String => String, validOptions: Set[String], enumType: String): ConfigReader[FieldType[K, H] :+: T] = {
         val transformedName = transformName(vName.value.name)
-        lazy val tReader = tReaderBuilder.build(transformName, validOptions + transformedName)
+        lazy val tReader = tReaderBuilder.build(transformName, validOptions + transformedName, enumType)
         new ConfigReader[FieldType[K, H] :+: T] {
           def from(cur: ConfigCursor): Result[FieldType[K, H] :+: T] = cur.asString match {
             case Right(`transformedName`) => Right(Inl(field[K](hGen.from(HNil))))
@@ -55,9 +50,8 @@ object EnumerationConfigReaderBuilder {
     gen: LabelledGeneric.Aux[A, Repr],
     reprReaderBuilder: EnumerationConfigReaderBuilder[Repr]): EnumerationConfigReaderBuilder[A] =
     new EnumerationConfigReaderBuilder[A] {
-
-      def build(transformName: String => String, validOptions: Set[String]): ConfigReader[A] = {
-        reprReaderBuilder.build(transformName, validOptions).map(gen.from)
+      def build(transformName: String => String, validOptions: Set[String], enumType: String): ConfigReader[A] = {
+        reprReaderBuilder.build(transformName, validOptions, enumType).map(gen.from)
       }
     }
 }
