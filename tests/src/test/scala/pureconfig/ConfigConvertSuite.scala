@@ -1,8 +1,8 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigValue, ConfigValueFactory, ConfigValueType }
-import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.error.{ ExceptionThrown, WrongType, CannotConvert }
+import com.typesafe.config.{ConfigValue, ConfigValueFactory, ConfigValueType}
+import org.scalacheck.{Arbitrary, Gen}
+import pureconfig.error.{ExceptionThrown, WrongType, CannotConvert}
 import ConfigConvertSuite._
 
 class ConfigConvertSuite extends BaseSuite {
@@ -12,7 +12,8 @@ class ConfigConvertSuite extends BaseSuite {
 
   // generate configs that always read correctly as strings, but not always as integers
   val genConfig: Gen[ConfigValue] =
-    Gen.frequency(80 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 20 -> Gen.alphaStr)
+    Gen
+      .frequency(80 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 20 -> Gen.alphaStr)
       .map(ConfigValueFactory.fromAnyRef)
 
   implicit val arbConfig = Arbitrary(genConfig)
@@ -27,10 +28,10 @@ class ConfigConvertSuite extends BaseSuite {
   it should "have a xmap method that wraps exceptions in a ConfigReaderFailure" in {
     val throwable = new Exception("Exception message.")
     val cc = ConfigConvert[Int].xmap[String]({ _ => throw throwable }, { _: String => 42 })
-    cc.from(ConfigValueFactory.fromAnyRef(1)) should failWith(
-      ExceptionThrown(throwable))
+    cc.from(ConfigValueFactory.fromAnyRef(1)) should failWith(ExceptionThrown(throwable))
     cc.from(ConfigValueFactory.fromAnyRef("test")) should failWith(
-      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)))
+      WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER))
+    )
   }
 
   it should "have a xemap method that allows specifying custom failure messages" in {
@@ -52,8 +53,6 @@ object ConfigConvertSuite {
       if (i % 2 == 0) Right(EvenInt(i)) else Left(err(i))
 
     implicit val configConvert: ConfigConvert[EvenInt] =
-      ConfigConvert[Int].xemap(
-        i => safely(i).left.map(s => CannotConvert(i.toString, "EvenInt", s)),
-        _.i)
+      ConfigConvert[Int].xemap(i => safely(i).left.map(s => CannotConvert(i.toString, "EvenInt", s)), _.i)
   }
 }

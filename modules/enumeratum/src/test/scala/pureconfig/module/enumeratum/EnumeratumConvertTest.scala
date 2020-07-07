@@ -1,7 +1,7 @@
 package pureconfig.module.enumeratum
 
 import com.typesafe.config.ConfigFactory
-import enumeratum.EnumEntry.{ Snakecase, Uppercase }
+import enumeratum.EnumEntry.{Snakecase, Uppercase}
 import enumeratum._
 import enumeratum.values._
 import org.scalatest.Inspectors
@@ -20,11 +20,10 @@ class EnumeratumConvertTest extends BaseSuite {
     case object ShoutGoodBye extends Greeting with Uppercase
   }
 
-  "Enumeratum ConfigConvert" should "parse an enum" in Inspectors.forAll(Greeting.values) {
-    greeting =>
-      val conf = ConfigFactory.parseString(s"""{greeting:"${greeting.entryName}"}""")
-      case class Conf(greeting: Greeting)
-      conf.to[Conf].right.value shouldEqual Conf(greeting)
+  "Enumeratum ConfigConvert" should "parse an enum" in Inspectors.forAll(Greeting.values) { greeting =>
+    val conf = ConfigFactory.parseString(s"""{greeting:"${greeting.entryName}"}""")
+    case class Conf(greeting: Greeting)
+    conf.to[Conf].right.value shouldEqual Conf(greeting)
   }
 
   sealed abstract class IntLibraryItem(val value: Int, val name: String) extends IntEnumEntry
@@ -37,11 +36,10 @@ class EnumeratumConvertTest extends BaseSuite {
     case object CD extends IntLibraryItem(4, name = "cd")
   }
 
-  it should "parse an int enum" in Inspectors.forAll(IntLibraryItem.values) {
-    item =>
-      val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-      case class Conf(item: IntLibraryItem)
-      conf.to[Conf].right.value shouldEqual Conf(item)
+  it should "parse an int enum" in Inspectors.forAll(IntLibraryItem.values) { item =>
+    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
+    case class Conf(item: IntLibraryItem)
+    conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class LongLibraryItem(val value: Long, val name: String) extends LongEnumEntry
@@ -54,11 +52,10 @@ class EnumeratumConvertTest extends BaseSuite {
     case object CD extends LongLibraryItem(4L, name = "cd")
   }
 
-  it should "parse a long value enum" in Inspectors.forAll(LongLibraryItem.values) {
-    item =>
-      val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-      case class Conf(item: LongLibraryItem)
-      conf.to[Conf].right.value shouldEqual Conf(item)
+  it should "parse a long value enum" in Inspectors.forAll(LongLibraryItem.values) { item =>
+    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
+    case class Conf(item: LongLibraryItem)
+    conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class ShortLibraryItem(val value: Short, val name: String) extends ShortEnumEntry
@@ -71,11 +68,10 @@ class EnumeratumConvertTest extends BaseSuite {
     case object CD extends ShortLibraryItem(4, name = "cd")
   }
 
-  it should "parse a short value enum" in Inspectors.forAll(ShortLibraryItem.values) {
-    item =>
-      val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-      case class Conf(item: ShortLibraryItem)
-      conf.to[Conf].right.value shouldEqual Conf(item)
+  it should "parse a short value enum" in Inspectors.forAll(ShortLibraryItem.values) { item =>
+    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
+    case class Conf(item: ShortLibraryItem)
+    conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class StringLibraryItem(val value: String, val number: Int) extends StringEnumEntry
@@ -89,11 +85,10 @@ class EnumeratumConvertTest extends BaseSuite {
     case object Empty extends StringLibraryItem("", number = 5)
   }
 
-  it should "parse a string value enum" in Inspectors.forAll(StringLibraryItem.values) {
-    item =>
-      val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-      case class Conf(item: StringLibraryItem)
-      conf.to[Conf].right.value shouldEqual Conf(item)
+  it should "parse a string value enum" in Inspectors.forAll(StringLibraryItem.values) { item =>
+    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
+    case class Conf(item: StringLibraryItem)
+    conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class ByteLibraryItem(val value: Byte, val name: String) extends ByteEnumEntry
@@ -106,11 +101,10 @@ class EnumeratumConvertTest extends BaseSuite {
     case object CD extends ByteLibraryItem(4, name = "cd")
   }
 
-  it should "parse a byte value enum" in Inspectors.forAll(ByteLibraryItem.values) {
-    item =>
-      val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-      case class Conf(item: ByteLibraryItem)
-      conf.to[Conf].right.value shouldEqual Conf(item)
+  it should "parse a byte value enum" in Inspectors.forAll(ByteLibraryItem.values) { item =>
+    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
+    case class Conf(item: ByteLibraryItem)
+    conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   sealed abstract class CharLibraryItem(val value: Char, val number: Int) extends CharEnumEntry
@@ -123,11 +117,10 @@ class EnumeratumConvertTest extends BaseSuite {
     case object CD extends CharLibraryItem('d', number = 4)
   }
 
-  it should "parse a char value enum" in Inspectors.forAll(CharLibraryItem.values) {
-    item =>
-      val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-      case class Conf(item: CharLibraryItem)
-      conf.to[Conf].right.value shouldEqual Conf(item)
+  it should "parse a char value enum" in Inspectors.forAll(CharLibraryItem.values) { item =>
+    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
+    case class Conf(item: CharLibraryItem)
+    conf.to[Conf].right.value shouldEqual Conf(item)
   }
 
   it should "not parse a char value enum when given a string with more than one character" in {

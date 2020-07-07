@@ -3,7 +3,7 @@ package pureconfig.module.magnolia
 import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueType }
+import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.ProductHint
@@ -46,19 +46,23 @@ class ProductHintSuite extends BaseSuite {
       "camel-case-string",
       "camel-case-conf",
       "this-is-an-int",
-      "this-is-another-int")
+      "this-is-another-int"
+    )
   }
 
   it should "allow customizing the field mapping through a product hint" in {
-    val conf = ConfigFactory.parseString("""{
+    val conf = ConfigFactory
+      .parseString("""{
         A = 2
         B = "two"
-      }""").root()
+      }""")
+      .root()
 
     case class SampleConf(a: Int, b: String)
     ConfigConvert[SampleConf].from(conf).left.value.toList should contain theSameElementsAs Seq(
       ConvertFailure(KeyNotFound("a", Set("A")), stringConfigOrigin(1), ""),
-      ConvertFailure(KeyNotFound("b", Set("B")), stringConfigOrigin(1), ""))
+      ConvertFailure(KeyNotFound("b", Set("B")), stringConfigOrigin(1), "")
+    )
 
     implicit val productHint = ProductHint[SampleConf](ConfigFieldMapping(_.toUpperCase))
     ConfigConvert[SampleConf].from(conf) shouldBe Right(SampleConf(2, "two"))
@@ -89,7 +93,8 @@ class ProductHintSuite extends BaseSuite {
       "camelCaseString",
       "camelCaseConf",
       "thisIsAnInt",
-      "thisIsAnotherInt")
+      "thisIsAnotherInt"
+    )
   }
 
   it should "read pascal case config keys to pascal case fields when configured to do so" in {
@@ -117,7 +122,8 @@ class ProductHintSuite extends BaseSuite {
       "CamelCaseString",
       "CamelCaseConf",
       "ThisIsAnInt",
-      "ThisIsAnotherInt")
+      "ThisIsAnotherInt"
+    )
   }
 
   it should "allow customizing the field mapping only for specific types" in {
@@ -169,12 +175,20 @@ class ProductHintSuite extends BaseSuite {
     conf.getConfig("conf").to[Conf] shouldBe Left(
       ConfigReaderFailures(
         ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), stringConfigOrigin(3), "a"),
-        ConvertFailure(UnknownKey("b"), stringConfigOrigin(4), "b")))
+        ConvertFailure(UnknownKey("b"), stringConfigOrigin(4), "b")
+      )
+    )
   }
 
   it should "not use default arguments if specified through a product hint" in {
     case class InnerConf(e: Int, g: Int)
-    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44), e: Option[Int] = Some(45))
+    case class Conf(
+        a: Int,
+        b: String = "default",
+        c: Int = 42,
+        d: InnerConf = InnerConf(43, 44),
+        e: Option[Int] = Some(45)
+    )
 
     implicit val productHint = ProductHint[Conf](useDefaultArgs = false)
 
@@ -182,6 +196,7 @@ class ProductHintSuite extends BaseSuite {
     conf1.to[Conf].left.value.toList should contain theSameElementsAs Seq(
       ConvertFailure(KeyNotFound("b"), emptyConfigOrigin, ""),
       ConvertFailure(KeyNotFound("c"), emptyConfigOrigin, ""),
-      ConvertFailure(KeyNotFound("d"), emptyConfigOrigin, ""))
+      ConvertFailure(KeyNotFound("d"), emptyConfigOrigin, "")
+    )
   }
 }

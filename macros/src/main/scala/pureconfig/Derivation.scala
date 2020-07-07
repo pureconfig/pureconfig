@@ -7,8 +7,10 @@ import scala.reflect.macros.whitebox
 
 import pureconfig.derivation._
 
-@implicitNotFound("""Cannot find an implicit instance of ${A}.
-If you are trying to read or write a case class or sealed trait consider using PureConfig's auto derivation by adding `import pureconfig.generic.auto._`""")
+@implicitNotFound(
+  """Cannot find an implicit instance of ${A}.
+If you are trying to read or write a case class or sealed trait consider using PureConfig's auto derivation by adding `import pureconfig.generic.auto._`"""
+)
 sealed trait Derivation[A] {
   def value: A
 }
@@ -61,14 +63,15 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
     // Determine what to do if an implicit search fails. If we're in the context of an implicit search, we want to set
     // the provided message in the @implicitNotFound annotation. If we're inside an explicit call to
     // `materializeDerivation` we want to abort with the message
-    val onFailedImplicitSearch: String => Nothing = if (isMaterializationExplicitCall)
-      c.abort(c.enclosingPosition, _)
-    else
-      msg => {
-        setImplicitNotFound(msg)
-        // cause the implicit to fail materializing - the message is ignored
-        c.abort(c.enclosingPosition, "")
-      }
+    val onFailedImplicitSearch: String => Nothing =
+      if (isMaterializationExplicitCall)
+        c.abort(c.enclosingPosition, _)
+      else
+        msg => {
+          setImplicitNotFound(msg)
+          // cause the implicit to fail materializing - the message is ignored
+          c.abort(c.enclosingPosition, "")
+        }
 
     // check the `-Xmacro-settings:materialize-derivations` scalac flag and make sure we're not in an explicit
     // materialization call
@@ -143,35 +146,36 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
       private[this] var currentPath = List[Type]()
       private[this] var lazyCtxOpt = Option.empty[LazyContext]
 
-      override def traverse(tree: Tree) = tree match {
-        case q"pureconfig.Derivation.Successful.apply[$typ]($valueExpr)" =>
-          currentPath = typ.toType :: currentPath
-          traverse(valueExpr)
-          currentPath = currentPath.tail
+      override def traverse(tree: Tree) =
+        tree match {
+          case q"pureconfig.Derivation.Successful.apply[$typ]($valueExpr)" =>
+            currentPath = typ.toType :: currentPath
+            traverse(valueExpr)
+            currentPath = currentPath.tail
 
-        case q"pureconfig.Derivation.Failed.apply[$typ]()" =>
-          failures += typ.toType :: currentPath
+          case q"pureconfig.Derivation.Failed.apply[$typ]()" =>
+            failures += typ.toType :: currentPath
 
-        case LazyContextTree(lazyCtx) =>
-          // if the `Lazy` context tree is found, store the created `LazyContext` instance and continue traversing from
-          // the `Lazy` entrypoint.
-          lazyCtxOpt = Some(lazyCtx)
-          traverse(lazyCtx.entrypoint)
-          lazyCtxOpt = None
+          case LazyContextTree(lazyCtx) =>
+            // if the `Lazy` context tree is found, store the created `LazyContext` instance and continue traversing from
+            // the `Lazy` entrypoint.
+            lazyCtxOpt = Some(lazyCtx)
+            traverse(lazyCtx.entrypoint)
+            lazyCtxOpt = None
 
-        case _ =>
-          // for every other tree, check if it is a reference to a lazy implicit. If so, follow the reference and
-          // continue traversing the corresponding tree with the new `LazyContext`.
-          lazyCtxOpt.flatMap(_.followRef(tree)) match {
-            case None => super.traverse(tree)
+          case _ =>
+            // for every other tree, check if it is a reference to a lazy implicit. If so, follow the reference and
+            // continue traversing the corresponding tree with the new `LazyContext`.
+            lazyCtxOpt.flatMap(_.followRef(tree)) match {
+              case None => super.traverse(tree)
 
-            case Some((newLazyCtx, lazyTree)) =>
-              val oldLazyCtx = lazyCtxOpt
-              lazyCtxOpt = Some(newLazyCtx)
-              traverse(lazyTree)
-              lazyCtxOpt = oldLazyCtx
-          }
-      }
+              case Some((newLazyCtx, lazyTree)) =>
+                val oldLazyCtx = lazyCtxOpt
+                lazyCtxOpt = Some(newLazyCtx)
+                traverse(lazyTree)
+                lazyCtxOpt = oldLazyCtx
+            }
+        }
     }
 
     traverser.traverse(tree)
@@ -217,9 +221,10 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
   private[this] def prettyPrintType(typ: Type): String =
     prettyPrintType(typ.toTree)
 
-  private[this] def prettyPrintType(typ: Tree): String = typ match {
-    case tq"Lazy[$lzyArg]" => prettyPrintType(lzyArg) // ignore `Lazy` for the purposes of showing the implicit chain
-    case tq"$typeclass[$arg]" => s"a $typeclass instance for type $arg"
-    case _ => s"an implicit value of $typ"
-  }
+  private[this] def prettyPrintType(typ: Tree): String =
+    typ match {
+      case tq"Lazy[$lzyArg]" => prettyPrintType(lzyArg) // ignore `Lazy` for the purposes of showing the implicit chain
+      case tq"$typeclass[$arg]" => s"a $typeclass instance for type $arg"
+      case _ => s"an implicit value of $typ"
+    }
 }

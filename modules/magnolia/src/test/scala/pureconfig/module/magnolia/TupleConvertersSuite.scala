@@ -3,7 +3,7 @@ package pureconfig.module.magnolia
 import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
-import com.typesafe.config.{ ConfigValueFactory, ConfigValueType }
+import com.typesafe.config.{ConfigValueFactory, ConfigValueType}
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig._
 import pureconfig.error._
@@ -31,26 +31,38 @@ class TupleConvertersSuite extends BaseSuite {
   // Check writers
   checkWrite[Tuple1[Int]](Tuple1(1) -> ConfigValueFactory.fromIterable(List(1).asJava))
   checkWrite[(String, Int)](("one", 2) -> ConfigValueFactory.fromIterable(List("one", 2).asJava))
-  checkWrite[(Int, (Long, String), Boolean)]((1, (2l, "three"), false) -> ConfigValueFactory.fromIterable(List(1, List(2l, "three").asJava, false).asJava))
+  checkWrite[(Int, (Long, String), Boolean)](
+    (1, (2L, "three"), false) -> ConfigValueFactory.fromIterable(List(1, List(2L, "three").asJava, false).asJava)
+  )
 
   // Check errors
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> "two").asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_2")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_2")
+    )
+  )
   checkFailures[(String, Int)](
     ConfigValueFactory.fromIterable(List("one", "two").asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "1")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "1")
+    )
+  )
 
   checkFailures[(Int, Int, Int)](
     ConfigValueFactory.fromIterable(List(1, "one").asJava) -> ConfigReaderFailures(
-      ConvertFailure(WrongSizeList(3, 2), emptyConfigOrigin, "")))
+      ConvertFailure(WrongSizeList(3, 2), emptyConfigOrigin, "")
+    )
+  )
 
   checkFailures[(Int, Int, Int)](
     ConfigValueFactory.fromAnyRef(Map("_1" -> "one", "_2" -> 2).asJava) -> ConfigReaderFailures(
       ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), emptyConfigOrigin, "_1"),
-      ConvertFailure(KeyNotFound("_3", Set()), emptyConfigOrigin, "")))
+      ConvertFailure(KeyNotFound("_3", Set()), emptyConfigOrigin, "")
+    )
+  )
 
   checkFailures[(String, Int)](
     ConfigValueFactory.fromAnyRef("str") -> ConfigReaderFailures(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), emptyConfigOrigin, "")))
+      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.LIST)), emptyConfigOrigin, "")
+    )
+  )
 }
