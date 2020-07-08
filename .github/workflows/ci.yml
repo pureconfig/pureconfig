@@ -92,7 +92,7 @@ jobs:
   diff_website:
     name: Diff Website
     runs-on: ubuntu-latest
-    if: github.ref != 'master'
+    if: github.event_name == 'pull_request' && github.base_ref == 'master'
 
     steps:
       - name: Checkout repository
@@ -112,4 +112,18 @@ jobs:
         run: gem install sass jekyll:4.0.0
 
       - name: Build and compare website
+        id: diff_website
         run: ./scripts/diff_website.sh
+        continue-on-error: true
+
+      - name: Comment on pull request
+        if: steps.diff_website.outcome == 'failure'
+        uses: thollander/actions-comment-pull-request@1.0.0
+        with:
+          message: >
+            Warning: the content of the PureConfig website changed with this pull request. This may
+            be intentional (as is the case when sbt-microsites is updated or some breaking change
+            occurs) or may be an unexpected change in the library's behavior. Please check the logs
+            of the [Diff Website job](https://github.com/pureconfig/pureconfig/actions/runs/${{ github.run_id }})
+            ("Build and compare website" step) in GitHub Actions to see the differences.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
