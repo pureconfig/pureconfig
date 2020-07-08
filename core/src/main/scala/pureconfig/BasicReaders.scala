@@ -176,7 +176,8 @@ trait TypesafeConfigReaders {
   implicit val configListConfigReader: ConfigReader[ConfigList] =
     ConfigReader.fromCursor(_.asListCursor.right.map(_.listValue))
 
-  // TODO: improve error handling
+  // TODO: improve error handling by copying the parsing logic from Typesafe and making it use PureConfig Results
+  // (see PeriodUtils and DurationUtils)
   implicit val configMemorySizeReader: ConfigReader[ConfigMemorySize] =
     ConfigReader.fromCursor { cur =>
       cur.scopeFailure {
