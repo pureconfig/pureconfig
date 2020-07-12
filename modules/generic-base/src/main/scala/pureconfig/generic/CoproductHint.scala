@@ -71,7 +71,9 @@ class FieldCoproductHint[A](key: String) extends CoproductHint[A] {
       option <-
         options
           .find(valueStr == fieldValue(_))
-          .toRight(ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.value))))
+          .toRight(
+            ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.valueOpt.get)))
+          )
           .right
     } yield Use(objCur.withoutKey(key), option)
   }
@@ -102,7 +104,9 @@ class FirstSuccessCoproductHint[A] extends CoproductHint[A] {
       Attempt(
         cursor,
         options,
-        failures => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(cursor.value, failures)))
+        failures =>
+          cursor.asConfigValue
+            .fold(identity, v => ConfigReaderFailures(cursor.failureFor(NoValidCoproductOptionFound(v, failures))))
       )
     )
 

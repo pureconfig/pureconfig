@@ -170,30 +170,31 @@ trait NumericReaders {
 trait TypesafeConfigReaders {
 
   implicit val configConfigReader: ConfigReader[Config] =
-    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.value.toConfig))
+    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.objValue.toConfig))
 
   implicit val configObjectConfigReader: ConfigReader[ConfigObject] =
-    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.value))
+    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.objValue))
 
   implicit val configValueConfigReader: ConfigReader[ConfigValue] =
-    ConfigReader.fromCursor(c => Right(c.value))
+    ConfigReader.fromCursor(_.asConfigValue)
 
   implicit val configListConfigReader: ConfigReader[ConfigList] =
-    ConfigReader.fromCursor(_.asListCursor.right.map(_.value))
+    ConfigReader.fromCursor(_.asListCursor.right.map(_.listValue))
 
+  // TODO: improve error handling by copying the parsing logic from Typesafe and making it use PureConfig Results
+  // (see PeriodUtils and DurationUtils)
   implicit val configMemorySizeReader: ConfigReader[ConfigMemorySize] =
-    ConfigReader
-      .fromCursor { cur =>
-        cur scopeFailure {
-          ConvertHelpers.tryToEither {
-            Try {
-              val wrapped = cur.value.atKey("_")
-              val bytes = wrapped.getBytes("_").longValue()
-              ConfigMemorySize ofBytes bytes
-            }
+    ConfigReader.fromCursor { cur =>
+      cur.scopeFailure {
+        ConvertHelpers.tryToEither {
+          Try {
+            val wrapped = cur.asConfigValue.right.get.atKey("_")
+            val bytes = wrapped.getBytes("_").longValue()
+            ConfigMemorySize.ofBytes(bytes)
           }
         }
       }
+    }
 }
 
 /**
