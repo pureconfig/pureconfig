@@ -1,7 +1,7 @@
 package pureconfig.module.joda.configurable
 
 import org.joda.time._
-import org.joda.time.format.{ DateTimeFormat, ISOPeriodFormat, PeriodFormatter }
+import org.joda.time.format.{DateTimeFormat, ISOPeriodFormat, PeriodFormatter}
 import pureconfig.BaseSuite
 import pureconfig.module.joda.arbitrary._
 

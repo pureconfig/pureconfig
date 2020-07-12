@@ -6,7 +6,7 @@ import _root_.sttp.model.Uri._
 import pureconfig.ConfigReader
 import pureconfig.error.CannotConvert
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 package object sttp {
 

@@ -5,8 +5,8 @@ import scala.reflect.macros.blackbox
 import pureconfig._
 
 /**
- * Macros used to circumvent divergence checker restrictions in the compiler.
- */
+  * Macros used to circumvent divergence checker restrictions in the compiler.
+  */
 class ExportMacros(val c: blackbox.Context) {
   import c.universe._
 
@@ -14,8 +14,7 @@ class ExportMacros(val c: blackbox.Context) {
     c.typecheck(q"_root_.shapeless.lazily[_root_.pureconfig.generic.DerivedConfigReader[$a]]", silent = true) match {
       case EmptyTree => c.abort(c.enclosingPosition, s"Unable to infer value of type $a")
       case t =>
-        c.Expr[Exported[ConfigReader[A]]](
-          q"new _root_.pureconfig.Exported($t: _root_.pureconfig.ConfigReader[$a])")
+        c.Expr[Exported[ConfigReader[A]]](q"new _root_.pureconfig.Exported($t: _root_.pureconfig.ConfigReader[$a])")
     }
   }
 
@@ -23,8 +22,7 @@ class ExportMacros(val c: blackbox.Context) {
     c.typecheck(q"_root_.shapeless.lazily[_root_.pureconfig.generic.DerivedConfigWriter[$a]]", silent = true) match {
       case EmptyTree => c.abort(c.enclosingPosition, s"Unable to infer value of type $a")
       case t =>
-        c.Expr[Exported[ConfigWriter[A]]](
-          q"new _root_.pureconfig.Exported($t: _root_.pureconfig.ConfigWriter[$a])")
+        c.Expr[Exported[ConfigWriter[A]]](q"new _root_.pureconfig.Exported($t: _root_.pureconfig.ConfigWriter[$a])")
     }
   }
 }

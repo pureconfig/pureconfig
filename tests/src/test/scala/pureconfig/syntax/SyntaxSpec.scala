@@ -1,6 +1,6 @@
 package pureconfig.syntax
 
-import scala.collection.immutable.{ List, Map }
+import scala.collection.immutable.{List, Map}
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest.flatspec.AnyFlatSpec

@@ -47,16 +47,15 @@ class DerivationSuite extends BaseSuite {
   }
 
   it should "fail with a message indicating the root reason when an implicit cannot be found" in {
-    illTyped(
-      "implicitly[Derivation[ConfigReader[Custom]]]",
-      "could not find a ConfigReader instance for type Custom")
+    illTyped("implicitly[Derivation[ConfigReader[Custom]]]", "could not find a ConfigReader instance for type Custom")
 
     illTyped(
       "implicitly[Derivation[ConfigReader[ConfC]]]",
       "could not derive a ConfigReader instance for type ConfC, because:",
       "  - missing a ConfigReader instance for type Option\\[Custom\\], because:",
       "    - missing a ConfigReader instance for type Custom",
-      "  - missing a ConfigReader instance for type Custom2")
+      "  - missing a ConfigReader instance for type Custom2"
+    )
 
     illTyped(
       "implicitly[Derivation[ConfigReader[Conf]]]",
@@ -64,31 +63,33 @@ class DerivationSuite extends BaseSuite {
       "  - missing a ConfigReader instance for type ConfC, because:",
       "    - missing a ConfigReader instance for type Option\\[Custom\\], because:",
       "      - missing a ConfigReader instance for type Custom",
-      "    - missing a ConfigReader instance for type Custom2")
+      "    - missing a ConfigReader instance for type Custom2"
+    )
 
     illTyped(
       "implicitly[Derivation[ConfigReader[RecFailConf1]]]",
       "could not derive a ConfigReader instance for type RecFailConf1, because:",
       "  - missing a ConfigReader instance for type RecFailConf2, because:",
-      "    - missing a ConfigReader instance for type Custom")
+      "    - missing a ConfigReader instance for type Custom"
+    )
 
     illTyped(
       "implicitly[Derivation[ConfigReader[RecFailConf2]]]",
       "could not derive a ConfigReader instance for type RecFailConf2, because:",
-      "  - missing a ConfigReader instance for type Custom")
+      "  - missing a ConfigReader instance for type Custom"
+    )
 
     // ---
 
-    illTyped(
-      "implicitly[Derivation[ConfigWriter[Custom]]]",
-      "could not find a ConfigWriter instance for type Custom")
+    illTyped("implicitly[Derivation[ConfigWriter[Custom]]]", "could not find a ConfigWriter instance for type Custom")
 
     illTyped(
       "implicitly[Derivation[ConfigWriter[ConfC]]]",
       "could not derive a ConfigWriter instance for type ConfC, because:",
       "  - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
       "    - missing a ConfigWriter instance for type Custom",
-      "  - missing a ConfigWriter instance for type Custom2")
+      "  - missing a ConfigWriter instance for type Custom2"
+    )
 
     illTyped(
       "implicitly[Derivation[ConfigWriter[Conf]]]",
@@ -96,7 +97,8 @@ class DerivationSuite extends BaseSuite {
       "  - missing a ConfigWriter instance for type ConfC, because:",
       "    - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
       "      - missing a ConfigWriter instance for type Custom",
-      "    - missing a ConfigWriter instance for type Custom2")
+      "    - missing a ConfigWriter instance for type Custom2"
+    )
 
     // ---
 
@@ -104,7 +106,8 @@ class DerivationSuite extends BaseSuite {
       "implicitly[Derivation[ConfigConvert[Custom]]]",
       "could not derive a ConfigConvert instance for type Custom, because:",
       "  - missing a ConfigReader instance for type Custom",
-      "  - missing a ConfigWriter instance for type Custom")
+      "  - missing a ConfigWriter instance for type Custom"
+    )
 
     illTyped(
       "implicitly[Derivation[ConfigConvert[Option[Custom]]]]",
@@ -112,13 +115,15 @@ class DerivationSuite extends BaseSuite {
       "  - missing a ConfigReader instance for type Option\\[Custom\\], because:",
       "    - missing a ConfigReader instance for type Custom",
       "  - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
-      "    - missing a ConfigWriter instance for type Custom")
+      "    - missing a ConfigWriter instance for type Custom"
+    )
 
     illTyped(
       "implicit val cr = customReader; implicitly[Derivation[ConfigConvert[Option[Custom]]]]",
       "could not derive a ConfigConvert instance for type Option\\[Custom\\], because:",
       "  - missing a ConfigWriter instance for type Option\\[Custom\\], because:",
-      "    - missing a ConfigWriter instance for type Custom")
+      "    - missing a ConfigWriter instance for type Custom"
+    )
 
     illTyped(
       "Derivation.materializeDerivation[ConfigReader[Conf]]",
@@ -126,13 +131,15 @@ class DerivationSuite extends BaseSuite {
       "  - missing a ConfigReader instance for type ConfC, because:",
       "    - missing a ConfigReader instance for type Option\\[Custom\\], because:",
       "      - missing a ConfigReader instance for type Custom",
-      "    - missing a ConfigReader instance for type Custom2")
+      "    - missing a ConfigReader instance for type Custom2"
+    )
   }
 
   it should "fallback to a regular implicit search if it's not at the root of that search" in {
     illTyped(
       "implicitly[ConfigReader[Conf]]",
-      "could not find implicit value for parameter e: pureconfig.ConfigReader\\[DerivationSuite.this.Conf\\]")
+      "could not find implicit value for parameter e: pureconfig.ConfigReader\\[DerivationSuite.this.Conf\\]"
+    )
 
     {
       implicit val cr = customReader
