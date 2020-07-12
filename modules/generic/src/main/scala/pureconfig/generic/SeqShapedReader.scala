@@ -6,10 +6,10 @@ import shapeless._
 import shapeless.ops.hlist.HKernelAux
 
 /**
- * A `ConfigReader` for generic representations that reads values in the shape of a sequence.
- *
- * @tparam Repr the generic representation
- */
+  * A `ConfigReader` for generic representations that reads values in the shape of a sequence.
+  *
+  * @tparam Repr the generic representation
+  */
 private[generic] trait SeqShapedReader[Repr] extends ConfigReader[Repr]
 
 object SeqShapedReader {
@@ -23,7 +23,11 @@ object SeqShapedReader {
     }
   }
 
-  implicit def hConsReader[H, T <: HList](implicit hr: Derivation[Lazy[ConfigReader[H]]], tr: Lazy[SeqShapedReader[T]], tl: HKernelAux[T]): SeqShapedReader[H :: T] =
+  implicit def hConsReader[H, T <: HList](implicit
+      hr: Derivation[Lazy[ConfigReader[H]]],
+      tr: Lazy[SeqShapedReader[T]],
+      tl: HKernelAux[T]
+  ): SeqShapedReader[H :: T] =
     new SeqShapedReader[H :: T] {
       def from(cur: ConfigCursor): ConfigReader.Result[H :: T] = {
         cur.asListCursor.right.flatMap {

@@ -1,16 +1,16 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
-import java.net.{ URI, URL }
-import java.nio.file.{ Path, Paths }
+import java.math.{BigInteger, BigDecimal => JavaBigDecimal}
+import java.net.{URI, URL}
+import java.nio.file.{Path, Paths}
 import java.time._
-import java.time.{ Duration => JavaDuration }
+import java.time.{Duration => JavaDuration}
 import java.util.UUID
 import java.util.regex.Pattern
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scala.math.{ BigDecimal, BigInt }
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.math.{BigDecimal, BigInt}
 import scala.reflect.ClassTag
 import scala.util.matching.Regex
 import com.typesafe.config._
@@ -20,8 +20,8 @@ import pureconfig.error._
 import scala.util.Try
 
 /**
- * Trait containing `ConfigReader` instances for primitive types.
- */
+  * Trait containing `ConfigReader` instances for primitive types.
+  */
 trait PrimitiveReaders {
 
   implicit val stringConfigReader = ConfigReader.fromCursor(_.asString)
@@ -30,7 +30,8 @@ trait PrimitiveReaders {
     s.size match {
       case 1 => Right(s.charAt(0))
       case len => Left(WrongSizeString(1, len))
-    })
+    }
+  )
 
   implicit val booleanConfigReader = ConfigReader.fromCursor(_.asBoolean)
 
@@ -40,8 +41,7 @@ trait PrimitiveReaders {
       case v => v.toDouble
     })
 
-    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s)))
-      .left.flatMap(_ => cur.asDouble)
+    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asDouble)
   })
 
   implicit val floatConfigReader = ConfigReader.fromCursor({ cur =>
@@ -50,8 +50,7 @@ trait PrimitiveReaders {
       case v => v.toFloat
     })
 
-    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s)))
-      .left.flatMap(_ => cur.asFloat)
+    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asFloat)
   })
 
   implicit val intConfigReader = ConfigReader.fromCursor(_.asInt)
@@ -64,8 +63,8 @@ trait PrimitiveReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instance for Java Enums.
- */
+  * Trait containing `ConfigReader` instance for Java Enums.
+  */
 trait JavaEnumReader {
 
   implicit def javaEnumReader[A <: Enum[A]](implicit tag: ClassTag[A]): ConfigReader[A] =
@@ -76,8 +75,8 @@ trait JavaEnumReader {
 }
 
 /**
- * Trait containing `ConfigReader` instances for classes related to file system paths and URIs.
- */
+  * Trait containing `ConfigReader` instances for classes related to file system paths and URIs.
+  */
 trait UriAndPathReaders {
 
   implicit val urlConfigReader = ConfigReader.fromNonEmptyString[URL](catchReadError(new URL(_)))
@@ -88,8 +87,8 @@ trait UriAndPathReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instances for classes related to regular expressions.
- */
+  * Trait containing `ConfigReader` instances for classes related to regular expressions.
+  */
 trait RegexReaders {
 
   implicit val patternReader = ConfigReader.fromString[Pattern](catchReadError(Pattern.compile))
@@ -97,8 +96,8 @@ trait RegexReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instances for `java.time` classes.
- */
+  * Trait containing `ConfigReader` instances for `java.time` classes.
+  */
 trait JavaTimeReaders {
 
   implicit val instantConfigReader: ConfigReader[Instant] =
@@ -121,9 +120,9 @@ trait JavaTimeReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
- * [[scala.concurrent.duration.FiniteDuration]].
- */
+  * Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
+  * [[scala.concurrent.duration.FiniteDuration]].
+  */
 trait DurationReaders {
 
   implicit val durationConfigReader: ConfigReader[Duration] =
@@ -133,8 +132,14 @@ trait DurationReaders {
     val fromString: String => Either[FailureReason, FiniteDuration] = { string =>
       DurationUtils.fromString(string).right.flatMap {
         case d: FiniteDuration => Right(d)
-        case _ => Left(CannotConvert(string, "FiniteDuration",
-          s"Couldn't parse '$string' into a FiniteDuration because it's infinite."))
+        case _ =>
+          Left(
+            CannotConvert(
+              string,
+              "FiniteDuration",
+              s"Couldn't parse '$string' into a FiniteDuration because it's infinite."
+            )
+          )
       }
     }
     ConfigReader.fromNonEmptyString[FiniteDuration](fromString)
@@ -142,8 +147,8 @@ trait DurationReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instances for Java and Scala arbitrary-precision numeric types.
- */
+  * Trait containing `ConfigReader` instances for Java and Scala arbitrary-precision numeric types.
+  */
 trait NumericReaders {
 
   implicit val javaBigIntegerReader: ConfigReader[BigInteger] =
@@ -160,8 +165,8 @@ trait NumericReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instances for Typesafe config models.
- */
+  * Trait containing `ConfigReader` instances for Typesafe config models.
+  */
 trait TypesafeConfigReaders {
 
   implicit val configConfigReader: ConfigReader[Config] =
@@ -193,17 +198,17 @@ trait TypesafeConfigReaders {
 }
 
 /**
- * Trait containing `ConfigReader` instances for primitive types and simple classes in Java and Scala standard
- * libraries.
- */
+  * Trait containing `ConfigReader` instances for primitive types and simple classes in Java and Scala standard
+  * libraries.
+  */
 trait BasicReaders
-  extends PrimitiveReaders
-  with JavaEnumReader
-  with UriAndPathReaders
-  with RegexReaders
-  with JavaTimeReaders
-  with DurationReaders
-  with NumericReaders
-  with TypesafeConfigReaders
+    extends PrimitiveReaders
+    with JavaEnumReader
+    with UriAndPathReaders
+    with RegexReaders
+    with JavaTimeReaders
+    with DurationReaders
+    with NumericReaders
+    with TypesafeConfigReaders
 
 object BasicReaders extends BasicReaders

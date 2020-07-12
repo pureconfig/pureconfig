@@ -4,7 +4,7 @@ import pureconfig.ConfigConvert
 import pureconfig.error.CannotConvert
 
 final case class Percentage(value: Int) {
-  def toDoubleFraction: Double = value.toDouble / 100D
+  def toDoubleFraction: Double = value.toDouble / 100d
   def toFloatFraction: Float = value.toFloat / 100f
 }
 

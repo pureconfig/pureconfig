@@ -1,6 +1,6 @@
 package pureconfig.module
 
-import pureconfig.{ ConfigWriter, ConfigReader }
+import pureconfig.{ConfigWriter, ConfigReader}
 import com.typesafe.config._
 import io.circe._
 import com.typesafe.config._
@@ -39,13 +39,15 @@ package object circe {
     json.fold(
       ConfigValueFactory.fromAnyRef(null),
       bool => ConfigValueFactory.fromAnyRef(bool),
-      jnum => jnum.toLong match {
-        case Some(long) => ConfigValueFactory.fromAnyRef(long)
-        case None => ConfigValueFactory.fromAnyRef(jnum.toDouble)
-      },
+      jnum =>
+        jnum.toLong match {
+          case Some(long) => ConfigValueFactory.fromAnyRef(long)
+          case None => ConfigValueFactory.fromAnyRef(jnum.toDouble)
+        },
       str => ConfigValueFactory.fromAnyRef(str),
       arr => ConfigValueFactory.fromIterable(arr.map(jsonToCv).asJava),
-      obj => ConfigValueFactory.fromMap(obj.toMap.map { case (k, v) => k -> jsonToCv(v) }.asJava))
+      obj => ConfigValueFactory.fromMap(obj.toMap.map { case (k, v) => k -> jsonToCv(v) }.asJava)
+    )
   }
 
   implicit val circeJsonReader: ConfigReader[Json] =

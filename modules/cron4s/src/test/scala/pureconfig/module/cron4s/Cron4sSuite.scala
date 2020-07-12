@@ -1,11 +1,11 @@
 package pureconfig.module.cron4s
 
-import java.util.{ Map => JMap }
+import java.util.{Map => JMap}
 import com.typesafe.config.ConfigFactory
 import _root_.cron4s.expr.CronExpr
 import _root_.cron4s.Cron
 import pureconfig.BaseSuite
-import pureconfig.error.{ CannotConvert, ConfigReaderFailures, ConvertFailure }
+import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure}
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 
@@ -26,7 +26,9 @@ class Cron4sSuite extends BaseSuite {
       ConvertFailure(
         CannotConvert("10-65 * * * * *", "CronExpr", "blank expected at position 3 but found '-'"),
         stringConfigOrigin(1),
-        "schedule"))
+        "schedule"
+      )
+    )
 
     conf.to[Config].left.value shouldEqual errors
   }

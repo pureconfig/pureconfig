@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 /**
- * @author Mario Pastorelli (mario.pastorelli@teralitycs.ch)
- */
+  * @author Mario Pastorelli (mario.pastorelli@teralitycs.ch)
+  */
 package pureconfig.example
 
 import pureconfig.ConfigConvert

@@ -7,71 +7,71 @@ import scala.util.Try
 
 import com.typesafe.config.ConfigValue
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, FailureReason }
+import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
 
 /**
- * Trait for objects capable of reading objects of a given type from `ConfigValues`.
- *
- * @tparam A the type of objects readable by this `ConfigReader`
- */
+  * Trait for objects capable of reading objects of a given type from `ConfigValues`.
+  *
+  * @tparam A the type of objects readable by this `ConfigReader`
+  */
 trait ConfigReader[A] {
   import pureconfig.ConfigReader._
 
   /**
-   * Convert the configuration given by a cursor into an instance of `A` if possible.
-   *
-   * @param cur The cursor from which the config should be loaded
-   * @return either a list of failures or an object of type `A`
-   */
+    * Convert the configuration given by a cursor into an instance of `A` if possible.
+    *
+    * @param cur The cursor from which the config should be loaded
+    * @return either a list of failures or an object of type `A`
+    */
   def from(cur: ConfigCursor): ConfigReader.Result[A]
 
   /**
-   * Convert the given configuration into an instance of `A` if possible.
-   *
-   * @param config The configuration from which the config should be loaded
-   * @return either a list of failures or an object of type `A`
-   */
+    * Convert the given configuration into an instance of `A` if possible.
+    *
+    * @param config The configuration from which the config should be loaded
+    * @return either a list of failures or an object of type `A`
+    */
   def from(config: ConfigValue): ConfigReader.Result[A] =
     from(ConfigCursor(config, Nil))
 
   /**
-   * Maps a function over the results of this reader.
-   *
-   * @param f the function to map over this reader
-   * @tparam B the output type of the function
-   * @return a `ConfigReader` returning the results of this reader mapped by `f`.
-   */
+    * Maps a function over the results of this reader.
+    *
+    * @param f the function to map over this reader
+    * @tparam B the output type of the function
+    * @return a `ConfigReader` returning the results of this reader mapped by `f`.
+    */
   def map[B](f: A => B): ConfigReader[B] =
     fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailure(toResult(f)(v)) } }
 
   /**
-   * Maps a function that can possibly fail over the results of this reader.
-   *
-   * @param f the function to map over this reader
-   * @tparam B the value read by the function in case of success
-   * @return a `ConfigReader` returning the results of this reader mapped by `f`, with the resulting `Either` flattened
-   *         as a success or failure.
-   */
+    * Maps a function that can possibly fail over the results of this reader.
+    *
+    * @param f the function to map over this reader
+    * @tparam B the value read by the function in case of success
+    * @return a `ConfigReader` returning the results of this reader mapped by `f`, with the resulting `Either` flattened
+    *         as a success or failure.
+    */
   def emap[B](f: A => Either[FailureReason, B]): ConfigReader[B] =
     fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailure(f(v)) } }
 
   /**
-   * Monadically bind a function over the results of this reader.
-   *
-   * @param f the function to bind over this reader
-   * @tparam B the type of the objects readable by the resulting `ConfigReader`
-   * @return a `ConfigReader` returning the results of this reader bound by `f`.
-   */
+    * Monadically bind a function over the results of this reader.
+    *
+    * @param f the function to bind over this reader
+    * @tparam B the type of the objects readable by the resulting `ConfigReader`
+    * @return a `ConfigReader` returning the results of this reader bound by `f`.
+    */
   def flatMap[B](f: A => ConfigReader[B]): ConfigReader[B] =
     fromCursor[B] { cur => from(cur).right.flatMap(f(_).from(cur)) }
 
   /**
-   * Combines this reader with another, returning both results as a pair.
-   *
-   * @param reader the reader to combine with this one
-   * @tparam B the type of the objects readable by the provided reader
-   * @return a `ConfigReader` returning the results of both readers as a pair.
-   */
+    * Combines this reader with another, returning both results as a pair.
+    *
+    * @param reader the reader to combine with this one
+    * @tparam B the type of the objects readable by the provided reader
+    * @return a `ConfigReader` returning the results of both readers as a pair.
+    */
   def zip[B](reader: ConfigReader[B]): ConfigReader[(A, B)] =
     fromCursor[(A, B)] { cur =>
       (from(cur), reader.from(cur)) match {
@@ -83,13 +83,13 @@ trait ConfigReader[A] {
     }
 
   /**
-   * Combines this reader with another, returning the result of the first one that succeeds.
-   *
-   * @param reader the reader to combine with this one
-   * @tparam AA the type of the objects readable by both readers
-   * @return a `ConfigReader` returning the results of this reader if it succeeds and the results of `reader`
-   *         otherwise.
-   */
+    * Combines this reader with another, returning the result of the first one that succeeds.
+    *
+    * @param reader the reader to combine with this one
+    * @tparam AA the type of the objects readable by both readers
+    * @return a `ConfigReader` returning the results of this reader if it succeeds and the results of `reader`
+    *         otherwise.
+    */
   def orElse[AA >: A, B <: AA](reader: => ConfigReader[B]): ConfigReader[AA] =
     fromCursor[AA] { cur =>
       from(cur) match {
@@ -99,57 +99,62 @@ trait ConfigReader[A] {
     }
 
   /**
-   * Applies a function to configs before passing them to this reader.
-   *
-   * @param f the function to apply to input configs
-   * @return a `ConfigReader` returning the results of this reader when the input configs are mapped using `f`.
-   */
+    * Applies a function to configs before passing them to this reader.
+    *
+    * @param f the function to apply to input configs
+    * @return a `ConfigReader` returning the results of this reader when the input configs are mapped using `f`.
+    */
   def contramapConfig(f: ConfigValue => ConfigValue): ConfigReader[A] =
     fromCursor[A] { cur => from(ConfigCursor(cur.valueOpt.map(f), cur.pathElems)) }
 
   /**
-   * Applies a function to config cursors before passing them to this reader.
-   *
-   * @param f the function to apply to input config cursors
-   * @return a `ConfigReader` returning the results of this reader when the input cursors are mapped using `f`.
-   */
+    * Applies a function to config cursors before passing them to this reader.
+    *
+    * @param f the function to apply to input config cursors
+    * @return a `ConfigReader` returning the results of this reader when the input cursors are mapped using `f`.
+    */
   def contramapCursor(f: ConfigCursor => ConfigCursor): ConfigReader[A] =
     fromCursor[A] { cur => from(f(cur)) }
 }
 
 /**
- * Provides methods to create [[ConfigReader]] instances.
- */
+  * Provides methods to create [[ConfigReader]] instances.
+  */
 object ConfigReader extends BasicReaders with CollectionReaders with ProductReaders with ExportedReaders {
 
   /**
-   * The type of most config PureConfig reading methods.
-   *
-   * @tparam A the type of the result
-   */
+    * The type of most config PureConfig reading methods.
+    *
+    * @tparam A the type of the result
+    */
   type Result[A] = Either[ConfigReaderFailures, A]
 
   /**
-   * Object containing useful constructors and utility methods for `Result`s.
-   */
+    * Object containing useful constructors and utility methods for `Result`s.
+    */
   object Result {
 
     /**
-     * Sequences a collection of `Result`s into a `Result` of a collection.
-     */
-    def sequence[A, CC[X] <: TraversableOnce[X]](rs: CC[ConfigReader.Result[A]])(implicit cbf: FactoryCompat[A, CC[A]]): ConfigReader.Result[CC[A]] = {
+      * Sequences a collection of `Result`s into a `Result` of a collection.
+      */
+    def sequence[A, CC[X] <: TraversableOnce[X]](
+        rs: CC[ConfigReader.Result[A]]
+    )(implicit cbf: FactoryCompat[A, CC[A]]): ConfigReader.Result[CC[A]] = {
       rs.foldLeft[ConfigReader.Result[mutable.Builder[A, CC[A]]]](Right(cbf.newBuilder())) {
         case (Right(builder), Right(a)) => Right(builder += a)
         case (Left(err), Right(_)) => Left(err)
         case (Right(_), Left(err)) => Left(err)
         case (Left(errs), Left(err)) => Left(errs ++ err)
-      }.right.map(_.result())
+      }.right
+        .map(_.result())
     }
 
     /**
-     * Merges two `Result`s using a given function.
-     */
-    def zipWith[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(f: (A, B) => C): ConfigReader.Result[C] =
+      * Merges two `Result`s using a given function.
+      */
+    def zipWith[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(
+        f: (A, B) => C
+    ): ConfigReader.Result[C] =
       (first, second) match {
         case (Right(a), Right(b)) => Right(f(a, b))
         case (Left(aFailures), Left(bFailures)) => Left(aFailures ++ bFailures)
@@ -158,31 +163,32 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
       }
 
     /**
-     * Returns a `Result` containing a single failure.
-     */
+      * Returns a `Result` containing a single failure.
+      */
     def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
   }
 
   def apply[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[A] = reader.value
 
   /**
-   * Creates a `ConfigReader` from a function reading a `ConfigCursor`.
-   *
-   * @param fromF the function used to read config cursors to values
-   * @tparam A the type of the objects readable by the returned reader
-   * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
-   */
-  def fromCursor[A](fromF: ConfigCursor => ConfigReader.Result[A]) = new ConfigReader[A] {
-    def from(cur: ConfigCursor) = fromF(cur)
-  }
+    * Creates a `ConfigReader` from a function reading a `ConfigCursor`.
+    *
+    * @param fromF the function used to read config cursors to values
+    * @tparam A the type of the objects readable by the returned reader
+    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
+    */
+  def fromCursor[A](fromF: ConfigCursor => ConfigReader.Result[A]) =
+    new ConfigReader[A] {
+      def from(cur: ConfigCursor) = fromF(cur)
+    }
 
   /**
-   * Creates a `ConfigReader` from a function.
-   *
-   * @param fromF the function used to read configs to values
-   * @tparam A the type of the objects readable by the returned reader
-   * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
-   */
+    * Creates a `ConfigReader` from a function.
+    *
+    * @param fromF the function used to read configs to values
+    * @tparam A the type of the objects readable by the returned reader
+    * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
+    */
   def fromFunction[A](fromF: ConfigValue => ConfigReader.Result[A]) =
     fromCursor(_.asConfigValue.right.flatMap(fromF))
 

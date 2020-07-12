@@ -2,11 +2,11 @@ package pureconfig
 
 import java.net.URL
 
-import com.typesafe.config.{ ConfigOrigin, ConfigOriginFactory }
+import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory}
 
 import scala.reflect.ClassTag
 import org.scalatest._
-import org.scalatest.matchers.{ MatchResult, Matcher }
+import org.scalatest.matchers.{MatchResult, Matcher}
 import pureconfig.error._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -17,9 +17,10 @@ trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
     matchPattern { case Left(ConfigReaderFailures(ConvertFailure(`reason`, _, _))) => }
 
   def failWith(
-    reason: FailureReason,
-    path: String,
-    origin: Option[ConfigOrigin] = None): Matcher[ConfigReader.Result[Any]] =
+      reason: FailureReason,
+      path: String,
+      origin: Option[ConfigOrigin] = None
+  ): Matcher[ConfigReader.Result[Any]] =
     be(Left(ConfigReaderFailures(ConvertFailure(reason, origin, path))))
 
   def failWith(failure: ConfigReaderFailure): Matcher[ConfigReader.Result[Any]] =
@@ -28,7 +29,9 @@ trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
   def failWithType[Reason <: FailureReason: ClassTag]: Matcher[ConfigReader.Result[Any]] =
     matchPattern { case Left(ConfigReaderFailures(ConvertFailure(_: Reason, _, _))) => }
 
-  def failWithType[Failure <: ConfigReaderFailure: ClassTag](implicit dummy: DummyImplicit): Matcher[ConfigReader.Result[Any]] =
+  def failWithType[Failure <: ConfigReaderFailure: ClassTag](implicit
+      dummy: DummyImplicit
+  ): Matcher[ConfigReader.Result[Any]] =
     matchPattern { case Left(ConfigReaderFailures(_: Failure)) => }
 
   def failLike(pf: PartialFunction[ConfigReaderFailure, MatchResult]) =

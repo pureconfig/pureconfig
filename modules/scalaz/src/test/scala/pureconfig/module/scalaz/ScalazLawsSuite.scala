@@ -1,14 +1,14 @@
 package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
-import org.scalacheck.{ Prop, Properties }
+import org.scalacheck.{Prop, Properties}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.Checkers
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.module.scalaz.arbitrary._
 import pureconfig.module.scalaz.equal._
 import pureconfig.module.scalaz.instances._
-import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter }
+import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
 import scalaz.scalacheck.ScalazProperties._
 import scalaz.std.anyVal.intInstance
 

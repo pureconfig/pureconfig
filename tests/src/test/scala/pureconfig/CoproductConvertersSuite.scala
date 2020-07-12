@@ -1,7 +1,7 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigValueFactory }
-import org.scalacheck.{ Arbitrary, Gen }
+import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueFactory}
+import org.scalacheck.{Arbitrary, Gen}
 import pureconfig.error._
 import pureconfig.generic.auto._
 

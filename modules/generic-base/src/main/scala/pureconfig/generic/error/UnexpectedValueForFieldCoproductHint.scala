@@ -1,14 +1,14 @@
 package pureconfig.generic.error
 
-import com.typesafe.config.{ ConfigRenderOptions, ConfigValue }
+import com.typesafe.config.{ConfigRenderOptions, ConfigValue}
 import pureconfig.error.FailureReason
 
 /**
- * A failure reason given when an unknown value was found in the discriminating field of a config value, when using a
- * `FieldCoproductHint`.
- *
- * @param value the value found in the discriminating field of a config value
- */
+  * A failure reason given when an unknown value was found in the discriminating field of a config value, when using a
+  * `FieldCoproductHint`.
+  *
+  * @param value the value found in the discriminating field of a config value
+  */
 final case class UnexpectedValueForFieldCoproductHint(value: ConfigValue) extends FailureReason {
   def description =
     s"Unexpected value ${value.render(ConfigRenderOptions.concise())} found. Note that the default transformation " +
