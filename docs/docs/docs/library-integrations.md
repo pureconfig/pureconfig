@@ -10,6 +10,7 @@ title: Library Integrations
 The core of PureConfig eschews unnecessary dependencies. Separate modules exist to support types which are not part of the standard Scala and Java libraries:
 
 - [`pureconfig-akka`](https://github.com/pureconfig/pureconfig/tree/master/modules/akka) provides converters for [Akka](http://akka.io/) data types;
+- [`pureconfig-akka-http`](https://github.com/pureconfig/pureconfig/tree/master/modules/akka-http) provides converters for [Akka-Http](https://doc.akka.io/docs/akka-http/current/common/http-model.html#http-model) models;
 - [`pureconfig-cats`](https://github.com/pureconfig/pureconfig/tree/master/modules/cats) provides converters for [Cats](http://typelevel.org/cats/) data structures and Cats typeclass instances;
 - [`pureconfig-cats-effect`](https://github.com/pureconfig/pureconfig/tree/master/modules/cats-effect) uses [cats-effect](https://github.com/typelevel/cats-effect) to load and save configurations in a side-effect free manner;
 - [`pureconfig-circe`](https://github.com/pureconfig/pureconfig/tree/master/modules/circe) provides converters for Circe's Json AST;
