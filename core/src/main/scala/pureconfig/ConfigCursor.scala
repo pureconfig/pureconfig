@@ -53,7 +53,7 @@ sealed trait ConfigCursor {
   /**
    * Casts this cursor to a `ConfigValue`.
    *
-   * @return a `Right` with the string value pointed to by this cursor if the value is defined, `Left` with a list of
+   * @return a `Right` with the config value pointed to by this cursor if the value is defined, `Left` with a list of
    *         failures otherwise.
    */
   def asConfigValue: ConfigReader.Result[ConfigValue] = {
