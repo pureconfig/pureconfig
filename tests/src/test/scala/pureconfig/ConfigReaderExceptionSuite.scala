@@ -36,7 +36,8 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
     exception.failures.toList.toSet shouldBe Set(
       ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER)), stringConfigOrigin(3), "a"),
       ConvertFailure(KeyNotFound("b", Set()), stringConfigOrigin(2), ""),
-      ConvertFailure(KeyNotFound("c", Set()), stringConfigOrigin(2), ""))
+      ConvertFailure(KeyNotFound("c", Set()), stringConfigOrigin(2), "")
+    )
 
     exception.getMessage shouldBe
       s"""|Cannot convert configuration to a pureconfig.ConfigReaderExceptionSuite$$Conf. Failures are:
@@ -62,14 +63,16 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
     }
 
     exception1.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(3), ""))
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(3), "")
+    )
 
     val exception2 = intercept[ConfigReaderException[_]] {
       conf.root().toOrThrow[ParentConf]
     }
 
     exception2.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(3), "conf"))
+      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(3), "conf")
+    )
   }
 
   case class MapConf(values: Map[String, MapConf])
@@ -96,8 +99,17 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
     }
 
     exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)), stringConfigOrigin(12), "values.b"),
-      ConvertFailure(WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), stringConfigOrigin(6), "values.a.values.c"))
+      ConvertFailure(
+        WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)),
+        stringConfigOrigin(12),
+        "values.b"
+      ),
+      ConvertFailure(
+        WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)),
+        stringConfigOrigin(6),
+        "values.a.values.c"
+      )
+    )
   }
 
   sealed trait A
@@ -129,17 +141,19 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
     }
 
     exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), stringConfigOrigin(5), "values.v1.type"),
-      ConvertFailure(KeyNotFound("type", Set()), stringConfigOrigin(12), "values.v3"))
+      ConvertFailure(
+        UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")),
+        stringConfigOrigin(5),
+        "values.v1.type"
+      ),
+      ConvertFailure(KeyNotFound("type", Set()), stringConfigOrigin(12), "values.v3")
+    )
   }
 
   case class CamelCaseConf(camelCaseInt: Int, camelCaseString: String)
   case class KebabCaseConf(kebabCaseInt: Int, kebabCaseString: String)
   case class SnakeCaseConf(snakeCaseInt: Int, snakeCaseString: String)
-  case class EnclosingConf(
-      camelCaseConf: CamelCaseConf,
-      kebabCaseConf: KebabCaseConf,
-      snakeCaseConf: SnakeCaseConf)
+  case class EnclosingConf(camelCaseConf: CamelCaseConf, kebabCaseConf: KebabCaseConf, snakeCaseConf: SnakeCaseConf)
 
   it should "include candidate keys in case of a suspected misconfigured ProductHint" in {
     val conf = ConfigFactory.parseString("""{
@@ -163,9 +177,18 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
 
     exception.failures.toList.toSet shouldBe Set(
       ConvertFailure(KeyNotFound("camel-case-int", Set("camelCaseInt")), stringConfigOrigin(2), "camel-case-conf"),
-      ConvertFailure(KeyNotFound("camel-case-string", Set("camelCaseString")), stringConfigOrigin(2), "camel-case-conf"),
+      ConvertFailure(
+        KeyNotFound("camel-case-string", Set("camelCaseString")),
+        stringConfigOrigin(2),
+        "camel-case-conf"
+      ),
       ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), stringConfigOrigin(10), "snake-case-conf"),
-      ConvertFailure(KeyNotFound("snake-case-string", Set("snake_case_string")), stringConfigOrigin(10), "snake-case-conf"))
+      ConvertFailure(
+        KeyNotFound("snake-case-string", Set("snake_case_string")),
+        stringConfigOrigin(10),
+        "snake-case-conf"
+      )
+    )
   }
 
   it should "have failures with the proper file system location of the values that raised errors, if available" in {
@@ -180,9 +203,9 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
 
     inside(exception.failures.toList) {
       case List(
-        ConvertFailure(KeyNotFound("a", _), Some(origin1), ""),
-        ConvertFailure(WrongType(ConfigValueType.STRING, types), Some(origin2), "c")
-        ) =>
+            ConvertFailure(KeyNotFound("a", _), Some(origin1), ""),
+            ConvertFailure(WrongType(ConfigValueType.STRING, types), Some(origin2), "c")
+          ) =>
         origin1.url shouldBe url
         origin1.lineNumber shouldBe 1
         types should contain only ConfigValueType.NUMBER
@@ -237,6 +260,7 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
 
     exception.failures.toList.toSet shouldBe Set(
       ConvertFailure(WrongSizeList(3, 4), stringConfigOrigin(3), "hlist"),
-      ConvertFailure(WrongSizeList(3, 6), stringConfigOrigin(4), "tuple"))
+      ConvertFailure(WrongSizeList(3, 6), stringConfigOrigin(4), "tuple")
+    )
   }
 }

@@ -3,12 +3,12 @@ package pureconfig.module.magnolia
 import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
-import com.typesafe.config.{ ConfigFactory, ConfigRenderOptions, ConfigValueFactory }
+import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 import org.scalacheck.ScalacheckShapeless._
 import pureconfig._
 import pureconfig.ConfigConvert.catchReadError
-import pureconfig.error.{ KeyNotFound, WrongType }
+import pureconfig.error.{KeyNotFound, WrongType}
 import pureconfig.module.magnolia.auto.reader._
 import pureconfig.module.magnolia.auto.writer._
 
@@ -22,10 +22,11 @@ class ProductConvertersSuite extends BaseSuite {
   /* A configuration with a field of a type that is unknown to `ConfigConvert` */
   class MyType(myField: String) {
     def getMyField: String = myField
-    override def equals(obj: Any): Boolean = obj match {
-      case mt: MyType => myField.equals(mt.getMyField)
-      case _ => false
-    }
+    override def equals(obj: Any): Boolean =
+      obj match {
+        case mt: MyType => myField.equals(mt.getMyField)
+        case _ => false
+      }
   }
   case class ConfigWithUnknownType(d: MyType)
 
@@ -42,14 +43,14 @@ class ProductConvertersSuite extends BaseSuite {
   it should s"be able to override all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in forAll {
     (config: FlatConfig) =>
       implicit val readBoolean = ConfigReader.fromString[Boolean](catchReadError(_ => false))
-      implicit val readDouble = ConfigReader.fromString[Double](catchReadError(_ => 1D))
-      implicit val readFloat = ConfigReader.fromString[Float](catchReadError(_ => 2F))
+      implicit val readDouble = ConfigReader.fromString[Double](catchReadError(_ => 1d))
+      implicit val readFloat = ConfigReader.fromString[Float](catchReadError(_ => 2f))
       implicit val readInt = ConfigReader.fromString[Int](catchReadError(_ => 3))
       implicit val readLong = ConfigReader.fromString[Long](catchReadError(_ => 4L))
       implicit val readString = ConfigReader.fromString[String](catchReadError(_ => "foobar"))
       implicit val readOption = ConfigConvert.viaString[Option[String]](catchReadError(_ => None), _ => " ")
       val cc = ConfigConvert[FlatConfig]
-      cc.from(cc.to(config)) shouldBe Right(FlatConfig(false, 1D, 2F, 3, 4L, "foobar", None))
+      cc.from(cc.to(config)) shouldBe Right(FlatConfig(false, 1d, 2f, 3, 4L, "foobar", None))
   }
 
   val emptyConf = ConfigFactory.empty().root()
@@ -78,7 +79,8 @@ class ProductConvertersSuite extends BaseSuite {
 
     implicit val defaultInt = new ConfigReader[Int] with ReadsMissingKeys {
       def from(cur: ConfigCursor) =
-        if (cur.isUndefined) Right(42) else {
+        if (cur.isUndefined) Right(42)
+        else {
           val s = cur.value.render(ConfigRenderOptions.concise)
           cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
         }
@@ -113,7 +115,13 @@ class ProductConvertersSuite extends BaseSuite {
 
   it should "consider default arguments by default" in {
     case class InnerConf(e: Int, g: Int)
-    case class Conf(a: Int, b: String = "default", c: Int = 42, d: InnerConf = InnerConf(43, 44), e: Option[Int] = Some(45))
+    case class Conf(
+        a: Int,
+        b: String = "default",
+        c: Int = 42,
+        d: InnerConf = InnerConf(43, 44),
+        e: Option[Int] = Some(45)
+    )
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava).root()
     ConfigConvert[Conf].from(conf1).right.value shouldBe Conf(2, "default", 42, InnerConf(43, 44), Some(45))

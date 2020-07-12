@@ -5,16 +5,16 @@ package pureconfig
 
 import java.net.URL
 
-import com.typesafe.config.{ ConfigFactory, ConfigValueType }
-import org.scalatest.{ EitherValues, Inside }
+import com.typesafe.config.{ConfigFactory, ConfigValueType}
+import org.scalatest.{EitherValues, Inside}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
 import pureconfig.generic.auto._
 
 /**
- * Suite of tests related to the origin of ConfigValues that raised failures.
- */
+  * Suite of tests related to the origin of ConfigValues that raised failures.
+  */
 class ConfigReaderFailureOriginSuite extends BaseSuite with EitherValues with Inside {
   "Loading configuration from files" should "show proper error locations when loading a single file" in {
     import pureconfig.syntax._
@@ -26,15 +26,9 @@ class ConfigReaderFailureOriginSuite extends BaseSuite with EitherValues with In
 
     inside(conf.get("conf").to[Conf].left.value.toList) {
       case List(
-        ConvertFailure(
-          KeyNotFound("a", _),
-          Some(origin1),
-          ""),
-        ConvertFailure(
-          WrongType(ConfigValueType.STRING, valueTypes),
-          Some(origin2),
-          "c")
-        ) =>
+            ConvertFailure(KeyNotFound("a", _), Some(origin1), ""),
+            ConvertFailure(WrongType(ConfigValueType.STRING, valueTypes), Some(origin2), "c")
+          ) =>
         origin1.filename() should endWith(file)
         origin1.url() shouldBe new URL("file", "", workingDir + file)
         origin1.lineNumber() shouldBe 1
@@ -48,19 +42,10 @@ class ConfigReaderFailureOriginSuite extends BaseSuite with EitherValues with In
 
     inside(conf.get("other-conf").to[Conf].left.value.toList) {
       case List(
-        ConvertFailure(
-          KeyNotFound("a", _),
-          Some(origin1),
-          ""),
-        ConvertFailure(
-          KeyNotFound("b", _),
-          Some(origin2),
-          ""),
-        ConvertFailure(
-          WrongType(ConfigValueType.STRING, valueTypes2),
-          Some(origin3),
-          "c")
-        ) =>
+            ConvertFailure(KeyNotFound("a", _), Some(origin1), ""),
+            ConvertFailure(KeyNotFound("b", _), Some(origin2), ""),
+            ConvertFailure(WrongType(ConfigValueType.STRING, valueTypes2), Some(origin3), "c")
+          ) =>
         origin1.filename() should endWith(file)
         origin1.url shouldBe new URL("file", "", workingDir + file)
         origin1.lineNumber shouldBe 7
@@ -86,10 +71,7 @@ class ConfigReaderFailureOriginSuite extends BaseSuite with EitherValues with In
     val conf = ConfigFactory.load(file1).withFallback(ConfigFactory.load(file2)).root()
 
     inside(conf.get("conf").to[Conf].left.value.toList) {
-      case List(ConvertFailure(
-        WrongType(ConfigValueType.STRING, valueTypes),
-        Some(origin),
-        "a")) =>
+      case List(ConvertFailure(WrongType(ConfigValueType.STRING, valueTypes), Some(origin), "a")) =>
         valueTypes should contain only ConfigValueType.NUMBER
         origin.url() shouldBe new URL("file", "", workingDir + file2)
         origin.lineNumber() shouldBe 2

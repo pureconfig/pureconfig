@@ -20,8 +20,7 @@ class ConfigFieldMappingSuite extends AnyFlatSpec with Matchers {
   }
 
   it should "allow defining mappings with some overrides" in {
-    val mapping = ConfigFieldMapping(CamelCase, SnakeCase).withOverrides(
-      "theUglyFld" -> "the_ugly_field")
+    val mapping = ConfigFieldMapping(CamelCase, SnakeCase).withOverrides("theUglyFld" -> "the_ugly_field")
 
     mapping("theBeautifulField") === "the_beautiful_field"
     mapping("theUglyFld") === "the_ugly_field"

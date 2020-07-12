@@ -1,8 +1,8 @@
 package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
-import org.scalacheck.{ Arbitrary, Gen }
-import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter }
+import org.scalacheck.{Arbitrary, Gen}
+import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
 import pureconfig.module.scalaz.arbitrary._
 import pureconfig.module.scalaz.instances._
 

@@ -1,6 +1,6 @@
 package pureconfig
 
-import org.scalacheck.{ Arbitrary, Gen }
+import org.scalacheck.{Arbitrary, Gen}
 import pureconfig.gen._
 
 package object arbitrary {

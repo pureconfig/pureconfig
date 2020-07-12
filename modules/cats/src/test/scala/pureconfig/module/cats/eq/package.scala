@@ -14,17 +14,18 @@ package object eq {
   // This is the old implementation (pre-2.0.0) of Eq for functions in Cats. The new implementation requires an instance
   // of ExhaustiveCheck (see https://github.com/typelevel/cats/pull/2577), which we are unable to provide for the types
   // we use in tests. For our use case, it's OK to go with Arbitrary values.
-  private implicit def catsLawsEqForFn1[A, B](implicit A: Arbitrary[A], B: Eq[B]): Eq[A => B] = new Eq[A => B] {
-    val sampleCnt: Int = 50
+  private implicit def catsLawsEqForFn1[A, B](implicit A: Arbitrary[A], B: Eq[B]): Eq[A => B] =
+    new Eq[A => B] {
+      val sampleCnt: Int = 50
 
-    def eqv(f: A => B, g: A => B): Boolean = {
-      val samples = List.fill(sampleCnt)(A.arbitrary.sample).collect {
-        case Some(a) => a
-        case None => sys.error("Could not generate arbitrary values to compare two functions")
+      def eqv(f: A => B, g: A => B): Boolean = {
+        val samples = List.fill(sampleCnt)(A.arbitrary.sample).collect {
+          case Some(a) => a
+          case None => sys.error("Could not generate arbitrary values to compare two functions")
+        }
+        samples.forall(s => B.eqv(f(s), g(s)))
       }
-      samples.forall(s => B.eqv(f(s), g(s)))
     }
-  }
 
   implicit def configReaderEq[A: Eq]: Eq[ConfigReader[A]] =
     Eq.by[ConfigReader[A], ConfigValue => ConfigReader.Result[A]](_.from)
