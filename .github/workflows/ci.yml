@@ -20,6 +20,9 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
 
+      - name: Check formatting
+        run: sbt "++${{ matrix.scala }} scalafmtCheckAll"
+
       - name: Compile
         run: sbt coverage "++${{ matrix.scala }} compile"
 

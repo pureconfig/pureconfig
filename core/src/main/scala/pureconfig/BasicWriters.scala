@@ -1,23 +1,23 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigDecimal => JavaBigDecimal, BigInteger }
-import java.net.{ URI, URL }
+import java.math.{BigDecimal => JavaBigDecimal, BigInteger}
+import java.net.{URI, URL}
 import java.nio.file.Path
 import java.time._
-import java.time.{ Duration => JavaDuration }
+import java.time.{Duration => JavaDuration}
 import java.util.UUID
 import java.util.regex.Pattern
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scala.math.{ BigDecimal, BigInt }
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.math.{BigDecimal, BigInt}
 import scala.util.matching.Regex
 
 import com.typesafe.config._
 
 /**
- * Trait containing `ConfigWriter` instances for primitive types.
- */
+  * Trait containing `ConfigWriter` instances for primitive types.
+  */
 trait PrimitiveWriters {
 
   implicit val stringConfigWriter = ConfigWriter.forPrimitive[String]
@@ -32,16 +32,16 @@ trait PrimitiveWriters {
 }
 
 /**
- * Trait containing instance for `ConfigWriter` for Java Enum.
- */
+  * Trait containing instance for `ConfigWriter` for Java Enum.
+  */
 trait JavaEnumWriter {
 
   implicit def javaEnumWriter[A <: Enum[A]]: ConfigWriter[A] = ConfigWriter.toDefaultString[A]
 }
 
 /**
- * Trait containing `ConfigWriter` instances for classes related to file system paths and URIs.
- */
+  * Trait containing `ConfigWriter` instances for classes related to file system paths and URIs.
+  */
 trait UriAndPathWriters {
 
   implicit val urlConfigWriter = ConfigWriter.toDefaultString[URL]
@@ -52,8 +52,8 @@ trait UriAndPathWriters {
 }
 
 /**
- * Trait containing `ConfigWriter` instances for classes related to regular expressions.
- */
+  * Trait containing `ConfigWriter` instances for classes related to regular expressions.
+  */
 trait RegexWriters {
 
   implicit val patternWriter = ConfigWriter.toString[Pattern](_.pattern)
@@ -61,8 +61,8 @@ trait RegexWriters {
 }
 
 /**
- * Trait containing `ConfigWriter` instances for `java.time` classes.
- */
+  * Trait containing `ConfigWriter` instances for `java.time` classes.
+  */
 trait JavaTimeWriters {
 
   implicit val instantConfigWriter = ConfigWriter.toDefaultString[Instant]
@@ -79,9 +79,9 @@ trait JavaTimeWriters {
 }
 
 /**
- * Trait containing `ConfigWriter` instances for [[scala.concurrent.duration.Duration]] and
- * [[scala.concurrent.duration.FiniteDuration]].
- */
+  * Trait containing `ConfigWriter` instances for [[scala.concurrent.duration.Duration]] and
+  * [[scala.concurrent.duration.FiniteDuration]].
+  */
 trait DurationWriters {
 
   implicit val durationConfigWriter = ConfigWriter.toString[Duration](DurationUtils.fromDuration)
@@ -89,8 +89,8 @@ trait DurationWriters {
 }
 
 /**
- * Trait containing `ConfigWriter` instances for Java and Scala arbitrary-precision numeric types.
- */
+  * Trait containing `ConfigWriter` instances for Java and Scala arbitrary-precision numeric types.
+  */
 trait NumericWriters {
 
   implicit val javaBigDecimalWriter: ConfigWriter[JavaBigDecimal] = ConfigWriter.toDefaultString[JavaBigDecimal]
@@ -100,8 +100,8 @@ trait NumericWriters {
 }
 
 /**
- * Trait containing `ConfigWriter` instances for Typesafe config models.
- */
+  * Trait containing `ConfigWriter` instances for Typesafe config models.
+  */
 trait TypesafeConfigWriters {
 
   implicit val configConfigWriter: ConfigWriter[Config] = new ConfigWriter[Config] {
@@ -126,17 +126,17 @@ trait TypesafeConfigWriters {
 }
 
 /**
- * Trait containing `ConfigWriter` instances for primitive types and simple classes in Java and Scala standard
- * libraries.
- */
+  * Trait containing `ConfigWriter` instances for primitive types and simple classes in Java and Scala standard
+  * libraries.
+  */
 trait BasicWriters
-  extends PrimitiveWriters
-  with JavaEnumWriter
-  with UriAndPathWriters
-  with RegexWriters
-  with JavaTimeWriters
-  with DurationWriters
-  with NumericWriters
-  with TypesafeConfigWriters
+    extends PrimitiveWriters
+    with JavaEnumWriter
+    with UriAndPathWriters
+    with RegexWriters
+    with JavaTimeWriters
+    with DurationWriters
+    with NumericWriters
+    with TypesafeConfigWriters
 
 object BasicWriters extends BasicWriters

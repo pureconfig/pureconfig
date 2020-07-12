@@ -1,15 +1,15 @@
 package pureconfig.module.catseffect
 
-import java.io.{ BufferedOutputStream, PipedInputStream, PipedOutputStream }
-import java.nio.file.{ Path, Paths }
+import java.io.{BufferedOutputStream, PipedInputStream, PipedOutputStream}
+import java.nio.file.{Path, Paths}
 import java.util.concurrent.Executors
 
 import scala.concurrent.ExecutionContext
 
-import cats.effect.{ Blocker, ContextShift, IO }
+import cats.effect.{Blocker, ContextShift, IO}
 import com.typesafe.config.ConfigFactory
-import pureconfig.{ BaseSuite, ConfigSource }
-import pureconfig.error.{ ConfigReaderException, ConvertFailure }
+import pureconfig.{BaseSuite, ConfigSource}
+import pureconfig.error.{ConfigReaderException, ConvertFailure}
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
 

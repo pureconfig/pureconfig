@@ -1,7 +1,7 @@
 package pureconfig
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, Path, Paths }
+import java.nio.file.{Files, Path, Paths}
 
 object PathUtils {
 

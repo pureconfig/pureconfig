@@ -1,15 +1,15 @@
 package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
-import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter }
-import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, FailureReason }
+import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
+import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
 
-import scalaz.{ Contravariant, Equal, InvariantFunctor, MonadError, Semigroup, Show }
+import scalaz.{Contravariant, Equal, InvariantFunctor, MonadError, Semigroup, Show}
 
 /**
- * Instances of `scalaz` type classes for `ConfigReader`, `ConfigWriter`, `ConfigConvert`
- * and other `pureconfig` citizens.
- */
+  * Instances of `scalaz` type classes for `ConfigReader`, `ConfigWriter`, `ConfigConvert`
+  * and other `pureconfig` citizens.
+  */
 package object instances {
 
   implicit val configReaderInstance: MonadError[ConfigReader, ConfigReaderFailures] =

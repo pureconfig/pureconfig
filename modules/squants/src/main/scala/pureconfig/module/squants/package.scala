@@ -15,17 +15,17 @@ import _root_.squants.time._
 import pureconfig.ConfigConvert._
 
 /**
- * Provides [[ConfigConvert]] instances for Squants [[_root_.squants.Dimension]].
- *
- * Note: All of the machinery can disappear if the `parse` method of [[_root_.squants.Dimension]]
- * is made public. (see: https://github.com/typelevel/squants/issues/184). After that, something
- * like this should suffice:
- *
- * {{{
- *   implicit def dimensionConfigConvert[A <: Quantity[A]](dim: Dimension[A])(implicit tag: ClassTag[A]) =
- *     viaNonEmptyStringTry[A](dim.parse, _.toString)
- * }}}
- */
+  * Provides [[ConfigConvert]] instances for Squants [[_root_.squants.Dimension]].
+  *
+  * Note: All of the machinery can disappear if the `parse` method of [[_root_.squants.Dimension]]
+  * is made public. (see: https://github.com/typelevel/squants/issues/184). After that, something
+  * like this should suffice:
+  *
+  * {{{
+  *   implicit def dimensionConfigConvert[A <: Quantity[A]](dim: Dimension[A])(implicit tag: ClassTag[A]) =
+  *     viaNonEmptyStringTry[A](dim.parse, _.toString)
+  * }}}
+  */
 package object squants {
 
   // electro

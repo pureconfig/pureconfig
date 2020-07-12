@@ -1,7 +1,14 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigFactory, ConfigObject, ConfigOriginFactory, ConfigParseOptions, ConfigValue, ConfigValueFactory }
-import org.scalacheck.{ Arbitrary, Gen }
+import com.typesafe.config.{
+  ConfigFactory,
+  ConfigObject,
+  ConfigOriginFactory,
+  ConfigParseOptions,
+  ConfigValue,
+  ConfigValueFactory
+}
+import org.scalacheck.{Arbitrary, Gen}
 import pureconfig.error._
 
 class ConfigReaderSuite extends BaseSuite {
@@ -10,13 +17,15 @@ class ConfigReaderSuite extends BaseSuite {
   val intReader = ConfigReader[Int]
   val strReader = ConfigReader[String]
 
-  def intSummedReader(n: Int) = new ConfigReader[Int] {
-    def from(cur: ConfigCursor) = intReader.from(cur).right.map(_ + n)
-  }
+  def intSummedReader(n: Int) =
+    new ConfigReader[Int] {
+      def from(cur: ConfigCursor) = intReader.from(cur).right.map(_ + n)
+    }
 
   // generate configs that always read correctly as strings, but not always as integers
   val genConfig: Gen[ConfigValue] =
-    Gen.frequency(80 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 20 -> Gen.alphaStr)
+    Gen
+      .frequency(80 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 20 -> Gen.alphaStr)
       .map(ConfigValueFactory.fromAnyRef)
 
   val genFailureReason: Gen[FailureReason] =
@@ -38,10 +47,11 @@ class ConfigReaderSuite extends BaseSuite {
   }
 
   it should "have a correct emap method" in forAll { (conf: ConfigValue, f: Int => Either[FailureReason, String]) =>
-    def getReason[A](failures: ConfigReaderFailures): FailureReason = failures match {
-      case ConfigReaderFailures(ConvertFailure(reason, _, _)) => reason
-      case _ => throw new Exception(s"Unexpected value: $failures")
-    }
+    def getReason[A](failures: ConfigReaderFailures): FailureReason =
+      failures match {
+        case ConfigReaderFailures(ConvertFailure(reason, _, _)) => reason
+        case _ => throw new Exception(s"Unexpected value: $failures")
+      }
     intReader.emap(f).from(conf).left.map(getReason) shouldEqual
       intReader.from(conf).left.map(getReason).right.flatMap(f)
   }
