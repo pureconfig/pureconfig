@@ -23,14 +23,7 @@ class AkkaHttpSuite extends BaseSuite {
 
   it should " throw proper CannotConvert error" in {
     val conf = ConfigFactory.parseString(s"""{uri:"https://doc.akka.io/docs/akka-http/current folder with spaces/index.html"}""")
-    val errors = ConfigReaderFailures(
-      ConvertFailure(
-        CannotConvert(
-          "https://doc.akka.io/docs/akka-http/current folder with spaces/index.html",
-          "Uri",
-          "Illegal URI reference: Invalid input ' ', expected '/', 'EOI', '#', '?' or pchar (line 1, column 43)"),
-        stringConfigOrigin(1),
-        "uri"))
+    val errors = ConfigReaderFailures(ConvertFailure(CannotConvert("https://doc.akka.io/docs/akka-http/current folder with spaces/index.html", "Uri", "Illegal URI reference: Invalid input ' ', expected '/', 'EOI', '#', '?' or pchar (line 1, column 43)"), stringConfigOrigin(1), "uri"))
     conf.to[ServerConfig].left.value shouldEqual errors
   }
 

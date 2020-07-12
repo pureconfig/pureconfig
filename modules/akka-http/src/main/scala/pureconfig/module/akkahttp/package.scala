@@ -13,9 +13,9 @@ package object akkahttp {
     ConfigReader.fromString(str =>
       Try(Uri(str, ParsingMode.Strict)).fold(
         {
-        case err: IllegalUriException => Left(CannotConvert(str, "Uri", err.info.summary))
-        case err => Left(CannotConvert(str, "Uri", err.getMessage.replace('^', " ".charAt(0)).trim))
-      },
+          case err: IllegalUriException => Left(CannotConvert(str, "Uri", err.info.summary))
+          case err => Left(CannotConvert(str, "Uri", err.getMessage.replace('^', " ".charAt(0)).trim))
+        },
         uri => Right(uri)))
 
   implicit val uriWriter: ConfigWriter[Uri] = ConfigWriter[String].contramap(_.toString)
