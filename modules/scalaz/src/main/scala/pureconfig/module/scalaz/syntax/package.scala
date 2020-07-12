@@ -1,16 +1,16 @@
 package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
-import pureconfig.{ ConfigConvert, ConfigReader }
-import pureconfig.error.{ ConfigReaderFailure, ConfigReaderFailures, FailureReason }
+import pureconfig.{ConfigConvert, ConfigReader}
+import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
 
-import scalaz.{ \/, Maybe, NonEmptyList, Validation }
+import scalaz.{\/, Maybe, NonEmptyList, Validation}
 
 import scala.reflect.ClassTag
 
 /**
- * Useful extension methods that bring `scalaz` data structures into `pureconfig` world.
- */
+  * Useful extension methods that bring `scalaz` data structures into `pureconfig` world.
+  */
 package object syntax {
 
   implicit final class ConfigConvertCompanionObjectOps(val co: ConfigConvert.type) extends AnyVal {
@@ -20,7 +20,10 @@ package object syntax {
     def viaStringMaybe[A: ClassTag](fromF: String => Maybe[A], toF: A => String): ConfigConvert[A] =
       co.viaStringOpt[A](fromF.andThen(_.toOption), toF)
 
-    def viaNonEmptyStringDisjunction[A: ClassTag](fromF: String => FailureReason \/ A, toF: A => String): ConfigConvert[A] =
+    def viaNonEmptyStringDisjunction[A: ClassTag](
+        fromF: String => FailureReason \/ A,
+        toF: A => String
+    ): ConfigConvert[A] =
       co.viaNonEmptyString(fromF.andThen(_.toEither), toF)
 
     def viaNonEmptyStringMaybe[A: ClassTag](fromF: String => Maybe[A], toF: A => String): ConfigConvert[A] =

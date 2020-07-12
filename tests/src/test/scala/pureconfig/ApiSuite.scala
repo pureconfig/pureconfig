@@ -6,7 +6,7 @@ package pureconfig
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.{ ConfigFactory, ConfigValueType }
+import com.typesafe.config.{ConfigFactory, ConfigValueType}
 import pureconfig.PathUtils._
 import scala.concurrent.duration.FiniteDuration
 
@@ -23,69 +23,100 @@ class ApiSuite extends BaseSuite {
 
   it should "loadConfig from reference.conf" in {
     case class Conf(d: Double, i: Int, s: String)
-    loadConfig[Conf] shouldBe Right(Conf(0D, 0, "app_value"))
+    loadConfig[Conf] shouldBe Right(Conf(0d, 0, "app_value"))
   }
 
   it should "loadConfig from reference.conf with a namespace" in {
     case class Conf(f: Float)
-    loadConfig[Conf](namespace = "foo") shouldBe Right(Conf(3.0F))
+    loadConfig[Conf](namespace = "foo") shouldBe Right(Conf(3.0f))
   }
 
   it should "loadConfig config objects from a Typesafe Config" in {
     case class Conf(d: Double, i: Int)
     val conf = ConfigFactory.parseString("{ d: 0.5, i: 10 }")
-    loadConfig[Conf](conf = conf) shouldBe Right(Conf(0.5D, 10))
+    loadConfig[Conf](conf = conf) shouldBe Right(Conf(0.5d, 10))
   }
 
   it should "loadConfig config objects from a Typesafe Config with a namespace" in {
     case class Conf(f: Float)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
-    loadConfig[Conf](conf = conf, namespace = "foo.bar") shouldBe Right(Conf(1.0F))
-    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
+    loadConfig[Conf](conf = conf, namespace = "foo.bar") shouldBe Right(Conf(1.0f))
+    loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(
+      KeyNotFound("bar", Set.empty),
+      "",
+      stringConfigOrigin(1)
+    )
   }
 
   it should "loadConfig other values from a Typesafe Config with a namespace" in {
     val conf = ConfigFactory.parseString("foo { bar { f: 1.0 }, baz: 3.4 }")
 
-    loadConfig[Float](conf = conf, namespace = "foo.bar.f") shouldBe Right(1.0F)
+    loadConfig[Float](conf = conf, namespace = "foo.bar.f") shouldBe Right(1.0f)
 
     loadConfig[Float](conf = conf, namespace = "foo.bar.h") should failWith(
-      KeyNotFound("h", Set.empty), "foo.bar", stringConfigOrigin(1))
+      KeyNotFound("h", Set.empty),
+      "foo.bar",
+      stringConfigOrigin(1)
+    )
 
     loadConfig[Float](conf = conf, namespace = "foo.baz.f") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz", stringConfigOrigin(1))
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)),
+      "foo.baz",
+      stringConfigOrigin(1)
+    )
 
     loadConfig[Float](conf = conf, namespace = "bar.foo.f") should failWith(
-      KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
+      KeyNotFound("bar", Set.empty),
+      "",
+      stringConfigOrigin(1)
+    )
 
-    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0F))
+    loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.f") shouldBe Right(Some(1.0f))
 
     // With the introduction of `ConfigSource`s we dropped support for reading missing
     // keys as `None` when an `Option[A]` is loaded as a root value
     // loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") shouldBe Right(None)
     loadConfig[Option[Float]](conf = conf, namespace = "foo.bar.h") should failWith(
-      KeyNotFound("h", Set.empty), "foo.bar", stringConfigOrigin(1))
+      KeyNotFound("h", Set.empty),
+      "foo.bar",
+      stringConfigOrigin(1)
+    )
 
     loadConfig[Option[Float]](conf = conf, namespace = "foo.baz.f") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "foo.baz", stringConfigOrigin(1))
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)),
+      "foo.baz",
+      stringConfigOrigin(1)
+    )
 
     loadConfig[Option[Float]](conf = conf, namespace = "bar.foo.f") should failWith(
-      KeyNotFound("bar", Set.empty), "", stringConfigOrigin(1))
+      KeyNotFound("bar", Set.empty),
+      "",
+      stringConfigOrigin(1)
+    )
   }
 
   it should "handle correctly namespaces with special chars" in {
     val conf = ConfigFactory.parseString(""" "fo.o" { "ba r" { f: 1.0 }, "ba z": 3.4 }""")
 
-    loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".f") shouldBe Right(1.0F)
+    loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".f") shouldBe Right(1.0f)
 
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba r\".h") should failWith(
-      KeyNotFound("h", Set.empty), "\"fo.o\".\"ba r\"", stringConfigOrigin(1))
+      KeyNotFound("h", Set.empty),
+      "\"fo.o\".\"ba r\"",
+      stringConfigOrigin(1)
+    )
 
     loadConfig[Float](conf = conf, namespace = "\"fo.o\".\"ba z\".h") should failWith(
-      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)), "\"fo.o\".\"ba z\"", stringConfigOrigin(1))
+      WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)),
+      "\"fo.o\".\"ba z\"",
+      stringConfigOrigin(1)
+    )
 
     loadConfig[Float](conf = conf, namespace = "\"b.a.r\".foo.f") should failWith(
-      KeyNotFound("b.a.r", Set.empty), "", stringConfigOrigin(1))
+      KeyNotFound("b.a.r", Set.empty),
+      "",
+      stringConfigOrigin(1)
+    )
   }
 
   it should "loadConfig from a configuration file" in {
@@ -113,10 +144,17 @@ class ApiSuite extends BaseSuite {
     case class SparkAppConf(name: String)
     case class SparkLocalConf(dir: String)
     case class SparkNetwork(timeout: FiniteDuration)
-    case class SparkConf(master: String, app: SparkAppConf, local: SparkLocalConf, driver: DriverConf, executor: ExecutorConf, extraListeners: Seq[String], network: SparkNetwork)
+    case class SparkConf(
+        master: String,
+        app: SparkAppConf,
+        local: SparkLocalConf,
+        driver: DriverConf,
+        executor: ExecutorConf,
+        extraListeners: Seq[String],
+        network: SparkNetwork
+    )
     case class SparkRootConf(spark: SparkConf)
-    val configFile = createTempFile(
-      """spark {
+    val configFile = createTempFile("""spark {
         |  app.name="myApp"
         |  master="local[*]"
         |  driver {
@@ -159,13 +197,14 @@ class ApiSuite extends BaseSuite {
   "loadConfigFromFiles" should "load a complete configuration from a single file" in {
     case class Conf(b: Boolean, d: Double)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf")
-    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D))
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001d))
   }
 
   it should "fill in missing values from the lower priority files" in {
     case class Conf(f: Float)
-    val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority1.conf", "/conf/loadConfigFromFiles/priority2.conf")
-    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(0.99F))
+    val files =
+      listResourcesFromNames("/conf/loadConfigFromFiles/priority1.conf", "/conf/loadConfigFromFiles/priority2.conf")
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(0.99f))
   }
 
   it should "use an empty config if the list of files is empty" in {
@@ -177,13 +216,13 @@ class ApiSuite extends BaseSuite {
   it should "merge reference.conf with the provided files" in {
     case class Conf(b: Boolean, d: Double, sref: String) // sref defined in reference.conf
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf")
-    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D, "wow"))
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001d, "wow"))
   }
 
   it should "ignore files that don't exist when failOnReadError is false" in {
     case class Conf(b: Boolean, d: Double)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf") :+ nonExistingPath
-    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001D))
+    loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001d))
   }
 
   it should "fail if any of the files doesn't exist and failOnReadError is true" in {
@@ -195,13 +234,13 @@ class ApiSuite extends BaseSuite {
   it should "use a namespace if given" in {
     case class Conf(f: Float)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/outerobject.conf")
-    loadConfigFromFiles[Conf](files, namespace = "foo") shouldBe Right(Conf(3.0F))
+    loadConfigFromFiles[Conf](files, namespace = "foo") shouldBe Right(Conf(3.0f))
   }
 
   "loadConfigWithFallback" should "fallback if no config keys are found" in {
     case class Conf(f: Float, o: Option[Int], d: Double)
     val priority1Conf = ConfigFactory.load("conf/loadConfigFromFiles/priority1.conf")
     // `f` and `o` are defined in priority1.conf, `d` is defined in reference.conf
-    loadConfigWithFallback[Conf](priority1Conf) shouldBe Right(Conf(0.99F, None, 0.0))
+    loadConfigWithFallback[Conf](priority1Conf) shouldBe Right(Conf(0.99f, None, 0.0))
   }
 }

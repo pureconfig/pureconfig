@@ -4,13 +4,13 @@ import scala.language.experimental.macros
 
 import magnolia._
 import pureconfig.ConfigReader
-import pureconfig.generic.{ CoproductHint, ProductHint }
+import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.MagnoliaConfigReader
 
 /**
- * An object that, when imported, provides methods for deriving `ConfigReader` instances on demand for value classes,
- * tuples, case classes and sealed traits. The generation of `ConfigReader`s is done by Magnolia.
- */
+  * An object that, when imported, provides methods for deriving `ConfigReader` instances on demand for value classes,
+  * tuples, case classes and sealed traits. The generation of `ConfigReader`s is done by Magnolia.
+  */
 object reader {
   type Typeclass[A] = ConfigReader[A]
 

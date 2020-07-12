@@ -1,6 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{ ConfigFactory, ConfigValue }
+import com.typesafe.config.{ConfigFactory, ConfigValue}
 
 class ConfigWriterSuite extends BaseSuite {
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)

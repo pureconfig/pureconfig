@@ -4,7 +4,7 @@ import sttp.model.Uri
 import sttp.model.Uri._
 import com.typesafe.config.ConfigFactory
 import pureconfig.BaseSuite
-import pureconfig.error.{ CannotConvert, ConfigReaderFailures, ConvertFailure }
+import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure}
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 
@@ -25,12 +25,10 @@ class SttpSuite extends BaseSuite {
 
     val failure =
       ConvertFailure(
-        reason = CannotConvert(
-          value = "sttp.readthedocs.io",
-          toType = "sttp.model.Uri",
-          because = "missing scheme"),
+        reason = CannotConvert(value = "sttp.readthedocs.io", toType = "sttp.model.Uri", because = "missing scheme"),
         origin = stringConfigOrigin(1),
-        path = "uri")
+        path = "uri"
+      )
 
     config.to[AppConfig].left.value shouldBe ConfigReaderFailures(failure)
   }

@@ -3,15 +3,15 @@ package pureconfig.module
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-import _root_.fs2.{ Stream, text }
-import cats.effect.{ IO, Timer }
+import _root_.fs2.{Stream, text}
+import cats.effect.{IO, Timer}
 import cats.implicits._
 import org.scalatest.EitherValues._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import pureconfig.error.ConfigReaderException
 import pureconfig.generic.auto._
-import pureconfig.module.{ fs2 => testee }
+import pureconfig.module.{fs2 => testee}
 
 class fs2Suite extends AnyFlatSpec with Matchers {
 

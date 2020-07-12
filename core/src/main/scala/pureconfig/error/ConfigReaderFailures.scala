@@ -6,8 +6,8 @@ package pureconfig.error
 import scala.collection.mutable
 
 /**
- * A non-empty list of ConfigReader failures
- */
+  * A non-empty list of ConfigReader failures
+  */
 case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFailure*) {
 
   def toList: List[ConfigReaderFailure] = head :: tail.toList
@@ -22,7 +22,9 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFai
     def tabs(n: Int): String = " " * ((indentLevel + n) * 2)
     def descriptionWithOrigin(failure: ConfigReaderFailure, indent: Int): String = {
       val failureLines = failure.description.split("\n")
-      (failure.origin.fold(s"${tabs(indent)}- ${failureLines.head}")(f => s"${tabs(indent)}- (${f.description}) ${failureLines.head}") ::
+      (failure.origin.fold(s"${tabs(indent)}- ${failureLines.head}")(f =>
+        s"${tabs(indent)}- (${f.description}) ${failureLines.head}"
+      ) ::
         failureLines.tail.map(l => s"${tabs(indent + 1)}$l").toList).mkString("\n")
     }
 

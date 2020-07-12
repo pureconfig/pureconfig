@@ -1,7 +1,6 @@
 import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
-import scalariform.formatter.preferences._
 
 organization in ThisBuild := "com.github.pureconfig"
 
@@ -102,10 +101,7 @@ lazy val commonSettings = Seq(
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 
-  scalariformPreferences := scalariformPreferences.value
-    .setPreference(DanglingCloseParenthesis, Prevent)
-    .setPreference(DoubleIndentConstructorArguments, true)
-    .setPreference(SpacesAroundMultiImports, true),
+  scalafmtOnCompile := true,
 
   autoAPIMappings := true,
 

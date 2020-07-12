@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 /**
- * @author Mario Pastorelli (mario.pastorelli@teralitycs.ch)
- */
+  * @author Mario Pastorelli (mario.pastorelli@teralitycs.ch)
+  */
 package pureconfig.example
 
 import java.nio.file.Path
@@ -28,7 +28,7 @@ dirwatch.email.port=12345
 dirwatch.email.message="Dirwatch new path found report"
 dirwatch.email.recipients=["recipient1@domain.tld","recipient2@domain.tld"]
 dirwatch.email.sender="sender@domain.tld"
-*/
+ */
 object Main extends App {
 
   case class Config(dirwatch: DirWatchConfig)

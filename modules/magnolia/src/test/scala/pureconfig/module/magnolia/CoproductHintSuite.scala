@@ -6,7 +6,7 @@ import com.typesafe.config._
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic._
-import pureconfig.generic.error.{ CoproductHintException, UnexpectedValueForFieldCoproductHint }
+import pureconfig.generic.error.{CoproductHintException, UnexpectedValueForFieldCoproductHint}
 import pureconfig.module.magnolia.auto.reader._
 import pureconfig.module.magnolia.auto.writer._
 
@@ -33,21 +33,38 @@ class CoproductHintSuite extends BaseSuite {
     it should "fail to read values that are not objects when using a FieldCoproductHint" in {
       val conf = ConfigValueFactory.fromAnyRef("Dog")
       ConfigConvert[AnimalConfig].from(conf) should failWith(
-        WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT)))
+        WrongType(ConfigValueType.STRING, Set(ConfigValueType.OBJECT))
+      )
     }
 
     it should "fail to read values in the discriminating field that are not strings when using a FieldCoproductHint" in {
       val conf = ConfigFactory.parseString("{ which-animal { type = Dog }, age = 2 }")
-      ConfigConvert[AnimalConfig].from(conf.root()) should be(Left(
-        ConfigReaderFailures(
-          ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), stringConfigOrigin(1), "which-animal"))))
+      ConfigConvert[AnimalConfig].from(conf.root()) should be(
+        Left(
+          ConfigReaderFailures(
+            ConvertFailure(
+              WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)),
+              stringConfigOrigin(1),
+              "which-animal"
+            )
+          )
+        )
+      )
     }
 
     it should "fail with an appropriate reason if an unexpected value is found at the discriminating field when using a FieldCoproductHint" in {
       val conf = ConfigFactory.parseString("{ which-animal = unexpected, age = 2 }")
-      ConfigConvert[AnimalConfig].from(conf.root()) should be(Left(
-        ConfigReaderFailures(
-          ConvertFailure(UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")), stringConfigOrigin(1), "which-animal"))))
+      ConfigConvert[AnimalConfig].from(conf.root()) should be(
+        Left(
+          ConfigReaderFailures(
+            ConvertFailure(
+              UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")),
+              stringConfigOrigin(1),
+              "which-animal"
+            )
+          )
+        )
+      )
     }
 
     it should "fail to read when the hint field conflicts with a field of an option when using a FieldCoproductHint" in {

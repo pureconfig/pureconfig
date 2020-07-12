@@ -1,6 +1,6 @@
 package pureconfig.module.cats
 
-import scala.collection.immutable.{ SortedMap, SortedSet }
+import scala.collection.immutable.{SortedMap, SortedSet}
 
 import cats.data._
 import cats.implicits._
@@ -27,22 +27,38 @@ class CatsSuite extends BaseSuite {
 
   it should "return an EmptyTraversableFound when reading empty lists into NonEmptyList" in {
     val config = parseString("{ numbers: [] }")
-    config.to[Numbers] should failWith(EmptyTraversableFound("scala.collection.immutable.List"), "numbers", stringConfigOrigin(1))
+    config.to[Numbers] should failWith(
+      EmptyTraversableFound("scala.collection.immutable.List"),
+      "numbers",
+      stringConfigOrigin(1)
+    )
   }
 
   it should "return an EmptyTraversableFound when reading empty vector into NonEmptyVector" in {
     val config = parseString("{ numbers: [] }")
-    config.to[NumVec] should failWith(EmptyTraversableFound("scala.collection.immutable.Vector"), "numbers", stringConfigOrigin(1))
+    config.to[NumVec] should failWith(
+      EmptyTraversableFound("scala.collection.immutable.Vector"),
+      "numbers",
+      stringConfigOrigin(1)
+    )
   }
 
   it should "return an EmptyTraversableFound when reading empty set into NonEmptySet" in {
     val config = parseString("{ numbers: [] }")
-    config.to[NumSet] should failWith(EmptyTraversableFound("scala.collection.immutable.SortedSet"), "numbers", stringConfigOrigin(1))
+    config.to[NumSet] should failWith(
+      EmptyTraversableFound("scala.collection.immutable.SortedSet"),
+      "numbers",
+      stringConfigOrigin(1)
+    )
   }
 
   it should "return an EmptyTraversableFound when reading empty map into NonEmptyMap" in {
     val config = parseString("{ numbers{} }")
-    config.to[NumMap] should failWith(EmptyTraversableFound("scala.collection.immutable.Map"), "numbers", stringConfigOrigin(1))
+    config.to[NumMap] should failWith(
+      EmptyTraversableFound("scala.collection.immutable.Map"),
+      "numbers",
+      stringConfigOrigin(1)
+    )
   }
 
   it should "return an EmptyTraversableFound when reading empty chain into NonEmptyChain" in {
