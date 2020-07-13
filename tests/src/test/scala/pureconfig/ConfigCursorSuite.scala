@@ -194,7 +194,7 @@ class ConfigCursorSuite extends BaseSuite {
   }
 
   it should "handle in a safe way cursors to undefined values" in {
-    val cur = ConfigCursor(null, defaultPath)
+    val cur = ConfigCursor(None, defaultPath)
     cur.path shouldBe defaultPathStr
     cur.isUndefined shouldBe true
     cur.isNull shouldBe false

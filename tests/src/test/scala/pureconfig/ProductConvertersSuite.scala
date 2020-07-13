@@ -76,11 +76,13 @@ class ProductConvertersSuite extends BaseSuite {
 
     implicit val defaultInt = new ConfigReader[Int] with ReadsMissingKeys {
       def from(cur: ConfigCursor) =
-        if (cur.isUndefined) Right(42)
-        else {
-          val s = cur.value.render(ConfigRenderOptions.concise)
-          cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
-        }
+        cur.asConfigValue.fold(
+          _ => Right(42),
+          v => {
+            val s = v.render(ConfigRenderOptions.concise)
+            cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
+          }
+        )
     }
     ConfigReader[Conf].from(conf).right.value shouldBe Conf(1, 42)
   }
