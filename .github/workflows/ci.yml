@@ -29,6 +29,12 @@ jobs:
       - name: Run tests
         run: sbt coverage "++${{ matrix.scala }} test"
 
+      - name: Upload coverage data to Coveralls
+        run: sbt ++${{ matrix.scala }} coverageAggregate coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
+
       - name: Build Scaladoc
         run: sbt "++${{ matrix.scala }} doc"
 
@@ -43,18 +49,6 @@ jobs:
         run: >
            sbt "++${{ matrix.scala }} tut" &&
            git diff --exit-code
-
-# TODO: enable this once either sbt-coveralls starts supporting GitHub Actions
-# (https://github.com/scoverage/sbt-coveralls/issues/126) or coverallsapp/github-action starts
-# supporting cobertura.xml format (https://github.com/coverallsapp/github-action/issues/30)
-#
-#      - name: Compile coverage data
-#        run: sbt ++${{ matrix.scala }} coverageAggregate
-#
-#      - name: Upload coverage data to Coveralls
-#        uses: coverallsapp/github-action@master
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build_website:
     name: Build Website
