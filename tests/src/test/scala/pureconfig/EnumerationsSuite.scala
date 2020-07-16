@@ -72,6 +72,9 @@ class EnumerationsSuite extends BaseSuite {
   }
 
   it should "not allow deriving readers, writers and full converters for enumerations encoded as sealed traits whose subclasses are not all case objects" in {
+    sealed trait Entity
+    case class Person(name: String, surname: String) extends Entity
+    case class Place(name: String, lat: Double, lon: Double) extends Entity
 
     illTyped("deriveEnumerationReader[Entity]")
     illTyped("deriveEnumerationWriter[Entity]")
