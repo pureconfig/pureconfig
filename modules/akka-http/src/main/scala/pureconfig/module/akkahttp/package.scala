@@ -3,7 +3,7 @@ package pureconfig.module
 import akka.http.scaladsl.model.{IllegalUriException, Uri}
 import akka.http.scaladsl.model.Uri.ParsingMode
 import pureconfig.{ConfigReader, ConfigWriter}
-import pureconfig.error.CannotConvert
+import pureconfig.error.{CannotConvert, ExceptionThrown}
 
 import scala.util.Try
 
@@ -11,13 +11,11 @@ package object akkahttp {
 
   implicit val uriReader: ConfigReader[Uri] =
     ConfigReader.fromString(str =>
-      Try(Uri(str, ParsingMode.Strict)).fold(
-        {
-          case err: IllegalUriException => Left(CannotConvert(str, "Uri", err.info.summary))
-          case err => Left(CannotConvert(str, "Uri", err.getMessage.replace('^', " ".charAt(0)).trim))
-        },
-        uri => Right(uri)
-      )
+      Try(Uri(str, ParsingMode.Strict)).toEither.left
+        .map {
+          case err: IllegalUriException => CannotConvert(str, "Uri", err.info.summary)
+          case err => ExceptionThrown(err)
+        }
     )
 
   implicit val uriWriter: ConfigWriter[Uri] = ConfigWriter[String].contramap(_.toString)
