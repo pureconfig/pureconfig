@@ -3,7 +3,7 @@ name := "pureconfig-akka-http"
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-stream" % "2.5.31" % Provided,
+  "com.typesafe.akka" %% "akka-stream" % "2.5.31" % "provided,Tut",
   "com.typesafe.akka" %% "akka-http" % "10.1.12")
 
 developers := List(
