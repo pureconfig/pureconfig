@@ -1,7 +1,7 @@
 name := "pureconfig-hadoop"
 
 libraryDependencies ++= Seq(
-  "org.apache.hadoop" % "hadoop-common" % "3.2.1" % "provided,Tut")
+  "org.apache.hadoop" % "hadoop-common" % "3.3.0" % "provided,Tut")
 
 developers := List(
   Developer("lmnet", "Yuriy Badalyantc", "lmnet89@gmail.com", url("https://github.com/lmnet")))
