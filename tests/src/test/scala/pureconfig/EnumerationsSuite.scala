@@ -76,8 +76,8 @@ class EnumerationsSuite extends BaseSuite {
     case class Person(name: String, surname: String) extends Entity
     case class Place(name: String, lat: Double, lon: Double) extends Entity
 
-    illTyped("deriveEnumerationReader[Entity]")
-    illTyped("deriveEnumerationWriter[Entity]")
-    illTyped("deriveEnumerationConvert[Entity]")
+    illTyped("deriveEnumerationReader[Entity]", ".*could not find Lazy implicit value of type.*")
+    illTyped("deriveEnumerationWriter[Entity]", ".*could not find Lazy implicit value of type.*")
+    illTyped("deriveEnumerationConvert[Entity]", ".*could not find Lazy implicit value of type.*")
   }
 }
