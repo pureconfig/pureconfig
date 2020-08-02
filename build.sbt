@@ -1,7 +1,6 @@
 import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
-import scalariform.formatter.preferences._
 
 organization in ThisBuild := "com.github.pureconfig"
 
@@ -53,6 +52,7 @@ def module(proj: Project) = proj.
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
+lazy val `akka-http` = module(project) in file("modules/akka-http")
 lazy val cats = module(project) in file("modules/cats")
 lazy val `cats-effect` = module(project) in file("modules/cats-effect")
 lazy val circe = module(project) in file("modules/circe")
@@ -101,10 +101,7 @@ lazy val commonSettings = Seq(
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 
-  scalariformPreferences := scalariformPreferences.value
-    .setPreference(DanglingCloseParenthesis, Prevent)
-    .setPreference(DoubleIndentConstructorArguments, true)
-    .setPreference(SpacesAroundMultiImports, true),
+  scalafmtOnCompile := true,
 
   autoAPIMappings := true,
 

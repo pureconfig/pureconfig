@@ -14,6 +14,7 @@ env:
 script:
   - >
     sbt coverage
+    "++$TRAVIS_SCALA_VERSION scalafmtCheckAll"
     "++$TRAVIS_SCALA_VERSION test"
     "++$TRAVIS_SCALA_VERSION doc"
     "++$TRAVIS_SCALA_VERSION publishLocal"
@@ -55,14 +56,6 @@ jobs:
             --url-ignore "/search.maven.org/"
             docs/target/site
       after_success: ignore
-    - env: JOB=diff_website
-      if: type = pull_request AND branch = master
-      scala: 2.12.10
-      install:
-        - rvm use 2.6 --install --fuzzy
-        - gem install sass jekyll:4.0.0
-      script:
-        - ./scripts/diff_website.sh
 
 cache:
   directories:

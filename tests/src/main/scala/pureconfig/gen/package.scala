@@ -1,19 +1,20 @@
 package pureconfig
 
 import java.io.File
-import java.math.{ BigInteger, BigDecimal => JavaBigDecimal }
-import java.nio.file.{ Path, Paths }
+import java.math.{BigInteger, BigDecimal => JavaBigDecimal}
+import java.nio.file.{Path, Paths}
 import java.time._
-import java.time.{ Duration => JavaDuration }
+import java.time.{Duration => JavaDuration}
 
-import org.scalacheck.{ Arbitrary, Gen }
+import org.scalacheck.{Arbitrary, Gen}
 import pureconfig.data._
 import scala.collection.JavaConverters._
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
 package object gen {
   val genFiniteDuration: Gen[FiniteDuration] =
-    Gen.choose(Long.MinValue + 1, Long.MaxValue)
+    Gen
+      .choose(Long.MinValue + 1, Long.MaxValue)
       .suchThat(_ != 8092048641075763L) // doesn't work, see #182
       .map(Duration.fromNanos)
 
@@ -29,9 +30,7 @@ package object gen {
   } yield JavaDuration.ofSeconds(seconds, nanoseconds)
 
   val genDuration: Gen[Duration] =
-    Gen.frequency(
-      1 -> Gen.oneOf(Duration.Inf, Duration.MinusInf, Duration.Undefined),
-      99 -> genFiniteDuration)
+    Gen.frequency(1 -> Gen.oneOf(Duration.Inf, Duration.MinusInf, Duration.Undefined), 99 -> genFiniteDuration)
 
   val genInstant: Gen[Instant] =
     Gen.choose(Instant.MIN.getEpochSecond, Instant.MAX.getEpochSecond).map(Instant.ofEpochSecond)

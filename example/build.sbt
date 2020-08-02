@@ -27,3 +27,5 @@ scalacOptions ++= Seq(
   "-Xlint",
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard")
+
+scalafmtOnCompile := true

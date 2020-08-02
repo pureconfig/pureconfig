@@ -1,13 +1,13 @@
 package pureconfig.derivation
 
-import scala.reflect.macros.{ TypecheckException, whitebox }
+import scala.reflect.macros.{TypecheckException, whitebox}
 
 import pureconfig.Derivation
 
 /**
- * An API for macro operations that require access to macro or even compiler internals. Since they rely on
- * non-public APIs, the code may be distinct between Scala major versions and even between minor versions.
- */
+  * An API for macro operations that require access to macro or even compiler internals. Since they rely on
+  * non-public APIs, the code may be distinct between Scala major versions and even between minor versions.
+  */
 trait MacroCompat {
   val c: whitebox.Context
 
@@ -27,13 +27,22 @@ trait MacroCompat {
   def inferImplicitValueCompat(typ: Type): Tree = {
     val cc = c.asInstanceOf[scala.reflect.macros.contexts.Context]
     val enclosingTree =
-      cc.openImplicits.headOption.map(_.tree)
+      cc.openImplicits.headOption
+        .map(_.tree)
         .orElse(cc.enclosingMacros.lastOption.map(_.macroApplication))
-        .getOrElse(EmptyTree).asInstanceOf[cc.universe.analyzer.global.Tree]
+        .getOrElse(EmptyTree)
+        .asInstanceOf[cc.universe.analyzer.global.Tree]
 
     val res: cc.Tree = cc.universe.analyzer.inferImplicit(
-      enclosingTree, typ.asInstanceOf[cc.Type], false, cc.callsiteTyper.context, true, false, cc.enclosingPosition,
-      (pos, msg) => throw TypecheckException(pos, msg))
+      enclosingTree,
+      typ.asInstanceOf[cc.Type],
+      false,
+      cc.callsiteTyper.context,
+      true,
+      false,
+      cc.enclosingPosition,
+      (pos, msg) => throw TypecheckException(pos, msg)
+    )
 
     res.asInstanceOf[c.Tree]
   }

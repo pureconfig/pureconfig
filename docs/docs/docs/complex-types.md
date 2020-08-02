@@ -104,7 +104,7 @@ def extractByType(typ: String, objCur: ConfigObjectCursor): ConfigReader.Result[
   case "class1" => class1Reader.from(objCur)
   case "class2" => class2Reader.from(objCur)
   case t =>
-    objCur.failed(CannotConvert(objCur.value.toString, "Identifiable",
+    objCur.failed(CannotConvert(objCur.objValue.toString, "Identifiable",
       s"type has value $t instead of class1 or class2"))
 }
 

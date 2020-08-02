@@ -15,7 +15,11 @@ class DerivationModesSuite extends BaseSuite {
   val person = Person("John", "Doe")
   val conf = ConfigFactory.parseString("{ type: person, name: John, surname: Doe }")
 
-  case class CustomCaseClass(customObject: CustomObject, mapCustomObject: Map[String, CustomObject], mapListCustomObject: Map[String, List[CustomObject]])
+  case class CustomCaseClass(
+      customObject: CustomObject,
+      mapCustomObject: Map[String, CustomObject],
+      mapListCustomObject: Map[String, List[CustomObject]]
+  )
   case class CustomObject(value: Int)
   object CustomObject {
     implicit val pureconfigReader: ConfigReader[CustomObject] = ConfigReader.fromStringOpt {
@@ -33,9 +37,9 @@ class DerivationModesSuite extends BaseSuite {
   val customCaseClass = CustomCaseClass(
     CustomObject(453),
     Map("a" -> CustomObject(453), "b" -> CustomObject(45)),
-    Map("x" -> List(CustomObject(45), CustomObject(453), CustomObject(1))))
-  val customConf = ConfigFactory.parseString(
-    """{
+    Map("x" -> List(CustomObject(45), CustomObject(453), CustomObject(1)))
+  )
+  val customConf = ConfigFactory.parseString("""{
       |  custom-object = "eaaxacaca"
       |  map-custom-object { a = "eaaxacaca", b = "a" }
       |  map-list-custom-object { x = ["a", "eaaxacaca", "cvbc"]}

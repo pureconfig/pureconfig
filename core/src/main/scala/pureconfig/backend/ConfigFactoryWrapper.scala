@@ -10,9 +10,9 @@ import pureconfig.backend.ErrorUtil._
 import pureconfig.error._
 
 /**
- * A wrapper of `com.typesafe.config.ConfigFactory` whose methods return [[scala.Either]] instead
- * of throwing exceptions
- */
+  * A wrapper of `com.typesafe.config.ConfigFactory` whose methods return [[scala.Either]] instead
+  * of throwing exceptions
+  */
 object ConfigFactoryWrapper {
   private[this] val strictSettings = ConfigParseOptions.defaults.setAllowMissing(false)
 
@@ -52,25 +52,26 @@ object ConfigFactoryWrapper {
   def parseFile(file: File): ConfigReader.Result[Config] =
     unsafeToReaderResult(
       ConfigFactory.parseFile(file, strictSettings),
-      onIOFailure = Some(CannotReadFile(file.toPath, _)))
+      onIOFailure = Some(CannotReadFile(file.toPath, _))
+    )
 
   /** @see `com.typesafe.config.ConfigFactory.parseFile()` */
   def parseFile(path: Path): ConfigReader.Result[Config] =
     unsafeToReaderResult(
       ConfigFactory.parseFile(path.toFile, strictSettings),
-      onIOFailure = Some(CannotReadFile(path, _)))
+      onIOFailure = Some(CannotReadFile(path, _))
+    )
 
   /** @see `com.typesafe.config.ConfigFactory.parseResources()` */
   def parseResources(resource: String, classLoader: ClassLoader = null): ConfigReader.Result[Config] =
     unsafeToReaderResult(
       ConfigFactory.parseResources(resource, strictSettings.setClassLoader(classLoader)),
-      onIOFailure = Some(CannotReadResource(resource, _)))
+      onIOFailure = Some(CannotReadResource(resource, _))
+    )
 
   /** @see `com.typesafe.config.ConfigFactory.parseURL()` */
   def parseURL(url: URL): ConfigReader.Result[Config] =
-    unsafeToReaderResult(
-      ConfigFactory.parseURL(url, strictSettings),
-      onIOFailure = Some(CannotReadUrl(url, _)))
+    unsafeToReaderResult(ConfigFactory.parseURL(url, strictSettings), onIOFailure = Some(CannotReadUrl(url, _)))
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =

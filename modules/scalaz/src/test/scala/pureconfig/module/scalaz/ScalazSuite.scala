@@ -1,11 +1,11 @@
 package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigFactory.parseString
-import pureconfig.{ BaseSuite, ConfigConvertChecks }
+import pureconfig.{BaseSuite, ConfigConvertChecks}
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 
-import scalaz.{ ==>>, IList, ISet, Maybe, NonEmptyList }
+import scalaz.{==>>, IList, ISet, Maybe, NonEmptyList}
 import scalaz.scalacheck.ScalazArbitrary._
 import scalaz.std.anyVal.intInstance
 import scalaz.std.string._

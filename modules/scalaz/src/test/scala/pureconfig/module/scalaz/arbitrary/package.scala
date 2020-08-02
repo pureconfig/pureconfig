@@ -1,9 +1,9 @@
 package pureconfig.module.scalaz
 
-import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
-import org.scalacheck.{ Arbitrary, Cogen, Gen }
-import org.scalacheck.Arbitrary.{ arbitrary => arb }
-import pureconfig.{ ConfigConvert, ConfigReader, ConfigWriter, Derivation }
+import com.typesafe.config.{ConfigValue, ConfigValueFactory}
+import org.scalacheck.{Arbitrary, Cogen, Gen}
+import org.scalacheck.Arbitrary.{arbitrary => arb}
+import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter, Derivation}
 import pureconfig.error._
 
 import scala.collection.JavaConverters._
@@ -17,24 +17,18 @@ package object arbitrary {
 
   private[this] def genAny(depth: Int): Gen[Any] = {
     val genScalar: Gen[Any] =
-      Gen.oneOf(
-        Gen.oneOf(true, false),
-        Gen.choose(Double.MinValue, Double.MaxValue),
-        Gen.alphaStr)
+      Gen.oneOf(Gen.oneOf(true, false), Gen.choose(Double.MinValue, Double.MaxValue), Gen.alphaStr)
 
     def genList(depth: Int): Gen[List[Any]] =
-      Gen.choose(0, MaxCollectionLength).flatMap(n =>
-        Gen.listOfN(n, Gen.lzy(genAny(depth - 1))))
+      Gen.choose(0, MaxCollectionLength).flatMap(n => Gen.listOfN(n, Gen.lzy(genAny(depth - 1))))
 
     def genMap(depth: Int): Gen[Map[String, Any]] =
-      Gen.choose(0, MaxCollectionLength).flatMap(n =>
-        Gen.mapOfN(n, for { k <- Gen.alphaStr; v <- Gen.lzy(genAny(depth - 1)) } yield (k, v)))
+      Gen
+        .choose(0, MaxCollectionLength)
+        .flatMap(n => Gen.mapOfN(n, for { k <- Gen.alphaStr; v <- Gen.lzy(genAny(depth - 1)) } yield (k, v)))
 
     if (depth == 0) genScalar
-    else Gen.frequency(
-      3 -> genScalar,
-      1 -> genList(depth).map(_.asJava),
-      1 -> genMap(depth).map(_.asJava))
+    else Gen.frequency(3 -> genScalar, 1 -> genList(depth).map(_.asJava), 1 -> genMap(depth).map(_.asJava))
   }
 
   implicit val arbConfigValue: Arbitrary[ConfigValue] =
@@ -49,7 +43,8 @@ package object arbitrary {
       ^(Gen.posNum[Int], Gen.posNum[Int])(WrongSizeString.apply),
       ^(Gen.posNum[Int], Gen.posNum[Int])(WrongSizeList.apply),
       Gen.alphaStr.map(k => KeyNotFound.apply(k)),
-      Gen.alphaStr.map(UnknownKey.apply))
+      Gen.alphaStr.map(UnknownKey.apply)
+    )
 
   implicit val arbConfigReaderFailures: Arbitrary[ConfigReaderFailures] =
     Arbitrary {

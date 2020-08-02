@@ -13,7 +13,8 @@ import pureconfig.syntax._
 class CirceSuite extends AnyFlatSpec with Matchers with EitherValues {
 
   case class JsonConf(json: Json)
-  val confJson = json"""{ "long": 123, "double": 123.123, "alpha": "test", "arr": [1, 2, 3], "map": { "key1": "value1", "key2": "value2" } }"""
+  val confJson =
+    json"""{ "long": 123, "double": 123.123, "alpha": "test", "arr": [1, 2, 3], "map": { "key1": "value1", "key2": "value2" } }"""
   val confString = """
     json = {
       long = 123

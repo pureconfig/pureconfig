@@ -3,32 +3,45 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package pureconfig
 
-import scala.concurrent.duration.Duration.{ Inf, MinusInf }
-import scala.concurrent.duration.{ DAYS, Duration, FiniteDuration, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, SECONDS, TimeUnit }
+import scala.concurrent.duration.Duration.{Inf, MinusInf}
+import scala.concurrent.duration.{
+  DAYS,
+  Duration,
+  FiniteDuration,
+  HOURS,
+  MICROSECONDS,
+  MILLISECONDS,
+  MINUTES,
+  NANOSECONDS,
+  SECONDS,
+  TimeUnit
+}
 import scala.util.Try
 import scala.util.control.NonFatal
 
-import pureconfig.error.{ CannotConvert, ExceptionThrown, FailureReason }
+import pureconfig.error.{CannotConvert, ExceptionThrown, FailureReason}
 
 /**
- * Utility functions for converting a `String` to a `Duration` and vice versa. The parser accepts the HOCON unit
- * syntax.
- */
+  * Utility functions for converting a `String` to a `Duration` and vice versa. The parser accepts the HOCON unit
+  * syntax.
+  */
 private[pureconfig] object DurationUtils {
+
   /**
-   * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
-   */
+    * Convert a string to a Duration while trying to maintain compatibility with Typesafe's abbreviations.
+    */
   val fromString: String => Either[FailureReason, Duration] = { string =>
     if (string == UndefinedDuration) Right(Duration.Undefined)
-    else try {
-      Right(parseDuration(addDefaultUnit(justAMinute(itsGreekToMe(string)))))
-    } catch {
-      case ex: NumberFormatException =>
-        val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
-        Left(CannotConvert(string, "Duration", err))
-      case NonFatal(t) =>
-        Left(ExceptionThrown(t))
-    }
+    else
+      try {
+        Right(parseDuration(addDefaultUnit(justAMinute(itsGreekToMe(string)))))
+      } catch {
+        case ex: NumberFormatException =>
+          val err = s"${ex.getMessage}. (try a number followed by any of ns, us, ms, s, m, h, d)"
+          Left(CannotConvert(string, "Duration", err))
+        case NonFatal(t) =>
+          Left(ExceptionThrown(t))
+      }
   }
 
   ////////////////////////////////////
@@ -49,7 +62,8 @@ private[pureconfig] object DurationUtils {
     SECONDS -> "s sec second",
     MILLISECONDS -> "ms milli millisecond",
     MICROSECONDS -> "µs micro microsecond",
-    NANOSECONDS -> "ns nano nanosecond")
+    NANOSECONDS -> "ns nano nanosecond"
+  )
 
   // Label => TimeUnit
   protected[pureconfig] val timeUnit: Map[String, TimeUnit] =
@@ -86,15 +100,17 @@ private[pureconfig] object DurationUtils {
   private val addDefaultUnit = { s: String => if (onlyNumberRegex.unapplySeq(s).isDefined) s + " ms" else s }
 
   // To maintain compatibility with Typesafe Config, replace "us" with "µs".
-  private val itsGreekToMe = fauxMuRegex.replaceSomeIn(_: String, m => Some(s"${m.group(1)}${m.group(2)}µs${m.group(3)}"))
+  private val itsGreekToMe =
+    fauxMuRegex.replaceSomeIn(_: String, m => Some(s"${m.group(1)}${m.group(2)}µs${m.group(3)}"))
 
   // To maintain compatibility with Typesafe Config, replace "m" with "minutes".
-  private val justAMinute = shortMinuteRegex.replaceSomeIn(_: String, m => Some(s"${m.group(1)}${m.group(2)}minutes${m.group(3)}"))
+  private val justAMinute =
+    shortMinuteRegex.replaceSomeIn(_: String, m => Some(s"${m.group(1)}${m.group(2)}minutes${m.group(3)}"))
 
   /**
-   * Format a possibily infinite duration as a string with a suitable time unit using units TypesafeConfig understands.
-   * Caveat: TypesafeConfig doesn't undersand infinite durations
-   */
+    * Format a possibily infinite duration as a string with a suitable time unit using units TypesafeConfig understands.
+    * Caveat: TypesafeConfig doesn't undersand infinite durations
+    */
   def fromDuration(d: Duration): String = {
     d match {
       case f: FiniteDuration => fromFiniteDuration(f)
@@ -110,16 +126,18 @@ private[pureconfig] object DurationUtils {
   private final val UndefinedDuration = "Undefined"
 
   /**
-   * Format a FiniteDuration as a string with a suitable time unit using units TypesafeConfig understands.
-   */
+    * Format a FiniteDuration as a string with a suitable time unit using units TypesafeConfig understands.
+    */
   def fromFiniteDuration(d: FiniteDuration): String = {
     d.toNanos match {
       case 0L => "0"
       case n =>
-        timeUnitsToLabels.collectFirst {
-          case (unitInNanos, unitLabel) if n >= unitInNanos && n % unitInNanos == 0 =>
-            s"${n / unitInNanos}$unitLabel"
-        }.getOrElse(s"${n}ns")
+        timeUnitsToLabels
+          .collectFirst {
+            case (unitInNanos, unitLabel) if n >= unitInNanos && n % unitInNanos == 0 =>
+              s"${n / unitInNanos}$unitLabel"
+          }
+          .getOrElse(s"${n}ns")
     }
   }
 
@@ -137,5 +155,6 @@ private[pureconfig] object DurationUtils {
     minuteInNanos -> "m",
     secondInNanos -> "s",
     millisecondInNanos -> "ms",
-    microsecondInNanos -> "us").sortBy(_._1)(implicitly[Ordering[Long]].reverse)
+    microsecondInNanos -> "us"
+  ).sortBy(_._1)(implicitly[Ordering[Long]].reverse)
 }

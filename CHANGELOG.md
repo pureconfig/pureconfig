@@ -1,7 +1,27 @@
+### 0.13.0 (Jun 27, 2020)
+
+- Breaking changes
+  - `ConfigOrigin` is now used in place of `ConfigValueLocation` to represent the origin of `ConfigValue`s;
+  - The `ProductHint` and `CoproductHint` API was changed to allow better customization of how generic derivations are
+    performed.
+
+- New features
+  - `ConfigReader` and `ConfigWriter` instances for `Byte`;
+  - Errors are now accumulated in readers derived using the `pureconfig-magnolia` module;
+  - The error message displayed when using `FirstSuccessCoproductHint` and no valid coproduct option is found now shows
+    the errors raised when attempting to derive each option;
+  - `ConfigReader` and `ConfigWriter` instances for `ConfigMemorySize`;
+  - `ConfigConvert` now has a more natural constructor;
+  - `ConfigConvert` now has the `xemap` combinator to transform values read and written, where the reader function may
+    specify custom failure reasons (similar to the `emap` of `ConfigReader`).
+
+- Bug fixes
+  - Key names are no longer built using `Symbol#toString`, making them compatible with Scala 2.13.3.
+
 ### 0.12.3 (Feb 29, 2020)
 
 - Bug fixes
-    - `pureconfig-magnolia` now uses existing `ConfigReader` instances in auto-derivation mode.
+  - `pureconfig-magnolia` now uses existing `ConfigReader` instances in auto-derivation mode.
 
 ### 0.12.2 (Dec 21, 2019)
 

@@ -20,8 +20,7 @@ class ScalaXMLSuite extends AnyFlatSpec with Matchers with EitherValues {
     </people>
 
   it should "be able to read a config with XML" in {
-    val config = parseString(
-      s"""{ people =
+    val config = parseString(s"""{ people =
          |    \"\"\"$sampleXML\"\"\"
          | }""".stripMargin)
     config.to[Config] shouldEqual Right(Config(sampleXML))
