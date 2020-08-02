@@ -12,8 +12,6 @@ class EnumerationsSuite extends BaseSuite {
   case object RainyBlue extends Color
   case object SunnyYellow extends Color
 
-  val conf = ConfigFactory.parseString("{ type: person, name: John, surname: Doe }")
-
   behavior of "deriveEnumeration"
 
   it should "provide methods to derive readers for enumerations encoded as sealed traits" in {
@@ -25,6 +23,8 @@ class EnumerationsSuite extends BaseSuite {
     val unknownValue = ConfigValueFactory.fromAnyRef("blue")
     ConfigReader[Color]
       .from(unknownValue) should failWith(NoValidCoproductOptionFound(unknownValue, Seq.empty), "", emptyConfigOrigin)
+
+    val conf = ConfigFactory.parseString("{ type: person, name: John, surname: Doe }")
     ConfigReader[Color].from(conf.root()) should failWith(
       WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)),
       "",
