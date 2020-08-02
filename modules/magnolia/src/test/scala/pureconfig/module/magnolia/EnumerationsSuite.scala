@@ -8,6 +8,7 @@ import pureconfig.error.WrongType
 import pureconfig.generic.error.NoValidCoproductOptionFound
 import pureconfig.module.magnolia.semiauto.reader._
 import pureconfig.module.magnolia.semiauto.writer._
+import shapeless.test.illTyped
 
 class EnumerationsSuite extends BaseSuite {
 
@@ -54,5 +55,14 @@ class EnumerationsSuite extends BaseSuite {
 
     ConfigWriter[Color].to(RainyBlue) shouldEqual ConfigValueFactory.fromAnyRef("rainy_blue")
     ConfigWriter[Color].to(SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny_yellow")
+  }
+
+  it should "not allow deriving readers, writers and full converters for enumerations encoded as sealed traits whose subclasses are not all case objects" in {
+    sealed trait Entity
+    case class Person(name: String, surname: String) extends Entity
+    case class Place(name: String, lat: Double, lon: Double) extends Entity
+
+    illTyped("deriveEnumerationReader[Entity]", ".*could not find implicit value for evidence.*")
+    illTyped("deriveEnumerationWriter[Entity]", ".*could not find implicit value for evidence.*")
   }
 }
