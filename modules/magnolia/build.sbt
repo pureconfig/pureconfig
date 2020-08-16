@@ -5,7 +5,7 @@ name := "pureconfig-magnolia"
 crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
 
 libraryDependencies ++= Seq(
-  "com.propensive" %% "magnolia" % "0.16.0",
+  "com.propensive" %% "magnolia" % "0.17.0",
   scalaCheckShapeless % "test",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided)
 
