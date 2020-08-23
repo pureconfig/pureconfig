@@ -18,11 +18,11 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-magnolia" % "0.13.
 ## Example
 
 The only thing needed to use Magnolia-based derivation is to replace the `pureconfig.generic.auto._` import with
-`pureconfig.module.magnolia.reader.auto._`:
+`pureconfig.module.magnolia.auto.reader._`:
 
 ```scala
 import pureconfig._
-import pureconfig.generic.auto._
+import pureconfig.module.magnolia.auto.reader._
 import scala.language.higherKinds
 
 sealed trait MyAdt
