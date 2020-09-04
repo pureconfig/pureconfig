@@ -15,7 +15,18 @@ val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
 libraryDependencies ++= Seq(
   "com.github.pureconfig" %% "pureconfig" % pureconfigVersion)
 
-crossScalaVersions := Seq("2.11.12", "2.12.11", "2.13.2")
+crossScalaVersions := Seq("2.11.12", "2.12.12", "2.13.3")
+
+val lintFlags =
+  Def.setting {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 13)) =>
+        // Excluding -byname-implicit is required for Scala 2.13 due to https://github.com/scala/bug/issues/12072
+        "-Xlint:_,-byname-implicit"
+      case _ =>
+        "-Xlint:_"
+    }
+  }
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -24,8 +35,8 @@ scalacOptions ++= Seq(
   "-feature",
   "-unchecked",
   "-Xfatal-warnings",
-  "-Xlint",
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard")
+  "-Ywarn-value-discard",
+  lintFlags.value)
 
 scalafmtOnCompile := true
