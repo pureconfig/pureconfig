@@ -1,9 +1,11 @@
 package pureconfig.module.magnolia
 
 import scala.language.experimental.macros
+import scala.reflect.ClassTag
 
 import magnolia._
 import pureconfig.ConfigReader.Result
+import pureconfig.error.CannotConvert
 import pureconfig.generic.error.NoValidCoproductOptionFound
 import pureconfig.{ConfigCursor, ConfigReader}
 
@@ -20,13 +22,24 @@ private[magnolia] trait EnumerationConfigReaderBuilder[A] {
 object EnumerationConfigReaderBuilder {
   type Typeclass[A] = EnumerationConfigReaderBuilder[A]
 
-  def combine[A](ctx: CaseClass[EnumerationConfigReaderBuilder, A]): EnumerationConfigReaderBuilder[A] =
+  def combine[A](
+      ctx: CaseClass[EnumerationConfigReaderBuilder, A]
+  )(implicit ct: ClassTag[A]): EnumerationConfigReaderBuilder[A] =
     new EnumerationConfigReaderBuilder[A] {
       def build(transformName: String => String): ConfigReader[A] =
         new ConfigReader[A] {
           def from(cur: ConfigCursor): Result[A] =
             if (ctx.isObject) Right(ctx.rawConstruct(Seq.empty))
-            else cur.asConfigValue.right.flatMap(v => cur.failed(NoValidCoproductOptionFound(v, Seq.empty)))
+            else
+              cur.asString.right.flatMap(v =>
+                cur.failed(
+                  CannotConvert(
+                    v,
+                    ct.runtimeClass.getName,
+                    s"An enumeration reader was derived for a sealed family in which subtype ${ct.runtimeClass.getName} isn't an object"
+                  )
+                )
+              )
         }
     }
 
