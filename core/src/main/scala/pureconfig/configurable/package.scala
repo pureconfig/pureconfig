@@ -54,13 +54,12 @@ package object configurable {
   )(implicit readerV: Derivation[ConfigReader[V]]): ConfigReader[Map[K, V]] =
     ConfigReader.fromCursor { cursor =>
       cursor.asMap.right.flatMap { map =>
-        map.foldLeft[ConfigReader.Result[Map[K, V]]](Right(Map.empty)) {
-          case (acc, (key, valueCursor)) =>
-            val eitherKeyOrError = cursor.scopeFailure(keyParser(key))
-            val eitherValueOrError = readerV.value.from(valueCursor)
-            ConfigReader.Result.zipWith(acc, ConfigReader.Result.zipWith(eitherKeyOrError, eitherValueOrError)(_ -> _))(
-              _ + _
-            )
+        map.foldLeft[ConfigReader.Result[Map[K, V]]](Right(Map.empty)) { case (acc, (key, valueCursor)) =>
+          val eitherKeyOrError = cursor.scopeFailure(keyParser(key))
+          val eitherValueOrError = readerV.value.from(valueCursor)
+          ConfigReader.Result.zipWith(acc, ConfigReader.Result.zipWith(eitherKeyOrError, eitherValueOrError)(_ -> _))(
+            _ + _
+          )
         }
       }
     }
@@ -69,9 +68,8 @@ package object configurable {
       keyFormatter: K => String
   )(implicit writerV: Derivation[ConfigWriter[V]]): ConfigWriter[Map[K, V]] =
     ConfigWriter.fromFunction[Map[K, V]](map =>
-      ConfigValueFactory.fromMap(map.map {
-        case (key, value) =>
-          keyFormatter(key) -> writerV.value.to(value)
+      ConfigValueFactory.fromMap(map.map { case (key, value) =>
+        keyFormatter(key) -> writerV.value.to(value)
       }.asJava)
     )
 }

@@ -26,8 +26,8 @@ object CoproductReaderOptions {
       lazy val options = {
         val optionName = hName.value.name
         val optionReader = hConfigReader.value.value.map[FieldType[Name, H] :+: T](v => Inl(field[Name](v)))
-        val remaining = tConfigReaderOptions.value.options.map {
-          case (name, reader) => name -> reader.map[FieldType[Name, H] :+: T](Inr.apply)
+        val remaining = tConfigReaderOptions.value.options.map { case (name, reader) =>
+          name -> reader.map[FieldType[Name, H] :+: T](Inr.apply)
         }
         remaining.updated(optionName, optionReader)
       }

@@ -33,9 +33,8 @@ package object instances {
         fa.contramap(f)
 
       def product[A, B](fa: ConfigWriter[A], fb: ConfigWriter[B]) =
-        ConfigWriter.fromFunction[(A, B)] {
-          case (a, b) =>
-            fb.to(b).withFallback(fa.to(a))
+        ConfigWriter.fromFunction[(A, B)] { case (a, b) =>
+          fb.to(b).withFallback(fa.to(a))
         }
     }
 
@@ -46,9 +45,8 @@ package object instances {
 
       def product[A, B](fa: ConfigConvert[A], fb: ConfigConvert[B]): ConfigConvert[(A, B)] = {
         val reader = fa.zip(fb)
-        val writer = ConfigWriter.fromFunction[(A, B)] {
-          case (a, b) =>
-            fb.to(b).withFallback(fa.to(a))
+        val writer = ConfigWriter.fromFunction[(A, B)] { case (a, b) =>
+          fb.to(b).withFallback(fa.to(a))
         }
 
         ConfigConvert.fromReaderAndWriter(Derivation.Successful(reader), Derivation.Successful(writer))

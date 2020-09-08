@@ -16,9 +16,8 @@ final case class NoValidCoproductOptionFound(value: ConfigValue, optionFailures:
     baseDescription + (if (optionFailures.isEmpty) ""
                        else {
                          "\n" + optionFailures
-                           .map {
-                             case (optionName, failures) =>
-                               s"Can't use coproduct option '$optionName':\n" + failures.prettyPrint(1)
+                           .map { case (optionName, failures) =>
+                             s"Can't use coproduct option '$optionName':\n" + failures.prettyPrint(1)
                            }
                            .mkString("\n")
                        })
