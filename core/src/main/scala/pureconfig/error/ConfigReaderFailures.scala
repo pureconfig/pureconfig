@@ -41,12 +41,11 @@ case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFai
       linesBuffer += ""
     }
 
-    failuresByPath.foreach {
-      case (p, failures) =>
-        linesBuffer += (tabs(0) + (if (p.isEmpty) s"at the root:" else s"at '$p':"))
-        failures.foreach { failure =>
-          linesBuffer += descriptionWithOrigin(failure, 1)
-        }
+    failuresByPath.foreach { case (p, failures) =>
+      linesBuffer += (tabs(0) + (if (p.isEmpty) s"at the root:" else s"at '$p':"))
+      failures.foreach { failure =>
+        linesBuffer += descriptionWithOrigin(failure, 1)
+      }
     }
     linesBuffer.mkString(System.lineSeparator())
   }

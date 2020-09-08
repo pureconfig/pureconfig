@@ -125,10 +125,10 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
     for (value <- values) {
       it should s"fail when it tries to read a value of type ${tpe.tpe} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
-        val result = cr.from(value)
-        result.left.value.toList should have size 1
-        result.left.value.head should matchPattern { case ConvertFailure(_: E, _, _) => }
-      }
+          val result = cr.from(value)
+          result.left.value.toList should have size 1
+          result.left.value.head should matchPattern { case ConvertFailure(_: E, _, _) => }
+        }
     }
 
   /**
@@ -142,7 +142,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
     for ((value, errors) <- valuesToErrors) {
       it should s"fail when it tries to read a value of type ${tpe.tpe} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
-        cr.from(value).left.value.toList should contain theSameElementsAs errors.toList
-      }
+          cr.from(value).left.value.toList should contain theSameElementsAs errors.toList
+        }
     }
 }

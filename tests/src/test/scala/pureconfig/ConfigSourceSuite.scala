@@ -95,8 +95,8 @@ class ConfigSourceSuite extends BaseSuite {
     case class Conf(s: String, b: Boolean)
     val path = createTempFile("""{ b: true, s: "str" }""")
     ConfigSource.file(path).load[Conf] shouldBe Right(Conf("str", true))
-    ConfigSource.file(nonExistingPath).load[Conf] should failLike {
-      case CannotReadFile(path, _) => be(path)(nonExistingPath)
+    ConfigSource.file(nonExistingPath).load[Conf] should failLike { case CannotReadFile(path, _) =>
+      be(path)(nonExistingPath)
     }
   }
 
@@ -104,8 +104,8 @@ class ConfigSourceSuite extends BaseSuite {
     case class Conf(s: String, b: Boolean)
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
     ConfigSource.file(path).at("foo.bar").load[Conf] shouldBe Right(Conf("str", true))
-    ConfigSource.file(nonExistingPath).at("foo.bar").load[Conf] should failLike {
-      case CannotReadFile(path, _) => be(path)(nonExistingPath)
+    ConfigSource.file(nonExistingPath).at("foo.bar").load[Conf] should failLike { case CannotReadFile(path, _) =>
+      be(path)(nonExistingPath)
     }
     ConfigSource.file(path).at("bar.foo").load[Conf] should failWith(KeyNotFound("bar", Set.empty))
   }
@@ -114,8 +114,8 @@ class ConfigSourceSuite extends BaseSuite {
     case class Conf(s: String, b: Boolean)
     val path = createTempFile("""{ b: true, s: "str" }""")
     ConfigSource.url(path.toUri.toURL).load[Conf] shouldBe Right(Conf("str", true))
-    ConfigSource.url(nonExistingPath.toUri.toURL).load[Conf] should failLike {
-      case CannotReadUrl(url, _) => be(url)(nonExistingPath.toUri.toURL)
+    ConfigSource.url(nonExistingPath.toUri.toURL).load[Conf] should failLike { case CannotReadUrl(url, _) =>
+      be(url)(nonExistingPath.toUri.toURL)
     }
   }
 
@@ -229,12 +229,12 @@ class ConfigSourceSuite extends BaseSuite {
     case class Conf(hostOverride: String)
     val resolve1 = ConfigSource.resources("conf/configSource/resolve1.conf")
 
-    resolve1.value() should failLike {
-      case CannotParse(msg, _) => be(msg)(s"Could not resolve substitution to a value: $${host-suffix}")
+    resolve1.value() should failLike { case CannotParse(msg, _) =>
+      be(msg)(s"Could not resolve substitution to a value: $${host-suffix}")
     }
 
-    resolve1.load[Conf] should failLike {
-      case CannotParse(msg, _) => be(msg)(s"Could not resolve substitution to a value: $${host-suffix}")
+    resolve1.load[Conf] should failLike { case CannotParse(msg, _) =>
+      be(msg)(s"Could not resolve substitution to a value: $${host-suffix}")
     }
   }
 

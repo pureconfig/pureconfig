@@ -206,11 +206,10 @@ class DerivationMacros(val c: whitebox.Context) extends LazyContextParser with M
           }
         }
 
-      failuresByDirectReason.foreach {
-        case (typ, innerReasons) =>
-          val msgEnding = if (innerReasons.isEmpty) "" else ", because:"
-          builder ++= s"${"  " * depth}- missing ${prettyPrintType(typ)}$msgEnding\n"
-          buildMessage(innerReasons, depth + 1)
+      failuresByDirectReason.foreach { case (typ, innerReasons) =>
+        val msgEnding = if (innerReasons.isEmpty) "" else ", because:"
+        builder ++= s"${"  " * depth}- missing ${prettyPrintType(typ)}$msgEnding\n"
+        buildMessage(innerReasons, depth + 1)
       }
     }
 
