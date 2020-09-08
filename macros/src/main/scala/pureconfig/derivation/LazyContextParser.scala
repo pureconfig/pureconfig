@@ -56,8 +56,8 @@ trait LazyContextParser {
               }
               shapeless.Lazy.apply[${_}]($outerRef)
             }""" if isRefTo(outerRef, outer) && isRefTo(anonClassRef, anonClass) =>
-          val lazyDefMap: Map[TermName, Tree] = lazyDefs.collect {
-            case q"lazy val $valName = $valBody" => valName -> valBody
+          val lazyDefMap: Map[TermName, Tree] = lazyDefs.collect { case q"lazy val $valName = $valBody" =>
+            valName -> valBody
           }.toMap
 
           val entrypointDef = lazyDefMap(entrypoint)

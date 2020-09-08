@@ -123,8 +123,8 @@ class ApiSuite extends BaseSuite {
     case class Conf(s: String, b: Boolean, sref: String) // sref defined in reference.conf
     val path = createTempFile("""{ b: true, s: "str" }""")
     loadConfig[Conf](path = path) shouldBe Right(Conf("str", true, "wow"))
-    loadConfig[Conf](path = nonExistingPath) should failLike {
-      case CannotReadFile(path, _) => be(path)(nonExistingPath)
+    loadConfig[Conf](path = nonExistingPath) should failLike { case CannotReadFile(path, _) =>
+      be(path)(nonExistingPath)
     }
   }
 
@@ -132,8 +132,8 @@ class ApiSuite extends BaseSuite {
     case class Conf(s: String, b: Boolean, sref: String) // foo.bar.sref defined in reference.conf
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
     loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true, "foowow"))
-    loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failLike {
-      case CannotReadFile(path, _) => be(path)(nonExistingPath)
+    loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failLike { case CannotReadFile(path, _) =>
+      be(path)(nonExistingPath)
     }
     loadConfig[Conf](path = path, namespace = "bar.foo") should failWith(KeyNotFound("bar", Set.empty))
   }

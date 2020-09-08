@@ -40,9 +40,8 @@ object MapShapedWriter {
         val kv = hint.to(valueOpt, key.value.name)
 
         // TODO check that all keys are unique
-        kv.fold(rem) {
-          case (k, v) =>
-            rem.asInstanceOf[ConfigObject].withValue(k, v)
+        kv.fold(rem) { case (k, v) =>
+          rem.asInstanceOf[ConfigObject].withValue(k, v)
         }
       }
     }

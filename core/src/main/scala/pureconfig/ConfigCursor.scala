@@ -447,8 +447,8 @@ case class ConfigListCursor(listValue: ConfigList, pathElems: List[String], offs
     * @return a list of cursors to the elements of the config list pointed to by this cursor.
     */
   def list: List[ConfigCursor] =
-    listValue.asScala.toList.drop(offset).zipWithIndex.map {
-      case (cv, idx) => ConfigCursor(cv, indexKey(idx) :: pathElems)
+    listValue.asScala.toList.drop(offset).zipWithIndex.map { case (cv, idx) =>
+      ConfigCursor(cv, indexKey(idx) :: pathElems)
     }
 
   // Avoid resetting the offset when using ConfigCursor's implementation.

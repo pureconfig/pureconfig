@@ -98,9 +98,8 @@ class DurationUtilsSuite extends BaseSuite {
     fromS(fromD(expected)).right.value shouldBe expected
   }
   it should "freak when given a value larger than 2^64" in {
-    dcc.from(scc.to("12345678901234567890 ns")) should failLike {
-      case ConvertFailure(ExceptionThrown(ex), _, _) =>
-        (include regex "trying to construct too large duration")(ex.getMessage)
+    dcc.from(scc.to("12345678901234567890 ns")) should failLike { case ConvertFailure(ExceptionThrown(ex), _, _) =>
+      (include regex "trying to construct too large duration")(ex.getMessage)
     }
   }
   it should "parse a fractional value" in {

@@ -59,8 +59,8 @@ object MagnoliaConfigReader {
             if (listCur.size != ctx.parameters.length) {
               cur.failed(WrongSizeList(ctx.parameters.length, listCur.size))
             } else {
-              val fields = ConfigReader.Result.sequence(ctx.parameters.zip(listCur.list).map {
-                case (param, cur) => param.typeclass.from(cur)
+              val fields = ConfigReader.Result.sequence(ctx.parameters.zip(listCur.list).map { case (param, cur) =>
+                param.typeclass.from(cur)
               })
               fields.map(ctx.rawConstruct)
             }
