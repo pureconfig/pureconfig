@@ -1,9 +1,13 @@
-package pureconfig
+package pureconfig.module.magnolia
+
+import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
+import pureconfig._
 import pureconfig.error.WrongType
 import pureconfig.generic.error.NoValidCoproductOptionFound
-import pureconfig.generic.semiauto._
+import pureconfig.module.magnolia.semiauto.reader._
+import pureconfig.module.magnolia.semiauto.writer._
 import shapeless.test.illTyped
 
 class EnumerationsSuite extends BaseSuite {
@@ -39,15 +43,6 @@ class EnumerationsSuite extends BaseSuite {
     ConfigWriter[Color].to(SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny-yellow")
   }
 
-  it should "provide methods to derive full converters for enumerations encoded as sealed traits" in {
-    implicit val colorConvert = deriveEnumerationConvert[Color]
-
-    ConfigConvert[Color].from(ConfigValueFactory.fromAnyRef("rainy-blue")) shouldBe Right(RainyBlue)
-    ConfigConvert[Color].from(ConfigValueFactory.fromAnyRef("sunny-yellow")) shouldBe Right(SunnyYellow)
-    ConfigConvert[Color].to(RainyBlue) shouldEqual ConfigValueFactory.fromAnyRef("rainy-blue")
-    ConfigConvert[Color].to(SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny-yellow")
-  }
-
   it should "provide customizable methods to derive readers for enumerations encoded as sealed traits" in {
     implicit val colorReader = deriveEnumerationReader[Color](ConfigFieldMapping(PascalCase, SnakeCase))
 
@@ -62,22 +57,12 @@ class EnumerationsSuite extends BaseSuite {
     ConfigWriter[Color].to(SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny_yellow")
   }
 
-  it should "provide customizable methods to derive full converters for enumerations encoded as sealed traits" in {
-    implicit val colorConvert = deriveEnumerationConvert[Color](ConfigFieldMapping(PascalCase, SnakeCase))
-
-    ConfigConvert[Color].from(ConfigValueFactory.fromAnyRef("rainy_blue")) shouldBe Right(RainyBlue)
-    ConfigConvert[Color].from(ConfigValueFactory.fromAnyRef("sunny_yellow")) shouldBe Right(SunnyYellow)
-    ConfigConvert[Color].to(RainyBlue) shouldEqual ConfigValueFactory.fromAnyRef("rainy_blue")
-    ConfigConvert[Color].to(SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny_yellow")
-  }
-
   it should "not allow deriving readers, writers and full converters for enumerations encoded as sealed traits whose subclasses are not all case objects" in {
     sealed trait Entity
     case class Person(name: String, surname: String) extends Entity
     case class Place(name: String, lat: Double, lon: Double) extends Entity
 
-    illTyped("deriveEnumerationReader[Entity]", ".*could not find Lazy implicit value of type.*")
-    illTyped("deriveEnumerationWriter[Entity]", ".*could not find Lazy implicit value of type.*")
-    illTyped("deriveEnumerationConvert[Entity]", ".*could not find Lazy implicit value of type.*")
+    illTyped("deriveEnumerationReader[Entity]", ".*could not find implicit value for evidence.*")
+    illTyped("deriveEnumerationWriter[Entity]", ".*could not find implicit value for evidence.*")
   }
 }
