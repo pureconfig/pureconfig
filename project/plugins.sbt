@@ -4,7 +4,7 @@ addSbtPlugin("com.jsuereth"      % "sbt-pgp"         % "2.0.1")
 addSbtPlugin("com.typesafe.sbt"  % "sbt-osgi"        % "0.9.5")
 addSbtPlugin("io.spray"          % "sbt-boilerplate" % "0.6.1")
 addSbtPlugin("net.ruippeixotog"  % "sbt-coveralls"   % "1.3.0")  // fork with scoverage/sbt-coveralls#128 merged in
-addSbtPlugin("org.scalameta"     % "sbt-mdoc"        % "2.2.8")
+addSbtPlugin("org.scalameta"     % "sbt-mdoc"        % "2.2.9")
 addSbtPlugin("org.scalameta"     % "sbt-scalafmt"    % "2.4.2")
 addSbtPlugin("org.scoverage"     % "sbt-scoverage"   % "1.6.1")
 addSbtPlugin("org.tpolecat"      % "tut-plugin"      % "0.6.13")
