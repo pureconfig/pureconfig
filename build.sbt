@@ -4,51 +4,50 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 organization in ThisBuild := "com.github.pureconfig"
 
-lazy val core = (project in file("core")).
-  enablePlugins(BoilerplatePlugin, SbtOsgi, TutPlugin).
-  settings(commonSettings).
-  dependsOn(macros)
+lazy val core = (project in file("core"))
+  .enablePlugins(BoilerplatePlugin, SbtOsgi, TutPlugin)
+  .settings(commonSettings)
+  .dependsOn(macros)
 
 // Two special modules for now, since `tests` depend on them. We should improve this organization later by separating
 // the test helpers (which all projects' tests should depend on) from the core+generic test implementations.
-lazy val `generic-base` = (project in file("modules/generic-base")).
-  enablePlugins(SbtOsgi, TutPlugin).
-  dependsOn(core).
-  settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+lazy val `generic-base` = (project in file("modules/generic-base"))
+  .enablePlugins(SbtOsgi, TutPlugin)
+  .dependsOn(core)
+  .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
-lazy val generic = (project in file("modules/generic")).
-  enablePlugins(SbtOsgi, TutPlugin).
-  dependsOn(core, `generic-base`).
-  settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+lazy val generic = (project in file("modules/generic"))
+  .enablePlugins(SbtOsgi, TutPlugin)
+  .dependsOn(core, `generic-base`)
+  .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 // -----
 
-lazy val macros = (project in file("macros")).
-  enablePlugins(TutPlugin).
-  settings(commonSettings)
+lazy val macros = (project in file("macros")).enablePlugins(TutPlugin).settings(commonSettings)
 
-lazy val tests = (project in file("tests")).
-  enablePlugins(BoilerplatePlugin).
-  settings(commonSettings).
-  dependsOn(core, generic).
-  dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
+lazy val tests = (project in file("tests"))
+  .enablePlugins(BoilerplatePlugin)
+  .settings(commonSettings)
+  .dependsOn(core, generic)
+  .dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
-lazy val bundle = (project in file("bundle")).
-  enablePlugins(SbtOsgi, TutPlugin).
-  settings(commonSettings, tutTargetDirectory := file(".")).
-  dependsOn(core, generic)
+lazy val bundle = (project in file("bundle"))
+  .enablePlugins(SbtOsgi, TutPlugin)
+  .settings(commonSettings, tutTargetDirectory := file("."))
+  .dependsOn(core, generic)
 
-lazy val docs = (project in file("docs")).
-  enablePlugins(MicrositesPlugin).
-  settings(commonSettings, publishArtifact := false).
-  settings(docsSettings).
-  dependsOn(bundle)
+lazy val docs = (project in file("docs"))
+  .enablePlugins(MicrositesPlugin)
+  .settings(commonSettings, publishArtifact := false)
+  .settings(docsSettings)
+  .dependsOn(bundle)
 
-def module(proj: Project) = proj.
-  enablePlugins(SbtOsgi, TutPlugin).
-  dependsOn(core).
-  dependsOn(tests % "test").
-  dependsOn(generic % "Tut"). // Allow auto-derivation in documentation
+def module(proj: Project) = proj
+  .enablePlugins(SbtOsgi, TutPlugin)
+  .dependsOn(core)
+  .dependsOn(tests % "test")
+  .dependsOn(generic % "Tut")
+  . // Allow auto-derivation in documentation
   settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
@@ -74,40 +73,30 @@ lazy val yaml = module(project) in file("modules/yaml")
 lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
-
   developers := List(
     Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
     Developer("leifwickland", "Leif Wickland", "leifwickland@gmail.com", url("https://github.com/leifwickland")),
     Developer("jcazevedo", "Joao Azevedo", "joao.c.azevedo@gmail.com", url("https://github.com/jcazevedo")),
     Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")),
-    Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))),
-
+    Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))
+  ),
   crossScalaVersions := Seq(scala211, scala212, scala213),
   scalaVersion := scala212,
-
-  resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")),
-
+  resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
   crossVersionSharedSources(unmanagedSourceDirectories in Compile),
   crossVersionSharedSources(unmanagedSourceDirectories in Test),
-
   scalacOptions ++= lintFlags.value,
-
   scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
-
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
-
   scalafmtOnCompile := true,
-
   autoAPIMappings := true,
-
   publishMavenStyle := true,
   publishArtifact in Test := false,
-  publishTo := sonatypePublishToBundle.value)
+  publishTo := sonatypePublishToBundle.value
+)
 
 lazy val docsSettings = Seq(
   micrositeName := "PureConfig",
@@ -121,14 +110,15 @@ lazy val docsSettings = Seq(
   micrositeTheme := "pattern",
   micrositeHighlightTheme := "default",
   micrositePalette := Map(
-        "brand-primary"   /* link color       */  -> "#ab4b4b",
-        "brand-secondary" /* nav/sidebar back */  -> "#4b4b4b",
-        "brand-tertiary"  /* sidebar top back */  -> "#292929",
-        "gray-dark"       /* section title    */  -> "#453E46",
-        "gray"            /* text color       */  -> "#837F84",
-        "gray-light"      /* star back        */  -> "#E3E2E3",
-        "gray-lighter"    /* code back        */  -> "#F4F3F4",
-        "white-color"                             -> "#FFFFFF"),
+    "brand-primary" /* link color       */ -> "#ab4b4b",
+    "brand-secondary" /* nav/sidebar back */ -> "#4b4b4b",
+    "brand-tertiary" /* sidebar top back */ -> "#292929",
+    "gray-dark" /* section title    */ -> "#453E46",
+    "gray" /* text color       */ -> "#837F84",
+    "gray-light" /* star back        */ -> "#E3E2E3",
+    "gray-lighter" /* code back        */ -> "#F4F3F4",
+    "white-color" -> "#FFFFFF"
+  ),
   micrositeGitterChannel := false, // ugly
   mdocExtraArguments += "--no-link-hygiene"
 )
@@ -141,43 +131,42 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
     List(
-      if (minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") } else Nil,
-      if (minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") } else Nil,
+      if (minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") }
+      else Nil,
+      if (minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") }
+      else Nil
     ).flatten
   }
 }
 
 lazy val lintFlags = {
   lazy val allVersionLintFlags = List(
-    "-encoding", "UTF-8", // yes, this is 2 args
+    "-encoding",
+    "UTF-8", // yes, this is 2 args
     "-feature",
     "-unchecked",
     "-Ywarn-dead-code",
-    "-Ywarn-numeric-widen")
+    "-Ywarn-numeric-widen"
+  )
 
   def withCommon(flags: String*) =
     allVersionLintFlags ++ flags
 
   forScalaVersions {
     case (2, 11) =>
-      withCommon(
-        "-deprecation",
-        "-Xlint",
-        "-Xfatal-warnings",
-        "-Yno-adapted-args",
-        "-Ywarn-unused-import")
+      withCommon("-deprecation", "-Xlint", "-Xfatal-warnings", "-Yno-adapted-args", "-Ywarn-unused-import")
 
     case (2, 12) =>
       withCommon(
-        "-deprecation",                // Either#right is deprecated on Scala 2.13
+        "-deprecation", // Either#right is deprecated on Scala 2.13
         "-Xlint:_,-unused",
         "-Xfatal-warnings",
         "-Yno-adapted-args",
-        "-Ywarn-unused:_,-implicits")  // Some implicits are intentionally used just as evidences, triggering warnings
+        "-Ywarn-unused:_,-implicits"
+      ) // Some implicits are intentionally used just as evidences, triggering warnings
 
     case (2, 13) =>
-      withCommon(
-        "-Ywarn-unused:_,-implicits")
+      withCommon("-Ywarn-unused:_,-implicits")
 
     case _ =>
       withCommon()
@@ -208,4 +197,5 @@ releaseProcess := Seq[ReleaseStep](
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
   commitNextVersion,
-  pushChanges)
+  pushChanges
+)
