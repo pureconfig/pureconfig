@@ -112,13 +112,13 @@ lazy val docsSettings = Seq(
   micrositeTheme := "pattern",
   micrositeHighlightTheme := "default",
   micrositePalette := Map(
-    "brand-primary" /* link color       */ -> "#ab4b4b",
-    "brand-secondary" /* nav/sidebar back */ -> "#4b4b4b",
-    "brand-tertiary" /* sidebar top back */ -> "#292929",
-    "gray-dark" /* section title    */ -> "#453E46",
-    "gray" /* text color       */ -> "#837F84",
-    "gray-light" /* star back        */ -> "#E3E2E3",
-    "gray-lighter" /* code back        */ -> "#F4F3F4",
+    "brand-primary" -> "#ab4b4b", // link color
+    "brand-secondary" -> "#4b4b4b", // nav/sidebar back
+    "brand-tertiary" -> "#292929", // sidebar top back
+    "gray-dark" -> "#453E46", // section title
+    "gray" -> "#837F84", // text color
+    "gray-light" -> "#E3E2E3", // star back
+    "gray-lighter" -> "#F4F3F4", // code back
     "white-color" -> "#FFFFFF"
   ),
   micrositeGitterChannel := false, // ugly
@@ -144,7 +144,7 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
 lazy val lintFlags = {
   lazy val allVersionLintFlags = List(
     "-encoding",
-    "UTF-8", // yes, this is 2 args
+    "UTF-8", // arg for -encoding
     "-feature",
     "-unchecked",
     "-Ywarn-dead-code",
@@ -164,8 +164,8 @@ lazy val lintFlags = {
         "-Xlint:_,-unused",
         "-Xfatal-warnings",
         "-Yno-adapted-args",
-        "-Ywarn-unused:_,-implicits"
-      ) // Some implicits are intentionally used just as evidences, triggering warnings
+        "-Ywarn-unused:_,-implicits" // Some implicits are intentionally used just as evidences, triggering warnings
+      )
 
     case (2, 13) =>
       withCommon("-Ywarn-unused:_,-implicits")
