@@ -199,6 +199,3 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
-
-// Alias to check the formatting of both scala and sbt files
-addCommandAlias("fmtCheckAll", "; scalafmtCheckAll; scalafmtSbtCheck")
