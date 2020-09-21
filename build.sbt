@@ -2,8 +2,6 @@ import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
-addCommandAlias("fmtCheckAll", "; scalafmtCheckAll; scalafmtSbtCheck")
-
 organization in ThisBuild := "com.github.pureconfig"
 
 lazy val core = (project in file("core"))
@@ -201,3 +199,6 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
+
+// Alias to check the formatting of both scala and sbt files
+addCommandAlias("fmtCheckAll", "; scalafmtCheckAll; scalafmtSbtCheck")
