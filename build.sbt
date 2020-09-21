@@ -46,9 +46,8 @@ def module(proj: Project) = proj
   .enablePlugins(SbtOsgi, TutPlugin)
   .dependsOn(core)
   .dependsOn(tests % "test")
-  .dependsOn(generic % "Tut")
-  . // Allow auto-derivation in documentation
-  settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+  .dependsOn(generic % "Tut") // Allow auto-derivation in documentation
+  .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
 lazy val akka = module(project) in file("modules/akka")
 lazy val `akka-http` = module(project) in file("modules/akka-http")
