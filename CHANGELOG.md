@@ -1,3 +1,9 @@
+### 0.14.0 (Sep 21, 2020)
+
+- Breaking changes
+  - Cursors are now backed up by `Option[ConfigValue]` instead of `ConfigValue`. Code accessing the `value` of a cursor
+    should use `valueOpt` instead (with `None` replacing `null` in undefined values). 
+
 ### 0.13.0 (Jun 27, 2020)
 
 - Breaking changes
