@@ -20,12 +20,8 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
 
-      - name: Check sbt formatting
-        if: startsWith(matrix.scala, '2.12')
-        run: sbt "++${{ matrix.scala }} scalafmtSbtCheck"
-
       - name: Check formatting
-        run: sbt "++${{ matrix.scala }} scalafmtCheckAll"
+        run: sbt "++${{ matrix.scala }} scalafmtCheckAll; scalafmtSbtCheck"
 
       - name: Compile
         run: sbt coverage "++${{ matrix.scala }} compile"
