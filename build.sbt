@@ -70,8 +70,10 @@ lazy val sttp = module(project) in file("modules/sttp")
 lazy val yaml = module(project) in file("modules/yaml")
 
 lazy val commonSettings = Seq(
+  // format: off
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
   licenses := Seq("Mozilla Public License, version 2.0" -> url("https://www.mozilla.org/MPL/2.0/")),
+
   developers := List(
     Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
     Developer("leifwickland", "Leif Wickland", "leifwickland@gmail.com", url("https://github.com/leifwickland")),
@@ -79,22 +81,32 @@ lazy val commonSettings = Seq(
     Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog")),
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))
   ),
+
   crossScalaVersions := Seq(scala211, scala212, scala213),
   scalaVersion := scala212,
+
   resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
+
   crossVersionSharedSources(unmanagedSourceDirectories in Compile),
   crossVersionSharedSources(unmanagedSourceDirectories in Test),
+
   scalacOptions ++= lintFlags.value,
+
   scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
   scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
+
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
   scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
+
   scalafmtOnCompile := true,
+
   autoAPIMappings := true,
+
   publishMavenStyle := true,
   publishArtifact in Test := false,
   publishTo := sonatypePublishToBundle.value
+  // format: on
 )
 
 lazy val docsSettings = Seq(
