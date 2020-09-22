@@ -21,7 +21,7 @@ jobs:
           java-version: ${{ matrix.jdk }}
 
       - name: Check formatting
-        run: sbt "++${{ matrix.scala }} scalafmtCheckAll"
+        run: sbt "++${{ matrix.scala }} scalafmtCheckAll; scalafmtSbtCheck"
 
       - name: Compile
         run: sbt coverage "++${{ matrix.scala }} compile"
