@@ -7,7 +7,7 @@ Adds support for loading and saving configurations from [fs2](https://github.com
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.13.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.14.0"
 ```
 
 ## Example
