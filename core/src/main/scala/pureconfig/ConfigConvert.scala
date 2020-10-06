@@ -1,8 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-/**
-  * @author Mario Pastorelli
+/** @author Mario Pastorelli
   */
 package pureconfig
 
@@ -11,13 +10,11 @@ import scala.util.Try
 
 import pureconfig.error.FailureReason
 
-/**
-  * Trait for objects capable of reading and writing objects of a given type from and to `ConfigValues`.
+/** Trait for objects capable of reading and writing objects of a given type from and to `ConfigValues`.
   */
 trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
 
-  /**
-    * Transforms the values read and written by this `ConfigConvert` using two functions.
+  /** Transforms the values read and written by this `ConfigConvert` using two functions.
     *
     * @param f the function applied to values after they are read; a thrown exception will be caught and converted to a pureconfig FailureReason
     * @param g the function applied to values before they are written
@@ -28,8 +25,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
   def xmap[B](f: A => B, g: B => A): ConfigConvert[B] =
     ConfigConvert(map(f), contramap(g))
 
-  /**
-    * Transforms the values read and written by this `ConfigConvert` using two functions where the reader may
+  /** Transforms the values read and written by this `ConfigConvert` using two functions where the reader may
     * specify custom failure reason.
     *
     * @param f the function applied to values after they are read
@@ -42,8 +38,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
     ConfigConvert(emap(f), contramap(g))
 }
 
-/**
-  * Provides methods to create [[ConfigConvert]] instances.
+/** Provides methods to create [[ConfigConvert]] instances.
   */
 object ConfigConvert extends ConvertHelpers {
 

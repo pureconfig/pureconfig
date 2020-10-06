@@ -15,8 +15,7 @@ import pureconfig.{ConfigReader, ConfigSource, ConfigWriter, Derivation}
 
 package object fs2 {
 
-  /**
-    * Load a configuration of type `A` from the given byte stream.
+  /** Load a configuration of type `A` from the given byte stream.
     *
     * @param configStream a stream of bytes representing the contents of a configuration file
     * @return The returned action will complete with `A` if it is possible to create an instance of type
@@ -37,8 +36,7 @@ package object fs2 {
     } yield a
   }
 
-  /**
-    * Writes the configuration to a fs2 byte stream
+  /** Writes the configuration to a fs2 byte stream
     *
     * @param config The configuration to write
     * @param options the config rendering options

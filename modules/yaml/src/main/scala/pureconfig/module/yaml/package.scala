@@ -9,8 +9,7 @@ import pureconfig.error._
 
 package object yaml {
 
-  /**
-    * Loads a configuration of type `Config` from the given YAML file.
+  /** Loads a configuration of type `Config` from the given YAML file.
     *
     * @param path the path of the YAML file to read
     * @return A `Success` with the configuration if it is possible to create an instance of type
@@ -21,8 +20,7 @@ package object yaml {
     YamlConfigSource.file(path).load[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given YAML file.
+  /** Loads a configuration of type `Config` from the given YAML file.
     *
     * @param path the path of the YAML file to read
     * @param namespace the base namespace from which the configuration should be load
@@ -36,8 +34,7 @@ package object yaml {
     YamlConfigSource.file(path).at(namespace).load[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given string.
+  /** Loads a configuration of type `Config` from the given string.
     *
     * @param content the string containing the YAML document
     * @return A `Success` with the configuration if it is possible to create an instance of type
@@ -57,8 +54,7 @@ package object yaml {
     YamlConfigSource.string(content).at(namespace).load[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given YAML file.
+  /** Loads a configuration of type `Config` from the given YAML file.
     *
     * @param path the path of the YAML file to read
     * @return the configuration
@@ -69,8 +65,7 @@ package object yaml {
     YamlConfigSource.file(path).loadOrThrow[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given YAML file.
+  /** Loads a configuration of type `Config` from the given YAML file.
     *
     * @param path the path of the YAML file to read
     * @param namespace the base namespace from which the configuration should be load
@@ -84,8 +79,7 @@ package object yaml {
     YamlConfigSource.file(path).at(namespace).loadOrThrow[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given string.
+  /** Loads a configuration of type `Config` from the given string.
     *
     * @param content the string containing the YAML document
     * @return the configuration
@@ -96,8 +90,7 @@ package object yaml {
     YamlConfigSource.string(content).loadOrThrow[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given string.
+  /** Loads a configuration of type `Config` from the given string.
     *
     * @param content the string containing the YAML document
     * @param namespace the base namespace from which the configuration should be load
@@ -111,8 +104,7 @@ package object yaml {
     YamlConfigSource.string(content).at(namespace).loadOrThrow[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given multi-document YAML file. `Config` must have a
+  /** Loads a configuration of type `Config` from the given multi-document YAML file. `Config` must have a
     * `ConfigReader` supporting reading from config lists.
     *
     * @param path the path of the YAML file to read
@@ -125,8 +117,7 @@ package object yaml {
     YamlConfigSource.file(path).multiDoc.load[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given multi-document string. `Config` must have a
+  /** Loads a configuration of type `Config` from the given multi-document string. `Config` must have a
     * `ConfigReader` supporting reading from config lists.
     *
     * @param content the string containing the YAML documents
@@ -141,8 +132,7 @@ package object yaml {
     YamlConfigSource.string(content).multiDoc.load[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given multi-document YAML file. `Config` must have a
+  /** Loads a configuration of type `Config` from the given multi-document YAML file. `Config` must have a
     * `ConfigReader` supporting reading from config lists.
     *
     * @param path the path of the YAML file to read
@@ -154,8 +144,7 @@ package object yaml {
     YamlConfigSource.file(path).multiDoc.loadOrThrow[Config]
   }
 
-  /**
-    * Loads a configuration of type `Config` from the given multi-document string. `Config` must have a
+  /** Loads a configuration of type `Config` from the given multi-document string. `Config` must have a
     * `ConfigReader` supporting reading from config lists.
     *
     * @param content the string containing the YAML documents

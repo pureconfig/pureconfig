@@ -19,8 +19,7 @@ import pureconfig.error._
 
 import scala.util.Try
 
-/**
-  * Trait containing `ConfigReader` instances for primitive types.
+/** Trait containing `ConfigReader` instances for primitive types.
   */
 trait PrimitiveReaders {
 
@@ -62,8 +61,7 @@ trait PrimitiveReaders {
   implicit val byteConfigReader = ConfigReader.fromCursor(_.asByte)
 }
 
-/**
-  * Trait containing `ConfigReader` instance for Java Enums.
+/** Trait containing `ConfigReader` instance for Java Enums.
   */
 trait JavaEnumReader {
 
@@ -74,8 +72,7 @@ trait JavaEnumReader {
     }))
 }
 
-/**
-  * Trait containing `ConfigReader` instances for classes related to file system paths and URIs.
+/** Trait containing `ConfigReader` instances for classes related to file system paths and URIs.
   */
 trait UriAndPathReaders {
 
@@ -86,8 +83,7 @@ trait UriAndPathReaders {
   implicit val uriConfigReader = ConfigReader.fromString[URI](catchReadError(new URI(_)))
 }
 
-/**
-  * Trait containing `ConfigReader` instances for classes related to regular expressions.
+/** Trait containing `ConfigReader` instances for classes related to regular expressions.
   */
 trait RegexReaders {
 
@@ -95,8 +91,7 @@ trait RegexReaders {
   implicit val regexReader = ConfigReader.fromString[Regex](catchReadError(new Regex(_)))
 }
 
-/**
-  * Trait containing `ConfigReader` instances for `java.time` classes.
+/** Trait containing `ConfigReader` instances for `java.time` classes.
   */
 trait JavaTimeReaders {
 
@@ -119,8 +114,7 @@ trait JavaTimeReaders {
     ConfigReader.fromNonEmptyString[Year](catchReadError(Year.parse))
 }
 
-/**
-  * Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
+/** Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
   * [[scala.concurrent.duration.FiniteDuration]].
   */
 trait DurationReaders {
@@ -146,8 +140,7 @@ trait DurationReaders {
   }
 }
 
-/**
-  * Trait containing `ConfigReader` instances for Java and Scala arbitrary-precision numeric types.
+/** Trait containing `ConfigReader` instances for Java and Scala arbitrary-precision numeric types.
   */
 trait NumericReaders {
 
@@ -164,8 +157,7 @@ trait NumericReaders {
     ConfigReader.fromNonEmptyString[BigDecimal](catchReadError(BigDecimal(_)))
 }
 
-/**
-  * Trait containing `ConfigReader` instances for Typesafe config models.
+/** Trait containing `ConfigReader` instances for Typesafe config models.
   */
 trait TypesafeConfigReaders {
 
@@ -197,8 +189,7 @@ trait TypesafeConfigReaders {
     }
 }
 
-/**
-  * Trait containing `ConfigReader` instances for primitive types and simple classes in Java and Scala standard
+/** Trait containing `ConfigReader` instances for primitive types and simple classes in Java and Scala standard
   * libraries.
   */
 trait BasicReaders

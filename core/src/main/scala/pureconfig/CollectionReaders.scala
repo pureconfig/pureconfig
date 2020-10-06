@@ -3,8 +3,7 @@ package pureconfig
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-/**
-  * A marker trait signaling that a `ConfigReader` accepts missing (undefined) values.
+/** A marker trait signaling that a `ConfigReader` accepts missing (undefined) values.
   *
   * The standard behavior of `ConfigReader`s that expect required keys in config objects is to return a `KeyNotFound`
   * failure when one or more of them are missing. Mixing in this trait into the key's `ConfigReader` signals that if
@@ -12,8 +11,7 @@ import scala.reflect.ClassTag
   */
 trait ReadsMissingKeys { this: ConfigReader[_] => }
 
-/**
-  * Trait containing `ConfigReader` instances for collection types.
+/** Trait containing `ConfigReader` instances for collection types.
   */
 trait CollectionReaders {
 

@@ -7,8 +7,7 @@ import pureconfig.generic.CoproductHint.Use
 import pureconfig.generic.error.{CoproductHintException, NoValidCoproductOptionFound}
 import pureconfig.syntax._
 
-/**
-  * Hint applicable to sealed families of case objects where objects are written and read as strings with their type
+/** Hint applicable to sealed families of case objects where objects are written and read as strings with their type
   * names. Trying to read or write values that are not case objects results in failure.
   *
   * @tparam A the type of the coproduct or sealed family for which this hint applies
@@ -19,8 +18,7 @@ import pureconfig.syntax._
 )
 class EnumCoproductHint[A] extends CoproductHint[A] {
 
-  /**
-    * Returns the field value for a class or coproduct option name.
+  /** Returns the field value for a class or coproduct option name.
     *
     * @param name the name of the class or coproduct option
     * @return the field value associated with the given class or coproduct option name.

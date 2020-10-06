@@ -2,8 +2,7 @@ package pureconfig.module.cats
 
 import pureconfig.error.FailureReason
 
-/**
-  * A failure representing an unexpected empty traversable
+/** A failure representing an unexpected empty traversable
   *
   * @param typ the type that was attempted to be converted to from an empty string
   */

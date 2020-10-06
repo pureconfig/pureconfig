@@ -9,8 +9,7 @@ import pureconfig.error.FailureReason
 
 import scala.collection.JavaConverters._
 
-/**
-  * Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
+/** Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
   *
   * The result of calling one of the methods can be assigned to an `implicit val` so that `pureconfig` will be able to
   * use it:

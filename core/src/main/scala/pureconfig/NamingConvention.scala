@@ -16,8 +16,7 @@ object CapitalizedWordsNamingConvention {
     String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])").r
 }
 
-/**
-  * CamelCase identifiers look like `camelCase` and `useMorePureconfig`
+/** CamelCase identifiers look like `camelCase` and `useMorePureconfig`
   * @see https://en.wikipedia.org/wiki/Camel_case
   */
 object CamelCase extends CapitalizedWordsNamingConvention {
@@ -30,8 +29,7 @@ object CamelCase extends CapitalizedWordsNamingConvention {
   }
 }
 
-/**
-  * PascalCase identifiers look like e.g.`PascalCase` and `UseMorePureconfig`
+/** PascalCase identifiers look like e.g.`PascalCase` and `UseMorePureconfig`
   * @see https://en.wikipedia.org/wiki/PascalCase
   */
 object PascalCase extends CapitalizedWordsNamingConvention {
@@ -46,14 +44,12 @@ class StringDelimitedNamingConvention(d: String) extends NamingConvention {
     l.map(_.toLowerCase).mkString(d)
 }
 
-/**
-  * KebabCase identifiers look like `kebab-case` and `use-more-pureconfig`
+/** KebabCase identifiers look like `kebab-case` and `use-more-pureconfig`
   * @see http://wiki.c2.com/?KebabCase
   */
 object KebabCase extends StringDelimitedNamingConvention("-")
 
-/**
-  * SnakeCase identifiers look like `snake_case` and `use_more_pureconfig`
+/** SnakeCase identifiers look like `snake_case` and `use_more_pureconfig`
   * @see https://en.wikipedia.org/wiki/Snake_case
   */
 object SnakeCase extends StringDelimitedNamingConvention("_")

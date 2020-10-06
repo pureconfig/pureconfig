@@ -5,8 +5,7 @@ import pureconfig.ConfigWriter
 import shapeless._
 import shapeless.labelled._
 
-/**
-  * A type class to build `ConfigWriter`s for sealed families of case objects where each type is encoded as a
+/** A type class to build `ConfigWriter`s for sealed families of case objects where each type is encoded as a
   * `ConfigString` based on the type name.
   *
   * @tparam A the type of objects capable of being written as an enumeration

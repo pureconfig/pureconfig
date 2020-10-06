@@ -2,24 +2,21 @@ package pureconfig
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 
-/**
-  * Trait for objects capable of writing objects of a given type to `ConfigValues`.
+/** Trait for objects capable of writing objects of a given type to `ConfigValues`.
   *
   * @tparam A the type of objects writable by this `ConfigWriter`
   */
 trait ConfigWriter[A] {
   import pureconfig.ConfigWriter._
 
-  /**
-    * Converts a type `A` to a `ConfigValue`.
+  /** Converts a type `A` to a `ConfigValue`.
     *
     * @param a The instance of `A` to convert
     * @return The `ConfigValue` obtained from the `A` instance
     */
   def to(a: A): ConfigValue
 
-  /**
-    * Applies a function to values before passing them to this writer.
+  /** Applies a function to values before passing them to this writer.
     *
     * @param f the function to apply to input values
     * @tparam B the input type of the function
@@ -28,8 +25,7 @@ trait ConfigWriter[A] {
   def contramap[B](f: B => A): ConfigWriter[B] =
     fromFunction[B] { a => to(f(a)) }
 
-  /**
-    * Maps a function over the results of this writer.
+  /** Maps a function over the results of this writer.
     *
     * @param f the function to map over this writer
     * @return a `ConfigWriter` returning the results of this writer mapped by `f`.
@@ -38,15 +34,13 @@ trait ConfigWriter[A] {
     fromFunction[A] { a => f(to(a)) }
 }
 
-/**
-  * Provides methods to create [[ConfigWriter]] instances.
+/** Provides methods to create [[ConfigWriter]] instances.
   */
 object ConfigWriter extends BasicWriters with CollectionWriters with ProductWriters with ExportedWriters {
 
   def apply[A](implicit writer: Derivation[ConfigWriter[A]]): ConfigWriter[A] = writer.value
 
-  /**
-    * Creates a `ConfigWriter` from a function.
+  /** Creates a `ConfigWriter` from a function.
     *
     * @param toF the function used to write values to configs
     * @tparam A the type of the objects writable by the returned writer
@@ -57,8 +51,7 @@ object ConfigWriter extends BasicWriters with CollectionWriters with ProductWrit
       def to(a: A) = toF(a)
     }
 
-  /**
-    * Returns a `ConfigWriter` for types supported by `ConfigValueFactory.fromAnyRef`. This method should be used
+  /** Returns a `ConfigWriter` for types supported by `ConfigValueFactory.fromAnyRef`. This method should be used
     * carefully, as a runtime exception is thrown if the type passed as argument is not supported.
     *
     * @tparam A the primitive type for which a `ConfigWriter` is to be created
@@ -69,8 +62,7 @@ object ConfigWriter extends BasicWriters with CollectionWriters with ProductWrit
       def to(t: A) = ConfigValueFactory.fromAnyRef(t)
     }
 
-  /**
-    * Returns a `ConfigWriter` that writes objects of a given type as strings created by `.toString`.
+  /** Returns a `ConfigWriter` that writes objects of a given type as strings created by `.toString`.
     *
     * @tparam A the type for which a `ConfigWriter` is to be created
     * @return a `ConfigWriter` for the type `A`.
@@ -80,8 +72,7 @@ object ConfigWriter extends BasicWriters with CollectionWriters with ProductWrit
       def to(t: A) = ConfigValueFactory.fromAnyRef(t.toString)
     }
 
-  /**
-    * Returns a `ConfigWriter` that writes objects of a given type as strings created by a function.
+  /** Returns a `ConfigWriter` that writes objects of a given type as strings created by a function.
     *
     * @param toF the function converting an object of type `A` to a string
     * @tparam A the type for which a `ConfigWriter` is to be created

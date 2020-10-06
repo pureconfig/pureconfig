@@ -11,8 +11,7 @@ import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
 import pureconfig.generic.error._
 
-/**
-  * Suite of tests related to the pretty printing of config reader failures.
+/** Suite of tests related to the pretty printing of config reader failures.
   */
 class ConfigReaderFailuresPrettyPrintSuite extends BaseSuite {
   "A ConfigReaderFailures prettyPrint method" should "print errors with a configurable identation" in {

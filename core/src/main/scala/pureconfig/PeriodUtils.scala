@@ -7,13 +7,11 @@ import scala.util.{Success, Try}
 import com.typesafe.config.impl.ConfigImplUtil
 import pureconfig.error.{CannotConvert, FailureReason}
 
-/**
-  * Utility functions for converting a `String` to a `Period`. The parser accepts the HOCON unit syntax.
+/** Utility functions for converting a `String` to a `Period`. The parser accepts the HOCON unit syntax.
   */
 private[pureconfig] object PeriodUtils {
 
-  /**
-    * Convert a string to a Period while trying to maintain compatibility with Typesafe's abbreviations.
+  /** Convert a string to a Period while trying to maintain compatibility with Typesafe's abbreviations.
     */
   val fromString: String => Either[FailureReason, Period] = { str =>
     Try(Right(Period.parse(str))).getOrElse(typesafeConfigParsePeriod(str))

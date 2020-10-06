@@ -5,8 +5,7 @@ package pureconfig.error
 
 import scala.collection.mutable
 
-/**
-  * A non-empty list of ConfigReader failures
+/** A non-empty list of ConfigReader failures
   */
 case class ConfigReaderFailures(head: ConfigReaderFailure, tail: ConfigReaderFailure*) {
 

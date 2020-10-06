@@ -11,15 +11,13 @@ import pureconfig.generic.error.{
 }
 import pureconfig.syntax._
 
-/**
-  * A trait that can be implemented to disambiguate between the different options of a coproduct or sealed family.
+/** A trait that can be implemented to disambiguate between the different options of a coproduct or sealed family.
   *
   * @tparam A the type of the coproduct or sealed family for which this hint applies
   */
 trait CoproductHint[A] {
 
-  /**
-    * Given a `ConfigCursor` for the sealed family, disambiguate and return what should be performed when trying to read
+  /** Given a `ConfigCursor` for the sealed family, disambiguate and return what should be performed when trying to read
     * one of the provided coproduct options. This method can decide either to:
     *   - use the `ConfigCursor` with a single option ([[CoproductHint.Use]]);
     *   - or attempt different options in a given order ([[CoproductHint.Attempt]]).
@@ -32,8 +30,7 @@ trait CoproductHint[A] {
     */
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action]
 
-  /**
-    * Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
+  /** Given the `ConfigValue` for a specific class or coproduct option, encode disambiguation information and return a
     * config for the sealed family or coproduct.
     *
     * @param value the `ConfigValue` of the class or coproduct option
@@ -44,8 +41,7 @@ trait CoproductHint[A] {
   def to(value: ConfigValue, name: String): ConfigValue
 }
 
-/**
-  * Hint where the options are disambiguated by a `key = "value"` field inside the config.
+/** Hint where the options are disambiguated by a `key = "value"` field inside the config.
   *
   * This hint will cause derived `ConfigConvert` instance to fail to convert configs to objects if the object has a
   * field with the same name as the disambiguation key.
@@ -55,8 +51,7 @@ trait CoproductHint[A] {
   */
 class FieldCoproductHint[A](key: String) extends CoproductHint[A] {
 
-  /**
-    * Returns the field value for a class or coproduct option name.
+  /** Returns the field value for a class or coproduct option name.
     *
     * @param name the name of the class or coproduct option
     * @return the field value associated with the given class or coproduct option name.
@@ -94,8 +89,7 @@ object FieldCoproductHint {
   val defaultMapping: String => String = ConfigFieldMapping(PascalCase, KebabCase)
 }
 
-/**
-  * Hint where all coproduct options are tried in order. `from` will choose the first option able to deserialize
+/** Hint where all coproduct options are tried in order. `from` will choose the first option able to deserialize
   * the config without errors, while `to` will write the config as is, with no disambiguation information.
   */
 class FirstSuccessCoproductHint[A] extends CoproductHint[A] {
@@ -116,27 +110,23 @@ class FirstSuccessCoproductHint[A] extends CoproductHint[A] {
 
 object CoproductHint {
 
-  /**
-    * What should be done when reading a given coproduct option.
+  /** What should be done when reading a given coproduct option.
     */
   sealed trait Action {
 
-    /**
-      * The `ConfigCursor` to use when trying to read the coproduct option.
+    /** The `ConfigCursor` to use when trying to read the coproduct option.
       */
     def cursor: ConfigCursor
   }
 
-  /**
-    * An action to only use the provided `ConfigCursor` and not try other options.
+  /** An action to only use the provided `ConfigCursor` and not try other options.
     *
     * @param cursor the `ConfigCursor` to use when reading the coproduct option
     * @param option the coproduct option to consider when reading from the provider cursor
     */
   case class Use(cursor: ConfigCursor, option: String) extends Action
 
-  /**
-    * An action to attempt to use the provided coproduct options, in the specified order, stopping at the first one that
+  /** An action to attempt to use the provided coproduct options, in the specified order, stopping at the first one that
     * reads successfully.
     *
     * @param cursor the `ConfigCursor` to use when reading the coproduct option

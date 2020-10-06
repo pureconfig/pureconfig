@@ -1,14 +1,12 @@
 package pureconfig
 
-/**
-  * A mapping between case class fields and their respective keys in the config.
+/** A mapping between case class fields and their respective keys in the config.
   */
 trait ConfigFieldMapping extends (String => String) {
 
   def apply(fieldName: String): String
 
-  /**
-    * Returns a `ConfigFieldMapping` that uses this mapping with some overrides.
+  /** Returns a `ConfigFieldMapping` that uses this mapping with some overrides.
     *
     * @param overrides the overrides for this mapping as pairs (field, configKey)
     * @return a `ConfigFieldMapping` that maps fields using `overrides` if the field is present there and otherwise
@@ -20,8 +18,7 @@ trait ConfigFieldMapping extends (String => String) {
 
 object ConfigFieldMapping {
 
-  /**
-    * Creates a ConfigFieldMapping from the provided function, mapping names in
+  /** Creates a ConfigFieldMapping from the provided function, mapping names in
     * the object that will receive config values to names in the configuration
     * file.
     *
@@ -34,8 +31,7 @@ object ConfigFieldMapping {
       def apply(fieldName: String): String = f(fieldName)
     }
 
-  /**
-    * Creates a ConfigFieldMapping according to the naming conventions specified
+  /** Creates a ConfigFieldMapping according to the naming conventions specified
     * both for the object that will receive config values and for the
     * configuration file.
     *

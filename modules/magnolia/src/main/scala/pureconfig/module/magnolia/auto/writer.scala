@@ -8,8 +8,7 @@ import pureconfig.{ConfigWriter, Exported}
 import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.{ExportedMagnolia, MagnoliaConfigWriter}
 
-/**
-  * An object that, when imported, provides implicit `ConfigWriter` instances for value classes, tuples, case classes and
+/** An object that, when imported, provides implicit `ConfigWriter` instances for value classes, tuples, case classes and
   * sealed traits. The generation of `ConfigWriter`s is done by Magnolia.
   */
 object writer {
