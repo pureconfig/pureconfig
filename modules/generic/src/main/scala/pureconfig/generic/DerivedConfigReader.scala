@@ -5,8 +5,7 @@ import pureconfig.error.ConfigReaderFailures
 import pureconfig.generic.error.InvalidCoproductOption
 import shapeless._
 
-/**
-  * A `ConfigReader` derived with `shapeless`.
+/** A `ConfigReader` derived with `shapeless`.
   *
   * @tparam A the type of objects readable by this `ConfigReader`
   */

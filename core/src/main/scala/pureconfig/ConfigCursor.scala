@@ -8,50 +8,42 @@ import com.typesafe.config._
 import pureconfig.backend.PathUtil
 import pureconfig.error._
 
-/**
-  * A wrapper for a `ConfigValue` providing safe navigation through the config and holding positional data for better
+/** A wrapper for a `ConfigValue` providing safe navigation through the config and holding positional data for better
   * error handling.
   */
 sealed trait ConfigCursor {
 
-  /**
-    * The optional `ConfigValue` which this cursor points to.
+  /** The optional `ConfigValue` which this cursor points to.
     */
   def valueOpt: Option[ConfigValue]
 
-  /**
-    * The path in the config to which this cursor points as a list of keys in reverse order (deepest key first).
+  /** The path in the config to which this cursor points as a list of keys in reverse order (deepest key first).
     */
   def pathElems: List[String]
 
-  /**
-    * The path in the config to which this cursor points.
+  /** The path in the config to which this cursor points.
     */
   def path: String = PathUtil.joinPath(pathElems.reverse)
 
-  /**
-    * The file system location of the config to which this cursor points.
+  /** The file system location of the config to which this cursor points.
     */
   def origin: Option[ConfigOrigin] = valueOpt.map(_.origin())
 
-  /**
-    * Returns whether this cursor points to an undefined value. A cursor can point to an undefined value when a missing
+  /** Returns whether this cursor points to an undefined value. A cursor can point to an undefined value when a missing
     * config key is requested or when a `null` `ConfigValue` is provided, among other reasons.
     *
     * @return `true` if this cursor points to an undefined value, `false` otherwise.
     */
   def isUndefined: Boolean = valueOpt.isEmpty
 
-  /**
-    * Returns whether this cursor points to a `null` config value. An explicit `null` value is different than a missing
+  /** Returns whether this cursor points to a `null` config value. An explicit `null` value is different than a missing
     * value - `isUndefined` can be used to check for the latter.
     *
     * @return `true` if this cursor points to a `null` value, `false` otherwise.
     */
   def isNull: Boolean = valueOpt.exists(_.unwrapped == null)
 
-  /**
-    * Casts this cursor to a `ConfigValue`.
+  /** Casts this cursor to a `ConfigValue`.
     *
     * @return a `Right` with the config value pointed to by this cursor if the value is defined, `Left` with a list of
     *         failures otherwise.
@@ -63,8 +55,7 @@ sealed trait ConfigCursor {
     }
   }
 
-  /**
-    * Casts this cursor to a string.
+  /** Casts this cursor to a string.
     *
     * @return a `Right` with the string value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -72,8 +63,7 @@ sealed trait ConfigCursor {
   def asString: ConfigReader.Result[String] =
     castOrFail(STRING, v => Right(v.unwrapped.asInstanceOf[String]))
 
-  /**
-    * Casts this cursor to a boolean.
+  /** Casts this cursor to a boolean.
     *
     * @return a `Right` with the boolean value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -81,8 +71,7 @@ sealed trait ConfigCursor {
   def asBoolean: ConfigReader.Result[Boolean] =
     castOrFail(BOOLEAN, v => Right(v.unwrapped.asInstanceOf[Boolean]))
 
-  /**
-    * Casts this cursor to a long.
+  /** Casts this cursor to a long.
     *
     * @return a `Right` with the long value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -98,8 +87,7 @@ sealed trait ConfigCursor {
       }
     )
 
-  /**
-    * Casts this cursor to an int.
+  /** Casts this cursor to an int.
     *
     * @return a `Right` with the int value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -115,8 +103,7 @@ sealed trait ConfigCursor {
       }
     )
 
-  /**
-    * Casts this cursor to a short.
+  /** Casts this cursor to a short.
     *
     * @return a `Right` with the short value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -132,8 +119,7 @@ sealed trait ConfigCursor {
       }
     )
 
-  /**
-    * Casts this cursor to a byte.
+  /** Casts this cursor to a byte.
     *
     * @return a `Right` with the byte value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -149,8 +135,7 @@ sealed trait ConfigCursor {
       }
     )
 
-  /**
-    * Casts this cursor to a double.
+  /** Casts this cursor to a double.
     *
     * @return a `Right` with the double value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -166,8 +151,7 @@ sealed trait ConfigCursor {
       }
     )
 
-  /**
-    * Casts this cursor to a float.
+  /** Casts this cursor to a float.
     *
     * @return a `Right` with the float value pointed to by this cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -183,8 +167,7 @@ sealed trait ConfigCursor {
       }
     )
 
-  /**
-    * Casts this cursor to a `ConfigListCursor`.
+  /** Casts this cursor to a `ConfigListCursor`.
     *
     * @return a `Right` with this cursor as a list cursor if the cast can be done, `Left` with a list of failures
     *         otherwise.
@@ -192,8 +175,7 @@ sealed trait ConfigCursor {
   def asListCursor: ConfigReader.Result[ConfigListCursor] =
     castOrFail(LIST, v => Right(v.asInstanceOf[ConfigList])).right.map(ConfigListCursor(_, pathElems))
 
-  /**
-    * Casts this cursor to a list of cursors.
+  /** Casts this cursor to a list of cursors.
     *
     * @return a `Right` with the list pointed to by this cursor if the cast can be done, `Left` with a list of failures
     *         otherwise.
@@ -201,8 +183,7 @@ sealed trait ConfigCursor {
   def asList: ConfigReader.Result[List[ConfigCursor]] =
     asListCursor.right.map(_.list)
 
-  /**
-    * Casts this cursor to a `ConfigObjectCursor`.
+  /** Casts this cursor to a `ConfigObjectCursor`.
     *
     * @return a `Right` with this cursor as an object cursor if it points to an object, `Left` with a list of failures
     *         otherwise.
@@ -210,8 +191,7 @@ sealed trait ConfigCursor {
   def asObjectCursor: ConfigReader.Result[ConfigObjectCursor] =
     castOrFail(OBJECT, v => Right(v.asInstanceOf[ConfigObject])).right.map(ConfigObjectCursor(_, pathElems))
 
-  /**
-    * Casts this cursor to a map from config keys to cursors.
+  /** Casts this cursor to a map from config keys to cursors.
     *
     * @return a `Right` with the map pointed to by this cursor if the cast can be done, `Left` with a list of failures
     *         otherwise.
@@ -219,8 +199,7 @@ sealed trait ConfigCursor {
   def asMap: ConfigReader.Result[Map[String, ConfigCursor]] =
     asObjectCursor.right.map(_.map)
 
-  /**
-    * Returns a cursor to the config at the path composed of given path segments.
+  /** Returns a cursor to the config at the path composed of given path segments.
     *
     * @param pathSegments the path of the config for which a cursor should be returned
     * @return a `Right` with a cursor to the config at `pathSegments` if such a config exists, a `Left` with a list of
@@ -229,8 +208,7 @@ sealed trait ConfigCursor {
   @deprecated("Use `.fluent.at(pathSegments).cursor` instead", "0.10.2")
   final def atPath(pathSegments: PathSegment*): ConfigReader.Result[ConfigCursor] = fluent.at(pathSegments: _*).cursor
 
-  /**
-    * Casts this cursor as either a `ConfigListCursor` or a `ConfigObjectCursor`.
+  /** Casts this cursor as either a `ConfigListCursor` or a `ConfigObjectCursor`.
     *
     * @return a `Right` with this cursor as a list or object cursor if the cast can be done, `Left` with a list of
     *         failures otherwise.
@@ -247,8 +225,7 @@ sealed trait ConfigCursor {
   def fluent: FluentConfigCursor =
     FluentConfigCursor(asConfigValue.right.map(_ => this))
 
-  /**
-    * Returns a failed `ConfigReader` result resulting from scoping a `FailureReason` into the context of this cursor.
+  /** Returns a failed `ConfigReader` result resulting from scoping a `FailureReason` into the context of this cursor.
     *
     * This operation is the easiest way to return a failure from a `ConfigReader`.
     *
@@ -259,8 +236,7 @@ sealed trait ConfigCursor {
   def failed[A](reason: FailureReason): ConfigReader.Result[A] =
     Left(ConfigReaderFailures(failureFor(reason)))
 
-  /**
-    * Returns a `ConfigReaderFailure` resulting from scoping a `FailureReason` into the context of this cursor.
+  /** Returns a `ConfigReaderFailure` resulting from scoping a `FailureReason` into the context of this cursor.
     *
     * This operation is useful for constructing `ConfigReaderFailures` when there are multiple `FailureReason`s.
     *
@@ -270,8 +246,7 @@ sealed trait ConfigCursor {
   def failureFor(reason: FailureReason): ConfigReaderFailure =
     ConvertFailure(reason, this)
 
-  /**
-    * Returns a failed `ConfigReader` result resulting from scoping a `Either[FailureReason, A]` into the context of
+  /** Returns a failed `ConfigReader` result resulting from scoping a `Either[FailureReason, A]` into the context of
     * this cursor.
     *
     * This operation is needed when control of the reading process is passed to a place without a `ConfigCursor`
@@ -298,8 +273,7 @@ sealed trait ConfigCursor {
 
 object ConfigCursor {
 
-  /**
-    * Builds a `ConfigCursor` for a `ConfigValue` at a path.
+  /** Builds a `ConfigCursor` for a `ConfigValue` at a path.
     *
     * @param value the `ConfigValue` to which the cursor should point
     * @param pathElems the path of `value` in the config as a list of keys
@@ -307,8 +281,7 @@ object ConfigCursor {
     */
   def apply(value: ConfigValue, pathElems: List[String]): ConfigCursor = SimpleConfigCursor(Option(value), pathElems)
 
-  /**
-    * Builds a `ConfigCursor` for an optional `ConfigValue` at a path.
+  /** Builds a `ConfigCursor` for an optional `ConfigValue` at a path.
     *
     * @param value the optional `ConfigValue` to which the cursor should point
     * @param pathElems the path of `value` in the config as a list of keys
@@ -316,8 +289,7 @@ object ConfigCursor {
     */
   def apply(value: Option[ConfigValue], pathElems: List[String]): ConfigCursor = SimpleConfigCursor(value, pathElems)
 
-  /**
-    * Handle automatic type conversions of `ConfigValue`s the way the
+  /** Handle automatic type conversions of `ConfigValue`s the way the
     * [[https://github.com/lightbend/config/blob/master/HOCON.md#automatic-type-conversions HOCON specification]]
     * describes. This code mimics the behavior of the package-private `com.typesafe.config.impl.DefaultTransformer` class
     * in Typesafe Config.
@@ -374,13 +346,11 @@ object ConfigCursor {
   }
 }
 
-/**
-  * A simple `ConfigCursor` providing no extra operations.
+/** A simple `ConfigCursor` providing no extra operations.
   */
 case class SimpleConfigCursor(valueOpt: Option[ConfigValue], pathElems: List[String]) extends ConfigCursor
 
-/**
-  * A `ConfigCursor` pointing to a config list.
+/** A `ConfigCursor` pointing to a config list.
   */
 case class ConfigListCursor(listValue: ConfigList, pathElems: List[String], offset: Int = 0) extends ConfigCursor {
 
@@ -391,18 +361,15 @@ case class ConfigListCursor(listValue: ConfigList, pathElems: List[String], offs
 
   override def asConfigValue: ConfigReader.Result[ConfigList] = Right(listValue)
 
-  /**
-    * Returns whether the config list pointed to by this cursor is empty.
+  /** Returns whether the config list pointed to by this cursor is empty.
     */
   def isEmpty: Boolean = listValue.isEmpty
 
-  /**
-    * Returns the size of the config list pointed to by this cursor.
+  /** Returns the size of the config list pointed to by this cursor.
     */
   def size: Int = listValue.size
 
-  /**
-    * Returns a cursor to the config at a given index.
+  /** Returns a cursor to the config at a given index.
     *
     * @param idx the index of the config for which a cursor should be returned
     * @return a `Right` with a cursor to the config at `idx` if such a config exists, a `Left` with a list of failures
@@ -415,8 +382,7 @@ case class ConfigListCursor(listValue: ConfigList, pathElems: List[String], offs
     }
   }
 
-  /**
-    * Returns a cursor to the config at a given index. An out of range index will return a cursor to an undefined value.
+  /** Returns a cursor to the config at a given index. An out of range index will return a cursor to an undefined value.
     *
     * @param idx the index of the config for which a cursor should be returned
     * @return a cursor to the config at `idx` if such a config exists, a cursor to an undefined value otherwise.
@@ -424,8 +390,7 @@ case class ConfigListCursor(listValue: ConfigList, pathElems: List[String], offs
   def atIndexOrUndefined(idx: Int): ConfigCursor =
     ConfigCursor(if (validIndex(idx)) Some(listValue.get(idx)) else None, indexKey(idx) :: pathElems)
 
-  /**
-    * Returns a cursor to the tail of the config list pointed to by this cursor if non-empty.
+  /** Returns a cursor to the tail of the config list pointed to by this cursor if non-empty.
     *
     * @return a `Some` with the tail of the config list if the list is not empty, `None` otherwise.
     */
@@ -441,8 +406,7 @@ case class ConfigListCursor(listValue: ConfigList, pathElems: List[String], offs
     }
   }
 
-  /**
-    * Returns a list of cursors to the elements of the config list pointed to by this cursor.
+  /** Returns a list of cursors to the elements of the config list pointed to by this cursor.
     *
     * @return a list of cursors to the elements of the config list pointed to by this cursor.
     */
@@ -455,8 +419,7 @@ case class ConfigListCursor(listValue: ConfigList, pathElems: List[String], offs
   override def asListCursor: ConfigReader.Result[ConfigListCursor] = Right(this)
 }
 
-/**
-  * A `ConfigCursor` pointing to a config object.
+/** A `ConfigCursor` pointing to a config object.
   */
 case class ConfigObjectCursor(objValue: ConfigObject, pathElems: List[String]) extends ConfigCursor {
 
@@ -464,24 +427,20 @@ case class ConfigObjectCursor(objValue: ConfigObject, pathElems: List[String]) e
 
   override def asConfigValue: ConfigReader.Result[ConfigObject] = Right(objValue)
 
-  /**
-    * Returns whether the config object pointed to by this cursor is empty.
+  /** Returns whether the config object pointed to by this cursor is empty.
     */
   def isEmpty: Boolean = objValue.isEmpty
 
-  /**
-    * Returns the size of the config object pointed to by this cursor.
+  /** Returns the size of the config object pointed to by this cursor.
     */
   def size: Int = objValue.size
 
-  /**
-    * Returns the list of keys of the config object pointed to by this cursor.
+  /** Returns the list of keys of the config object pointed to by this cursor.
     */
   def keys: Iterable[String] =
     objValue.keySet.asScala
 
-  /**
-    * Returns a cursor to the config at a given key.
+  /** Returns a cursor to the config at a given key.
     *
     * @param key the key of the config for which a cursor should be returned
     * @return a `Right` with a cursor to the config at `key` if such a config exists, a `Left` with a list of failures
@@ -494,8 +453,7 @@ case class ConfigObjectCursor(objValue: ConfigObject, pathElems: List[String]) e
     }
   }
 
-  /**
-    * Returns a cursor to the config at a given key. A missing key will return a cursor to an undefined value.
+  /** Returns a cursor to the config at a given key. A missing key will return a cursor to an undefined value.
     *
     * @param key the key of the config for which a cursor should be returned
     * @return a cursor to the config at `key` if such a config exists, a cursor to an undefined value otherwise.
@@ -503,8 +461,7 @@ case class ConfigObjectCursor(objValue: ConfigObject, pathElems: List[String]) e
   def atKeyOrUndefined(key: String): ConfigCursor =
     ConfigCursor(objValue.get(key), key :: pathElems)
 
-  /**
-    * Returns a cursor to the object pointed to by this cursor without a given key.
+  /** Returns a cursor to the object pointed to by this cursor without a given key.
     *
     * @param key the key to remove on the config object
     * @return a cursor to the object pointed to by this cursor without `key`.
@@ -512,8 +469,7 @@ case class ConfigObjectCursor(objValue: ConfigObject, pathElems: List[String]) e
   def withoutKey(key: String): ConfigObjectCursor =
     ConfigObjectCursor(objValue.withoutKey(key), pathElems)
 
-  /**
-    * Returns a map of cursors to the elements of the config object pointed to by this cursor.
+  /** Returns a map of cursors to the elements of the config object pointed to by this cursor.
     */
   def map: Map[String, ConfigCursor] =
     objValue.asScala.toMap.map { case (key, cv) => key -> ConfigCursor(cv, key :: pathElems) }

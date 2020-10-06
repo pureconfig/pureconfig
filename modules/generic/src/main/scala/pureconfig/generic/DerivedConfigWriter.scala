@@ -4,8 +4,7 @@ import com.typesafe.config._
 import pureconfig._
 import shapeless._
 
-/**
-  * A `ConfigWriter` derived with `shapeless`.
+/** A `ConfigWriter` derived with `shapeless`.
   *
   * @tparam A the type of objects writable by this `ConfigWriter`
   */

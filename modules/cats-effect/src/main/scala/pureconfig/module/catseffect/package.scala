@@ -19,8 +19,7 @@ package object catseffect {
   @deprecated("Root will be treated as the default namespace", "0.12.0")
   val defaultNameSpace = ""
 
-  /**
-    * Load a configuration of type `A` from a config source
+  /** Load a configuration of type `A` from a config source
     *
     * @param cs the config source from where the configuration will be loaded
     * @return The returned action will complete with `A` if it is possible to create an instance of type
@@ -37,8 +36,7 @@ package object catseffect {
     delayedLoad.rethrow
   }
 
-  /**
-    * Load a configuration of type `A` from a config source
+  /** Load a configuration of type `A` from a config source
     *
     * @param cs the config source from where the configuration will be loaded
     * @param blocker the blocking context which will be used to load the configuration.
@@ -55,8 +53,7 @@ package object catseffect {
       .leftMap(ConfigReaderException[A])
       .rethrowT
 
-  /**
-    * Load a configuration of type `A` from the standard configuration files
+  /** Load a configuration of type `A` from the standard configuration files
     *
     * @return The returned action will complete with `A` if it is possible to create an instance of type
     *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
@@ -66,8 +63,7 @@ package object catseffect {
   def loadConfigF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default)
 
-  /**
-    * Load a configuration of type `A` from the standard configuration files
+  /** Load a configuration of type `A` from the standard configuration files
     *
     * @param blocker the blocking context which will be used to load the configuration.
     * @return The returned action will complete with `A` if it is possible to create an instance of type
@@ -79,8 +75,7 @@ package object catseffect {
   )(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     loadF(ConfigSource.default, blocker)
 
-  /**
-    * Load a configuration of type `A` from the standard configuration files
+  /** Load a configuration of type `A` from the standard configuration files
     *
     * @param namespace the base namespace from which the configuration should be load
     * @return The returned action will complete with `A` if it is possible to create an instance of type
@@ -93,8 +88,7 @@ package object catseffect {
   )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default.at(namespace))
 
-  /**
-    * Load a configuration of type `A` from the given file. Note that standard configuration
+  /** Load a configuration of type `A` from the given file. Note that standard configuration
     * files are still loaded but can be overridden from the given configuration file
     *
     * @param path the path of the configuration file from which to load
@@ -108,8 +102,7 @@ package object catseffect {
   )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default(ConfigSource.file(path)))
 
-  /**
-    * Load a configuration of type `A` from the given file. Note that standard configuration
+  /** Load a configuration of type `A` from the given file. Note that standard configuration
     * files are still loaded but can be overridden from the given configuration file
     *
     * @param path the path of the configuration file from which to load
@@ -126,8 +119,7 @@ package object catseffect {
   ): F[A] =
     loadF[F, A](ConfigSource.default(ConfigSource.file(path)).at(namespace))
 
-  /**
-    * Load a configuration of type `A` from the given `Config`
+  /** Load a configuration of type `A` from the given `Config`
     * @return The returned action will complete with `A` if it is possible to create an instance of type
     *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
     *         details on why it isn't possible
@@ -138,8 +130,7 @@ package object catseffect {
   )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.fromConfig(conf))
 
-  /**
-    * Load a configuration of type `A` from the given `Config`
+  /** Load a configuration of type `A` from the given `Config`
     * @return The returned action will complete with `A` if it is possible to create an instance of type
     *         `A` from the configuration object, or fail with a ConfigReaderException which in turn contains
     *         details on why it isn't possible
@@ -152,8 +143,7 @@ package object catseffect {
   ): F[A] =
     loadF[F, A](ConfigSource.fromConfig(conf).at(namespace))
 
-  /**
-    * Save the given configuration into a property file
+  /** Save the given configuration into a property file
     *
     * @param conf The configuration to save
     * @param outputPath Where to write the configuration
@@ -175,8 +165,7 @@ package object catseffect {
       pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options)
     }
 
-  /**
-    * Save the given configuration into a property file
+  /** Save the given configuration into a property file
     *
     * @param conf The configuration to save
     * @param outputPath Where to write the configuration
@@ -219,8 +208,7 @@ package object catseffect {
     }
   }
 
-  /**
-    * Writes the configuration to the output stream and closes the stream
+  /** Writes the configuration to the output stream and closes the stream
     *
     * @param conf The configuration to write
     * @param outputStream The stream in which the configuration should be written
@@ -237,8 +225,7 @@ package object catseffect {
       pureconfig.saveConfigToStream(conf, outputStream, options)
     }
 
-  /**
-    * Writes the configuration to the output stream and closes the stream
+  /** Writes the configuration to the output stream and closes the stream
     *
     * @param conf The configuration to write
     * @param outputStream The stream in which the configuration should be written
@@ -263,8 +250,7 @@ package object catseffect {
       }
     }
 
-  /**
-    * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them into a `A`.
+  /** Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them into a `A`.
     *
     * This is a convenience method which enables having default configuration which backstops local configuration.
     *

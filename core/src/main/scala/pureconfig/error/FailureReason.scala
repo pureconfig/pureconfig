@@ -5,19 +5,16 @@ import scala.collection.mutable
 
 import com.typesafe.config.{ConfigValue, ConfigValueType}
 
-/**
-  * A representation of a reason why a value failed to be converted.
+/** A representation of a reason why a value failed to be converted.
   */
 trait FailureReason {
 
-  /**
-    * A human-readable description of the failure.
+  /** A human-readable description of the failure.
     */
   def description: String
 }
 
-/**
-  * A general reason given for the failure of a value to be converted to a desired type.
+/** A general reason given for the failure of a value to be converted to a desired type.
   *
   * @param value the value that was requested to be converted
   * @param toType the target type that the value was requested to be converted to
@@ -27,8 +24,7 @@ final case class CannotConvert(value: String, toType: String, because: String) e
   def description = s"Cannot convert '$value' to $toType: $because."
 }
 
-/**
-  * A failure reason given when there is a collision of keys with different semantics. This error is raised when a key
+/** A failure reason given when there is a collision of keys with different semantics. This error is raised when a key
   * that should be used to disambiguate a coproduct is mapped to a field in a product.
   *
   * @param key the colliding key
@@ -39,8 +35,7 @@ final case class CollidingKeys(key: String, existingValue: ConfigValue) extends 
     s"Key with value '{$existingValue.render(ConfigRenderOptions.concise)}' collides with a key necessary to disambiguate a coproduct."
 }
 
-/**
-  * A failure reason given when a key is missing from a `ConfigObject` or `ConfigList`.
+/** A failure reason given when a key is missing from a `ConfigObject` or `ConfigList`.
   *
   * @param key the key that is missing
   * @param candidates a set of candidate keys that might correspond to the
@@ -82,8 +77,7 @@ object KeyNotFound {
   }
 }
 
-/**
-  * A failure reason given when an unknown key is found in a `ConfigObject`. The failure is raised when a key of a
+/** A failure reason given when an unknown key is found in a `ConfigObject`. The failure is raised when a key of a
   * `ConfigObject` is not mapped into a field of a given type and the `allowUnknownKeys` property of the `ProductHint`
   * for the type in question is `false`.
   *
@@ -93,8 +87,7 @@ final case class UnknownKey(key: String) extends FailureReason {
   def description = s"Unknown key."
 }
 
-/**
-  * A failure reason given when a `ConfigValue` has the wrong type.
+/** A failure reason given when a `ConfigValue` has the wrong type.
   *
   * @param foundType the `ConfigValueType` that was found
   * @param expectedTypes the `ConfigValueType`s that were expected
@@ -103,8 +96,7 @@ final case class WrongType(foundType: ConfigValueType, expectedTypes: Set[Config
   def description = s"""Expected type ${expectedTypes.mkString(" or ")}. Found $foundType instead."""
 }
 
-/**
-  * A failure reason given when an exception is thrown during a conversion.
+/** A failure reason given when an exception is thrown during a conversion.
   *
   * @param throwable the `Throwable` that was raised
   */
@@ -112,8 +104,7 @@ final case class ExceptionThrown(throwable: Throwable) extends FailureReason {
   def description = s"${throwable.getMessage}."
 }
 
-/**
-  * A failure reason given when an unexpected empty string is found.
+/** A failure reason given when an unexpected empty string is found.
   *
   * @param typ the type that was attempted to be converted to from an empty string
   */
@@ -121,8 +112,7 @@ final case class EmptyStringFound(typ: String) extends FailureReason {
   def description = s"Empty string found when trying to convert to $typ."
 }
 
-/**
-  * A failure reason given when an unexpected non-empty object is found. The failure happens when using
+/** A failure reason given when an unexpected non-empty object is found. The failure happens when using
   * `EnumCoproductHint` to write a config.
   *
   * @param typ the type for which a non-empty object was attempted to be written
@@ -135,8 +125,7 @@ final case class NonEmptyObjectFound(typ: String) extends FailureReason {
   def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
 }
 
-/**
-  * A failure reason given when a list of an unexpected size is found when attempting to read into an `HList`.
+/** A failure reason given when a list of an unexpected size is found when attempting to read into an `HList`.
   *
   * @param expected the expected number of elements
   * @param found the number of elements found
@@ -145,8 +134,7 @@ final case class WrongSizeList(expected: Int, found: Int) extends FailureReason 
   def description = s"List of wrong size found. Expected $expected elements. Found $found elements instead."
 }
 
-/**
-  * A failure reason given when a string is not of the expected size.
+/** A failure reason given when a string is not of the expected size.
   *
   * @param expected the expected number of characters
   * @param found the number of characters found

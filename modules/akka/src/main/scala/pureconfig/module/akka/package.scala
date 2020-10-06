@@ -8,8 +8,7 @@ import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.viaString
 import pureconfig.ConvertHelpers.catchReadError
 
-/**
-  * ConfigConvert instances for Akka value classes.
+/** ConfigConvert instances for Akka value classes.
   */
 package object akka {
   implicit val timeoutCC: ConfigConvert[Timeout] =

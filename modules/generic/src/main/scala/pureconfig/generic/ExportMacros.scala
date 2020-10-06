@@ -4,8 +4,7 @@ import scala.reflect.macros.blackbox
 
 import pureconfig._
 
-/**
-  * Macros used to circumvent divergence checker restrictions in the compiler.
+/** Macros used to circumvent divergence checker restrictions in the compiler.
   */
 class ExportMacros(val c: blackbox.Context) {
   import c.universe._

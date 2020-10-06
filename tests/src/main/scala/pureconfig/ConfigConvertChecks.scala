@@ -13,13 +13,11 @@ import pureconfig.error._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-/**
-  * Add utilities to a scalatest `FlatSpec` to test `ConfigConvert` instances
+/** Add utilities to a scalatest `FlatSpec` to test `ConfigConvert` instances
   */
 trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks with EitherValues =>
 
-  /**
-    * For each value of type `A`, check that the value produced by converting to and then from `ConfigValue` is the same
+  /** For each value of type `A`, check that the value produced by converting to and then from `ConfigValue` is the same
     * of the original value
     *
     * Note that this method doesn't check all the values but only the values that can be created by `Arbitrary[A]` and
@@ -37,8 +35,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
       cc.value.from(cc.value.to(a)).right.value shouldEqual a
     }
 
-  /**
-    * A more generic version of [[checkArbitrary]] where the type which will be written as `ConfigValue` is
+  /** A more generic version of [[checkArbitrary]] where the type which will be written as `ConfigValue` is
     * different from the type which will be read from that `ConfigValue`. The idea being is to test the reading
     * part of a `ConfigConvert` by providing another type for which it's easy to create `Arbitrary` instances
     * and write the values to a configuration.
@@ -67,8 +64,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
       cr.from(cw.to(b)).right.value shouldEqual f(b)
     }
 
-  /**
-    * For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from`
+  /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from`
     * successfully converts the latter into to former. Useful to test specific values
     */
   def checkRead[A: Equality](reprsToValues: (ConfigValue, A)*)(implicit cr: ConfigReader[A], tpe: TypeTag[A]): Unit =
@@ -82,8 +78,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
   def checkReadString[A: ConfigReader: TypeTag: Equality](strsToValues: (String, A)*): Unit =
     checkRead[A](strsToValues.map { case (s, a) => ConfigValueFactory.fromAnyRef(s) -> a }: _*)
 
-  /**
-    * For each pair of value of type `A` and `ConfigValue`, check that `ConfigWriter[A].to`
+  /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigWriter[A].to`
     * successfully converts the former into the latter. Useful to test specific values
     */
   def checkWrite[A: Equality](valuesToReprs: (A, ConfigValue)*)(implicit cw: ConfigWriter[A], tpe: TypeTag[A]): Unit =
@@ -97,8 +92,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
   def checkWriteString[A: ConfigWriter: TypeTag: Equality](valuesToStrs: (A, String)*): Unit =
     checkWrite[A](valuesToStrs.map { case (a, s) => a -> ConfigValueFactory.fromAnyRef(s) }: _*)
 
-  /**
-    * For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from`
+  /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from`
     * successfully converts the latter into to former and `ConfigWriter[A].to` successfully converts the former into the
     * latter.
     */
@@ -113,8 +107,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
     checkWriteString[A](strsValues.map(_.swap): _*)
   }
 
-  /**
-    * Check that `cc` returns error of type `E` when trying to read each value passed with `values`
+  /** Check that `cc` returns error of type `E` when trying to read each value passed with `values`
     *
     * @param values the values that should not be conver
     * @param cr the `ConfigConvert` to test
@@ -131,8 +124,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
         }
     }
 
-  /**
-    * For each pair of `ConfigValue` and `ConfigReaderFailures`, check that `cr`
+  /** For each pair of `ConfigValue` and `ConfigReaderFailures`, check that `cr`
     * fails with the provided errors when trying to read the provided
     * `ConfigValue`.
     */

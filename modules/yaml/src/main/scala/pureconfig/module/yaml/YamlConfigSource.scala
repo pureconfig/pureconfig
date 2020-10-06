@@ -18,8 +18,7 @@ import pureconfig.error._
 import pureconfig.module.yaml.error.{NonStringKeyFound, UnsupportedYamlType}
 import pureconfig.{ConfigObjectSource, ConfigSource}
 
-/**
-  * A `ConfigSource` that reads configs from YAML documents in a stream, file or string.
+/** A `ConfigSource` that reads configs from YAML documents in a stream, file or string.
   *
   * @param getReader the thunk to generate a `Reader` instance from which the YAML document will be
   *                  read. This parameter won't be memoized so it can be used with dynamic sources
@@ -42,8 +41,7 @@ final class YamlConfigSource private (
     }
   }
 
-  /**
-    * Converts this YAML source to a config object source to allow merging with other sources. This
+  /** Converts this YAML source to a config object source to allow merging with other sources. This
     * operation is not reversible. The new source will load with an error if this document does not
     * contain an object.
     *
@@ -52,8 +50,7 @@ final class YamlConfigSource private (
   def asObjectSource: ConfigObjectSource =
     ConfigObjectSource(fluentCursor().asObjectCursor.right.map(_.objValue.toConfig))
 
-  /**
-    * Returns a new source that produces a multi-document YAML read by this source as a config list.
+  /** Returns a new source that produces a multi-document YAML read by this source as a config list.
     *
     * @return a new source that produces a multi-document YAML read by this source as a config list.
     */
@@ -144,8 +141,7 @@ final class YamlConfigSource private (
 
 object YamlConfigSource {
 
-  /**
-    * Returns a YAML source that provides configs read from a file.
+  /** Returns a YAML source that provides configs read from a file.
     *
     * @param path the path to the file as a string
     * @return a YAML source that provides configs read from a file.
@@ -157,8 +153,7 @@ object YamlConfigSource {
       onIOFailure = Some(CannotReadFile(Paths.get(path), _))
     )
 
-  /**
-    * Returns a YAML source that provides configs read from a file.
+  /** Returns a YAML source that provides configs read from a file.
     *
     * @param path the path to the file
     * @return a YAML source that provides configs read from a file.
@@ -170,8 +165,7 @@ object YamlConfigSource {
       onIOFailure = Some(CannotReadFile(path, _))
     )
 
-  /**
-    * Returns a YAML source that provides configs read from a file.
+  /** Returns a YAML source that provides configs read from a file.
     *
     * @param file the file
     * @return a YAML source that provides configs read from a file.
@@ -183,8 +177,7 @@ object YamlConfigSource {
       onIOFailure = Some(CannotReadFile(file.toPath, _))
     )
 
-  /**
-    * Returns a YAML source that provides a config parsed from a string.
+  /** Returns a YAML source that provides a config parsed from a string.
     *
     * @param confStr the YAML content
     * @return a YAML source that provides a config parsed from a string.

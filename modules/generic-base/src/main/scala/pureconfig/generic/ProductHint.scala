@@ -4,15 +4,13 @@ import com.typesafe.config.ConfigValue
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailures, UnknownKey}
 
-/**
-  * A trait that can be implemented to customize how case classes are read from and written to a config.
+/** A trait that can be implemented to customize how case classes are read from and written to a config.
   *
   * @tparam A the type of case class for which this hint applies
   */
 trait ProductHint[A] {
 
-  /**
-    * Returns what should be used when attempting to read a case class field with name `fieldName` from the provided
+  /** Returns what should be used when attempting to read a case class field with name `fieldName` from the provided
     * `ConfigObjectCursor`.
     *
     * @param cursor the cursor from which to read a value
@@ -23,8 +21,7 @@ trait ProductHint[A] {
     */
   def from(cursor: ConfigObjectCursor, fieldName: String): ProductHint.Action
 
-  /**
-    * Returns optional failures given the provided `ConfigObjectCursor`.
+  /** Returns optional failures given the provided `ConfigObjectCursor`.
     *
     * @param cursor a `ConfigObjectCursor` at the configuration root from where the product was read
     * @param usedFields a set of all the used fields when reading the product
@@ -32,8 +29,7 @@ trait ProductHint[A] {
     */
   def bottom(cursor: ConfigObjectCursor, usedFields: Set[String]): Option[ConfigReaderFailures]
 
-  /**
-    * Returns an optional key-value pair that should be used for the field with name `fieldName` in the `ConfigObject`
+  /** Returns an optional key-value pair that should be used for the field with name `fieldName` in the `ConfigObject`
     * representation of `T`.
     *
     * @param value the optional serialized value of the field
@@ -80,32 +76,27 @@ private[pureconfig] case class ProductHintImpl[A](
 
 object ProductHint {
 
-  /**
-    * What should be done when attempting to read a given field from a product.
+  /** What should be done when attempting to read a given field from a product.
     */
   sealed trait Action {
 
-    /**
-      * The `ConfigCursor` to use when trying to read the field.
+    /** The `ConfigCursor` to use when trying to read the field.
       */
     def cursor: ConfigCursor
 
-    /**
-      * The name of the field in the `ConfigObject` representation of the product.
+    /** The name of the field in the `ConfigObject` representation of the product.
       */
     def field: String
   }
 
-  /**
-    * An action to use the provided `ConfigCursor` when trying to read a given field.
+  /** An action to use the provided `ConfigCursor` when trying to read a given field.
     *
     * @param cursor the `ConfigCursor` to use when trying to read the field
     * @param field the name of the field in the `ConfigObject` representation of the product
     */
   case class Use(cursor: ConfigCursor, field: String) extends Action
 
-  /**
-    * An action to either use the provided `ConfigCursor` (if it isn't null or undefined) or fallback to the default
+  /** An action to either use the provided `ConfigCursor` (if it isn't null or undefined) or fallback to the default
     * value in the product's constructor.
     *
     * @param cursor the `ConfigCursor` to use when trying to read the field

@@ -12,8 +12,7 @@ import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
 import pureconfig.generic.auto._
 
-/**
-  * Suite of tests related to the origin of ConfigValues that raised failures.
+/** Suite of tests related to the origin of ConfigValues that raised failures.
   */
 class ConfigReaderFailureOriginSuite extends BaseSuite with EitherValues with Inside {
   "Loading configuration from files" should "show proper error locations when loading a single file" in {

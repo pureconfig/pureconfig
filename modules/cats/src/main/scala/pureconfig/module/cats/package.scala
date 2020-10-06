@@ -10,8 +10,7 @@ import scala.collection.immutable.{SortedMap, SortedSet}
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-/**
-  * `ConfigReader` and `ConfigWriter` instances for cats data structures.
+/** `ConfigReader` and `ConfigWriter` instances for cats data structures.
   */
 package object cats {
 

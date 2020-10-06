@@ -7,8 +7,7 @@ import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.{EnumerationConfigReaderBuilder, MagnoliaConfigReader}
 import pureconfig.{ConfigFieldMapping, ConfigReader, KebabCase, PascalCase}
 
-/**
-  * An object that, when imported, provides methods for deriving `ConfigReader` instances on demand for value classes,
+/** An object that, when imported, provides methods for deriving `ConfigReader` instances on demand for value classes,
   * tuples, case classes and sealed traits. The generation of `ConfigReader`s is done by Magnolia.
   */
 object reader {
@@ -22,15 +21,13 @@ object reader {
 
   def deriveReader[A]: ConfigReader[A] = macro Magnolia.gen[A]
 
-  /**
-    * Derive a `ConfigReader` for a sealed family of case objects where each type is encoded as the kebab-case
+  /** Derive a `ConfigReader` for a sealed family of case objects where each type is encoded as the kebab-case
     * representation of the type name.
     */
   def deriveEnumerationReader[A: EnumerationConfigReaderBuilder]: ConfigReader[A] =
     deriveEnumerationReader[A](ConfigFieldMapping(PascalCase, KebabCase))
 
-  /**
-    * Derive a `ConfigReader` for a sealed family of case objects where each type is encoded with the `transformName`
+  /** Derive a `ConfigReader` for a sealed family of case objects where each type is encoded with the `transformName`
     * function applied to the type name.
     */
   def deriveEnumerationReader[A](

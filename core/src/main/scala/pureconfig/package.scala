@@ -1,8 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-/**
-  * @author Mario Pastorelli
+/** @author Mario Pastorelli
   */
 
 import java.io.{OutputStream, OutputStreamWriter}
@@ -16,8 +15,7 @@ import pureconfig.error._
 
 package object pureconfig {
 
-  /**
-    * Load a configuration of type `A` from the standard configuration files
+  /** Load a configuration of type `A` from the standard configuration files
     *
     * @return A `Success` with the configuration if it is possible to create an instance of type
     *         `A` from the configuration files, else a `Failure` with details on why it
@@ -27,8 +25,7 @@ package object pureconfig {
   def loadConfig[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
     ConfigSource.default.load[A]
 
-  /**
-    * Load a configuration of type `A` from the standard configuration files
+  /** Load a configuration of type `A` from the standard configuration files
     *
     * @param namespace the base namespace from which the configuration should be load
     * @return A `Success` with the configuration if it is possible to create an instance of type
@@ -39,8 +36,7 @@ package object pureconfig {
   def loadConfig[A](namespace: String)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
     ConfigSource.default.at(namespace).load[A]
 
-  /**
-    * Load a configuration of type `A` from the given file. Note that standard configuration
+  /** Load a configuration of type `A` from the given file. Note that standard configuration
     * files are still loaded but can be overridden from the given configuration file
     *
     * @return A `Success` with the configuration if it is possible to create an instance of type
@@ -51,8 +47,7 @@ package object pureconfig {
   def loadConfig[A](path: Path)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
     ConfigSource.default(ConfigSource.file(path)).load[A]
 
-  /**
-    * Load a configuration of type `A` from the given file. Note that standard configuration
+  /** Load a configuration of type `A` from the given file. Note that standard configuration
     * files are still loaded but can be overridden from the given configuration file
     *
     * @param namespace the base namespace from which the configuration should be load
@@ -78,8 +73,7 @@ package object pureconfig {
   ): ConfigReader.Result[A] =
     ConfigSource.fromConfig(conf).at(namespace).load[A]
 
-  /**
-    * Load a configuration of type `A` from the given `Config`, falling back to the default configuration
+  /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
     *
     * @param conf Typesafe configuration to load
     * @return A `Success` with the configuration if it is possible to create an instance of type
@@ -90,8 +84,7 @@ package object pureconfig {
   def loadConfigWithFallback[A](conf: Config)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).load[A]
 
-  /**
-    * Load a configuration of type `A` from the given `Config`, falling back to the default configuration
+  /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
     *
     * @param conf      Typesafe configuration to load
     * @param namespace the base namespace from which the configuration should be load
@@ -108,8 +101,7 @@ package object pureconfig {
   ): ConfigReader.Result[A] =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).load[A]
 
-  /**
-    * Load a configuration of type `A` from the standard configuration files
+  /** Load a configuration of type `A` from the standard configuration files
     *
     * @return the configuration
     */
@@ -118,8 +110,7 @@ package object pureconfig {
   def loadConfigOrThrow[A: ClassTag](implicit reader: Derivation[ConfigReader[A]]): A =
     ConfigSource.default.loadOrThrow[A]
 
-  /**
-    * Load a configuration of type `A` from the standard configuration files
+  /** Load a configuration of type `A` from the standard configuration files
     *
     * @param namespace the base namespace from which the configuration should be load
     * @return the configuration
@@ -129,8 +120,7 @@ package object pureconfig {
   def loadConfigOrThrow[A: ClassTag](namespace: String)(implicit reader: Derivation[ConfigReader[A]]): A =
     ConfigSource.default.at(namespace).loadOrThrow[A]
 
-  /**
-    * Load a configuration of type `A` from the given file. Note that standard configuration
+  /** Load a configuration of type `A` from the given file. Note that standard configuration
     * files are still loaded but can be overridden from the given configuration file
     *
     * @return the configuration
@@ -140,8 +130,7 @@ package object pureconfig {
   def loadConfigOrThrow[A: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[A]]): A =
     ConfigSource.default(ConfigSource.file(path)).loadOrThrow[A]
 
-  /**
-    * Load a configuration of type `A` from the given file. Note that standard configuration
+  /** Load a configuration of type `A` from the given file. Note that standard configuration
     * files are still loaded but can be overridden from the given configuration file
     *
     * @param namespace the base namespace from which the configuration should be load
@@ -152,8 +141,7 @@ package object pureconfig {
   def loadConfigOrThrow[A: ClassTag](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): A =
     ConfigSource.default(ConfigSource.file(path)).at(namespace).loadOrThrow[A]
 
-  /**
-    * Load a configuration of type `A` from the given `Config`
+  /** Load a configuration of type `A` from the given `Config`
     *
     * @param conf Typesafe configuration to load
     * @return the configuration
@@ -163,8 +151,7 @@ package object pureconfig {
   def loadConfigOrThrow[A: ClassTag](conf: Config)(implicit reader: Derivation[ConfigReader[A]]): A =
     ConfigSource.fromConfig(conf).loadOrThrow[A]
 
-  /**
-    * Load a configuration of type `A` from the given `Config`
+  /** Load a configuration of type `A` from the given `Config`
     *
     * @param conf      Typesafe configuration to load
     * @param namespace the base namespace from which the configuration should be load
@@ -175,8 +162,7 @@ package object pureconfig {
   def loadConfigOrThrow[A: ClassTag](conf: Config, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): A =
     ConfigSource.fromConfig(conf).at(namespace).loadOrThrow[A]
 
-  /**
-    * Load a configuration of type `A` from the given `Config`, falling back to the default configuration
+  /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
     *
     * @param conf Typesafe configuration to load
     * @return the configuration
@@ -186,8 +172,7 @@ package object pureconfig {
   def loadConfigWithFallbackOrThrow[A: ClassTag](conf: Config)(implicit reader: Derivation[ConfigReader[A]]): A =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).loadOrThrow[A]
 
-  /**
-    * Load a configuration of type `A` from the given `Config`, falling back to the default configuration
+  /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
     *
     * @param conf      Typesafe configuration to load
     * @param namespace the base namespace from which the configuration should be load
@@ -203,8 +188,7 @@ package object pureconfig {
   ): A =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).loadOrThrow[A]
 
-  /**
-    * Save the given configuration into a property file
+  /** Save the given configuration into a property file
     *
     * @param conf               The configuration to save
     * @param outputPath         Where to write the configuration
@@ -231,8 +215,7 @@ package object pureconfig {
     saveConfigToStream(conf, Files.newOutputStream(outputPath), options)
   }
 
-  /**
-    * Writes the configuration to the output stream and closes the stream
+  /** Writes the configuration to the output stream and closes the stream
     *
     * @param conf         The configuration to write
     * @param outputStream The stream in which the configuration should be written
@@ -252,8 +235,7 @@ package object pureconfig {
     printOutputStream.close()
   }
 
-  /**
-    * Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them
+  /** Loads `files` in order, allowing values in later files to backstop missing values from prior, and converts them
     * into a `Config`.
     *
     * This is a convenience method which enables having default configuration which backstops local configuration.
@@ -281,8 +263,7 @@ package object pureconfig {
       .load[A]
   }
 
-  /**
-    * @see [[loadConfigFromFiles]]
+  /** @see [[loadConfigFromFiles]]
     * @return the configuration
     */
   @throws[ConfigReaderException[_]]

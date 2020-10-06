@@ -6,8 +6,7 @@ import pureconfig.generic.ProductHint.UseOrDefault
 import shapeless._
 import shapeless.labelled.{FieldType, field}
 
-/**
-  * A specialized reader for generic representations that reads values in the shape of a config object, and is capable
+/** A specialized reader for generic representations that reads values in the shape of a config object, and is capable
   * of handling default values.
   *
   * @tparam Original the original type for which `Repr` is a generic sub-representation

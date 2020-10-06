@@ -4,8 +4,7 @@ import pureconfig._
 import shapeless._
 import shapeless.labelled._
 
-/**
-  * A typeclass to collect the `ConfigReader` options for a given coproduct, indexed by the coproduct name.
+/** A typeclass to collect the `ConfigReader` options for a given coproduct, indexed by the coproduct name.
   */
 private[generic] trait CoproductReaderOptions[Repr <: Coproduct] {
   def options: Map[String, ConfigReader[Repr]]

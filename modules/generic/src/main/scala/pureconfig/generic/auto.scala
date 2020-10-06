@@ -4,8 +4,7 @@ import scala.language.experimental.macros
 
 import pureconfig._
 
-/**
-  * An object that, when imported, provides implicit `ConfigReader` and `ConfigWriter` instances for value classes,
+/** An object that, when imported, provides implicit `ConfigReader` and `ConfigWriter` instances for value classes,
   * tuples, case classes and sealed traits.
   */
 object auto {

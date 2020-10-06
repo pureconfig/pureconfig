@@ -7,8 +7,7 @@ import pureconfig.{ConfigReader, Exported}
 import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.{ExportedMagnolia, MagnoliaConfigReader}
 
-/**
-  * An object that, when imported, provides implicit `ConfigReader` instances for value classes, tuples, case classes and
+/** An object that, when imported, provides implicit `ConfigReader` instances for value classes, tuples, case classes and
   * sealed traits. The generation of `ConfigReader`s is done by Magnolia.
   */
 object reader {

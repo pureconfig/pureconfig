@@ -3,13 +3,11 @@ package pureconfig
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-/**
-  * Helper methods for testing the behavior of `Derivation`.
+/** Helper methods for testing the behavior of `Derivation`.
   */
 object DerivationChecks {
 
-  /**
-    * A version of the `shapeless.test.illTyped` macro that allows expected error messages with multiple lines, as well
+  /** A version of the `shapeless.test.illTyped` macro that allows expected error messages with multiple lines, as well
     * as whitespace before and after the message.
     *
     * @param code the code to check for non-compilation

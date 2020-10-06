@@ -5,8 +5,7 @@ import _root_.javax.security.auth.x500.X500Principal
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.{catchReadError, viaString}
 
-/**
-  * ConfigConvert instances for javax value classes.
+/** ConfigConvert instances for javax value classes.
   */
 package object javax {
   implicit val readKerberosPrincipal: ConfigConvert[KerberosPrincipal] =

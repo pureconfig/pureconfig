@@ -9,8 +9,7 @@ import pureconfig._
 import pureconfig.backend.ErrorUtil._
 import pureconfig.error._
 
-/**
-  * A wrapper of `com.typesafe.config.ConfigFactory` whose methods return [[scala.Either]] instead
+/** A wrapper of `com.typesafe.config.ConfigFactory` whose methods return [[scala.Either]] instead
   * of throwing exceptions
   */
 object ConfigFactoryWrapper {

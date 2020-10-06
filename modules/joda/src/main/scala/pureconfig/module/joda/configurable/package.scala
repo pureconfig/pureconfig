@@ -5,8 +5,7 @@ import org.joda.time.format._
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert._
 
-/**
-  * Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
+/** Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
   *
   * The result of calling one of the methods can be assigned to an `implicit val` so that `pureconfig` will be able to
   * use it:

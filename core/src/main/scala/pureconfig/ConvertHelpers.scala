@@ -6,8 +6,7 @@ import scala.util.{Failure, Success, Try}
 
 import pureconfig.error._
 
-/**
-  * Useful helpers for building `ConfigConvert` instances and dealing with results.
+/** Useful helpers for building `ConfigConvert` instances and dealing with results.
   */
 trait ConvertHelpers {
 
@@ -41,8 +40,7 @@ trait ConvertHelpers {
     }
   }
 
-  /**
-    * Convert a `String => Try` into a  `String => Option[ConfigValueLocation] => Either` such that after application
+  /** Convert a `String => Try` into a  `String => Option[ConfigValueLocation] => Either` such that after application
     * - `Success(t)` becomes `_ => Right(t)`
     * - `Failure(e)` becomes `location => Left(CannotConvert(value, type, e.getMessage, location)`
     */
@@ -53,8 +51,7 @@ trait ConvertHelpers {
     }
   }
 
-  /**
-    * Convert a `String => Option` into a `String => Option[ConfigValueLocation] => Either` such that after application
+  /** Convert a `String => Option` into a `String => Option[ConfigValueLocation] => Either` such that after application
     * - `Some(t)` becomes `_ => Right(t)`
     * - `None` becomes `location => Left(CannotConvert(value, type, "", location)`
     */

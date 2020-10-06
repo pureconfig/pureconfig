@@ -5,8 +5,7 @@ import pureconfig.ConfigConvert
 
 import scala.util.Try
 
-/**
-  * `ConfigConvert` instances for Hadoop data structures.
+/** `ConfigConvert` instances for Hadoop data structures.
   */
 package object hadoop {
 

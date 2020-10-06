@@ -5,8 +5,7 @@ package pureconfig.example
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * This is not a production-quality email address validator.
+/** This is not a production-quality email address validator.
   * It is provided only for illustration purposes.
   */
 object Email {

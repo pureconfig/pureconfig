@@ -5,8 +5,7 @@ import pureconfig.error._
 import shapeless._
 import shapeless.ops.hlist.HKernelAux
 
-/**
-  * A `ConfigReader` for generic representations that reads values in the shape of a sequence.
+/** A `ConfigReader` for generic representations that reads values in the shape of a sequence.
   *
   * @tparam Repr the generic representation
   */

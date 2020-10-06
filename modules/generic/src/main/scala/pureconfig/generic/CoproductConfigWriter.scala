@@ -5,8 +5,7 @@ import pureconfig.{ConfigWriter, Derivation}
 import shapeless.labelled._
 import shapeless._
 
-/**
-  * A `ConfigWriter` for generic representations of coproducts.
+/** A `ConfigWriter` for generic representations of coproducts.
   *
   * @tparam Original the original type for which `Repr` is the coproduct representation
   * @tparam Repr the generic representation

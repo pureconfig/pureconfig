@@ -4,8 +4,7 @@ import scala.reflect.macros.{TypecheckException, whitebox}
 
 import pureconfig.Derivation
 
-/**
-  * An API for macro operations that require access to macro or even compiler internals. Since they rely on
+/** An API for macro operations that require access to macro or even compiler internals. Since they rely on
   * non-public APIs, the code may be distinct between Scala major versions and even between minor versions.
   */
 trait MacroCompat {
