@@ -14,7 +14,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka" % "0.14.0"
 
 To load a `Timeout` and an `ActorPath` into a configuration, we create a class to hold our configuration:
 
-```tut:silent
+```scala mdoc:silent
 import akka.actor.ActorPath
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory.parseString
@@ -26,7 +26,7 @@ case class MyConfig(timeout: Timeout, actorPath: ActorPath)
 ```
 
 We can read a `MyConfig` like:
-```tut:book
+```scala mdoc
 val conf = parseString("""{
   timeout: 5 seconds,
   actor-path:  "akka://my-sys/user/service-a/worker1"

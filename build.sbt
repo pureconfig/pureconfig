@@ -49,7 +49,13 @@ def module(proj: Project) = proj
   .dependsOn(generic % "Tut") // Allow auto-derivation in documentation
   .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
 
-lazy val akka = module(project) in file("modules/akka")
+def moduleWithMdoc(proj: Project) = proj
+  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
+  .dependsOn(core)
+  .dependsOn(tests % "test")
+  .settings(commonSettings)
+
+lazy val akka = moduleWithMdoc(project) in file("modules/akka")
 lazy val `akka-http` = module(project) in file("modules/akka-http")
 lazy val cats = module(project) in file("modules/cats")
 lazy val `cats-effect` = module(project) in file("modules/cats-effect")
