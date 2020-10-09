@@ -3,14 +3,13 @@ import mdoc.MdocPlugin.autoImport._
 import sbt._
 import sbt.Keys._
 
-/**
- * A plugin that generates a synthetic SBT project for documentation for each module it is enabled on. The generated SBT
- * projects depend on the original project and also have a hardcoded dependency on "generic" in order to provide support
- * for auto-derivation in documentation.
- *
- * This is needed because unlike tut there is no separate classpath configuration for documentation. See
- * https://github.com/scalameta/mdoc/issues/155 for details.
- */
+/** A plugin that generates a synthetic SBT project for documentation for each module it is enabled on. The generated
+  * SBT projects depend on the original project and also have a hardcoded dependency on "generic" in order to provide
+  * support for auto-derivation in documentation.
+  *
+  * This is needed because unlike tut there is no separate classpath configuration for documentation. See
+  * https://github.com/scalameta/mdoc/issues/155 for details.
+  */
 object ModuleMdocPlugin extends AutoPlugin {
 
   override def derivedProjects(proj: ProjectDefinition[_]): Seq[Project] = {
