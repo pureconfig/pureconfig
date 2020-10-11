@@ -5,30 +5,21 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 organization in ThisBuild := "com.github.pureconfig"
 
 lazy val core = (project in file("core"))
-  .enablePlugins(BoilerplatePlugin, SbtOsgi, TutPlugin)
+  .enablePlugins(BoilerplatePlugin, SbtOsgi)
   .settings(commonSettings)
   .dependsOn(macros)
 
-// Two special modules for now, since `tests` depend on them. We should improve this organization later by separating
-// the test helpers (which all projects' tests should depend on) from the core+generic test implementations.
-lazy val `generic-base` = (project in file("modules/generic-base"))
-  .enablePlugins(SbtOsgi, TutPlugin)
+lazy val macros = (project in file("macros"))
+  .settings(commonSettings)
+
+lazy val testkit = (project in file("testkit"))
+  .settings(commonSettings)
   .dependsOn(core)
-  .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
-
-lazy val generic = (project in file("modules/generic"))
-  .enablePlugins(SbtOsgi, TutPlugin)
-  .dependsOn(core, `generic-base`)
-  .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
-// -----
-
-lazy val macros = (project in file("macros")).enablePlugins(TutPlugin).settings(commonSettings)
 
 lazy val tests = (project in file("tests"))
   .enablePlugins(BoilerplatePlugin)
   .settings(commonSettings)
-  .dependsOn(core, generic)
-  .dependsOn(macros % "test->test") // provides helpers to test pureconfig macros
+  .dependsOn(core, testkit, generic)
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle"))
@@ -42,17 +33,20 @@ lazy val docs = (project in file("docs"))
   .settings(docsSettings)
   .dependsOn(bundle)
 
-def module(proj: Project) = proj
+def genericModule(proj: Project) = proj
   .enablePlugins(SbtOsgi, TutPlugin)
   .dependsOn(core)
-  .dependsOn(tests % "test")
-  .dependsOn(generic % "Tut") // Allow auto-derivation in documentation
+  .dependsOn(testkit % "test")
   .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+
+def module(proj: Project) = genericModule(proj)
+  .dependsOn(generic % "test")
+  .dependsOn(generic % "Tut") // Allow auto-derivation in documentation
 
 def moduleWithMdoc(proj: Project) = proj
   .enablePlugins(SbtOsgi, ModuleMdocPlugin)
   .dependsOn(core)
-  .dependsOn(tests % "test")
+  .dependsOn(testkit % "test", generic % "test")
   .settings(commonSettings)
 
 lazy val akka = moduleWithMdoc(project) in file("modules/akka")
@@ -64,6 +58,8 @@ lazy val cron4s = module(project) in file("modules/cron4s")
 lazy val enum = module(project) in file("modules/enum")
 lazy val enumeratum = module(project) in file("modules/enumeratum")
 lazy val fs2 = module(project) in file("modules/fs2")
+lazy val generic = genericModule(project) in file("modules/generic") dependsOn `generic-base`
+lazy val `generic-base` = genericModule(project) in file("modules/generic-base")
 lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s")
 lazy val javax = module(project) in file("modules/javax")
