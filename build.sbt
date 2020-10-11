@@ -43,7 +43,13 @@ def module(proj: Project) = genericModule(proj)
   .dependsOn(generic % "test")
   .dependsOn(generic % "Tut") // Allow auto-derivation in documentation
 
-lazy val akka = module(project) in file("modules/akka")
+def moduleWithMdoc(proj: Project) = proj
+  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
+  .dependsOn(core)
+  .dependsOn(testkit % "test", generic % "test")
+  .settings(commonSettings)
+
+lazy val akka = moduleWithMdoc(project) in file("modules/akka")
 lazy val `akka-http` = module(project) in file("modules/akka-http")
 lazy val cats = module(project) in file("modules/cats")
 lazy val `cats-effect` = module(project) in file("modules/cats-effect")

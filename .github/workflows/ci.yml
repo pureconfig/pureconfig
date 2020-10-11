@@ -44,10 +44,10 @@ jobs:
       - name: Compile example project
         run: cd example && sbt "++${{ matrix.scala }} test"
 
-      - name: Check tut output
+      - name: Check tut and mdoc output
         if: startsWith(matrix.scala, '2.12')
         run: >
-           sbt "++${{ matrix.scala }} tut" &&
+           sbt "++${{ matrix.scala }} tut" "++${{ matrix.scala }} mdoc" &&
            git diff --exit-code
 
   build_website:
