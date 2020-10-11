@@ -22,9 +22,12 @@ object ModuleMdocPlugin extends AutoPlugin {
         .dependsOn(LocalProject("generic")) // Allow auto-derivation in documentation
         .settings(
           name := docProjId,
+
           mdocVariables := Map("VERSION" -> version.value),
           mdocIn := proj.base / "docs",
-          mdocOut := proj.base
+          mdocOut := proj.base,
+
+          skip in publish := true
         )
     List(docProj)
   }
