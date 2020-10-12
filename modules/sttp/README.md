@@ -31,5 +31,5 @@ val config = parseString("""{uri: "https://sttp.readthedocs.io" }""")
 // config: com.typesafe.config.Config = Config(SimpleConfigObject({"uri":"https://sttp.readthedocs.io"}))
 
 ConfigSource.fromConfig(config).load[AppConfig]
-// res0: pureconfig.ConfigReader.Result[AppConfig] = Right(AppConfig(https://sttp.readthedocs.io))
+// res0: ConfigReader.Result[AppConfig] = Right(AppConfig(https://sttp.readthedocs.io))
 ```

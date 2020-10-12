@@ -34,10 +34,8 @@ val conf = parseString(
     |    </people>\"\"\"
     |}""".stripMargin)
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"people":"<people>\n      <person firstName=\"A\" lastName=\"Person\" />\n      <person firstName=\"Another\" lastName=\"Person\" />\n    </people>"}))
-
 ConfigSource.fromConfig(conf).load[Config]
-// res0: pureconfig.ConfigReader.Result[Config] =
-// Right(Config(<people>
+// res0: ConfigReader.Result[Config] = Right(Config(<people>
 //       <person lastName="Person" firstName="A"/>
 //       <person lastName="Person" firstName="Another"/>
 //     </people>))

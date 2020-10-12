@@ -64,10 +64,10 @@ lazy val http4s = module(project) in file("modules/http4s")
 lazy val javax = moduleWithMdoc(project) in file("modules/javax")
 lazy val joda = moduleWithMdoc(project) in file("modules/joda")
 lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
-lazy val `scala-xml` = module(project) in file("modules/scala-xml")
+lazy val `scala-xml` = moduleWithMdoc(project) in file("modules/scala-xml")
 lazy val scalaz = module(project) in file("modules/scalaz")
 lazy val squants = moduleWithMdoc(project) in file("modules/squants")
-lazy val sttp = module(project) in file("modules/sttp")
+lazy val sttp = moduleWithMdoc(project) in file("modules/sttp")
 lazy val yaml = moduleWithMdoc(project) in file("modules/yaml")
 
 lazy val commonSettings = Seq(
