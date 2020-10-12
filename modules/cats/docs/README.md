@@ -28,7 +28,7 @@ Custom collection readers, if any, may affect the behavior of these too.
 
 Here is an example of usage:
 
-```tut:silent
+```scala mdoc:silent
 import cats.data.{NonEmptyList, NonEmptySet, NonEmptyVector, NonEmptyMap, NonEmptyChain}
 import cats.instances.string._
 import com.typesafe.config.ConfigFactory.parseString
@@ -46,7 +46,7 @@ case class MyConfig(
 ```
 
 We can read a `MyConfig` like:
-```tut:book
+```scala mdoc
 val conf = parseString("""{
   number-list: [1,2,3],
   number-set: [1,2,3],
@@ -63,7 +63,7 @@ ConfigSource.fromConfig(conf).load[MyConfig]
 In order to put in scope the `cats` type classes for our readers and writers and extend the latter with the extra
 operations provided by `cats`, we need some extra imports:
 
-```tut:silent
+```scala mdoc:silent
 import cats._
 import cats.syntax.all._
 import pureconfig.module.cats.instances._
@@ -71,7 +71,7 @@ import pureconfig.module.cats.instances._
 
 We are now ready to use the new syntax:
 
-```tut:silent
+```scala mdoc:silent
 // a reader that returns a constant value
 val constIntReader = 42.pure[ConfigReader]
 
@@ -84,7 +84,7 @@ implicit def someWriter[A: ConfigWriter] = ConfigWriter[Option[A]].narrow[Some[A
 
 And we can finally put them to use:
 
-```tut:book
+```scala mdoc
 constIntReader.from(conf.root())
 
 safeIntReader.from(conf.root())
@@ -96,27 +96,28 @@ someWriter[String].to(Some("abc"))
 
 We can provide some useful extension methods by importing:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig.module.cats.syntax._
 ```
 
 For example, you can easily convert a `ConfigReaderFailures` to a `NonEmptyList[ConfigReaderFailure]`:
 
-```tut:book
+```scala mdoc
 case class MyConfig2(a: Int, b: String)
 
-val conf = parseString("{}")
-val res = ConfigSource.fromConfig(conf).load[MyConfig2].left.map(_.toNonEmptyList)
+val conf2 = parseString("{}")
+
+val res = ConfigSource.fromConfig(conf2).load[MyConfig2].left.map(_.toNonEmptyList)
 ```
 
 This allows cats users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
 
-```tut:silent
+```scala mdoc:silent
 import cats.data.{ Validated, ValidatedNel }
 import pureconfig.error.ConfigReaderFailure
 ```
 
-```tut:book
+```scala mdoc
 val catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] =
   Validated.fromEither(res)
 ```

@@ -17,8 +17,6 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.
 To load a configuration file from a path using cats-effect's `IO`:
 
 
-
-
 ```scala
 import pureconfig._
 import pureconfig.generic.auto._
@@ -35,24 +33,19 @@ def load(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[MyConfig] = {
 To test that this `IO` does indeed return a `MyConfig` instance:
 
 
-
-
 ```scala
 //Show the contents of the file
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
-// res2: String =
-// somefield=1234
-// anotherfield=some string
+// res1: String = """somefield=1234
+// anotherfield=some string"""
 
 Blocker[IO].use(load).unsafeRunSync().equals(MyConfig(1234, "some string"))
-// res3: Boolean = true
+// res2: Boolean = true
 ```
 
 ### Writing configuration
 
 To create an IO that writes out a configuration file, do as follows:
-
-
 
 
 ```scala

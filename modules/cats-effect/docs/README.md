@@ -16,7 +16,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.
 
 To load a configuration file from a path using cats-effect's `IO`:
 
-```tut:invisible
+```scala mdoc:invisible
 import java.nio.file.Files
 import java.nio.charset.StandardCharsets
 
@@ -25,7 +25,7 @@ val fileContents = "somefield=1234\nanotherfield=some string"
 Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
 ```
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
@@ -40,11 +40,11 @@ def load(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[MyConfig] = {
 
 To test that this `IO` does indeed return a `MyConfig` instance:
 
-```tut:invisible
+```scala mdoc:invisible:nest
 implicit val ioCS: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 ```
 
-```tut:book
+```scala mdoc
 //Show the contents of the file
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
 
@@ -55,7 +55,7 @@ Blocker[IO].use(load).unsafeRunSync().equals(MyConfig(1234, "some string"))
 
 To create an IO that writes out a configuration file, do as follows:
 
-```tut:reset:invisible
+```scala mdoc:reset:invisible
 import java.nio.file.Files
 
 val somePath = Files.createTempFile("config", ".properties")
@@ -63,7 +63,7 @@ val somePath = Files.createTempFile("config", ".properties")
 case class MyConfig(somefield: Int, anotherfield: String)
 ```
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig.module.catseffect._
 import pureconfig.generic.auto._
 import cats.effect.{ Blocker, ContextShift, IO }

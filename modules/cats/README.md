@@ -57,7 +57,15 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-chain":[1,2,3],"number-list":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-set":[1,2,3],"number-vector":[1,2,3]}))
 
 ConfigSource.fromConfig(conf).load[MyConfig]
-// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(NonEmptyList(1, 2, 3),TreeSet(1, 2, 3),NonEmptyVector(1, 2, 3),Map(one -> 1, three -> 3, two -> 2),Chain(1, 2, 3)))
+// res0: ConfigReader.Result[MyConfig] = Right(
+//   MyConfig(
+//     NonEmptyList(1, List(2, 3)),
+//     TreeSet(1, 2, 3),
+//     NonEmptyVector(1, 2, 3),
+//     Map("one" -> 1, "three" -> 3, "two" -> 2),
+//     Append(Singleton(1), Append(Singleton(2), Singleton(3)))
+//   )
+// )
 ```
 
 ### Using cats type class instances for readers and writers
@@ -88,13 +96,13 @@ And we can finally put them to use:
 
 ```scala
 constIntReader.from(conf.root())
-// res4: pureconfig.ConfigReader.Result[Int] = Right(42)
+// res1: ConfigReader.Result[Int] = Right(42)
 
 safeIntReader.from(conf.root())
-// res5: pureconfig.ConfigReader.Result[Int] = Right(-1)
+// res2: ConfigReader.Result[Int] = Right(-1)
 
 someWriter[String].to(Some("abc"))
-// res6: com.typesafe.config.ConfigValue = Quoted("abc")
+// res3: com.typesafe.config.ConfigValue = Quoted("abc")
 ```
 
 ### Extra syntactic sugar
@@ -109,13 +117,19 @@ For example, you can easily convert a `ConfigReaderFailures` to a `NonEmptyList[
 
 ```scala
 case class MyConfig2(a: Int, b: String)
-// defined class MyConfig2
 
-val conf = parseString("{}")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
+val conf2 = parseString("{}")
+// conf2: com.typesafe.config.Config = Config(SimpleConfigObject({}))
 
-val res = ConfigSource.fromConfig(conf).load[MyConfig2].left.map(_.toNonEmptyList)
-// res: scala.util.Either[cats.data.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig2] = Left(NonEmptyList(ConvertFailure(KeyNotFound(a,Set()),Some(ConfigOrigin(String)),), ConvertFailure(KeyNotFound(b,Set()),Some(ConfigOrigin(String)),)))
+val res = ConfigSource.fromConfig(conf2).load[MyConfig2].left.map(_.toNonEmptyList)
+// res: Either[NonEmptyList[error.ConfigReaderFailure], MyConfig2] = Left(
+//   NonEmptyList(
+//     ConvertFailure(KeyNotFound("a", Set()), Some(ConfigOrigin(String)), ""),
+//     List(
+//       ConvertFailure(KeyNotFound("b", Set()), Some(ConfigOrigin(String)), "")
+//     )
+//   )
+// )
 ```
 
 This allows cats users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
@@ -128,5 +142,12 @@ import pureconfig.error.ConfigReaderFailure
 ```scala
 val catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] =
   Validated.fromEither(res)
-// catsRes: cats.data.ValidatedNel[pureconfig.error.ConfigReaderFailure,MyConfig2] = Invalid(NonEmptyList(ConvertFailure(KeyNotFound(a,Set()),Some(ConfigOrigin(String)),), ConvertFailure(KeyNotFound(b,Set()),Some(ConfigOrigin(String)),)))
+// catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] = Invalid(
+//   NonEmptyList(
+//     ConvertFailure(KeyNotFound("a", Set()), Some(ConfigOrigin(String)), ""),
+//     List(
+//       ConvertFailure(KeyNotFound("b", Set()), Some(ConfigOrigin(String)), "")
+//     )
+//   )
+// )
 ```
