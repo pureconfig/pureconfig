@@ -54,7 +54,15 @@ val scalazConf = parseString("""{
 // scalazConf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-lst":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-maybe":1,"number-nel":[1,2,3],"number-set":[1,2,3]}))
 
 ConfigSource.fromConfig(scalazConf).load[ScalazConfig]
-// res0: pureconfig.ConfigReader.Result[ScalazConfig] = Right(ScalazConfig([1,2,3],Bin(2,Bin(1,Tip(),Tip()),Bin(3,Tip(),Tip())),NonEmpty[1,2,3],Bin(three,3,Bin(one,1,Tip(),Tip()),Bin(two,2,Tip(),Tip())),Just(1)))
+// res0: ConfigReader.Result[ScalazConfig] = Right(
+//   ScalazConfig(
+//     ICons(1, ICons(2, ICons(3, []))),
+//     Bin(2, Bin(1, Tip(), Tip()), Bin(3, Tip(), Tip())),
+//     NonEmpty[1,2,3],
+//     Bin("three", 3, Bin("one", 1, Tip(), Tip()), Bin("two", 2, Tip(), Tip())),
+//     Just(1)
+//   )
+// )
 ```
 
 ### Using `scalaz` type class instances for readers
@@ -90,16 +98,16 @@ val invalidConf = parseString("""{ s: "abc" }""")
 // invalidConf: com.typesafe.config.Config = Config(SimpleConfigObject({"s":"abc"}))
 
 constReader.from(validConf.root())
-// res3: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
+// res1: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
 
 constReader.from(invalidConf.root())
-// res4: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
+// res2: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
 
 safeReader.from(validConf.root())
-// res5: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(1))
+// res3: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(1))
 
 safeReader.from(invalidConf.root())
-// res6: pureconfig.ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(-1))
+// res4: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(-1))
 ```
 
 In case there's a necessity to parse multiple configs and accumulate errors, you could leverage from `Semigroup` instance for `ConfigReaderFailures`:
@@ -111,7 +119,18 @@ val anotherInvalidConf = parseString("""{ i: false }""")
 List(validConf, invalidConf, anotherInvalidConf).traverse { c =>
   Validation.fromEither(implicitly[ConfigReader[SimpleConfig]].from(c.root))
 }
-// res7: scalaz.Validation[pureconfig.error.ConfigReaderFailures,List[SimpleConfig]] = Failure(ConfigReaderFailures(ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(WrongType(BOOLEAN,Set(NUMBER)),Some(ConfigOrigin(String)),i)))
+// res5: Validation[error.ConfigReaderFailures, List[SimpleConfig]] = Failure(
+//   ConfigReaderFailures(
+//     ConvertFailure(KeyNotFound("i", Set()), Some(ConfigOrigin(String)), ""),
+//     ArrayBuffer(
+//       ConvertFailure(
+//         WrongType(BOOLEAN, Set(NUMBER)),
+//         Some(ConfigOrigin(String)),
+//         "i"
+//       )
+//     )
+//   )
+// )
 ```
 
 ### Extra syntactic sugar
@@ -132,7 +151,9 @@ val myConf = parseString("{}")
 // myConf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
 
 val res = ConfigSource.fromConfig(myConf).load[MyConfig].left.map(_.toNel)
-// res: scala.util.Either[scalaz.NonEmptyList[pureconfig.error.ConfigReaderFailure],MyConfig] = Left(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)])
+// res: Either[NonEmptyList[error.ConfigReaderFailure], MyConfig] = Left(
+//   NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
+// )
 ```
 
 This allows `scalaz` users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
@@ -145,7 +166,9 @@ import pureconfig.error._
 ```scala
 val result: ValidationNel[ConfigReaderFailure, MyConfig] =
   Validation.fromEither(res)
-// result: scalaz.ValidationNel[pureconfig.error.ConfigReaderFailure,MyConfig] = Failure(NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)])
+// result: ValidationNel[ConfigReaderFailure, MyConfig] = Failure(
+//   NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
+// )
 ```
 
 Also, you could create `ConfigReader`s using `scalaz` types:

@@ -12,13 +12,27 @@ import sbt.Keys._
   */
 object ModuleMdocPlugin extends AutoPlugin {
 
+  object autoImport {
+    val mdocLibraryDependencies = settingKey[Seq[ModuleID]]("Declares managed dependencies for the mdoc project.")
+    val mdocScalacOptions = settingKey[Seq[String]]("Options for the Scala compiler in the mdoc project.")
+  }
+
+  import autoImport._
+
+  override def projectSettings: Seq[Setting[_]] = Seq(
+    mdocLibraryDependencies := Nil,
+    mdocScalacOptions := Nil
+  )
+
   override def derivedProjects(proj: ProjectDefinition[_]): Seq[Project] = {
+    val moduleProj = LocalProject(proj.id)
     val docProjId = s"${proj.id}-docs"
     val docProjRoot = proj.base / "target" / "docs-project"
+
     val docProj =
       Project(docProjId, docProjRoot)
         .enablePlugins(MdocPlugin)
-        .dependsOn(LocalProject(proj.id))
+        .dependsOn(moduleProj)
         .dependsOn(LocalProject("generic")) // Allow auto-derivation in documentation
         .settings(
           name := docProjId,
@@ -26,8 +40,12 @@ object ModuleMdocPlugin extends AutoPlugin {
           mdocOut := proj.base,
           mdocExtraArguments += "--no-link-hygiene",
           mdocVariables := Map("VERSION" -> version.value),
-          skip in publish := true
+          skip in publish := true,
+
+          libraryDependencies ++= (mdocLibraryDependencies in moduleProj).value,
+          scalacOptions ++= (mdocScalacOptions in moduleProj).value
         )
+
     List(docProj)
   }
 }

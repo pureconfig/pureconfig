@@ -33,5 +33,5 @@ val conf = ConfigFactory.parseString("""{ uri: "https://doc.akka.io/docs/akka-ht
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"uri":"https://doc.akka.io/docs/akka-http/current/common/http-model.html#http-model"}))
 
 ConfigSource.fromConfig(conf).load[MyConfig]
-// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(https://doc.akka.io/docs/akka-http/current/common/http-model.html#http-model))
+// res0: ConfigReader.Result[MyConfig] = Right(MyConfig(https://doc.akka.io/docs/akka-http/current/common/http-model.html#http-model))
 ```

@@ -16,7 +16,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka-http" % "0.14
 
 To load an `Uri` into a configuration, create a class to hold it:
 
-```tut:silent
+```scala mdoc:silent
 import akka.http.scaladsl.model.Uri
 import com.typesafe.config.ConfigFactory
 import pureconfig._
@@ -28,7 +28,7 @@ case class MyConfig(uri: Uri)
 
 We can read a `MyConfig` with the following code:
 
-```tut:book
+```scala mdoc:to-string
 val conf = ConfigFactory.parseString("""{ uri: "https://doc.akka.io/docs/akka-http/current/common/http-model.html#http-model" }""")
 
 ConfigSource.fromConfig(conf).load[MyConfig]
