@@ -14,7 +14,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-circe" % "0.14.0"
 
 Imports to be used below:
 
-```tut:silent
+```scala mdoc:silent
 import io.circe._
 import com.typesafe.config.ConfigFactory
 import pureconfig._
@@ -26,13 +26,13 @@ import pureconfig.module.circe._
 
 Imagine a class, `UserConfig`, that has a `Json` field:
 
-```tut:silent
+```scala mdoc:silent
 case class UserConfig(username: String, age: Int, custom: Json)
 ```
 
 A `UserConfig` can be read like this:
 
-```tut:book
+```scala mdoc
 val conf = ConfigFactory.parseString("""{
   username = nathan
   age = 31

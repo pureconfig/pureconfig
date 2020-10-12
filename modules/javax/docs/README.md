@@ -14,7 +14,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-javax" % "0.14.0"
 
 To load a KerberosPrincipal into a configuration, we need a class to hold our configuration:
 
-```tut:silent
+```scala mdoc:silent
 import javax.security.auth.kerberos.KerberosPrincipal
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
@@ -25,7 +25,7 @@ case class MyConfig(principal: KerberosPrincipal)
 ```
 
 We can read a `MyConfig` like:
-```tut:book
+```scala mdoc
 val conf = parseString("""{ principal: "userid@tld.REALM" }""")
 ConfigSource.fromConfig(conf).load[MyConfig]
 ```

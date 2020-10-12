@@ -28,9 +28,8 @@ We can read a `MyConfig` like:
 ```scala
 val conf = parseString("""{ principal: "userid@tld.REALM" }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"principal":"userid@tld.REALM"}))
-
 ConfigSource.fromConfig(conf).load[MyConfig]
-// res0: pureconfig.ConfigReader.Result[MyConfig] = Right(MyConfig(userid@tld.REALM))
+// res0: ConfigReader.Result[MyConfig] = Right(MyConfig(userid@tld.REALM))
 ```
 
 

@@ -43,9 +43,8 @@ val conf = ConfigFactory.parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"age":31,"custom":{"favoriteFood":"pizza"},"username":"nathan"}))
 
 ConfigSource.fromConfig(conf).load[UserConfig]
-// res0: pureconfig.ConfigReader.Result[UserConfig] =
-// Right(UserConfig(nathan,31,{
-//   "favoriteFood" : "pizza"
-// }))
+// res0: ConfigReader.Result[UserConfig] = Right(
+//   UserConfig("nathan", 31, JObject(object[favoriteFood -> "pizza"]))
+// )
 ```
 

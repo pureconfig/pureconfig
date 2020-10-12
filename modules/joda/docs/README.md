@@ -20,13 +20,13 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-joda" % "0.14.0"
 
 Define a Joda `DateTimeFormatter` for ISO 8601-encoded date/time strings. The formatter converts datetimes into UTC:
 
-```tut:silent
+```scala mdoc:silent
 import org.joda.time.format.ISODateTimeFormat
 val isoFormatter = ISODateTimeFormat.dateTimeParser.withZoneUTC
 ```
 
 Create a ConfigConvert to read DateTime with that format:
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.joda.configurable._
@@ -36,14 +36,14 @@ implicit val dateTimeConverter = dateTimeConfigConvert(isoFormatter)
 ```
 
 An object to receive our configuration;
-```tut:silent
+```scala mdoc:silent
 import org.joda.time.DateTime
 case class GreatDatesConfig(apollo: DateTime, pluto: DateTime)
 ```
 
 We can read a GreatDatesConfig like:
 
-```tut:book
+```scala mdoc
 
 val conf = parseString("""{
   apollo: "1969-07-20T20:18:00.000Z"

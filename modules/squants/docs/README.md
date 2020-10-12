@@ -18,7 +18,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-squants" % "0.14.0
 
 Given a type to hold our configuration:
 
-```tut:silent
+```scala mdoc:silent
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import pureconfig.generic.auto._
@@ -31,7 +31,7 @@ case class HowConfiguration(far: Length, hot: Temperature)
 
 We can read a HowConfiguration like:
 
-```tut:book
+```scala mdoc
 val conf = parseString("""{
   far: 42.195 km
   hot: 56.7° C

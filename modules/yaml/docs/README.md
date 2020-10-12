@@ -15,7 +15,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-yaml" % "0.14.0"
 
 Given a type to hold our configuration:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig.generic.auto._
 import pureconfig.module.yaml._
 
@@ -24,7 +24,7 @@ case class Person(name: String, age: Int, children: List[Person])
 
 And a YAML document with the appropriate format:
 
-```tut:silent
+```scala mdoc:silent
 import java.nio.file.Files
 
 val yamlFile = Files.createTempFile("conf-", ".yaml")
@@ -43,12 +43,12 @@ Files.write(yamlFile, """
 
 We can load the configuration to a `MyConf` instance using a `YamlConfigSource`:
 
-```tut:book
+```scala mdoc
 YamlConfigSource.file(yamlFile).load[Person]
 ```
 
 We can also load a particular namespace inside the YAML file:
 
-```tut:book
+```scala mdoc
 YamlConfigSource.file(yamlFile).at("age").load[Int]
 ```
