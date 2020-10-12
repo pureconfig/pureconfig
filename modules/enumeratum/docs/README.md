@@ -18,7 +18,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.1
 
 Given a Greeting ADT which implements one of Enumeratum's `EnumEntry` types:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.enumeratum._
@@ -26,30 +26,28 @@ import com.typesafe.config.ConfigFactory.parseString
 import enumeratum._
 import enumeratum.EnumEntry._
 
-object example {
-  sealed trait Greeting extends EnumEntry with Snakecase
+sealed trait Greeting extends EnumEntry with Snakecase
 
-  object Greeting extends Enum[Greeting] {
-    val values = findValues
-    case object Hello extends Greeting
-    case object GoodBye extends Greeting
-    case object ShoutGoodBye extends Greeting with Uppercase
-  }
+object Greeting extends Enum[Greeting] {
+  val values = findValues
+  case object Hello extends Greeting
+  case object GoodBye extends Greeting
+  case object ShoutGoodBye extends Greeting with Uppercase
 }
-import example._
 ```
 
 And a class to hold the configuration:
-```tut:silent
+```scala mdoc:silent
 case class GreetingConf(start: Greeting, end: Greeting)
 ```
 
 We can read a GreetingConf like:
-```tut:book
+```scala mdoc
 val conf = parseString("""{
   start: hello
   end: SHOUT_GOOD_BYE
 }""")
+
 ConfigSource.fromConfig(conf).load[GreetingConf]
 ```
 

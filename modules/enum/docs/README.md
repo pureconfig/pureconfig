@@ -18,7 +18,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-enum" % "0.14.0"
 
 Given a Greeting ADT composed of `case object`s with an `implicit` `Enum` instance:
 
-```tut:silent
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.enum._
@@ -27,27 +27,26 @@ import enum.Enum
 
 sealed trait Greeting
 
-object Greeting {
-  case object Hello extends Greeting
-  case object WhisperHello extends Greeting
-  case object GoodBye extends Greeting
-  case object ShoutGoodBye extends Greeting
+case object Hello extends Greeting
+case object WhisperHello extends Greeting
+case object GoodBye extends Greeting
+case object ShoutGoodBye extends Greeting
 
-  final implicit val EnumInstance: Enum[Greeting] = Enum.derived[Greeting]
-}
+final implicit val EnumInstance: Enum[Greeting] = Enum.derived[Greeting]
 ```
 
 And a class to hold the configuration:
-```tut:silent
+```scala mdoc:silent
 case class GreetingConf(start: Greeting, end: Greeting)
 ```
 
 We can read a GreetingConf like:
-```tut:book
+```scala mdoc
 val conf = parseString("""{
   start: WhisperHello
   end: ShoutGoodBye
 }""")
+
 ConfigSource.fromConfig(conf).load[GreetingConf]
 ```
 

@@ -27,14 +27,12 @@ import enum.Enum
 
 sealed trait Greeting
 
-object Greeting {
-  case object Hello extends Greeting
-  case object WhisperHello extends Greeting
-  case object GoodBye extends Greeting
-  case object ShoutGoodBye extends Greeting
+case object Hello extends Greeting
+case object WhisperHello extends Greeting
+case object GoodBye extends Greeting
+case object ShoutGoodBye extends Greeting
 
-  final implicit val EnumInstance: Enum[Greeting] = Enum.derived[Greeting]
-}
+final implicit val EnumInstance: Enum[Greeting] = Enum.derived[Greeting]
 ```
 
 And a class to hold the configuration:
@@ -51,7 +49,9 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"ShoutGoodBye","start":"WhisperHello"}))
 
 ConfigSource.fromConfig(conf).load[GreetingConf]
-// res0: pureconfig.ConfigReader.Result[GreetingConf] = Right(GreetingConf(WhisperHello,ShoutGoodBye))
+// res0: ConfigReader.Result[GreetingConf] = Right(
+//   GreetingConf(WhisperHello, ShoutGoodBye)
+// )
 ```
 
 ## Can I configure how the elements are read?
