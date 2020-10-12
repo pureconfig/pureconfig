@@ -55,7 +55,16 @@ We are now able to read configs to case classes and sealed families:
 
 ```scala
 source.load[MyClass]
-// res0: pureconfig.ConfigReader.Result[MyClass] = Right(MyClass(true,Port(8080),AdtB(1),List(1.0, 0.2),Map(key -> value),None))
+// res1: ConfigReader.Result[MyClass] = Right(
+//   MyClass(
+//     true,
+//     Port(8080),
+//     AdtB(1),
+//     List(1.0, 0.2),
+//     Map("key" -> "value"),
+//     None
+//   )
+// )
 ```
 
 You can do with this module most of the things allowed by the default generic derivation, like creating hints for

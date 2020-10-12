@@ -20,7 +20,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-magnolia" % "0.14.
 The only thing needed to use Magnolia-based derivation is to replace the `pureconfig.generic.auto._` import with
 `pureconfig.module.magnolia.auto.reader._`:
 
-```tut:silent
+```scala mdoc:silent:reset-object
 import pureconfig._
 import pureconfig.module.magnolia.auto.reader._
 import scala.language.higherKinds
@@ -53,7 +53,7 @@ val source = ConfigSource.string("""
 
 We are now able to read configs to case classes and sealed families:
 
-```tut:book
+```scala mdoc
 source.load[MyClass]
 ```
 
