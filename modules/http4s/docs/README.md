@@ -16,7 +16,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-http4s" % "0.14.0"
 
 To load an `Uri` into a configuration, create a class to hold it:
 
-```scala
+```scala mdoc:silent
 import org.http4s.Uri
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
@@ -28,10 +28,8 @@ case class MyConfig(uri: Uri)
 
 We can read a `MyConfig` with the following code:
 
-```scala
+```scala mdoc:to-string
 val conf = parseString("""{ uri: "http://http4s.org/" }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"uri":"http://http4s.org/"}))
 
 ConfigSource.fromConfig(conf).load[MyConfig]
-// res0: ConfigReader.Result[MyConfig] = Right(MyConfig(http://http4s.org/))
 ```
