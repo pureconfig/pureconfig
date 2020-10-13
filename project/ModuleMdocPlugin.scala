@@ -20,8 +20,13 @@ object ModuleMdocPlugin extends AutoPlugin {
   import autoImport._
 
   override def projectSettings: Seq[Setting[_]] = Seq(
+    // format: off
+    mdocIn := baseDirectory.value / "docs",
+    mdocOut := baseDirectory.value,
+
     mdocLibraryDependencies := Nil,
     mdocScalacOptions := Nil
+    // format: on
   )
 
   override def derivedProjects(proj: ProjectDefinition[_]): Seq[Project] = {
@@ -35,15 +40,19 @@ object ModuleMdocPlugin extends AutoPlugin {
         .dependsOn(moduleProj)
         .dependsOn(LocalProject("generic")) // Allow auto-derivation in documentation
         .settings(
+          // format: off
           name := docProjId,
-          mdocIn := proj.base / "docs",
-          mdocOut := proj.base,
+
+          mdocIn := (mdocIn in moduleProj).value,
+          mdocOut := (mdocOut in moduleProj).value,
           mdocExtraArguments += "--no-link-hygiene",
           mdocVariables := Map("VERSION" -> version.value),
-          skip in publish := true,
 
           libraryDependencies ++= (mdocLibraryDependencies in moduleProj).value,
-          scalacOptions ++= (mdocScalacOptions in moduleProj).value
+          scalacOptions ++= (mdocScalacOptions in moduleProj).value,
+
+          skip in publish := true
+          // format: on
         )
 
     List(docProj)

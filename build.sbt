@@ -23,8 +23,8 @@ lazy val tests = (project in file("tests"))
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle"))
-  .enablePlugins(SbtOsgi, TutPlugin)
-  .settings(commonSettings, tutTargetDirectory := file("."))
+  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
+  .settings(commonSettings, mdocOut := file("."))
   .dependsOn(core, generic)
 
 lazy val docs = (project in file("docs"))
@@ -91,7 +91,6 @@ lazy val commonSettings = Seq(
 
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
-  scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 
   scalafmtOnCompile := true,
 
