@@ -33,42 +33,35 @@ lazy val docs = (project in file("docs"))
   .dependsOn(bundle)
 
 def genericModule(proj: Project) = proj
-  .enablePlugins(SbtOsgi, TutPlugin)
+  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
   .dependsOn(core)
   .dependsOn(testkit % "test")
-  .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
+  .settings(commonSettings)
 
 def module(proj: Project) = genericModule(proj)
   .dependsOn(generic % "test")
-  .dependsOn(generic % "Tut") // Allow auto-derivation in documentation
 
-def moduleWithMdoc(proj: Project) = proj
-  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
-  .dependsOn(core)
-  .dependsOn(testkit % "test", generic % "test")
-  .settings(commonSettings)
-
-lazy val akka = moduleWithMdoc(project) in file("modules/akka")
-lazy val `akka-http` = moduleWithMdoc(project) in file("modules/akka-http")
-lazy val cats = moduleWithMdoc(project) in file("modules/cats")
-lazy val `cats-effect` = moduleWithMdoc(project) in file("modules/cats-effect")
-lazy val circe = moduleWithMdoc(project) in file("modules/circe")
-lazy val cron4s = moduleWithMdoc(project) in file("modules/cron4s")
-lazy val enum = moduleWithMdoc(project) in file("modules/enum")
-lazy val enumeratum = moduleWithMdoc(project) in file("modules/enumeratum")
-lazy val fs2 = moduleWithMdoc(project) in file("modules/fs2")
+lazy val akka = module(project) in file("modules/akka")
+lazy val `akka-http` = module(project) in file("modules/akka-http")
+lazy val cats = module(project) in file("modules/cats")
+lazy val `cats-effect` = module(project) in file("modules/cats-effect")
+lazy val circe = module(project) in file("modules/circe")
+lazy val cron4s = module(project) in file("modules/cron4s")
+lazy val enum = module(project) in file("modules/enum")
+lazy val enumeratum = module(project) in file("modules/enumeratum")
+lazy val fs2 = module(project) in file("modules/fs2")
 lazy val generic = genericModule(project) in file("modules/generic") dependsOn `generic-base`
 lazy val `generic-base` = genericModule(project) in file("modules/generic-base")
-lazy val hadoop = moduleWithMdoc(project) in file("modules/hadoop")
-lazy val http4s = moduleWithMdoc(project) in file("modules/http4s")
-lazy val javax = moduleWithMdoc(project) in file("modules/javax")
-lazy val joda = moduleWithMdoc(project) in file("modules/joda")
-lazy val magnolia = moduleWithMdoc(project) in file("modules/magnolia") dependsOn `generic-base`
-lazy val `scala-xml` = moduleWithMdoc(project) in file("modules/scala-xml")
-lazy val scalaz = moduleWithMdoc(project) in file("modules/scalaz")
-lazy val squants = moduleWithMdoc(project) in file("modules/squants")
-lazy val sttp = moduleWithMdoc(project) in file("modules/sttp")
-lazy val yaml = moduleWithMdoc(project) in file("modules/yaml")
+lazy val hadoop = module(project) in file("modules/hadoop")
+lazy val http4s = module(project) in file("modules/http4s")
+lazy val javax = module(project) in file("modules/javax")
+lazy val joda = module(project) in file("modules/joda")
+lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
+lazy val `scala-xml` = module(project) in file("modules/scala-xml")
+lazy val scalaz = module(project) in file("modules/scalaz")
+lazy val squants = module(project) in file("modules/squants")
+lazy val sttp = module(project) in file("modules/sttp")
+lazy val yaml = module(project) in file("modules/yaml")
 
 lazy val commonSettings = Seq(
   // format: off
