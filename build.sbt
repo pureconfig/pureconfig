@@ -33,12 +33,13 @@ lazy val docs = (project in file("docs"))
   .dependsOn(bundle)
 
 def genericModule(proj: Project) = proj
-  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
+  .enablePlugins(SbtOsgi)
   .dependsOn(core)
   .dependsOn(testkit % "test")
   .settings(commonSettings)
 
 def module(proj: Project) = genericModule(proj)
+  .enablePlugins(ModuleMdocPlugin)
   .dependsOn(generic % "test")
 
 lazy val akka = module(project) in file("modules/akka")
