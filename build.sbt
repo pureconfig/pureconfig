@@ -188,6 +188,9 @@ releaseProcess := Seq[ReleaseStep](
   pushChanges
 )
 
+// This avoids linting warnings in sbt.
+// FIXME: It should be possible to remove this once a new sbt version with the changes from
+// https://github.com/sbt/sbt/pull/5991 is released.
 excludeLintKeys in Global ++= Set(
   releaseCrossBuild,
   releaseProcess
