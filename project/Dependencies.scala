@@ -13,7 +13,7 @@ object Dependencies {
     val scalaTest = "3.2.2"
     val scalaTestPlusScalaCheck = "3.2.2.0"
 
-    val scalaCheck = "1.14.3"
+    val scalaCheck = "1.15.0"
     val scalaCheckShapeless = "1.2.5"
   }
 
