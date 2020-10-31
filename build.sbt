@@ -187,3 +187,8 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
+
+excludeLintKeys in Global ++= Set(
+  releaseCrossBuild,
+  releaseProcess
+)
