@@ -6,7 +6,7 @@ layout: home
 
 <img src="img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right" alt="PureConfig">
 
-[![Build Status](https://github.com/pureconfig/pureconfig/workflows/CI/badge.svg)](https://github.com/pureconfig/pureconfig/actions?query=workflow%3ACI)
+[![Build Status](https://github.com/pureconfig/pureconfig/workflows/CI/badge.svg?branch=master)](https://github.com/pureconfig/pureconfig/actions?query=workflow%3ACI+branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.12/badge.svg)](https://search.maven.org/artifact/com.github.pureconfig/pureconfig_2.12)
 [![Scaladoc](https://javadoc.io/badge/com.github.pureconfig/pureconfig-core_2.12.svg)](https://javadoc.io/page/com.github.pureconfig/pureconfig-core_2.12/latest/pureconfig/index.html)
