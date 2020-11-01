@@ -46,7 +46,7 @@ object ModuleMdocPlugin extends AutoPlugin {
           mdocIn := (mdocIn in moduleProj).value,
           mdocOut := (mdocOut in moduleProj).value,
           mdocExtraArguments += "--no-link-hygiene",
-          mdocVariables := Map("VERSION" -> version.value),
+          mdocVariables := Map("VERSION" -> latestPureconfigRelease),
 
           libraryDependencies ++= (mdocLibraryDependencies in moduleProj).value,
           scalacOptions ++= (mdocScalacOptions in moduleProj).value,
@@ -57,4 +57,9 @@ object ModuleMdocPlugin extends AutoPlugin {
 
     List(docProj)
   }
+
+  val changelogVersionRegex = "^### ([^\\s]+)".r
+
+  lazy val latestPureconfigRelease: String =
+    IO.readLines(file("CHANGELOG.md")).flatMap(changelogVersionRegex.findFirstMatchIn).head.group(1)
 }
