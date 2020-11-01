@@ -14,7 +14,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-scala-xml" % "0.14
 
 To load an `Elem` into a configuration, we'll create a class to hold our configuration:
 
-```scala
+```scala mdoc:silent
 import scala.xml.Elem
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
@@ -25,7 +25,7 @@ case class Config(people: Elem)
 ```
 
 We can read a `Config` like:
-```scala
+```scala mdoc:to-string
 val conf = parseString(
   s"""{ people =
     |   \"\"\"<people>
@@ -33,12 +33,7 @@ val conf = parseString(
     |      <person firstName="Another" lastName="Person" />
     |    </people>\"\"\"
     |}""".stripMargin)
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"people":"<people>\n      <person firstName=\"A\" lastName=\"Person\" />\n      <person firstName=\"Another\" lastName=\"Person\" />\n    </people>"}))
 ConfigSource.fromConfig(conf).load[Config]
-// res0: ConfigReader.Result[Config] = Right(Config(<people>
-//       <person lastName="Person" firstName="A"/>
-//       <person lastName="Person" firstName="Another"/>
-//     </people>))
 ```
 
 ## Notes

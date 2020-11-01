@@ -24,7 +24,7 @@ For example, if your `ISet` instance contains `String` values then `Order[String
 
 Here is an usage example:
 
-```scala
+```scala mdoc:silent
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
 import pureconfig.generic.auto._
@@ -43,7 +43,7 @@ case class ScalazConfig(
 ```
 
 We can read a `ScalazConfig` like:
-```scala
+```scala mdoc
 val scalazConf = parseString("""{
   number-lst: [1,2,3],
   number-set: [1,2,3],
@@ -51,18 +51,8 @@ val scalazConf = parseString("""{
   number-map { "one": 1, "two": 2, "three": 3 },
   number-maybe: 1
 }""")
-// scalazConf: com.typesafe.config.Config = Config(SimpleConfigObject({"number-lst":[1,2,3],"number-map":{"one":1,"three":3,"two":2},"number-maybe":1,"number-nel":[1,2,3],"number-set":[1,2,3]}))
 
 ConfigSource.fromConfig(scalazConf).load[ScalazConfig]
-// res0: ConfigReader.Result[ScalazConfig] = Right(
-//   ScalazConfig(
-//     ICons(1, ICons(2, ICons(3, []))),
-//     Bin(2, Bin(1, Tip(), Tip()), Bin(3, Tip(), Tip())),
-//     NonEmpty[1,2,3],
-//     Bin("three", 3, Bin("one", 1, Tip(), Tip()), Bin("two", 2, Tip(), Tip())),
-//     Just(1)
-//   )
-// )
 ```
 
 ### Using `scalaz` type class instances for readers
@@ -70,7 +60,7 @@ ConfigSource.fromConfig(scalazConf).load[ScalazConfig]
 In order to put in scope `scalaz` type classes for our readers and extend them with the extra
 operations provided by `scalaz`, we need some extra imports:
 
-```scala
+```scala mdoc:silent
 import pureconfig.module.scalaz.instances._
 import scalaz._
 import scalaz.Scalaz._
@@ -78,7 +68,7 @@ import scalaz.Scalaz._
 
 We are now ready to use the new syntax:
 
-```scala
+```scala mdoc:silent
 case class SimpleConfig(i: Int)
 
 // a reader that always returns SimpleConfig(42)
@@ -90,90 +80,64 @@ val safeReader = ConfigReader[SimpleConfig].handleError(_ => SimpleConfig(-1).po
 
 And we can finally put them to use:
 
-```scala
+```scala mdoc
 val validConf = parseString("""{ i: 1 }""")
-// validConf: com.typesafe.config.Config = Config(SimpleConfigObject({"i":1}))
 
 val invalidConf = parseString("""{ s: "abc" }""")
-// invalidConf: com.typesafe.config.Config = Config(SimpleConfigObject({"s":"abc"}))
 
 constReader.from(validConf.root())
-// res1: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
 
 constReader.from(invalidConf.root())
-// res2: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
 
 safeReader.from(validConf.root())
-// res3: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(1))
 
 safeReader.from(invalidConf.root())
-// res4: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(-1))
 ```
 
 In case there's a necessity to parse multiple configs and accumulate errors, you could leverage from `Semigroup` instance for `ConfigReaderFailures`:
 
-```scala
+```scala mdoc
 val anotherInvalidConf = parseString("""{ i: false }""")
-// anotherInvalidConf: com.typesafe.config.Config = Config(SimpleConfigObject({"i":false}))
 
 List(validConf, invalidConf, anotherInvalidConf).traverse { c =>
   Validation.fromEither(implicitly[ConfigReader[SimpleConfig]].from(c.root))
 }
-// res5: Validation[error.ConfigReaderFailures, List[SimpleConfig]] = Failure(
-//   ConfigReaderFailures(
-//     ConvertFailure(KeyNotFound("i", Set()), Some(ConfigOrigin(String)), ""),
-//     ArrayBuffer(
-//       ConvertFailure(
-//         WrongType(BOOLEAN, Set(NUMBER)),
-//         Some(ConfigOrigin(String)),
-//         "i"
-//       )
-//     )
-//   )
-// )
 ```
 
 ### Extra syntactic sugar
 
 We can provide some useful extension methods by importing:
 
-```scala
+```scala mdoc:silent
 import pureconfig.module.scalaz.syntax._
 ```
 
 For example, you can easily convert a `ConfigReaderFailures` to a `NonEmptyList[ConfigReaderFailure]`:
 
-```scala
+```scala mdoc:silent
 case class MyConfig(i: Int, s: String)
 ```
-```scala
+```scala mdoc
 val myConf = parseString("{}")
-// myConf: com.typesafe.config.Config = Config(SimpleConfigObject({}))
 
 val res = ConfigSource.fromConfig(myConf).load[MyConfig].left.map(_.toNel)
-// res: Either[NonEmptyList[error.ConfigReaderFailure], MyConfig] = Left(
-//   NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
-// )
 ```
 
 This allows `scalaz` users to easily convert a result of a `ConfigReader` into a `ValidatedNel`:
 
-```scala
+```scala mdoc:silent
 import scalaz.{ Validation, ValidationNel }
 import pureconfig.error._
 ```
 
-```scala
+```scala mdoc
 val result: ValidationNel[ConfigReaderFailure, MyConfig] =
   Validation.fromEither(res)
-// result: ValidationNel[ConfigReaderFailure, MyConfig] = Failure(
-//   NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
-// )
 ```
 
 Also, you could create `ConfigReader`s using `scalaz` types:
 
-```scala
+```scala mdoc:silent
 case class Tweet(msg: String)
 
 val tweetReader: ConfigReader[Tweet] = ConfigReader.fromNonEmptyStringDisjunction { s =>

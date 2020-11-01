@@ -15,8 +15,16 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.14.0"
 
 To load a configuration file from a path using cats-effect's `IO`:
 
+```scala mdoc:invisible
+import java.nio.file.{Paths, Files}
+import java.nio.charset.StandardCharsets
 
-```scala
+val somePath = Files.createTempFile("config", ".properties")
+val fileContents = "somefield=1234\nanotherfield=some string"
+Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
+```
+
+```scala mdoc:silent
 import pureconfig.generic.auto._
 import pureconfig.module.fs2._
 import cats.effect.{Blocker, IO, ContextShift}
@@ -40,21 +48,18 @@ val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream)
 ```
 
 To test that this `IO` does indeed return a `MyConfig` instance:
-```scala
+```scala mdoc
 //Show the contents of the file
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
-// res1: String = """somefield=1234
-// anotherfield=some string"""
 
 load.unsafeRunSync().equals(MyConfig(1234, "some string"))
-// res2: Boolean = true
 ```
 
 ### Writing configuration
 
 To create a byte stream from a configuration:
 
-```scala
+```scala mdoc:silent
 import pureconfig.module.fs2._
 import fs2.text
 import cats.effect.IO
@@ -68,8 +73,6 @@ val configStream2: fs2.Stream[IO, Byte] = saveConfigToStream(someConfig)
 
 And to confirm the stream has the values we expect:
 
-```scala
+```scala mdoc:to-string
 configStream.through(text.utf8Decode).showLinesStdOut.compile.drain.unsafeRunSync
-// somefield=1234
-// anotherfield=some string
 ```

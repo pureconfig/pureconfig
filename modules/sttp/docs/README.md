@@ -14,7 +14,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-sttp" % "0.14.0"
 
 To load an sttp `Uri` into a configuration, create a new class:
 
-```scala
+```scala mdoc:silent
 import sttp.model.Uri
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
@@ -26,10 +26,8 @@ case class AppConfig(uri: Uri)
 
 Now, we can load the configuration with the following code:
 
-```scala
+```scala mdoc:to-string
 val config = parseString("""{uri: "https://sttp.readthedocs.io" }""")
-// config: com.typesafe.config.Config = Config(SimpleConfigObject({"uri":"https://sttp.readthedocs.io"}))
 
 ConfigSource.fromConfig(config).load[AppConfig]
-// res0: ConfigReader.Result[AppConfig] = Right(AppConfig(https://sttp.readthedocs.io))
 ```

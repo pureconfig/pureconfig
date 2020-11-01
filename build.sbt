@@ -23,8 +23,8 @@ lazy val tests = (project in file("tests"))
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle"))
-  .enablePlugins(SbtOsgi, TutPlugin)
-  .settings(commonSettings, tutTargetDirectory := file("."))
+  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
+  .settings(commonSettings, mdocOut := file("."))
   .dependsOn(core, generic)
 
 lazy val docs = (project in file("docs"))
@@ -33,22 +33,16 @@ lazy val docs = (project in file("docs"))
   .dependsOn(bundle)
 
 def genericModule(proj: Project) = proj
-  .enablePlugins(SbtOsgi, TutPlugin)
+  .enablePlugins(SbtOsgi)
   .dependsOn(core)
   .dependsOn(testkit % "test")
-  .settings(commonSettings, tutTargetDirectory := baseDirectory.value)
-
-def module(proj: Project) = genericModule(proj)
-  .dependsOn(generic % "test")
-  .dependsOn(generic % "Tut") // Allow auto-derivation in documentation
-
-def moduleWithMdoc(proj: Project) = proj
-  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
-  .dependsOn(core)
-  .dependsOn(testkit % "test", generic % "test")
   .settings(commonSettings)
 
-lazy val akka = moduleWithMdoc(project) in file("modules/akka")
+def module(proj: Project) = genericModule(proj)
+  .enablePlugins(ModuleMdocPlugin)
+  .dependsOn(generic % "test")
+
+lazy val akka = module(project) in file("modules/akka")
 lazy val `akka-http` = module(project) in file("modules/akka-http")
 lazy val cats = module(project) in file("modules/cats")
 lazy val `cats-effect` = module(project) in file("modules/cats-effect")
@@ -98,7 +92,6 @@ lazy val commonSettings = Seq(
 
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
-  scalacOptions in Tut --= Seq("-Ywarn-unused-import", "-Xmacro-settings:materialize-derivations"),
 
   scalafmtOnCompile := true,
 

@@ -18,7 +18,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-enum" % "0.14.0"
 
 Given a Greeting ADT composed of `case object`s with an `implicit` `Enum` instance:
 
-```scala
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.enum._
@@ -36,22 +36,18 @@ final implicit val EnumInstance: Enum[Greeting] = Enum.derived[Greeting]
 ```
 
 And a class to hold the configuration:
-```scala
+```scala mdoc:silent
 case class GreetingConf(start: Greeting, end: Greeting)
 ```
 
 We can read a GreetingConf like:
-```scala
+```scala mdoc
 val conf = parseString("""{
   start: WhisperHello
   end: ShoutGoodBye
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"ShoutGoodBye","start":"WhisperHello"}))
 
 ConfigSource.fromConfig(conf).load[GreetingConf]
-// res0: ConfigReader.Result[GreetingConf] = Right(
-//   GreetingConf(WhisperHello, ShoutGoodBye)
-// )
 ```
 
 ## Can I configure how the elements are read?

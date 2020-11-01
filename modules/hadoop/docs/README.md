@@ -29,7 +29,7 @@ import pureconfig.module.hadoop._
 
 To load a `Path` into a configuration, we create a class to hold our configuration:
 
-```scala
+```scala mdoc:silent
 import org.apache.hadoop.fs.Path
 import com.typesafe.config.ConfigFactory.parseString
 import pureconfig._
@@ -40,14 +40,10 @@ case class MyConfig(path: Path)
 ```
 
 Now we can read a `MyConfig` like:
-```scala
+```scala mdoc
 val conf = parseString("""{
   path: "hdfs://some.domain/foo/bar.gz"
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"path":"hdfs://some.domain/foo/bar.gz"}))
 
 ConfigSource.fromConfig(conf).load[MyConfig]
-// res0: ConfigReader.Result[MyConfig] = Right(
-//   MyConfig(hdfs://some.domain/foo/bar.gz)
-// )
 ```

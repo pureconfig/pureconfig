@@ -18,7 +18,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.1
 
 Given a Greeting ADT which implements one of Enumeratum's `EnumEntry` types:
 
-```scala
+```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.enumeratum._
@@ -37,22 +37,18 @@ object Greeting extends Enum[Greeting] {
 ```
 
 And a class to hold the configuration:
-```scala
+```scala mdoc:silent
 case class GreetingConf(start: Greeting, end: Greeting)
 ```
 
 We can read a GreetingConf like:
-```scala
+```scala mdoc
 val conf = parseString("""{
   start: hello
   end: SHOUT_GOOD_BYE
 }""")
-// conf: com.typesafe.config.Config = Config(SimpleConfigObject({"end":"SHOUT_GOOD_BYE","start":"hello"}))
 
 ConfigSource.fromConfig(conf).load[GreetingConf]
-// res0: ConfigReader.Result[GreetingConf] = Right(
-//   GreetingConf(Hello, ShoutGoodBye)
-// )
 ```
 
 Note that Enumeratum has a variety of [other ways to define enums](https://github.com/lloydmeta/enumeratum#more-examples) which are [also supported by `pureconfig-enumeratum`](src/test/scala/pureconfig/module/enumeratum/EnumeratumConvertTest.scala). If you need to read integers, another numeric type, or arbitrary strings to specify your enum values, Enumeratum and Pureconfig have you covered.
