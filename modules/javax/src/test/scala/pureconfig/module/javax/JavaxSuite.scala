@@ -16,7 +16,7 @@ class JavaxSuite extends AnyFlatSpec with Matchers with EitherValues {
   it should "be able to read a config with a KerberosPrincipal" in {
     val expected = "sample/principal@pureconfig"
     val config = ConfigFactory.parseString(s"""{ principal: "$expected" }""")
-    config.to[K5Conf].right.value shouldEqual K5Conf(new KerberosPrincipal(expected))
+    config.to[K5Conf].value shouldEqual K5Conf(new KerberosPrincipal(expected))
   }
 
   case class X500Conf(principal: X500Principal)
@@ -24,6 +24,6 @@ class JavaxSuite extends AnyFlatSpec with Matchers with EitherValues {
   it should "be able to read a config with an X500Principal" in {
     val expected = "CN=Steve Kille,O=Isode Limited,C=GBg"
     val config = ConfigFactory.parseString(s"""{ principal: "$expected" }""")
-    config.to[X500Conf].right.value shouldEqual X500Conf(new X500Principal(expected))
+    config.to[X500Conf].value shouldEqual X500Conf(new X500Principal(expected))
   }
 }

@@ -17,7 +17,7 @@ class HadoopModuleTest extends BaseSuite {
     val strPath = "hdfs://my.domain/foo/bar/baz.gz"
     val expected = new Path(strPath)
     val config = ConfigFactory.parseString(s"""{ path: "$strPath" }""")
-    config.to[Conf].right.value shouldEqual Conf(expected)
+    config.to[Conf].value shouldEqual Conf(expected)
   }
 
   it should "be able to write correct path value to config" in {

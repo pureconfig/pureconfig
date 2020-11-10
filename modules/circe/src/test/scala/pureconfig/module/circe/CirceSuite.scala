@@ -30,7 +30,7 @@ class CirceSuite extends AnyFlatSpec with Matchers with EitherValues {
   val config = ConfigFactory.parseString(confString)
 
   it should "be able to read a config as circe json" in {
-    config.to[JsonConf].right.value shouldEqual JsonConf(confJson)
+    config.to[JsonConf].value shouldEqual JsonConf(confJson)
   }
 
   it should "be able to write a config as circe json" in {

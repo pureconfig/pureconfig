@@ -115,12 +115,11 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
       .string(resourceContents("basic.yaml"))
       .at("map")
       .load[Map[String, String]]
-      .right
       .value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
   }
 
   it should "loadYaml from string content with a specific namespace of a BigInt" in {
-    YamlConfigSource.string(resourceContents("basic.yaml")).at("n").load[BigInt].right.value shouldBe BigInt(
+    YamlConfigSource.string(resourceContents("basic.yaml")).at("n").load[BigInt].value shouldBe BigInt(
       "1234567890123456789012345678901234567890"
     )
   }
@@ -138,12 +137,11 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
       .file(resourcePath("basic.yaml"))
       .at("map")
       .load[Map[String, String]]
-      .right
       .value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
   }
 
   it should "loadYaml from a path with a specific namespace of a BigInt" in {
-    YamlConfigSource.string(resourceContents("basic.yaml")).at("n").load[BigInt].right.value shouldBe BigInt(
+    YamlConfigSource.string(resourceContents("basic.yaml")).at("n").load[BigInt].value shouldBe BigInt(
       "1234567890123456789012345678901234567890"
     )
   }

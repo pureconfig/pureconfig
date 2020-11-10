@@ -114,11 +114,11 @@ class YamlApiSuite extends BaseSuite with EitherValues {
     loadYaml[Map[String, String]](
       resourceContents("basic.yaml"),
       "map"
-    ).right.value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
+    ).value should contain theSameElementsAs Map("a" -> "1.5", "b" -> "2.5", "c" -> "3.5")
   }
 
   it should "loadYaml from string content with a specific namespace of a BigInt" in {
-    loadYaml[BigInt](resourceContents("basic.yaml"), "n").right.value shouldBe BigInt(
+    loadYaml[BigInt](resourceContents("basic.yaml"), "n").value shouldBe BigInt(
       "1234567890123456789012345678901234567890"
     )
   }
@@ -132,7 +132,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYaml from a path with a specific namespace of a Map" in {
-    loadYaml[Map[String, String]](resourcePath("basic.yaml"), "map").right.value should contain theSameElementsAs Map(
+    loadYaml[Map[String, String]](resourcePath("basic.yaml"), "map").value should contain theSameElementsAs Map(
       "a" -> "1.5",
       "b" -> "2.5",
       "c" -> "3.5"
@@ -140,7 +140,7 @@ class YamlApiSuite extends BaseSuite with EitherValues {
   }
 
   it should "loadYaml from a path with a specific namespace of a BigInt" in {
-    loadYaml[BigInt](resourceContents("basic.yaml"), "n").right.value shouldBe BigInt(
+    loadYaml[BigInt](resourceContents("basic.yaml"), "n").value shouldBe BigInt(
       "1234567890123456789012345678901234567890"
     )
   }

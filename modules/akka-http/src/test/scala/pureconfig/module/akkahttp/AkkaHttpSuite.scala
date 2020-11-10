@@ -18,7 +18,7 @@ class AkkaHttpSuite extends BaseSuite {
   behavior of "AkkaHttp module"
 
   it should "read the uri properly" in {
-    config.to[ServerConfig].right.value shouldEqual ServerConfig(uri)
+    config.to[ServerConfig].value shouldEqual ServerConfig(uri)
   }
 
   it should " throw proper CannotConvert error" in {

@@ -37,7 +37,7 @@ class DurationUtilsSuite extends BaseSuite {
   }
   it should "round trip negative infinity" in {
     val expected = Duration.MinusInf
-    fromS(fromD(expected)).right.value shouldBe expected
+    fromS(fromD(expected)).value shouldBe expected
   }
 
   "Converting a String to a Duration" should "succeed for known units" in {
@@ -87,15 +87,15 @@ class DurationUtilsSuite extends BaseSuite {
     fromS(fromD(Duration.Inf)) shouldEqual Right(Duration.Inf)
   }
   it should "convert a value larger than 2^52" in {
-    fromS("8092048641075763 ns").right.value shouldBe Duration(8092048641075763L, NANOSECONDS)
+    fromS("8092048641075763 ns").value shouldBe Duration(8092048641075763L, NANOSECONDS)
   }
   it should "round trip a value which is greater than 2^52" in {
     val expected = Duration(781251341142500992L, NANOSECONDS)
-    fromS(fromD(expected)).right.value shouldBe expected
+    fromS(fromD(expected)).value shouldBe expected
   }
   it should "round trip a value < 2^52 which is > 2^52 when converted to milliseconds" in {
     val expected = Duration(781251341142501L, MICROSECONDS)
-    fromS(fromD(expected)).right.value shouldBe expected
+    fromS(fromD(expected)).value shouldBe expected
   }
   it should "freak when given a value larger than 2^64" in {
     dcc.from(scc.to("12345678901234567890 ns")) should failLike { case ConvertFailure(ExceptionThrown(ex), _, _) =>
@@ -104,11 +104,11 @@ class DurationUtilsSuite extends BaseSuite {
   }
   it should "parse a fractional value" in {
     val expected = 1.5.minutes
-    fromS(fromD(expected)).right.value shouldBe expected
+    fromS(fromD(expected)).value shouldBe expected
   }
   it should "change the units on a fractional value, failing to round trip in the config representation" in {
-    val duration = dcc.from(scc.to("1.5 minutes")).right.value
-    val rep = scc.from(dcc.to(duration)).right.value shouldBe "90s" // Not "1.5 minutes" as we might hope
+    val duration = dcc.from(scc.to("1.5 minutes")).value
+    val rep = scc.from(dcc.to(duration)).value shouldBe "90s" // Not "1.5 minutes" as we might hope
   }
 }
 
