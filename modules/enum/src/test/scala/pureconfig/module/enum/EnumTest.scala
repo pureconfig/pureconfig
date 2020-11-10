@@ -23,7 +23,7 @@ class EnumTest extends BaseSuite {
   "enum config convert" should "parse an enum" in Inspectors.forAll(Greeting.EnumInstance.values) { greeting =>
     val conf = ConfigFactory.parseString(s"""{greeting:"$greeting"}""")
     case class Conf(greeting: Greeting)
-    conf.to[Conf].right.value shouldEqual Conf(greeting)
+    conf.to[Conf].value shouldEqual Conf(greeting)
   }
 
   it should "politely refuse an invalid member" in {

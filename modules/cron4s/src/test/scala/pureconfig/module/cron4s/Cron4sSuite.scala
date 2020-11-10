@@ -16,7 +16,7 @@ class Cron4sSuite extends BaseSuite {
   "reading valid cron expressons" should "parse the expression" in {
     val conf = ConfigFactory.parseString(s"""{schedule: "10-35 2,4,6 * ? * *"}""")
 
-    conf.to[Config].right.value shouldEqual Config(Cron.unsafeParse("10-35 2,4,6 * ? * *"))
+    conf.to[Config].value shouldEqual Config(Cron.unsafeParse("10-35 2,4,6 * ? * *"))
   }
 
   "reading invalid cron expressions" should "get a CannotConvert error" in {

@@ -44,7 +44,7 @@ class ForProductNSuite extends BaseSuite {
     val confWithMissingKeys = missingKeys.foldLeft(conf.asInstanceOf[ConfigObject])(_.withoutKey(_))
     val fooKeys = Foo1.keys
     val fooReader = ConfigReader.forProduct1([#fooKeys(0)#])(Foo1.apply)
-    fooReader.from(ConfigCursor.apply(confWithMissingKeys, List.empty)).right.value shouldEqual Foo1(
+    fooReader.from(ConfigCursor.apply(confWithMissingKeys, List.empty)).value shouldEqual Foo1(
       [#if ((bitmask & ##1 << 0) == ##0) "missing" else foo.s0#])
   }
 

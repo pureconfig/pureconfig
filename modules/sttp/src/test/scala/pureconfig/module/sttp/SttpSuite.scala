@@ -17,7 +17,7 @@ class SttpSuite extends BaseSuite {
   it should "read uri" in {
     val config = ConfigFactory.parseString("""{uri = "https://sttp.readthedocs.io"}""")
 
-    config.to[AppConfig].right.value shouldBe AppConfig(uri"https://sttp.readthedocs.io")
+    config.to[AppConfig].value shouldBe AppConfig(uri"https://sttp.readthedocs.io")
   }
 
   it should "handle error when reading uri" in {

@@ -50,7 +50,7 @@ class ConfigurableSuite extends BaseSuite {
       case animal => Left(UnknownKey(s"$animal is unsupported"))
     }
 
-    conf.to[Map[Animal, Food]].right.value shouldEqual Map(Bird -> Food("worms"), Monkey -> Food("banana"))
+    conf.to[Map[Animal, Food]].value shouldEqual Map(Bird -> Food("worms"), Monkey -> Food("banana"))
   }
 
   it should "format using generic map writer" in {

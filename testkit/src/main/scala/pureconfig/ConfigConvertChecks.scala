@@ -32,7 +32,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
       equality: Equality[A]
   ): Unit =
     it should s"read an arbitrary ${tpe.tpe}" in forAll { a: A =>
-      cc.value.from(cc.value.to(a)).right.value shouldEqual a
+      cc.value.from(cc.value.to(a)).value shouldEqual a
     }
 
   /** A more generic version of [[checkArbitrary]] where the type which will be written as `ConfigValue` is
@@ -61,7 +61,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
       equality: Equality[A]
   ): Unit =
     it should s"read a ${tpe1.tpe} from an arbitrary ${tpe2.tpe}" in forAll { b: B =>
-      cr.from(cw.to(b)).right.value shouldEqual f(b)
+      cr.from(cw.to(b)).value shouldEqual f(b)
     }
 
   /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from`
@@ -70,7 +70,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
   def checkRead[A: Equality](reprsToValues: (ConfigValue, A)*)(implicit cr: ConfigReader[A], tpe: TypeTag[A]): Unit =
     for ((repr, value) <- reprsToValues) {
       it should s"read the value $value of type ${tpe.tpe} from ${repr.render(ConfigRenderOptions.concise())}" in {
-        cr.from(repr).right.value shouldEqual value
+        cr.from(repr).value shouldEqual value
       }
     }
 

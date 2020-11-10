@@ -84,7 +84,7 @@ class ProductConvertersSuite extends BaseSuite {
           }
         )
     }
-    ConfigReader[Conf].from(conf).right.value shouldBe Conf(1, 42)
+    ConfigReader[Conf].from(conf).value shouldBe Conf(1, 42)
   }
 
   it should "allow custom ConfigWriters to handle missing keys" in {
@@ -123,10 +123,10 @@ class ProductConvertersSuite extends BaseSuite {
     )
 
     val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava).root()
-    ConfigConvert[Conf].from(conf1).right.value shouldBe Conf(2, "default", 42, InnerConf(43, 44), Some(45))
+    ConfigConvert[Conf].from(conf1).value shouldBe Conf(2, "default", 42, InnerConf(43, 44), Some(45))
 
     val conf2 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50).asJava).root()
-    ConfigConvert[Conf].from(conf2).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(45))
+    ConfigConvert[Conf].from(conf2).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(45))
 
     val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava).root()
     ConfigConvert[Conf].from(conf3) should failWith(KeyNotFound("a"))
@@ -135,20 +135,20 @@ class ProductConvertersSuite extends BaseSuite {
     ConfigConvert[Conf].from(conf4) should failWith(KeyNotFound("g"), "d", emptyConfigOrigin)
 
     val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava).root()
-    ConfigConvert[Conf].from(conf5).right.value shouldBe Conf(2, "default", 42, InnerConf(5, 6), Some(45))
+    ConfigConvert[Conf].from(conf5).value shouldBe Conf(2, "default", 42, InnerConf(5, 6), Some(45))
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava).root()
     ConfigConvert[Conf].from(conf6) should failWithType[WrongType]
 
     val conf7 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> 1).asJava).root()
-    ConfigConvert[Conf].from(conf7).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(1))
+    ConfigConvert[Conf].from(conf7).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(1))
 
     val conf8 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> null).asJava).root()
-    ConfigConvert[Conf].from(conf8).right.value shouldBe Conf(2, "default", 50, InnerConf(43, 44), None)
+    ConfigConvert[Conf].from(conf8).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), None)
   }
 
   it should s"work properly with recursively defined product types" in {
     val conf = ConfigFactory.parseString("ls = [{ ls = [] }, { ls = [{ ls = [] }] }]").root()
-    ConfigConvert[RecType].from(conf).right.value shouldBe RecType(List(RecType(Nil), RecType(List(RecType(Nil)))))
+    ConfigConvert[RecType].from(conf).value shouldBe RecType(List(RecType(Nil), RecType(List(RecType(Nil)))))
   }
 }
