@@ -14,8 +14,8 @@ class ForProductNSuite extends BaseSuite {
   [#case class Foo1([#s0: String#])
   object Foo1 {
     val keys = List([#UUID.randomUUID().toString#])
-    implicit val foo1Writer = ConfigWriter.forProduct1([#keys(0)#])((Foo1.unapply _).andThen(_.get))
-    implicit val foo1Reader = ConfigReader.forProduct1([#keys(0)#])(Foo1.apply)
+    implicit val foo1Writer: ConfigWriter[Foo1] = ConfigWriter.forProduct1([#keys(0)#])((Foo1.unapply _).andThen(_.get))
+    implicit val foo1Reader: ConfigReader[Foo1] = ConfigReader.forProduct1([#keys(0)#])(Foo1.apply)
   }
   checkArbitrary[Foo1]
 
@@ -34,7 +34,7 @@ class ForProductNSuite extends BaseSuite {
   it should "produce ConfigReaders respecting the ReadsMissingKeys trait for arity 1" in
   forAll(bitmaskGen1) { bitmask =>
     val foo = Foo1([#UUID.randomUUID().toString#])
-    implicit val missingStringReader = new ConfigReader[String] with ReadsMissingKeys {
+    implicit val missingStringReader: ConfigReader[String] = new ConfigReader[String] with ReadsMissingKeys {
       def from(cur: ConfigCursor): ConfigReader.Result[String] =
         if (cur.isUndefined || cur.isNull) Right("missing")
         else cur.asString
@@ -50,7 +50,7 @@ class ForProductNSuite extends BaseSuite {
 
   it should "produce ConfigWriters respecting the WritesMissingKeys trait for arity 1" in
   forAll(bitmaskGen1) { bitmask =>
-    implicit val emptyStringWriter = new ConfigWriter[String] with WritesMissingKeys[String] {
+    implicit val emptyStringWriter: ConfigWriter[String] = new ConfigWriter[String] with WritesMissingKeys[String] {
       def to(v: String) = ConfigValueFactory.fromAnyRef(v)
       def toOpt(v: String) = if (v.isEmpty) None else Some(to(v))
     }

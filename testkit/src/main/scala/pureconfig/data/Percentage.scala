@@ -13,6 +13,6 @@ object Percentage {
     Left(CannotConvert(s, "Percentage", "Percentage is a dummy type, you should not read it"))
   }
 
-  implicit val percentageConfigWriter =
+  implicit val percentageConfigWriter: ConfigConvert[Percentage] =
     ConfigConvert.viaNonEmptyString[Percentage](failConfigReadPercentage, percentage => s"${percentage.value} %")
 }

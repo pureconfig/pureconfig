@@ -53,7 +53,7 @@ object ConfigConvert extends ConvertHelpers {
   implicit def fromReaderAndWriter[A](implicit
       reader: Derivation[ConfigReader[A]],
       writer: Derivation[ConfigWriter[A]]
-  ) =
+  ): ConfigConvert[A] =
     ConfigConvert(reader.value, writer.value)
 
   def viaString[A](fromF: String => Either[FailureReason, A], toF: A => String): ConfigConvert[A] =

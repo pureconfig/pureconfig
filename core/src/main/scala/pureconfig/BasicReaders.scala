@@ -23,18 +23,18 @@ import scala.util.Try
   */
 trait PrimitiveReaders {
 
-  implicit val stringConfigReader = ConfigReader.fromCursor(_.asString)
+  implicit val stringConfigReader: ConfigReader[String] = ConfigReader.fromCursor(_.asString)
 
-  implicit val charConfigReader = ConfigReader.fromNonEmptyString[Char](s =>
+  implicit val charConfigReader: ConfigReader[Char] = ConfigReader.fromNonEmptyString[Char](s =>
     s.size match {
       case 1 => Right(s.charAt(0))
       case len => Left(WrongSizeString(1, len))
     }
   )
 
-  implicit val booleanConfigReader = ConfigReader.fromCursor(_.asBoolean)
+  implicit val booleanConfigReader: ConfigReader[Boolean] = ConfigReader.fromCursor(_.asBoolean)
 
-  implicit val doubleConfigReader = ConfigReader.fromCursor({ cur =>
+  implicit val doubleConfigReader: ConfigReader[Double] = ConfigReader.fromCursor({ cur =>
     val asStringReader = catchReadError({
       case v if v.last == '%' => v.dropRight(1).toDouble / 100f
       case v => v.toDouble
@@ -43,7 +43,7 @@ trait PrimitiveReaders {
     cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asDouble)
   })
 
-  implicit val floatConfigReader = ConfigReader.fromCursor({ cur =>
+  implicit val floatConfigReader: ConfigReader[Float] = ConfigReader.fromCursor({ cur =>
     val asStringReader = catchReadError({
       case v if v.last == '%' => v.dropRight(1).toFloat / 100f
       case v => v.toFloat
@@ -52,13 +52,13 @@ trait PrimitiveReaders {
     cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asFloat)
   })
 
-  implicit val intConfigReader = ConfigReader.fromCursor(_.asInt)
+  implicit val intConfigReader: ConfigReader[Int] = ConfigReader.fromCursor(_.asInt)
 
-  implicit val longConfigReader = ConfigReader.fromCursor(_.asLong)
+  implicit val longConfigReader: ConfigReader[Long] = ConfigReader.fromCursor(_.asLong)
 
-  implicit val shortConfigReader = ConfigReader.fromCursor(_.asShort)
+  implicit val shortConfigReader: ConfigReader[Short] = ConfigReader.fromCursor(_.asShort)
 
-  implicit val byteConfigReader = ConfigReader.fromCursor(_.asByte)
+  implicit val byteConfigReader: ConfigReader[Byte] = ConfigReader.fromCursor(_.asByte)
 }
 
 /** Trait containing `ConfigReader` instance for Java Enums.
@@ -76,19 +76,20 @@ trait JavaEnumReader {
   */
 trait UriAndPathReaders {
 
-  implicit val urlConfigReader = ConfigReader.fromNonEmptyString[URL](catchReadError(new URL(_)))
-  implicit val uuidConfigReader = ConfigReader.fromNonEmptyString[UUID](catchReadError(UUID.fromString))
-  implicit val pathConfigReader = ConfigReader.fromString[Path](catchReadError(Paths.get(_)))
-  implicit val fileConfigReader = ConfigReader.fromString[File](catchReadError(new File(_)))
-  implicit val uriConfigReader = ConfigReader.fromString[URI](catchReadError(new URI(_)))
+  implicit val urlConfigReader: ConfigReader[URL] = ConfigReader.fromNonEmptyString[URL](catchReadError(new URL(_)))
+  implicit val uuidConfigReader: ConfigReader[UUID] =
+    ConfigReader.fromNonEmptyString[UUID](catchReadError(UUID.fromString))
+  implicit val pathConfigReader: ConfigReader[Path] = ConfigReader.fromString[Path](catchReadError(Paths.get(_)))
+  implicit val fileConfigReader: ConfigReader[File] = ConfigReader.fromString[File](catchReadError(new File(_)))
+  implicit val uriConfigReader: ConfigReader[URI] = ConfigReader.fromString[URI](catchReadError(new URI(_)))
 }
 
 /** Trait containing `ConfigReader` instances for classes related to regular expressions.
   */
 trait RegexReaders {
 
-  implicit val patternReader = ConfigReader.fromString[Pattern](catchReadError(Pattern.compile))
-  implicit val regexReader = ConfigReader.fromString[Regex](catchReadError(new Regex(_)))
+  implicit val patternReader: ConfigReader[Pattern] = ConfigReader.fromString[Pattern](catchReadError(Pattern.compile))
+  implicit val regexReader: ConfigReader[Regex] = ConfigReader.fromString[Regex](catchReadError(new Regex(_)))
 }
 
 /** Trait containing `ConfigReader` instances for `java.time` classes.
