@@ -1,11 +1,19 @@
-import Dependencies._
+import Dependencies.Version
 
 name := "pureconfig-macros"
 
-libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
-  "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
-)
+crossScalaVersions += Version.scala30
+
+libraryDependencies ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) =>
+      Seq(
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
+      )
+    case _ => Seq.empty
+  }
+}
 
 // Scala has excessive warnings about unused implicits on macro exps (https://github.com/scala/bug/issues/10270)
 scalacOptions ~= { _.filterNot(_.contains("-Ywarn-unused")) }

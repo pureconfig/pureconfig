@@ -95,7 +95,7 @@ private[pureconfig] object DurationUtils {
   private val shortMinuteRegex = "([0-9])(\\s*)m(\\s*)$".r
 
   // To maintain compatibility with Typesafe Config, use "ms" as default unit.
-  private val addDefaultUnit = { s: String => if (onlyNumberRegex.unapplySeq(s).isDefined) s + " ms" else s }
+  private val addDefaultUnit = { (s: String) => if (onlyNumberRegex.unapplySeq(s).isDefined) s + " ms" else s }
 
   // To maintain compatibility with Typesafe Config, replace "us" with "µs".
   private val itsGreekToMe =
@@ -115,6 +115,7 @@ private[pureconfig] object DurationUtils {
       case Duration.MinusInf => "MinusInf"
       // We must do an `eq` instead of `==` comparison because `Undefined` is intentionally != itself.
       case d if d eq Duration.Undefined => UndefinedDuration
+      case _ => UndefinedDuration
     }
   }
 

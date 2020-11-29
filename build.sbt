@@ -103,19 +103,25 @@ lazy val commonSettings = Seq(
   // format: on
 )
 
-// add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as
-// "scala-2.11" are natively supported by SBT).
-// In order to keep this simple, we're doing this case by case, taking advantage of the fact that we intend to support
-// only 3 major versions at any given moment.
+// add support for Scala version ranges such as "scala-2.12+" or "scala-2.13-" in source folders (single version folders
+// such as "scala-2.11" are natively supported by SBT).
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
-    val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
-    List(
-      if (minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") }
-      else Nil,
-      if (minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") }
-      else Nil
-    ).flatten
+    val version = CrossVersion.partialVersion(scalaVersion.value)
+    val expectedVersions = Seq((2, 11), (2, 12), (2, 13), (3, 0))
+    expectedVersions.flatMap { case (major, minor) =>
+      lazy val versionV = major * 100 + minor
+      List(
+        if (version.exists { case (maj, min) => maj * 100 + min <= versionV }) unmanagedSrcs.value.map { dir =>
+          new File(dir.getPath + s"-$major.$minor-")
+        }
+        else Nil,
+        if (version.exists { case (maj, min) => maj * 100 + min >= versionV }) unmanagedSrcs.value.map { dir =>
+          new File(dir.getPath + s"-$major.$minor+")
+        }
+        else Nil
+      )
+    }.flatten
   }
 }
 
@@ -124,20 +130,26 @@ lazy val lintFlags = {
     "-encoding",
     "UTF-8", // arg for -encoding
     "-feature",
-    "-unchecked",
+    "-unchecked"
+  )
+
+  lazy val preScala3LintFlags = allVersionLintFlags ++ List(
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen"
   )
 
-  def withCommon(flags: String*) =
-    allVersionLintFlags ++ flags
-
   forScalaVersions {
     case (2, 11) =>
-      withCommon("-deprecation", "-Xlint", "-Xfatal-warnings", "-Yno-adapted-args", "-Ywarn-unused-import")
+      preScala3LintFlags ++ List(
+        "-deprecation",
+        "-Xlint",
+        "-Xfatal-warnings",
+        "-Yno-adapted-args",
+        "-Ywarn-unused-import"
+      )
 
     case (2, 12) =>
-      withCommon(
+      preScala3LintFlags ++ List(
         "-deprecation", // Either#right is deprecated on Scala 2.13
         "-Xlint:_,-unused",
         "-Xfatal-warnings",
@@ -146,10 +158,10 @@ lazy val lintFlags = {
       )
 
     case (2, 13) =>
-      withCommon("-Ywarn-unused:_,-implicits")
+      preScala3LintFlags ++ List("-Ywarn-unused:_,-implicits")
 
     case _ =>
-      withCommon()
+      allVersionLintFlags
   }
 }
 

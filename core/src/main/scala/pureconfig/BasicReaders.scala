@@ -65,7 +65,7 @@ trait PrimitiveReaders {
   */
 trait JavaEnumReader {
 
-  implicit def javaEnumReader[A <: Enum[A]](implicit tag: ClassTag[A]): ConfigReader[A] =
+  implicit def javaEnumReader[A <: java.lang.Enum[A]](implicit tag: ClassTag[A]): ConfigReader[A] =
     ConfigReader.fromString(catchReadError(s => {
       val enumClass = tag.runtimeClass.asInstanceOf[Class[A]]
       Enum.valueOf(enumClass, s)
