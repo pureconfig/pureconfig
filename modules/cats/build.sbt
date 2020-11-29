@@ -3,8 +3,8 @@ import Utilities._
 name := "pureconfig-cats"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.2.0" }.value,
-  "org.typelevel" %% "cats-laws" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.2.0" }.value % "test",
+  "org.typelevel" %% "cats-core" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.3.0" }.value,
+  "org.typelevel" %% "cats-laws" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.3.0" }.value % "test",
   "org.typelevel" %% "discipline-scalatest" % "2.1.0" % "test"
 )
 
