@@ -3,8 +3,7 @@ package pureconfig
 import java.io.File
 import java.math.BigInteger
 import java.nio.file.Path
-import java.time
-import java.time._
+import java.time.{Duration => JavaDuration, _}
 import java.util.UUID
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
@@ -16,7 +15,7 @@ import pureconfig.gen._
 package object arbitrary {
 
   implicit val arbDuration: Arbitrary[Duration] = Arbitrary(genDuration)
-  implicit val arbJavaDuration: Arbitrary[time.Duration] = Arbitrary(genJavaDuration)
+  implicit val arbJavaDuration: Arbitrary[JavaDuration] = Arbitrary(genJavaDuration)
   implicit val arbFiniteDuration: Arbitrary[FiniteDuration] = Arbitrary(genFiniteDuration)
   implicit val arbInstant: Arbitrary[Instant] = Arbitrary(genInstant)
   implicit val arbPeriod: Arbitrary[Period] = Arbitrary(genPeriod)
