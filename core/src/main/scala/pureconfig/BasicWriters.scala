@@ -19,15 +19,15 @@ import com.typesafe.config._
   */
 trait PrimitiveWriters {
 
-  implicit val stringConfigWriter = ConfigWriter.forPrimitive[String]
-  implicit val charConfigWriter = ConfigWriter.toDefaultString[Char]
-  implicit val booleanConfigWriter = ConfigWriter.forPrimitive[Boolean]
-  implicit val doubleConfigWriter = ConfigWriter.forPrimitive[Double]
-  implicit val floatConfigWriter = ConfigWriter.forPrimitive[Float]
-  implicit val intConfigWriter = ConfigWriter.forPrimitive[Int]
-  implicit val longConfigWriter = ConfigWriter.forPrimitive[Long]
-  implicit val shortConfigWriter = ConfigWriter.forPrimitive[Short]
-  implicit val byteConfigWriter = ConfigWriter.forPrimitive[Byte]
+  implicit val stringConfigWriter: ConfigWriter[String] = ConfigWriter.forPrimitive[String]
+  implicit val charConfigWriter: ConfigWriter[Char] = ConfigWriter.toDefaultString[Char]
+  implicit val booleanConfigWriter: ConfigWriter[Boolean] = ConfigWriter.forPrimitive[Boolean]
+  implicit val doubleConfigWriter: ConfigWriter[Double] = ConfigWriter.forPrimitive[Double]
+  implicit val floatConfigWriter: ConfigWriter[Float] = ConfigWriter.forPrimitive[Float]
+  implicit val intConfigWriter: ConfigWriter[Int] = ConfigWriter.forPrimitive[Int]
+  implicit val longConfigWriter: ConfigWriter[Long] = ConfigWriter.forPrimitive[Long]
+  implicit val shortConfigWriter: ConfigWriter[Short] = ConfigWriter.forPrimitive[Short]
+  implicit val byteConfigWriter: ConfigWriter[Byte] = ConfigWriter.forPrimitive[Byte]
 }
 
 /** Trait containing instance for `ConfigWriter` for Java Enum.
@@ -41,36 +41,37 @@ trait JavaEnumWriter {
   */
 trait UriAndPathWriters {
 
-  implicit val urlConfigWriter = ConfigWriter.toDefaultString[URL]
-  implicit val uuidConfigWriter = ConfigWriter.toDefaultString[UUID]
-  implicit val pathConfigWriter = ConfigWriter.toDefaultString[Path]
-  implicit val fileConfigWriter = ConfigWriter.toDefaultString[File]
-  implicit val uriConfigWriter = ConfigWriter.toDefaultString[URI]
+  implicit val urlConfigWriter: ConfigWriter[URL] = ConfigWriter.toDefaultString[URL]
+  implicit val uuidConfigWriter: ConfigWriter[UUID] = ConfigWriter.toDefaultString[UUID]
+  implicit val pathConfigWriter: ConfigWriter[Path] = ConfigWriter.toDefaultString[Path]
+  implicit val fileConfigWriter: ConfigWriter[File] = ConfigWriter.toDefaultString[File]
+  implicit val uriConfigWriter: ConfigWriter[URI] = ConfigWriter.toDefaultString[URI]
 }
 
 /** Trait containing `ConfigWriter` instances for classes related to regular expressions.
   */
 trait RegexWriters {
 
-  implicit val patternWriter = ConfigWriter.toString[Pattern](_.pattern)
-  implicit val regexWriter = ConfigWriter.toString[Regex](_.pattern.pattern) // Regex.regex isn't supported until 2.11
+  implicit val patternWriter: ConfigWriter[Pattern] = ConfigWriter.toString[Pattern](_.pattern)
+  implicit val regexWriter: ConfigWriter[Regex] =
+    ConfigWriter.toString[Regex](_.pattern.pattern) // Regex.regex isn't supported until 2.11
 }
 
 /** Trait containing `ConfigWriter` instances for `java.time` classes.
   */
 trait JavaTimeWriters {
 
-  implicit val instantConfigWriter = ConfigWriter.toDefaultString[Instant]
-  implicit val zoneOffsetConfigWriter = ConfigWriter.toDefaultString[ZoneOffset]
-  implicit val zoneIdConfigWriter = ConfigWriter.toDefaultString[ZoneId]
-  implicit val periodConfigWriter = ConfigWriter.toDefaultString[Period]
+  implicit val instantConfigWriter: ConfigWriter[Instant] = ConfigWriter.toDefaultString[Instant]
+  implicit val zoneOffsetConfigWriter: ConfigWriter[ZoneOffset] = ConfigWriter.toDefaultString[ZoneOffset]
+  implicit val zoneIdConfigWriter: ConfigWriter[ZoneId] = ConfigWriter.toDefaultString[ZoneId]
+  implicit val periodConfigWriter: ConfigWriter[Period] = ConfigWriter.toDefaultString[Period]
 
   // see documentation for [[java.time.Year.parse]]
   private[this] def yearToString(year: Year): String =
     if (year.getValue > 9999) "+" + year else year.toString
 
-  implicit val yearConfigWriter = ConfigWriter.toString[Year](yearToString)
-  implicit val javaDurationConfigWriter = ConfigWriter.toDefaultString[JavaDuration]
+  implicit val yearConfigWriter: ConfigWriter[Year] = ConfigWriter.toString[Year](yearToString)
+  implicit val javaDurationConfigWriter: ConfigWriter[JavaDuration] = ConfigWriter.toDefaultString[JavaDuration]
 }
 
 /** Trait containing `ConfigWriter` instances for [[scala.concurrent.duration.Duration]] and
@@ -78,8 +79,10 @@ trait JavaTimeWriters {
   */
 trait DurationWriters {
 
-  implicit val durationConfigWriter = ConfigWriter.toString[Duration](DurationUtils.fromDuration)
-  implicit val finiteDurationConfigWriter = ConfigWriter.toString[FiniteDuration](DurationUtils.fromDuration)
+  implicit val durationConfigWriter: ConfigWriter[Duration] =
+    ConfigWriter.toString[Duration](DurationUtils.fromDuration)
+  implicit val finiteDurationConfigWriter: ConfigWriter[FiniteDuration] =
+    ConfigWriter.toString[FiniteDuration](DurationUtils.fromDuration)
 }
 
 /** Trait containing `ConfigWriter` instances for Java and Scala arbitrary-precision numeric types.

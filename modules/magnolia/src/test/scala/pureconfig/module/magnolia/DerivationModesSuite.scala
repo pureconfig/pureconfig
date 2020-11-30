@@ -62,9 +62,9 @@ class DerivationModesSuite extends BaseSuite {
   it should "provide methods to derive readers on demand" in {
     import pureconfig.module.magnolia.semiauto.reader._
 
-    implicit val personReader = deriveReader[Person]
-    implicit val placeReader = deriveReader[Place]
-    implicit val entityReader = deriveReader[Entity]
+    implicit val personReader: ConfigReader[Person] = deriveReader[Person]
+    implicit val placeReader: ConfigReader[Place] = deriveReader[Place]
+    implicit val entityReader: ConfigReader[Entity] = deriveReader[Entity]
 
     ConfigReader[Entity].from(conf.root) shouldBe Right(person)
   }
@@ -72,9 +72,9 @@ class DerivationModesSuite extends BaseSuite {
   it should "provide methods to derive writers on demand" in {
     import pureconfig.module.magnolia.semiauto.writer._
 
-    implicit val personWriter = deriveWriter[Person]
-    implicit val placeWriter = deriveWriter[Place]
-    implicit val entityWriter = deriveWriter[Entity]
+    implicit val personWriter: ConfigWriter[Person] = deriveWriter[Person]
+    implicit val placeWriter: ConfigWriter[Place] = deriveWriter[Place]
+    implicit val entityWriter: ConfigWriter[Entity] = deriveWriter[Entity]
 
     ConfigWriter[Entity].to(person) shouldBe conf.root()
   }

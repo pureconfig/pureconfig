@@ -29,7 +29,9 @@ trait CollectionWriters {
       def toOpt(t: Option[A]): Option[ConfigValue] = t.map(conv.value.to)
     }
 
-  implicit def traversableWriter[A, F[A] <: TraversableOnce[A]](implicit configConvert: Derivation[ConfigWriter[A]]) =
+  implicit def traversableWriter[A, F[A] <: TraversableOnce[A]](implicit
+      configConvert: Derivation[ConfigWriter[A]]
+  ): ConfigWriter[F[A]] =
     new ConfigWriter[F[A]] {
 
       override def to(ts: F[A]): ConfigValue = {
@@ -37,14 +39,14 @@ trait CollectionWriters {
       }
     }
 
-  implicit def mapWriter[A](implicit configConvert: Derivation[ConfigWriter[A]]) =
+  implicit def mapWriter[A](implicit configConvert: Derivation[ConfigWriter[A]]): ConfigWriter[Map[String, A]] =
     new ConfigWriter[Map[String, A]] {
       override def to(keyVals: Map[String, A]): ConfigValue = {
         ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).toMap.asJava)
       }
     }
 
-  implicit def arrayWriter[A](implicit writer: Derivation[ConfigWriter[A]]) =
+  implicit def arrayWriter[A](implicit writer: Derivation[ConfigWriter[A]]): ConfigWriter[Array[A]] =
     new ConfigWriter[Array[A]] {
       override def to(a: Array[A]): ConfigValue =
         ConfigValueFactory.fromIterable(a.toList.map(writer.value.to).asJava)

@@ -26,7 +26,7 @@ trait CollectionReaders {
   implicit def traversableReader[A, F[A] <: TraversableOnce[A]](implicit
       configConvert: Derivation[ConfigReader[A]],
       cbf: FactoryCompat[A, F[A]]
-  ) =
+  ): ConfigReader[F[A]] =
     new ConfigReader[F[A]] {
 
       override def from(cur: ConfigCursor): ConfigReader.Result[F[A]] = {
@@ -37,14 +37,14 @@ trait CollectionReaders {
       }
     }
 
-  implicit def mapReader[A](implicit reader: Derivation[ConfigReader[A]]) =
+  implicit def mapReader[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[Map[String, A]] =
     new ConfigReader[Map[String, A]] {
       override def from(cur: ConfigCursor): ConfigReader.Result[Map[String, A]] = {
         cur.fluent.mapObject { valueCur => reader.value.from(valueCur) }
       }
     }
 
-  implicit def arrayReader[A: ClassTag](implicit reader: Derivation[ConfigReader[A]]) =
+  implicit def arrayReader[A: ClassTag](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[Array[A]] =
     new ConfigReader[Array[A]] {
       override def from(cur: ConfigCursor): ConfigReader.Result[Array[A]] =
         cur.fluent.mapList(reader.value.from).right.map(_.toArray)
