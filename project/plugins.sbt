@@ -1,6 +1,6 @@
 addSbtPlugin("com.47deg" % "sbt-microsites" % "1.2.1")
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.13")
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.1")
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.2")
 addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.6")
 addSbtPlugin("io.spray" % "sbt-boilerplate" % "0.6.1")
 addSbtPlugin("net.ruippeixotog" % "sbt-coveralls" % "1.3.0") // fork with scoverage/sbt-coveralls#128 merged in
