@@ -7,17 +7,16 @@ import java.net.URL
 
 import com.typesafe.config.{ConfigFactory, ConfigValueType}
 import org.scalatest.{EitherValues, Inside}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 import pureconfig.error._
-import pureconfig.generic.auto._
 
 /** Suite of tests related to the origin of ConfigValues that raised failures.
   */
 class ConfigReaderFailureOriginSuite extends BaseSuite with EitherValues with Inside {
+  case class Conf(a: Int, b: String, c: Int)
+  implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("a", "b", "c")(Conf.apply)
+
   "Loading configuration from files" should "show proper error locations when loading a single file" in {
     import pureconfig.syntax._
-    case class Conf(a: Int, b: String, c: Int)
 
     val workingDir = getClass.getResource("/").getFile
     val file = "conf/configFailureOrigin/single/a.conf"
@@ -62,7 +61,6 @@ class ConfigReaderFailureOriginSuite extends BaseSuite with EitherValues with In
 
   it should "show proper error location when loading from multiple files" in {
     import pureconfig.syntax._
-    case class Conf(a: Int, b: String, c: Int)
 
     val workingDir = getClass.getResource("/").getFile
     val file1 = "conf/configFailureOrigin/multiple/a.conf"

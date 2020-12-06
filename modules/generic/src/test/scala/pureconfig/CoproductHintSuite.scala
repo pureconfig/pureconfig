@@ -5,6 +5,7 @@ import pureconfig.error._
 import pureconfig.generic._
 import pureconfig.generic.auto._
 import pureconfig.generic.error.{CoproductHintException, UnexpectedValueForFieldCoproductHint}
+import pureconfig.syntax._
 
 class CoproductHintSuite extends BaseSuite {
 
@@ -90,6 +91,46 @@ class CoproductHintSuite extends BaseSuite {
       val conf = ConfigConvert[AnimalConfig].to(DogConfig(2))
       conf shouldBe a[ConfigObject]
       conf.asInstanceOf[ConfigObject].get("which-animal") shouldBe null
+    }
+  }
+
+  {
+    sealed trait A
+    case class AA1(a: Int) extends A
+    case class AA2(a: String) extends A
+    case class EnclosingA(values: Map[String, A])
+
+    it should "fail to read with errors relevant for coproduct derivation when using the default CoproductHint" in {
+      val conf = ConfigFactory.parseString("""
+        {
+          values {
+            v1 {
+              type = "unexpected"
+              a = 2
+            }
+            v2 {
+              type = "aa-2"
+              a = "val"
+            }
+            v3 {
+              a = 5
+            }
+          }
+        }
+      """)
+
+      val exception = intercept[ConfigReaderException[_]] {
+        conf.root().toOrThrow[EnclosingA]
+      }
+
+      exception.failures.toList.toSet shouldBe Set(
+        ConvertFailure(
+          UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")),
+          stringConfigOrigin(5),
+          "values.v1.type"
+        ),
+        ConvertFailure(KeyNotFound("type", Set()), stringConfigOrigin(12), "values.v3")
+      )
     }
   }
 }

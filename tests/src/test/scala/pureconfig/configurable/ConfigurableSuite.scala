@@ -3,14 +3,11 @@ package pureconfig.configurable
 import java.time._
 import java.time.format.DateTimeFormatter
 
-import scala.collection.JavaConverters._
-
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigRenderOptions.concise
-import pureconfig.BaseSuite
+import pureconfig.{BaseSuite, ConfigReader, ConfigWriter}
 import pureconfig.arbitrary._
-import pureconfig.error.UnknownKey
-import pureconfig.generic.auto._
+import pureconfig.error.{CannotConvert, UnknownKey}
 import pureconfig.syntax._
 
 class ConfigurableSuite extends BaseSuite {
@@ -40,6 +37,10 @@ class ConfigurableSuite extends BaseSuite {
   final case object Bird extends Animal
   final case object Monkey extends Animal
   case class Food(food: String)
+  object Food {
+    implicit val foodReader: ConfigReader[Food] = ConfigReader.forProduct1("food")(Food.apply)
+    implicit val foodWriter: ConfigWriter[Food] = ConfigWriter.forProduct1("food")(_.food)
+  }
 
   it should "parse using generic map reader" in {
     val conf = ConfigFactory.parseString("""{"bird": {"food": "worms"}, "monkey": {"food": "banana"}}""")

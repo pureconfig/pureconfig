@@ -8,19 +8,15 @@ import java.nio.file.Paths
 
 import com.typesafe.config._
 import org.scalatest.Inside
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
+import pureconfig.ConfigReader.Result
 import pureconfig.error._
-import pureconfig.generic.auto._
-import pureconfig.generic.error._
-import pureconfig.generic.hlist._
 import pureconfig.syntax._
-import shapeless._
 
 class ConfigReaderExceptionSuite extends BaseSuite with Inside {
   behavior of "ConfigReaderException"
 
   case class Conf(a: Int, b: String, c: Int)
+  implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("a", "b", "c")(Conf.apply)
 
   it should "have a message with failures organized by path" in {
     val conf = ConfigFactory.parseString("""
@@ -50,6 +46,7 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
   }
 
   case class ParentConf(conf: Conf)
+  implicit val parentConfReader: ConfigReader[ParentConf] = ConfigReader.forProduct1("conf")(ParentConf.apply)
 
   it should "include failures that occur at the root of the configuration" in {
     val conf = ConfigFactory.parseString("""
@@ -76,6 +73,17 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
   }
 
   case class MapConf(values: Map[String, MapConf])
+  object MapConf {
+    // FIXME: This is being used to that we can have a recursive definition in the `mapConfReader` below. This is not
+    //        necessary in Scala 2.13+ if we use by-name implicits in the `ConfigReader.forProductN` implementations.
+    def lazyReader(reader: => ConfigReader[MapConf]): ConfigReader[MapConf] = new ConfigReader[MapConf] {
+      lazy val delegate = reader
+      def from(cur: ConfigCursor): Result[MapConf] = delegate.from(cur)
+    }
+    implicit lazy val mapConfReader: ConfigReader[MapConf] = lazyReader(
+      ConfigReader.forProduct1("values")(MapConf.apply)
+    )
+  }
 
   it should "include failures with the full error path" in {
     val conf = ConfigFactory.parseString("""
@@ -108,85 +116,6 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
         WrongType(ConfigValueType.NUMBER, Set(ConfigValueType.OBJECT)),
         stringConfigOrigin(6),
         "values.a.values.c"
-      )
-    )
-  }
-
-  sealed trait A
-  case class AA1(a: Int) extends A
-  case class AA2(a: String) extends A
-  case class EnclosingA(values: Map[String, A])
-
-  it should "include failures relevant for coproduct derivation" in {
-    val conf = ConfigFactory.parseString("""
-      {
-        values {
-          v1 {
-            type = "unexpected"
-            a = 2
-          }
-          v2 {
-            type = "aa-2"
-            a = "val"
-          }
-          v3 {
-            a = 5
-          }
-        }
-      }
-    """)
-
-    val exception = intercept[ConfigReaderException[_]] {
-      conf.root().toOrThrow[EnclosingA]
-    }
-
-    exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(
-        UnexpectedValueForFieldCoproductHint(ConfigValueFactory.fromAnyRef("unexpected")),
-        stringConfigOrigin(5),
-        "values.v1.type"
-      ),
-      ConvertFailure(KeyNotFound("type", Set()), stringConfigOrigin(12), "values.v3")
-    )
-  }
-
-  case class CamelCaseConf(camelCaseInt: Int, camelCaseString: String)
-  case class KebabCaseConf(kebabCaseInt: Int, kebabCaseString: String)
-  case class SnakeCaseConf(snakeCaseInt: Int, snakeCaseString: String)
-  case class EnclosingConf(camelCaseConf: CamelCaseConf, kebabCaseConf: KebabCaseConf, snakeCaseConf: SnakeCaseConf)
-
-  it should "include candidate keys in case of a suspected misconfigured ProductHint" in {
-    val conf = ConfigFactory.parseString("""{
-      camel-case-conf {
-        camelCaseInt = 2
-        camelCaseString = "str"
-      }
-      kebab-case-conf {
-        kebab-case-int = 2
-        kebab-case-string = "str"
-      }
-      snake-case-conf {
-        snake_case_int = 2
-        snake_case_string = "str"
-      }
-    }""")
-
-    val exception = intercept[ConfigReaderException[_]] {
-      conf.root().toOrThrow[EnclosingConf]
-    }
-
-    exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(KeyNotFound("camel-case-int", Set("camelCaseInt")), stringConfigOrigin(2), "camel-case-conf"),
-      ConvertFailure(
-        KeyNotFound("camel-case-string", Set("camelCaseString")),
-        stringConfigOrigin(2),
-        "camel-case-conf"
-      ),
-      ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), stringConfigOrigin(10), "snake-case-conf"),
-      ConvertFailure(
-        KeyNotFound("snake-case-string", Set("snake_case_string")),
-        stringConfigOrigin(10),
-        "snake-case-conf"
       )
     )
   }
@@ -242,25 +171,5 @@ class ConfigReaderExceptionSuite extends BaseSuite with Inside {
     // Note: exceptions can't be compared for equality
     exception.failures.toList.toString shouldBe
       s"List(CannotReadFile(${workingDir}${file},Some(java.io.FileNotFoundException: ${workingDir}${file} (No such file or directory))))"
-  }
-
-  case class HListAndTupleConf(hlist: Int :: Int :: String :: HNil, tuple: (Int, Int, String))
-
-  it should "include failures showing lists of wrong size" in {
-    val conf = ConfigFactory.parseString("""
-      {
-        hlist = [1, 2, "three", 4]
-        tuple = [1, 2, "three", 4, 5, 6]
-      }
-    """)
-
-    val exception = intercept[ConfigReaderException[_]] {
-      conf.root().toOrThrow[HListAndTupleConf]
-    }
-
-    exception.failures.toList.toSet shouldBe Set(
-      ConvertFailure(WrongSizeList(3, 4), stringConfigOrigin(3), "hlist"),
-      ConvertFailure(WrongSizeList(3, 6), stringConfigOrigin(4), "tuple")
-    )
   }
 }

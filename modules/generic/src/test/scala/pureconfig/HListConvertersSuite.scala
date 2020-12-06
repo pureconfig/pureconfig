@@ -4,8 +4,8 @@ import scala.collection.JavaConverters._
 
 import com.typesafe.config.ConfigValueFactory
 import org.scalacheck.ScalacheckShapeless._
-import pureconfig.generic.auto._
 import pureconfig.generic.hlist._
+import pureconfig.generic.auto._
 import shapeless._
 
 class HListConvertersSuite extends BaseSuite {
