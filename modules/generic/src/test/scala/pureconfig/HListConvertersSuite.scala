@@ -4,8 +4,9 @@ import scala.collection.JavaConverters._
 
 import com.typesafe.config.ConfigValueFactory
 import org.scalacheck.ScalacheckShapeless._
-import pureconfig.generic.hlist._
+import pureconfig.error.{ConfigReaderFailures, ConvertFailure, WrongSizeList}
 import pureconfig.generic.auto._
+import pureconfig.generic.hlist._
 import shapeless._
 
 class HListConvertersSuite extends BaseSuite {
@@ -25,4 +26,11 @@ class HListConvertersSuite extends BaseSuite {
   val emptyConfigList = ConfigValueFactory.fromIterable(List().asJava)
   checkRead[HNil](emptyConfigList -> HNil)
   checkWrite[HNil](HNil -> emptyConfigList)
+
+  // Check WrongSizeList failures
+  checkFailures[Int :: Int :: String :: HNil](
+    ConfigValueFactory.fromIterable(List(1, 2, "three", 4).asJava) -> ConfigReaderFailures(
+      ConvertFailure(WrongSizeList(3, 4), emptyConfigOrigin, "")
+    )
+  )
 }
