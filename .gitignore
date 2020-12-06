@@ -24,5 +24,7 @@ target/
 .ensime
 .ensime_cache
 
-# Bloop specific
-.bloop
+# Metals specific
+.bloop/
+.metals/
+metals.sbt
