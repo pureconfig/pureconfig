@@ -9,7 +9,7 @@ final case class Percentage(value: Int) {
 }
 
 object Percentage {
-  private val failConfigReadPercentage = { s: String =>
+  private val failConfigReadPercentage = { (s: String) =>
     Left(CannotConvert(s, "Percentage", "Percentage is a dummy type, you should not read it"))
   }
 

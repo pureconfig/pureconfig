@@ -34,11 +34,11 @@ class CoproductConvertersSuite extends BaseSuite {
 
   it should "return a proper ConfigReaderFailure if the hint field in a coproduct is missing" in {
     val conf = ConfigFactory.parseString("{ can-fly = true }")
-    ConfigConvert[AnimalConfig].from(conf.root()) should failWithType[KeyNotFound]
+    ConfigConvert[AnimalConfig].from(conf.root()) should failWithConvertFailureOf[KeyNotFound]
   }
 
   it should "return a proper ConfigReaderFailure when a coproduct config is missing" in {
     case class AnimalCage(animal: AnimalConfig)
-    ConfigConvert[AnimalCage].from(ConfigFactory.empty().root()) should failWithType[KeyNotFound]
+    ConfigConvert[AnimalCage].from(ConfigFactory.empty().root()) should failWithConvertFailureOf[KeyNotFound]
   }
 }

@@ -1,7 +1,9 @@
-import Dependencies._
+import Dependencies.{Version, _}
 
 name := "pureconfig-testkit"
 
-libraryDependencies ++= Seq(scalaTest, scalaCheck, scalaTestPlusScalaCheck)
+crossScalaVersions += Version.scala30
+
+libraryDependencies ++= Seq(scalaTest, scalaCheck.withDottyCompat(scalaVersion.value), scalaTestPlusScalaCheck.intransitive().withDottyCompat(scalaVersion.value))
 
 skip in publish := true

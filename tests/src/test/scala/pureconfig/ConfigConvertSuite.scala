@@ -16,18 +16,18 @@ class ConfigConvertSuite extends BaseSuite {
       .frequency(80 -> Gen.chooseNum(Int.MinValue, Int.MaxValue), 20 -> Gen.alphaStr)
       .map(ConfigValueFactory.fromAnyRef)
 
-  implicit val arbConfig = Arbitrary(genConfig)
+  implicit val arbConfig: Arbitrary[ConfigValue] = Arbitrary(genConfig)
 
   behavior of "ConfigConvert"
 
   it should "have a correct xmap method" in forAll { (f: Int => String, g: String => Int) =>
-    forAll { str: String => intConvert.xmap(f, g).to(str) shouldEqual intConvert.to(g(str)) }
-    forAll { conf: ConfigValue => intConvert.xmap(f, g).from(conf) shouldEqual intConvert.from(conf).right.map(f) }
+    forAll { (str: String) => intConvert.xmap(f, g).to(str) shouldEqual intConvert.to(g(str)) }
+    forAll { (conf: ConfigValue) => intConvert.xmap(f, g).from(conf) shouldEqual intConvert.from(conf).right.map(f) }
   }
 
   it should "have a xmap method that wraps exceptions in a ConfigReaderFailure" in {
     val throwable = new Exception("Exception message.")
-    val cc = ConfigConvert[Int].xmap[String]({ _ => throw throwable }, { _: String => 42 })
+    val cc = ConfigConvert[Int].xmap[String]({ _ => throw throwable }, { (_: String) => 42 })
     cc.from(ConfigValueFactory.fromAnyRef(1)) should failWith(ExceptionThrown(throwable))
     cc.from(ConfigValueFactory.fromAnyRef("test")) should failWith(
       WrongType(ConfigValueType.STRING, Set(ConfigValueType.NUMBER))
