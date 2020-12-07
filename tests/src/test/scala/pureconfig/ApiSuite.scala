@@ -6,13 +6,11 @@ package pureconfig
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.{ConfigFactory, ConfigValueType}
-import pureconfig.PathUtils._
 import scala.concurrent.duration.FiniteDuration
 
+import com.typesafe.config.{ConfigFactory, ConfigValueType}
+import pureconfig.PathUtils._
 import pureconfig.error._
-import pureconfig.generic.ProductHint
-import pureconfig.generic.auto._
 
 // We are testing deprecated methods, but we want to keep this in place to prevent regressions
 // until we delete them. We need the annotation here to silence compiler warnings.
@@ -23,22 +21,26 @@ class ApiSuite extends BaseSuite {
 
   it should "loadConfig from reference.conf" in {
     case class Conf(d: Double, i: Int, s: String)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("d", "i", "s")(Conf.apply)
     loadConfig[Conf] shouldBe Right(Conf(0d, 0, "app_value"))
   }
 
   it should "loadConfig from reference.conf with a namespace" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     loadConfig[Conf](namespace = "foo") shouldBe Right(Conf(3.0f))
   }
 
   it should "loadConfig config objects from a Typesafe Config" in {
     case class Conf(d: Double, i: Int)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("d", "i")(Conf.apply)
     val conf = ConfigFactory.parseString("{ d: 0.5, i: 10 }")
     loadConfig[Conf](conf = conf) shouldBe Right(Conf(0.5d, 10))
   }
 
   it should "loadConfig config objects from a Typesafe Config with a namespace" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
     loadConfig[Conf](conf = conf, namespace = "foo.bar") shouldBe Right(Conf(1.0f))
     loadConfig[Conf](conf = conf, namespace = "bar.foo") should failWith(
@@ -121,6 +123,7 @@ class ApiSuite extends BaseSuite {
 
   it should "loadConfig from a configuration file" in {
     case class Conf(s: String, b: Boolean, sref: String) // sref defined in reference.conf
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("s", "b", "sref")(Conf.apply)
     val path = createTempFile("""{ b: true, s: "str" }""")
     loadConfig[Conf](path = path) shouldBe Right(Conf("str", true, "wow"))
     loadConfig[Conf](path = nonExistingPath) should failLike { case CannotReadFile(path, _) =>
@@ -130,6 +133,7 @@ class ApiSuite extends BaseSuite {
 
   it should "loadConfig from a configuration file with a namespace" in {
     case class Conf(s: String, b: Boolean, sref: String) // foo.bar.sref defined in reference.conf
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("s", "b", "sref")(Conf.apply)
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
     loadConfig[Conf](path = path, namespace = "foo.bar") shouldBe Right(Conf("str", true, "foowow"))
     loadConfig[Conf](path = nonExistingPath, namespace = "foo.bar") should failLike { case CannotReadFile(path, _) =>
@@ -140,10 +144,19 @@ class ApiSuite extends BaseSuite {
 
   it should "be able to load a realistic configuration file" in {
     case class DriverConf(cores: Int, maxResultSize: String, memory: String)
+    implicit val driverConfReader: ConfigReader[DriverConf] =
+      ConfigReader.forProduct3("cores", "maxResultSize", "memory")(DriverConf.apply)
     case class ExecutorConf(memory: String, extraJavaOptions: String)
+    implicit val executorConfReader: ConfigReader[ExecutorConf] =
+      ConfigReader.forProduct2("memory", "extraJavaOptions")(ExecutorConf.apply)
     case class SparkAppConf(name: String)
+    implicit val sparkAppConfReader: ConfigReader[SparkAppConf] = ConfigReader.forProduct1("name")(SparkAppConf.apply)
     case class SparkLocalConf(dir: String)
+    implicit val sparkLocalConfReader: ConfigReader[SparkLocalConf] =
+      ConfigReader.forProduct1("dir")(SparkLocalConf.apply)
     case class SparkNetwork(timeout: FiniteDuration)
+    implicit val sparkNetworkReader: ConfigReader[SparkNetwork] =
+      ConfigReader.forProduct1("timeout")(SparkNetwork.apply)
     case class SparkConf(
         master: String,
         app: SparkAppConf,
@@ -153,7 +166,13 @@ class ApiSuite extends BaseSuite {
         extraListeners: Seq[String],
         network: SparkNetwork
     )
+    implicit val sparkConfReader: ConfigReader[SparkConf] =
+      ConfigReader.forProduct7("master", "app", "local", "driver", "executor", "extraListeners", "network")(
+        SparkConf.apply
+      )
     case class SparkRootConf(spark: SparkConf)
+    implicit val sparkRootConfReader: ConfigReader[SparkRootConf] =
+      ConfigReader.forProduct1("spark")(SparkRootConf.apply)
     val configFile = createTempFile("""spark {
         |  app.name="myApp"
         |  master="local[*]"
@@ -174,7 +193,6 @@ class ApiSuite extends BaseSuite {
         |// unused configuration
         |akka.loggers = ["akka.event.Logging$DefaultLogger"]""".stripMargin)
 
-    implicit def productHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
     val configOrError = loadConfig[SparkRootConf](configFile)
 
     val config = configOrError match {
@@ -196,12 +214,14 @@ class ApiSuite extends BaseSuite {
 
   "loadConfigFromFiles" should "load a complete configuration from a single file" in {
     case class Conf(b: Boolean, d: Double)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("b", "d")(Conf.apply)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf")
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001d))
   }
 
   it should "fill in missing values from the lower priority files" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val files =
       listResourcesFromNames("/conf/loadConfigFromFiles/priority1.conf", "/conf/loadConfigFromFiles/priority2.conf")
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(0.99f))
@@ -209,36 +229,42 @@ class ApiSuite extends BaseSuite {
 
   it should "use an empty config if the list of files is empty" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val files = Set.empty[Path]
     loadConfigFromFiles[Conf](files) should failWithType[KeyNotFound] // f is missing
   }
 
   it should "merge reference.conf with the provided files" in {
     case class Conf(b: Boolean, d: Double, sref: String) // sref defined in reference.conf
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("b", "d", "sref")(Conf.apply)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf")
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001d, "wow"))
   }
 
   it should "ignore files that don't exist when failOnReadError is false" in {
     case class Conf(b: Boolean, d: Double)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("b", "d")(Conf.apply)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf") :+ nonExistingPath
     loadConfigFromFiles[Conf](files) shouldBe Right(Conf(false, 0.001d))
   }
 
   it should "fail if any of the files doesn't exist and failOnReadError is true" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/priority2.conf") :+ nonExistingPath
     loadConfigFromFiles[Conf](files, failOnReadError = true) should failWithType[CannotReadFile]
   }
 
   it should "use a namespace if given" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val files = listResourcesFromNames("/conf/loadConfigFromFiles/outerobject.conf")
     loadConfigFromFiles[Conf](files, namespace = "foo") shouldBe Right(Conf(3.0f))
   }
 
   "loadConfigWithFallback" should "fallback if no config keys are found" in {
     case class Conf(f: Float, o: Option[Int], d: Double)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("f", "o", "d")(Conf.apply)
     val priority1Conf = ConfigFactory.load("conf/loadConfigFromFiles/priority1.conf")
     // `f` and `o` are defined in priority1.conf, `d` is defined in reference.conf
     loadConfigWithFallback[Conf](priority1Conf) shouldBe Right(Conf(0.99f, None, 0.0))

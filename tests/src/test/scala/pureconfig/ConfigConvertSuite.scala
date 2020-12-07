@@ -2,8 +2,8 @@ package pureconfig
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory, ConfigValueType}
 import org.scalacheck.{Arbitrary, Gen}
-import pureconfig.error.{ExceptionThrown, WrongType, CannotConvert}
-import ConfigConvertSuite._
+import pureconfig.ConfigConvertSuite._
+import pureconfig.error.{CannotConvert, ExceptionThrown, WrongType}
 
 class ConfigConvertSuite extends BaseSuite {
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)

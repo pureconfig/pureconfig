@@ -19,7 +19,7 @@ lazy val testkit = (project in file("testkit"))
 lazy val tests = (project in file("tests"))
   .enablePlugins(BoilerplatePlugin)
   .settings(commonSettings)
-  .dependsOn(core, testkit, generic)
+  .dependsOn(core, testkit)
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle"))
@@ -191,12 +191,4 @@ releaseProcess := Seq[ReleaseStep](
   setNextVersion,
   commitNextVersion,
   pushChanges
-)
-
-// This avoids linting warnings in sbt.
-// FIXME: It should be possible to remove this once a new sbt version with the changes from
-// https://github.com/sbt/sbt/pull/5991 is released.
-excludeLintKeys in Global ++= Set(
-  releaseCrossBuild,
-  releaseProcess
 )
