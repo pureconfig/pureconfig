@@ -24,12 +24,23 @@ jobs:
         run: sbt "++${{ matrix.scala }} scalafmtCheckAll; scalafmtSbtCheck"
 
       - name: Compile
+        if: startsWith(matrix.scala, '2')
         run: sbt coverage "++${{ matrix.scala }} compile"
 
+      - name: Compile (without coverage)
+        if: startsWith(matrix.scala, '3')
+        run: sbt "++${{ matrix.scala }} compile"
+
       - name: Run tests
+        if: startsWith(matrix.scala, '2')
         run: sbt coverage "++${{ matrix.scala }} test"
 
+      - name: Run tests (without coverage)
+        if: startsWith(matrix.scala, '3')
+        run: sbt "++${{ matrix.scala }} test"
+
       - name: Upload coverage data to Coveralls
+        if: startsWith(matrix.scala, '2')
         run: sbt ++${{ matrix.scala }} coverageAggregate coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,6 +53,7 @@ jobs:
         run: sbt "++${{ matrix.scala }} publishLocal"
 
       - name: Compile example project
+        if: startsWith(matrix.scala, '2')
         run: cd example && sbt "++${{ matrix.scala }} test"
 
       - name: Check mdoc output
