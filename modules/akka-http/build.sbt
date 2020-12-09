@@ -4,7 +4,7 @@ crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.6.10" % "provided",
-  "com.typesafe.akka" %% "akka-http" % "10.2.1"
+  "com.typesafe.akka" %% "akka-http" % "10.2.2"
 )
 mdocLibraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.6.10"
