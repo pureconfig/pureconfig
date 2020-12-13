@@ -1,7 +1,7 @@
-import Dependencies.{Version, _}
+import Dependencies.Version._
 
 name := "pureconfig-tests"
 
-crossScalaVersions += Version.scala30
+crossScalaVersions := Seq(scala211, scala212, scala213, scala30)
 
 skip in publish := true

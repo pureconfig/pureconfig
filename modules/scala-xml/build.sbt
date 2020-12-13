@@ -1,4 +1,8 @@
+import Dependencies.Version._
+
 name := "pureconfig-scala-xml"
+
+crossScalaVersions := Seq(scala211, scala212, scala213)
 
 libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.3.0")
 

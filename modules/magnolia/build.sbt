@@ -1,12 +1,12 @@
-import Dependencies._
+import Dependencies.Version._
 
 name := "pureconfig-magnolia"
 
-crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
+crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
   "com.propensive" %% "magnolia" % "0.17.0",
-  scalaCheckShapeless % "test",
+  Dependencies.scalaCheckShapeless % "test",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
 )
 

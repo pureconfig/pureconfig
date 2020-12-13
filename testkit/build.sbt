@@ -1,13 +1,13 @@
-import Dependencies.{Version, _}
+import Dependencies.Version._
 
 name := "pureconfig-testkit"
 
-crossScalaVersions += Version.scala30
+crossScalaVersions := Seq(scala211, scala212, scala213, scala30)
 
 libraryDependencies ++= Seq(
-  scalaTest,
-  scalaCheck.withDottyCompat(scalaVersion.value),
-  scalaTestPlusScalaCheck.intransitive().withDottyCompat(scalaVersion.value)
+  Dependencies.scalaTest,
+  Dependencies.scalaCheck.withDottyCompat(scalaVersion.value),
+  Dependencies.scalaTestPlusScalaCheck.intransitive().withDottyCompat(scalaVersion.value)
 )
 
 // This is to avoid a warning due to the intransitive dependency of scalaTestPlusScalaCheck.

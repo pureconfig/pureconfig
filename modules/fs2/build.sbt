@@ -1,4 +1,8 @@
+import Dependencies.Version._
+
 name := "pureconfig-fs2"
+
+crossScalaVersions := Seq(scala211, scala212, scala213)
 
 libraryDependencies ++= Seq("co.fs2" %% "fs2-core" % "2.1.0", "co.fs2" %% "fs2-io" % "2.1.0")
 

@@ -1,8 +1,8 @@
-import Dependencies.Version
+import Dependencies.Version._
 
 name := "pureconfig-macros"
 
-crossScalaVersions += Version.scala30
+crossScalaVersions := Seq(scala211, scala212, scala213, scala30)
 
 libraryDependencies ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {

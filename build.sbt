@@ -77,7 +77,6 @@ lazy val commonSettings = Seq(
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))
   ),
 
-  crossScalaVersions := Seq(scala211, scala212, scala213),
   scalaVersion := scala212,
 
   resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
@@ -110,61 +109,73 @@ lazy val commonSettings = Seq(
 // such as "scala-2.11" are natively supported by SBT).
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
-    val version = CrossVersion.partialVersion(scalaVersion.value)
-    val expectedVersions = Seq((2, 11), (2, 12), (2, 13), (3, 0))
-    expectedVersions.flatMap { case (major, minor) =>
-      lazy val versionV = major * 100 + minor
+    val versionNumber = CrossVersion.partialVersion(scalaVersion.value)
+    val expectedVersions = Seq(scala211, scala212, scala213, scala30).flatMap(CrossVersion.partialVersion)
+    expectedVersions.flatMap { case v @ (major, minor) =>
       List(
-        if (version.exists { case (maj, min) => maj * 100 + min <= versionV }) unmanagedSrcs.value.map { dir =>
-          new File(dir.getPath + s"-$major.$minor-")
-        }
-        else Nil,
-        if (version.exists { case (maj, min) => maj * 100 + min >= versionV }) unmanagedSrcs.value.map { dir =>
-          new File(dir.getPath + s"-$major.$minor+")
-        }
-        else Nil
+        if (versionNumber.exists(Ordering[(Long, Long)].lteq(_, v)))
+          unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor-") }
+        else
+          Nil,
+        if (versionNumber.exists(Ordering[(Long, Long)].gteq(_, v)))
+          unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor+") }
+        else
+          Nil
       )
     }.flatten
   }
 }
 
-lazy val lintFlags = {
-  lazy val allVersionLintFlags = List(
-    "-encoding",
-    "UTF-8", // arg for -encoding
-    "-feature",
-    "-unchecked"
-  )
-
-  lazy val preScala3LintFlags = allVersionLintFlags ++ List(
-    "-Ywarn-dead-code",
-    "-Ywarn-numeric-widen"
-  )
-
-  forScalaVersions {
+lazy val lintFlags = forScalaVersions { v =>
+  (v: @unchecked) match {
     case (2, 11) =>
-      preScala3LintFlags ++ List(
+      List(
+        "-encoding",
+        "UTF-8", // arg for -encoding
+        "-feature",
+        "-unchecked",
         "-deprecation",
         "-Xlint",
         "-Xfatal-warnings",
         "-Yno-adapted-args",
-        "-Ywarn-unused-import"
+        "-Ywarn-unused-import",
+        "-Ywarn-dead-code",
+        "-Ywarn-numeric-widen"
       )
 
     case (2, 12) =>
-      preScala3LintFlags ++ List(
+      List(
+        "-encoding",
+        "UTF-8", // arg for -encoding
+        "-feature",
+        "-unchecked",
         "-deprecation", // Either#right is deprecated on Scala 2.13
         "-Xlint:_,-unused",
         "-Xfatal-warnings",
         "-Yno-adapted-args",
-        "-Ywarn-unused:_,-implicits" // Some implicits are intentionally used just as evidences, triggering warnings
+        "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
+        "-Ywarn-dead-code",
+        "-Ywarn-numeric-widen"
       )
 
     case (2, 13) =>
-      preScala3LintFlags ++ List("-Ywarn-unused:_,-implicits")
+      List(
+        "-encoding",
+        "UTF-8", // arg for -encoding
+        "-feature",
+        "-unchecked",
+        "-Ywarn-unused:_,-implicits",
+        "-Ywarn-dead-code",
+        "-Ywarn-numeric-widen"
+      )
 
-    case _ =>
-      allVersionLintFlags
+    case (3, 0) =>
+      List(
+        "-encoding",
+        "UTF-8", // arg for -encoding
+        "-feature",
+        "-unchecked"
+      )
   }
 }
 

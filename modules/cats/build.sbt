@@ -1,6 +1,9 @@
+import Dependencies.Version._
 import Utilities._
 
 name := "pureconfig-cats"
+
+crossScalaVersions := Seq(scala211, scala212, scala213)
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.3.0" }.value,
