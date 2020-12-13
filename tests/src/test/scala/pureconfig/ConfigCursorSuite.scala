@@ -1,7 +1,7 @@
 package pureconfig
 
 import com.typesafe.config._
-import pureconfig.error.{CannotConvert, ConvertFailure, KeyNotFound, WrongType}
+import pureconfig.error.{CannotConvert, KeyNotFound, WrongType}
 
 class ConfigCursorSuite extends BaseSuite {
 

@@ -1,6 +1,6 @@
 package pureconfig
 
-import pureconfig.DerivationChecks._
+import pureconfig.DerivationChecks.illTyped
 import pureconfig.generic.auto._
 
 class DerivationSuite extends BaseSuite {

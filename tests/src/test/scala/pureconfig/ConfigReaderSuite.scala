@@ -1,13 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{
-  ConfigFactory,
-  ConfigObject,
-  ConfigOriginFactory,
-  ConfigParseOptions,
-  ConfigValue,
-  ConfigValueFactory
-}
+import com.typesafe.config.{ConfigObject, ConfigValue, ConfigValueFactory}
 import org.scalacheck.{Arbitrary, Gen}
 import pureconfig.error._
 

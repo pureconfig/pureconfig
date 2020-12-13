@@ -1,11 +1,12 @@
 package pureconfig
 
-import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
-import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongType}
-import pureconfig.generic.auto._
-import pureconfig.generic.ProductHint
-import pureconfig.syntax._
 import scala.collection.JavaConverters._
+
+import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
+import pureconfig.error._
+import pureconfig.generic.ProductHint
+import pureconfig.generic.auto._
+import pureconfig.syntax._
 
 class ProductHintSuite extends BaseSuite {
 
@@ -193,6 +194,47 @@ class ProductHintSuite extends BaseSuite {
       ConvertFailure(KeyNotFound("b"), emptyConfigOrigin, ""),
       ConvertFailure(KeyNotFound("c"), emptyConfigOrigin, ""),
       ConvertFailure(KeyNotFound("d"), emptyConfigOrigin, "")
+    )
+  }
+
+  it should "include candidate keys in failure reasons in case of a suspected misconfigured ProductHint" in {
+    case class CamelCaseConf(camelCaseInt: Int, camelCaseString: String)
+    case class KebabCaseConf(kebabCaseInt: Int, kebabCaseString: String)
+    case class SnakeCaseConf(snakeCaseInt: Int, snakeCaseString: String)
+    case class EnclosingConf(camelCaseConf: CamelCaseConf, kebabCaseConf: KebabCaseConf, snakeCaseConf: SnakeCaseConf)
+
+    val conf = ConfigFactory.parseString("""{
+      camel-case-conf {
+        camelCaseInt = 2
+        camelCaseString = "str"
+      }
+      kebab-case-conf {
+        kebab-case-int = 2
+        kebab-case-string = "str"
+      }
+      snake-case-conf {
+        snake_case_int = 2
+        snake_case_string = "str"
+      }
+    }""")
+
+    val exception = intercept[ConfigReaderException[_]] {
+      conf.root().toOrThrow[EnclosingConf]
+    }
+
+    exception.failures.toList.toSet shouldBe Set(
+      ConvertFailure(KeyNotFound("camel-case-int", Set("camelCaseInt")), stringConfigOrigin(2), "camel-case-conf"),
+      ConvertFailure(
+        KeyNotFound("camel-case-string", Set("camelCaseString")),
+        stringConfigOrigin(2),
+        "camel-case-conf"
+      ),
+      ConvertFailure(KeyNotFound("snake-case-int", Set("snake_case_int")), stringConfigOrigin(10), "snake-case-conf"),
+      ConvertFailure(
+        KeyNotFound("snake-case-string", Set("snake_case_string")),
+        stringConfigOrigin(10),
+        "snake-case-conf"
+      )
     )
   }
 }

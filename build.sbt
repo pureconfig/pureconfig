@@ -19,7 +19,7 @@ lazy val testkit = (project in file("testkit"))
 lazy val tests = (project in file("tests"))
   .enablePlugins(BoilerplatePlugin)
   .settings(commonSettings)
-  .dependsOn(core, testkit, generic)
+  .dependsOn(core, testkit)
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle"))

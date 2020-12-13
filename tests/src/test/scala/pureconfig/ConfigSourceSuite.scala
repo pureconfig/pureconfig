@@ -5,7 +5,6 @@ import java.io.IOException
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueType}
 import pureconfig.PathUtils._
 import pureconfig.error._
-import pureconfig.generic.auto._
 
 class ConfigSourceSuite extends BaseSuite {
 
@@ -13,22 +12,26 @@ class ConfigSourceSuite extends BaseSuite {
 
   it should "load from application.conf and reference.conf by default" in {
     case class Conf(d: Double, i: Int, s: String)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("d", "i", "s")(Conf.apply)
     ConfigSource.default.load[Conf] shouldBe Right(Conf(0d, 0, "app_value"))
   }
 
   it should "allow reading at a namespace" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     ConfigSource.default.at("foo").load[Conf] shouldBe Right(Conf(3.0f))
   }
 
   it should "allow reading from a config object" in {
     case class Conf(d: Double, i: Int)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("d", "i")(Conf.apply)
     val conf = ConfigFactory.parseString("{ d: 0.5, i: 10 }")
     ConfigSource.fromConfig(conf).load[Conf] shouldBe Right(Conf(0.5d, 10))
   }
 
   it should "allow reading from a config object at a namespace" in {
     case class Conf(f: Float)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val conf = ConfigFactory.parseString("foo.bar { f: 1.0 }")
     ConfigSource.fromConfig(conf).at("foo.bar").load[Conf] shouldBe Right(Conf(1.0f))
     ConfigSource.fromConfig(conf).at("bar.foo").load[Conf] should failWith(
@@ -93,6 +96,7 @@ class ConfigSourceSuite extends BaseSuite {
 
   it should "allow reading from a configuration file" in {
     case class Conf(s: String, b: Boolean)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("s", "b")(Conf.apply)
     val path = createTempFile("""{ b: true, s: "str" }""")
     ConfigSource.file(path).load[Conf] shouldBe Right(Conf("str", true))
     ConfigSource.file(nonExistingPath).load[Conf] should failLike { case CannotReadFile(path, _) =>
@@ -102,6 +106,7 @@ class ConfigSourceSuite extends BaseSuite {
 
   it should "allow reading from a configuration file at a namespace" in {
     case class Conf(s: String, b: Boolean)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("s", "b")(Conf.apply)
     val path = createTempFile("""foo.bar { b: true, s: "str" }""")
     ConfigSource.file(path).at("foo.bar").load[Conf] shouldBe Right(Conf("str", true))
     ConfigSource.file(nonExistingPath).at("foo.bar").load[Conf] should failLike { case CannotReadFile(path, _) =>
@@ -112,6 +117,7 @@ class ConfigSourceSuite extends BaseSuite {
 
   it should "allow reading from a URL" in {
     case class Conf(s: String, b: Boolean)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("s", "b")(Conf.apply)
     val path = createTempFile("""{ b: true, s: "str" }""")
     ConfigSource.url(path.toUri.toURL).load[Conf] shouldBe Right(Conf("str", true))
     ConfigSource.url(nonExistingPath.toUri.toURL).load[Conf] should failLike { case CannotReadUrl(url, _) =>
@@ -121,11 +127,14 @@ class ConfigSourceSuite extends BaseSuite {
 
   it should "allow reading from a string" in {
     case class Conf(s: String, b: Boolean)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("s", "b")(Conf.apply)
     val confStr = """{ b: true, s: "str" }"""
     ConfigSource.string(confStr).load[Conf] shouldBe Right(Conf("str", true))
   }
 
   case class MyService(host: String, port: Int, useHttps: Boolean)
+  implicit val myServiceReader: ConfigReader[MyService] =
+    ConfigReader.forProduct3("host", "port", "use-https")(MyService.apply)
 
   it should "allow reading from resources" in {
     ConfigSource.resources("conf/configSource/full.conf").at("my-service").load[MyService] shouldBe
@@ -210,6 +219,7 @@ class ConfigSourceSuite extends BaseSuite {
     val otherSource = ConfigSource.string("{ name = John, age = 33 }")
 
     case class Conf(name: String, age: Int)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("name", "age")(Conf.apply)
 
     appSource.recoverWith { case ConfigReaderFailures(_: CannotRead) => otherSource }.load[Conf] shouldBe
       Right(Conf("John", 33))
@@ -219,6 +229,7 @@ class ConfigSourceSuite extends BaseSuite {
 
   it should "defer config resolution until all fallbacks are merged" in {
     case class Conf(host: String)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("host")(Conf.apply)
     val resolve1 = ConfigSource.resources("conf/configSource/resolve1.conf")
     val resolve2 = ConfigSource.resources("conf/configSource/resolve2.conf")
 
@@ -227,6 +238,7 @@ class ConfigSourceSuite extends BaseSuite {
 
   it should "fail safely when a substitution can't be resolved" in {
     case class Conf(hostOverride: String)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("hostOverride")(Conf.apply)
     val resolve1 = ConfigSource.resources("conf/configSource/resolve1.conf")
 
     resolve1.value() should failLike { case CannotParse(msg, _) =>

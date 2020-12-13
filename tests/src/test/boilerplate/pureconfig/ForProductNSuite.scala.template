@@ -4,7 +4,6 @@ import java.util.UUID
 
 import com.typesafe.config._
 import org.scalacheck._
-import org.scalacheck.ScalacheckShapeless._
 import pureconfig.error._
 import pureconfig.syntax._
 
@@ -16,6 +15,11 @@ class ForProductNSuite extends BaseSuite {
     val keys = List([#UUID.randomUUID().toString#])
     implicit val foo1Writer: ConfigWriter[Foo1] = ConfigWriter.forProduct1([#keys(0)#])((Foo1.unapply _).andThen(_.get))
     implicit val foo1Reader: ConfigReader[Foo1] = ConfigReader.forProduct1([#keys(0)#])(Foo1.apply)
+
+    implicit val genFoo1: Arbitrary[Foo1] = Arbitrary(for {
+      [#v1 <- Arbitrary.arbitrary[String]#
+      ]
+    } yield Foo1([#v1#]))
   }
   checkArbitrary[Foo1]
 
