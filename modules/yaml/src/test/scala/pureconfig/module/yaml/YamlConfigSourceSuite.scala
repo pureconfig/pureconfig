@@ -273,9 +273,7 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
   }
 
   it should "fail with a domain error when a file does not exist" in {
-    YamlConfigSource
-      .file(Paths.get("nonexisting.yaml"))
-      .load[ConfigValue] should failWithType[CannotReadFile]
+    YamlConfigSource.file(Paths.get("nonexisting.yaml")).load[ConfigValue] should failWithType[CannotReadFile]
     YamlConfigSource
       .file(Paths.get("nonexisting.yaml"))
       .multiDoc
@@ -290,9 +288,7 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
   }
 
   it should "fail with a domain error when a non-string key is found" in {
-    YamlConfigSource
-      .file(resourcePath("non_string_keys.yaml"))
-      .load[ConfigValue] should failWithType[NonStringKeyFound]
+    YamlConfigSource.file(resourcePath("non_string_keys.yaml")).load[ConfigValue] should failWithType[NonStringKeyFound]
     YamlConfigSource
       .string(resourceContents("non_string_keys.yaml"))
       .load[ConfigValue] should failWithType[NonStringKeyFound]
@@ -312,10 +308,7 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
     YamlConfigSource.file(resourcePath("basic.yaml")).load[Conf] shouldBe
       YamlConfigSource.file(resourcePath("basic.yaml")).asObjectSource.load[Conf]
 
-    YamlConfigSource
-      .file(resourcePath("array.yaml"))
-      .asObjectSource
-      .load[Conf] should failWithReason[WrongType]
+    YamlConfigSource.file(resourcePath("array.yaml")).asObjectSource.load[Conf] should failWithReason[WrongType]
   }
 
   it should "be mergeable with non-YAML configs" in {
