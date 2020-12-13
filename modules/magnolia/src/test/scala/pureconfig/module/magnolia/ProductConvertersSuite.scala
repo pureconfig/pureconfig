@@ -112,7 +112,7 @@ class ProductConvertersSuite extends BaseSuite {
     case class Bar(foo: Foo)
     case class FooBar(foo: Foo, bar: Bar)
     val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava).root()
-    ConfigConvert[FooBar].from(conf) should failWithConvertFailureOf[WrongType]
+    ConfigConvert[FooBar].from(conf) should failWithReason[WrongType]
   }
 
   it should "consider default arguments by default" in {
@@ -141,7 +141,7 @@ class ProductConvertersSuite extends BaseSuite {
     ConfigConvert[Conf].from(conf5).value shouldBe Conf(2, "default", 42, InnerConf(5, 6), Some(45))
 
     val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava).root()
-    ConfigConvert[Conf].from(conf6) should failWithConvertFailureOf[WrongType]
+    ConfigConvert[Conf].from(conf6) should failWithReason[WrongType]
 
     val conf7 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> 1).asJava).root()
     ConfigConvert[Conf].from(conf7).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(1))

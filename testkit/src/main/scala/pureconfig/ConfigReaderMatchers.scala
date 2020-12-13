@@ -26,7 +26,7 @@ trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
   def failWith(failure: ConfigReaderFailure): Matcher[ConfigReader.Result[Any]] =
     be(Left(ConfigReaderFailures(failure)))
 
-  def failWithConvertFailureOf[Reason <: FailureReason: ClassTag]: Matcher[ConfigReader.Result[Any]] =
+  def failWithReason[Reason <: FailureReason: ClassTag]: Matcher[ConfigReader.Result[Any]] =
     matchPattern { case Left(ConfigReaderFailures(ConvertFailure(_: Reason, _, _))) => }
 
   def failWithType[Failure <: ConfigReaderFailure: ClassTag]: Matcher[ConfigReader.Result[Any]] =

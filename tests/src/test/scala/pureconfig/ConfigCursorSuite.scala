@@ -198,11 +198,11 @@ class ConfigCursorSuite extends BaseSuite {
     cur.path shouldBe defaultPathStr
     cur.isUndefined shouldBe true
     cur.isNull shouldBe false
-    cur.asString should failWithConvertFailureOf[KeyNotFound]
-    cur.asListCursor should failWithConvertFailureOf[KeyNotFound]
-    cur.asList should failWithConvertFailureOf[KeyNotFound]
-    cur.asObjectCursor should failWithConvertFailureOf[KeyNotFound]
-    cur.asMap should failWithConvertFailureOf[KeyNotFound]
+    cur.asString should failWithReason[KeyNotFound]
+    cur.asListCursor should failWithReason[KeyNotFound]
+    cur.asList should failWithReason[KeyNotFound]
+    cur.asObjectCursor should failWithReason[KeyNotFound]
+    cur.asMap should failWithReason[KeyNotFound]
   }
 
   behavior of "ConfigListCursor"

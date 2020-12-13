@@ -315,7 +315,7 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
     YamlConfigSource
       .file(resourcePath("array.yaml"))
       .asObjectSource
-      .load[Conf] should failWithConvertFailureOf[WrongType]
+      .load[Conf] should failWithReason[WrongType]
   }
 
   it should "be mergeable with non-YAML configs" in {

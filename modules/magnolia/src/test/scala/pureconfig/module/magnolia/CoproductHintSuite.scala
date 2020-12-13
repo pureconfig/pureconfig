@@ -76,7 +76,7 @@ class CoproductHintSuite extends BaseSuite {
       val cc = implicitly[ConfigConvert[Conf]]
 
       val conf = ConfigFactory.parseString("{ typ = ambiguous-conf }")
-      cc.from(conf.root()) should failWithConvertFailureOf[
+      cc.from(conf.root()) should failWithReason[
         KeyNotFound
       ] // "typ" should not be passed to the coproduct option
 
