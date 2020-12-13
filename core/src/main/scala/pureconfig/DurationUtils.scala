@@ -113,8 +113,6 @@ private[pureconfig] object DurationUtils {
       case f: FiniteDuration => fromFiniteDuration(f)
       case Duration.Inf => "Inf"
       case Duration.MinusInf => "MinusInf"
-      // We must do an `eq` instead of `==` comparison because `Undefined` is intentionally != itself.
-      case d if d eq Duration.Undefined => UndefinedDuration
       case _ => UndefinedDuration
     }
   }
