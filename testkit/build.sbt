@@ -7,6 +7,9 @@ crossScalaVersions := Seq(scala211, scala212, scala213, scala30)
 libraryDependencies ++= Seq(
   Dependencies.scalaTest,
   Dependencies.scalaCheck.withDottyCompat(scalaVersion.value),
+  // We need to ignore the transitive dependencies to avoid having scalatest-core and scalactic with conflicting
+  // cross-version suffixes, since we'd get the native 3.x version from the `scalaTest` dependency and the 2.x
+  // dependency from `scalaTestPlusScalaCheck` with the `withDottyCompat` flag.
   Dependencies.scalaTestPlusScalaCheck.intransitive().withDottyCompat(scalaVersion.value)
 )
 
