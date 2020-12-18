@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         jdk: [adopt@1.8]
-        scala: [2.11.12, 2.12.12, 2.13.3]
+        scala: [2.11.12, 2.12.12, 2.13.3, 3.0.0-M2]
 
     steps:
       - name: Checkout repository
@@ -24,12 +24,23 @@ jobs:
         run: sbt "++${{ matrix.scala }} scalafmtCheckAll; scalafmtSbtCheck"
 
       - name: Compile
-        run: sbt coverage "++${{ matrix.scala }} compile"
+        run: >
+          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
+            sbt coverage "++${{ matrix.scala }} test";
+            else
+            sbt "++${{ matrix.scala }} test";
+            fi
 
       - name: Run tests
-        run: sbt coverage "++${{ matrix.scala }} test"
+        run: >
+          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
+            sbt coverage "++${{ matrix.scala }} test";
+            else
+            sbt "++${{ matrix.scala }} test";
+            fi
 
       - name: Upload coverage data to Coveralls
+        if: startsWith(matrix.scala, '2')
         run: sbt ++${{ matrix.scala }} coverageAggregate coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,6 +53,7 @@ jobs:
         run: sbt "++${{ matrix.scala }} publishLocal"
 
       - name: Compile example project
+        if: startsWith(matrix.scala, '2')
         run: cd example && sbt "++${{ matrix.scala }} test"
 
       - name: Check mdoc output

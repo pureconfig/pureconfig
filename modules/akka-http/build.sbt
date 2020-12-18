@@ -1,6 +1,8 @@
+import Dependencies.Version._
+
 name := "pureconfig-akka-http"
 
-crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
+crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.6.10" % "provided",

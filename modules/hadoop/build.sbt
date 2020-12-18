@@ -1,4 +1,8 @@
+import Dependencies.Version._
+
 name := "pureconfig-hadoop"
+
+crossScalaVersions := Seq(scala211, scala212, scala213)
 
 libraryDependencies ++= Seq("org.apache.hadoop" % "hadoop-common" % "3.3.0" % "provided")
 mdocLibraryDependencies ++= Seq("org.apache.hadoop" % "hadoop-common" % "3.3.0")

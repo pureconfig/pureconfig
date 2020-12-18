@@ -126,6 +126,6 @@ class EnumeratumConvertTest extends BaseSuite {
   it should "not parse a char value enum when given a string with more than one character" in {
     val conf = ConfigFactory.parseString(s"""{item:"string"}""")
     case class Conf(item: CharLibraryItem)
-    conf.to[Conf] should failWithType[CannotConvert]
+    conf.to[Conf] should failWithReason[CannotConvert]
   }
 }

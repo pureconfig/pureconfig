@@ -1,17 +1,15 @@
 package pureconfig
 
 import scala.reflect.ClassTag
-import scala.reflect.runtime.universe._
 
 import com.typesafe.config.{ConfigRenderOptions, ConfigValue, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 import org.scalactic.Equality
 import org.scalatest.EitherValues
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-
-import pureconfig.error._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import pureconfig.error.{ConfigReaderFailures, ConvertFailure, FailureReason}
 
 /** Add utilities to a scalatest `FlatSpec` to test `ConfigConvert` instances
   */
@@ -28,10 +26,10 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
   def checkArbitrary[A](implicit
       cc: Derivation[ConfigConvert[A]],
       arb: Arbitrary[A],
-      tpe: TypeTag[A],
+      tpe: TypeStringCompat[A],
       equality: Equality[A]
   ): Unit =
-    it should s"read an arbitrary ${tpe.tpe}" in forAll { a: A =>
+    it should s"read an arbitrary ${tpe.typeName}" in forAll { (a: A) =>
       cc.value.from(cc.value.to(a)).value shouldEqual a
     }
 
@@ -56,53 +54,61 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
       cr: ConfigConvert[A],
       cw: ConfigConvert[B],
       arb: Arbitrary[B],
-      tpe1: TypeTag[A],
-      tpe2: TypeTag[B],
+      tpe1: TypeStringCompat[A],
+      tpe2: TypeStringCompat[B],
       equality: Equality[A]
   ): Unit =
-    it should s"read a ${tpe1.tpe} from an arbitrary ${tpe2.tpe}" in forAll { b: B =>
+    it should s"read a ${tpe1.typeName} from an arbitrary ${tpe2.typeName}" in forAll { (b: B) =>
       cr.from(cw.to(b)).value shouldEqual f(b)
     }
 
   /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from`
     * successfully converts the latter into to former. Useful to test specific values
     */
-  def checkRead[A: Equality](reprsToValues: (ConfigValue, A)*)(implicit cr: ConfigReader[A], tpe: TypeTag[A]): Unit =
+  def checkRead[A: Equality](
+      reprsToValues: (ConfigValue, A)*
+  )(implicit cr: ConfigReader[A], tpe: TypeStringCompat[A]): Unit =
     for ((repr, value) <- reprsToValues) {
-      it should s"read the value $value of type ${tpe.tpe} from ${repr.render(ConfigRenderOptions.concise())}" in {
+      it should s"read the value $value of type ${tpe.typeName} from ${repr.render(ConfigRenderOptions.concise())}" in {
         cr.from(repr).value shouldEqual value
       }
     }
 
   /** Similar to [[checkRead]] but work on ConfigValues of type String */
-  def checkReadString[A: ConfigReader: TypeTag: Equality](strsToValues: (String, A)*): Unit =
+  def checkReadString[A: ConfigReader: TypeStringCompat: Equality](strsToValues: (String, A)*): Unit =
     checkRead[A](strsToValues.map { case (s, a) => ConfigValueFactory.fromAnyRef(s) -> a }: _*)
 
   /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigWriter[A].to`
     * successfully converts the former into the latter. Useful to test specific values
     */
-  def checkWrite[A: Equality](valuesToReprs: (A, ConfigValue)*)(implicit cw: ConfigWriter[A], tpe: TypeTag[A]): Unit =
+  def checkWrite[A: Equality](
+      valuesToReprs: (A, ConfigValue)*
+  )(implicit cw: ConfigWriter[A], tpe: TypeStringCompat[A]): Unit =
     for ((value, repr) <- valuesToReprs) {
-      it should s"write the value $value of type ${tpe.tpe} to ${repr.render(ConfigRenderOptions.concise())}" in {
+      it should s"write the value $value of type ${tpe.typeName} to ${repr.render(ConfigRenderOptions.concise())}" in {
         cw.to(value) shouldEqual repr
       }
     }
 
   /** Similar to [[checkWrite]] but work on ConfigValues of type String */
-  def checkWriteString[A: ConfigWriter: TypeTag: Equality](valuesToStrs: (A, String)*): Unit =
+  def checkWriteString[A: ConfigWriter: TypeStringCompat: Equality](valuesToStrs: (A, String)*): Unit =
     checkWrite[A](valuesToStrs.map { case (a, s) => a -> ConfigValueFactory.fromAnyRef(s) }: _*)
 
   /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from`
     * successfully converts the latter into to former and `ConfigWriter[A].to` successfully converts the former into the
     * latter.
     */
-  def checkReadWrite[A: ConfigReader: ConfigWriter: TypeTag: Equality](reprsValues: (ConfigValue, A)*): Unit = {
+  def checkReadWrite[A: ConfigReader: ConfigWriter: TypeStringCompat: Equality](
+      reprsValues: (ConfigValue, A)*
+  ): Unit = {
     checkRead[A](reprsValues: _*)
     checkWrite[A](reprsValues.map(_.swap): _*)
   }
 
   /** Similar to [[checkReadWrite]] but work on ConfigValues of type String */
-  def checkReadWriteString[A: ConfigReader: ConfigWriter: TypeTag: Equality](strsValues: (String, A)*): Unit = {
+  def checkReadWriteString[A: ConfigReader: ConfigWriter: TypeStringCompat: Equality](
+      strsValues: (String, A)*
+  ): Unit = {
     checkReadString[A](strsValues: _*)
     checkWriteString[A](strsValues.map(_.swap): _*)
   }
@@ -114,9 +120,9 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
     */
   def checkFailure[A, E <: FailureReason](
       values: ConfigValue*
-  )(implicit cr: ConfigReader[A], tpe: TypeTag[A], eTag: ClassTag[E]): Unit =
+  )(implicit cr: ConfigReader[A], tpe: TypeStringCompat[A], eTag: ClassTag[E]): Unit =
     for (value <- values) {
-      it should s"fail when it tries to read a value of type ${tpe.tpe} " +
+      it should s"fail when it tries to read a value of type ${tpe.typeName} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
           val result = cr.from(value)
           result.left.value.toList should have size 1
@@ -130,9 +136,9 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
     */
   def checkFailures[A](
       valuesToErrors: (ConfigValue, ConfigReaderFailures)*
-  )(implicit cr: ConfigReader[A], tpe: TypeTag[A]): Unit =
+  )(implicit cr: ConfigReader[A], tpe: TypeStringCompat[A]): Unit =
     for ((value, errors) <- valuesToErrors) {
-      it should s"fail when it tries to read a value of type ${tpe.tpe} " +
+      it should s"fail when it tries to read a value of type ${tpe.typeName} " +
         s"from ${value.render(ConfigRenderOptions.concise())}" in {
           cr.from(value).left.value.toList should contain theSameElementsAs errors.toList
         }

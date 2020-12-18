@@ -231,7 +231,7 @@ class ApiSuite extends BaseSuite {
     case class Conf(f: Float)
     implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val files = Set.empty[Path]
-    loadConfigFromFiles[Conf](files) should failWithType[KeyNotFound] // f is missing
+    loadConfigFromFiles[Conf](files) should failWithReason[KeyNotFound] // f is missing
   }
 
   it should "merge reference.conf with the provided files" in {

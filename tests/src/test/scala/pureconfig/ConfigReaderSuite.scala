@@ -24,8 +24,8 @@ class ConfigReaderSuite extends BaseSuite {
   val genFailureReason: Gen[FailureReason] =
     Gen.const(UnknownKey(""))
 
-  implicit val arbConfig = Arbitrary(genConfig)
-  implicit val arbFailureReason = Arbitrary(genFailureReason)
+  implicit val arbConfig: Arbitrary[ConfigValue] = Arbitrary(genConfig)
+  implicit val arbFailureReason: Arbitrary[FailureReason] = Arbitrary(genFailureReason)
 
   behavior of "ConfigReader"
 
@@ -49,12 +49,12 @@ class ConfigReaderSuite extends BaseSuite {
       intReader.from(conf).left.map(getReason).right.flatMap(f)
   }
 
-  it should "have a correct flatMap method" in forAll { conf: ConfigValue =>
+  it should "have a correct flatMap method" in forAll { (conf: ConfigValue) =>
     val g: Int => ConfigReader[Int] = intSummedReader
     intReader.flatMap(g).from(conf) shouldEqual intReader.from(conf).right.flatMap(g(_).from(conf))
   }
 
-  it should "have a correct zip method" in forAll { conf: ConfigValue =>
+  it should "have a correct zip method" in forAll { (conf: ConfigValue) =>
     def zip[A, B](r1: ConfigReader[A], r2: ConfigReader[B]): ConfigReader.Result[(A, B)] = {
       (r1.from(conf), r2.from(conf)) match {
         case (Right(a), Right(b)) => Right((a, b))
@@ -70,7 +70,7 @@ class ConfigReaderSuite extends BaseSuite {
     strReader.zip(strReader).from(conf) shouldEqual zip(strReader, strReader)
   }
 
-  it should "have a correct orElse method" in forAll { conf: ConfigValue =>
+  it should "have a correct orElse method" in forAll { (conf: ConfigValue) =>
     def orElse[AA, A <: AA, B <: AA](r1: ConfigReader[A], r2: ConfigReader[B]): ConfigReader.Result[AA] = {
       (r1.from(conf), r2.from(conf)) match {
         case (Right(a), _) => Right(a)
@@ -86,9 +86,9 @@ class ConfigReaderSuite extends BaseSuite {
     strReader.orElse(strReader).from(conf) shouldEqual orElse[String, String, String](strReader, strReader)
   }
 
-  it should "have a correct contramapConfig method" in forAll { conf: ConfigValue =>
+  it should "have a correct contramapConfig method" in forAll { (conf: ConfigValue) =>
     val wrappedConf = conf.atKey("value").root()
-    val unwrap = { cv: ConfigValue => cv.asInstanceOf[ConfigObject].get("value") }
+    val unwrap = { (cv: ConfigValue) => cv.asInstanceOf[ConfigObject].get("value") }
 
     intReader.contramapConfig(unwrap).from(wrappedConf) shouldEqual intReader.from(conf)
   }

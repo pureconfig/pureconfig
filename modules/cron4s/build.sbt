@@ -1,6 +1,8 @@
+import Dependencies.Version._
+
 name := "pureconfig-cron4s"
 
-crossScalaVersions ~= { _.filterNot(_.startsWith("2.11")) }
+crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies += "com.github.alonsodomin.cron4s" %% "cron4s-core" % "0.6.1"
 

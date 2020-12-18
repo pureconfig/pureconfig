@@ -29,11 +29,11 @@ class HadoopModuleTest extends BaseSuite {
 
   it should "refuse an invalid path value" in {
     val config = ConfigFactory.parseString(s"""{ path: "file:#//123" }""")
-    config.to[Conf] should failWithType[CannotConvert]
+    config.to[Conf] should failWithReason[CannotConvert]
   }
 
   it should "refuse an empty path value" in {
     val config = ConfigFactory.parseString(s"""{ path: "" }""")
-    config.to[Conf] should failWithType[EmptyStringFound]
+    config.to[Conf] should failWithReason[EmptyStringFound]
   }
 }

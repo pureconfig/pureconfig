@@ -1,4 +1,8 @@
+import Dependencies.Version._
+
 name := "pureconfig-enum"
+
+crossScalaVersions := Seq(scala211, scala212, scala213)
 
 libraryDependencies ++= Seq("org.julienrf" %% "enum" % "3.1")
 

@@ -1,4 +1,8 @@
+import Dependencies.Version._
+
 name := "pureconfig-scalaz"
+
+crossScalaVersions := Seq(scala211, scala212, scala213)
 
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.3.2",

@@ -34,7 +34,7 @@ trait PrimitiveWriters {
   */
 trait JavaEnumWriter {
 
-  implicit def javaEnumWriter[A <: Enum[A]]: ConfigWriter[A] = ConfigWriter.toDefaultString[A]
+  implicit def javaEnumWriter[A <: java.lang.Enum[A]]: ConfigWriter[A] = ConfigWriter.toDefaultString[A]
 }
 
 /** Trait containing `ConfigWriter` instances for classes related to file system paths and URIs.

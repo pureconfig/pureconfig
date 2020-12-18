@@ -1,8 +1,10 @@
-import Dependencies._
+import Dependencies.Version._
 
 name := "pureconfig-core"
 
-libraryDependencies += typesafeConfig
+crossScalaVersions := Seq(scala211, scala212, scala213, scala30)
+
+libraryDependencies += Dependencies.typesafeConfig
 
 osgiSettings
 
