@@ -121,57 +121,57 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   }
 }
 
-lazy val lintFlags = forScalaVersions { v =>
-  (v: @unchecked) match {
-    case (2, 11) =>
-      List(
-        "-encoding",
-        "UTF-8", // arg for -encoding
-        "-feature",
-        "-unchecked",
-        "-deprecation",
-        "-Xlint",
-        "-Xfatal-warnings",
-        "-Yno-adapted-args",
-        "-Ywarn-unused-import",
-        "-Ywarn-dead-code",
-        "-Ywarn-numeric-widen"
-      )
+lazy val lintFlags = forScalaVersions {
+  case (2, 11) =>
+    List(
+      "-encoding",
+      "UTF-8", // arg for -encoding
+      "-feature",
+      "-unchecked",
+      "-deprecation",
+      "-Xlint",
+      "-Xfatal-warnings",
+      "-Yno-adapted-args",
+      "-Ywarn-unused-import",
+      "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen"
+    )
 
-    case (2, 12) =>
-      List(
-        "-encoding",
-        "UTF-8", // arg for -encoding
-        "-feature",
-        "-unchecked",
-        "-deprecation", // Either#right is deprecated on Scala 2.13
-        "-Xlint:_,-unused",
-        "-Xfatal-warnings",
-        "-Yno-adapted-args",
-        "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
-        "-Ywarn-dead-code",
-        "-Ywarn-numeric-widen"
-      )
+  case (2, 12) =>
+    List(
+      "-encoding",
+      "UTF-8", // arg for -encoding
+      "-feature",
+      "-unchecked",
+      "-deprecation", // Either#right is deprecated on Scala 2.13
+      "-Xlint:_,-unused",
+      "-Xfatal-warnings",
+      "-Yno-adapted-args",
+      "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
+      "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen"
+    )
 
-    case (2, 13) =>
-      List(
-        "-encoding",
-        "UTF-8", // arg for -encoding
-        "-feature",
-        "-unchecked",
-        "-Ywarn-unused:_,-implicits",
-        "-Ywarn-dead-code",
-        "-Ywarn-numeric-widen"
-      )
+  case (2, 13) =>
+    List(
+      "-encoding",
+      "UTF-8", // arg for -encoding
+      "-feature",
+      "-unchecked",
+      "-Ywarn-unused:_,-implicits",
+      "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen"
+    )
 
-    case (3, 0) =>
-      List(
-        "-encoding",
-        "UTF-8", // arg for -encoding
-        "-feature",
-        "-unchecked"
-      )
-  }
+  case (3, 0) =>
+    List(
+      "-encoding",
+      "UTF-8", // arg for -encoding
+      "-feature",
+      "-unchecked"
+    )
+
+  case (maj, min) => throw new Exception(s"Unknown Scala version $maj.$min")
 }
 
 // Use the same Scala 2.12 version in the root project as in subprojects
