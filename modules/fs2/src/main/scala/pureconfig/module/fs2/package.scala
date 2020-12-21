@@ -27,7 +27,7 @@ package object fs2 {
       configStream: Stream[F, Byte]
   )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
     for {
-      bytes <- configStream.compile.to[Array]
+      bytes <- configStream.compile.to(Array)
       string = new String(bytes, UTF_8)
       configOrError <- F.delay(ConfigFactoryWrapper.parseString(string))
       config <- F.fromEither(configOrError.leftMap(ConfigReaderException[A]))
