@@ -5,7 +5,7 @@ name := "pureconfig-sttp"
 crossScalaVersions := Seq(scala211, scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "com.softwaremill.sttp.model" %% "core" % "1.1.4"
+  "com.softwaremill.sttp.model" %% "core" % "1.2.0"
 )
 
 developers := List(Developer("bszwej", "Bartlomiej Szwej", "bszwej@gmail.com", url("https://github.com/bszwej")))
