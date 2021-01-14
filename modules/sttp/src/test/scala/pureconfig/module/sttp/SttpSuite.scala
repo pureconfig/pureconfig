@@ -25,7 +25,7 @@ class SttpSuite extends BaseSuite {
 
     val failure =
       ConvertFailure(
-        reason = CannotConvert(value = "sttp.readthedocs.io", toType = "sttp.model.Uri", because = "missing scheme"),
+        reason = CannotConvert(value = "sttp.readthedocs.io", toType = "sttp.model.Uri", because = "empty.last"),
         origin = stringConfigOrigin(1),
         path = "uri"
       )
