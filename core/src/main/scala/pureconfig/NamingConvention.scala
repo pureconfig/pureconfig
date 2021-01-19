@@ -53,3 +53,11 @@ object KebabCase extends StringDelimitedNamingConvention("-")
   * @see https://en.wikipedia.org/wiki/Snake_case
   */
 object SnakeCase extends StringDelimitedNamingConvention("_")
+
+/** SnakeCase identifiers look like `SCREAMING_SNAKE_CASE` and `USE_MORE_PURECONFIG`
+  * @see https://en.wikipedia.org/wiki/Snake_case (and search for SCREAMING_SNAKE_CASE)
+  */
+object ScreamingSnakeCase extends NamingConvention {
+  def toTokens(s: String): Seq[String] = SnakeCase.toTokens(s)
+  def fromTokens(l: Seq[String]): String = l.map(_.toUpperCase).mkString("_")
+}
