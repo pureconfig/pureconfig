@@ -108,4 +108,30 @@ class NamingConventionSuite extends AnyFlatSpec with Matchers {
     SnakeCase.fromTokens(Seq("may", "5")) shouldBe "may_5"
     SnakeCase.fromTokens(Seq("bfg", "9000")) shouldBe "bfg_9000"
   }
+  "ScreamingSnakeCase" should "properly tokenize words" in {
+    ScreamingSnakeCase.toTokens("lowercase") shouldBe Seq("lowercase")
+    ScreamingSnakeCase.toTokens("CLASS") shouldBe Seq("class")
+    ScreamingSnakeCase.toTokens("MY_CLASS") shouldBe Seq("my", "class")
+    ScreamingSnakeCase.toTokens("HTML") shouldBe Seq("html")
+    ScreamingSnakeCase.toTokens("PDF_LOADER") shouldBe Seq("pdf", "loader")
+    ScreamingSnakeCase.toTokens("A_STRING") shouldBe Seq("a", "string")
+    ScreamingSnakeCase.toTokens("SIMPLE_XML_PARSER") shouldBe Seq("simple", "xml", "parser")
+    ScreamingSnakeCase.toTokens("GL_11_VERSION") shouldBe Seq("gl", "11", "version")
+    ScreamingSnakeCase.toTokens("99_BOTTLES") shouldBe Seq("99", "bottles")
+    ScreamingSnakeCase.toTokens("MAY_5") shouldBe Seq("may", "5")
+    ScreamingSnakeCase.toTokens("BFG_9000") shouldBe Seq("bfg", "9000")
+  }
+  it should "properly combine tokens" in {
+    ScreamingSnakeCase.fromTokens(Seq("lowercase")) shouldBe "LOWERCASE"
+    ScreamingSnakeCase.fromTokens(Seq("class")) shouldBe "CLASS"
+    ScreamingSnakeCase.fromTokens(Seq("my", "class")) shouldBe "MY_CLASS"
+    ScreamingSnakeCase.fromTokens(Seq("html")) shouldBe "HTML"
+    ScreamingSnakeCase.fromTokens(Seq("pdf", "loader")) shouldBe "PDF_LOADER"
+    ScreamingSnakeCase.fromTokens(Seq("a", "string")) shouldBe "A_STRING"
+    ScreamingSnakeCase.fromTokens(Seq("simple", "xml", "parser")) shouldBe "SIMPLE_XML_PARSER"
+    ScreamingSnakeCase.fromTokens(Seq("gl", "11", "version")) shouldBe "GL_11_VERSION"
+    ScreamingSnakeCase.fromTokens(Seq("99", "bottles")) shouldBe "99_BOTTLES"
+    ScreamingSnakeCase.fromTokens(Seq("may", "5")) shouldBe "MAY_5"
+    ScreamingSnakeCase.fromTokens(Seq("bfg", "9000")) shouldBe "BFG_9000"
+  }
 }
