@@ -47,6 +47,7 @@ jobs:
           COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
 
       - name: Build Scaladoc
+        if: startsWith(matrix.scala, '2')
         run: sbt "++${{ matrix.scala }} doc"
 
       - name: Publish artifact locally
