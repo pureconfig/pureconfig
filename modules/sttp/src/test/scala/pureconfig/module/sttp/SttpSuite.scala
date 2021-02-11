@@ -21,10 +21,10 @@ class SttpSuite extends BaseSuite {
   }
 
   it should "handle error when reading uri" in {
-    val config = ConfigFactory.parseString("""{uri = "sttp.readthedocs.io"}""")
+    val config = ConfigFactory.parseString("""{uri = "http://example.com:80:80"}""")
 
     config.to[AppConfig].left.value.head should matchPattern {
-      case ConvertFailure(CannotConvert("sttp.readthedocs.io", "sttp.model.Uri", _), _, "uri") =>
+      case ConvertFailure(CannotConvert("http://example.com:80:80", "sttp.model.Uri", _), _, "uri") =>
     }
   }
 }
