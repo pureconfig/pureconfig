@@ -22,7 +22,7 @@ class ApiSuite extends BaseSuite {
   it should "loadConfig from reference.conf" in {
     case class Conf(d: Double, i: Int, s: String)
     implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("d", "i", "s")(Conf.apply)
-    loadConfig[Conf] shouldBe Right(Conf(0d, 0, "app_value"))
+    (loadConfig[Conf]: ConfigReader.Result[Conf]) shouldBe Right(Conf(0d, 0, "app_value"))
   }
 
   it should "loadConfig from reference.conf with a namespace" in {
