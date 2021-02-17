@@ -74,7 +74,7 @@ trait JavaTimeWriters {
   implicit val javaDurationConfigWriter: ConfigWriter[JavaDuration] = ConfigWriter.toDefaultString[JavaDuration]
 }
 
-/** Trait containing `ConfigWriter` instances for [[scala.concurrent.duration.Duration]] and
+/** Trait containing `ConfigWriter` instances for `scala.concurrent.duration.Duration` and
   * [[scala.concurrent.duration.FiniteDuration]].
   */
 trait DurationWriters {
