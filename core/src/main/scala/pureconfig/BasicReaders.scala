@@ -115,7 +115,7 @@ trait JavaTimeReaders {
     ConfigReader.fromNonEmptyString[Year](catchReadError(Year.parse))
 }
 
-/** Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
+/** Trait containing `ConfigReader` instances for `scala.concurrent.duration.Duration` and
   * [[scala.concurrent.duration.FiniteDuration]].
   */
 trait DurationReaders {
