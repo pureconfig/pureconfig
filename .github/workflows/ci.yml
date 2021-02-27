@@ -24,12 +24,7 @@ jobs:
         run: sbt "++${{ matrix.scala }} scalafmtCheckAll; scalafmtSbtCheck"
 
       - name: Compile
-        run: >
-          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
-            sbt coverage "++${{ matrix.scala }} test";
-            else
-            sbt "++${{ matrix.scala }} test";
-            fi
+        run: sbt "++${{ matrix.scala }} compile"
 
       - name: Run tests
         run: >
