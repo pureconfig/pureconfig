@@ -33,12 +33,7 @@ jobs:
         run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll; scalafmtSbtCheck"
 
       - name: Compile
-        run: >
-          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
-            sbt coverage "++${{ matrix.scala-version }} test";
-            else
-            sbt "++${{ matrix.scala-version }} test";
-            fi
+        run: sbt "++${{ matrix.scala-version }} compile"
 
       - name: Run tests
         run: >
