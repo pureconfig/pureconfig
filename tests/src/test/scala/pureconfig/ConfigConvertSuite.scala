@@ -22,7 +22,7 @@ class ConfigConvertSuite extends BaseSuite {
 
   it should "have a correct xmap method" in forAll { (f: Int => String, g: String => Int) =>
     forAll { (str: String) => intConvert.xmap(f, g).to(str) shouldEqual intConvert.to(g(str)) }
-    forAll { (conf: ConfigValue) => intConvert.xmap(f, g).from(conf) shouldEqual intConvert.from(conf).right.map(f) }
+    forAll { (conf: ConfigValue) => intConvert.xmap(f, g).from(conf) shouldEqual intConvert.from(conf).map(f) }
   }
 
   it should "have a xmap method that wraps exceptions in a ConfigReaderFailure" in {

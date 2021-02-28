@@ -70,7 +70,7 @@ object ConfigConvert extends ConvertHelpers {
   def viaNonEmptyString[A](fromF: String => Either[FailureReason, A], toF: A => String)(implicit
       ct: ClassTag[A]
   ): ConfigConvert[A] = {
-    viaString[A](string => ensureNonEmpty(ct)(string).right.flatMap(s => fromF(s)), toF)
+    viaString[A](string => ensureNonEmpty(ct)(string).flatMap(s => fromF(s)), toF)
   }
 
   def viaNonEmptyStringTry[A: ClassTag](fromF: String => Try[A], toF: A => String): ConfigConvert[A] = {
