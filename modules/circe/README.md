@@ -7,7 +7,7 @@ Adds support for [Circe](https://circe.github.io/circe/) `Json` to PureConfig.
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-circe" % "0.14.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-circe" % "0.14.1"
 ```
 
 ## Example
