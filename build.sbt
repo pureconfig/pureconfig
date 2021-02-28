@@ -105,11 +105,11 @@ lazy val commonSettings = Seq(
 )
 
 // add support for Scala version ranges such as "scala-2.12+" or "scala-2.13-" in source folders (single version folders
-// such as "scala-2.11" are natively supported by SBT).
+// such as "scala-2.12" are natively supported by SBT).
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val versionNumber = CrossVersion.partialVersion(scalaVersion.value)
-    val expectedVersions = Seq(scala211, scala212, scala213, scala30).flatMap(CrossVersion.partialVersion)
+    val expectedVersions = Seq(scala212, scala213, scala30).flatMap(CrossVersion.partialVersion)
     expectedVersions.flatMap { case v @ (major, minor) =>
       List(
         if (versionNumber.exists(_ <= v)) unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor-") }
@@ -122,21 +122,6 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
 }
 
 lazy val lintFlags = forScalaVersions {
-  case (2, 11) =>
-    List(
-      "-encoding",
-      "UTF-8", // arg for -encoding
-      "-feature",
-      "-unchecked",
-      "-deprecation",
-      "-Xlint",
-      "-Xfatal-warnings",
-      "-Yno-adapted-args",
-      "-Ywarn-unused-import",
-      "-Ywarn-dead-code",
-      "-Ywarn-numeric-widen"
-    )
-
   case (2, 12) =>
     List(
       "-encoding",

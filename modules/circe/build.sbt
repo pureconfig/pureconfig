@@ -3,12 +3,12 @@ import Utilities._
 
 name := "pureconfig-circe"
 
-crossScalaVersions := Seq(scala211, scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core" % forScalaVersions { case (2, 11) => "0.11.2"; case _ => "0.13.0" }.value,
-  "io.circe" %% "circe-literal" % forScalaVersions { case (2, 11) => "0.11.2"; case _ => "0.13.0" }.value % Test,
-  "org.typelevel" %% "jawn-parser" % forScalaVersions { case (2, 11) => "0.14.3"; case _ => "1.0.1" }.value % Test
+  "io.circe" %% "circe-core" % "0.13.0",
+  "io.circe" %% "circe-literal" % "0.13.0" % Test,
+  "org.typelevel" %% "jawn-parser" % "1.0.1" % Test
 )
 
 developers := List(

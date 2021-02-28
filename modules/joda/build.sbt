@@ -2,7 +2,7 @@ import Dependencies.Version._
 
 name := "pureconfig-joda"
 
-crossScalaVersions := Seq(scala211, scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq("joda-time" % "joda-time" % "2.10.10", "org.joda" % "joda-convert" % "2.2.1")
 
