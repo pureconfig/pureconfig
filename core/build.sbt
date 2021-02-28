@@ -2,7 +2,7 @@ import Dependencies.Version._
 
 name := "pureconfig-core"
 
-crossScalaVersions := Seq(scala211, scala212, scala213, scala30)
+crossScalaVersions := Seq(scala212, scala213, scala30)
 
 libraryDependencies += Dependencies.typesafeConfig
 
