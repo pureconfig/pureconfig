@@ -1,4 +1,4 @@
-### 0.14.1 (unreleased)
+### 0.14.1 (Feb 28, 2020)
 
 Support for Scala 2.11 was dropped and support for Scala 3.0 (RC1) was introduced.
 
