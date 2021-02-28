@@ -74,5 +74,5 @@ object ConfigFactoryWrapper {
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =
-    parseFile(path.toFile).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
+    parseFile(path.toFile).flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
 }

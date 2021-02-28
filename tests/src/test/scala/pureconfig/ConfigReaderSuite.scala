@@ -12,7 +12,7 @@ class ConfigReaderSuite extends BaseSuite {
 
   def intSummedReader(n: Int) =
     new ConfigReader[Int] {
-      def from(cur: ConfigCursor) = intReader.from(cur).right.map(_ + n)
+      def from(cur: ConfigCursor) = intReader.from(cur).map(_ + n)
     }
 
   // generate configs that always read correctly as strings, but not always as integers
@@ -30,7 +30,7 @@ class ConfigReaderSuite extends BaseSuite {
   behavior of "ConfigReader"
 
   it should "have a correct map method" in forAll { (conf: ConfigValue, f: Int => String) =>
-    intReader.map(f).from(conf) shouldEqual intReader.from(conf).right.map(f)
+    intReader.map(f).from(conf) shouldEqual intReader.from(conf).map(f)
   }
 
   it should "have a map method that wraps exceptions in a ConfigReaderFailure" in {
@@ -46,12 +46,12 @@ class ConfigReaderSuite extends BaseSuite {
         case _ => throw new Exception(s"Unexpected value: $failures")
       }
     intReader.emap(f).from(conf).left.map(getReason) shouldEqual
-      intReader.from(conf).left.map(getReason).right.flatMap(f)
+      intReader.from(conf).left.map(getReason).flatMap(f)
   }
 
   it should "have a correct flatMap method" in forAll { (conf: ConfigValue) =>
     val g: Int => ConfigReader[Int] = intSummedReader
-    intReader.flatMap(g).from(conf) shouldEqual intReader.from(conf).right.flatMap(g(_).from(conf))
+    intReader.flatMap(g).from(conf) shouldEqual intReader.from(conf).flatMap(g(_).from(conf))
   }
 
   it should "have a correct zip method" in forAll { (conf: ConfigValue) =>

@@ -9,10 +9,8 @@ jobs:
       fail-fast: false
       matrix:
         jdk: [adopt@1.8]
-        scala: ['2.11', '2.12', '2.13', '3.0']
+        scala: ['2.12', '2.13', '3.0']
         include:
-          - scala: '2.11'
-            scala-version: 2.11.12
           - scala: '2.12'
             scala-version: 2.12.12
           - scala: '2.13'

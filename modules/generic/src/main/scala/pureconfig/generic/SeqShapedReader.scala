@@ -15,7 +15,7 @@ object SeqShapedReader {
 
   implicit val hNilReader: SeqShapedReader[HNil] = new SeqShapedReader[HNil] {
     def from(cur: ConfigCursor): ConfigReader.Result[HNil] = {
-      cur.asList.right.flatMap {
+      cur.asList.flatMap {
         case Nil => Right(HNil)
         case cl => cur.failed(WrongSizeList(0, cl.size))
       }
@@ -29,7 +29,7 @@ object SeqShapedReader {
   ): SeqShapedReader[H :: T] =
     new SeqShapedReader[H :: T] {
       def from(cur: ConfigCursor): ConfigReader.Result[H :: T] = {
-        cur.asListCursor.right.flatMap {
+        cur.asListCursor.flatMap {
           case listCur if listCur.size != tl().length + 1 =>
             cur.failed(WrongSizeList(tl().length + 1, listCur.size))
 

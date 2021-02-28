@@ -2,7 +2,7 @@ import Dependencies.Version._
 
 name := "pureconfig-squants"
 
-crossScalaVersions := Seq(scala211, scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq("org.typelevel" %% "squants" % "1.7.0")
 

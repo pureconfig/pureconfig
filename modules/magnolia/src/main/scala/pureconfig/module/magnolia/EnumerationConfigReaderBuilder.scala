@@ -30,7 +30,7 @@ object EnumerationConfigReaderBuilder {
           def from(cur: ConfigCursor): Result[A] =
             if (ctx.isObject) Right(ctx.rawConstruct(Seq.empty))
             else
-              cur.asString.right.flatMap(v =>
+              cur.asString.flatMap(v =>
                 cur.failed(
                   CannotConvert(
                     v,
@@ -50,7 +50,7 @@ object EnumerationConfigReaderBuilder {
             cur.asString.flatMap { stringValue =>
               ctx.subtypes.find(typ => transformName(typ.typeName.short) == stringValue) match {
                 case Some(typ) => typ.typeclass.build(transformName).from(cur)
-                case None => cur.asConfigValue.right.flatMap(v => cur.failed(NoValidCoproductOptionFound(v, Seq.empty)))
+                case None => cur.asConfigValue.flatMap(v => cur.failed(NoValidCoproductOptionFound(v, Seq.empty)))
               }
             }
           }
