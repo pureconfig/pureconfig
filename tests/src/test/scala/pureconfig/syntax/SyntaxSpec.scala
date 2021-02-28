@@ -25,7 +25,7 @@ class SyntaxSpec extends AnyFlatSpec with Matchers {
   it should "be able to load a Config to a type with ConfigConvert using the to method" in {
     val conf = ConfigFactory.parseString("""{ "a": [1, 2, 3, 4], "b": { "k1": "v1", "k2": "v2" } }""")
     case class Conf(a: List[Int], b: Map[String, String])
-    implicit val confReader = ConfigReader.forProduct2("a", "b")(Conf.apply)
+    implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct2("a", "b")(Conf.apply)
     conf.to[Conf] shouldBe Right(Conf(List(1, 2, 3, 4), Map("k1" -> "v1", "k2" -> "v2")))
   }
 

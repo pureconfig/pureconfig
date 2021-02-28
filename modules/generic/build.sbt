@@ -1,10 +1,12 @@
-import Dependencies._
+import Dependencies.Version._
 
 name := "pureconfig-generic"
 
+crossScalaVersions := Seq(scala212, scala213)
+
 libraryDependencies ++= Seq(
-  shapeless,
-  scalaCheckShapeless % "test",
+  Dependencies.shapeless,
+  Dependencies.scalaCheckShapeless % "test",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
 )
 

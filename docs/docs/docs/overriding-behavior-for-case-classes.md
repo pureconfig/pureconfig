@@ -62,6 +62,7 @@ library:
 
 * [`CamelCase`](https://en.wikipedia.org/wiki/Camel_case) (examples: `camelCase`, `useMorePureconfig`);
 * [`SnakeCase`](https://en.wikipedia.org/wiki/Snake_case) (examples: `snake_case`, `use_more_pureconfig`);
+* [`ScreamingSnakeCase`](https://en.wikipedia.org/wiki/Snake_case) (examples: `SCREAMING_SNAKE_CASE`, `USE_MORE_PURECONFIG`);
 * [`KebabCase`](http://wiki.c2.com/?KebabCase): (examples: `kebab-case`, `use-more-pureconfig`);
 * [`PascalCase`](https://en.wikipedia.org/wiki/PascalCase): (examples: `PascalCase`, `UseMorePureconfig`).
 

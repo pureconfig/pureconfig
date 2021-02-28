@@ -29,6 +29,6 @@ class EnumTest extends BaseSuite {
   it should "politely refuse an invalid member" in {
     val conf = ConfigFactory.parseString(s"""{greeting:"Psych"}""")
     case class Conf(greeting: Greeting)
-    conf.to[Conf] should failWithType[CannotConvert]
+    conf.to[Conf] should failWithReason[CannotConvert]
   }
 }

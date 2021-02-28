@@ -1,3 +1,5 @@
+import scala.math.Ordering.Implicits._
+
 import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
@@ -77,7 +79,6 @@ lazy val commonSettings = Seq(
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))
   ),
 
-  crossScalaVersions := Seq(scala211, scala212, scala213),
   scalaVersion := scala212,
 
   resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
@@ -103,54 +104,59 @@ lazy val commonSettings = Seq(
   // format: on
 )
 
-// add support for Scala version ranges such as "scala-2.12+" in source folders (single version folders such as
-// "scala-2.11" are natively supported by SBT).
-// In order to keep this simple, we're doing this case by case, taking advantage of the fact that we intend to support
-// only 3 major versions at any given moment.
+// add support for Scala version ranges such as "scala-2.12+" or "scala-2.13-" in source folders (single version folders
+// such as "scala-2.12" are natively supported by SBT).
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
-    val minor = CrossVersion.partialVersion(scalaVersion.value).map(_._2)
-    List(
-      if (minor.exists(_ <= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12-") }
-      else Nil,
-      if (minor.exists(_ >= 12)) unmanagedSrcs.value.map { dir => new File(dir.getPath + "-2.12+") }
-      else Nil
-    ).flatten
+    val versionNumber = CrossVersion.partialVersion(scalaVersion.value)
+    val expectedVersions = Seq(scala212, scala213, scala30).flatMap(CrossVersion.partialVersion)
+    expectedVersions.flatMap { case v @ (major, minor) =>
+      List(
+        if (versionNumber.exists(_ <= v)) unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor-") }
+        else Nil,
+        if (versionNumber.exists(_ >= v)) unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor+") }
+        else Nil
+      )
+    }.flatten
   }
 }
 
-lazy val lintFlags = {
-  lazy val allVersionLintFlags = List(
-    "-encoding",
-    "UTF-8", // arg for -encoding
-    "-feature",
-    "-unchecked",
-    "-Ywarn-dead-code",
-    "-Ywarn-numeric-widen"
-  )
+lazy val lintFlags = forScalaVersions {
+  case (2, 12) =>
+    List(
+      "-encoding",
+      "UTF-8", // arg for -encoding
+      "-feature",
+      "-unchecked",
+      "-deprecation", // Either#right is deprecated on Scala 2.13
+      "-Xlint:_,-unused",
+      "-Xfatal-warnings",
+      "-Yno-adapted-args",
+      "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
+      "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen"
+    )
 
-  def withCommon(flags: String*) =
-    allVersionLintFlags ++ flags
+  case (2, 13) =>
+    List(
+      "-encoding",
+      "UTF-8", // arg for -encoding
+      "-feature",
+      "-unchecked",
+      "-Ywarn-unused:_,-implicits",
+      "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen"
+    )
 
-  forScalaVersions {
-    case (2, 11) =>
-      withCommon("-deprecation", "-Xlint", "-Xfatal-warnings", "-Yno-adapted-args", "-Ywarn-unused-import")
+  case (3, 0) =>
+    List(
+      "-encoding",
+      "UTF-8", // arg for -encoding
+      "-feature",
+      "-unchecked"
+    )
 
-    case (2, 12) =>
-      withCommon(
-        "-deprecation", // Either#right is deprecated on Scala 2.13
-        "-Xlint:_,-unused",
-        "-Xfatal-warnings",
-        "-Yno-adapted-args",
-        "-Ywarn-unused:_,-implicits" // Some implicits are intentionally used just as evidences, triggering warnings
-      )
-
-    case (2, 13) =>
-      withCommon("-Ywarn-unused:_,-implicits")
-
-    case _ =>
-      withCommon()
-  }
+  case (maj, min) => throw new Exception(s"Unknown Scala version $maj.$min")
 }
 
 // Use the same Scala 2.12 version in the root project as in subprojects

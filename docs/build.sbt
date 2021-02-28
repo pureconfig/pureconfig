@@ -1,5 +1,7 @@
+import Dependencies.Version._
+
 // Code snippets in the website are written using Scala 2.12+ compatible code
-crossScalaVersions ~= { oldVersions => oldVersions.filterNot(_.startsWith("2.11")) }
+crossScalaVersions := Seq(scala212, scala213)
 
 micrositeName := "PureConfig"
 micrositeDescription := "A boilerplate-free library for loading configuration files"

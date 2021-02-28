@@ -21,7 +21,7 @@ object EnumerationConfigReaderBuilder {
       def build(transformName: String => String): ConfigReader[CNil] =
         new ConfigReader[CNil] {
           def from(cur: ConfigCursor): Result[CNil] =
-            cur.asConfigValue.right.flatMap(v => cur.failed(NoValidCoproductOptionFound(v, Seq.empty)))
+            cur.asConfigValue.flatMap(v => cur.failed(NoValidCoproductOptionFound(v, Seq.empty)))
         }
     }
 
@@ -37,7 +37,7 @@ object EnumerationConfigReaderBuilder {
           def from(cur: ConfigCursor): Result[FieldType[K, H] :+: T] =
             cur.asString match {
               case Right(s) if s == transformName(vName.value.name) => Right(Inl(field[K](hGen.from(HNil))))
-              case Right(_) => tReader.from(cur).right.map(Inr.apply)
+              case Right(_) => tReader.from(cur).map(Inr.apply)
               case Left(err) => Left(err)
             }
         }

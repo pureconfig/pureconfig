@@ -34,7 +34,7 @@ trait PrimitiveWriters {
   */
 trait JavaEnumWriter {
 
-  implicit def javaEnumWriter[A <: Enum[A]]: ConfigWriter[A] = ConfigWriter.toDefaultString[A]
+  implicit def javaEnumWriter[A <: java.lang.Enum[A]]: ConfigWriter[A] = ConfigWriter.toDefaultString[A]
 }
 
 /** Trait containing `ConfigWriter` instances for classes related to file system paths and URIs.
@@ -74,7 +74,7 @@ trait JavaTimeWriters {
   implicit val javaDurationConfigWriter: ConfigWriter[JavaDuration] = ConfigWriter.toDefaultString[JavaDuration]
 }
 
-/** Trait containing `ConfigWriter` instances for [[scala.concurrent.duration.Duration]] and
+/** Trait containing `ConfigWriter` instances for `scala.concurrent.duration.Duration` and
   * [[scala.concurrent.duration.FiniteDuration]].
   */
 trait DurationWriters {

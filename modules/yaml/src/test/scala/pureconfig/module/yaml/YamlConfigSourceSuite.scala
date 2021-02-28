@@ -308,7 +308,7 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
     YamlConfigSource.file(resourcePath("basic.yaml")).load[Conf] shouldBe
       YamlConfigSource.file(resourcePath("basic.yaml")).asObjectSource.load[Conf]
 
-    YamlConfigSource.file(resourcePath("array.yaml")).asObjectSource.load[Conf] should failWithType[WrongType]
+    YamlConfigSource.file(resourcePath("array.yaml")).asObjectSource.load[Conf] should failWithReason[WrongType]
   }
 
   it should "be mergeable with non-YAML configs" in {

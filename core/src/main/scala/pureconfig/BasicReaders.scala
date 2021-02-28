@@ -40,7 +40,7 @@ trait PrimitiveReaders {
       case v => v.toDouble
     })
 
-    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asDouble)
+    cur.asString.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asDouble)
   })
 
   implicit val floatConfigReader: ConfigReader[Float] = ConfigReader.fromCursor({ cur =>
@@ -49,7 +49,7 @@ trait PrimitiveReaders {
       case v => v.toFloat
     })
 
-    cur.asString.right.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asFloat)
+    cur.asString.flatMap(s => cur.scopeFailure(asStringReader(s))).left.flatMap(_ => cur.asFloat)
   })
 
   implicit val intConfigReader: ConfigReader[Int] = ConfigReader.fromCursor(_.asInt)
@@ -65,7 +65,7 @@ trait PrimitiveReaders {
   */
 trait JavaEnumReader {
 
-  implicit def javaEnumReader[A <: Enum[A]](implicit tag: ClassTag[A]): ConfigReader[A] =
+  implicit def javaEnumReader[A <: java.lang.Enum[A]](implicit tag: ClassTag[A]): ConfigReader[A] =
     ConfigReader.fromString(catchReadError(s => {
       val enumClass = tag.runtimeClass.asInstanceOf[Class[A]]
       Enum.valueOf(enumClass, s)
@@ -115,7 +115,7 @@ trait JavaTimeReaders {
     ConfigReader.fromNonEmptyString[Year](catchReadError(Year.parse))
 }
 
-/** Trait containing `ConfigReader` instances for [[scala.concurrent.duration.Duration]] and
+/** Trait containing `ConfigReader` instances for `scala.concurrent.duration.Duration` and
   * [[scala.concurrent.duration.FiniteDuration]].
   */
 trait DurationReaders {
@@ -125,7 +125,7 @@ trait DurationReaders {
 
   implicit val finiteDurationConfigReader: ConfigReader[FiniteDuration] = {
     val fromString: String => Either[FailureReason, FiniteDuration] = { string =>
-      DurationUtils.fromString(string).right.flatMap {
+      DurationUtils.fromString(string).flatMap {
         case d: FiniteDuration => Right(d)
         case _ =>
           Left(
@@ -163,16 +163,16 @@ trait NumericReaders {
 trait TypesafeConfigReaders {
 
   implicit val configConfigReader: ConfigReader[Config] =
-    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.objValue.toConfig))
+    ConfigReader.fromCursor(_.asObjectCursor.map(_.objValue.toConfig))
 
   implicit val configObjectConfigReader: ConfigReader[ConfigObject] =
-    ConfigReader.fromCursor(_.asObjectCursor.right.map(_.objValue))
+    ConfigReader.fromCursor(_.asObjectCursor.map(_.objValue))
 
   implicit val configValueConfigReader: ConfigReader[ConfigValue] =
     ConfigReader.fromCursor(_.asConfigValue)
 
   implicit val configListConfigReader: ConfigReader[ConfigList] =
-    ConfigReader.fromCursor(_.asListCursor.right.map(_.listValue))
+    ConfigReader.fromCursor(_.asListCursor.map(_.listValue))
 
   // TODO: improve error handling by copying the parsing logic from Typesafe and making it use PureConfig Results
   // (see PeriodUtils and DurationUtils)

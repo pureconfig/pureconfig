@@ -75,7 +75,7 @@ class DurationUtilsSuite extends BaseSuite {
   it should "report a helpful error message when failing to convert a bad duration" in {
     val badDuration = "10 lordsALeaping"
     BasicReaders.durationConfigReader
-      .from(ConfigValueFactory.fromAnyRef(badDuration)) should failWithType[CannotConvert]
+      .from(ConfigValueFactory.fromAnyRef(badDuration)) should failWithReason[CannotConvert]
   }
   it should "correctly round trip when converting Duration.Undefined" in {
     fromS(fromD(Duration.Undefined)) shouldEqual Right(Duration.Undefined)

@@ -1,9 +1,12 @@
+import Dependencies.Version._
 import Utilities._
 
 name := "pureconfig-cats-effect"
 
+crossScalaVersions := Seq(scala212, scala213)
+
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-effect" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.3.0" }.value
+  "org.typelevel" %% "cats-effect" % "2.3.3"
 )
 
 developers := List(Developer("keirlawson", "Keir Lawson", "keirlawson@gmail.com", url("https://github.com/keirlawson")))

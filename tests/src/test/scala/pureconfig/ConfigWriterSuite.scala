@@ -13,8 +13,8 @@ class ConfigWriterSuite extends BaseSuite {
     intWriter.contramap(f).to(str) shouldEqual intWriter.to(f(str))
   }
 
-  it should "have a correct mapConfig method" in forAll { x: Int =>
-    val wrap = { cv: ConfigValue => ConfigFactory.parseString(s"{ value: ${cv.render} }").root() }
+  it should "have a correct mapConfig method" in forAll { (x: Int) =>
+    val wrap = { (cv: ConfigValue) => ConfigFactory.parseString(s"{ value: ${cv.render} }").root() }
     intWriter.mapConfig(wrap).to(x) shouldEqual wrap(intWriter.to(x))
   }
 }

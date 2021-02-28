@@ -10,10 +10,22 @@ import pureconfig.syntax._
 class ForProductNSuite extends BaseSuite {
   behavior of "ConfigReader.forProductN and ConfigWriter.forProductN"
 
-  [#case class Foo1([#s0: String#])
+  case class Foo1(s0: String)
+  object Foo1 {
+    val keys = List(UUID.randomUUID().toString)
+    implicit val foo1Writer: ConfigWriter[Foo1] = ConfigWriter.forProduct1(keys(0))({ case Foo1(v1) => v1 }: Foo1 => String)
+    implicit val foo1Reader: ConfigReader[Foo1] = ConfigReader.forProduct1(keys(0))(Foo1.apply)
+
+    implicit val genFoo1: Arbitrary[Foo1] = Arbitrary(for {
+      v1 <- Arbitrary.arbitrary[String]
+    } yield Foo1(v1))
+  }
+  checkArbitrary[Foo1]
+
+  [2..22#case class Foo1([#s0: String#])
   object Foo1 {
     val keys = List([#UUID.randomUUID().toString#])
-    implicit val foo1Writer: ConfigWriter[Foo1] = ConfigWriter.forProduct1([#keys(0)#])((Foo1.unapply _).andThen(_.get))
+    implicit val foo1Writer: ConfigWriter[Foo1] = ConfigWriter.forProduct1([#keys(0)#])({ case Foo1([#v1#]) => Tuple1([#v1#]) }: Foo1 => Product1[[#String#]])
     implicit val foo1Reader: ConfigReader[Foo1] = ConfigReader.forProduct1([#keys(0)#])(Foo1.apply)
 
     implicit val genFoo1: Arbitrary[Foo1] = Arbitrary(for {
@@ -21,9 +33,11 @@ class ForProductNSuite extends BaseSuite {
       ]
     } yield Foo1([#v1#]))
   }
-  checkArbitrary[Foo1]
+  checkArbitrary[Foo1]#
 
-  val bitmaskGen1 = Gen.choose(0, (##1 << 1) - ##2)
+  ]
+
+  [#val bitmaskGen1 = Gen.choose(0, (##1 << 1) - ##2)
   it should "produce ConfigReaders returning correct KeyNotFound failures in the absence of certain keys for arity 1" in
   forAll(bitmaskGen1, Arbitrary.arbitrary[Foo1]) { (bitmask, foo) =>
     val conf = foo.toConfig
@@ -33,9 +47,11 @@ class ForProductNSuite extends BaseSuite {
     val result = confWithMissingKeys.to[Foo1]
     result.left.value.toList.size shouldEqual failures.size
     result.left.value.toList should contain theSameElementsAs failures
-  }
+  }#
 
-  it should "produce ConfigReaders respecting the ReadsMissingKeys trait for arity 1" in
+  ]
+
+  [#it should "produce ConfigReaders respecting the ReadsMissingKeys trait for arity 1" in
   forAll(bitmaskGen1) { bitmask =>
     val foo = Foo1([#UUID.randomUUID().toString#])
     implicit val missingStringReader: ConfigReader[String] = new ConfigReader[String] with ReadsMissingKeys {
@@ -50,9 +66,26 @@ class ForProductNSuite extends BaseSuite {
     val fooReader = ConfigReader.forProduct1([#fooKeys(0)#])(Foo1.apply)
     fooReader.from(ConfigCursor.apply(confWithMissingKeys, List.empty)).value shouldEqual Foo1(
       [#if ((bitmask & ##1 << 0) == ##0) "missing" else foo.s0#])
-  }
+  }#
+
+  ]
 
   it should "produce ConfigWriters respecting the WritesMissingKeys trait for arity 1" in
+  forAll(bitmaskGen1) { bitmask =>
+    implicit val emptyStringWriter: ConfigWriter[String] = new ConfigWriter[String] with WritesMissingKeys[String] {
+      def to(v: String) = ConfigValueFactory.fromAnyRef(v)
+      def toOpt(v: String) = if (v.isEmpty) None else Some(to(v))
+    }
+    val newFoo = Foo1(
+      if ((bitmask & 1 << 0) == 0) "" else UUID.randomUUID().toString)
+    val fooKeys = Foo1.keys
+    val missingKeys = fooKeys.zipWithIndex.filter({ case (_, i) => (bitmask & 1 << i) == 0 }).map(_._1)
+    val fooWriter = ConfigWriter.forProduct1(fooKeys(0))({ case Foo1(v1) => v1 }: Foo1 => String)
+    val conf = fooWriter.to(newFoo)
+    conf.asInstanceOf[ConfigObject].keySet should not(contain theSameElementsAs missingKeys)
+  }
+
+  [2..22#it should "produce ConfigWriters respecting the WritesMissingKeys trait for arity 1" in
   forAll(bitmaskGen1) { bitmask =>
     implicit val emptyStringWriter: ConfigWriter[String] = new ConfigWriter[String] with WritesMissingKeys[String] {
       def to(v: String) = ConfigValueFactory.fromAnyRef(v)
@@ -62,7 +95,7 @@ class ForProductNSuite extends BaseSuite {
       [#if ((bitmask & ##1 << 0) == ##0) "" else UUID.randomUUID().toString#])
     val fooKeys = Foo1.keys
     val missingKeys = fooKeys.zipWithIndex.filter({ case (_, i) => (bitmask & ##1 << i) == ##0 }).map(_._##1)
-    val fooWriter = ConfigWriter.forProduct1([#fooKeys(0)#])((Foo1.unapply _).andThen(_.get))
+    val fooWriter = ConfigWriter.forProduct1([#fooKeys(0)#])({ case Foo1([#v1#]) => Tuple1([#v1#]) }: Foo1 => Product1[[#String#]])
     val conf = fooWriter.to(newFoo)
     conf.asInstanceOf[ConfigObject].keySet should not(contain theSameElementsAs missingKeys)
   }#

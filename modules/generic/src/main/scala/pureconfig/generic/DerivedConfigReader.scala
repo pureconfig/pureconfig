@@ -22,7 +22,7 @@ object DerivedConfigReader extends DerivedConfigReader1 {
     new DerivedConfigReader[A] {
 
       def from(value: ConfigCursor): ConfigReader.Result[A] =
-        reader.from(value).right.map(unwrapped.wrap)
+        reader.from(value).map(unwrapped.wrap)
     }
 
   implicit def tupleReader[A: IsTuple, Repr <: HList, LabelledRepr <: HList, DefaultRepr <: HList](implicit
@@ -37,12 +37,12 @@ object DerivedConfigReader extends DerivedConfigReader1 {
       def from(cur: ConfigCursor) = {
         // Try to read first as the list representation and afterwards as the product representation (i.e. ConfigObject
         // with '_1', '_2', etc. keys).
-        val cc = cur.asListCursor.right
+        val cc = cur.asListCursor
           .map(Right.apply)
           .left
-          .flatMap(failure => cur.asObjectCursor.right.map(Left.apply).left.map(_ => failure))
+          .flatMap(failure => cur.asObjectCursor.map(Left.apply).left.map(_ => failure))
 
-        cc.right.flatMap {
+        cc.flatMap {
           case Right(listCur) => tupleAsListReader(listCur)
           case Left(objCur) => tupleAsObjectReader(objCur)
         }
@@ -52,7 +52,7 @@ object DerivedConfigReader extends DerivedConfigReader1 {
   private[pureconfig] def tupleAsListReader[A: IsTuple, Repr <: HList](
       cur: ConfigListCursor
   )(implicit gen: Generic.Aux[A, Repr], cr: SeqShapedReader[Repr]): ConfigReader.Result[A] =
-    cr.from(cur).right.map(gen.from)
+    cr.from(cur).map(gen.from)
 
   private[pureconfig] def tupleAsObjectReader[A: IsTuple, Repr <: HList, DefaultRepr <: HList](
       cur: ConfigObjectCursor
@@ -61,7 +61,7 @@ object DerivedConfigReader extends DerivedConfigReader1 {
       default: Default.AsOptions.Aux[A, DefaultRepr],
       cr: MapShapedReader[A, Repr, DefaultRepr]
   ): ConfigReader.Result[A] =
-    cr.from(cur, default(), Set.empty).right.map(gen.from)
+    cr.from(cur, default(), Set.empty).map(gen.from)
 }
 
 trait DerivedConfigReader1 {
@@ -74,7 +74,7 @@ trait DerivedConfigReader1 {
     new DerivedConfigReader[A] {
 
       override def from(cur: ConfigCursor): ConfigReader.Result[A] = {
-        cur.asObjectCursor.right.flatMap(cc.value.from(_, default(), Set.empty)).right.map(gen.from)
+        cur.asObjectCursor.flatMap(cc.value.from(_, default(), Set.empty)).map(gen.from)
       }
     }
 
@@ -89,7 +89,7 @@ trait DerivedConfigReader1 {
         def readerFor(option: String) =
           readerOptions.options.get(option).map(_.map(gen.from))
 
-        hint.from(cur, readerOptions.options.keys.toList.sorted).right.flatMap {
+        hint.from(cur, readerOptions.options.keys.toList.sorted).flatMap {
           case CoproductHint.Use(cursor, option) =>
             readerFor(option) match {
               case Some(value) => value.from(cursor)

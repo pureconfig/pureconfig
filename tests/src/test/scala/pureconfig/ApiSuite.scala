@@ -22,7 +22,7 @@ class ApiSuite extends BaseSuite {
   it should "loadConfig from reference.conf" in {
     case class Conf(d: Double, i: Int, s: String)
     implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct3("d", "i", "s")(Conf.apply)
-    loadConfig[Conf] shouldBe Right(Conf(0d, 0, "app_value"))
+    (loadConfig[Conf]: ConfigReader.Result[Conf]) shouldBe Right(Conf(0d, 0, "app_value"))
   }
 
   it should "loadConfig from reference.conf with a namespace" in {
@@ -231,7 +231,7 @@ class ApiSuite extends BaseSuite {
     case class Conf(f: Float)
     implicit val confReader: ConfigReader[Conf] = ConfigReader.forProduct1("f")(Conf.apply)
     val files = Set.empty[Path]
-    loadConfigFromFiles[Conf](files) should failWithType[KeyNotFound] // f is missing
+    loadConfigFromFiles[Conf](files) should failWithReason[KeyNotFound] // f is missing
   }
 
   it should "merge reference.conf with the provided files" in {
