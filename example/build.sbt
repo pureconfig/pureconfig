@@ -4,7 +4,7 @@ version := "1.0"
 
 scalaVersion := "2.12.12"
 
-val VersionPattern = """version in ThisBuild := "([^"]*)"""".r
+val VersionPattern = """ThisBuild / version := "([^"]*)"""".r
 val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
   case VersionPattern(ver) => ver
   case ex =>
