@@ -23,14 +23,14 @@ object MapShapedWriter {
 
   final implicit def labelledHConsWriter[Original, K <: Symbol, H, T <: HList](implicit
       key: Witness.Aux[K],
-      hConfigWriter: Derivation[Lazy[ConfigWriter[H]]],
+      hConfigWriter: Lazy[ConfigWriter[H]],
       tConfigWriter: Lazy[MapShapedWriter[Original, T]],
       hint: ProductHint[Original]
   ): MapShapedWriter[Original, FieldType[K, H] :: T] =
     new MapShapedWriter[Original, FieldType[K, H] :: T] {
       override def to(t: FieldType[K, H] :: T): ConfigValue = {
         val rem = tConfigWriter.value.to(t.tail)
-        val valueOpt = hConfigWriter.value.value match {
+        val valueOpt = hConfigWriter.value match {
           case tc: WritesMissingKeys[H @unchecked] =>
             tc.toOpt(t.head)
           case w =>

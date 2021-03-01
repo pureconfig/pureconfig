@@ -39,4 +39,6 @@ scalacOptions ++= Seq(
   "-Ywarn-value-discard",
   lintFlags.value)
 
+addCompilerPlugin("io.tryp" % "splain" % "0.5.8" cross CrossVersion.patch)
+
 scalafmtOnCompile := true
