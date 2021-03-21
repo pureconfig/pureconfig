@@ -5,7 +5,7 @@ import scala.reflect.runtime.universe._
 import _root_.squants._
 import _root_.squants.market._
 import pureconfig.module.squants.arbitrary._
-import pureconfig.{BaseSuite, ConfigConvert, Derivation}
+import pureconfig.{BaseSuite, ConfigConvert}
 
 class SquantsConvertTest extends BaseSuite {
   implicit val mc: MoneyContext = defaultMoneyContext
@@ -80,7 +80,7 @@ class SquantsConvertTest extends BaseSuite {
 
   def checkDimension[T <: Quantity[T]](
       dim: Dimension[T]
-  )(implicit tag: TypeTag[T], cc: Derivation[ConfigConvert[T]]): Unit = {
+  )(implicit tag: TypeTag[T], cc: ConfigConvert[T]): Unit = {
     implicit val arbitrary = quantityAbitrary(dim)
     checkArbitrary[T]
   }

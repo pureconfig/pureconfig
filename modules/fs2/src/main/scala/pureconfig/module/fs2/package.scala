@@ -11,7 +11,7 @@ import cats.implicits._
 import com.typesafe.config.ConfigRenderOptions
 import pureconfig.backend.ConfigFactoryWrapper
 import pureconfig.error.ConfigReaderException
-import pureconfig.{ConfigReader, ConfigSource, ConfigWriter, Derivation}
+import pureconfig.{ConfigReader, ConfigSource, ConfigWriter}
 
 package object fs2 {
 
@@ -25,7 +25,7 @@ package object fs2 {
     */
   def streamConfig[F[_], A](
       configStream: Stream[F, Byte]
-  )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+  )(implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] = {
     for {
       bytes <- configStream.compile.to(Array)
       string = new String(bytes, UTF_8)
@@ -43,10 +43,10 @@ package object fs2 {
     * @return the configuration as a stream of utf-8 bytes
     */
   def saveConfigToStream[F[_], A](config: A, options: ConfigRenderOptions = ConfigRenderOptions.defaults())(implicit
-      writer: Derivation[ConfigWriter[A]]
+      writer: ConfigWriter[A]
   ): Stream[F, Byte] = {
 
-    val asString = writer.value.to(config).render(options)
+    val asString = writer.to(config).render(options)
     Stream.emit(asString).through(text.utf8Encode)
   }
 

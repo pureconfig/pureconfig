@@ -38,7 +38,7 @@ trait ConfigWriter[A] {
   */
 object ConfigWriter extends BasicWriters with CollectionWriters with ProductWriters with ExportedWriters {
 
-  def apply[A](implicit writer: Derivation[ConfigWriter[A]]): ConfigWriter[A] = writer.value
+  def apply[A](implicit writer: ConfigWriter[A]): ConfigWriter[A] = writer
 
   /** Creates a `ConfigWriter` from a function.
     *

@@ -138,30 +138,83 @@ ConfigSource.default.load[Conf]
 ```
 
 In PureConfig, the derivation of config readers and writers is done by chaining implicits - the converters of larger
-structures (like `Conf`) depend on the implicit converters of smaller ones (like `Boolean` or `Custom`). However, Scala
-is not helpful in case one of those upstream dependencies is missing, limiting itself to showing the message above.
+structures (like `Conf`) depend on the implicit converters of smaller ones (like `Boolean` or `Custom`). However, the
+Scala compiler for Scala 2.x is not helpful in case one of those upstream dependencies is missing, limiting itself to
+showing the message above.
 
-Since version 0.8.0, PureConfig provides a way to obtain better error messages for those cases. To enable it, we need to
-add the following entry to our SBT project:
+To more efficiently debug these "implicit not found" errors, we recommend using [splain](https://github.com/tek/splain).
+Please refer to the project's documentation for instructions on how to include the compiler plugin.
 
-```scala
-scalacOptions += "-Xmacro-settings:materialize-derivations"
-```
-
-When code using PureConfig derived converters is compiled using the compiler flag above, an internal macro will analyze
-the dependencies between converters and show a much more helpful message in case of an error:
+When code using PureConfig derived converters is compiled using the compiler plugin recommended above, you will get a
+more thorough error message. In this particular case, the message will be quite large because there are some alternative
+implicit paths to try and the path until we arrive at an implicit not found outside PureConfig's derivation code is big:
 
 ```scala
 ConfigSource.default.load[Conf]
-// <console>:18: error: could not derive a ConfigReader instance for type Conf, because:
-//   - missing a ConfigReader instance for type ConfC, because:
-//     - missing a ConfigReader instance for type Option[Custom], because:
-//       - missing a ConfigReader instance for type Custom
-//     - missing a ConfigReader instance for type Custom2
-// 
-//        ConfigSource.default.load[Conf]
-//  
+// [error] !I reader: ConfigReader[Conf]
+// [error] shapeless.lazily.apply invalid because
+// [error] !I lv: DerivedConfigReader[Conf]
+// [error] ――DerivedConfigReader.productReader invalid because
+// [error]   !I gen: LabelledGeneric.Aux[Conf, Repr]
+// [error] ――――LabelledGeneric.materializeProduct invalid because
+// [error]     !I gen: Generic.Aux[Conf, V]
+// ...
+// [error]   ConfigSource.default.load[Conf]
+// [error]                            ^
 ```
 
-Since this is an experimental feature, it may not work as intended in some unforesseen cases. If you find any issue with
-it, please do open an issue!
+The error message above shows that the compiler tried various alternatives to create a `ConfigReader` for `Conf` but all
+of them failed due to some missing implicits deeper down in the path. A way to find which implicits we failed to provide
+as downstream users is to look for missing `ConfigReader` instances deeper in the chain. One of them is shown when
+attempting to use `ConfigReader.optionReader`:
+
+```scala
+// [error] !I reader: ConfigReader[Conf]
+// [error] shapeless.lazily.apply invalid because
+// [error] !I lv: DerivedConfigReader[Conf]
+// [error] ――DerivedConfigReader.productReader invalid because
+// [error]   !I gen: LabelledGeneric.Aux[Conf, Repr]
+// [error] ――――LabelledGeneric.materializeProduct invalid because
+// [error]     !I gen: Generic.Aux[Conf, V]
+// [error]
+// ...
+// [error] ――――――――――――――――――――――――――DerivedConfigReader.productReader invalid because
+// [error]                           !I cc: MapShapedReader[ConfC, Repr, DefaultRepr]
+// [error] ――――――――――――――――――――――――――――MapShapedReader.labelledHConsReader invalid because
+// ...
+// [error] ――――――――――――――――――――――――――――――――――ConfigReader.optionReader invalid because
+// [error]                                   !I conv: ConfigReader[Custom]
+// ...
+// [error]   ConfigSource.default.load[Conf]
+// [error]                            ^
+```
+
+This tells us that there's a missing `ConfigReader` in scope for type `Custom`. Since `Custom` isn't a case class nor a 
+sealed trait, we're unable to derive a `ConfigReader` for it using PureConfig's generic derivation. Making `Custom` a 
+case class or explicitly providing a `ConfigReader` instance for it helps us get rid of this error.
+
+Once that's fixed, we're still left with another error. Similarly, we can look for missing `ConfigReader` instances
+deeper in the chain. We're able to find one missing for `Custom2`:
+
+```scala
+// [error] !I reader: ConfigReader[Conf]
+// [error] shapeless.lazily.apply invalid because
+// [error] !I lv: DerivedConfigReader[Conf]
+// [error] ――DerivedConfigReader.productReader invalid because
+// [error]   !I gen: LabelledGeneric.Aux[Conf, Repr]
+// [error] ――――LabelledGeneric.materializeProduct invalid because
+// [error]     !I gen: Generic.Aux[Conf, V]
+// ...
+// [error] ――――――――――――――――――――――――――DerivedConfigReader.productReader invalid because
+// [error]                           !I cc: MapShapedReader[ConfC, Repr, DefaultRepr]
+// [error] ――――――――――――――――――――――――――――MapShapedReader.labelledHConsReader invalid because
+// [error]                             !I tConfigReader: MapShapedReader[ConfC, ('b ->> Custom2) :: HNil, Option[Custom2] :: HNil]
+// [error] ――――――――――――――――――――――――――――――MapShapedReader.labelledHConsReader invalid because
+// [error]                               !I hConfigReader: ConfigReader[Custom2]
+// ...
+// [error]   ConfigSource.default.load[Conf]
+// [error]                            ^
+```
+
+`Custom2` isn't also a case class nor a sealed trait, so either making it a case class or explicitly providing a
+`ConfigReader` instance would fix our error.
