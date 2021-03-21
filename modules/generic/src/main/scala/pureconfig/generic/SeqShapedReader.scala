@@ -1,9 +1,10 @@
 package pureconfig.generic
 
-import pureconfig._
-import pureconfig.error._
 import shapeless._
 import shapeless.ops.hlist.HKernelAux
+
+import pureconfig._
+import pureconfig.error._
 
 /** A `ConfigReader` for generic representations that reads values in the shape of a sequence.
   *

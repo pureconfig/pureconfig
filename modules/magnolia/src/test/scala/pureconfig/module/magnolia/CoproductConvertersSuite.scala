@@ -4,6 +4,7 @@ import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueFactory}
 import org.scalacheck.{Arbitrary, Gen}
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.module.magnolia.auto.reader._

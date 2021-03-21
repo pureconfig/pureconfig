@@ -9,6 +9,7 @@ import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, FailureReason}
 
 /** Add utilities to a scalatest `FlatSpec` to test `ConfigConvert` instances

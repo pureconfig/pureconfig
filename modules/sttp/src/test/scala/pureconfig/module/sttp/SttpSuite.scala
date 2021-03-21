@@ -1,8 +1,9 @@
 package pureconfig.module.sttp
 
+import com.typesafe.config.ConfigFactory
 import sttp.model.Uri
 import sttp.model.Uri._
-import com.typesafe.config.ConfigFactory
+
 import pureconfig.BaseSuite
 import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure}
 import pureconfig.generic.auto._

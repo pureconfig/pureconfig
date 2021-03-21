@@ -6,6 +6,7 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 import com.typesafe.config.ConfigValue
+
 import pureconfig.ConvertHelpers._
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
 

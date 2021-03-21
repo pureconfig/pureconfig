@@ -5,6 +5,7 @@ import scala.collection.immutable.{SortedMap, SortedSet}
 import cats.data._
 import cats.implicits._
 import com.typesafe.config.ConfigFactory.parseString
+
 import pureconfig.BaseSuite
 import pureconfig.generic.auto._
 import pureconfig.syntax._

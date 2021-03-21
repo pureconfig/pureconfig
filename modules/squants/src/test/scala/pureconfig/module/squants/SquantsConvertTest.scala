@@ -4,6 +4,7 @@ import scala.reflect.runtime.universe._
 
 import _root_.squants._
 import _root_.squants.market._
+
 import pureconfig.module.squants.arbitrary._
 import pureconfig.{BaseSuite, ConfigConvert, Derivation}
 

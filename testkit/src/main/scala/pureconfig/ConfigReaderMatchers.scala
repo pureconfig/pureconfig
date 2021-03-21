@@ -2,14 +2,15 @@ package pureconfig
 
 import java.net.URL
 
-import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory}
-
 import scala.reflect.ClassTag
+
+import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory}
 import org.scalatest._
-import org.scalatest.matchers.{MatchResult, Matcher}
-import pureconfig.error._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.{MatchResult, Matcher}
+
+import pureconfig.error._
 
 trait ConfigReaderMatchers { this: AnyFlatSpec with Matchers =>
 

@@ -3,11 +3,12 @@ package pureconfig
 import java.time._
 import java.time.format.DateTimeFormatter
 
+import scala.collection.JavaConverters._
+
 import com.typesafe.config.ConfigValueFactory
+
 import pureconfig.ConfigConvert.{catchReadError, viaNonEmptyString}
 import pureconfig.error.FailureReason
-
-import scala.collection.JavaConverters._
 
 /** Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
   *

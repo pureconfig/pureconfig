@@ -4,10 +4,11 @@ import scala.collection.JavaConverters._
 
 import com.typesafe.config.ConfigValueFactory
 import org.scalacheck.ScalacheckShapeless._
+import shapeless._
+
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, WrongSizeList}
 import pureconfig.generic.auto._
 import pureconfig.generic.hlist._
-import shapeless._
 
 class HListConvertersSuite extends BaseSuite {
 

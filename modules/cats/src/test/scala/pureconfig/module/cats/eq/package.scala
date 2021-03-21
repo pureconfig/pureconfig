@@ -5,6 +5,7 @@ import cats.kernel.instances.either._
 import cats.kernel.instances.tuple._
 import com.typesafe.config.ConfigValue
 import org.scalacheck.Arbitrary
+
 import pureconfig._
 import pureconfig.module.cats.arbitrary._
 import pureconfig.module.cats.instances._

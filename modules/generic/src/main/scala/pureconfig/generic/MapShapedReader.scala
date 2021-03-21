@@ -1,10 +1,11 @@
 package pureconfig.generic
 
+import shapeless._
+import shapeless.labelled.{FieldType, field}
+
 import pureconfig._
 import pureconfig.error.KeyNotFound
 import pureconfig.generic.ProductHint.UseOrDefault
-import shapeless._
-import shapeless.labelled.{FieldType, field}
 
 /** A specialized reader for generic representations that reads values in the shape of a config object, and is capable
   * of handling default values.

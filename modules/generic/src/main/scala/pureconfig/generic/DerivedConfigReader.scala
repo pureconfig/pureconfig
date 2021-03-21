@@ -1,9 +1,10 @@
 package pureconfig.generic
 
+import shapeless._
+
 import pureconfig._
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.generic.error.InvalidCoproductOption
-import shapeless._
 
 /** A `ConfigReader` derived with `shapeless`.
   *

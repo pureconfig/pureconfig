@@ -4,6 +4,7 @@ import scala.collection.JavaConverters._
 
 import org.joda.time._
 import org.scalacheck.{Arbitrary, Gen}
+
 import pureconfig.gen._
 
 package object arbitrary {

@@ -5,10 +5,11 @@ import enumeratum.EnumEntry.{Snakecase, Uppercase}
 import enumeratum._
 import enumeratum.values._
 import org.scalatest.Inspectors
-import pureconfig.generic.auto._
-import pureconfig.syntax._
+
 import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
+import pureconfig.generic.auto._
+import pureconfig.syntax._
 
 class EnumeratumConvertTest extends BaseSuite {
   sealed trait Greeting extends EnumEntry with Snakecase

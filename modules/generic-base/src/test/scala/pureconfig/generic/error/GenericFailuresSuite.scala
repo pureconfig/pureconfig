@@ -1,6 +1,7 @@
 package pureconfig.generic.error
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
+
 import pureconfig.BaseSuite
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey}
 

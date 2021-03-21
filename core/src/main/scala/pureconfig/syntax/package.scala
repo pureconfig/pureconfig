@@ -1,9 +1,10 @@
 package pureconfig
 
-import com.typesafe.config.{ConfigValue, Config => TypesafeConfig}
-import pureconfig.error.ConfigReaderException
-
 import scala.reflect.ClassTag
+
+import com.typesafe.config.{Config => TypesafeConfig, ConfigValue}
+
+import pureconfig.error.ConfigReaderException
 
 package object syntax {
   implicit class AnyWriterOps[A](val any: A) extends AnyVal {

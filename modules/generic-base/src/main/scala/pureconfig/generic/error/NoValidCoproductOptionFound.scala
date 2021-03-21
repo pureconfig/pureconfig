@@ -1,6 +1,7 @@
 package pureconfig.generic.error
 
 import com.typesafe.config.{ConfigRenderOptions, ConfigValue}
+
 import pureconfig.error.{ConfigReaderFailures, FailureReason}
 
 /** A failure reason given when a valid option for a coproduct cannot be found.

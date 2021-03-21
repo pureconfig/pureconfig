@@ -1,9 +1,10 @@
 package pureconfig.module
 
-import org.joda.time.{DateTimeZone, Duration, Instant, Interval}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
-import pureconfig.{ConfigConvert, ConfigReader}
+import org.joda.time.{DateTimeZone, Duration, Instant, Interval}
+
 import pureconfig.ConfigConvert.{catchReadError, viaNonEmptyString}
+import pureconfig.{ConfigConvert, ConfigReader}
 
 package object joda {
   implicit def instantConfigConvert: ConfigConvert[Instant] =

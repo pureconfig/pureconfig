@@ -4,8 +4,9 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import cats.effect.{Blocker, ContextShift, Sync}
-import pureconfig.{ConfigReader, ConfigSource, Derivation}
+
 import pureconfig.module.catseffect
+import pureconfig.{ConfigReader, ConfigSource, Derivation}
 
 package object syntax {
 

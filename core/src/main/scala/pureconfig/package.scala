@@ -11,6 +11,7 @@ import java.nio.file.{Files, Path}
 import scala.reflect.ClassTag
 
 import com.typesafe.config.{Config, ConfigRenderOptions}
+
 import pureconfig.error._
 
 package object pureconfig {

@@ -1,7 +1,8 @@
 package pureconfig.generic
 
-import pureconfig._
 import shapeless._
+
+import pureconfig._
 
 /** An object that provides methods for deriving `ConfigReader` and `ConfigWriter` instances on demand for value
   * classes, tuples, case classes and sealed traits.
