@@ -28,6 +28,7 @@ jobs:
           java-version: ${{ matrix.jdk }}
 
       - name: Check formatting
+        if: startsWith(matrix.scala, '2')
         run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll; scalafmtSbtCheck"
 
       - name: Compile

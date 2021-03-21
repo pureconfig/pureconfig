@@ -89,7 +89,9 @@ lazy val commonSettings = Seq(
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
-  scalafmtOnCompile := true,
+  // Even though Scalafmt won't raise any issues as long as you don't use Scala 3 specific syntax, it still lacks
+  // support for it (https://github.com/scalameta/scalafmt/issues/2216).
+  scalafmtOnCompile := forScalaVersions { case (2, _) => true; case _ => false }.value,
 
   autoAPIMappings := true,
 
