@@ -1,9 +1,9 @@
 package pureconfig.generic
 
 import com.typesafe.config.ConfigValue
-import pureconfig.{ConfigWriter, Derivation}
-import shapeless.labelled._
+import pureconfig.ConfigWriter
 import shapeless._
+import shapeless.labelled._
 
 /** A `ConfigWriter` for generic representations of coproducts.
   *
@@ -22,14 +22,14 @@ object CoproductConfigWriter {
   final implicit def cConsWriter[Original, Name <: Symbol, V <: Original, T <: Coproduct](implicit
       coproductHint: CoproductHint[Original],
       vName: Witness.Aux[Name],
-      vConfigWriter: Derivation[Lazy[ConfigWriter[V]]],
+      vConfigWriter: Lazy[ConfigWriter[V]],
       tConfigWriter: Lazy[CoproductConfigWriter[Original, T]]
   ): CoproductConfigWriter[Original, FieldType[Name, V] :+: T] =
     new CoproductConfigWriter[Original, FieldType[Name, V] :+: T] {
       override def to(t: FieldType[Name, V] :+: T): ConfigValue =
         t match {
           case Inl(l) =>
-            coproductHint.to(vConfigWriter.value.value.to(l), vName.value.name)
+            coproductHint.to(vConfigWriter.value.to(l), vName.value.name)
 
           case Inr(r) =>
             tConfigWriter.value.to(r)

@@ -24,13 +24,13 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
     * because, for instance, multiple representation of `a: A` are possible. Use [[checkRead]] for those representations.
     */
   def checkArbitrary[A](implicit
-      cc: Derivation[ConfigConvert[A]],
+      cc: ConfigConvert[A],
       arb: Arbitrary[A],
       tpe: TypeStringCompat[A],
       equality: Equality[A]
   ): Unit =
     it should s"read an arbitrary ${tpe.typeName}" in forAll { (a: A) =>
-      cc.value.from(cc.value.to(a)).value shouldEqual a
+      cc.from(cc.to(a)).value shouldEqual a
     }
 
   /** A more generic version of [[checkArbitrary]] where the type which will be written as `ConfigValue` is

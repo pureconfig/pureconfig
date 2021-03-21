@@ -50,12 +50,12 @@ package object configurable {
 
   def genericMapReader[K, V](
       keyParser: String => Either[FailureReason, K]
-  )(implicit readerV: Derivation[ConfigReader[V]]): ConfigReader[Map[K, V]] =
+  )(implicit readerV: ConfigReader[V]): ConfigReader[Map[K, V]] =
     ConfigReader.fromCursor { cursor =>
       cursor.asMap.flatMap { map =>
         map.foldLeft[ConfigReader.Result[Map[K, V]]](Right(Map.empty)) { case (acc, (key, valueCursor)) =>
           val eitherKeyOrError = cursor.scopeFailure(keyParser(key))
-          val eitherValueOrError = readerV.value.from(valueCursor)
+          val eitherValueOrError = readerV.from(valueCursor)
           ConfigReader.Result.zipWith(acc, ConfigReader.Result.zipWith(eitherKeyOrError, eitherValueOrError)(_ -> _))(
             _ + _
           )
@@ -65,10 +65,10 @@ package object configurable {
 
   def genericMapWriter[K, V](
       keyFormatter: K => String
-  )(implicit writerV: Derivation[ConfigWriter[V]]): ConfigWriter[Map[K, V]] =
+  )(implicit writerV: ConfigWriter[V]): ConfigWriter[Map[K, V]] =
     ConfigWriter.fromFunction[Map[K, V]](map =>
       ConfigValueFactory.fromMap(map.map { case (key, value) =>
-        keyFormatter(key) -> writerV.value.to(value)
+        keyFormatter(key) -> writerV.to(value)
       }.asJava)
     )
 }
