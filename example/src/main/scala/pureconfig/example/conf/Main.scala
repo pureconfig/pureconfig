@@ -16,8 +16,10 @@ This is an example of configuration for our directory watcher. The configuration
 - the path that is the directory to watch
 - a filter that will be used to decide if a path should be notified or not
 - the email configuration used to send emails
+
 The root namespace will be "dirwatch". For instance, valid property file for this
 configuration will contain:
+
 dirwatch.path="/path/to/observe"
 dirwatch.filter="*"
 dirwatch.email.host=host_of_email_service
