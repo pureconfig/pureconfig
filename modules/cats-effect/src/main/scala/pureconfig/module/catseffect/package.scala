@@ -192,7 +192,7 @@ package object catseffect {
       )
 
     val check =
-      F.suspend {
+      F.defer {
         if (!overrideOutputPath && Files.isRegularFile(outputPath)) fileAlreadyExists
         else if (Files.isDirectory(outputPath)) fileIsDirectory
         else F.unit
