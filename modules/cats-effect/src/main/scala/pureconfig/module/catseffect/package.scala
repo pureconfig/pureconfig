@@ -8,7 +8,7 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import cats.data.{EitherT, NonEmptyList}
-import cats.effect.{Blocker, ContextShift, Resource, Sync}
+import cats.effect.{Resource, Sync}
 import cats.implicits._
 import com.typesafe.config.{ConfigRenderOptions, Config => TypesafeConfig}
 import pureconfig._
@@ -45,9 +45,7 @@ package object catseffect {
     *         details on why it isn't possible
     */
   def loadF[F[_], A](
-      cs: ConfigSource,
-      blocker: Blocker
-  )(implicit F: Sync[F], csf: ContextShift[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
+      cs: ConfigSource)(implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     EitherT(blocker.delay(cs.cursor()))
       .subflatMap(reader.from)
       .leftMap(ConfigReaderException[A])
@@ -70,9 +68,7 @@ package object catseffect {
     *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
     *         details on why it isn't possible
     */
-  def loadConfigF[F[_], A](
-      blocker: Blocker
-  )(implicit F: Sync[F], csf: ContextShift[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
+  def loadConfigF[F[_], A](implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     loadF(ConfigSource.default, blocker)
 
   /** Load a configuration of type `A` from the standard configuration files
@@ -177,10 +173,9 @@ package object catseffect {
   def blockingSaveConfigAsPropertyFileF[F[_], A](
       conf: A,
       outputPath: Path,
-      blocker: Blocker,
       overrideOutputPath: Boolean = false,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], csf: ContextShift[F], writer: ConfigWriter[A]): F[Unit] = {
+  )(implicit F: Sync[F], writer: ConfigWriter[A]): F[Unit] = {
     val fileAlreadyExists =
       F.raiseError(
         new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
@@ -236,9 +231,8 @@ package object catseffect {
   def blockingSaveConfigToStreamF[F[_], A](
       conf: A,
       outputStream: OutputStream,
-      blocker: Blocker,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], csf: ContextShift[F], writer: ConfigWriter[A]): F[Unit] =
+  )(implicit F: Sync[F], writer: ConfigWriter[A]): F[Unit] =
     F.delay(writer.to(conf)).map { rawConf =>
       // HOCON requires UTF-8:
       // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json

@@ -6,7 +6,7 @@ import java.util.concurrent.Executors
 
 import scala.concurrent.ExecutionContext
 
-import cats.effect.{Blocker, ContextShift, IO}
+import cats.effect.IO
 import com.typesafe.config.ConfigFactory
 import pureconfig.{BaseSuite, ConfigSource}
 import pureconfig.error.{ConfigReaderException, ConvertFailure}
