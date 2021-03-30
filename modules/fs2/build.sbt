@@ -5,8 +5,8 @@ name := "pureconfig-fs2"
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "co.fs2" %% "fs2-core" % "2.5.3",
-  "co.fs2" %% "fs2-io" % "2.5.3"
+  "co.fs2" %% "fs2-core" % "2.5.4",
+  "co.fs2" %% "fs2-io" % "2.5.4"
 )
 
 developers := List(Developer("keirlawson", "Keir Lawson", "keirlawson@gmail.com", url("https://github.com/keirlawson")))
