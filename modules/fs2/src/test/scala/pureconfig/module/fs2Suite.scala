@@ -4,7 +4,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 import _root_.fs2.{Stream, text}
-import cats.effect.{IO, Timer}
+import cats.effect.IO
+import cats.effect.unsafe.implicits._
 import cats.implicits._
 import org.scalatest.EitherValues._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -14,8 +15,6 @@ import pureconfig.generic.auto._
 import pureconfig.module.{fs2 => testee}
 
 class fs2Suite extends AnyFlatSpec with Matchers {
-
-  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
   private def delayEachLine(stream: Stream[IO, String], delay: FiniteDuration) = {
     val byLine = stream.through(text.lines)
