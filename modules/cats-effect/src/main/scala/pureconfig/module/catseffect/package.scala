@@ -158,15 +158,10 @@ package object catseffect {
       )
 
     val check =
-      F.ifElseM(
-        F.blocking(!overrideOutputPath && Files.isRegularFile(outputPath)) -> fileAlreadyExists,
-        F.blocking(Files.isDirectory(outputPath)) -> fileIsDirectory
-      )(F.unit)
+      F.blocking(!overrideOutputPath && Files.isRegularFile(outputPath))
+        .ifM(fileAlreadyExists, F.blocking(Files.isDirectory(outputPath)).ifM(fileIsDirectory, F.unit))
 
-    val outputStream =
-      Resource.make(F.blocking(Files.newOutputStream(outputPath))) { os =>
-        F.blocking(os.close())
-      }
+    val outputStream = Resource.fromAutoCloseable(F.blocking(Files.newOutputStream(outputPath)))
 
     check >> outputStream.use { os =>
       blockingSaveConfigToStreamF(conf, os, options)
