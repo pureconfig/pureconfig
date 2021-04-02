@@ -3,8 +3,9 @@ package pureconfig.generic
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ConfigList, ConfigValue, ConfigValueFactory}
-import pureconfig.ConfigWriter
 import shapeless._
+
+import pureconfig.ConfigWriter
 
 /** A `ConfigWriter` for generic representations that writes values in the shape of a sequence.
   *
