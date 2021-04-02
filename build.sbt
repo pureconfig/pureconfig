@@ -142,7 +142,7 @@ lazy val lintFlags = forScalaVersions {
       "-Xlint:_,-unused",
       "-Xfatal-warnings",
       "-Yno-adapted-args",
-      "-Yrangepos",
+      "-Yrangepos", // Required by SemanticDB compiler plugin.
       "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
@@ -154,7 +154,7 @@ lazy val lintFlags = forScalaVersions {
       "UTF-8", // arg for -encoding
       "-feature",
       "-unchecked",
-      "-Yrangepos",
+      "-Yrangepos", // Required by SemanticDB compiler plugin.
       "-Ywarn-unused:_,-implicits",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
