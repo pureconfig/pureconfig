@@ -6,7 +6,7 @@ import scala.reflect.ClassTag
 import cats.effect.{Blocker, ContextShift, Sync}
 
 import pureconfig.module.catseffect
-import pureconfig.{ConfigReader, ConfigSource, Derivation}
+import pureconfig.{ConfigReader, ConfigSource}
 
 package object syntax {
 
@@ -15,11 +15,11 @@ package object syntax {
     @inline
     final def loadF[F[_], A](
         blocker: Blocker
-    )(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    )(implicit F: Sync[F], csf: ContextShift[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
       catseffect.loadF(cs, blocker)
 
     @deprecated("Use `cs.loadF[F, A](blocker)` instead", "0.12.3")
-    def loadF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+    def loadF[F[_], A](implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
       catseffect.loadF(cs)
   }
 }

@@ -77,8 +77,8 @@ package object arbitrary {
   implicit def arbConfigConvert[A: Arbitrary: Cogen]: Arbitrary[ConfigConvert[A]] =
     Arbitrary {
       for { reader <- arb[ConfigReader[A]]; writer <- arb[ConfigWriter[A]] } yield ConfigConvert.fromReaderAndWriter(
-        Derivation.Successful(reader),
-        Derivation.Successful(writer)
+        reader,
+        writer
       )
     }
 }

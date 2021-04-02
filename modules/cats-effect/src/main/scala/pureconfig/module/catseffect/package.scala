@@ -30,7 +30,7 @@ package object catseffect {
   @deprecated("Use `loadF[F, A](cs, blocker)` instead", "0.12.3")
   def loadF[F[_], A](
       cs: ConfigSource
-  )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] = {
+  )(implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] = {
     val delayedLoad = F.delay {
       cs.load[A].leftMap[Throwable](ConfigReaderException[A])
     }
@@ -48,9 +48,9 @@ package object catseffect {
   def loadF[F[_], A](
       cs: ConfigSource,
       blocker: Blocker
-  )(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  )(implicit F: Sync[F], csf: ContextShift[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     EitherT(blocker.delay(cs.cursor()))
-      .subflatMap(reader.value.from)
+      .subflatMap(reader.from)
       .leftMap(ConfigReaderException[A])
       .rethrowT
 
@@ -61,7 +61,7 @@ package object catseffect {
     *         details on why it isn't possible
     */
   @deprecated("Use `loadConfigF[F, A](blocker)` instead", "0.12.3")
-  def loadConfigF[F[_], A](implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  def loadConfigF[F[_], A](implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default)
 
   /** Load a configuration of type `A` from the standard configuration files
@@ -73,7 +73,7 @@ package object catseffect {
     */
   def loadConfigF[F[_], A](
       blocker: Blocker
-  )(implicit F: Sync[F], csf: ContextShift[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  )(implicit F: Sync[F], csf: ContextShift[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     loadF(ConfigSource.default, blocker)
 
   /** Load a configuration of type `A` from the standard configuration files
@@ -86,7 +86,7 @@ package object catseffect {
   @deprecated("Use `ConfigSource.default.at(namespace).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](
       namespace: String
-  )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  )(implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default.at(namespace))
 
   /** Load a configuration of type `A` from the given file. Note that standard configuration
@@ -100,7 +100,7 @@ package object catseffect {
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](
       path: Path
-  )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  )(implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.default(ConfigSource.file(path)))
 
   /** Load a configuration of type `A` from the given file. Note that standard configuration
@@ -115,7 +115,7 @@ package object catseffect {
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).at(namespace).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](path: Path, namespace: String)(implicit
       F: Sync[F],
-      reader: Derivation[ConfigReader[A]],
+      reader: ConfigReader[A],
       ct: ClassTag[A]
   ): F[A] =
     loadF[F, A](ConfigSource.default(ConfigSource.file(path)).at(namespace))
@@ -128,7 +128,7 @@ package object catseffect {
   @deprecated("Use `ConfigSource.fromConfig(conf).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](
       conf: TypesafeConfig
-  )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  )(implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     loadF[F, A](ConfigSource.fromConfig(conf))
 
   /** Load a configuration of type `A` from the given `Config`
@@ -139,7 +139,7 @@ package object catseffect {
   @deprecated("Use `ConfigSource.fromConfig(conf).at(namespace).loadF[F, A]` instead", "0.12.0")
   def loadConfigF[F[_], A](conf: TypesafeConfig, namespace: String)(implicit
       F: Sync[F],
-      reader: Derivation[ConfigReader[A]],
+      reader: ConfigReader[A],
       ct: ClassTag[A]
   ): F[A] =
     loadF[F, A](ConfigSource.fromConfig(conf).at(namespace))
@@ -161,7 +161,7 @@ package object catseffect {
       outputPath: Path,
       overrideOutputPath: Boolean = false,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
+  )(implicit F: Sync[F], writer: ConfigWriter[A]): F[Unit] =
     F.delay {
       pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options)
     }
@@ -181,7 +181,7 @@ package object catseffect {
       blocker: Blocker,
       overrideOutputPath: Boolean = false,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] = {
+  )(implicit F: Sync[F], csf: ContextShift[F], writer: ConfigWriter[A]): F[Unit] = {
     val fileAlreadyExists =
       F.raiseError(
         new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
@@ -193,7 +193,7 @@ package object catseffect {
       )
 
     val check =
-      F.suspend {
+      F.defer {
         if (!overrideOutputPath && Files.isRegularFile(outputPath)) fileAlreadyExists
         else if (Files.isDirectory(outputPath)) fileIsDirectory
         else F.unit
@@ -221,7 +221,7 @@ package object catseffect {
       conf: A,
       outputStream: OutputStream,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
+  )(implicit F: Sync[F], writer: ConfigWriter[A]): F[Unit] =
     F.delay {
       pureconfig.saveConfigToStream(conf, outputStream, options)
     }
@@ -239,8 +239,8 @@ package object catseffect {
       outputStream: OutputStream,
       blocker: Blocker,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], csf: ContextShift[F], writer: Derivation[ConfigWriter[A]]): F[Unit] =
-    F.delay(writer.value.to(conf)).map { rawConf =>
+  )(implicit F: Sync[F], csf: ContextShift[F], writer: ConfigWriter[A]): F[Unit] =
+    F.delay(writer.to(conf)).map { rawConf =>
       // HOCON requires UTF-8:
       // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json
       StandardCharsets.UTF_8.encode(rawConf.render(options)).array
@@ -262,7 +262,7 @@ package object catseffect {
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesF[F[_], A](
       files: NonEmptyList[Path]
-  )(implicit F: Sync[F], reader: Derivation[ConfigReader[A]], ct: ClassTag[A]): F[A] =
+  )(implicit F: Sync[F], reader: ConfigReader[A], ct: ClassTag[A]): F[A] =
     loadF[F, A](
       ConfigSource.default(
         files

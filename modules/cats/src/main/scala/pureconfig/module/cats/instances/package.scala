@@ -50,7 +50,7 @@ package object instances {
           fb.to(b).withFallback(fa.to(a))
         }
 
-        ConfigConvert.fromReaderAndWriter(Derivation.Successful(reader), Derivation.Successful(writer))
+        ConfigConvert.fromReaderAndWriter(reader, writer)
       }
     }
 

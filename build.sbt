@@ -12,10 +12,6 @@ scalafixDependencies in ThisBuild += "com.github.liancheng" %% "organize-imports
 lazy val core = (project in file("core"))
   .enablePlugins(BoilerplatePlugin, SbtOsgi)
   .settings(commonSettings)
-  .dependsOn(macros)
-
-lazy val macros = (project in file("macros"))
-  .settings(commonSettings)
 
 lazy val testkit = (project in file("testkit"))
   .settings(commonSettings)
@@ -92,12 +88,13 @@ lazy val commonSettings = Seq(
   scalacOptions ++= lintFlags.value,
 
   scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
-  scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
 
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
-  scalafmtOnCompile := true,
+  // Even though Scalafmt won't raise any issues as long as you don't use Scala 3 specific syntax, it still lacks
+  // support for it (https://github.com/scalameta/scalafmt/issues/2216).
+  scalafmtOnCompile := forScalaVersions { case (2, _) => true; case _ => false }.value,
 
   // We can't use Scalafix in Scala 3 yet.
   libraryDependencies ++= forScalaVersions {

@@ -18,38 +18,38 @@ trait WritesMissingKeys[A] { this: ConfigWriter[A] =>
   */
 trait CollectionWriters {
 
-  implicit def optionWriter[A](implicit conv: Derivation[ConfigWriter[A]]): ConfigWriter[Option[A]] =
+  implicit def optionWriter[A](implicit conv: ConfigWriter[A]): ConfigWriter[Option[A]] =
     new ConfigWriter[Option[A]] with WritesMissingKeys[Option[A]] {
       override def to(t: Option[A]): ConfigValue =
         t match {
-          case Some(v) => conv.value.to(v)
+          case Some(v) => conv.to(v)
           case None => ConfigValueFactory.fromAnyRef(null)
         }
 
-      def toOpt(t: Option[A]): Option[ConfigValue] = t.map(conv.value.to)
+      def toOpt(t: Option[A]): Option[ConfigValue] = t.map(conv.to)
     }
 
   implicit def traversableWriter[A, F[A] <: TraversableOnce[A]](implicit
-      configConvert: Derivation[ConfigWriter[A]]
+      configConvert: ConfigWriter[A]
   ): ConfigWriter[F[A]] =
     new ConfigWriter[F[A]] {
 
       override def to(ts: F[A]): ConfigValue = {
-        ConfigValueFactory.fromIterable(ts.toList.map(configConvert.value.to).asJava)
+        ConfigValueFactory.fromIterable(ts.toList.map(configConvert.to).asJava)
       }
     }
 
-  implicit def mapWriter[A](implicit configConvert: Derivation[ConfigWriter[A]]): ConfigWriter[Map[String, A]] =
+  implicit def mapWriter[A](implicit configConvert: ConfigWriter[A]): ConfigWriter[Map[String, A]] =
     new ConfigWriter[Map[String, A]] {
       override def to(keyVals: Map[String, A]): ConfigValue = {
-        ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.value.to).toMap.asJava)
+        ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.to).toMap.asJava)
       }
     }
 
-  implicit def arrayWriter[A](implicit writer: Derivation[ConfigWriter[A]]): ConfigWriter[Array[A]] =
+  implicit def arrayWriter[A](implicit writer: ConfigWriter[A]): ConfigWriter[Array[A]] =
     new ConfigWriter[Array[A]] {
       override def to(a: Array[A]): ConfigValue =
-        ConfigValueFactory.fromIterable(a.toList.map(writer.value.to).asJava)
+        ConfigValueFactory.fromIterable(a.toList.map(writer.to).asJava)
     }
 }
 

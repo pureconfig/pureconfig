@@ -24,7 +24,7 @@ object SeqShapedReader {
   }
 
   implicit def hConsReader[H, T <: HList](implicit
-      hr: Derivation[Lazy[ConfigReader[H]]],
+      hr: Lazy[ConfigReader[H]],
       tr: Lazy[SeqShapedReader[T]],
       tl: HKernelAux[T]
   ): SeqShapedReader[H :: T] =
@@ -36,7 +36,7 @@ object SeqShapedReader {
 
           case listCur =>
             // it's guaranteed that the list cursor is non-empty at this point due to the case above
-            val hv = hr.value.value.from(listCur.atIndexOrUndefined(0))
+            val hv = hr.value.from(listCur.atIndexOrUndefined(0))
             val tv = tr.value.from(listCur.tailOption.get)
             ConfigReader.Result.zipWith(hv, tv)(_ :: _)
         }

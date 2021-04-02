@@ -19,13 +19,13 @@ object CoproductReaderOptions {
 
   implicit def cConsReaderOptions[H, T <: Coproduct, Name <: Symbol](implicit
       hName: Witness.Aux[Name],
-      hConfigReader: Derivation[Lazy[ConfigReader[H]]],
+      hConfigReader: Lazy[ConfigReader[H]],
       tConfigReaderOptions: Lazy[CoproductReaderOptions[T]]
   ): CoproductReaderOptions[FieldType[Name, H] :+: T] =
     new CoproductReaderOptions[FieldType[Name, H] :+: T] {
       lazy val options = {
         val optionName = hName.value.name
-        val optionReader = hConfigReader.value.value.map[FieldType[Name, H] :+: T](v => Inl(field[Name](v)))
+        val optionReader = hConfigReader.value.map[FieldType[Name, H] :+: T](v => Inl(field[Name](v)))
         val remaining = tConfigReaderOptions.value.options.map { case (name, reader) =>
           name -> reader.map[FieldType[Name, H] :+: T](Inr.apply)
         }
