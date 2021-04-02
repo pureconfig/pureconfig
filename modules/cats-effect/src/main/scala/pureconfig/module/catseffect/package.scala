@@ -119,29 +119,7 @@ package object catseffect {
     * @param options the config rendering options
     * @return The return action will save out the supplied configuration upon invocation
     */
-  @deprecated(
-    "Use `blockingSaveConfigAsPropertyFileF[IO, A](conf, outputPat, blocker, overrideOutputPath, options)` instead",
-    "0.12.3"
-  )
   def saveConfigAsPropertyFileF[F[_], A](
-      conf: A,
-      outputPath: Path,
-      overrideOutputPath: Boolean = false,
-      options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], writer: ConfigWriter[A]): F[Unit] =
-    F.delay {
-      pureconfig.saveConfigAsPropertyFile(conf, outputPath, overrideOutputPath, options)
-    }
-
-  /** Save the given configuration into a property file
-    *
-    * @param conf The configuration to save
-    * @param outputPath Where to write the configuration
-    * @param overrideOutputPath Override the path if it already exists
-    * @param options the config rendering options
-    * @return The return action will save out the supplied configuration upon invocation
-    */
-  def blockingSaveConfigAsPropertyFileF[F[_], A](
       conf: A,
       outputPath: Path,
       overrideOutputPath: Boolean = false,
@@ -164,7 +142,7 @@ package object catseffect {
     val outputStream = Resource.fromAutoCloseable(F.blocking(Files.newOutputStream(outputPath)))
 
     check >> outputStream.use { os =>
-      blockingSaveConfigToStreamF(conf, os, options)
+      saveConfigToStreamF(conf, os, options)
     }
   }
 
@@ -175,24 +153,7 @@ package object catseffect {
     * @param options the config rendering options
     * @return The return action will save out the supplied configuration upon invocation
     */
-  @deprecated("Use `blockingSaveConfigToStreamF[IO, A](conf, outputStream, blocker, options)` instead", "0.12.3")
   def saveConfigToStreamF[F[_], A](
-      conf: A,
-      outputStream: OutputStream,
-      options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit F: Sync[F], writer: ConfigWriter[A]): F[Unit] =
-    F.delay {
-      pureconfig.saveConfigToStream(conf, outputStream, options)
-    }
-
-  /** Writes the configuration to the output stream and closes the stream
-    *
-    * @param conf The configuration to write
-    * @param outputStream The stream in which the configuration should be written
-    * @param options the config rendering options
-    * @return The return action will save out the supplied configuration upon invocation
-    */
-  def blockingSaveConfigToStreamF[F[_], A](
       conf: A,
       outputStream: OutputStream,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()

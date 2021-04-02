@@ -88,7 +88,7 @@ final class CatsEffectSuite extends BaseSuite {
     val outputStream = new BufferedOutputStream(new PipedOutputStream(pipeInput))
 
     val someConfig = SomeCaseClass(1234, "some string")
-    val save = blockingSaveConfigToStreamF[IO, SomeCaseClass](someConfig, outputStream)
+    val save = saveConfigToStreamF[IO, SomeCaseClass](someConfig, outputStream)
 
     pipeInput.available shouldBe 0
 
