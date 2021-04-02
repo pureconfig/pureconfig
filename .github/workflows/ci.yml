@@ -27,7 +27,7 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
 
-      - name: Check formatting
+      - name: Check formatting and run linter
         if: startsWith(matrix.scala, '2')
         run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll; scalafmtSbtCheck; scalafixAll --check"
 
