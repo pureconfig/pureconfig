@@ -6,8 +6,9 @@ import scala.language.higherKinds
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 import org.scalacheck.ScalacheckShapeless._
-import pureconfig._
+
 import pureconfig.ConfigConvert.catchReadError
+import pureconfig._
 import pureconfig.error.{KeyNotFound, WrongType}
 import pureconfig.module.magnolia.auto.reader._
 import pureconfig.module.magnolia.auto.writer._

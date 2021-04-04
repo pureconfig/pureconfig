@@ -1,7 +1,8 @@
 package pureconfig.module
 
-import _root_.cron4s.expr.CronExpr
 import _root_.cron4s.Cron
+import _root_.cron4s.expr.CronExpr
+
 import pureconfig.ConfigConvert
 import pureconfig.error.CannotConvert
 

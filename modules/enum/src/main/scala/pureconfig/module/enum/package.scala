@@ -1,11 +1,12 @@
 package pureconfig.module
 
+import scala.reflect.ClassTag
+
 import _root_.enum.Enum
+
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.viaNonEmptyString
 import pureconfig.error.CannotConvert
-
-import scala.reflect.ClassTag
 
 package object enum {
   implicit def enumConfigConvert[A](implicit e: Enum[A], ct: ClassTag[A]): ConfigConvert[A] = {

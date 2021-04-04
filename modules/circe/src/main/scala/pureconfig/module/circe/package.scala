@@ -1,11 +1,11 @@
 package pureconfig.module
 
-import pureconfig.{ConfigWriter, ConfigReader}
+import scala.collection.JavaConverters._
+
 import com.typesafe.config._
 import io.circe._
-import com.typesafe.config._
 
-import scala.collection.JavaConverters._
+import pureconfig.{ConfigReader, ConfigWriter}
 
 package object circe {
   private def cvToJson(cv: ConfigValue): Json = {

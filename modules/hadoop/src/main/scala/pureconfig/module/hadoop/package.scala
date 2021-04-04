@@ -1,9 +1,10 @@
 package pureconfig.module
 
-import _root_.org.apache.hadoop.fs.Path
-import pureconfig.ConfigConvert
-
 import scala.util.Try
+
+import _root_.org.apache.hadoop.fs.Path
+
+import pureconfig.ConfigConvert
 
 /** `ConfigConvert` instances for Hadoop data structures.
   */

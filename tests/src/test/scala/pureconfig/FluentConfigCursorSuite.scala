@@ -1,6 +1,7 @@
 package pureconfig
 
 import com.typesafe.config._
+
 import pureconfig.error._
 
 class FluentConfigCursorSuite extends BaseSuite {

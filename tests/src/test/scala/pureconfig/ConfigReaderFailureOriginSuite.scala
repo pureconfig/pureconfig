@@ -7,6 +7,7 @@ import java.net.URL
 
 import com.typesafe.config.{ConfigFactory, ConfigValueType}
 import org.scalatest.{EitherValues, Inside}
+
 import pureconfig.error._
 
 /** Suite of tests related to the origin of ConfigValues that raised failures.

@@ -1,10 +1,10 @@
 package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
-import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
-import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
-
 import scalaz.{Contravariant, Equal, InvariantFunctor, MonadError, Semigroup, Show}
+
+import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
+import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
 
 /** Instances of `scalaz` type classes for `ConfigReader`, `ConfigWriter`, `ConfigConvert`
   * and other `pureconfig` citizens.

@@ -1,6 +1,7 @@
 package pureconfig.module.cats
 
 import cats.data.NonEmptyList
+
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures}
 
 package object syntax {

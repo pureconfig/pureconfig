@@ -1,7 +1,6 @@
 package pureconfig
 
-import scala.collection.Factory
-import scala.collection.mutable
+import scala.collection.{Factory, mutable}
 
 /** A compatibility layer for creating `CanBuildFrom`-like generic methods that work both on Scala 2.13 and pre-2.13
   * versions.

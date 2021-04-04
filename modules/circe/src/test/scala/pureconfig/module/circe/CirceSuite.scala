@@ -6,6 +6,7 @@ import io.circe.literal._
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.syntax._

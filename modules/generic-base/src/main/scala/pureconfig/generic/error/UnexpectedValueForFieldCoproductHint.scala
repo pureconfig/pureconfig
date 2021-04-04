@@ -1,6 +1,7 @@
 package pureconfig.generic.error
 
 import com.typesafe.config.{ConfigRenderOptions, ConfigValue}
+
 import pureconfig.error.FailureReason
 
 /** A failure reason given when an unknown value was found in the discriminating field of a config value, when using a
