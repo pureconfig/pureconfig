@@ -2,6 +2,7 @@ package pureconfig.module.joda
 
 import org.joda.time._
 import org.joda.time.format._
+
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert._
 

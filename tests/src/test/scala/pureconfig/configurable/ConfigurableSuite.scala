@@ -5,10 +5,11 @@ import java.time.format.DateTimeFormatter
 
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigRenderOptions.concise
-import pureconfig.{BaseSuite, ConfigConvert, ConfigReader, ConfigWriter}
+
 import pureconfig.arbitrary._
 import pureconfig.error.{CannotConvert, UnknownKey}
 import pureconfig.syntax._
+import pureconfig.{BaseSuite, ConfigConvert, ConfigReader, ConfigWriter}
 
 class ConfigurableSuite extends BaseSuite {
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)

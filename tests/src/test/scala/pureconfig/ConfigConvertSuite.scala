@@ -2,6 +2,7 @@ package pureconfig
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory, ConfigValueType}
 import org.scalacheck.{Arbitrary, Gen}
+
 import pureconfig.ConfigConvertSuite._
 import pureconfig.error.{CannotConvert, ExceptionThrown, WrongType}
 

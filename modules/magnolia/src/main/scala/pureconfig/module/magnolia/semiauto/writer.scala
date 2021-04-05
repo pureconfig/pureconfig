@@ -4,6 +4,7 @@ import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 import magnolia._
+
 import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.{EnumerationConfigWriterBuilder, MagnoliaConfigWriter}
 import pureconfig.{ConfigFieldMapping, ConfigWriter, KebabCase, PascalCase}

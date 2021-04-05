@@ -2,13 +2,13 @@ package pureconfig.module.scalaz
 
 import com.typesafe.config.ConfigValue
 import org.scalacheck.{Arbitrary, Gen}
-import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
-import pureconfig.module.scalaz.arbitrary._
-import pureconfig.module.scalaz.instances._
-
 import scalaz.Equal
 import scalaz.std.either._
 import scalaz.std.tuple._
+
+import pureconfig.module.scalaz.arbitrary._
+import pureconfig.module.scalaz.instances._
+import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
 
 package object equal {
 

@@ -5,6 +5,7 @@ import scala.collection.JavaConverters._
 import com.typesafe.config.{Config, ConfigValue, ConfigValueFactory}
 import org.scalacheck.Arbitrary.{arbitrary => arb}
 import org.scalacheck.{Arbitrary, Cogen, Gen}
+
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure}
 

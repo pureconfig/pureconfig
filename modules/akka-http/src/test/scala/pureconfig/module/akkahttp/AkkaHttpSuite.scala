@@ -1,11 +1,12 @@
 package pureconfig.module.akkahttp
 
-import com.typesafe.config.ConfigFactory
 import akka.http.scaladsl.model.Uri
-import pureconfig.{BaseSuite, ConfigWriter}
+import com.typesafe.config.ConfigFactory
+
 import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure}
 import pureconfig.generic.auto._
 import pureconfig.syntax._
+import pureconfig.{BaseSuite, ConfigWriter}
 
 class AkkaHttpSuite extends BaseSuite {
 

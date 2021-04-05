@@ -6,10 +6,11 @@ import java.time.Instant
 
 import com.typesafe.config.{ConfigValue, ConfigValueType}
 import org.scalatest.EitherValues
-import pureconfig.{BaseSuite, ConfigSource}
+
 import pureconfig.error._
 import pureconfig.generic.auto._
 import pureconfig.module.yaml.error.NonStringKeyFound
+import pureconfig.{BaseSuite, ConfigSource}
 
 class YamlConfigSourceSuite extends BaseSuite with EitherValues {
 

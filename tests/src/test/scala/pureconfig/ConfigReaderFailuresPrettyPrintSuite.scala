@@ -6,6 +6,7 @@ package pureconfig
 import java.net.URL
 
 import com.typesafe.config._
+
 import pureconfig.error._
 
 /** Suite of tests related to the pretty printing of config reader failures.

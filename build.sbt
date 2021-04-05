@@ -6,6 +6,9 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 organization in ThisBuild := "com.github.pureconfig"
 
+// Enable the OrganizeImports Scalafix rule.
+scalafixDependencies in ThisBuild += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+
 lazy val core = (project in file("core"))
   .enablePlugins(BoilerplatePlugin, SbtOsgi)
   .settings(commonSettings)
@@ -93,6 +96,13 @@ lazy val commonSettings = Seq(
   // support for it (https://github.com/scalameta/scalafmt/issues/2216).
   scalafmtOnCompile := forScalaVersions { case (2, _) => true; case _ => false }.value,
 
+  // We can't use Scalafix in Scala 3 yet.
+  libraryDependencies ++= forScalaVersions {
+    case (2, _) => List(compilerPlugin(scalafixSemanticdb))
+    case _ => List.empty
+  }.value,
+  scalafixOnCompile := forScalaVersions { case (2, _) => true; case _ => false }.value,
+
   autoAPIMappings := true,
 
   publishMavenStyle := true,
@@ -129,6 +139,7 @@ lazy val lintFlags = forScalaVersions {
       "-Xlint:_,-unused",
       "-Xfatal-warnings",
       "-Yno-adapted-args",
+      "-Yrangepos", // Required by SemanticDB compiler plugin.
       "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
@@ -140,6 +151,7 @@ lazy val lintFlags = forScalaVersions {
       "UTF-8", // arg for -encoding
       "-feature",
       "-unchecked",
+      "-Yrangepos", // Required by SemanticDB compiler plugin.
       "-Ywarn-unused:_,-implicits",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"

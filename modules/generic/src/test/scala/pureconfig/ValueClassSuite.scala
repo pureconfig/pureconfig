@@ -1,7 +1,8 @@
 package pureconfig
 
-import pureconfig.generic.auto._
 import shapeless.test.illTyped
+
+import pureconfig.generic.auto._
 
 final class IntWrapper(val inner: Int) extends AnyVal {
   override def toString: String = s"IntWrapper($inner)"

@@ -1,12 +1,12 @@
 package pureconfig.module
 
-import _root_.sttp.model._
+import scala.util.{Failure, Success, Try}
+
 import _root_.sttp.model.Uri._
+import _root_.sttp.model._
 
 import pureconfig.ConfigReader
 import pureconfig.error.CannotConvert
-
-import scala.util.{Failure, Success, Try}
 
 package object sttp {
 

@@ -1,6 +1,7 @@
 package pureconfig.backend
 
 import com.typesafe.config._
+
 import pureconfig.ConfigReader.Result
 import pureconfig.backend.ErrorUtil._
 
