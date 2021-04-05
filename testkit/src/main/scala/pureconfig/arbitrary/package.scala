@@ -9,6 +9,7 @@ import java.util.UUID
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
 import org.scalacheck.{Arbitrary, Gen}
+
 import pureconfig.data.Percentage
 import pureconfig.gen._
 

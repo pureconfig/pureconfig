@@ -3,7 +3,8 @@ package pureconfig.module.catseffect
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-import cats.effect.Sync
+import cats.effect.{Blocker, ContextShift, Sync}
+
 import pureconfig.module.catseffect
 import pureconfig.{ConfigReader, ConfigSource}
 

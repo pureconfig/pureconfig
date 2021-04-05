@@ -2,6 +2,7 @@ package pureconfig.module.cats
 
 import cats._
 import com.typesafe.config.{Config, ConfigFactory, ConfigValue}
+
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures}
 

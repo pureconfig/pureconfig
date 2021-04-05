@@ -1,6 +1,7 @@
 package pureconfig.generic
 
 import com.typesafe.config.ConfigValue
+
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailures, UnknownKey}
 

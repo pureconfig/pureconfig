@@ -5,6 +5,7 @@ import scala.util.{Failure, Success, Try}
 
 import com.typesafe.config.ConfigValueType._
 import com.typesafe.config._
+
 import pureconfig.backend.PathUtil
 import pureconfig.error._
 

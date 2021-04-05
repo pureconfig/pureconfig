@@ -4,6 +4,7 @@ import scala.reflect.ClassTag
 
 import _root_.enumeratum._
 import _root_.enumeratum.values._
+
 import pureconfig.ConfigConvert
 import pureconfig.ConfigConvert.{viaNonEmptyString, viaNonEmptyStringOpt, viaStringOpt}
 import pureconfig.error.CannotConvert

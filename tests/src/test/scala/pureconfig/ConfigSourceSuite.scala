@@ -3,6 +3,7 @@ package pureconfig
 import java.io.IOException
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueType}
+
 import pureconfig.PathUtils._
 import pureconfig.error._
 

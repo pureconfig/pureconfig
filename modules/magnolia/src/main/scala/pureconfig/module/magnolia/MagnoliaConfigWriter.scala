@@ -5,6 +5,7 @@ import scala.reflect.ClassTag
 
 import _root_.magnolia._
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
+
 import pureconfig._
 import pureconfig.generic.{CoproductHint, ProductHint}
 

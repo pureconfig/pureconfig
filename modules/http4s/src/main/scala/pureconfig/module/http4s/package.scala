@@ -1,6 +1,7 @@
 package pureconfig.module
 
 import org.http4s.Uri
+
 import pureconfig.error.CannotConvert
 import pureconfig.{ConfigReader, ConfigWriter}
 

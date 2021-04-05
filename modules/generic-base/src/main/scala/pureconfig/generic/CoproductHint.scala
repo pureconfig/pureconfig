@@ -1,6 +1,7 @@
 package pureconfig.generic
 
 import com.typesafe.config.{ConfigObject, ConfigValue, ConfigValueType}
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.{Attempt, Use}

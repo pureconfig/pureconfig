@@ -1,8 +1,9 @@
 package pureconfig.generic
 
 import com.typesafe.config._
-import pureconfig._
 import shapeless._
+
+import pureconfig._
 
 /** A `ConfigWriter` derived with `shapeless`.
   *

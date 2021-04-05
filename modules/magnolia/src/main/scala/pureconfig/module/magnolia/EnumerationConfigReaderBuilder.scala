@@ -4,6 +4,7 @@ import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 import magnolia._
+
 import pureconfig.ConfigReader.Result
 import pureconfig.error.CannotConvert
 import pureconfig.generic.error.NoValidCoproductOptionFound

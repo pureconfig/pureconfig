@@ -1,9 +1,10 @@
 package pureconfig.generic
 
 import com.typesafe.config.ConfigValue
-import pureconfig.ConfigWriter
 import shapeless._
 import shapeless.labelled._
+
+import pureconfig.ConfigWriter
 
 /** A `ConfigWriter` for generic representations of coproducts.
   *

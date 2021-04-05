@@ -8,6 +8,7 @@ import java.net.URL
 import java.nio.file.Path
 
 import com.typesafe.config.ConfigOrigin
+
 import pureconfig.ConfigCursor
 
 /** A representation of a failure raised from reading a config. The failure contains an optional file system location of

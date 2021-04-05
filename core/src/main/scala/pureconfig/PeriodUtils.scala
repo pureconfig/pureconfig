@@ -5,6 +5,7 @@ import java.time.Period
 import scala.util.{Success, Try}
 
 import com.typesafe.config.impl.ConfigImplUtil
+
 import pureconfig.error.{CannotConvert, FailureReason}
 
 /** Utility functions for converting a `String` to a `Period`. The parser accepts the HOCON unit syntax.
