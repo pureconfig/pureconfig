@@ -3,6 +3,7 @@ package pureconfig.backend
 import java.io.FileNotFoundException
 
 import com.typesafe.config.{ConfigException, ConfigFactory}
+
 import pureconfig.BaseSuite
 import pureconfig.PathUtils._
 import pureconfig.error.{CannotParse, CannotReadFile}

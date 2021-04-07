@@ -8,6 +8,7 @@ import java.nio.file.Paths
 
 import com.typesafe.config._
 import org.scalatest.Inside
+
 import pureconfig.ConfigReader.Result
 import pureconfig.error._
 import pureconfig.syntax._

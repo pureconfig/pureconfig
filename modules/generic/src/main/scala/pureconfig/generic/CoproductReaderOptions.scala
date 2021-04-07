@@ -1,8 +1,9 @@
 package pureconfig.generic
 
-import pureconfig._
 import shapeless._
 import shapeless.labelled._
+
+import pureconfig._
 
 /** A typeclass to collect the `ConfigReader` options for a given coproduct, indexed by the coproduct name.
   */

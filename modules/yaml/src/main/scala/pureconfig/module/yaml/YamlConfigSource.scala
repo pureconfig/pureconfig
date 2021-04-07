@@ -8,11 +8,13 @@ import java.util.Base64
 import scala.collection.JavaConverters._
 import scala.util.Try
 import scala.util.control.NonFatal
+
 import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory, ConfigValue, ConfigValueFactory}
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.error.{Mark, MarkedYAMLException, YAMLException}
 import org.yaml.snakeyaml.nodes.Tag
+
 import pureconfig.ConfigReader.Result
 import pureconfig.error._
 import pureconfig.module.yaml.error.{NonStringKeyFound, UnsupportedYamlType}

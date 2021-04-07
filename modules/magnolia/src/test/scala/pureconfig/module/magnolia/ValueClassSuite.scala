@@ -2,10 +2,11 @@ package pureconfig.module.magnolia
 
 import scala.language.higherKinds
 
+import shapeless.test.illTyped
+
 import pureconfig._
 import pureconfig.module.magnolia.auto.reader._
 import pureconfig.module.magnolia.auto.writer._
-import shapeless.test.illTyped
 
 // NOTE: behavior differs from pureconfig.generic (value classes also need to be case classes)
 final case class IntWrapper(inner: Int) extends AnyVal {

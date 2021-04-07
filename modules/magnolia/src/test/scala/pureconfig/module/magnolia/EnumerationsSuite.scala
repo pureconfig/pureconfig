@@ -3,12 +3,13 @@ package pureconfig.module.magnolia
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
+import shapeless.test.illTyped
+
 import pureconfig._
 import pureconfig.error.WrongType
 import pureconfig.generic.error.NoValidCoproductOptionFound
 import pureconfig.module.magnolia.semiauto.reader._
 import pureconfig.module.magnolia.semiauto.writer._
-import shapeless.test.illTyped
 
 class EnumerationsSuite extends BaseSuite {
 

@@ -4,6 +4,7 @@ import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ConfigValueFactory, ConfigValueType}
 import org.scalacheck.ScalacheckShapeless._
+
 import pureconfig.error._
 import pureconfig.generic.auto._
 

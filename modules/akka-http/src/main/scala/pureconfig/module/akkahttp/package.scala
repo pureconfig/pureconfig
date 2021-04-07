@@ -1,11 +1,12 @@
 package pureconfig.module
 
-import akka.http.scaladsl.model.{IllegalUriException, Uri}
-import akka.http.scaladsl.model.Uri.ParsingMode
-import pureconfig.{ConfigReader, ConfigWriter}
-import pureconfig.error.{CannotConvert, ExceptionThrown}
-
 import scala.util.Try
+
+import akka.http.scaladsl.model.Uri.ParsingMode
+import akka.http.scaladsl.model.{IllegalUriException, Uri}
+
+import pureconfig.error.{CannotConvert, ExceptionThrown}
+import pureconfig.{ConfigReader, ConfigWriter}
 
 package object akkahttp {
 

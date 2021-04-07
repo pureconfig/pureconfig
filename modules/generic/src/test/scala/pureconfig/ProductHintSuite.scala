@@ -3,6 +3,7 @@ package pureconfig
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
+
 import pureconfig.error._
 import pureconfig.generic.ProductHint
 import pureconfig.generic.auto._

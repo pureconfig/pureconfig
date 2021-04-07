@@ -1,12 +1,12 @@
 package pureconfig.module.scalaz
 
-import com.typesafe.config.ConfigValue
-import pureconfig.{ConfigConvert, ConfigReader}
-import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
-
-import scalaz.{\/, Maybe, NonEmptyList, Validation}
-
 import scala.reflect.ClassTag
+
+import com.typesafe.config.ConfigValue
+import scalaz.{Maybe, NonEmptyList, Validation, \/}
+
+import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
+import pureconfig.{ConfigConvert, ConfigReader}
 
 /** Useful extension methods that bring `scalaz` data structures into `pureconfig` world.
   */

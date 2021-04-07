@@ -10,7 +10,8 @@ import scala.reflect.ClassTag
 import cats.data.{EitherT, NonEmptyList}
 import cats.effect.{Resource, Sync}
 import cats.implicits._
-import com.typesafe.config.{ConfigRenderOptions, Config => TypesafeConfig}
+import com.typesafe.config.{Config => TypesafeConfig, ConfigRenderOptions}
+
 import pureconfig._
 import pureconfig.error.ConfigReaderException
 

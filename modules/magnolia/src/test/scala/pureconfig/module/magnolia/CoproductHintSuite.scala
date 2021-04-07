@@ -3,13 +3,14 @@ package pureconfig.module.magnolia
 import scala.language.higherKinds
 
 import com.typesafe.config._
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic._
-import pureconfig.syntax._
 import pureconfig.generic.error.{CoproductHintException, UnexpectedValueForFieldCoproductHint}
 import pureconfig.module.magnolia.auto.reader._
 import pureconfig.module.magnolia.auto.writer._
+import pureconfig.syntax._
 
 class CoproductHintSuite extends BaseSuite {
 

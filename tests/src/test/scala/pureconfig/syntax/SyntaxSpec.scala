@@ -5,6 +5,7 @@ import scala.collection.immutable.{List, Map}
 import com.typesafe.config.ConfigFactory
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import pureconfig.ConfigReader
 import pureconfig.error.ConfigReaderException
 

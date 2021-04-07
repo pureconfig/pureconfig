@@ -1,9 +1,10 @@
 package pureconfig.generic
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
-import pureconfig.ConfigWriter
 import shapeless._
 import shapeless.labelled._
+
+import pureconfig.ConfigWriter
 
 /** A type class to build `ConfigWriter`s for sealed families of case objects where each type is encoded as a
   * `ConfigString` based on the type name.

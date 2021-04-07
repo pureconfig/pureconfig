@@ -2,6 +2,7 @@ package pureconfig
 
 import com.typesafe.config.{ConfigObject, ConfigValue, ConfigValueFactory}
 import org.scalacheck.{Arbitrary, Gen}
+
 import pureconfig.error._
 
 class ConfigReaderSuite extends BaseSuite {

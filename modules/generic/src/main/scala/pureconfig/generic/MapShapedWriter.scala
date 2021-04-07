@@ -3,9 +3,10 @@ package pureconfig.generic
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValue}
-import pureconfig._
 import shapeless._
 import shapeless.labelled.FieldType
+
+import pureconfig._
 
 /** A `ConfigWriter` for generic representations that writes values in the shape of a config object.
   *

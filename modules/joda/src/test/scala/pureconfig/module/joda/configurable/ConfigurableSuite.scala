@@ -2,8 +2,9 @@ package pureconfig.module.joda.configurable
 
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormat, ISOPeriodFormat, PeriodFormatter}
-import pureconfig.{BaseSuite, ConfigConvert}
+
 import pureconfig.module.joda.arbitrary._
+import pureconfig.{BaseSuite, ConfigConvert}
 
 class ConfigurableSuite extends BaseSuite {
 

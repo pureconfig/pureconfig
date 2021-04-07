@@ -1,11 +1,13 @@
 package pureconfig.module.javax
 
+import javax.security.auth.x500.X500Principal
+
 import _root_.javax.security.auth.kerberos.KerberosPrincipal
 import com.typesafe.config.ConfigFactory
-import javax.security.auth.x500.X500Principal
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import pureconfig.generic.auto._
 import pureconfig.syntax._
 

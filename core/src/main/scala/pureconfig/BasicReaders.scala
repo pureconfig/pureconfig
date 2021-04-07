@@ -1,7 +1,7 @@
 package pureconfig
 
 import java.io.File
-import java.math.{BigInteger, BigDecimal => JavaBigDecimal}
+import java.math.{BigDecimal => JavaBigDecimal, BigInteger}
 import java.net.{URI, URL}
 import java.nio.file.{Path, Paths}
 import java.time._
@@ -12,12 +12,13 @@ import java.util.regex.Pattern
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.math.{BigDecimal, BigInt}
 import scala.reflect.ClassTag
+import scala.util.Try
 import scala.util.matching.Regex
+
 import com.typesafe.config._
+
 import pureconfig.ConvertHelpers._
 import pureconfig.error._
-
-import scala.util.Try
 
 /** Trait containing `ConfigReader` instances for primitive types.
   */

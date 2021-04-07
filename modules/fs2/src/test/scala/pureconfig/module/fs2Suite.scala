@@ -10,6 +10,7 @@ import cats.implicits._
 import org.scalatest.EitherValues._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import pureconfig.error.ConfigReaderException
 import pureconfig.generic.auto._
 import pureconfig.module.{fs2 => testee}

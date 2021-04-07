@@ -1,9 +1,11 @@
 package pureconfig.module.cron4s
 
 import java.util.{Map => JMap}
-import com.typesafe.config.ConfigFactory
-import _root_.cron4s.expr.CronExpr
+
 import _root_.cron4s.Cron
+import _root_.cron4s.expr.CronExpr
+import com.typesafe.config.ConfigFactory
+
 import pureconfig.BaseSuite
 import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure}
 import pureconfig.generic.auto._
