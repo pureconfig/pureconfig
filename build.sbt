@@ -4,10 +4,10 @@ import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
-organization in ThisBuild := "com.github.pureconfig"
+ThisBuild / organization := "com.github.pureconfig"
 
 // Enable the OrganizeImports Scalafix rule.
-scalafixDependencies in ThisBuild += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
 lazy val core = (project in file("core"))
   .enablePlugins(BoilerplatePlugin, SbtOsgi)
@@ -82,15 +82,15 @@ lazy val commonSettings = Seq(
 
   resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
 
-  crossVersionSharedSources(unmanagedSourceDirectories in Compile),
-  crossVersionSharedSources(unmanagedSourceDirectories in Test),
+  crossVersionSharedSources(Compile / unmanagedSourceDirectories),
+  crossVersionSharedSources(Test / unmanagedSourceDirectories),
 
   scalacOptions ++= lintFlags.value,
 
-  scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
+  Test / scalacOptions ~= { _.filterNot(_.contains("-Ywarn-unused")) },
 
-  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
-  scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
+  Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
+  Test / console / scalacOptions := (Compile / console / scalacOptions).value,
 
   // Even though Scalafmt won't raise any issues as long as you don't use Scala 3 specific syntax, it still lacks
   // support for it (https://github.com/scalameta/scalafmt/issues/2216).
@@ -106,7 +106,7 @@ lazy val commonSettings = Seq(
   autoAPIMappings := true,
 
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   publishTo := sonatypePublishToBundle.value
   // format: on
 )
@@ -172,12 +172,12 @@ lazy val lintFlags = forScalaVersions {
 scalaVersion := scala212
 
 // do not publish the root project
-skip in publish := true
+publish / skip := true
 
 releaseCrossBuild := true
-releaseTagComment := s"Release ${(version in ThisBuild).value}"
-releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"
-releaseNextCommitMessage := s"Set version to ${(version in ThisBuild).value}"
+releaseTagComment := s"Release ${(ThisBuild / version).value}"
+releaseCommitMessage := s"Set version to ${(ThisBuild / version).value}"
+releaseNextCommitMessage := s"Set version to ${(ThisBuild / version).value}"
 
 // redefine the release process due to https://github.com/sbt/sbt-release/issues/184
 // and to append `sonatypeReleaseAll`
