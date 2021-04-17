@@ -1,3 +1,8 @@
+### 0.15.0 (Apr 18, 2020)
+
+- Breaking changes
+  - The `Derivation` type class was removed. If you were relying on it, e.g. by using `Derivation.Successful` directly or using `Derivation` values in function signatures, you can simply use `ConfigReader` and `ConfigWriter` directly. The docs were updated to recommend [splain](https://github.com/tek/splain) as a tool to debug implicit not found errors.
+
 ### 0.14.1 (Feb 28, 2020)
 
 Support for Scala 2.11 was dropped and support for Scala 3.0 (RC1) was introduced.
