@@ -92,9 +92,7 @@ lazy val commonSettings = Seq(
   Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   Test / console / scalacOptions := (Compile / console / scalacOptions).value,
 
-  // Even though Scalafmt won't raise any issues as long as you don't use Scala 3 specific syntax, it still lacks
-  // support for it (https://github.com/scalameta/scalafmt/issues/2216).
-  scalafmtOnCompile := forScalaVersions { case (2, _) => true; case _ => false }.value,
+  scalafmtOnCompile := true,
 
   // We can't use Scalafix in Scala 3 yet.
   libraryDependencies ++= forScalaVersions {
