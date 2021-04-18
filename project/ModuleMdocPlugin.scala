@@ -45,15 +45,15 @@ object ModuleMdocPlugin extends AutoPlugin {
           // format: off
           name := docProjId,
 
-          mdocIn := (mdocIn in moduleProj).value,
-          mdocOut := (mdocOut in moduleProj).value,
+          mdocIn := (moduleProj / mdocIn).value,
+          mdocOut := (moduleProj / mdocOut).value,
           mdocExtraArguments += "--no-link-hygiene",
           mdocVariables := Map("VERSION" -> latestPureconfigRelease),
 
-          libraryDependencies ++= (mdocLibraryDependencies in moduleProj).value,
-          scalacOptions ++= (mdocScalacOptions in moduleProj).value,
+          libraryDependencies ++= (moduleProj / mdocLibraryDependencies).value,
+          scalacOptions ++= (moduleProj / mdocScalacOptions).value,
 
-          skip in publish := true
+          publish / skip := true
           // format: on
         )
 
