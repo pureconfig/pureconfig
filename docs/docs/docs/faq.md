@@ -26,7 +26,7 @@ can [shade](https://github.com/sbt/sbt-assembly#shading) shapeless by
 adding to your `assembly.sbt` file the following setting:
 
 ```scala
-assemblyShadeRules in assembly := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
+assembly / assemblyShadeRules := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
 ```
 
 #### Maven
