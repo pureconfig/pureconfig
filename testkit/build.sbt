@@ -16,4 +16,4 @@ libraryDependencies ++= Seq(
 // This is to avoid a warning due to the intransitive dependency of scalaTestPlusScalaCheck.
 publishMavenStyle := false
 
-skip in publish := true
+publish / skip := true
