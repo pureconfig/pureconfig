@@ -28,13 +28,13 @@ fi
 ls -d -1 "$WEBSITE_DIR"/** | grep -Ev 'v[0-9]+\.[0-9]+' | xargs rm -r
 
 # generate the main website pages
-sbt "set siteDirectory in docs := file(\"$WEBSITE_DIR\")" \
+sbt "set docs / siteDirectory := file(\"$WEBSITE_DIR\")" \
     makeMicrosite
 
 # generate the website pages for this version
 rm -rf 'docs/target/streams/_global/makeSite'
-sbt "set siteDirectory in docs := file(\"$WEBSITE_DIR/v$VERSION\")" \
-    "set micrositeBaseUrl in docs := \"v$VERSION\"" \
+sbt "set docs / siteDirectory := file(\"$WEBSITE_DIR/v$VERSION\")" \
+    "set docs / micrositeBaseUrl := \"v$VERSION\"" \
     makeMicrosite
 
 # show Git status and prompt for user confirmation before pushing changes
