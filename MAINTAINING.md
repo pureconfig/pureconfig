@@ -2,7 +2,7 @@
 
 This document outlines useful information for PureConfig maintainers to do day-to-day tasks like releasing new versions.
 
-# Releasing a new version
+## Releasing a new version
 
 There are a few steps we follow every time we publish a new PureConfig version to Sonatype:
 
