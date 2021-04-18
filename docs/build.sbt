@@ -28,4 +28,4 @@ micrositeGitterChannel := false // ugly
 mdocExtraArguments += "--no-link-hygiene"
 mdocVariables := Map("VERSION" -> version.value)
 
-skip in publish := true
+publish / skip := true
