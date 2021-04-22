@@ -24,7 +24,7 @@ object Product {
       def from(cur: ConfigCursor): ConfigReader.Result[A] =
         for {
           objCur <- cur.asObjectCursor
-          result <-
+          result <- {
             val results =
               for {
                 (field, reader) <- summonFor[A]
@@ -42,6 +42,7 @@ object Product {
                   .foldLeft[Tuple](EmptyTuple)((t, v) => v *: t)
                   .asInstanceOf[m.MirroredElemTypes]
               )
+          }
         } yield m.fromProduct(result)
     }
   }
