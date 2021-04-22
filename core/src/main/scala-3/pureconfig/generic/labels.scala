@@ -9,8 +9,9 @@ inline def labelsFor[T <: Tuple]: List[String] =
 inline def transformedLabelsFor[T <: Tuple](
   inline transform: String => String
 ): List[String] =
-  inline erasedValue[T] match
+  inline erasedValue[T] match {
     case _: (h *: t) =>
       transform(constValue[h & String]) :: transformedLabelsFor[t](transform)
 
     case _: EmptyTuple => Nil
+  }

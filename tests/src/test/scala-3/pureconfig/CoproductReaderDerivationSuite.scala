@@ -2,18 +2,19 @@ package pureconfig
 
 import scala.language.higherKinds
 
-import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueFactory}
+import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.error._
 
-enum AnimalConfig derives ConfigReader:
+enum AnimalConfig derives ConfigReader {
   case DogConfig(age: Int)
   case CatConfig(age: Int)
   case BirdConfig(canFly: Boolean)
+}
 
 class CoproductReaderDerivationSuite extends BaseSuite {
 
-  import AnimalConfig.*
+  import AnimalConfig._
 
   behavior of "ConfigConvert"
 

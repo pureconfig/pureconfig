@@ -9,12 +9,13 @@ import pureconfig.error.WrongType
 import pureconfig.generic.{EnumConfigReader, deriveForEnum}
 import pureconfig.generic.error.NoValidCoproductOptionFound
 
-enum Color derives EnumConfigReader:
+enum Color derives EnumConfigReader {
   case RainyBlue, SunnyYellow
+}
 
 class EnumerationReaderDerivationSuite extends BaseSuite {
 
-  import Color.*
+  import Color._
 
   behavior of "deriveEnumeration"
 
