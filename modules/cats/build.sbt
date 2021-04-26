@@ -8,7 +8,7 @@ crossScalaVersions := Seq(scala212, scala213)
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "2.6.0",
   "org.typelevel" %% "cats-laws" % "2.6.0" % "test",
-  "org.typelevel" %% "discipline-scalatest" % "2.1.3" % "test"
+  "org.typelevel" %% "discipline-scalatest" % "2.1.4" % "test"
 )
 
 developers := List(
