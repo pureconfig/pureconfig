@@ -8,7 +8,8 @@ import pureconfig.error._
 
 /** A `ConfigReader` for generic representations that reads values in the shape of a sequence.
   *
-  * @tparam Repr the generic representation
+  * @tparam Repr
+  *   the generic representation
   */
 private[generic] trait SeqShapedReader[Repr] extends ConfigReader[Repr]
 
