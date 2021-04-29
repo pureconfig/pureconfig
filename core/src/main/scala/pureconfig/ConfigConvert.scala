@@ -42,7 +42,7 @@ trait ConfigConvert[A] extends ConfigReader[A] with ConfigWriter[A] { outer =>
   */
 object ConfigConvert extends ConvertHelpers {
 
-  def apply[A](implicit conv: Derivation[ConfigConvert[A]]): ConfigConvert[A] = conv.value
+  def apply[A](implicit conv: ConfigConvert[A]): ConfigConvert[A] = conv
 
   def apply[A](reader: ConfigReader[A], writer: ConfigWriter[A]): ConfigConvert[A] =
     new ConfigConvert[A] {
@@ -51,10 +51,10 @@ object ConfigConvert extends ConvertHelpers {
     }
 
   implicit def fromReaderAndWriter[A](implicit
-      reader: Derivation[ConfigReader[A]],
-      writer: Derivation[ConfigWriter[A]]
+      reader: ConfigReader[A],
+      writer: ConfigWriter[A]
   ): ConfigConvert[A] =
-    ConfigConvert(reader.value, writer.value)
+    ConfigConvert(reader, writer)
 
   def viaString[A](fromF: String => Either[FailureReason, A], toF: A => String): ConfigConvert[A] =
     ConfigConvert(ConfigReader.fromString(fromF), ConfigWriter.toString(toF))
@@ -70,7 +70,7 @@ object ConfigConvert extends ConvertHelpers {
   def viaNonEmptyString[A](fromF: String => Either[FailureReason, A], toF: A => String)(implicit
       ct: ClassTag[A]
   ): ConfigConvert[A] = {
-    viaString[A](string => ensureNonEmpty(ct)(string).right.flatMap(s => fromF(s)), toF)
+    viaString[A](string => ensureNonEmpty(ct)(string).flatMap(s => fromF(s)), toF)
   }
 
   def viaNonEmptyStringTry[A: ClassTag](fromF: String => Try[A], toF: A => String): ConfigConvert[A] = {

@@ -4,6 +4,7 @@ import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.ProductHint

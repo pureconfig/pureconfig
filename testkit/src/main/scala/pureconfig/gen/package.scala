@@ -1,15 +1,17 @@
 package pureconfig
 
 import java.io.File
-import java.math.{BigInteger, BigDecimal => JavaBigDecimal}
+import java.math.{BigDecimal => JavaBigDecimal, BigInteger}
 import java.nio.file.{Path, Paths}
 import java.time._
 import java.time.{Duration => JavaDuration}
 
-import org.scalacheck.{Arbitrary, Gen}
-import pureconfig.data._
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.{Duration, FiniteDuration}
+
+import org.scalacheck.{Arbitrary, Gen}
+
+import pureconfig.data._
 
 package object gen {
   val genFiniteDuration: Gen[FiniteDuration] =

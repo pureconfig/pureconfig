@@ -1,10 +1,11 @@
 package pureconfig
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
+import shapeless.test.illTyped
+
 import pureconfig.error.WrongType
 import pureconfig.generic.error.NoValidCoproductOptionFound
 import pureconfig.generic.semiauto._
-import shapeless.test.illTyped
 
 class EnumerationsSuite extends BaseSuite {
 

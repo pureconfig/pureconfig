@@ -6,6 +6,7 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 import com.typesafe.config.ConfigValue
+
 import pureconfig.ConvertHelpers._
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
 
@@ -38,7 +39,7 @@ trait ConfigReader[A] {
     * @return a `ConfigReader` returning the results of this reader mapped by `f`.
     */
   def map[B](f: A => B): ConfigReader[B] =
-    fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailure(toResult(f)(v)) } }
+    fromCursor[B] { cur => from(cur).flatMap { v => cur.scopeFailure(toResult(f)(v)) } }
 
   /** Maps a function that can possibly fail over the results of this reader.
     *
@@ -48,7 +49,7 @@ trait ConfigReader[A] {
     *         as a success or failure.
     */
   def emap[B](f: A => Either[FailureReason, B]): ConfigReader[B] =
-    fromCursor[B] { cur => from(cur).right.flatMap { v => cur.scopeFailure(f(v)) } }
+    fromCursor[B] { cur => from(cur).flatMap { v => cur.scopeFailure(f(v)) } }
 
   /** Monadically bind a function over the results of this reader.
     *
@@ -57,7 +58,7 @@ trait ConfigReader[A] {
     * @return a `ConfigReader` returning the results of this reader bound by `f`.
     */
   def flatMap[B](f: A => ConfigReader[B]): ConfigReader[B] =
-    fromCursor[B] { cur => from(cur).right.flatMap(f(_).from(cur)) }
+    fromCursor[B] { cur => from(cur).flatMap(f(_).from(cur)) }
 
   /** Combines this reader with another, returning both results as a pair.
     *
@@ -131,8 +132,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
         case (Left(err), Right(_)) => Left(err)
         case (Right(_), Left(err)) => Left(err)
         case (Left(errs), Left(err)) => Left(errs ++ err)
-      }.right
-        .map(_.result())
+      }.map(_.result())
     }
 
     /** Merges two `Result`s using a given function.
@@ -152,7 +152,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
     def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
   }
 
-  def apply[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[A] = reader.value
+  def apply[A](implicit reader: ConfigReader[A]): ConfigReader[A] = reader
 
   /** Creates a `ConfigReader` from a function reading a `ConfigCursor`.
     *
@@ -172,7 +172,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
     * @return a `ConfigReader` for reading objects of type `A` using `fromF`.
     */
   def fromFunction[A](fromF: ConfigValue => ConfigReader.Result[A]) =
-    fromCursor(_.asConfigValue.right.flatMap(fromF))
+    fromCursor(_.asConfigValue.flatMap(fromF))
 
   def fromString[A](fromF: String => Either[FailureReason, A]): ConfigReader[A] =
     ConfigReader.fromCursor(_.asString).emap(fromF)
@@ -186,7 +186,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
   }
 
   def fromNonEmptyString[A](fromF: String => Either[FailureReason, A])(implicit ct: ClassTag[A]): ConfigReader[A] = {
-    fromString(string => ensureNonEmpty(ct)(string).right.flatMap(s => fromF(s)))
+    fromString(string => ensureNonEmpty(ct)(string).flatMap(s => fromF(s)))
   }
 
   def fromNonEmptyStringTry[A](fromF: String => Try[A])(implicit ct: ClassTag[A]): ConfigReader[A] = {

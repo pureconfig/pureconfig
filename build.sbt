@@ -4,14 +4,13 @@ import Dependencies.Version._
 import Utilities._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
-organization in ThisBuild := "com.github.pureconfig"
+ThisBuild / organization := "com.github.pureconfig"
+
+// Enable the OrganizeImports Scalafix rule.
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
 lazy val core = (project in file("core"))
   .enablePlugins(BoilerplatePlugin, SbtOsgi)
-  .settings(commonSettings)
-  .dependsOn(macros)
-
-lazy val macros = (project in file("macros"))
   .settings(commonSettings)
 
 lazy val testkit = (project in file("testkit"))
@@ -83,33 +82,39 @@ lazy val commonSettings = Seq(
 
   resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
 
-  crossVersionSharedSources(unmanagedSourceDirectories in Compile),
-  crossVersionSharedSources(unmanagedSourceDirectories in Test),
+  crossVersionSharedSources(Compile / unmanagedSourceDirectories),
+  crossVersionSharedSources(Test / unmanagedSourceDirectories),
 
   scalacOptions ++= lintFlags.value,
 
-  scalacOptions in Test ~= { _.filterNot(_.contains("-Ywarn-unused")) },
-  scalacOptions in Test += "-Xmacro-settings:materialize-derivations",
+  Test / scalacOptions ~= { _.filterNot(_.contains("-Ywarn-unused")) },
 
-  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
-  scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
+  Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
+  Test / console / scalacOptions := (Compile / console / scalacOptions).value,
 
   scalafmtOnCompile := true,
+
+  // We can't use Scalafix in Scala 3 yet.
+  libraryDependencies ++= forScalaVersions {
+    case (2, _) => List(compilerPlugin(scalafixSemanticdb))
+    case _ => List.empty
+  }.value,
+  scalafixOnCompile := forScalaVersions { case (2, _) => true; case _ => false }.value,
 
   autoAPIMappings := true,
 
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   publishTo := sonatypePublishToBundle.value
   // format: on
 )
 
 // add support for Scala version ranges such as "scala-2.12+" or "scala-2.13-" in source folders (single version folders
-// such as "scala-2.11" are natively supported by SBT).
+// such as "scala-2.12" are natively supported by SBT).
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val versionNumber = CrossVersion.partialVersion(scalaVersion.value)
-    val expectedVersions = Seq(scala211, scala212, scala213, scala30).flatMap(CrossVersion.partialVersion)
+    val expectedVersions = Seq(scala212, scala213, scala30).flatMap(CrossVersion.partialVersion)
     expectedVersions.flatMap { case v @ (major, minor) =>
       List(
         if (versionNumber.exists(_ <= v)) unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor-") }
@@ -122,21 +127,6 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
 }
 
 lazy val lintFlags = forScalaVersions {
-  case (2, 11) =>
-    List(
-      "-encoding",
-      "UTF-8", // arg for -encoding
-      "-feature",
-      "-unchecked",
-      "-deprecation",
-      "-Xlint",
-      "-Xfatal-warnings",
-      "-Yno-adapted-args",
-      "-Ywarn-unused-import",
-      "-Ywarn-dead-code",
-      "-Ywarn-numeric-widen"
-    )
-
   case (2, 12) =>
     List(
       "-encoding",
@@ -147,6 +137,7 @@ lazy val lintFlags = forScalaVersions {
       "-Xlint:_,-unused",
       "-Xfatal-warnings",
       "-Yno-adapted-args",
+      "-Yrangepos", // Required by SemanticDB compiler plugin.
       "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
@@ -158,6 +149,7 @@ lazy val lintFlags = forScalaVersions {
       "UTF-8", // arg for -encoding
       "-feature",
       "-unchecked",
+      "-Yrangepos", // Required by SemanticDB compiler plugin.
       "-Ywarn-unused:_,-implicits",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
@@ -178,12 +170,12 @@ lazy val lintFlags = forScalaVersions {
 scalaVersion := scala212
 
 // do not publish the root project
-skip in publish := true
+publish / skip := true
 
 releaseCrossBuild := true
-releaseTagComment := s"Release ${(version in ThisBuild).value}"
-releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"
-releaseNextCommitMessage := s"Set version to ${(version in ThisBuild).value}"
+releaseTagComment := s"Release ${(ThisBuild / version).value}"
+releaseCommitMessage := s"Set version to ${(ThisBuild / version).value}"
+releaseNextCommitMessage := s"Set version to ${(ThisBuild / version).value}"
 
 // redefine the release process due to https://github.com/sbt/sbt-release/issues/184
 // and to append `sonatypeReleaseAll`

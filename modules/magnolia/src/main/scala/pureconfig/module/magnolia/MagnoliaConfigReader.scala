@@ -1,6 +1,7 @@
 package pureconfig.module.magnolia
 
 import _root_.magnolia._
+
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailures, KeyNotFound, WrongSizeList}
 import pureconfig.generic.ProductHint.UseOrDefault
@@ -79,7 +80,7 @@ object MagnoliaConfigReader {
         def readerFor(option: String) =
           ctx.subtypes.find(_.typeName.short == option).map(_.typeclass)
 
-        hint.from(cur, ctx.subtypes.map(_.typeName.short).sorted).right.flatMap {
+        hint.from(cur, ctx.subtypes.map(_.typeName.short).sorted).flatMap {
           case CoproductHint.Use(cur, option) =>
             readerFor(option) match {
               case Some(value) => value.from(cur)

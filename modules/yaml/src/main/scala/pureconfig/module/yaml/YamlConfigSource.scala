@@ -8,11 +8,13 @@ import java.util.Base64
 import scala.collection.JavaConverters._
 import scala.util.Try
 import scala.util.control.NonFatal
+
 import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory, ConfigValue, ConfigValueFactory}
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.error.{Mark, MarkedYAMLException, YAMLException}
 import org.yaml.snakeyaml.nodes.Tag
+
 import pureconfig.ConfigReader.Result
 import pureconfig.error._
 import pureconfig.module.yaml.error.{NonStringKeyFound, UnsupportedYamlType}
@@ -48,7 +50,7 @@ final class YamlConfigSource private (
     * @return a config object source that produces YAML object documents read by this source
     */
   def asObjectSource: ConfigObjectSource =
-    ConfigObjectSource(fluentCursor().asObjectCursor.right.map(_.objValue.toConfig))
+    ConfigObjectSource(fluentCursor().asObjectCursor.map(_.objValue.toConfig))
 
   /** Returns a new source that produces a multi-document YAML read by this source as a config list.
     *
@@ -63,7 +65,6 @@ final class YamlConfigSource private (
             .asScala
             .map(yamlObjToConfigValue)
             .foldRight(Right(Nil): Result[List[ConfigValue]])(Result.zipWith(_, _)(_ :: _))
-            .right
             .map { cvs => ConfigValueFactory.fromIterable(cvs.asJava) }
         }
       }
@@ -84,16 +85,16 @@ final class YamlConfigSource private (
       obj match {
         case m: java.util.Map[AnyRef @unchecked, AnyRef @unchecked] =>
           val entries: Iterable[Result[(String, AnyRef)]] = m.asScala.map {
-            case (k: String, v) => aux(v).right.map { v: AnyRef => k -> v }
+            case (k: String, v) => aux(v).map { v: AnyRef => k -> v }
             case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
           }
-          Result.sequence(entries).right.map(_.toMap.asJava)
+          Result.sequence(entries).map(_.toMap.asJava)
 
         case xs: java.util.List[AnyRef @unchecked] =>
-          Result.sequence(xs.asScala.map(aux)).right.map(_.toList.asJava)
+          Result.sequence(xs.asScala.map(aux)).map(_.toList.asJava)
 
         case s: java.util.Set[AnyRef @unchecked] =>
-          Result.sequence(s.asScala.map(aux)).right.map(_.toSet.asJava)
+          Result.sequence(s.asScala.map(aux)).map(_.toSet.asJava)
 
         case _: java.lang.Integer | _: java.lang.Long | _: java.lang.Double | _: java.lang.String |
             _: java.lang.Boolean =>
@@ -112,7 +113,7 @@ final class YamlConfigSource private (
           Left(ConfigReaderFailures(UnsupportedYamlType(obj.toString, obj.getClass.getSimpleName)))
       }
 
-    aux(obj).right.map(ConfigValueFactory.fromAnyRef)
+    aux(obj).map(ConfigValueFactory.fromAnyRef)
   }
 
   // Opens and processes a YAML file, converting all exceptions into the most appropriate PureConfig errors.

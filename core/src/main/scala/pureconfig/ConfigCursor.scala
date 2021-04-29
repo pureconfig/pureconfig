@@ -5,6 +5,7 @@ import scala.util.{Failure, Success, Try}
 
 import com.typesafe.config.ConfigValueType._
 import com.typesafe.config._
+
 import pureconfig.backend.PathUtil
 import pureconfig.error._
 
@@ -173,7 +174,7 @@ sealed trait ConfigCursor {
     *         otherwise.
     */
   def asListCursor: ConfigReader.Result[ConfigListCursor] =
-    castOrFail(LIST, v => Right(v.asInstanceOf[ConfigList])).right.map(ConfigListCursor(_, pathElems))
+    castOrFail(LIST, v => Right(v.asInstanceOf[ConfigList])).map(ConfigListCursor(_, pathElems))
 
   /** Casts this cursor to a list of cursors.
     *
@@ -181,7 +182,7 @@ sealed trait ConfigCursor {
     *         otherwise.
     */
   def asList: ConfigReader.Result[List[ConfigCursor]] =
-    asListCursor.right.map(_.list)
+    asListCursor.map(_.list)
 
   /** Casts this cursor to a `ConfigObjectCursor`.
     *
@@ -189,7 +190,7 @@ sealed trait ConfigCursor {
     *         otherwise.
     */
   def asObjectCursor: ConfigReader.Result[ConfigObjectCursor] =
-    castOrFail(OBJECT, v => Right(v.asInstanceOf[ConfigObject])).right.map(ConfigObjectCursor(_, pathElems))
+    castOrFail(OBJECT, v => Right(v.asInstanceOf[ConfigObject])).map(ConfigObjectCursor(_, pathElems))
 
   /** Casts this cursor to a map from config keys to cursors.
     *
@@ -197,7 +198,7 @@ sealed trait ConfigCursor {
     *         otherwise.
     */
   def asMap: ConfigReader.Result[Map[String, ConfigCursor]] =
-    asObjectCursor.right.map(_.map)
+    asObjectCursor.map(_.map)
 
   /** Returns a cursor to the config at the path composed of given path segments.
     *
@@ -215,15 +216,15 @@ sealed trait ConfigCursor {
     */
   @deprecated("Use `asListCursor` and/or `asObjectCursor` instead", "0.10.1")
   def asCollectionCursor: ConfigReader.Result[Either[ConfigListCursor, ConfigObjectCursor]] = {
-    asConfigValue.right.flatMap { value =>
-      val listAtLeft = asListCursor.right.map(Left.apply)
-      lazy val mapAtRight = asObjectCursor.right.map(Right.apply)
+    asConfigValue.flatMap { value =>
+      val listAtLeft = asListCursor.map(Left.apply)
+      lazy val mapAtRight = asObjectCursor.map(Right.apply)
       listAtLeft.left.flatMap(_ => mapAtRight).left.flatMap(_ => failed(WrongType(value.valueType, Set(LIST, OBJECT))))
     }
   }
 
   def fluent: FluentConfigCursor =
-    FluentConfigCursor(asConfigValue.right.map(_ => this))
+    FluentConfigCursor(asConfigValue.map(_ => this))
 
   /** Returns a failed `ConfigReader` result resulting from scoping a `FailureReason` into the context of this cursor.
     *
@@ -265,8 +266,8 @@ sealed trait ConfigCursor {
       cast: ConfigValue => Either[FailureReason, A]
   ): ConfigReader.Result[A] = {
 
-    asConfigValue.right.flatMap { value =>
-      scopeFailure(ConfigCursor.transform(value, expectedType).right.flatMap(cast))
+    asConfigValue.flatMap { value =>
+      scopeFailure(ConfigCursor.transform(value, expectedType).flatMap(cast))
     }
   }
 }

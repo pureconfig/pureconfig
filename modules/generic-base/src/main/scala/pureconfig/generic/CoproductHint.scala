@@ -1,6 +1,7 @@
 package pureconfig.generic
 
 import com.typesafe.config.{ConfigObject, ConfigValue, ConfigValueType}
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.{Attempt, Use}
@@ -60,16 +61,15 @@ class FieldCoproductHint[A](key: String) extends CoproductHint[A] {
 
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] = {
     for {
-      objCur <- cursor.asObjectCursor.right
-      valueCur <- objCur.atKey(key).right
-      valueStr <- valueCur.asString.right
+      objCur <- cursor.asObjectCursor
+      valueCur <- objCur.atKey(key)
+      valueStr <- valueCur.asString
       option <-
         options
           .find(valueStr == fieldValue(_))
           .toRight(
             ConfigReaderFailures(valueCur.failureFor(UnexpectedValueForFieldCoproductHint(valueCur.valueOpt.get)))
           )
-          .right
     } yield Use(objCur.withoutKey(key), option)
   }
 

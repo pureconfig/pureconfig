@@ -3,12 +3,12 @@ import Utilities._
 
 name := "pureconfig-cats"
 
-crossScalaVersions := Seq(scala211, scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.4.2" }.value,
-  "org.typelevel" %% "cats-laws" % forScalaVersions { case (2, 11) => "2.0.0"; case _ => "2.4.2" }.value % "test",
-  "org.typelevel" %% "discipline-scalatest" % "2.1.1" % "test"
+  "org.typelevel" %% "cats-core" % "2.6.0",
+  "org.typelevel" %% "cats-laws" % "2.6.0" % "test",
+  "org.typelevel" %% "discipline-scalatest" % "2.1.4" % "test"
 )
 
 developers := List(

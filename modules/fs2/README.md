@@ -7,7 +7,7 @@ Adds support for loading and saving configurations from [fs2](https://github.com
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.14.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-fs2" % "0.15.0"
 ```
 
 ## Example
@@ -19,22 +19,15 @@ To load a configuration file from a path using cats-effect's `IO`:
 ```scala
 import pureconfig.generic.auto._
 import pureconfig.module.fs2._
-import cats.effect.{Blocker, IO, ContextShift}
+import cats.effect.IO
+import cats.effect.unsafe.implicits._
 import fs2.io.file
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.ExecutionContext
-
-import java.util.concurrent.Executors
 
 case class MyConfig(somefield: Int, anotherfield: String)
 
 val chunkSize = 4096
 
-implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
-val blocker: Blocker = Blocker.liftExecutorService(Executors.newCachedThreadPool())
-
-val configStream = file.readAll[IO](somePath, blocker, chunkSize)
+val configStream = fs2.io.file.Files[IO].readAll(somePath, chunkSize)
 
 val load: IO[MyConfig] = streamConfig[IO, MyConfig](configStream)
 ```
@@ -58,6 +51,7 @@ To create a byte stream from a configuration:
 import pureconfig.module.fs2._
 import fs2.text
 import cats.effect.IO
+import cats.effect.unsafe.implicits._
 
 import cats.instances.string._
 
@@ -69,7 +63,5 @@ val configStream2: fs2.Stream[IO, Byte] = saveConfigToStream(someConfig)
 And to confirm the stream has the values we expect:
 
 ```scala
-configStream.through(text.utf8Decode).showLinesStdOut.compile.drain.unsafeRunSync
-// somefield=1234
-// anotherfield=some string
+configStream.through(text.utf8Decode).printlns.compile.drain.unsafeRunSync()
 ```

@@ -1,7 +1,8 @@
 package pureconfig.generic
 
-import pureconfig._
 import shapeless._
+
+import pureconfig._
 
 /** An object that provides methods for deriving `ConfigReader` and `ConfigWriter` instances on demand for value
   * classes, tuples, case classes and sealed traits.
@@ -14,7 +15,7 @@ object semiauto {
       reader: Lazy[DerivedConfigReader[A]],
       writer: Lazy[DerivedConfigWriter[A]]
   ): ConfigConvert[A] =
-    ConfigConvert.fromReaderAndWriter(Derivation.Successful(reader.value), Derivation.Successful(writer.value))
+    ConfigConvert.fromReaderAndWriter(reader.value, writer.value)
 
   /** Derive a `ConfigReader` for a sealed family of case objects where each type is encoded as the kebab-case
     * representation of the type name.
@@ -63,7 +64,7 @@ object semiauto {
       writerBuilder: Lazy[EnumerationConfigWriterBuilder[A]]
   ): ConfigConvert[A] =
     ConfigConvert.fromReaderAndWriter(
-      Derivation.Successful(readerBuilder.value.build(transformName)),
-      Derivation.Successful(writerBuilder.value.build(transformName))
+      readerBuilder.value.build(transformName),
+      writerBuilder.value.build(transformName)
     )
 }

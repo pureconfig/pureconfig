@@ -7,6 +7,7 @@ import java.nio.file.Path
 import scala.reflect.ClassTag
 
 import com.typesafe.config._
+
 import pureconfig.ConfigReader.Result
 import pureconfig.backend.ConfigWrapper._
 import pureconfig.backend.{ConfigFactoryWrapper, PathUtil}
@@ -34,7 +35,7 @@ trait ConfigSource {
     * @return a cursor for a `ConfigValue` retrieved from this source.
     */
   def cursor(): Result[ConfigCursor] =
-    value().right.map(ConfigCursor(_, Nil))
+    value().map(ConfigCursor(_, Nil))
 
   /** Returns a fluent cursor for a `ConfigValue` retrieved from this source.
     *
@@ -57,8 +58,7 @@ trait ConfigSource {
     * @return A `Right` with the configuration if it is possible to create an instance of type
     *         `A` from this source, a `Failure` with details on why it isn't possible otherwise
     */
-  final def load[A](implicit reader: Derivation[ConfigReader[A]]): Result[A] =
-    cursor().right.flatMap(reader.value.from)
+  final def load[A](implicit reader: ConfigReader[A]): Result[A] = cursor().flatMap(reader.from)
 
   /** Loads a configuration of type `A` from this source. If it is not possible to create an
     * instance of `A`, this method throws a `ConfigReaderException`.
@@ -67,7 +67,7 @@ trait ConfigSource {
     * @return The configuration of type `A` loaded from this source.
     */
   @throws[ConfigReaderException[_]]
-  final def loadOrThrow[A: ClassTag](implicit reader: Derivation[ConfigReader[A]]): A = {
+  final def loadOrThrow[A: ClassTag](implicit reader: ConfigReader[A]): A = {
     load[A] match {
       case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[A](failures)
@@ -83,11 +83,11 @@ trait ConfigSource {
 final class ConfigObjectSource private (getConf: () => Result[Config]) extends ConfigSource {
 
   def value(): Result[ConfigObject] =
-    config().right.flatMap(_.resolveSafe()).right.map(_.root)
+    config().flatMap(_.resolveSafe()).map(_.root)
 
   // Avoids unnecessary cast on `ConfigCursor#asObjectCursor`.
   override def cursor(): Result[ConfigCursor] =
-    value().right.map(ConfigObjectCursor(_, Nil))
+    value().map(ConfigObjectCursor(_, Nil))
 
   /** Reads a `Config` from this config source. The returned config is usually unresolved, unless
     * the source forces it otherwise.
@@ -179,7 +179,7 @@ object ConfigSource {
     *         custom application config source.
     */
   def default(appSource: ConfigObjectSource): ConfigObjectSource =
-    ConfigObjectSource(appSource.config().right.flatMap(ConfigFactoryWrapper.load))
+    ConfigObjectSource(appSource.config().flatMap(ConfigFactoryWrapper.load))
 
   /** A config source that always provides empty configs.
     */
@@ -301,7 +301,7 @@ object ConfigSource {
     */
   private[pureconfig] def fromCursor(cur: FluentConfigCursor): ConfigSource =
     new ConfigSource {
-      def value(): Result[ConfigValue] = cur.cursor.right.flatMap(_.asConfigValue)
+      def value(): Result[ConfigValue] = cur.cursor.flatMap(_.asConfigValue)
       override def cursor() = cur.cursor
       override def fluentCursor() = cur
     }

@@ -1,3 +1,15 @@
+### 0.15.0 (Apr 18, 2020)
+
+- Breaking changes
+  - The `Derivation` type class was removed. If you were relying on it, e.g. by using `Derivation.Successful` directly or using `Derivation` values in function signatures, you can simply use `ConfigReader` and `ConfigWriter` directly. The docs were updated to recommend [splain](https://github.com/tek/splain) as a tool to debug implicit not found errors.
+
+### 0.14.1 (Feb 28, 2020)
+
+Support for Scala 2.11 was dropped and support for Scala 3.0 (RC1) was introduced.
+
+- New features
+  - Added support for screaming snake case on naming conventions.
+
 ### 0.14.0 (Sep 21, 2020)
 
 - Breaking changes
@@ -51,10 +63,11 @@
 
 ### 0.11.1 (Jun 14, 2019)
 
-- New features
-  - Added support for Scala 2.13.
+Support for Scala 2.13 was introduced.
 
 ### 0.11.0 (May 9, 2019)
+
+Support for Scala 2.13 (RC1) was introduced.
 
 - Breaking changes
   - The default transformation in `FieldCoproductHint` changed from converting class names to lower case to converting
@@ -63,7 +76,6 @@
     fieldValue(name: String): String = name.toLowerCase }`.
 
 - New features
-  - Added support for Scala 2.13.0-RC1;
   - Added `deriveEnumerationReader`, `deriveEnumerationWriter` and `deriveEnumerationConvert` to the
     `pureconfig.generic.semiauto` package, allowing the derivation of readers and writers for enumerations encoded as
     sealed traits of case objects. As a consequence, the `EnumCoproductHint` is now deprecated in favor of these new
@@ -87,12 +99,13 @@
 
 ### 0.10.0 (Oct 30, 2018)
 
+Support for Scala 2.10 was dropped.
+
 - Breaking changes
   - Auto derivation of readers and writers for case classes and sealed traits is now disabled by default. Now users need
     to import `pureconfig.generic.auto._` everywhere a config is loaded or written (e.g. in files with calls to
     `loadConfig`);
-  - The `AllowMissingKeys` trait was renamed to `ReadsMissingKeys`;
-  - Dropped support for Scala 2.10.
+  - The `AllowMissingKeys` trait was renamed to `ReadsMissingKeys`.
 
 - New features
   - The auto-derivation features of PureConfig, powered by shapeless, were extracted to a separate `pureconfig-generic`

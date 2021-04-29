@@ -5,6 +5,7 @@ import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigValueFactory, ConfigValueType}
 import org.scalacheck.ScalacheckShapeless._
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.module.magnolia.auto.reader._

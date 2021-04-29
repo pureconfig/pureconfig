@@ -65,8 +65,7 @@ assert(ConfigSource.fromConfig(conf).load[Conf].isRight)
 The factory method `ConfigReader.fromCursor` allows us to create a `ConfigReader` without much boilerplate by providing
 the required `ConfigCursor => ConfigReader.Result[A]` function. Since most methods in the cursor API return
 `Either` values with failures at their left side,
-[for comprehensions](https://docs.scala-lang.org/tour/for-comprehensions.html) are a natural fit (note that on Scala
-2.11 and below you need to add `.right` projections at the end of each `Either` result). Let's analyze the lines
+[for comprehensions](https://docs.scala-lang.org/tour/for-comprehensions.html) are a natural fit. Let's analyze the lines
 marked above:
 
 1. `asObjectCursor` casts a cursor to a special `ConfigObjectCursor`, which contains methods exclusive to config

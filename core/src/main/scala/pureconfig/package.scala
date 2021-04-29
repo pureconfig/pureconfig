@@ -11,6 +11,7 @@ import java.nio.file.{Files, Path}
 import scala.reflect.ClassTag
 
 import com.typesafe.config.{Config, ConfigRenderOptions}
+
 import pureconfig.error._
 
 package object pureconfig {
@@ -22,7 +23,7 @@ package object pureconfig {
     *         isn't possible
     */
   @deprecated("Use `ConfigSource.default.load[A]` instead", "0.12.0")
-  def loadConfig[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
+  def loadConfig[A](implicit reader: ConfigReader[A]): ConfigReader.Result[A] =
     ConfigSource.default.load[A]
 
   /** Load a configuration of type `A` from the standard configuration files
@@ -33,7 +34,7 @@ package object pureconfig {
     *         isn't possible
     */
   @deprecated("Use `ConfigSource.default.at(namespace).load[A]` instead", "0.12.0")
-  def loadConfig[A](namespace: String)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
+  def loadConfig[A](namespace: String)(implicit reader: ConfigReader[A]): ConfigReader.Result[A] =
     ConfigSource.default.at(namespace).load[A]
 
   /** Load a configuration of type `A` from the given file. Note that standard configuration
@@ -44,7 +45,7 @@ package object pureconfig {
     *         isn't possible
     */
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).load[A]` instead", "0.12.0")
-  def loadConfig[A](path: Path)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
+  def loadConfig[A](path: Path)(implicit reader: ConfigReader[A]): ConfigReader.Result[A] =
     ConfigSource.default(ConfigSource.file(path)).load[A]
 
   /** Load a configuration of type `A` from the given file. Note that standard configuration
@@ -56,21 +57,17 @@ package object pureconfig {
     *         isn't possible
     */
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).at(namespace).load[A]` instead", "0.12.0")
-  def loadConfig[A](path: Path, namespace: String)(implicit
-      reader: Derivation[ConfigReader[A]]
-  ): ConfigReader.Result[A] =
+  def loadConfig[A](path: Path, namespace: String)(implicit reader: ConfigReader[A]): ConfigReader.Result[A] =
     ConfigSource.default(ConfigSource.file(path)).at(namespace).load[A]
 
   /** Load a configuration of type `A` from the given `Config` */
   @deprecated("Use `ConfigSource.fromConfig(conf).load[A]` instead", "0.12.0")
-  def loadConfig[A](conf: Config)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
+  def loadConfig[A](conf: Config)(implicit reader: ConfigReader[A]): ConfigReader.Result[A] =
     ConfigSource.fromConfig(conf).load[A]
 
   /** Load a configuration of type `A` from the given `Config` */
   @deprecated("Use `ConfigSource.fromConfig(conf).at(namespace).load[A]` instead", "0.12.0")
-  def loadConfig[A](conf: Config, namespace: String)(implicit
-      reader: Derivation[ConfigReader[A]]
-  ): ConfigReader.Result[A] =
+  def loadConfig[A](conf: Config, namespace: String)(implicit reader: ConfigReader[A]): ConfigReader.Result[A] =
     ConfigSource.fromConfig(conf).at(namespace).load[A]
 
   /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
@@ -81,7 +78,7 @@ package object pureconfig {
     *         isn't possible
     */
   @deprecated("Use `ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).load[A]` instead", "0.12.0")
-  def loadConfigWithFallback[A](conf: Config)(implicit reader: Derivation[ConfigReader[A]]): ConfigReader.Result[A] =
+  def loadConfigWithFallback[A](conf: Config)(implicit reader: ConfigReader[A]): ConfigReader.Result[A] =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).load[A]
 
   /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
@@ -97,7 +94,7 @@ package object pureconfig {
     "0.12.0"
   )
   def loadConfigWithFallback[A](conf: Config, namespace: String)(implicit
-      reader: Derivation[ConfigReader[A]]
+      reader: ConfigReader[A]
   ): ConfigReader.Result[A] =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).load[A]
 
@@ -107,8 +104,7 @@ package object pureconfig {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `ConfigSource.default.loadOrThrow[A]` instead", "0.12.0")
-  def loadConfigOrThrow[A: ClassTag](implicit reader: Derivation[ConfigReader[A]]): A =
-    ConfigSource.default.loadOrThrow[A]
+  def loadConfigOrThrow[A: ClassTag](implicit reader: ConfigReader[A]): A = ConfigSource.default.loadOrThrow[A]
 
   /** Load a configuration of type `A` from the standard configuration files
     *
@@ -117,7 +113,7 @@ package object pureconfig {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `ConfigSource.default.at(namespace).loadOrThrow[A]` instead", "0.12.0")
-  def loadConfigOrThrow[A: ClassTag](namespace: String)(implicit reader: Derivation[ConfigReader[A]]): A =
+  def loadConfigOrThrow[A: ClassTag](namespace: String)(implicit reader: ConfigReader[A]): A =
     ConfigSource.default.at(namespace).loadOrThrow[A]
 
   /** Load a configuration of type `A` from the given file. Note that standard configuration
@@ -127,7 +123,7 @@ package object pureconfig {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).loadOrThrow[A]` instead", "0.12.0")
-  def loadConfigOrThrow[A: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[A]]): A =
+  def loadConfigOrThrow[A: ClassTag](path: Path)(implicit reader: ConfigReader[A]): A =
     ConfigSource.default(ConfigSource.file(path)).loadOrThrow[A]
 
   /** Load a configuration of type `A` from the given file. Note that standard configuration
@@ -138,7 +134,7 @@ package object pureconfig {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `ConfigSource.default(ConfigSource.file(path)).at(namespace).loadOrThrow[A]` instead", "0.12.0")
-  def loadConfigOrThrow[A: ClassTag](path: Path, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): A =
+  def loadConfigOrThrow[A: ClassTag](path: Path, namespace: String)(implicit reader: ConfigReader[A]): A =
     ConfigSource.default(ConfigSource.file(path)).at(namespace).loadOrThrow[A]
 
   /** Load a configuration of type `A` from the given `Config`
@@ -148,7 +144,7 @@ package object pureconfig {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `ConfigSource.fromConfig(conf).loadOrThrow[A]` instead", "0.12.0")
-  def loadConfigOrThrow[A: ClassTag](conf: Config)(implicit reader: Derivation[ConfigReader[A]]): A =
+  def loadConfigOrThrow[A: ClassTag](conf: Config)(implicit reader: ConfigReader[A]): A =
     ConfigSource.fromConfig(conf).loadOrThrow[A]
 
   /** Load a configuration of type `A` from the given `Config`
@@ -159,7 +155,7 @@ package object pureconfig {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `ConfigSource.fromConfig(conf).at(namespace).loadOrThrow[A]` instead", "0.12.0")
-  def loadConfigOrThrow[A: ClassTag](conf: Config, namespace: String)(implicit reader: Derivation[ConfigReader[A]]): A =
+  def loadConfigOrThrow[A: ClassTag](conf: Config, namespace: String)(implicit reader: ConfigReader[A]): A =
     ConfigSource.fromConfig(conf).at(namespace).loadOrThrow[A]
 
   /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
@@ -169,7 +165,7 @@ package object pureconfig {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).loadOrThrow[A]` instead", "0.12.0")
-  def loadConfigWithFallbackOrThrow[A: ClassTag](conf: Config)(implicit reader: Derivation[ConfigReader[A]]): A =
+  def loadConfigWithFallbackOrThrow[A: ClassTag](conf: Config)(implicit reader: ConfigReader[A]): A =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).loadOrThrow[A]
 
   /** Load a configuration of type `A` from the given `Config`, falling back to the default configuration
@@ -183,9 +179,7 @@ package object pureconfig {
     "Use `ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).loadOrThrow[A]` instead",
     "0.12.0"
   )
-  def loadConfigWithFallbackOrThrow[A: ClassTag](conf: Config, namespace: String)(implicit
-      reader: Derivation[ConfigReader[A]]
-  ): A =
+  def loadConfigWithFallbackOrThrow[A: ClassTag](conf: Config, namespace: String)(implicit reader: ConfigReader[A]): A =
     ConfigSource.fromConfig(conf).withFallback(ConfigSource.default).at(namespace).loadOrThrow[A]
 
   /** Save the given configuration into a property file
@@ -201,7 +195,7 @@ package object pureconfig {
       outputPath: Path,
       overrideOutputPath: Boolean = false,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit writer: Derivation[ConfigWriter[A]]): Unit = {
+  )(implicit writer: ConfigWriter[A]): Unit = {
 
     if (!overrideOutputPath && Files.isRegularFile(outputPath)) {
       throw new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
@@ -225,12 +219,12 @@ package object pureconfig {
       conf: A,
       outputStream: OutputStream,
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
-  )(implicit writer: Derivation[ConfigWriter[A]]): Unit = {
+  )(implicit writer: ConfigWriter[A]): Unit = {
 
     // HOCON requires UTF-8:
     // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json
     val printOutputStream = new OutputStreamWriter(outputStream, UTF_8)
-    val rawConf = writer.value.to(conf)
+    val rawConf = writer.to(conf)
     printOutputStream.write(rawConf.render(options))
     printOutputStream.close()
   }
@@ -250,7 +244,7 @@ package object pureconfig {
     */
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFiles[A](files: Traversable[Path], failOnReadError: Boolean = false, namespace: String = "")(
-      implicit reader: Derivation[ConfigReader[A]]
+      implicit reader: ConfigReader[A]
   ): ConfigReader.Result[A] = {
     ConfigSource
       .default(
@@ -270,7 +264,7 @@ package object pureconfig {
   @deprecated("Construct a custom `ConfigSource` pipeline instead", "0.12.0")
   def loadConfigFromFilesOrThrow[A: ClassTag](
       files: Traversable[Path]
-  )(implicit reader: Derivation[ConfigReader[A]]): A = {
+  )(implicit reader: ConfigReader[A]): A = {
     ConfigSource
       .default(
         files

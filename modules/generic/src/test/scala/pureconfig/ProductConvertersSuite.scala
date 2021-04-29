@@ -5,6 +5,7 @@ import scala.collection.JavaConverters._
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 import org.scalacheck.ScalacheckShapeless._
+
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig.error.{KeyNotFound, WrongType}
 import pureconfig.generic.auto._

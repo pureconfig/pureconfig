@@ -29,11 +29,11 @@ certain type. In other words, you define **what** to load and PureConfig provide
 
 ## Quick Start
 
-To use PureConfig in an existing SBT project with Scala 2.11 or a later version, add the following dependency to your
+To use PureConfig in an existing SBT project with Scala 2.12 or a later version, add the following dependency to your
 `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.14.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.15.0"
 ```
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).

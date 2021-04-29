@@ -5,6 +5,7 @@ import java.net.URL
 import java.nio.file.Path
 
 import com.typesafe.config._
+
 import pureconfig._
 import pureconfig.backend.ErrorUtil._
 import pureconfig.error._
@@ -74,5 +75,5 @@ object ConfigFactoryWrapper {
 
   /** Utility methods that parse a file and then calls `ConfigFactory.load` */
   def loadFile(path: Path): ConfigReader.Result[Config] =
-    parseFile(path.toFile).right.flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
+    parseFile(path.toFile).flatMap(rawConfig => unsafeToReaderResult(ConfigFactory.load(rawConfig)))
 }

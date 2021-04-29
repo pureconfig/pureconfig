@@ -11,7 +11,7 @@ trait ProductReaders {
       if (reader.isInstanceOf[ReadsMissingKeys])
         reader.from(cursor.atKeyOrUndefined(key))
       else
-        cursor.atKey(key).right.flatMap(reader.from))(_(_))
+        cursor.atKey(key).flatMap(reader.from))(_(_))
 
   /**
    * Builds a `ConfigReader` for an object created from the value of 1 key.
@@ -26,7 +26,7 @@ trait ProductReaders {
     readerA0: ConfigReader[A0]
   ): ConfigReader[B] = new ConfigReader[B] {
     def from(cur: ConfigCursor): ConfigReader.Result[B] =
-      cur.asObjectCursor.right.flatMap { objCur =>
+      cur.asObjectCursor.flatMap { objCur =>
         val a0Result: ConfigReader.Result[A0 => B] = Right(f)
         val a1Result = combineReaderResult(a0Result, readerA0, keyA0, objCur)
         a1Result
@@ -45,7 +45,7 @@ trait ProductReaders {
     [#readerA0: ConfigReader[A0]#]
   ): ConfigReader[B] = new ConfigReader[B] {
     def from(cur: ConfigCursor): ConfigReader.Result[B] =
-      cur.asObjectCursor.right.flatMap { objCur =>
+      cur.asObjectCursor.flatMap { objCur =>
         val a##0Result: ConfigReader.Result[[#A0# => ] => B] = Right(f.curried)
         [#val a1Result = combineReaderResult(a0Result, readerA0, keyA0, objCur)#
         ]

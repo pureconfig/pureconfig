@@ -1,6 +1,7 @@
 package pureconfig.generic
 
 import com.typesafe.config.{ConfigObject, ConfigValue, ConfigValueType}
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic.CoproductHint.Use
@@ -26,7 +27,7 @@ class EnumCoproductHint[A] extends CoproductHint[A] {
   protected def fieldValue(name: String): String = name.toLowerCase
 
   def from(cursor: ConfigCursor, options: Seq[String]): ConfigReader.Result[CoproductHint.Action] =
-    cursor.asString.right.flatMap { str =>
+    cursor.asString.flatMap { str =>
       options.find(str == fieldValue(_)) match {
         case Some(opt) => Right(Use(cursor, opt))
         case None => cursor.failed[CoproductHint.Action](NoValidCoproductOptionFound(cursor.valueOpt.get, Seq.empty))

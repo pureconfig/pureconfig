@@ -1,14 +1,15 @@
 package pureconfig.module
 
-import _root_.cats.data._
-import _root_.cats.kernel.Order
-import _root_.cats.{Alternative, Foldable}
-import _root_.cats.implicits._
-import pureconfig.{ConfigReader, ConfigWriter, Exported}
-
 import scala.collection.immutable.{SortedMap, SortedSet}
 import scala.language.higherKinds
 import scala.reflect.ClassTag
+
+import _root_.cats.data._
+import _root_.cats.implicits._
+import _root_.cats.kernel.Order
+import _root_.cats.{Alternative, Foldable}
+
+import pureconfig.{ConfigReader, ConfigWriter, Exported}
 
 /** `ConfigReader` and `ConfigWriter` instances for cats data structures.
   */
