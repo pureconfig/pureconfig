@@ -1,5 +1,6 @@
 package pureconfig
 package generic
+package derivation
 
 import scala.compiletime.{constValue, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
@@ -7,12 +8,11 @@ import scala.deriving.Mirror
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.generic.error.InvalidCoproductOption
 
-export Sum.deriveForMirroredSum
-
-object Sum {
-  inline def deriveForMirroredSum[A](using m: Mirror.SumOf[A]): ConfigReader[A] = {
+trait CoproductConfigReader[A] extends ConfigReader[A]
+object CoproductConfigReader {
+  inline def derived[A](using m: Mirror.SumOf[A]): CoproductConfigReader[A] = {
     val hint = summonInline[CoproductHint[A]]
-    new ConfigReader[A] {
+    new CoproductConfigReader[A] {
       def from(cur: ConfigCursor): ConfigReader.Result[A] =
         for {
           result <- {
@@ -47,20 +47,21 @@ object Sum {
   type AttemptResult[A] = Either[Vector[(String, ConfigReaderFailures)], A]
 
   inline def handleAction[A](action: CoproductHint.Attempt, optionReaders: Map[String, ConfigReader[A]]) =
-    action.options.foldLeft[AttemptResult[A]](Left(Vector.empty)) { (curr, option) =>
-      curr.left.flatMap { currentFailures =>
-        optionReaders.get(option) match {
-          case Some(value) => value.from(action.cursor).left.map(f => currentFailures :+ (option -> f))
-          case None =>
-            Left(
-              currentFailures :+
-                (option -> ConfigReaderFailures(action.cursor.failureFor(InvalidCoproductOption(option))))
-            )
+    action.options
+      .foldLeft[AttemptResult[A]](Left(Vector.empty)) { (curr, option) =>
+        curr.left.flatMap { currentFailures =>
+          optionReaders.get(option) match {
+            case Some(value) => value.from(action.cursor).left.map(f => currentFailures :+ (option -> f))
+            case None =>
+              Left(
+                currentFailures :+
+                  (option -> ConfigReaderFailures(action.cursor.failureFor(InvalidCoproductOption(option))))
+              )
+          }
         }
       }
-    }
-    .left
-    .map(action.combineFailures)
+      .left
+      .map(action.combineFailures)
 
   inline def deriveForSubtypes[T <: Tuple, A]: List[ConfigReader[A]] =
     inline erasedValue[T] match {
@@ -69,8 +70,7 @@ object Sum {
     }
 
   inline def deriveForSubtype[A0, A]: ConfigReader[A] =
-    summonFrom {
-      case given Mirror.Of[A0] =>
-        deriveForMirroredType[A0].asInstanceOf[ConfigReader[A]]
+    summonFrom { case given Mirror.Of[A0] =>
+      ConfigReader.derived[A0].map(summonInline[A0 <:< A])
     }
 }

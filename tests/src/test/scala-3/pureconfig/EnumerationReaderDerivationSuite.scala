@@ -1,12 +1,13 @@
 package pureconfig
 
 import scala.compiletime.testing.{typeChecks, typeCheckErrors}
+import scala.deriving.Mirror
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
 import pureconfig._
 import pureconfig.error.WrongType
-import pureconfig.generic.{EnumConfigReader, deriveForEnum}
+import pureconfig.generic.derivation.{EnumConfigReader, EnumConfigReaderDerivation}
 import pureconfig.generic.error.NoValidCoproductOptionFound
 
 enum Color derives EnumConfigReader {
@@ -36,7 +37,9 @@ class EnumerationReaderDerivationSuite extends BaseSuite {
   }
 
   it should "provide customizable methods to derive readers for enumerations encoded as sealed traits or enums" in {
-    given EnumConfigReader[Color] = deriveForEnum[Color](ConfigFieldMapping(PascalCase, SnakeCase))
+    object SnakeEnum extends EnumConfigReaderDerivation(ConfigFieldMapping(PascalCase, SnakeCase))
+
+    given SnakeEnum.EnumConfigReader[Color] = SnakeEnum.EnumConfigReader.derived[Color]
 
     ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("rainy_blue")) shouldBe Right(RainyBlue)
     ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("sunny_yellow")) shouldBe Right(SunnyYellow)

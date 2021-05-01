@@ -9,13 +9,15 @@ import org.scalacheck.Arbitrary
 import pureconfig._
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig.error.{KeyNotFound, WrongType}
+import pureconfig.generic.derivation._
 
 class ProductReaderDerivationSuite extends BaseSuite {
 
   behavior of "ConfigReader"
 
   it should s"be able to override all of the ConfigReader instances used to parse the product elements" in {
-    case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String]) derives ConfigReader
+    case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
+        derives ConfigReader
 
     given ConfigReader[Boolean] = ConfigReader.fromString[Boolean](catchReadError(_ => false))
     given ConfigReader[Double] = ConfigReader.fromString[Double](catchReadError(_ => 1d))
@@ -24,7 +26,7 @@ class ProductReaderDerivationSuite extends BaseSuite {
     given ConfigReader[Long] = ConfigReader.fromString[Long](catchReadError(_ => 4L))
     given ConfigReader[String] = ConfigReader.fromString[String](catchReadError(_ => "foobar"))
     given ConfigReader[Option[String]] = ConfigConvert.viaString[Option[String]](catchReadError(_ => None), _ => " ")
-    
+
     val cc = ConfigReader[FlatConfig]
     val configValue =
       ConfigValueFactory.fromMap(

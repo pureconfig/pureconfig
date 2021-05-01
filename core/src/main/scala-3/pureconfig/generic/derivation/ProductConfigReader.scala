@@ -1,26 +1,19 @@
 package pureconfig
 package generic
+package derivation
 
 import scala.compiletime.{constValue, constValueTuple, erasedValue, summonInline}
 import scala.compiletime.ops.int._
 import scala.deriving.Mirror
 
-import pureconfig.error.{
-  CannotConvert,
-  ConfigReaderFailures,
-  ConvertFailure,
-  KeyNotFound,
-  UnknownKey,
-  WrongSizeList
-}
+import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
 
-export Product.deriveForMirroredProduct
-
-object Product {
-  inline def deriveForMirroredProduct[A](using m: Mirror.ProductOf[A]): ConfigReader[A] = {
+trait ProductConfigReader[A] extends ConfigReader[A]
+object ProductConfigReader {
+  inline def derived[A](using m: Mirror.ProductOf[A]): ProductConfigReader[A] = {
     val hint = summonInline[ProductHint[A]]
 
-    new ConfigReader[A] {
+    new ProductConfigReader[A] {
       def from(cur: ConfigCursor): ConfigReader.Result[A] =
         for {
           objCur <- cur.asObjectCursor
@@ -30,17 +23,15 @@ object Product {
                 (field, reader) <- summonFor[A]
               } yield {
                 val action = hint.from(objCur, field)
-                if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined then
-                  reader.from(action.cursor)
-                else
-                  cur.failed(KeyNotFound.forKeys(action.field, objCur.keys))
+                if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined then reader.from(action.cursor)
+                else cur.failed(KeyNotFound.forKeys(action.field, objCur.keys))
               }
 
-            ConfigReader.Result.sequence(results)
+            ConfigReader.Result
+              .sequence(results)
               .map(
                 _.reverse
                   .foldLeft[Tuple](EmptyTuple)((t, v) => v *: t)
-                  .asInstanceOf[m.MirroredElemTypes]
               )
           }
         } yield m.fromProduct(result)
@@ -53,11 +44,11 @@ object Product {
   inline def summonConfigReaders[T <: Tuple]: List[ConfigReader[_]] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
-        inline erasedValue[h] match {
+        (inline erasedValue[h] match {
           case _: Tuple => deriveForTuple[h & Tuple] :: summonConfigReaders[t]
           case _ => summonInline[ConfigReader[h]] :: summonConfigReaders[t]
-        }
-          
+        })
+
       case _: EmptyTuple => Nil
     }
 
@@ -86,13 +77,18 @@ object Product {
         val h = summonInline[ConfigReader[h]].from(cursors(constValue[N]))
 
         h -> read[t, N + 1](cursors) match {
-          case (Right(h), Right(t)) => Right((h *: t).asInstanceOf[T])
-          case (Left(h), Left(t))   => Left(h ++ t)
-          case (_, Left(failures))  => Left(failures)
-          case (Left(failures), _)  => Left(failures)
+          case (Right(h), Right(t)) =>
+            (inline (h *: t) match {
+              case t: T => Right(t)
+            })
+          case (Left(h), Left(t)) => Left(h ++ t)
+          case (_, Left(failures)) => Left(failures)
+          case (Left(failures), _) => Left(failures)
         }
 
       case _: EmptyTuple =>
-        Right(EmptyTuple.asInstanceOf[T])
+        (inline EmptyTuple match {
+          case t: T => Right(t)
+        })
     }
 }
