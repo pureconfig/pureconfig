@@ -71,6 +71,6 @@ object CoproductConfigReader {
 
   inline def deriveForSubtype[A0, A]: ConfigReader[A] =
     summonFrom { case given Mirror.Of[A0] =>
-      ConfigReader.derived[A0].map(summonInline[A0 <:< A])
+      ConfigReader.derived[A0].map(_.expandType[A])
     }
 }

@@ -77,18 +77,13 @@ object ProductConfigReader {
         val h = summonInline[ConfigReader[h]].from(cursors(constValue[N]))
 
         h -> read[t, N + 1](cursors) match {
-          case (Right(h), Right(t)) =>
-            (inline (h *: t) match {
-              case t: T => Right(t)
-            })
+          case (Right(h), Right(t)) => Right((h *: t).expandType[T])
           case (Left(h), Left(t)) => Left(h ++ t)
           case (_, Left(failures)) => Left(failures)
           case (Left(failures), _) => Left(failures)
         }
 
       case _: EmptyTuple =>
-        (inline EmptyTuple match {
-          case t: T => Right(t)
-        })
+        Right(EmptyTuple.expandType[T])
     }
 }

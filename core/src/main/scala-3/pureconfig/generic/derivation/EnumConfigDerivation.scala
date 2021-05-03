@@ -39,9 +39,7 @@ trait EnumConfigReaderDerivation(transformName: String => String) {
         case _: (h *: t) =>
           (inline summonInline[Mirror.Of[h]] match {
             case m: Mirror.Singleton =>
-              (inline m.fromProduct(EmptyTuple) match {
-                case a: A => a :: summonCases[t, A]
-              })
+              m.fromProduct(EmptyTuple).expandType[A] :: summonCases[t, A]
             case _ => error("Enums cannot include parameterized cases.")
           })
 
