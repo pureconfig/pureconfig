@@ -8,8 +8,10 @@ import pureconfig.ConfigWriter
 
 /** A `ConfigWriter` for generic representations of coproducts.
   *
-  * @tparam Original the original type for which `Repr` is the coproduct representation
-  * @tparam Repr the generic representation
+  * @tparam Original
+  *   the original type for which `Repr` is the coproduct representation
+  * @tparam Repr
+  *   the generic representation
   */
 private[generic] trait CoproductConfigWriter[Original, Repr <: Coproduct] extends ConfigWriter[Repr]
 

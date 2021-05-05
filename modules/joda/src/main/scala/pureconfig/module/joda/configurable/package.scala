@@ -14,10 +14,12 @@ import pureconfig.ConfigConvert._
   *   implicit val localDateConfigConvert = makeLocalDateConfigConvert(ISODateTimeFormat)
   * }}}
   *
-  * @example we cannot provide a [[ConfigConvert]] for [[org.joda.time.LocalDate]] because traditionally there are many different
-  * [[org.joda.time.format.DateTimeFormatter]]s to parse a [[org.joda.time.LocalDate]] from a [[java.lang.String]]. This package
-  * provides a method that takes an input [[org.joda.time.format.DateTimeFormatter]] and returns a [[ConfigConvert]] for
-  * [[org.joda.time.LocalDate]] which will use that [[org.joda.time.format.DateTimeFormatter]] to parse a [[org.joda.time.LocalDate]].
+  * @example
+  *   we cannot provide a [[ConfigConvert]] for [[org.joda.time.LocalDate]] because traditionally there are many
+  *   different [[org.joda.time.format.DateTimeFormatter]] s to parse a [[org.joda.time.LocalDate]] from a
+  *   [[java.lang.String]]. This package provides a method that takes an input
+  *   [[org.joda.time.format.DateTimeFormatter]] and returns a [[ConfigConvert]] for [[org.joda.time.LocalDate]] which
+  *   will use that [[org.joda.time.format.DateTimeFormatter]] to parse a [[org.joda.time.LocalDate]].
   */
 package object configurable {
   def dateTimeConfigConvert(formatter: DateTimeFormatter): ConfigConvert[DateTime] =

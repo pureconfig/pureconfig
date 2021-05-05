@@ -9,7 +9,8 @@ import pureconfig.ConfigWriter
 
 /** A `ConfigWriter` for generic representations that writes values in the shape of a sequence.
   *
-  * @tparam Repr the generic representation
+  * @tparam Repr
+  *   the generic representation
   */
 private[generic] trait SeqShapedWriter[Repr] extends ConfigWriter[Repr]
 

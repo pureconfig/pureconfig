@@ -40,9 +40,9 @@ trait ConvertHelpers {
     }
   }
 
-  /** Convert a `String => Try` into a  `String => Option[ConfigValueLocation] => Either` such that after application
-    * - `Success(t)` becomes `_ => Right(t)`
-    * - `Failure(e)` becomes `location => Left(CannotConvert(value, type, e.getMessage, location)`
+  /** Convert a `String => Try` into a `String => Option[ConfigValueLocation] => Either` such that after application
+    *   - `Success(t)` becomes `_ => Right(t)`
+    *   - `Failure(e)` becomes `location => Left(CannotConvert(value, type, e.getMessage, location)`
     */
   def tryF[A](f: String => Try[A])(implicit ct: ClassTag[A]): String => Either[FailureReason, A] = { string =>
     f(string) match {
@@ -52,8 +52,8 @@ trait ConvertHelpers {
   }
 
   /** Convert a `String => Option` into a `String => Option[ConfigValueLocation] => Either` such that after application
-    * - `Some(t)` becomes `_ => Right(t)`
-    * - `None` becomes `location => Left(CannotConvert(value, type, "", location)`
+    *   - `Some(t)` becomes `_ => Right(t)`
+    *   - `None` becomes `location => Left(CannotConvert(value, type, "", location)`
     */
   def optF[A](f: String => Option[A])(implicit ct: ClassTag[A]): String => Either[FailureReason, A] = { string =>
     f(string) match {

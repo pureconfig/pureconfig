@@ -22,11 +22,13 @@ import pureconfig.{ConfigObjectSource, ConfigSource}
 
 /** A `ConfigSource` that reads configs from YAML documents in a stream, file or string.
   *
-  * @param getReader the thunk to generate a `Reader` instance from which the YAML document will be
-  *                  read. This parameter won't be memoized so it can be used with dynamic sources
-  *                  (e.g. URLs)
-  * @param uri the optional URI of the source. Used only to provide better error messages.
-  * @param onIOFailure an optional function used to provide a custom failure when IO errors happen
+  * @param getReader
+  *   the thunk to generate a `Reader` instance from which the YAML document will be read. This parameter won't be
+  *   memoized so it can be used with dynamic sources (e.g. URLs)
+  * @param uri
+  *   the optional URI of the source. Used only to provide better error messages.
+  * @param onIOFailure
+  *   an optional function used to provide a custom failure when IO errors happen
   */
 final class YamlConfigSource private (
     getReader: () => Reader,
@@ -43,18 +45,19 @@ final class YamlConfigSource private (
     }
   }
 
-  /** Converts this YAML source to a config object source to allow merging with other sources. This
-    * operation is not reversible. The new source will load with an error if this document does not
-    * contain an object.
+  /** Converts this YAML source to a config object source to allow merging with other sources. This operation is not
+    * reversible. The new source will load with an error if this document does not contain an object.
     *
-    * @return a config object source that produces YAML object documents read by this source
+    * @return
+    *   a config object source that produces YAML object documents read by this source
     */
   def asObjectSource: ConfigObjectSource =
     ConfigObjectSource(fluentCursor().asObjectCursor.map(_.objValue.toConfig))
 
   /** Returns a new source that produces a multi-document YAML read by this source as a config list.
     *
-    * @return a new source that produces a multi-document YAML read by this source as a config list.
+    * @return
+    *   a new source that produces a multi-document YAML read by this source as a config list.
     */
   def multiDoc: ConfigSource =
     new ConfigSource {
@@ -144,8 +147,10 @@ object YamlConfigSource {
 
   /** Returns a YAML source that provides configs read from a file.
     *
-    * @param path the path to the file as a string
-    * @return a YAML source that provides configs read from a file.
+    * @param path
+    *   the path to the file as a string
+    * @return
+    *   a YAML source that provides configs read from a file.
     */
   def file(path: String) =
     new YamlConfigSource(
@@ -156,8 +161,10 @@ object YamlConfigSource {
 
   /** Returns a YAML source that provides configs read from a file.
     *
-    * @param path the path to the file
-    * @return a YAML source that provides configs read from a file.
+    * @param path
+    *   the path to the file
+    * @return
+    *   a YAML source that provides configs read from a file.
     */
   def file(path: Path) =
     new YamlConfigSource(
@@ -168,8 +175,10 @@ object YamlConfigSource {
 
   /** Returns a YAML source that provides configs read from a file.
     *
-    * @param file the file
-    * @return a YAML source that provides configs read from a file.
+    * @param file
+    *   the file
+    * @return
+    *   a YAML source that provides configs read from a file.
     */
   def file(file: File) =
     new YamlConfigSource(
@@ -180,8 +189,10 @@ object YamlConfigSource {
 
   /** Returns a YAML source that provides a config parsed from a string.
     *
-    * @param confStr the YAML content
-    * @return a YAML source that provides a config parsed from a string.
+    * @param confStr
+    *   the YAML content
+    * @return
+    *   a YAML source that provides a config parsed from a string.
     */
   def string(confStr: String) = new YamlConfigSource(() => new StringReader(confStr))
 }

@@ -6,8 +6,8 @@ import scalaz.{Contravariant, Equal, InvariantFunctor, MonadError, Semigroup, Sh
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
 import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
 
-/** Instances of `scalaz` type classes for `ConfigReader`, `ConfigWriter`, `ConfigConvert`
-  * and other `pureconfig` citizens.
+/** Instances of `scalaz` type classes for `ConfigReader`, `ConfigWriter`, `ConfigConvert` and other `pureconfig`
+  * citizens.
   */
 package object instances {
 

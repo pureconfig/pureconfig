@@ -7,7 +7,8 @@ import pureconfig.error.FailureReason
 /** A failure reason given when an unknown value was found in the discriminating field of a config value, when using a
   * `FieldCoproductHint`.
   *
-  * @param value the value found in the discriminating field of a config value
+  * @param value
+  *   the value found in the discriminating field of a config value
   */
 final case class UnexpectedValueForFieldCoproductHint(value: ConfigValue) extends FailureReason {
   def description =

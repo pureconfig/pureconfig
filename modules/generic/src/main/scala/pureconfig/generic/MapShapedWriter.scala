@@ -10,8 +10,10 @@ import pureconfig._
 
 /** A `ConfigWriter` for generic representations that writes values in the shape of a config object.
   *
-  * @tparam Original the original type for which `Repr` is a generic sub-representation
-  * @tparam Repr the generic representation
+  * @tparam Original
+  *   the original type for which `Repr` is a generic sub-representation
+  * @tparam Repr
+  *   the generic representation
   */
 private[generic] trait MapShapedWriter[Original, Repr] extends ConfigWriter[Repr]
 
