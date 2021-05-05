@@ -8,7 +8,7 @@ crossScalaVersions := Seq(scala212, scala213)
 libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % "0.13.0",
   "io.circe" %% "circe-literal" % "0.13.0" % Test,
-  "org.typelevel" %% "jawn-parser" % "1.0.1" % Test
+  "org.typelevel" %% "jawn-parser" % "1.0.3" % Test
 )
 
 developers := List(
