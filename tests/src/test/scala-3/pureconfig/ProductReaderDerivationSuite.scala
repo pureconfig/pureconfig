@@ -9,7 +9,7 @@ import org.scalacheck.Arbitrary
 import pureconfig._
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig.error.{KeyNotFound, WrongType}
-import pureconfig.generic.derivation._
+import pureconfig.generic.derivation.default.derived
 
 class ProductReaderDerivationSuite extends BaseSuite {
 
@@ -84,8 +84,8 @@ class ProductReaderDerivationSuite extends BaseSuite {
   }
 
   it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {
-    case class Foo(i: Int) derives ConfigReader
-    case class Bar(foo: Foo) derives ConfigReader
+    case class Foo(i: Int)
+    case class Bar(foo: Foo)
     case class FooBar(foo: Foo, bar: Bar) derives ConfigReader
     val conf = ConfigFactory.parseMap(Map("foo.i" -> 1, "bar.foo" -> "").asJava).root()
     ConfigReader[FooBar].from(conf) should failWithReason[WrongType]
