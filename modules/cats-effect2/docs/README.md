@@ -1,13 +1,14 @@
-# Cats-effect module for PureConfig
+# Cats-effect2 module for PureConfig
 
-Adds support for loading configuration using [cats-effect](https://github.com/typelevel/cats-effect) to control side effects.
+Adds support for loading configuration using [cats-effect 2.* series](https://github.com/typelevel/cats-effect) to control side effects.
+This module written for backport pureconfig to old `cats-effect 2.* series`.
 
-## Add pureconfig-cats-effect to your project
+## Add pureconfig-cats-effect2 to your project
 
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "@VERSION@"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect2" % "@VERSION@"
 ```
 
 ## Example
@@ -29,11 +30,12 @@ Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
-import cats.effect.IO
-import cats.effect.unsafe.implicits._
+import cats.effect.{ Blocker, ContextShift, IO }
 
 case class MyConfig(somefield: Int, anotherfield: String)
 
+def load(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[MyConfig] = {
+  ConfigSource.file(somePath).loadF[IO, MyConfig](blocker)
 def load: IO[MyConfig] = {
   ConfigSource.file(somePath).loadF[IO, MyConfig]
 }
@@ -41,10 +43,15 @@ def load: IO[MyConfig] = {
 
 To test that this `IO` does indeed return a `MyConfig` instance:
 
+```scala mdoc:invisible:nest
+implicit val ioCS: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+```
+
 ```scala mdoc
 //Show the contents of the file
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
 
+Blocker[IO].use(load).unsafeRunSync().equals(MyConfig(1234, "some string"))
 load.unsafeRunSync().equals(MyConfig(1234, "some string"))
 ```
 
@@ -63,10 +70,12 @@ case class MyConfig(somefield: Int, anotherfield: String)
 ```scala mdoc:silent
 import pureconfig.module.catseffect._
 import pureconfig.generic.auto._
-import cats.effect.IO
+import cats.effect.{ Blocker, ContextShift, IO }
 
 val someConfig = MyConfig(1234, "some string")
 
+def save(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[Unit] = {
+  blockingSaveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
 def save: IO[Unit] = {
   saveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath)
 }

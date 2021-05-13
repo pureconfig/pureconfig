@@ -1,6 +1,7 @@
 # Cats-effect2 module for PureConfig
 
 Adds support for loading configuration using [cats-effect 2.* series](https://github.com/typelevel/cats-effect) to control side effects.
+This module written for backport pureconfig to old `cats-effect 2.* series`.
 
 ## Add pureconfig-cats-effect2 to your project
 
