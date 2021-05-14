@@ -3,12 +3,15 @@ package pureconfig.module
 import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
+
 import scala.language.higherKinds
 import scala.reflect.ClassTag
-import cats.data.{EitherT, NonEmptyList}
+
+import cats.data.EitherT
 import cats.effect.{Blocker, ContextShift, Resource, Sync}
 import cats.implicits._
-import com.typesafe.config.{ConfigRenderOptions, Config => TypesafeConfig}
+import com.typesafe.config.ConfigRenderOptions
+
 import pureconfig._
 import pureconfig.error.ConfigReaderException
 
@@ -40,7 +43,6 @@ package object catseffect {
     */
   def loadConfigF[F[_]: Sync: ContextShift, A: ConfigReader](blocker: Blocker)(implicit ct: ClassTag[A]): F[A] =
     loadF(ConfigSource.default, blocker)
-
 
   /** Save the given configuration into a property file
     *
@@ -84,7 +86,6 @@ package object catseffect {
       blockingSaveConfigToStreamF(conf, os, blocker, options)
     }
   }
-
 
   /** Writes the configuration to the output stream and closes the stream
     *

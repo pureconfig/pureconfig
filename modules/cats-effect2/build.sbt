@@ -1,7 +1,7 @@
 import Dependencies.Version._
 import Utilities._
 
-name := "pureconfig-cats-effect"
+name := "pureconfig-cats-effect2"
 
 crossScalaVersions := Seq(scala212, scala213)
 
