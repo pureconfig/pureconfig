@@ -74,5 +74,5 @@ val someConfig = MyConfig(1234, "some string")
 
 def save(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[Unit] = {
   blockingSaveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
-  }
+}
 ```
