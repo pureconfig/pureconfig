@@ -28,10 +28,6 @@ case class MyConfig(somefield: Int, anotherfield: String)
 
 def load(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[MyConfig] = {
   ConfigSource.file(somePath).loadF[IO, MyConfig](blocker)
-
-  def load: IO[MyConfig] = {
-    ConfigSource.file(somePath).loadF[IO, MyConfig]
-  }
 }
 ```
 
@@ -63,9 +59,5 @@ val someConfig = MyConfig(1234, "some string")
 
 def save(blocker: Blocker)(implicit cs: ContextShift[IO]): IO[Unit] = {
   blockingSaveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath, blocker)
-
-  def save: IO[Unit] = {
-    saveConfigAsPropertyFileF[IO, MyConfig](someConfig, somePath)
-  }
 }
 ```
