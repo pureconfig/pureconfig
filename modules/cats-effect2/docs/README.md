@@ -50,7 +50,6 @@ implicit val ioCS: ContextShift[IO] = IO.contextShift(scala.concurrent.Execution
 new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
 
 Blocker[IO].use(load).unsafeRunSync().equals(MyConfig(1234, "some string"))
-load.unsafeRunSync().equals(MyConfig(1234, "some string"))
 ```
 
 ### Writing configuration
