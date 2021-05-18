@@ -5,8 +5,8 @@ import com.typesafe.config._
 import pureconfig.ConfigReader.Result
 import pureconfig.backend.ErrorUtil._
 
-/** Provides extension methods for `com.typesafe.config.Config` that return [[scala.Either]] instead
-  * of throwing exceptions.
+/** Provides extension methods for `com.typesafe.config.Config` that return [[scala.Either]] instead of throwing
+  * exceptions.
   */
 object ConfigWrapper {
 

@@ -17,7 +17,8 @@ object CapitalizedWordsNamingConvention {
 }
 
 /** CamelCase identifiers look like `camelCase` and `useMorePureconfig`
-  * @see https://en.wikipedia.org/wiki/Camel_case
+  * @see
+  *   https://en.wikipedia.org/wiki/Camel_case
   */
 object CamelCase extends CapitalizedWordsNamingConvention {
   def fromTokens(l: Seq[String]): String = {
@@ -30,7 +31,8 @@ object CamelCase extends CapitalizedWordsNamingConvention {
 }
 
 /** PascalCase identifiers look like e.g.`PascalCase` and `UseMorePureconfig`
-  * @see https://en.wikipedia.org/wiki/PascalCase
+  * @see
+  *   https://en.wikipedia.org/wiki/PascalCase
   */
 object PascalCase extends CapitalizedWordsNamingConvention {
   def fromTokens(l: Seq[String]): String = l.map(_.capitalize).mkString
@@ -45,17 +47,20 @@ class StringDelimitedNamingConvention(d: String) extends NamingConvention {
 }
 
 /** KebabCase identifiers look like `kebab-case` and `use-more-pureconfig`
-  * @see http://wiki.c2.com/?KebabCase
+  * @see
+  *   http://wiki.c2.com/?KebabCase
   */
 object KebabCase extends StringDelimitedNamingConvention("-")
 
 /** SnakeCase identifiers look like `snake_case` and `use_more_pureconfig`
-  * @see https://en.wikipedia.org/wiki/Snake_case
+  * @see
+  *   https://en.wikipedia.org/wiki/Snake_case
   */
 object SnakeCase extends StringDelimitedNamingConvention("_")
 
 /** SnakeCase identifiers look like `SCREAMING_SNAKE_CASE` and `USE_MORE_PURECONFIG`
-  * @see https://en.wikipedia.org/wiki/Snake_case (and search for SCREAMING_SNAKE_CASE)
+  * @see
+  *   https://en.wikipedia.org/wiki/Snake_case (and search for SCREAMING_SNAKE_CASE)
   */
 object ScreamingSnakeCase extends NamingConvention {
   def toTokens(s: String): Seq[String] = SnakeCase.toTokens(s)

@@ -13,7 +13,8 @@ import pureconfig.{ConfigCursor, ConfigReader}
 /** A type class to build `ConfigReader`s for sealed families of case objects where each type is encoded as a
   * `ConfigString` based on the type name.
   *
-  * @tparam A the type of objects capable of being read as an enumeration
+  * @tparam A
+  *   the type of objects capable of being read as an enumeration
   */
 private[magnolia] trait EnumerationConfigReaderBuilder[A] {
   def build(transformName: String => String): ConfigReader[A]
