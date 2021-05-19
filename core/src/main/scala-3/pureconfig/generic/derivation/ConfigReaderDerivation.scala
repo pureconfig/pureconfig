@@ -31,9 +31,10 @@ class ConfigReaderDerivation(coproductHint: CoproductHint[?], productHint: Produ
       productHint
     )
 
-  extension (c: ConfigReader.type)
+  extension (c: ConfigReader.type) {
     inline def derived[A](using m: Mirror.Of[A]): ConfigReader[A] =
       DerivedConfigReader.derived
+  }
 }
 
 object ConfigReaderDerivation {
