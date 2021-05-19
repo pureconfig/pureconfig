@@ -15,25 +15,22 @@ trait CoproductConfigReaderDerivation(hint: CoproductHint[?]) { self: ConfigRead
   object CoproductConfigReader {
     inline def derived[A](using m: Mirror.SumOf[A]): CoproductConfigReader[A] =
       new CoproductConfigReader[A] {
-        def from(cur: ConfigCursor): ConfigReader.Result[A] =
-          for {
-            result <- {
-              val options = Labels.of[m.MirroredElemLabels]
-              val optionReaders =
-                options
-                  .zip(deriveForSubtypes[m.MirroredElemTypes, A])
-                  .toMap
+        def from(cur: ConfigCursor): ConfigReader.Result[A] = {
+          val options = Labels.of[m.MirroredElemLabels]
+          val optionReaders =
+            options
+              .zip(deriveForSubtypes[m.MirroredElemTypes, A])
+              .toMap
 
-              for {
-                action <- hint.from(cur, options)
-                result <-
-                  action match {
-                    case action: CoproductHint.Use => handleAction[A](action, optionReaders)
-                    case action: CoproductHint.Attempt => handleAction[A](action, optionReaders)
-                  }
-              } yield result
-            }
+          for {
+            action <- hint.from(cur, options)
+            result <-
+              action match {
+                case action: CoproductHint.Use => handleAction[A](action, optionReaders)
+                case action: CoproductHint.Attempt => handleAction[A](action, optionReaders)
+              }
           } yield result
+        }
       }
 
     inline def handleAction[A](action: CoproductHint.Use, optionReaders: Map[String, ConfigReader[A]]) =
