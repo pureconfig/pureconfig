@@ -6,7 +6,7 @@ import scala.compiletime.{constValue, erasedValue, error, summonInline}
 import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
-import pureconfig.generic.derivation.transformedLabelsFor
+import pureconfig.generic.derivation.WidenType.widen
 import pureconfig.generic.error.NoValidCoproductOptionFound
 
 type EnumConfigReader[A] = EnumConfigReaderDerivation.Default.EnumConfigReader[A]
@@ -39,7 +39,7 @@ trait EnumConfigReaderDerivation(transformName: String => String) {
         case _: (h *: t) =>
           (inline summonInline[Mirror.Of[h]] match {
             case m: Mirror.Singleton =>
-              m.fromProduct(EmptyTuple).expandType[A] :: summonCases[t, A]
+              widen[m.MirroredMonoType, A](m.fromProduct(EmptyTuple)) :: summonCases[t, A]
             case _ => error("Enums cannot include parameterized cases.")
           })
 
@@ -50,7 +50,7 @@ trait EnumConfigReaderDerivation(transformName: String => String) {
         inline transformName: String => String,
         inline value: String
     )(using m: Mirror.SumOf[A]) = {
-      val ord = transformedLabelsFor[m.MirroredElemLabels](transformName).indexOf(value)
+      val ord = Labels.transformed[m.MirroredElemLabels](transformName).indexOf(value)
       Option.when(ord >= 0)(ord)
     }
   }

@@ -7,6 +7,7 @@ import scala.compiletime.ops.int._
 import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
+import pureconfig.generic.derivation.WidenType.widen
 
 trait ProductConfigReaderDerivation(hint: ProductHint[?]) { self: ConfigReaderDerivation =>
   trait ProductConfigReader[A] extends DerivedConfigReader[A]
@@ -37,7 +38,7 @@ trait ProductConfigReaderDerivation(hint: ProductHint[?]) { self: ConfigReaderDe
       }
 
     inline def summonFor[A](using m: Mirror.ProductOf[A]): List[(String, ConfigReader[_])] =
-      labelsFor[m.MirroredElemLabels].zip(summonConfigReaders[m.MirroredElemTypes])
+      Labels.of[m.MirroredElemLabels].zip(summonConfigReaders[m.MirroredElemTypes])
 
     inline def summonConfigReaders[T <: Tuple]: List[ConfigReader[_]] =
       inline erasedValue[T] match {
@@ -81,14 +82,14 @@ trait ProductConfigReaderDerivation(hint: ProductHint[?]) { self: ConfigReaderDe
           val h = summonConfigReader[h].from(cursors(constValue[N]))
 
           h -> read[t, N + 1](cursors) match {
-            case (Right(h), Right(t)) => Right((h *: t).expandType[T])
+            case (Right(h), Right(t)) => Right(widen[h *: t, T](h *: t))
             case (Left(h), Left(t)) => Left(h ++ t)
             case (_, Left(failures)) => Left(failures)
             case (Left(failures), _) => Left(failures)
           }
 
         case _: EmptyTuple =>
-          Right(EmptyTuple.expandType[T])
+          Right(widen[EmptyTuple, T](EmptyTuple))
       }
   }
 }

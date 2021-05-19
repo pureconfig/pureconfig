@@ -7,6 +7,7 @@ import scala.deriving.Mirror
 
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.generic.derivation.ConfigReaderDerivation
+import pureconfig.generic.derivation.WidenType.widen
 import pureconfig.generic.error.InvalidCoproductOption
 
 trait CoproductConfigReaderDerivation(hint: CoproductHint[?]) { self: ConfigReaderDerivation =>
@@ -17,7 +18,7 @@ trait CoproductConfigReaderDerivation(hint: CoproductHint[?]) { self: ConfigRead
         def from(cur: ConfigCursor): ConfigReader.Result[A] =
           for {
             result <- {
-              val options = labelsFor[m.MirroredElemLabels]
+              val options = Labels.of[m.MirroredElemLabels]
               val optionReaders =
                 options
                   .zip(deriveForSubtypes[m.MirroredElemTypes, A])
@@ -72,10 +73,10 @@ trait CoproductConfigReaderDerivation(hint: CoproductHint[?]) { self: ConfigRead
     inline def deriveForSubtype[A0, A]: ConfigReader[A] =
       summonFrom {
         case reader: ConfigReader[A0] =>
-          reader.map(_.expandType[A])
+          reader.map(widen[A0, A](_))
 
         case given Mirror.Of[A0] =>
-          ConfigReader.derived[A0].map(_.expandType[A])
+          ConfigReader.derived[A0].map(widen[A0, A](_))
       }
   }
 }
