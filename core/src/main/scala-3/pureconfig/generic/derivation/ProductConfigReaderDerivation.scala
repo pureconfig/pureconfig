@@ -78,13 +78,7 @@ trait ProductConfigReaderDerivation(hint: ProductHint[?]) { self: ConfigReaderDe
     inline def read[T <: Tuple, N <: Int](cursors: List[ConfigCursor]): Either[ConfigReaderFailures, T] =
       inline erasedValue[T] match {
         case _: (h *: t) =>
-          val reader =
-            summonFrom {
-              case reader: ConfigReader[h] => reader
-              case given Mirror.Of[h] => ConfigReader.derived[h]
-            }
-
-          val h = reader.from(cursors(constValue[N]))
+          val h = summonConfigReader[h].from(cursors(constValue[N]))
 
           h -> read[t, N + 1](cursors) match {
             case (Right(h), Right(t)) => Right((h *: t).expandType[T])
