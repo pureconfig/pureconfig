@@ -62,7 +62,7 @@ trait ProductConfigReaderDerivation(hint: ProductHint[?]) { self: ConfigReaderDe
         def from(cur: ConfigCursor): ConfigReader.Result[T] =
           for {
             listCur <- asList(cur)
-            result <- read[T, 0](listCur.list)
+            result <- readTuple[T, 0](listCur.list)
           } yield result
 
         def asList(cur: ConfigCursor) =
@@ -76,12 +76,12 @@ trait ProductConfigReaderDerivation(hint: ProductHint[?]) { self: ConfigReaderDe
           }
       }
 
-    inline def read[T <: Tuple, N <: Int](cursors: List[ConfigCursor]): Either[ConfigReaderFailures, T] =
+    inline def readTuple[T <: Tuple, N <: Int](cursors: List[ConfigCursor]): Either[ConfigReaderFailures, T] =
       inline erasedValue[T] match {
         case _: (h *: t) =>
           val h = summonConfigReader[h].from(cursors(constValue[N]))
 
-          h -> read[t, N + 1](cursors) match {
+          h -> readTuple[t, N + 1](cursors) match {
             case (Right(h), Right(t)) => Right(widen[h *: t, T](h *: t))
             case (Left(h), Left(t)) => Left(h ++ t)
             case (_, Left(failures)) => Left(failures)
