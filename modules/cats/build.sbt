@@ -6,9 +6,9 @@ name := "pureconfig-cats"
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "2.6.0",
-  "org.typelevel" %% "cats-laws" % "2.6.0" % "test",
-  "org.typelevel" %% "discipline-scalatest" % "2.1.4" % "test"
+  "org.typelevel" %% "cats-core" % "2.6.1",
+  "org.typelevel" %% "cats-laws" % "2.6.1" % "test",
+  "org.typelevel" %% "discipline-scalatest" % "2.1.5" % "test"
 )
 
 developers := List(
