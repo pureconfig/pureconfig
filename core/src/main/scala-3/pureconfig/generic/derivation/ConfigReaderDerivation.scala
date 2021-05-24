@@ -3,7 +3,6 @@ package generic
 package derivation
 
 import scala.deriving.Mirror
-import pureconfig.generic.derivation.ConfigReaderDerivation
 
 trait ConfigReaderDerivation extends CoproductConfigReaderDerivation with ProductConfigReaderDerivation {
   extension (c: ConfigReader.type) {
