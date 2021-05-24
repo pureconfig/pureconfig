@@ -7,7 +7,6 @@ import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.derivation.WidenType.widen
-import pureconfig.generic.error.NoValidCoproductOptionFound
 
 type EnumConfigReader[A] = EnumConfigReaderDerivation.Default.EnumConfigReader[A]
 
@@ -18,7 +17,7 @@ trait EnumConfigReaderDerivation(transformName: String => String) {
   object EnumConfigReader {
     inline def derived[A](using m: Mirror.SumOf[A]): EnumConfigReader[A] = {
       val values = summonCases[m.MirroredElemTypes, A]
-      new EnumConfigReader[A]:
+      new EnumConfigReader[A] {
         def from(cur: ConfigCursor): ConfigReader.Result[A] =
           for {
             value <- cur.asString
@@ -28,10 +27,14 @@ trait EnumConfigReaderDerivation(transformName: String => String) {
                 case None =>
                   for {
                     v <- cur.asConfigValue
-                    result <- cur.failed(NoValidCoproductOptionFound(v, Seq.empty))
+                    result <-
+                      cur.failed(
+                        CannotConvert(value, constValue[m.MirroredLabel], "The value is not a valid enum option.")
+                      )
                   } yield result
               }
           } yield result
+      }
     }
 
     inline def summonCases[T <: Tuple, A]: List[A] =
