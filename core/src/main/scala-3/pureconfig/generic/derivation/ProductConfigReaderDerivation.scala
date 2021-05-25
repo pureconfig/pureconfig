@@ -5,6 +5,7 @@ package derivation
 import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
 import scala.compiletime.ops.int._
 import scala.deriving.Mirror
+import scala.util.chaining.*
 
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
 import pureconfig.generic.derivation.WidenType.widen
@@ -37,10 +38,14 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
             for {
               objCur <- cur.asObjectCursor
               result <-
-                readTuple[m.MirroredElemTypes, 0](
-                  Labels.transformed[m.MirroredElemLabels](fieldMapping).map(objCur.atKeyOrUndefined(_)),
-                  Labels.transformed[m.MirroredElemLabels](fieldMapping).map(KeyNotFound.forKeys(_, objCur.keys))
-                )
+                Labels
+                  .transformed[m.MirroredElemLabels](fieldMapping)
+                  .pipe(labels =>
+                    readTuple[m.MirroredElemTypes, 0](
+                      labels.map(objCur.atKeyOrUndefined(_)),
+                      labels.map(KeyNotFound.forKeys(_, objCur.keys))
+                    )
+                  )
             } yield m.fromProduct(result)
         }
     }
