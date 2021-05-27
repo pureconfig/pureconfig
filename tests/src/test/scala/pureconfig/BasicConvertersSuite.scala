@@ -1,7 +1,7 @@
 package pureconfig
 
 import java.io.File
-import java.math.{BigInteger, BigDecimal => JavaBigDecimal}
+import java.math.{BigDecimal => JavaBigDecimal, BigInteger}
 import java.net.{URI, URL}
 import java.nio.file.Path
 import java.time.{Duration => JavaDuration, _}
@@ -13,6 +13,7 @@ import scala.concurrent.duration.{Duration, FiniteDuration, _}
 import scala.util.matching.Regex
 
 import com.typesafe.config._
+
 import pureconfig.arbitrary._
 import pureconfig.data.Percentage
 import pureconfig.equality._

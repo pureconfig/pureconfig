@@ -1,6 +1,7 @@
 package pureconfig.module
 
-import _root_.scalaz.{==>>, ICons, INil, IList, ISet, Maybe, NonEmptyList, Order}
+import _root_.scalaz.{==>>, ICons, IList, INil, ISet, Maybe, NonEmptyList, Order}
+
 import pureconfig._
 import pureconfig.error.FailureReason
 

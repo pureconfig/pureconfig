@@ -16,7 +16,7 @@ package object yaml {
     *         `Config` from the YAML file, else a `Failure` with details on why it isn't possible
     */
   @deprecated("Use `YamlConfigSource.file(path).load[Config]` instead", "0.12.1")
-  def loadYaml[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
+  def loadYaml[Config](path: Path)(implicit reader: ConfigReader[Config]): ConfigReader.Result[Config] = {
     YamlConfigSource.file(path).load[Config]
   }
 
@@ -29,7 +29,7 @@ package object yaml {
     */
   @deprecated("Use `YamlConfigSource.file(path).at(namespace).load[Config]` instead", "0.12.1")
   def loadYaml[Config](path: Path, namespace: String)(implicit
-      reader: Derivation[ConfigReader[Config]]
+      reader: ConfigReader[Config]
   ): ConfigReader.Result[Config] = {
     YamlConfigSource.file(path).at(namespace).load[Config]
   }
@@ -41,15 +41,13 @@ package object yaml {
     *         `Config` from `content`, else a `Failure` with details on why it isn't possible
     */
   @deprecated("Use `YamlConfigSource.string(content).load[Config]` instead", "0.12.1")
-  def loadYaml[Config](
-      content: String
-  )(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
+  def loadYaml[Config](content: String)(implicit reader: ConfigReader[Config]): ConfigReader.Result[Config] = {
     YamlConfigSource.string(content).load[Config]
   }
 
   @deprecated("Use `YamlConfigSource.string(content).at(namespace).load[Config]` instead", "0.12.1")
   def loadYaml[Config](content: String, namespace: String)(implicit
-      reader: Derivation[ConfigReader[Config]]
+      reader: ConfigReader[Config]
   ): ConfigReader.Result[Config] = {
     YamlConfigSource.string(content).at(namespace).load[Config]
   }
@@ -61,7 +59,7 @@ package object yaml {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `YamlConfigSource.file(path).loadOrThrow[Config]` instead", "0.12.1")
-  def loadYamlOrThrow[Config: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+  def loadYamlOrThrow[Config: ClassTag](path: Path)(implicit reader: ConfigReader[Config]): Config = {
     YamlConfigSource.file(path).loadOrThrow[Config]
   }
 
@@ -74,7 +72,7 @@ package object yaml {
   @throws[ConfigReaderException[_]]
   @deprecated("Use `YamlConfigSource.file(path).at(namespace).loadOrThrow[Config]` instead", "0.12.1")
   def loadYamlOrThrow[Config: ClassTag](path: Path, namespace: String)(implicit
-      reader: Derivation[ConfigReader[Config]]
+      reader: ConfigReader[Config]
   ): Config = {
     YamlConfigSource.file(path).at(namespace).loadOrThrow[Config]
   }
@@ -86,7 +84,7 @@ package object yaml {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `YamlConfigSource.string(content).loadOrThrow[Config]` instead", "0.12.1")
-  def loadYamlOrThrow[Config: ClassTag](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+  def loadYamlOrThrow[Config: ClassTag](content: String)(implicit reader: ConfigReader[Config]): Config = {
     YamlConfigSource.string(content).loadOrThrow[Config]
   }
 
@@ -99,7 +97,7 @@ package object yaml {
   @throws[ConfigReaderException[_]]
   @deprecated("Use `YamlConfigSource.string(content).at(namespace).loadOrThrow[Config]` instead", "0.12.1")
   def loadYamlOrThrow[Config: ClassTag](content: String, namespace: String)(implicit
-      reader: Derivation[ConfigReader[Config]]
+      reader: ConfigReader[Config]
   ): Config = {
     YamlConfigSource.string(content).at(namespace).loadOrThrow[Config]
   }
@@ -113,7 +111,7 @@ package object yaml {
     *         isn't possible
     */
   @deprecated("Use `YamlConfigSource.file(path).multiDoc.load[Config]` instead", "0.12.1")
-  def loadYamls[Config](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
+  def loadYamls[Config](path: Path)(implicit reader: ConfigReader[Config]): ConfigReader.Result[Config] = {
     YamlConfigSource.file(path).multiDoc.load[Config]
   }
 
@@ -126,9 +124,7 @@ package object yaml {
     *         isn't possible
     */
   @deprecated("Use `YamlConfigSource.string(content).multiDoc.load[Config]` instead", "0.12.1")
-  def loadYamls[Config](
-      content: String
-  )(implicit reader: Derivation[ConfigReader[Config]]): ConfigReader.Result[Config] = {
+  def loadYamls[Config](content: String)(implicit reader: ConfigReader[Config]): ConfigReader.Result[Config] = {
     YamlConfigSource.string(content).multiDoc.load[Config]
   }
 
@@ -140,7 +136,7 @@ package object yaml {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `YamlConfigSource.file(path).multiDoc.loadOrThrow[Config]` instead", "0.12.1")
-  def loadYamlsOrThrow[Config: ClassTag](path: Path)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+  def loadYamlsOrThrow[Config: ClassTag](path: Path)(implicit reader: ConfigReader[Config]): Config = {
     YamlConfigSource.file(path).multiDoc.loadOrThrow[Config]
   }
 
@@ -152,7 +148,7 @@ package object yaml {
     */
   @throws[ConfigReaderException[_]]
   @deprecated("Use `YamlConfigSource.string(content).multiDoc.loadOrThrow[Config]` instead", "0.12.1")
-  def loadYamlsOrThrow[Config: ClassTag](content: String)(implicit reader: Derivation[ConfigReader[Config]]): Config = {
+  def loadYamlsOrThrow[Config: ClassTag](content: String)(implicit reader: ConfigReader[Config]): Config = {
     YamlConfigSource.string(content).multiDoc.loadOrThrow[Config]
   }
 }

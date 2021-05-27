@@ -7,6 +7,7 @@ import java.nio.file.Path
 import scala.reflect.ClassTag
 
 import com.typesafe.config._
+
 import pureconfig.ConfigReader.Result
 import pureconfig.backend.ConfigWrapper._
 import pureconfig.backend.{ConfigFactoryWrapper, PathUtil}
@@ -57,8 +58,7 @@ trait ConfigSource {
     * @return A `Right` with the configuration if it is possible to create an instance of type
     *         `A` from this source, a `Failure` with details on why it isn't possible otherwise
     */
-  final def load[A](implicit reader: Derivation[ConfigReader[A]]): Result[A] =
-    cursor().flatMap(reader.value.from)
+  final def load[A](implicit reader: ConfigReader[A]): Result[A] = cursor().flatMap(reader.from)
 
   /** Loads a configuration of type `A` from this source. If it is not possible to create an
     * instance of `A`, this method throws a `ConfigReaderException`.
@@ -67,7 +67,7 @@ trait ConfigSource {
     * @return The configuration of type `A` loaded from this source.
     */
   @throws[ConfigReaderException[_]]
-  final def loadOrThrow[A: ClassTag](implicit reader: Derivation[ConfigReader[A]]): A = {
+  final def loadOrThrow[A: ClassTag](implicit reader: ConfigReader[A]): A = {
     load[A] match {
       case Right(config) => config
       case Left(failures) => throw new ConfigReaderException[A](failures)

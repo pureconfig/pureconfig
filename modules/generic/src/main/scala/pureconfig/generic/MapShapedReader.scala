@@ -1,10 +1,11 @@
 package pureconfig.generic
 
+import shapeless._
+import shapeless.labelled.{FieldType, field}
+
 import pureconfig._
 import pureconfig.error.KeyNotFound
 import pureconfig.generic.ProductHint.UseOrDefault
-import shapeless._
-import shapeless.labelled.{FieldType, field}
 
 /** A specialized reader for generic representations that reads values in the shape of a config object, and is capable
   * of handling default values.
@@ -29,7 +30,7 @@ object MapShapedReader {
 
   final implicit def labelledHConsReader[Original, K <: Symbol, H, T <: HList, D <: HList](implicit
       key: Witness.Aux[K],
-      hConfigReader: Derivation[Lazy[ConfigReader[H]]],
+      hConfigReader: Lazy[ConfigReader[H]],
       tConfigReader: Lazy[MapShapedReader[Original, T, D]],
       hint: ProductHint[Original]
   ): MapShapedReader[Original, FieldType[K, H] :: T, Option[H] :: D] =
@@ -41,7 +42,7 @@ object MapShapedReader {
       ): ConfigReader.Result[FieldType[K, H] :: T] = {
         val fieldName = key.value.name
         val fieldAction = hint.from(cur, fieldName)
-        lazy val reader = hConfigReader.value.value
+        lazy val reader = hConfigReader.value
         val headResult = (fieldAction, default.head) match {
           case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
             Right(defaultValue)

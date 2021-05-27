@@ -5,6 +5,7 @@ import java.nio.file.{Files, Path, Paths}
 
 import com.typesafe.config.{ConfigValue, ConfigValueType}
 import org.scalatest.EitherValues
+
 import pureconfig.BaseSuite
 import pureconfig.error._
 import pureconfig.generic.auto._

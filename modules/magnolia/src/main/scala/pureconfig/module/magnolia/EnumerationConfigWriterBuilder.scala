@@ -4,6 +4,7 @@ import scala.language.experimental.macros
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 import magnolia._
+
 import pureconfig.ConfigWriter
 
 /** A type class to build `ConfigWriter`s for sealed families of case objects where each type is encoded as a

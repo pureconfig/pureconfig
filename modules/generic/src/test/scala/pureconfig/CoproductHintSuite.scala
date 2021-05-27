@@ -1,6 +1,7 @@
 package pureconfig
 
 import com.typesafe.config._
+
 import pureconfig.error._
 import pureconfig.generic._
 import pureconfig.generic.auto._

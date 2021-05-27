@@ -6,6 +6,7 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 import com.typesafe.config.ConfigValue
+
 import pureconfig.ConvertHelpers._
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
 
@@ -151,7 +152,7 @@ object ConfigReader extends BasicReaders with CollectionReaders with ProductRead
     def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
   }
 
-  def apply[A](implicit reader: Derivation[ConfigReader[A]]): ConfigReader[A] = reader.value
+  def apply[A](implicit reader: ConfigReader[A]): ConfigReader[A] = reader
 
   /** Creates a `ConfigReader` from a function reading a `ConfigCursor`.
     *

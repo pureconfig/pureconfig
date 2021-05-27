@@ -1,6 +1,7 @@
 package pureconfig.module.magnolia
 
 import _root_.magnolia._
+
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailures, KeyNotFound, WrongSizeList}
 import pureconfig.generic.ProductHint.UseOrDefault

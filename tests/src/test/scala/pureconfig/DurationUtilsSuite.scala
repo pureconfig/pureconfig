@@ -6,6 +6,7 @@ import scala.concurrent.duration._
 
 import com.typesafe.config.ConfigValueFactory
 import org.scalatest.Inspectors
+
 import pureconfig.DurationUtilsSuite._
 import pureconfig.error.{CannotConvert, ConvertFailure, ExceptionThrown}
 

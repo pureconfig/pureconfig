@@ -3,6 +3,7 @@ package pureconfig.backend
 import scala.util.control.NonFatal
 
 import com.typesafe.config._
+
 import pureconfig._
 import pureconfig.error._
 

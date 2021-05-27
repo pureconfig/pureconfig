@@ -12,11 +12,11 @@ jobs:
         scala: ['2.12', '2.13', '3.0']
         include:
           - scala: '2.12'
-            scala-version: 2.12.12
+            scala-version: 2.12.13
           - scala: '2.13'
             scala-version: 2.13.5
           - scala: '3.0'
-            scala-version: 3.0.0-RC1
+            scala-version: 3.0.0
 
     steps:
       - name: Checkout repository
@@ -28,7 +28,12 @@ jobs:
           java-version: ${{ matrix.jdk }}
 
       - name: Check formatting
-        run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll; scalafmtSbtCheck"
+        run: sbt ++${{ matrix.scala-version }} scalafmtCheckAll scalafmtSbtCheck
+
+        # Consider joining this action with the "Check formatting" one once Scalafix is supported for Scala 3.
+      - name: Run linter
+        if: startsWith(matrix.scala, '2')
+        run: sbt ++${{ matrix.scala-version }} "scalafixAll --check"
 
       - name: Compile
         run: sbt "++${{ matrix.scala-version }} compile"

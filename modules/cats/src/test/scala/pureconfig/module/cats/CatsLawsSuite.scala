@@ -10,6 +10,7 @@ import com.typesafe.config.{Config, ConfigValue}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.typelevel.discipline.scalatest.FunSuiteDiscipline
+
 import pureconfig._
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.module.cats.arbitrary._

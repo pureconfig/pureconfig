@@ -2,6 +2,7 @@ package pureconfig.module.joda
 
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+
 import pureconfig.BaseSuite
 import pureconfig.module.joda.arbitrary._
 

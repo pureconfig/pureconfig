@@ -1,7 +1,8 @@
 import mdoc.MdocPlugin
 import mdoc.MdocPlugin.autoImport._
-import sbt._
 import sbt.Keys._
+import sbt._
+import scalafix.sbt.ScalafixPlugin
 
 /** A plugin that generates a synthetic SBT project for documentation for each module it is enabled on. The generated
   * SBT projects depend on the original project and also have a hardcoded dependency on "generic" in order to provide
@@ -39,19 +40,20 @@ object ModuleMdocPlugin extends AutoPlugin {
         .enablePlugins(MdocPlugin)
         .dependsOn(moduleProj)
         .dependsOn(LocalProject("generic")) // Allow auto-derivation in documentation
+        .disablePlugins(ScalafixPlugin) // Disable Scalafix in the docs project
         .settings(
           // format: off
           name := docProjId,
 
-          mdocIn := (mdocIn in moduleProj).value,
-          mdocOut := (mdocOut in moduleProj).value,
+          mdocIn := (moduleProj / mdocIn).value,
+          mdocOut := (moduleProj / mdocOut).value,
           mdocExtraArguments += "--no-link-hygiene",
           mdocVariables := Map("VERSION" -> latestPureconfigRelease),
 
-          libraryDependencies ++= (mdocLibraryDependencies in moduleProj).value,
-          scalacOptions ++= (mdocScalacOptions in moduleProj).value,
+          libraryDependencies ++= (moduleProj / mdocLibraryDependencies).value,
+          scalacOptions ++= (moduleProj / mdocScalacOptions).value,
 
-          skip in publish := true
+          publish / skip := true
           // format: on
         )
 

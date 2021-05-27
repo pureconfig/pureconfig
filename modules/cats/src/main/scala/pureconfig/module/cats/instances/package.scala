@@ -2,6 +2,7 @@ package pureconfig.module.cats
 
 import cats._
 import com.typesafe.config.{Config, ConfigFactory, ConfigValue}
+
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures}
 
@@ -49,7 +50,7 @@ package object instances {
           fb.to(b).withFallback(fa.to(a))
         }
 
-        ConfigConvert.fromReaderAndWriter(Derivation.Successful(reader), Derivation.Successful(writer))
+        ConfigConvert.fromReaderAndWriter(reader, writer)
       }
     }
 

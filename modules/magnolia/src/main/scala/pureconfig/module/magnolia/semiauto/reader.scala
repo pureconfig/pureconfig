@@ -3,6 +3,7 @@ package pureconfig.module.magnolia.semiauto
 import scala.language.experimental.macros
 
 import magnolia._
+
 import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.{EnumerationConfigReaderBuilder, MagnoliaConfigReader}
 import pureconfig.{ConfigFieldMapping, ConfigReader, KebabCase, PascalCase}

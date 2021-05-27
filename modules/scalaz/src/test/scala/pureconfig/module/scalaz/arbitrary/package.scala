@@ -1,14 +1,15 @@
 package pureconfig.module.scalaz
 
-import com.typesafe.config.{ConfigValue, ConfigValueFactory}
-import org.scalacheck.{Arbitrary, Cogen, Gen}
-import org.scalacheck.Arbitrary.{arbitrary => arb}
-import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter, Derivation}
-import pureconfig.error._
-
 import scala.collection.JavaConverters._
+
+import com.typesafe.config.{ConfigValue, ConfigValueFactory}
+import org.scalacheck.Arbitrary.{arbitrary => arb}
+import org.scalacheck.{Arbitrary, Cogen, Gen}
 import scalaz.scalacheck.ScalaCheckBinding.GenMonad
 import scalaz.syntax.applicative._
+
+import pureconfig.error._
+import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
 
 package object arbitrary {
 
@@ -68,6 +69,6 @@ package object arbitrary {
       for {
         reader <- arb[ConfigReader[A]]
         writer <- arb[ConfigWriter[A]]
-      } yield ConfigConvert.fromReaderAndWriter(Derivation.Successful(reader), Derivation.Successful(writer))
+      } yield ConfigConvert.fromReaderAndWriter(reader, writer)
     }
 }

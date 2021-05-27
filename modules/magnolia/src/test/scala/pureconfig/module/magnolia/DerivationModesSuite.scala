@@ -3,8 +3,9 @@ package pureconfig.module.magnolia
 import scala.language.higherKinds
 
 import com.typesafe.config.ConfigFactory
-import pureconfig._
 import shapeless.test.illTyped
+
+import pureconfig._
 
 class DerivationModesSuite extends BaseSuite {
 

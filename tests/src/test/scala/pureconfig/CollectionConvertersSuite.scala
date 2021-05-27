@@ -4,6 +4,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.{HashSet, ListSet, Queue, TreeSet}
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
+
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, WrongType}
 
 class CollectionConvertersSuite extends BaseSuite {
