@@ -1,7 +1,7 @@
 # Cats-effect2 module for PureConfig
 
-Adds support for loading configuration using [cats-effect 2.* series](https://github.com/typelevel/cats-effect) to control side effects.
-This module written for backport pureconfig to old `cats-effect 2.* series`.
+Adds support for loading configuration using [old cats-effect 2.* series](https://github.com/typelevel/cats-effect) to control side effects.
+This is a backport of `pureconfig-cats-effect` to the old 2.* series.
 
 ## Add pureconfig-cats-effect2 to your project
 
@@ -17,12 +17,11 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect2" % "0
 
 To load a configuration file from a path using cats-effect's `IO`:
 
-
 ```scala
 import pureconfig._
 import pureconfig.generic.auto._
-import pureconfig.module.catseffect.syntax._
-import cats.effect.{ Blocker, ContextShift, IO }
+import pureconfig.module.catseffect2.syntax._
+import cats.effect.{Blocker, ContextShift, IO}
 
 case class MyConfig(somefield: Int, anotherfield: String)
 
@@ -41,7 +40,6 @@ new String(Files.readAllBytes(somePath), StandardCharsets.UTF_8)
 // anotherfield=some string"""
 
 Blocker[IO].use(load).unsafeRunSync().equals(MyConfig(1234, "some string"))
-load.unsafeRunSync().equals(MyConfig(1234, "some string"))
 // res2: Boolean = true
 ```
 
@@ -51,9 +49,9 @@ To create an IO that writes out a configuration file, do as follows:
 
 
 ```scala
-import pureconfig.module.catseffect._
+import pureconfig.module.catseffect2._
 import pureconfig.generic.auto._
-import cats.effect.{ Blocker, ContextShift, IO }
+import cats.effect.{Blocker, ContextShift, IO}
 
 val someConfig = MyConfig(1234, "some string")
 

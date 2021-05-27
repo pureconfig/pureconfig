@@ -1,7 +1,7 @@
 # Cats-effect2 module for PureConfig
 
-Adds support for loading configuration using [cats-effect 2.* series](https://github.com/typelevel/cats-effect) to control side effects.
-This module written for backport pureconfig to old `cats-effect 2.* series`.
+Adds support for loading configuration using [old cats-effect 2.* series](https://github.com/typelevel/cats-effect) to control side effects.
+This is a backport of `pureconfig-cats-effect` to the old 2.* series.
 
 ## Add pureconfig-cats-effect2 to your project
 
@@ -29,7 +29,7 @@ Files.write(somePath, fileContents.getBytes(StandardCharsets.UTF_8))
 ```scala mdoc:silent
 import pureconfig._
 import pureconfig.generic.auto._
-import pureconfig.module.catseffect.syntax._
+import pureconfig.module.catseffect2.syntax._
 import cats.effect.{ Blocker, ContextShift, IO }
 
 case class MyConfig(somefield: Int, anotherfield: String)
@@ -65,7 +65,7 @@ case class MyConfig(somefield: Int, anotherfield: String)
 ```
 
 ```scala mdoc:silent
-import pureconfig.module.catseffect._
+import pureconfig.module.catseffect2._
 import pureconfig.generic.auto._
 import cats.effect.{ Blocker, ContextShift, IO }
 
