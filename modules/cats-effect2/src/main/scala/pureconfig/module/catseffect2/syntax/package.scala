@@ -1,11 +1,11 @@
-package pureconfig.module.catseffect
+package pureconfig.module.catseffect2
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import cats.effect.{Blocker, ContextShift, Sync}
 
-import pureconfig.module.catseffect
+import pureconfig.module.catseffect2
 import pureconfig.{ConfigReader, ConfigSource}
 
 package object syntax {
@@ -14,6 +14,6 @@ package object syntax {
 
     @inline
     final def loadF[F[_]: Sync: ContextShift, A: ConfigReader](blocker: Blocker)(implicit ct: ClassTag[A]): F[A] =
-      catseffect.loadF(cs, blocker)
+      catseffect2.loadF(cs, blocker)
   }
 }

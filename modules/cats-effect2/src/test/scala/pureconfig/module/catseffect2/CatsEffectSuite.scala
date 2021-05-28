@@ -1,4 +1,4 @@
-package pureconfig.module.catseffect
+package pureconfig.module.catseffect2
 
 import java.io.{BufferedOutputStream, PipedInputStream, PipedOutputStream}
 import java.nio.file.{Path, Paths}
@@ -11,7 +11,7 @@ import com.typesafe.config.ConfigFactory
 
 import pureconfig.error.{ConfigReaderException, ConvertFailure}
 import pureconfig.generic.auto._
-import pureconfig.module.catseffect.syntax._
+import pureconfig.module.catseffect2.syntax._
 import pureconfig.{BaseSuite, ConfigSource}
 
 final class CatsEffectSuite extends BaseSuite {

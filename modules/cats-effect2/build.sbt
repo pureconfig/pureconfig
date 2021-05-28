@@ -13,7 +13,7 @@ developers := List(Developer("keirlawson", "Keir Lawson", "keirlawson@gmail.com"
 
 osgiSettings
 
-OsgiKeys.exportPackage := Seq("pureconfig.module.catseffect.*")
+OsgiKeys.exportPackage := Seq("pureconfig.module.catseffect2.*")
 OsgiKeys.privatePackage := Seq()
 OsgiKeys.importPackage := Seq(
   s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""",

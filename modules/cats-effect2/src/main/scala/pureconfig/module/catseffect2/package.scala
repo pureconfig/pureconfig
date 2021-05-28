@@ -15,7 +15,7 @@ import com.typesafe.config.ConfigRenderOptions
 import pureconfig._
 import pureconfig.error.ConfigReaderException
 
-package object catseffect {
+package object catseffect2 {
 
   /** Load a configuration of type `A` from a config source
     *

@@ -17,11 +17,12 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect2" % "0
 
 To load a configuration file from a path using cats-effect's `IO`:
 
+
 ```scala
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect2.syntax._
-import cats.effect.{Blocker, ContextShift, IO}
+import cats.effect.{ Blocker, ContextShift, IO }
 
 case class MyConfig(somefield: Int, anotherfield: String)
 
@@ -51,7 +52,7 @@ To create an IO that writes out a configuration file, do as follows:
 ```scala
 import pureconfig.module.catseffect2._
 import pureconfig.generic.auto._
-import cats.effect.{Blocker, ContextShift, IO}
+import cats.effect.{ Blocker, ContextShift, IO }
 
 val someConfig = MyConfig(1234, "some string")
 
