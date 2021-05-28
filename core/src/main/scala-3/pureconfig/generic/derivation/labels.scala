@@ -5,9 +5,6 @@ import scala.compiletime.{constValue, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 
 object Labels {
-  inline def of[T <: Tuple]: List[String] =
-    transformed[T](identity)
-
   inline def transformed[T <: Tuple](
       inline transform: String => String
   ): List[String] =
