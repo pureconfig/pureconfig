@@ -58,6 +58,12 @@ class ProductReaderDerivationSuite extends BaseSuite {
     ConfigReader[Foo].from(conf) shouldBe Right(Foo(true -> 5))
   }
 
+  it should s"return a ${classOf[WrongType]} if the types in the list do not match the tuple" in {
+    case class Foo(values: (Boolean, Int)) derives ConfigReader
+    val conf = ConfigFactory.parseString("""{ values: [ true, "value" ] }""").root()
+    ConfigReader[Foo].from(conf) should failWithReason[WrongType]
+  }
+
   it should s"return a ${classOf[WrongSizeList]} if the list is shorter than the tuple size" in {
     case class Foo(values: (Boolean, Int)) derives ConfigReader
     val conf = ConfigFactory.parseString("""{ values: [ true ] }""").root()
