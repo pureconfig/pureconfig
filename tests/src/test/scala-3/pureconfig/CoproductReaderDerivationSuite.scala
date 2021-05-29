@@ -30,6 +30,13 @@ class CoproductReaderDerivationSuite extends BaseSuite {
     ConfigReader[AnimalConfig].from(conf.root()) should failWithReason[KeyNotFound]
   }
 
+  it should "return a proper ConfigReaderFailure if the hint field in a coproduct contains an invalid option" in {
+    val conf = ConfigFactory.parseString("{ can-fly = true, type = car-config }")
+    ConfigReader[AnimalConfig].from(conf.root()) should failWith(
+      CannotConvert("car-config", "AnimalConfig", "The value is not a valid option.")
+    )
+  }
+
   it should "return a proper ConfigReaderFailure when a coproduct config is missing" in {
     case class AnimalCage(animal: AnimalConfig) derives ConfigReader
     ConfigReader[AnimalCage].from(ConfigFactory.empty().root()) should failWithReason[KeyNotFound]

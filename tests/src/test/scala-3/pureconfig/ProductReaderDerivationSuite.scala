@@ -10,6 +10,7 @@ import pureconfig._
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig.error.{KeyNotFound, WrongType}
 import pureconfig.generic.derivation.default.derived
+import pureconfig.error.WrongSizeList
 
 class ProductReaderDerivationSuite extends BaseSuite {
 
@@ -44,6 +45,30 @@ class ProductReaderDerivationSuite extends BaseSuite {
   }
 
   val emptyConf = ConfigFactory.empty().root()
+
+  it should s"succeed with a correct config" in {
+    case class Foo(i: Int, s: String, bs: List[Boolean]) derives ConfigReader
+    val conf = ConfigFactory.parseString("""{ i: 1, s: "value", bs: [ true, false ] }""").root()
+    ConfigReader[Foo].from(conf) shouldBe Right(Foo(1, "value", List(true, false)))
+  }
+
+  it should s"be able to read lists as tuples" in {
+    case class Foo(values: (Boolean, Int)) derives ConfigReader
+    val conf = ConfigFactory.parseString("""{ values: [ true, 5 ] }""").root()
+    ConfigReader[Foo].from(conf) shouldBe Right(Foo(true -> 5))
+  }
+
+  it should s"return a ${classOf[WrongSizeList]} if the list is shorter than the tuple size" in {
+    case class Foo(values: (Boolean, Int)) derives ConfigReader
+    val conf = ConfigFactory.parseString("""{ values: [ true ] }""").root()
+    ConfigReader[Foo].from(conf) should failWithReason[WrongSizeList]
+  }
+
+  it should s"return a ${classOf[WrongSizeList]} if the list is longer than the tuple size" in {
+    case class Foo(values: (Boolean, Int)) derives ConfigReader
+    val conf = ConfigFactory.parseString("""{ values: [ true, 5, "value" ] }""").root()
+    ConfigReader[Foo].from(conf) should failWithReason[WrongSizeList]
+  }
 
   it should s"return a ${classOf[KeyNotFound]} when a key is not in the configuration" in {
     case class Foo(i: Int) derives ConfigReader
