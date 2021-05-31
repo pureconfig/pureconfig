@@ -6,8 +6,10 @@ import pureconfig.error.{ConfigReaderFailures, FailureReason}
 
 /** A failure reason given when a valid option for a coproduct cannot be found.
   *
-  * @param value the ConfigValue that was unable to be mapped to a coproduct option
-  * @param optionFailures the failures produced when attempting to read coproduct options
+  * @param value
+  *   the ConfigValue that was unable to be mapped to a coproduct option
+  * @param optionFailures
+  *   the failures produced when attempting to read coproduct options
   */
 final case class NoValidCoproductOptionFound(value: ConfigValue, optionFailures: Seq[(String, ConfigReaderFailures)])
     extends FailureReason {

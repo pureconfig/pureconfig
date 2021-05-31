@@ -28,9 +28,12 @@ trait ConfigReaderFailure {
 /** A failure occurred when converting from a `ConfigValue` to a given type. The failure contains a path to the
   * `ConfigValue` that raised the error.
   *
-  * @param reason the reason for the conversion failure
-  * @param origin the optional origin of the failure
-  * @param path the path to the `ConfigValue` that raised the error
+  * @param reason
+  *   the reason for the conversion failure
+  * @param origin
+  *   the optional origin of the failure
+  * @param path
+  *   the path to the `ConfigValue` that raised the error
   */
 case class ConvertFailure(reason: FailureReason, origin: Option[ConfigOrigin], path: String)
     extends ConfigReaderFailure {
@@ -42,9 +45,12 @@ object ConvertFailure {
 
   /** Constructs a `ConvertFailure` from a reason and a `ConfigCursor`.
     *
-    * @param reason the reason for the conversion failure
-    * @param cur the cursor where the failure ocurred
-    * @return a `ConvertFailure` for the given reason at the given cursor.
+    * @param reason
+    *   the reason for the conversion failure
+    * @param cur
+    *   the cursor where the failure ocurred
+    * @return
+    *   a `ConvertFailure` for the given reason at the given cursor.
     */
   def apply(reason: FailureReason, cur: ConfigCursor): ConvertFailure =
     ConvertFailure(reason, cur.origin, cur.path)
@@ -60,8 +66,10 @@ case object NoFilesToRead extends ConfigReaderFailure {
 
 /** A failure occurred because an exception was thrown during the reading process.
   *
-  * @param throwable the exception thrown
-  * @param origin the optional origin of the failure
+  * @param throwable
+  *   the exception thrown
+  * @param origin
+  *   the optional origin of the failure
   */
 final case class ThrowableFailure(throwable: Throwable, origin: Option[ConfigOrigin]) extends ConfigReaderFailure {
 
@@ -98,8 +106,10 @@ trait CannotRead extends ConfigReaderFailure {
 
 /** A failure occurred due to the inability to read a requested file.
   *
-  * @param path the file system path of the file that couldn't be read
-  * @param reason an optional exception thrown when trying to read the file
+  * @param path
+  *   the file system path of the file that couldn't be read
+  * @param reason
+  *   an optional exception thrown when trying to read the file
   */
 final case class CannotReadFile(path: Path, reason: Option[Throwable]) extends CannotRead {
   val sourceType = "file"
@@ -108,8 +118,10 @@ final case class CannotReadFile(path: Path, reason: Option[Throwable]) extends C
 
 /** A failure occurred due to the inability to read a requested URL.
   *
-  * @param url the URL that couldn't be read
-  * @param reason an optional exception thrown when trying to read the URL
+  * @param url
+  *   the URL that couldn't be read
+  * @param reason
+  *   an optional exception thrown when trying to read the URL
   */
 final case class CannotReadUrl(url: URL, reason: Option[Throwable]) extends CannotRead {
   val sourceType = "URL"
@@ -118,8 +130,10 @@ final case class CannotReadUrl(url: URL, reason: Option[Throwable]) extends Cann
 
 /** A failure occurred due to the inability to read a requested resource.
   *
-  * @param resourceName the resource that couldn't be read
-  * @param reason an optional exception thrown when trying to read the resource
+  * @param resourceName
+  *   the resource that couldn't be read
+  * @param reason
+  *   an optional exception thrown when trying to read the resource
   */
 final case class CannotReadResource(resourceName: String, reason: Option[Throwable]) extends CannotRead {
   val sourceType = "resource"
@@ -128,8 +142,10 @@ final case class CannotReadResource(resourceName: String, reason: Option[Throwab
 
 /** A failure occurred due to the inability to parse the configuration.
   *
-  * @param msg the error message from the parser
-  * @param origin the optional origin of the failure
+  * @param msg
+  *   the error message from the parser
+  * @param origin
+  *   the optional origin of the failure
   */
 final case class CannotParse(msg: String, origin: Option[ConfigOrigin]) extends ConfigReaderFailure {
   def description = s"Unable to parse the configuration: $msg."
