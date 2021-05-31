@@ -19,11 +19,14 @@ package object catseffect2 {
 
   /** Load a configuration of type `A` from a config source
     *
-    * @param cs the config source from where the configuration will be loaded
-    * @param blocker the blocking context which will be used to load the configuration.
-    * @return The returned action will complete with `A` if it is possible to create an instance of type
-    *         `A` from the configuration source, or fail with a ConfigReaderException which in turn contains
-    *         details on why it isn't possible
+    * @param cs
+    *   the config source from where the configuration will be loaded
+    * @param blocker
+    *   the blocking context which will be used to load the configuration.
+    * @return
+    *   The returned action will complete with `A` if it is possible to create an instance of type `A` from the
+    *   configuration source, or fail with a ConfigReaderException which in turn contains details on why it isn't
+    *   possible
     */
   def loadF[F[_]: Sync: ContextShift, A](
       cs: ConfigSource,
@@ -36,22 +39,30 @@ package object catseffect2 {
 
   /** Load a configuration of type `A` from the standard configuration files
     *
-    * @param blocker the blocking context which will be used to load the configuration.
-    * @return The returned action will complete with `A` if it is possible to create an instance of type
-    *         `A` from the configuration files, or fail with a ConfigReaderException which in turn contains
-    *         details on why it isn't possible
+    * @param blocker
+    *   the blocking context which will be used to load the configuration.
+    * @return
+    *   The returned action will complete with `A` if it is possible to create an instance of type `A` from the
+    *   configuration files, or fail with a ConfigReaderException which in turn contains details on why it isn't
+    *   possible
     */
   def loadConfigF[F[_]: Sync: ContextShift, A: ConfigReader](blocker: Blocker)(implicit ct: ClassTag[A]): F[A] =
     loadF(ConfigSource.default, blocker)
 
   /** Save the given configuration into a property file
     *
-    * @param conf The configuration to save
-    * @param outputPath Where to write the configuration
-    * @param blocker the blocking context which will be used to load the configuration.
-    * @param overrideOutputPath Override the path if it already exists
-    * @param options the config rendering options
-    * @return The return action will save out the supplied configuration upon invocation
+    * @param conf
+    *   The configuration to save
+    * @param outputPath
+    *   Where to write the configuration
+    * @param blocker
+    *   the blocking context which will be used to load the configuration.
+    * @param overrideOutputPath
+    *   Override the path if it already exists
+    * @param options
+    *   the config rendering options
+    * @return
+    *   The return action will save out the supplied configuration upon invocation
     */
   def blockingSaveConfigAsPropertyFileF[F[_]: ContextShift, A: ConfigWriter](
       conf: A,
@@ -89,11 +100,16 @@ package object catseffect2 {
 
   /** Writes the configuration to the output stream and closes the stream
     *
-    * @param conf The configuration to write
-    * @param outputStream The stream in which the configuration should be written
-    * @param blocker the blocking context which will be used to load the configuration.
-    * @param options the config rendering options
-    * @return The return action will save out the supplied configuration upon invocation
+    * @param conf
+    *   The configuration to write
+    * @param outputStream
+    *   The stream in which the configuration should be written
+    * @param blocker
+    *   the blocking context which will be used to load the configuration.
+    * @param options
+    *   the config rendering options
+    * @return
+    *   The return action will save out the supplied configuration upon invocation
     */
   def blockingSaveConfigToStreamF[F[_]: ContextShift, A](
       conf: A,

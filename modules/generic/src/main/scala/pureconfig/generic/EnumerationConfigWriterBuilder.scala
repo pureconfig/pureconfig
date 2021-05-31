@@ -9,7 +9,8 @@ import pureconfig.ConfigWriter
 /** A type class to build `ConfigWriter`s for sealed families of case objects where each type is encoded as a
   * `ConfigString` based on the type name.
   *
-  * @tparam A the type of objects capable of being written as an enumeration
+  * @tparam A
+  *   the type of objects capable of being written as an enumeration
   */
 trait EnumerationConfigWriterBuilder[A] {
   def build(transformName: String => String): ConfigWriter[A]

@@ -5,7 +5,9 @@ package pureconfig
   * in their companion objects, as done by `ConfigReader` (see [[pureconfig.ExportedReaders]]) and `ConfigWriter` (see
   * [[pureconfig.ExportedWriters]]).
   *
-  * @param instance the type class instance to wrap
-  * @tparam A the type class
+  * @param instance
+  *   the type class instance to wrap
+  * @tparam A
+  *   the type class
   */
 case class Exported[A](instance: A) extends AnyVal
