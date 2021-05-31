@@ -10,9 +10,12 @@ import pureconfig.generic.ProductHint.UseOrDefault
 /** A specialized reader for generic representations that reads values in the shape of a config object, and is capable
   * of handling default values.
   *
-  * @tparam Original the original type for which `Repr` is a generic sub-representation
-  * @tparam Repr the generic representation
-  * @tparam DefaultRepr the default representation of the original type
+  * @tparam Original
+  *   the original type for which `Repr` is a generic sub-representation
+  * @tparam Repr
+  *   the generic representation
+  * @tparam DefaultRepr
+  *   the default representation of the original type
   */
 private[generic] trait MapShapedReader[Original, Repr, DefaultRepr] {
   def from(cur: ConfigObjectCursor, default: DefaultRepr, usedFields: Set[String]): ConfigReader.Result[Repr]
