@@ -18,7 +18,7 @@ import pureconfig._
 import pureconfig.generic.derivation.default._
 ```
 
-After that, you can derive `ConfigReader` instaces for your config class using a `derives` clause:
+After that, you can derive `ConfigReader` instances for your config class using a `derives` clause:
 
 ```scala
 sealed trait AnimalConf derives ConfigReader
@@ -52,4 +52,4 @@ instances in scope are ignored.
 `ConfigWriter` derivation is not supported at the moment.
 
 Overall, consider this to be in alpha/beta stage. This implementation is not as mature as the Shapeless or
-Magnolia-based derivation libaries available in Scala 2 yet so please report any bugs that you find!
+Magnolia-based derivation libraries available in Scala 2 yet so please report any bugs that you find!
