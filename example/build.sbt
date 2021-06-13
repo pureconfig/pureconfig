@@ -1,8 +1,6 @@
-name := "example"
-
+name := "pureconfig-example"
 version := "1.0"
-
-scalaVersion := "2.12.12"
+scalaVersion := "2.12.13"
 
 val VersionPattern = """ThisBuild / version := "([^"]*)"""".r
 val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
@@ -12,9 +10,9 @@ val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
     throw new Exception("Could not parse PureConfig version")
 }
 
-libraryDependencies ++= Seq("com.github.pureconfig" %% "pureconfig" % pureconfigVersion)
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % pureconfigVersion
 
-crossScalaVersions := Seq("2.12.13", "2.13.5")
+crossScalaVersions := Seq("2.12.13", "2.13.6")
 
 val lintFlags =
   Def.setting {
@@ -39,7 +37,5 @@ scalacOptions ++= Seq(
   "-Ywarn-value-discard",
   lintFlags.value
 )
-
-addCompilerPlugin("io.tryp" % "splain" % "0.5.8" cross CrossVersion.patch)
 
 scalafmtOnCompile := true
