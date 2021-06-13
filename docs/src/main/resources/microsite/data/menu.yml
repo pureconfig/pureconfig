@@ -41,6 +41,9 @@ options:
     - title: Non-Automatic Derivation
       url: docs/non-automatic-derivation.html
 
+    - title: Scala 3 Derivation
+      url: docs/scala-3-derivation.html
+
     - title: Library Integrations
       url: docs/library-integrations.html
 

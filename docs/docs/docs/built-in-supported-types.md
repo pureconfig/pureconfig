@@ -39,6 +39,10 @@ Additionally, PureConfig also handles the following collections and composite Sc
 - classes with only public `val` and `var` parameters in their constructor;
 - sealed families of case classes (ADTs).
 
+Finally, on Scala 3 PureConfig has early support for native
+[type class derivation](https://dotty.epfl.ch/docs/reference/contextual/derivation.html). See
+[Scala 3 Derivation](scala-3-derivation.html) for more details.
+
 The support for these types already covers most simple cases, such as the one shown in [Quick Start](index.html). See
 [Supporting New Types](supporting-new-types.html) to see how to support types that are not on those lists and
 [Overriding Behavior for Types](overriding-behavior-for-types.html) to change how PureConfig reads the built-in types
