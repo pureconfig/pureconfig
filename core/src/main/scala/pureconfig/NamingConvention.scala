@@ -7,13 +7,62 @@ trait NamingConvention {
 
 trait CapitalizedWordsNamingConvention extends NamingConvention {
   def toTokens(s: String): Seq[String] = {
-    CapitalizedWordsNamingConvention.wordBreakPattern.split(s).map(_.toLowerCase)
+    if (s.isEmpty) List.empty
+    else {
+      val buffer = List.newBuilder[String]
+      val currentTokenBuilder = new StringBuilder
+      val noneCtx = 0
+      val lowerCaseCtx = 1
+      val upperCaseCtx = 2
+      val notLetterCtx = 3
+      var ctx = noneCtx
+      val _ = {
+        val c = s.charAt(0)
+        if ('a' <= c && c <= 'z') {
+          currentTokenBuilder.append(c)
+          ctx = lowerCaseCtx
+        } else if ('A' <= c && c <= 'Z') {
+          currentTokenBuilder.append(c.toLower)
+          ctx = upperCaseCtx
+        } else {
+          currentTokenBuilder.append(c)
+          ctx = notLetterCtx
+        }
+      }
+      var i = 1
+      while (i < s.length) {
+        val c = s.charAt(i)
+        if ('a' <= c && c <= 'z') {
+          if (ctx == upperCaseCtx && currentTokenBuilder.length > 1) {
+            val previousChar = currentTokenBuilder.charAt(currentTokenBuilder.length - 1)
+            currentTokenBuilder.deleteCharAt(currentTokenBuilder.length - 1)
+            buffer += currentTokenBuilder.result()
+            currentTokenBuilder.clear()
+            currentTokenBuilder.append(previousChar)
+          }
+          currentTokenBuilder.append(c)
+          ctx = lowerCaseCtx
+        } else if ('A' <= c && c <= 'Z') {
+          if (ctx != upperCaseCtx) {
+            buffer += currentTokenBuilder.result()
+            currentTokenBuilder.clear()
+          }
+          currentTokenBuilder.append(c.toLower)
+          ctx = upperCaseCtx
+        } else {
+          if (ctx != notLetterCtx) {
+            buffer += currentTokenBuilder.result()
+            currentTokenBuilder.clear()
+          }
+          currentTokenBuilder.append(c)
+          ctx = notLetterCtx
+        }
+        i += 1
+      }
+      buffer += currentTokenBuilder.result()
+      buffer.result()
+    }
   }
-}
-
-object CapitalizedWordsNamingConvention {
-  private val wordBreakPattern =
-    String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])").r
 }
 
 /** CamelCase identifiers look like `camelCase` and `useMorePureconfig`
