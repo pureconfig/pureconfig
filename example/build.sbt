@@ -14,7 +14,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig" % pureconfigVersi
 
 crossScalaVersions := Seq("2.12.14", "2.13.6")
 
-val lintFlags =
+val versionSpecificFlags =
   Def.setting {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) =>
@@ -35,6 +35,6 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings",
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard"
-) ++ lintFlags.value
+) ++ versionSpecificFlags.value
 
 scalafmtOnCompile := true
