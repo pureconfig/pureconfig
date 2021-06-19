@@ -19,9 +19,9 @@ val lintFlags =
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) =>
         // Excluding -byname-implicit is required for Scala 2.13 due to https://github.com/scala/bug/issues/12072
-        "-Xlint:_,-byname-implicit"
+        Seq("-Xlint:_,-byname-implicit", "-Vimplicits")
       case _ =>
-        "-Xlint:_"
+        Seq("-Xlint:_")
     }
   }
 
@@ -34,8 +34,7 @@ scalacOptions ++= Seq(
   "-unchecked",
   "-Xfatal-warnings",
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard",
-  lintFlags.value
-)
+  "-Ywarn-value-discard"
+) ++ lintFlags.value
 
 scalafmtOnCompile := true
