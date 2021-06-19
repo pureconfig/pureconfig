@@ -123,20 +123,6 @@ final case class EmptyStringFound(typ: String) extends FailureReason {
   def description = s"Empty string found when trying to convert to $typ."
 }
 
-/** A failure reason given when an unexpected non-empty object is found. The failure happens when using
-  * `EnumCoproductHint` to write a config.
-  *
-  * @param typ
-  *   the type for which a non-empty object was attempted to be written
-  */
-@deprecated(
-  "`EnumCoproductHint` is deprecated in favor of the `pureconfig.generic.semiauto.deriveEnumeration(Reader|Writer|Convert)[A]` methods",
-  "0.11.0"
-)
-final case class NonEmptyObjectFound(typ: String) extends FailureReason {
-  def description = s"Non-empty object found when using EnumCoproductHint to write a $typ."
-}
-
 /** A failure reason given when a list of an unexpected size is found when attempting to read into an `HList`.
   *
   * @param expected

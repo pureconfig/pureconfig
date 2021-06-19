@@ -214,32 +214,6 @@ sealed trait ConfigCursor {
   def asMap: ConfigReader.Result[Map[String, ConfigCursor]] =
     asObjectCursor.map(_.map)
 
-  /** Returns a cursor to the config at the path composed of given path segments.
-    *
-    * @param pathSegments
-    *   the path of the config for which a cursor should be returned
-    * @return
-    *   a `Right` with a cursor to the config at `pathSegments` if such a config exists, a `Left` with a list of
-    *   failures otherwise.
-    */
-  @deprecated("Use `.fluent.at(pathSegments).cursor` instead", "0.10.2")
-  final def atPath(pathSegments: PathSegment*): ConfigReader.Result[ConfigCursor] = fluent.at(pathSegments: _*).cursor
-
-  /** Casts this cursor as either a `ConfigListCursor` or a `ConfigObjectCursor`.
-    *
-    * @return
-    *   a `Right` with this cursor as a list or object cursor if the cast can be done, `Left` with a list of failures
-    *   otherwise.
-    */
-  @deprecated("Use `asListCursor` and/or `asObjectCursor` instead", "0.10.1")
-  def asCollectionCursor: ConfigReader.Result[Either[ConfigListCursor, ConfigObjectCursor]] = {
-    asConfigValue.flatMap { value =>
-      val listAtLeft = asListCursor.map(Left.apply)
-      lazy val mapAtRight = asObjectCursor.map(Right.apply)
-      listAtLeft.left.flatMap(_ => mapAtRight).left.flatMap(_ => failed(WrongType(value.valueType, Set(LIST, OBJECT))))
-    }
-  }
-
   def fluent: FluentConfigCursor =
     FluentConfigCursor(asConfigValue.map(_ => this))
 
