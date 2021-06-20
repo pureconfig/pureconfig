@@ -5,7 +5,6 @@ import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary
-import org.scalacheck.ScalacheckShapeless._
 
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig._
@@ -33,11 +32,22 @@ class ProductConvertersSuite extends BaseSuite {
 
   case class RecType(ls: List[RecType])
 
+  implicit val arbFlatConfig: Arbitrary[FlatConfig] = Arbitrary {
+    Arbitrary.arbitrary[(Boolean, Double, Float, Int, Long, String, Option[String])].map((FlatConfig.apply _).tupled)
+  }
+
+  implicit val arbMyType: Arbitrary[MyType] = Arbitrary {
+    Arbitrary.arbitrary[String].map(new MyType(_))
+  }
+
+  implicit val arbConfigWithUnknownType: Arbitrary[ConfigWithUnknownType] = Arbitrary {
+    Arbitrary.arbitrary[MyType].map(ConfigWithUnknownType.apply)
+  }
+
   // tests
 
   checkArbitrary[FlatConfig]
 
-  implicit val arbMyType = Arbitrary(Arbitrary.arbitrary[String].map(new MyType(_)))
   implicit val myTypeConvert = ConfigConvert.viaString[MyType](catchReadError(new MyType(_)), _.getMyField)
   checkArbitrary[ConfigWithUnknownType]
 
