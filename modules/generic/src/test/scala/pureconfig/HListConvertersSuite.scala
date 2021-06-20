@@ -3,7 +3,7 @@ package pureconfig
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.ConfigValueFactory
-import org.scalacheck.ScalacheckShapeless._
+import org.scalacheck.{Arbitrary, Gen}
 import shapeless._
 
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, WrongSizeList}
@@ -11,6 +11,17 @@ import pureconfig.generic.auto._
 import pureconfig.generic.hlist._
 
 class HListConvertersSuite extends BaseSuite {
+  case class Foo(a: Int, b: String)
+
+  implicit val arbFoo: Arbitrary[Foo] = Arbitrary {
+    Arbitrary.arbitrary[(Int, String)].map((Foo.apply _).tupled)
+  }
+
+  implicit val arbHNil: Arbitrary[HNil] = Arbitrary(Gen.const(HNil))
+
+  implicit def arbHCons[H: Arbitrary, T <: HList: Arbitrary]: Arbitrary[H :: T] = Arbitrary {
+    Arbitrary.arbitrary[(H, T)].map { case (h, t) => h :: t }
+  }
 
   behavior of "ConfigConvert"
 
@@ -20,7 +31,6 @@ class HListConvertersSuite extends BaseSuite {
   checkArbitrary[Int :: (Long :: String :: HNil) :: Boolean :: HNil]
 
   // Check arbitrary HList with custom types
-  case class Foo(a: Int, b: String)
   checkArbitrary[Long :: Foo :: Boolean :: Foo :: HNil]
 
   // Check HNil

@@ -6,7 +6,6 @@ crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
   Dependencies.shapeless,
-  Dependencies.scalaCheckShapeless % "test",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
 )
 

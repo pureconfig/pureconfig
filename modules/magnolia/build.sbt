@@ -6,7 +6,6 @@ crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
   "com.propensive" %% "magnolia" % "0.17.0",
-  Dependencies.scalaCheckShapeless % "test",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
 )
 

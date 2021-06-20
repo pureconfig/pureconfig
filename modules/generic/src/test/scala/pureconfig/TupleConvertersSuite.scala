@@ -3,12 +3,17 @@ package pureconfig
 import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ConfigValueFactory, ConfigValueType}
-import org.scalacheck.ScalacheckShapeless._
+import org.scalacheck.Arbitrary
 
 import pureconfig.error._
 import pureconfig.generic.auto._
 
 class TupleConvertersSuite extends BaseSuite {
+  case class Foo(a: Int, b: String)
+
+  implicit val arbFoo: Arbitrary[Foo] = Arbitrary {
+    Arbitrary.arbitrary[(Int, String)].map((Foo.apply _).tupled)
+  }
 
   behavior of "ConfigConvert"
 
@@ -18,7 +23,6 @@ class TupleConvertersSuite extends BaseSuite {
   checkArbitrary[(Int, (Long, String), Boolean)]
 
   // Check arbitrary Tuples with custom types
-  case class Foo(a: Int, b: String)
   checkArbitrary[(Long, Foo, Boolean, Foo)]
 
   // Check readers from objects and lists
