@@ -1,9 +1,20 @@
-### 0.15.0 (Apr 18, 2020)
+### 0.16.0 (Jun 9, 2021)
+
+Support for Scala 3.0 was introduced.
+
+- New features
+  - Added beta support for Scala 3 type class derivation. See
+    [documentation](https://pureconfig.github.io/v0.16.0/docs/scala-3-derivation.html) for details.
+
+### 0.15.0 (Apr 18, 2021)
 
 - Breaking changes
-  - The `Derivation` type class was removed. If you were relying on it, e.g. by using `Derivation.Successful` directly or using `Derivation` values in function signatures, you can simply use `ConfigReader` and `ConfigWriter` directly. The docs were updated to recommend [splain](https://github.com/tek/splain) as a tool to debug implicit not found errors.
+  - The `Derivation` type class was removed. If you were relying on it, e.g. by using `Derivation.Successful` directly
+    or using `Derivation` values in function signatures, you can simply use `ConfigReader` and `ConfigWriter` directly.
+    The docs were updated to recommend [splain](https://github.com/tek/splain) as a tool to debug implicit not found
+    errors.
 
-### 0.14.1 (Feb 28, 2020)
+### 0.14.1 (Feb 28, 2021)
 
 Support for Scala 2.11 was dropped and support for Scala 3.0 (RC1) was introduced.
 

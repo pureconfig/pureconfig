@@ -7,8 +7,8 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class BaseSuite
     extends AnyFlatSpec
-    with ConfigConvertChecks
     with Matchers
-    with ConfigReaderMatchers
     with EitherValues
     with ScalaCheckDrivenPropertyChecks
+    with ConfigConvertChecks
+    with ConfigReaderMatchers

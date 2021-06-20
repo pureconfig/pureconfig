@@ -10,15 +10,6 @@ import pureconfig.error._
   */
 trait ConvertHelpers {
 
-  @deprecated("Use `ConfigReader.Result.zipWith` instead", "0.10.2")
-  def combineResults[A, B, C](first: ConfigReader.Result[A], second: ConfigReader.Result[B])(
-      f: (A, B) => C
-  ): ConfigReader.Result[C] =
-    ConfigReader.Result.zipWith(first, second)(f)
-
-  @deprecated("Use `ConfigReader.Result.fail` instead", "0.10.2")
-  def fail[A](failure: ConfigReaderFailure): ConfigReader.Result[A] = Left(ConfigReaderFailures(failure))
-
   private[pureconfig] def toResult[A, B](f: A => B): A => Either[FailureReason, B] =
     v => tryToEither(Try(f(v)))
 
@@ -40,9 +31,9 @@ trait ConvertHelpers {
     }
   }
 
-  /** Convert a `String => Try` into a  `String => Option[ConfigValueLocation] => Either` such that after application
-    * - `Success(t)` becomes `_ => Right(t)`
-    * - `Failure(e)` becomes `location => Left(CannotConvert(value, type, e.getMessage, location)`
+  /** Convert a `String => Try` into a `String => Option[ConfigValueLocation] => Either` such that after application
+    *   - `Success(t)` becomes `_ => Right(t)`
+    *   - `Failure(e)` becomes `location => Left(CannotConvert(value, type, e.getMessage, location)`
     */
   def tryF[A](f: String => Try[A])(implicit ct: ClassTag[A]): String => Either[FailureReason, A] = { string =>
     f(string) match {
@@ -52,8 +43,8 @@ trait ConvertHelpers {
   }
 
   /** Convert a `String => Option` into a `String => Option[ConfigValueLocation] => Either` such that after application
-    * - `Some(t)` becomes `_ => Right(t)`
-    * - `None` becomes `location => Left(CannotConvert(value, type, "", location)`
+    *   - `Some(t)` becomes `_ => Right(t)`
+    *   - `None` becomes `location => Left(CannotConvert(value, type, "", location)`
     */
   def optF[A](f: String => Option[A])(implicit ct: ClassTag[A]): String => Either[FailureReason, A] = { string =>
     f(string) match {

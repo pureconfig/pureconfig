@@ -7,7 +7,8 @@ import pureconfig._
 
 /** A `ConfigWriter` derived with `shapeless`.
   *
-  * @tparam A the type of objects writable by this `ConfigWriter`
+  * @tparam A
+  *   the type of objects writable by this `ConfigWriter`
   */
 trait DerivedConfigWriter[A] extends ConfigWriter[A]
 
