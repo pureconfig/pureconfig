@@ -139,11 +139,13 @@ ConfigSource.default.load[Conf]
 
 In PureConfig, the derivation of config readers and writers is done by chaining implicits - the converters of larger
 structures (like `Conf`) depend on the implicit converters of smaller ones (like `Boolean` or `Custom`). However, the
-Scala compiler for Scala 2.x is not helpful in case one of those upstream dependencies is missing, limiting itself to
-showing the message above.
+Scala compiler for Scala 2.x is not helpful by default in case one of those upstream dependencies is missing, limiting
+itself to showing the message above.
 
 To more efficiently debug these "implicit not found" errors, we recommend using [splain](https://github.com/tek/splain).
-Please refer to the project's documentation for instructions on how to include the compiler plugin.
+splain was integrated into the compiler in [Scala 2.13.6](https://github.com/scala/scala/releases/tag/v2.13.6) and can
+be enabled with the `-Vimplicits` scalac flag. For Scala 2.13 versions prior to 2.13.6 or Scala 2.12 versions, please
+refer to the project's documentation for instructions on how to include the compiler plugin.
 
 When code using PureConfig derived converters is compiled using the compiler plugin recommended above, you will get a
 more thorough error message. In this particular case, the message will be quite large because there are some alternative
