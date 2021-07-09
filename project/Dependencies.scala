@@ -5,7 +5,7 @@ object Dependencies {
   object Version {
     val scala212 = "2.12.14"
     val scala213 = "2.13.6"
-    val scala30 = "3.0.0"
+    val scala30 = "3.0.1"
 
     val shapeless = "2.3.7"
     val typesafeConfig = "1.4.1"
