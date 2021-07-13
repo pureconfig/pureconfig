@@ -1,4 +1,4 @@
-package pureconfig.module
+package pureconfig.module.spark
 
 import scala.util.Try
 
@@ -6,9 +6,9 @@ import org.apache.spark.sql.types.{DataType, Metadata, StructType}
 
 import pureconfig.{ConfigConvert, ConfigReader, ConfigWriter}
 
-/** `ConfigConvert` instances for Spark data structures.
+/** `ConfigConvert` instances for `spark-sql` data structures.
   */
-package object spark {
+package object sql {
   implicit val dataTypeConvert: ConfigConvert[DataType] =
     ConfigConvert.viaNonEmptyStringTry[DataType](s => Try(DataType.fromDDL(s)), _.sql)
 

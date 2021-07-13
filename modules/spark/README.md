@@ -35,7 +35,7 @@ Setup custom schema case classes and converters between custom schema and Spark 
 import org.apache.spark.sql.types._
 import pureconfig._
 import pureconfig.generic.auto._
-import pureconfig.module.spark._
+import pureconfig.module.spark.sql._
 
 case class MySchema(name: String, fields: List[StructField], someOtherSetting: Option[String])
 
