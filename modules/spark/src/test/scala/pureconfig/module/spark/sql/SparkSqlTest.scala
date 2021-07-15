@@ -8,7 +8,7 @@ import pureconfig.error.CannotConvert
 import pureconfig.generic.auto._
 import pureconfig.module.spark.sql.arbitrary._
 
-class SparkSqlTest extends BaseSuite {
+class SparkSqlSuite extends BaseSuite {
   checkArbitrary[Metadata]
   checkArbitrary[DataType]
   checkArbitrary[StructType]
