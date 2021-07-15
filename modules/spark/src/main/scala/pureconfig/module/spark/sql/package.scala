@@ -12,7 +12,7 @@ package object sql {
   implicit val dataTypeConvert: ConfigConvert[DataType] =
     ConfigConvert.viaNonEmptyStringTry[DataType](s => Try(DataType.fromDDL(s)), _.sql)
 
-  implicit val structTypeReader: ConfigConvert[StructType] =
+  implicit val structTypeConvert: ConfigConvert[StructType] =
     ConfigConvert.viaNonEmptyStringTry[StructType](s => Try(StructType.fromDDL(s)), _.toDDL)
 
   implicit val metadataConvert: ConfigConvert[Metadata] =
