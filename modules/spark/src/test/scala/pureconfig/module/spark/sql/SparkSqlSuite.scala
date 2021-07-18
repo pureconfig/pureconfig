@@ -5,7 +5,6 @@ import org.apache.spark.sql.types._
 
 import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
-import pureconfig.generic.auto._
 import pureconfig.module.spark.sql.arbitrary._
 
 class SparkSqlSuite extends BaseSuite {

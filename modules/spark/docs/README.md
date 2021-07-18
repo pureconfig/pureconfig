@@ -25,7 +25,7 @@ import pureconfig.module.spark._
 * `org.apache.spark.sql.types.DataType`
 * `org.apache.spark.sql.types.StructType`
 * `org.apache.spark.sql.types.Metadata`
-* `org.apache.spark.sql.types.StructField` (derivable)
+* `org.apache.spark.sql.types.StructField`
 
 ## Example
 
