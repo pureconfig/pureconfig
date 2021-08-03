@@ -4,7 +4,7 @@ name := "pureconfig-squants"
 
 crossScalaVersions := Seq(scala212, scala213)
 
-libraryDependencies ++= Seq("org.typelevel" %% "squants" % "1.8.0")
+libraryDependencies ++= Seq("org.typelevel" %% "squants" % "1.8.1")
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
