@@ -5,7 +5,7 @@ name := "pureconfig-scala-xml"
 
 crossScalaVersions := Seq(scala212, scala213)
 
-// Scala 2.12 depends on an old version of scala-xml  
+// Scala 2.12 depends on an old version of scala-xml
 libraryDependencies ++= forScalaVersions {
   case (2, 12) => Seq("org.scala-lang.modules" %% "scala-xml" % "1.3.0")
   case _ => Seq("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
