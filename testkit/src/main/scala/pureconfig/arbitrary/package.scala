@@ -3,6 +3,7 @@ package pureconfig
 import java.io.File
 import java.math.BigInteger
 import java.nio.file.Path
+import java.time.temporal.ChronoUnit
 import java.time.{Duration => JavaDuration, _}
 import java.util.UUID
 
@@ -20,6 +21,7 @@ package object arbitrary {
   implicit val arbFiniteDuration: Arbitrary[FiniteDuration] = Arbitrary(genFiniteDuration)
   implicit val arbInstant: Arbitrary[Instant] = Arbitrary(genInstant)
   implicit val arbPeriod: Arbitrary[Period] = Arbitrary(genPeriod)
+  implicit val arbChronoUnit: Arbitrary[ChronoUnit] = Arbitrary(Gen.oneOf(ChronoUnit.values()))
   implicit val arbYear: Arbitrary[Year] = Arbitrary(genYear)
   implicit val arbUUID: Arbitrary[UUID] = Arbitrary(Gen.uuid)
   implicit val arbPath: Arbitrary[Path] = Arbitrary(genPath)

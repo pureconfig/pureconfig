@@ -5,6 +5,7 @@ import java.math.{BigDecimal => JavaBigDecimal, BigInteger}
 import java.net.{URI, URL}
 import java.nio.file.Path
 import java.time._
+import java.time.temporal.ChronoUnit
 import java.time.{Duration => JavaDuration}
 import java.util.UUID
 import java.util.regex.Pattern
@@ -65,10 +66,15 @@ trait JavaTimeWriters {
   implicit val zoneOffsetConfigWriter: ConfigWriter[ZoneOffset] = ConfigWriter.toDefaultString[ZoneOffset]
   implicit val zoneIdConfigWriter: ConfigWriter[ZoneId] = ConfigWriter.toDefaultString[ZoneId]
   implicit val periodConfigWriter: ConfigWriter[Period] = ConfigWriter.toDefaultString[Period]
+  implicit val chronoUnitConfigWriter: ConfigWriter[ChronoUnit] =
+    ConfigWriter.toString[ChronoUnit](chronoUnitToString)
 
   // see documentation for [[java.time.Year.parse]]
   private[this] def yearToString(year: Year): String =
     if (year.getValue > 9999) "+" + year else year.toString
+
+  private[this] def chronoUnitToString(chronoUnit: ChronoUnit): String =
+    ConfigFieldMapping(ScreamingSnakeCase, KebabCase)(chronoUnit.name)
 
   implicit val yearConfigWriter: ConfigWriter[Year] = ConfigWriter.toString[Year](yearToString)
   implicit val javaDurationConfigWriter: ConfigWriter[JavaDuration] = ConfigWriter.toDefaultString[JavaDuration]
