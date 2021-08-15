@@ -27,7 +27,7 @@ class fs2Suite extends AnyFlatSpec with Matchers {
   "streamConfig" should "load a case class from a byte stream" in {
 
     val someConfig = "somefield=1234\nanotherfield=some string"
-    val configBytes = Stream.emit(someConfig).through(text.utf8Encode)
+    val configBytes = Stream.emit(someConfig).through(text.utf8.encode)
 
     val myConfig = testee.streamConfig[IO, SomeCaseClass](configBytes)
 
@@ -47,7 +47,7 @@ class fs2Suite extends AnyFlatSpec with Matchers {
 
     val someConfig = "somefield=1234\nanotherfield=some string"
     val configStream = Stream.emit(someConfig)
-    val configBytes = delayEachLine(configStream, 200.milliseconds).through(text.utf8Encode)
+    val configBytes = delayEachLine(configStream, 200.milliseconds).through(text.utf8.encode)
 
     val myConfig = testee.streamConfig[IO, SomeCaseClass](configBytes)
 
@@ -57,7 +57,7 @@ class fs2Suite extends AnyFlatSpec with Matchers {
   "saveConfigToStream" should "produce HOCON for given input" in {
     val someConfig = SomeCaseClass(1234, "some string")
     val configStream: Stream[IO, Byte] = testee.saveConfigToStream(someConfig)
-    val result = configStream.through(text.utf8Decode).compile.foldMonoid.unsafeRunSync()
+    val result = configStream.through(text.utf8.decode).compile.foldMonoid.unsafeRunSync()
 
     result should (include("somefield") and include("1234") and include("anotherfield") and include("some string"))
   }

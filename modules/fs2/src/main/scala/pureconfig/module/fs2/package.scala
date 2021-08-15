@@ -52,7 +52,6 @@ package object fs2 {
   ): Stream[F, Byte] = {
 
     val asString = writer.to(config).render(options)
-    Stream.emit(asString).through(text.utf8Encode)
+    Stream.emit(asString).through(text.utf8.encode)
   }
-
 }
