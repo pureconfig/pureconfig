@@ -4,7 +4,7 @@ name := "pureconfig-akka"
 
 crossScalaVersions := Seq(scala212, scala213)
 
-libraryDependencies ++= Seq("com.typesafe.akka" %% "akka-actor" % "2.6.15")
+libraryDependencies ++= Seq("com.typesafe.akka" %% "akka-actor" % "2.6.16")
 
 developers := List(
   Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr")),
