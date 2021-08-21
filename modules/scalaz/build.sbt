@@ -5,8 +5,8 @@ name := "pureconfig-scalaz"
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.3.4",
-  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.4" % "test"
+  "org.scalaz" %% "scalaz-core" % "7.3.5",
+  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.5" % "test"
 )
 
 mdocScalacOptions += "-Ypartial-unification"
