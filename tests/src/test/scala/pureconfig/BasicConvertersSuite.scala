@@ -4,6 +4,7 @@ import java.io.File
 import java.math.{BigDecimal => JavaBigDecimal, BigInteger}
 import java.net.{URI, URL}
 import java.nio.file.Path
+import java.time.temporal.ChronoUnit
 import java.time.{Duration => JavaDuration, _}
 import java.util.UUID
 import java.util.regex.Pattern
@@ -71,12 +72,19 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[Period]
 
+  checkArbitrary[ChronoUnit]
+
   checkReadString[Period](
     "1d" -> Period.ofDays(1),
     "42" -> Period.ofDays(42),
     "4 weeks" -> Period.ofWeeks(4),
     "13 months" -> Period.ofMonths(13),
     "2y" -> Period.ofYears(2)
+  )
+
+  checkReadString[ChronoUnit](
+    "half-days" -> ChronoUnit.HALF_DAYS,
+    "weeks" -> ChronoUnit.WEEKS
   )
 
   checkRead[Period](ConfigValueFactory.fromAnyRef(42) -> Period.ofDays(42))

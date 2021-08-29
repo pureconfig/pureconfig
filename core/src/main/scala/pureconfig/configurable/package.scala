@@ -4,10 +4,12 @@ import java.time._
 import java.time.format.DateTimeFormatter
 
 import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 
 import com.typesafe.config.ConfigValueFactory
 
-import pureconfig.ConfigConvert.{catchReadError, viaNonEmptyString}
+import pureconfig.ConfigConvert.viaNonEmptyString
+import pureconfig.ConvertHelpers.catchReadError
 import pureconfig.error.FailureReason
 
 /** Provides methods that create [[ConfigConvert]] instances from a set of parameters used to configure the instances.
@@ -74,4 +76,12 @@ package object configurable {
         keyFormatter(key) -> writerV.to(value)
       }.asJava)
     )
+
+  def genericJavaEnumReader[A <: java.lang.Enum[A]](
+      transformValue: String => String
+  )(implicit tag: ClassTag[A]): ConfigReader[A] =
+    ConfigReader.fromString(catchReadError(s => {
+      val enumClass = tag.runtimeClass.asInstanceOf[Class[A]]
+      Enum.valueOf(enumClass, transformValue(s))
+    }))
 }

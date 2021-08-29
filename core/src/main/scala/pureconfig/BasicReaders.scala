@@ -5,6 +5,7 @@ import java.math.{BigDecimal => JavaBigDecimal, BigInteger}
 import java.net.{URI, URL}
 import java.nio.file.{Path, Paths}
 import java.time._
+import java.time.temporal.ChronoUnit
 import java.time.{Duration => JavaDuration}
 import java.util.UUID
 import java.util.regex.Pattern
@@ -67,10 +68,7 @@ trait PrimitiveReaders {
 trait JavaEnumReader {
 
   implicit def javaEnumReader[A <: java.lang.Enum[A]](implicit tag: ClassTag[A]): ConfigReader[A] =
-    ConfigReader.fromString(catchReadError(s => {
-      val enumClass = tag.runtimeClass.asInstanceOf[Class[A]]
-      Enum.valueOf(enumClass, s)
-    }))
+    configurable.genericJavaEnumReader[A](identity)
 }
 
 /** Trait containing `ConfigReader` instances for classes related to file system paths and URIs.
@@ -108,6 +106,9 @@ trait JavaTimeReaders {
 
   implicit val periodConfigReader: ConfigReader[Period] =
     ConfigReader.fromNonEmptyString[Period](PeriodUtils.fromString)
+
+  implicit val chronoUnitReader: ConfigReader[ChronoUnit] =
+    configurable.genericJavaEnumReader[ChronoUnit](ConfigFieldMapping(KebabCase, ScreamingSnakeCase))
 
   implicit val javaDurationConfigReader: ConfigReader[JavaDuration] =
     ConfigReader.fromNonEmptyString[JavaDuration](catchReadError(JavaDuration.parse))
