@@ -1,6 +1,6 @@
 # ZIO Config module for PureConfig
 
-Support for providing instances of `ConfigCovert` given instances of ZIO Config `ConfigDescriptor`
+Support for providing instances of `ConfigCovert` given instances of [ZIO Config](https://zio.github.io/zio-config/) `ConfigDescriptor`.
 
 ## Add pureconfig-zio-config to your project
 
@@ -20,10 +20,13 @@ import com.typesafe.config.ConfigRenderOptions
 import pureconfig._
 import pureconfig.module.zioconfig._
 import zio.config.ConfigDescriptor
-import zio.config.magnolia.DeriveConfigDescriptor.descriptor
+import zio.config.ConfigDescriptor._
 
 case class Person(name: String, age: Int, children: List[Person])
-object Person { implicit val confDesc: ConfigDescriptor[Person] = descriptor }
+object Person {
+  implicit val confDesc: ConfigDescriptor[Person] =
+    (string("name") |@| int("age") |@| list("children")(confDesc))(Person.apply, Person.unapply)
+}
 ```
 
 You can now read and write `Person` without re-implementing or re-deriving `ConfigConvert`.
@@ -51,4 +54,3 @@ val maybeAlice = ConfigSource.string(res).load[Person]
 //   Person("alice", 42, List(Person("bob", 24, List())))
 // )
 ```
-

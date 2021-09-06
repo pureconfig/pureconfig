@@ -20,10 +20,13 @@ import com.typesafe.config.ConfigRenderOptions
 import pureconfig._
 import pureconfig.module.zioconfig._
 import zio.config.ConfigDescriptor
-import zio.config.magnolia.DeriveConfigDescriptor.descriptor
+import zio.config.ConfigDescriptor._
 
 case class Person(name: String, age: Int, children: List[Person])
-object Person { implicit val confDesc: ConfigDescriptor[Person] = descriptor }
+object Person {
+  implicit val confDesc: ConfigDescriptor[Person] =
+    (string("name") |@| int("age") |@| list("children")(confDesc))(Person.apply, Person.unapply)
+}
 ```
 
 You can now read and write `Person` without re-implementing or re-deriving `ConfigConvert`.
@@ -35,4 +38,3 @@ val res = ConfigWriter[Person].to(alice)
 
 val maybeAlice = ConfigSource.string(res).load[Person]
 ```
-
