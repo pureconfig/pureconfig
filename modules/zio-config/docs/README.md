@@ -1,6 +1,6 @@
 # ZIO Config module for PureConfig
 
-Support for providing instances of `ConfigCovert` given instances of ZIO Config `ConfigDescriptor`
+Support for providing instances of `ConfigCovert` given instances of [ZIO Config](https://zio.github.io/zio-config/) `ConfigDescriptor`.
 
 ## Add pureconfig-zio-config to your project
 
