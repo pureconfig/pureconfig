@@ -1,6 +1,6 @@
 package pureconfig.module
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 import zio.config._
 import zio.config.typesafe._
 
@@ -15,8 +15,10 @@ package object zioconfig {
           .flatMap(cs => read(cd.from(cs)))
           .left
           .map(ZioConfigReadError.apply),
-      //`zio-config` write should not fail but is allowed to fail
-      //defaulting write failures to empty `Config` so it fits `pureconfig` writer
-      _.toHocon(cd).map(_.toConfig).getOrElse(ConfigFactory.empty)
+      //`zio-config` write should typically not fail but is allowed to fail
+      //an exception will be throw on write errors
+      _.toHocon(cd)
+        .map(_.toConfig)
+        .fold(s => throw new Exception(s"ZioConfigWriteException: $s"), identity)
     )
 }
