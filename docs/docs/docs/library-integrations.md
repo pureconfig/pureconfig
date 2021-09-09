@@ -28,6 +28,7 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 - [`pureconfig-squants`](https://github.com/pureconfig/pureconfig/tree/master/modules/squants) provides converters for [Squants](http://www.squants.com/)'s beautiful types representing units of measure;
 - [`pureconfig-sttp`](https://github.com/pureconfig/pureconfig/tree/master/modules/sttp) provides converters for [sttp](https://github.com/softwaremill/sttp) types;
 - [`pureconfig-yaml`](https://github.com/pureconfig/pureconfig/tree/master/modules/yaml) provides support for reading YAML files as configurations.
+- [`pureconfig-zio-config`](https://github.com/pureconfig/pureconfig/tree/master/modules/zio-config) provides converters given instances of [ZIO Config](https://zio.github.io/zio-config/) `ConfigDescriptor`.
 
 ### External Integrations
 
