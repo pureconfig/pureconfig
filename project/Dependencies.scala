@@ -10,8 +10,8 @@ object Dependencies {
     val shapeless = "2.3.7"
     val typesafeConfig = "1.4.1"
 
-    val scalaTest = "3.2.9"
-    val scalaTestPlusScalaCheck = "3.2.9.0"
+    val scalaTest = "3.2.10"
+    val scalaTestPlusScalaCheck = "3.2.10.0"
 
     val scalaCheck = "1.15.4"
   }
