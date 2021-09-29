@@ -4,7 +4,7 @@ name := "pureconfig-joda"
 
 crossScalaVersions := Seq(scala212, scala213)
 
-libraryDependencies ++= Seq("joda-time" % "joda-time" % "2.10.11", "org.joda" % "joda-convert" % "2.2.1")
+libraryDependencies ++= Seq("joda-time" % "joda-time" % "2.10.12", "org.joda" % "joda-convert" % "2.2.1")
 
 developers := List(
   Developer("melrief", "Mario Pastorelli", "pastorelli.mario@gmail.com", url("https://github.com/melrief")),
