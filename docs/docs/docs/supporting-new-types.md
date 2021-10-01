@@ -62,7 +62,7 @@ implicit val myIntReader = new ConfigReader[MyInt] {
 }
 ```
 
-The inteface consists of a single `from` method that takes a `ConfigCursor` and returns an `Either` of a `MyInt` or a
+The interface consists of a single `from` method that takes a `ConfigCursor` and returns an `Either` of a `MyInt` or a
 list of errors. You can read more about cursors at [Config Cursors](config-cursors.html).
 
 Using any of the approaches above would now make the config be loaded successfully:
