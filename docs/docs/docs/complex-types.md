@@ -39,7 +39,7 @@ the class above cannot be read automatically by PureConfig.
 
 #### Method 1: Use a Scala copy of the configuration
 
-Because PureConfig works out-of-the-box with Scala sealed familes of case classes, one simple solution
+Because PureConfig works out-of-the-box with Scala sealed families of case classes, one simple solution
 to support unsupported complex types is to:
 
 1. define a hierarchy of Scala classes mirroring the complex type;
