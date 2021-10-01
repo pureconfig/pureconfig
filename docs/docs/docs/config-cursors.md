@@ -37,7 +37,7 @@ val conf = ConfigFactory.parseString("person.name: John Doe")
 
 For the purposes of this example, we'll assume the provided `name` will always have at least two words.
 
-An implementation of the `ConfigReader` using the cursors API is shown below:
+An implementation of the `ConfigReader` using the cursor API is shown below:
 
 ```scala mdoc:silent
 import pureconfig._

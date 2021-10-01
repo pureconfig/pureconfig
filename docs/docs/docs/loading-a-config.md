@@ -15,7 +15,7 @@ The `ConfigSource` companion object defines many other ready-to-use sources, lik
 
 - `ConfigSource.file` - reads a config from a file in a file system;
 - `ConfigSource.resources` - reads a config from resources in your classpath or packaged application;
-- `ConfigSource.url` - reads a config from an URL;
+- `ConfigSource.url` - reads a config from a URL;
 - `ConfigSource.string` - reads a literal config from a string.
 
 After you have a config source you can load your config using several methods:

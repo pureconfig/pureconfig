@@ -40,7 +40,7 @@ this:
 implicit val myIntReader = ConfigReader[Int].map(n => new MyInt(n))
 ```
 
-Note that the `ConfigReader[Int]` expression "summons" an existing implicit instance, being syntatic sugar for `implicitly[ConfigReader[Int]]`. This is usually the easiest way to create a `ConfigReader` for simple types. See
+Note that the `ConfigReader[Int]` expression "summons" an existing implicit instance, being syntactic sugar for `implicitly[ConfigReader[Int]]`. This is usually the easiest way to create a `ConfigReader` for simple types. See
 [Combinators](combinators.html) for more examples.
 
 As an example for the second approach, we could read the required integer by parsing it from a string form like this:
@@ -62,7 +62,7 @@ implicit val myIntReader = new ConfigReader[MyInt] {
 }
 ```
 
-The inteface consists of a single `from` method that takes a `ConfigCursor` and returns an `Either` of a `MyInt` or a
+The interface consists of a single `from` method that takes a `ConfigCursor` and returns an `Either` of a `MyInt` or a
 list of errors. You can read more about cursors at [Config Cursors](config-cursors.html).
 
 Using any of the approaches above would now make the config be loaded successfully:
