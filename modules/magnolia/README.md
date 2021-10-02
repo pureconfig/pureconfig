@@ -12,7 +12,7 @@ configuration using the same [product](https://pureconfig.github.io/docs/overrid
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-magnolia" % "0.16.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-magnolia" % "0.17.0"
 ```
 
 ## Example

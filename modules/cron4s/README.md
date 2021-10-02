@@ -8,7 +8,7 @@ Adds support for [Cron4s](https://github.com/alonsodomin/cron4s)'s CronExpr clas
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cron4s" % "0.16.0"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cron4s" % "0.17.0"
 ```
 
 ## Example

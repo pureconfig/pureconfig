@@ -1,3 +1,11 @@
+### 0.17.0 (Oct 2, 2021)
+
+- Breaking changes
+  - Removed code deprecated on or before v0.11.x.
+
+- New features
+  - Added support for `ChronoUnit`.
+
 ### 0.16.0 (Jun 9, 2021)
 
 Support for Scala 3.0 was introduced.
