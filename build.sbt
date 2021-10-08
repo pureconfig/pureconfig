@@ -62,6 +62,7 @@ lazy val joda = module(project) in file("modules/joda")
 lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val scalaz = module(project) in file("modules/scalaz")
+lazy val shapeless3 = genericModule(project) in file("modules/shapeless3") dependsOn `generic-base`
 lazy val squants = module(project) in file("modules/squants")
 lazy val sttp = module(project) in file("modules/sttp")
 lazy val yaml = module(project) in file("modules/yaml")
