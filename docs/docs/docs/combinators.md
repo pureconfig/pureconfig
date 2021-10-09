@@ -52,18 +52,17 @@ ConfigSource.string("{ port = -1 }").load[PortConf]
 `ensure` allows users to quickly fail a reader if a condition does not hold:
 
 ```scala mdoc:silent
-case class Age(years: Int)
-case class User(age: Age)
+import pureconfig.generic.semiauto._
 
-// reads a valid age
-implicit val userReader = ConfigReader[Int]
-  .map(Age(_))
-  .ensure(_.years >= 0, _ => "Age must be positive")
+case class Bounds(min: Int, max: Int)
+
+implicit val boundsReader = deriveReader[Bounds]
+  .ensure(b => b.max > b.min, _ => "Max must be bigger than Min")
 ```
 
 ```scala mdoc
-ConfigSource.string("{ age = 18 }").load[User]
-ConfigSource.string("{ age = -1 }").load[User]
+ConfigSource.string("{ min = 1, max = 3 }").load[Bounds]
+ConfigSource.string("{ min = 5, max = 3 }").load[Bounds]
 ```
 
 `orElse` can be used to provide alternative ways to load a config:
