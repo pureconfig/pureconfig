@@ -8,7 +8,7 @@ import scala.util.Try
 import com.typesafe.config.ConfigValue
 
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason, ValidationFailed}
+import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason, UserValidationFailed}
 
 /** Trait for objects capable of reading objects of a given type from `ConfigValues`.
   *
@@ -140,7 +140,7 @@ trait ConfigReader[A] {
     *   a `ConfigReader` returning the results of this reader if the condition holds or a failed reader otherwise.
     */
   def ensure(pred: A => Boolean, message: A => String): ConfigReader[A] =
-    emap(a => Either.cond(pred(a), a, ValidationFailed(message(a))))
+    emap(a => Either.cond(pred(a), a, UserValidationFailed(message(a))))
 }
 
 /** Provides methods to create [[ConfigReader]] instances.

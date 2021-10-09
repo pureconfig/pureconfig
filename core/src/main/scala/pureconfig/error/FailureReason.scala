@@ -145,9 +145,9 @@ final case class WrongSizeString(expected: Int, found: Int) extends FailureReaso
   def description = s"String of wrong size found. Expected $expected characters. Found $found characters instead."
 }
 
-/** A failure reason given when a validation failed.
+/** A failure reason given when a user validation failed.
   *
   * @param description
   *   the validation failed description
   */
-final case class ValidationFailed(description: String) extends FailureReason
+final case class UserValidationFailed(description: String) extends FailureReason

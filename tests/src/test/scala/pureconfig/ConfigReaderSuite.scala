@@ -96,6 +96,6 @@ class ConfigReaderSuite extends BaseSuite {
 
   it should "have a correct ensure method" in forAll { (conf: ConfigValue, f: Int => Boolean) =>
     intReader.ensure(f, v => s"Validation message $v.").from(conf) shouldEqual
-      intReader.emap(v => if (f(v)) Right(v) else Left(ValidationFailed(s"Validation message $v."))).from(conf)
+      intReader.emap(v => if (f(v)) Right(v) else Left(UserValidationFailed(s"Validation message $v."))).from(conf)
   }
 }
