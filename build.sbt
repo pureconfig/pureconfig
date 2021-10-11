@@ -41,7 +41,6 @@ def genericModule(proj: Project) = proj
 
 def module(proj: Project) = genericModule(proj)
   .enablePlugins(ModuleMdocPlugin)
-  .dependsOn(generic % "test")
 
 lazy val akka = module(project) in file("modules/akka")
 lazy val `akka-http` = module(project) in file("modules/akka-http")

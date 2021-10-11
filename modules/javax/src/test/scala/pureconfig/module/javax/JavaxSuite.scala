@@ -8,24 +8,20 @@ import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import pureconfig.generic.auto._
 import pureconfig.syntax._
+import pureconfig.{ConfigSource, ConfigWriter}
 
 class JavaxSuite extends AnyFlatSpec with Matchers with EitherValues {
 
-  case class K5Conf(principal: KerberosPrincipal)
-
   it should "be able to read a config with a KerberosPrincipal" in {
     val expected = "sample/principal@pureconfig"
-    val config = ConfigFactory.parseString(s"""{ principal: "$expected" }""")
-    config.to[K5Conf].value shouldEqual K5Conf(new KerberosPrincipal(expected))
+    val source = ConfigSource.string(s"""{ principal: "$expected" }""")
+    source.at("principal").load[KerberosPrincipal].value shouldEqual new KerberosPrincipal(expected)
   }
-
-  case class X500Conf(principal: X500Principal)
 
   it should "be able to read a config with an X500Principal" in {
     val expected = "CN=Steve Kille,O=Isode Limited,C=GBg"
-    val config = ConfigFactory.parseString(s"""{ principal: "$expected" }""")
-    config.to[X500Conf].value shouldEqual X500Conf(new X500Principal(expected))
+    val source = ConfigSource.string(s"""{ principal: "$expected" }""")
+    source.at("principal").load[X500Principal].value shouldEqual new X500Principal(expected)
   }
 }

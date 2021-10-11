@@ -3,13 +3,12 @@ package pureconfig.module.yaml
 import java.net.URLDecoder
 import java.nio.file.{Files, Path, Paths}
 
-import com.typesafe.config.{ConfigValue, ConfigValueType}
+import com.typesafe.config.{ConfigList, ConfigValue, ConfigValueType}
 import org.scalatest.EitherValues
 
-import pureconfig.BaseSuite
 import pureconfig.error._
-import pureconfig.generic.auto._
 import pureconfig.module.yaml.error.NonStringKeyFound
+import pureconfig.{BaseSuite, ConfigReader}
 
 @deprecated("Construct a `YamlConfigSource` pipeline instead", "0.12.1")
 class YamlApiSuite extends BaseSuite with EitherValues {
@@ -21,6 +20,8 @@ class YamlApiSuite extends BaseSuite with EitherValues {
     new String(Files.readAllBytes(resourcePath(path)))
 
   case class InnerConf(aa: Int, bb: String)
+  implicit val innerConfReader: ConfigReader[InnerConf] = ConfigReader.forProduct2("aa", "bb")(InnerConf.apply)
+
   case class Conf(
       str: String,
       b: Boolean,
@@ -32,6 +33,17 @@ class YamlApiSuite extends BaseSuite with EitherValues {
       map: Map[String, Double],
       inner: InnerConf
   )
+  implicit val confReader: ConfigReader[Conf] =
+    ConfigReader.forProduct9("str", "b", "n", "data", "opt", "s", "xs", "map", "inner")(Conf.apply)
+
+  implicit val tupleReader: ConfigReader[(InnerConf, Conf)] =
+    ConfigReader.fromCursor(cursor =>
+      for {
+        list <- cursor.asList
+        innerConf <- ConfigReader[InnerConf].from(list(0))
+        conf <- ConfigReader[Conf].from(list(1))
+      } yield (innerConf, conf)
+    )
 
   behavior of "YAML loading"
 

@@ -6,7 +6,9 @@ crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
   "com.propensive" %% "magnolia" % "0.17.0",
-  "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
+  // We're using shapeless for illTyped in tests.
+  Dependencies.shapeless % Test
 )
 
 developers := List(

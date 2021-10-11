@@ -1,8 +1,11 @@
 package pureconfig
 
+import scala.language.higherKinds
+
 import com.typesafe.config.ConfigFactory
 
-import pureconfig.generic.auto._
+import pureconfig.module.magnolia.auto.reader._
+import pureconfig.module.magnolia.auto.writer._
 
 class CoproductConvertersSuite2_12 extends BaseSuite {
 

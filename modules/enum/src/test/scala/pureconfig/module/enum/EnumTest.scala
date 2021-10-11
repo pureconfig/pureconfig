@@ -4,10 +4,9 @@ import _root_.enum.Enum
 import com.typesafe.config.ConfigFactory
 import org.scalatest.Inspectors
 
-import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
-import pureconfig.generic.auto._
 import pureconfig.syntax._
+import pureconfig.{BaseSuite, ConfigSource}
 
 sealed trait Greeting
 
@@ -22,14 +21,12 @@ object Greeting {
 class EnumTest extends BaseSuite {
 
   "enum config convert" should "parse an enum" in Inspectors.forAll(Greeting.EnumInstance.values) { greeting =>
-    val conf = ConfigFactory.parseString(s"""{greeting:"$greeting"}""")
-    case class Conf(greeting: Greeting)
-    conf.to[Conf].value shouldEqual Conf(greeting)
+    val source = ConfigSource.string(s"""{greeting:"$greeting"}""")
+    source.at("greeting").load[Greeting].value shouldEqual greeting
   }
 
   it should "politely refuse an invalid member" in {
-    val conf = ConfigFactory.parseString(s"""{greeting:"Psych"}""")
-    case class Conf(greeting: Greeting)
-    conf.to[Conf] should failWithReason[CannotConvert]
+    val source = ConfigSource.string(s"""{greeting:"Psych"}""")
+    source.at("greeting").load[Greeting] should failWithReason[CannotConvert]
   }
 }

@@ -4,37 +4,33 @@ import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
 import org.apache.hadoop.fs.Path
 
 import pureconfig.error.{CannotConvert, EmptyStringFound}
-import pureconfig.generic.auto._
 import pureconfig.syntax._
-import pureconfig.{BaseSuite, ConfigWriter}
+import pureconfig.{BaseSuite, ConfigSource, ConfigWriter}
 
 class HadoopModuleTest extends BaseSuite {
-
-  case class Conf(path: Path)
 
   behavior of "HDFS Path ConfigConvert"
 
   it should "be able to read correct path value from config" in {
     val strPath = "hdfs://my.domain/foo/bar/baz.gz"
     val expected = new Path(strPath)
-    val config = ConfigFactory.parseString(s"""{ path: "$strPath" }""")
-    config.to[Conf].value shouldEqual Conf(expected)
+    val source = ConfigSource.string(s"""{ path: "$strPath" }""")
+    source.at("path").load[Path].value shouldEqual expected
   }
 
   it should "be able to write correct path value to config" in {
     val strPath = "hdfs://my.domain/foo/bar/baz.gz"
-    val conf = Conf(new Path(strPath))
-    val expected = ConfigFactory.parseString(s"""{ path: "$strPath" }""").root().render(ConfigRenderOptions.concise())
-    ConfigWriter[Conf].to(conf).render(ConfigRenderOptions.concise()) shouldEqual expected
+    val path = new Path(strPath)
+    ConfigWriter[Path].to(path).unwrapped() shouldEqual strPath
   }
 
   it should "refuse an invalid path value" in {
-    val config = ConfigFactory.parseString(s"""{ path: "file:#//123" }""")
-    config.to[Conf] should failWithReason[CannotConvert]
+    val source = ConfigSource.string(s"""{ path: "file:#//123" }""")
+    source.at("path").load[Path] should failWithReason[CannotConvert]
   }
 
   it should "refuse an empty path value" in {
-    val config = ConfigFactory.parseString(s"""{ path: "" }""")
-    config.to[Conf] should failWithReason[EmptyStringFound]
+    val source = ConfigSource.string(s"""{ path: "" }""")
+    source.at("path").load[Path] should failWithReason[EmptyStringFound]
   }
 }

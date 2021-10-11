@@ -4,13 +4,12 @@ import java.net.URLDecoder
 import java.nio.file.{Files, Path, Paths}
 import java.time.Instant
 
-import com.typesafe.config.{ConfigValue, ConfigValueType}
+import com.typesafe.config.{ConfigList, ConfigValue, ConfigValueType}
 import org.scalatest.EitherValues
 
 import pureconfig.error._
-import pureconfig.generic.auto._
 import pureconfig.module.yaml.error.NonStringKeyFound
-import pureconfig.{BaseSuite, ConfigSource}
+import pureconfig.{BaseSuite, ConfigReader, ConfigSource}
 
 class YamlConfigSourceSuite extends BaseSuite with EitherValues {
 
@@ -21,6 +20,8 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
     new String(Files.readAllBytes(resourcePath(path)))
 
   case class InnerConf(aa: Int, bb: String)
+  implicit val innerConfReader: ConfigReader[InnerConf] = ConfigReader.forProduct2("aa", "bb")(InnerConf.apply)
+
   case class Conf(
       str: String,
       b: Boolean,
@@ -32,6 +33,17 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
       map: Map[String, Double],
       inner: InnerConf
   )
+  implicit val confReader: ConfigReader[Conf] =
+    ConfigReader.forProduct9("str", "b", "n", "data", "opt", "s", "xs", "map", "inner")(Conf.apply)
+
+  implicit val tupleReader: ConfigReader[(InnerConf, Conf)] =
+    ConfigReader.fromCursor(cursor =>
+      for {
+        list <- cursor.asList
+        innerConf <- ConfigReader[InnerConf].from(list(0))
+        conf <- ConfigReader[Conf].from(list(1))
+      } yield (innerConf, conf)
+    )
 
   behavior of "YAML loading"
 
@@ -148,13 +160,11 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
   }
 
   it should "not change date formats when parsing YAML documents" in {
-    case class MyConf(myInstant: Instant)
-
     val yaml = """
       | my-instant: 2019-01-01T00:00:00Z
       |""".stripMargin
 
-    YamlConfigSource.string(yaml).load[MyConf] shouldBe Right(MyConf(Instant.parse("2019-01-01T00:00:00Z")))
+    YamlConfigSource.string(yaml).at("my-instant").load[Instant] shouldBe Right(Instant.parse("2019-01-01T00:00:00Z"))
   }
 
   it should "loadYamlOrThrow from a simple YAML file" in {

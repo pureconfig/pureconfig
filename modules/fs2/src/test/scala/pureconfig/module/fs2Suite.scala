@@ -12,8 +12,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import pureconfig.error.ConfigReaderException
-import pureconfig.generic.auto._
 import pureconfig.module.{fs2 => testee}
+import pureconfig.{ConfigReader, ConfigWriter}
 
 class fs2Suite extends AnyFlatSpec with Matchers {
 
@@ -23,6 +23,10 @@ class fs2Suite extends AnyFlatSpec with Matchers {
   }
 
   case class SomeCaseClass(somefield: Int, anotherfield: String)
+  implicit val reader: ConfigReader[SomeCaseClass] =
+    ConfigReader.forProduct2("somefield", "anotherfield")(SomeCaseClass.apply)
+  implicit val writer: ConfigWriter[SomeCaseClass] =
+    ConfigWriter.forProduct2("somefield", "anotherfield")(SomeCaseClass.unapply(_).get)
 
   "streamConfig" should "load a case class from a byte stream" in {
 
