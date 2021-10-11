@@ -49,6 +49,22 @@ ConfigSource.string("{ port = 8080 }").load[PortConf]
 ConfigSource.string("{ port = -1 }").load[PortConf]
 ```
 
+`ensure` allows users to quickly fail a reader if a condition does not hold:
+
+```scala mdoc:silent
+import pureconfig.generic.semiauto._
+
+case class Bounds(min: Int, max: Int)
+
+implicit val boundsReader = deriveReader[Bounds]
+  .ensure(b => b.max > b.min, _ => "Max must be bigger than Min")
+```
+
+```scala mdoc
+ConfigSource.string("{ min = 1, max = 3 }").load[Bounds]
+ConfigSource.string("{ min = 5, max = 3 }").load[Bounds]
+```
+
 `orElse` can be used to provide alternative ways to load a config:
 
 ```scala mdoc:silent

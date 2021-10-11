@@ -85,14 +85,14 @@ jobs:
           java-version: adopt@1.8
 
       - name: Set up Ruby
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6
+          ruby-version: 3.0
 
       - name: Install dependencies
         run: >
           sudo apt install libxslt-dev &&
-          gem install sass jekyll:4.0.0 html-proofer:3.9.3
+          gem install sass jekyll:4.2.1 html-proofer:3.19.0
 
       - name: Build website
         run: sbt makeMicrosite
@@ -120,12 +120,12 @@ jobs:
           java-version: adopt@1.8
 
       - name: Set up Ruby
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6
+          ruby-version: 3.0
 
       - name: Install dependencies
-        run: gem install sass jekyll:4.0.0
+        run: gem install sass jekyll:4.2.1
 
       - name: Build and compare website
         id: diff_website
@@ -134,7 +134,7 @@ jobs:
 
       - name: Comment on pull request
         if: steps.diff_website.outcome == 'failure'
-        uses: thollander/actions-comment-pull-request@1.0.1
+        uses: thollander/actions-comment-pull-request@v1.0.4
         with:
           message: >
             Warning: the content of the PureConfig website changed with this pull request. This may
