@@ -85,7 +85,7 @@ jobs:
           java-version: adopt@1.8
 
       - name: Set up Ruby
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.0
 
@@ -120,7 +120,7 @@ jobs:
           java-version: adopt@1.8
 
       - name: Set up Ruby
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.0
 
