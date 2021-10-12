@@ -8,7 +8,7 @@ import scala.util.Try
 import com.typesafe.config.ConfigValue
 
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason}
+import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason, UserValidationFailed}
 
 /** Trait for objects capable of reading objects of a given type from `ConfigValues`.
   *
@@ -129,6 +129,18 @@ trait ConfigReader[A] {
     */
   def contramapCursor(f: ConfigCursor => ConfigCursor): ConfigReader[A] =
     fromCursor[A] { cur => from(f(cur)) }
+
+  /** Fails the reader if the condition does not hold for the result.
+    *
+    * @param pred
+    *   the condition to assert
+    * @param message
+    *   the failed validation message
+    * @return
+    *   a `ConfigReader` returning the results of this reader if the condition holds or a failed reader otherwise.
+    */
+  def ensure(pred: A => Boolean, message: A => String): ConfigReader[A] =
+    emap(a => Either.cond(pred(a), a, UserValidationFailed(message(a))))
 }
 
 /** Provides methods to create [[ConfigReader]] instances.
