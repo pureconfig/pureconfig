@@ -5,7 +5,7 @@ name := "pureconfig-generic"
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  Dependencies.shapeless,
+  "com.chuusai" %% "shapeless" % "2.3.7",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided
 )
 
