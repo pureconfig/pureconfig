@@ -1,12 +1,11 @@
 package pureconfig.module.enum
 
 import _root_.enum.Enum
-import com.typesafe.config.ConfigFactory
 import org.scalatest.Inspectors
 
+import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
 import pureconfig.syntax._
-import pureconfig.{BaseSuite, ConfigSource}
 
 sealed trait Greeting
 
@@ -21,12 +20,10 @@ object Greeting {
 class EnumTest extends BaseSuite {
 
   "enum config convert" should "parse an enum" in Inspectors.forAll(Greeting.EnumInstance.values) { greeting =>
-    val source = ConfigSource.string(s"""{greeting:"$greeting"}""")
-    source.at("greeting").load[Greeting].value shouldEqual greeting
+    configValue(s""""$greeting"""").to[Greeting].value shouldEqual greeting
   }
 
   it should "politely refuse an invalid member" in {
-    val source = ConfigSource.string(s"""{greeting:"Psych"}""")
-    source.at("greeting").load[Greeting] should failWithReason[CannotConvert]
+    configValue(s""""Psych"""").to[Greeting] should failWithReason[CannotConvert]
   }
 }

@@ -7,7 +7,7 @@ import scalaz.std.string._
 import scalaz.{==>>, IList, ISet, Maybe, NonEmptyList}
 
 import pureconfig.syntax._
-import pureconfig.{BaseSuite, ConfigConvertChecks, ConfigSource}
+import pureconfig.{BaseSuite, ConfigConvertChecks}
 
 class ScalazSuite extends BaseSuite {
 
@@ -22,7 +22,6 @@ class ScalazSuite extends BaseSuite {
   checkArbitrary[String ==>> Int]
 
   it should "return an EmptyIListFound when reading empty list into NonEmptyList" in {
-    val source = ConfigSource.string("{ numbers: [] }")
-    source.at("numbers").load[NonEmptyList[Int]] should failWith(EmptyIListFound, "numbers", stringConfigOrigin(1))
+    configValue("[]").to[NonEmptyList[Int]] should failWith(EmptyIListFound, "", stringConfigOrigin(1))
   }
 }

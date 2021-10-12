@@ -5,7 +5,7 @@ import org.apache.hadoop.fs.Path
 
 import pureconfig.error.{CannotConvert, EmptyStringFound}
 import pureconfig.syntax._
-import pureconfig.{BaseSuite, ConfigSource, ConfigWriter}
+import pureconfig.{BaseSuite, ConfigWriter}
 
 class HadoopModuleTest extends BaseSuite {
 
@@ -13,9 +13,7 @@ class HadoopModuleTest extends BaseSuite {
 
   it should "be able to read correct path value from config" in {
     val strPath = "hdfs://my.domain/foo/bar/baz.gz"
-    val expected = new Path(strPath)
-    val source = ConfigSource.string(s"""{ path: "$strPath" }""")
-    source.at("path").load[Path].value shouldEqual expected
+    configValue(s""""$strPath"""").to[Path].value shouldEqual new Path(strPath)
   }
 
   it should "be able to write correct path value to config" in {
@@ -25,12 +23,10 @@ class HadoopModuleTest extends BaseSuite {
   }
 
   it should "refuse an invalid path value" in {
-    val source = ConfigSource.string(s"""{ path: "file:#//123" }""")
-    source.at("path").load[Path] should failWithReason[CannotConvert]
+    configValue(""""file:#//123"""").to[Path] should failWithReason[CannotConvert]
   }
 
   it should "refuse an empty path value" in {
-    val source = ConfigSource.string(s"""{ path: "" }""")
-    source.at("path").load[Path] should failWithReason[EmptyStringFound]
+    configValue(s"""""""").to[Path] should failWithReason[EmptyStringFound]
   }
 }

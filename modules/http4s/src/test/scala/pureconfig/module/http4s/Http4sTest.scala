@@ -5,23 +5,19 @@ import org.http4s.Uri
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures, ConvertFailure}
 import pureconfig.syntax._
-import pureconfig.{BaseSuite, ConfigReader, ConfigSource, ConfigWriter}
+import pureconfig.{BaseSuite, ConfigReader, ConfigWriter}
 
 class Http4sTest extends BaseSuite {
 
   "reading the uri config" should "parse the uri" in {
-    val source = ConfigSource.string(s"""{uri:"http://http4s.org/"}""")
-
-    source.at("uri").load[Uri].value shouldEqual Uri.unsafeFromString("http://http4s.org/")
+    val uriStr = "http://http4s.org/"
+    configValue(s""""$uriStr"""").to[Uri].value shouldEqual Uri.unsafeFromString(uriStr)
   }
 
   "reading the uri config" should "get a CannotConvert error" in {
-    val source = ConfigSource.string(s"""{uri:"\\\\"}""")
-
-    val errors =
-      ConfigReaderFailures(ConvertFailure(CannotConvert("\\", "Uri", "Invalid URI"), stringConfigOrigin(1), "uri"))
-
-    source.at("uri").load[Uri].left.value shouldEqual errors
+    configValue(s""""\\\\"""").to[Uri].left.value shouldEqual ConfigReaderFailures(
+      ConvertFailure(CannotConvert("\\", "Uri", "Invalid URI"), stringConfigOrigin(1), "")
+    )
   }
 
   "Uri ConfigReader and ConfigWriter" should "be able to round-trip reading/writing of Uri" in {
@@ -31,8 +27,6 @@ class Http4sTest extends BaseSuite {
       )
 
     val configValue = ConfigWriter[Uri].to(expectedComplexUri)
-    val Right(actualUri) = ConfigReader[Uri].from(configValue)
-
-    actualUri shouldEqual expectedComplexUri
+    configValue.to[Uri].value shouldEqual expectedComplexUri
   }
 }

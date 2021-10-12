@@ -13,16 +13,14 @@ class SttpSuite extends BaseSuite {
   behavior of "sttp module"
 
   it should "read uri" in {
-    val source = ConfigSource.string("""{uri = "https://sttp.readthedocs.io"}""")
-
-    source.at("uri").load[Uri].value shouldBe uri"https://sttp.readthedocs.io"
+    val uriStr = "https://sttp.readthedocs.io"
+    configValue(s""""$uriStr"""").to[Uri].value shouldBe Uri.unsafeParse(uriStr)
   }
 
   it should "handle error when reading uri" in {
-    val source = ConfigSource.string("""{uri = "http://example.com:80:80"}""")
-
-    source.at("uri").load[Uri].left.value.head should matchPattern {
-      case ConvertFailure(CannotConvert("http://example.com:80:80", "sttp.model.Uri", _), _, "uri") =>
+    val uriStr = "http://example.com:80:80"
+    configValue(s""""$uriStr"""").to[Uri].left.value.head should matchPattern {
+      case ConvertFailure(CannotConvert(str, "sttp.model.Uri", _), _, "") if str == uriStr =>
     }
   }
 }
