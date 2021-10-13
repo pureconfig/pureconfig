@@ -14,12 +14,12 @@ class SttpSuite extends BaseSuite {
 
   it should "read uri" in {
     val uriStr = "https://sttp.readthedocs.io"
-    configValue(s""""$uriStr"""").to[Uri].value shouldBe Uri.unsafeParse(uriStr)
+    configString(uriStr).to[Uri].value shouldBe Uri.unsafeParse(uriStr)
   }
 
   it should "handle error when reading uri" in {
     val uriStr = "http://example.com:80:80"
-    configValue(s""""$uriStr"""").to[Uri].left.value.head should matchPattern {
+    configString(uriStr).to[Uri].left.value.head should matchPattern {
       case ConvertFailure(CannotConvert(str, "sttp.model.Uri", _), _, "") if str == uriStr =>
     }
   }

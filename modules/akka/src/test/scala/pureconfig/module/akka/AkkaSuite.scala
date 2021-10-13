@@ -18,10 +18,10 @@ class AkkaSuite extends BaseSuite {
   it should "load a valid ActorPath" in {
     val str = "akka://my-sys/user/service-a/worker1"
     val expected = ActorPath.fromString(str)
-    configValue(s""""$str"""").to[ActorPath].value shouldEqual expected
+    configString(str).to[ActorPath].value shouldEqual expected
   }
 
   it should "not load invalid ActorPath" in {
-    configValue(""""this is this the path you're looking for"""").to[ActorPath] should be('left)
+    configString("this is this the path you're looking for").to[ActorPath] should be('left)
   }
 }

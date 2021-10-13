@@ -10,8 +10,8 @@ import pureconfig.{BaseSuite, ConfigWriter}
 class AkkaHttpSuite extends BaseSuite {
 
   val uri = Uri("https://doc.akka.io/docs/akka-http/current/index.html")
-  val serverConf = s""""https://doc.akka.io/docs/akka-http/current/index.html""""
-  val config = configValue(serverConf)
+  val serverConf = "https://doc.akka.io/docs/akka-http/current/index.html"
+  val config = configString(serverConf)
 
   behavior of "AkkaHttp module"
 
@@ -20,7 +20,7 @@ class AkkaHttpSuite extends BaseSuite {
   }
 
   it should " throw proper CannotConvert error" in {
-    val config = configValue(""""https://doc.akka.io/docs/akka-http/current folder with spaces/index.html"""")
+    val config = configString("https://doc.akka.io/docs/akka-http/current folder with spaces/index.html")
     val errors = ConfigReaderFailures(
       ConvertFailure(
         CannotConvert(

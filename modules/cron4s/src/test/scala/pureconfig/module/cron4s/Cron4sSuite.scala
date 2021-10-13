@@ -13,12 +13,12 @@ import pureconfig.{BaseSuite, ConfigSource}
 class Cron4sSuite extends BaseSuite {
 
   "reading valid cron expressons" should "parse the expression" in {
-    configValue(""""10-35 2,4,6 * ? * *"""").to[CronExpr].value shouldEqual Cron.unsafeParse("10-35 2,4,6 * ? * *")
+    configString("10-35 2,4,6 * ? * *").to[CronExpr].value shouldEqual Cron.unsafeParse("10-35 2,4,6 * ? * *")
   }
 
   "reading invalid cron expressions" should "get a CannotConvert error" in {
     val exprStr = "10-65 * * * * *"
-    configValue(s""""$exprStr"""").to[CronExpr].left.value shouldEqual ConfigReaderFailures(
+    configString(exprStr).to[CronExpr].left.value shouldEqual ConfigReaderFailures(
       ConvertFailure(
         CannotConvert(exprStr, "CronExpr", "blank expected at position 3 but found '-'"),
         stringConfigOrigin(1),

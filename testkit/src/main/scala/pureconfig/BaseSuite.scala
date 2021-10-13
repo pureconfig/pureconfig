@@ -15,7 +15,8 @@ class BaseSuite
     with ConfigReaderMatchers {
 
   // Creates a ConfigValue from the provided string representation.
-  def configValue(confStr: String): ConfigValue = {
-    ConfigFactory.parseString(s"aux = $confStr").root.get("aux")
-  }
+  def configValue(confStr: String): ConfigValue = ConfigFactory.parseString(s"aux = $confStr").root.get("aux")
+
+  // Creates a ConfigString from the provided string.
+  def configString(confStr: String): ConfigValue = ConfigFactory.parseString(s"""aux = "$confStr"""").root.get("aux")
 }

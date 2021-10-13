@@ -12,11 +12,11 @@ class JavaxSuite extends BaseSuite {
 
   it should "be able to read a config with a KerberosPrincipal" in {
     val expected = "sample/principal@pureconfig"
-    configValue(s""""$expected"""").to[KerberosPrincipal].value shouldEqual new KerberosPrincipal(expected)
+    configString(expected).to[KerberosPrincipal].value shouldEqual new KerberosPrincipal(expected)
   }
 
   it should "be able to read a config with an X500Principal" in {
     val expected = "CN=Steve Kille,O=Isode Limited,C=GBg"
-    configValue(s""""$expected"""").to[X500Principal].value shouldEqual new X500Principal(expected)
+    configString(expected).to[X500Principal].value shouldEqual new X500Principal(expected)
   }
 }

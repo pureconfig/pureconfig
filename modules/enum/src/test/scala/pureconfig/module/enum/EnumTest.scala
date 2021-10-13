@@ -20,10 +20,10 @@ object Greeting {
 class EnumTest extends BaseSuite {
 
   "enum config convert" should "parse an enum" in Inspectors.forAll(Greeting.EnumInstance.values) { greeting =>
-    configValue(s""""$greeting"""").to[Greeting].value shouldEqual greeting
+    configString(s"$greeting").to[Greeting].value shouldEqual greeting
   }
 
   it should "politely refuse an invalid member" in {
-    configValue(s""""Psych"""").to[Greeting] should failWithReason[CannotConvert]
+    configString("Psych").to[Greeting] should failWithReason[CannotConvert]
   }
 }

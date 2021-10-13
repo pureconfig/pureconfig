@@ -11,11 +11,11 @@ class Http4sTest extends BaseSuite {
 
   "reading the uri config" should "parse the uri" in {
     val uriStr = "http://http4s.org/"
-    configValue(s""""$uriStr"""").to[Uri].value shouldEqual Uri.unsafeFromString(uriStr)
+    configString(uriStr).to[Uri].value shouldEqual Uri.unsafeFromString(uriStr)
   }
 
   "reading the uri config" should "get a CannotConvert error" in {
-    configValue(s""""\\\\"""").to[Uri].left.value shouldEqual ConfigReaderFailures(
+    configString("\\\\").to[Uri].left.value shouldEqual ConfigReaderFailures(
       ConvertFailure(CannotConvert("\\", "Uri", "Invalid URI"), stringConfigOrigin(1), "")
     )
   }
