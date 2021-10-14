@@ -9,12 +9,8 @@ class FluentConfigCursorSuite extends BaseSuite {
   val defaultPath = List("key2", "key1")
   val defaultPathStr = "key1.key2"
 
-  def conf(confStr: String): ConfigValue = {
-    ConfigFactory.parseString(s"aux = $confStr").root.get("aux")
-  }
-
   def cursor(confStr: String, pathElems: List[String] = defaultPath): FluentConfigCursor =
-    ConfigCursor(conf(confStr), pathElems).fluent
+    ConfigCursor(configValue(confStr), pathElems).fluent
 
   def failedCursor(
       reason: FailureReason,
@@ -39,7 +35,7 @@ class FluentConfigCursorSuite extends BaseSuite {
     )
 
     cursor("[1, 2]").asListCursor shouldBe
-      Right(ConfigListCursor(conf("[1, 2]").asInstanceOf[ConfigList], defaultPath))
+      Right(ConfigListCursor(configValue("[1, 2]").asInstanceOf[ConfigList], defaultPath))
   }
 
   it should "allow being casted to an object cursor in a safe way" in {
@@ -50,7 +46,7 @@ class FluentConfigCursorSuite extends BaseSuite {
     )
 
     cursor("{ a: 1, b: 2 }").asObjectCursor shouldBe
-      Right(ConfigObjectCursor(conf("{ a: 1, b: 2 }").asInstanceOf[ConfigObject], defaultPath))
+      Right(ConfigObjectCursor(configValue("{ a: 1, b: 2 }").asInstanceOf[ConfigObject], defaultPath))
   }
 
   it should "allow access to a given path with implicit failure handling" in {

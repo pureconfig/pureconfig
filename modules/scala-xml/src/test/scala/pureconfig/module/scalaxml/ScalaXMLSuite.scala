@@ -2,17 +2,10 @@ package pureconfig.module.scalaxml
 
 import scala.xml.Elem
 
-import com.typesafe.config.ConfigFactory.parseString
-import org.scalatest.EitherValues
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-
-import pureconfig.generic.auto._
+import pureconfig.BaseSuite
 import pureconfig.syntax._
 
-class ScalaXMLSuite extends AnyFlatSpec with Matchers with EitherValues {
-
-  case class Config(people: Elem)
+class ScalaXMLSuite extends BaseSuite {
 
   val sampleXML: Elem =
     <people>
@@ -21,14 +14,10 @@ class ScalaXMLSuite extends AnyFlatSpec with Matchers with EitherValues {
     </people>
 
   it should "be able to read a config with XML" in {
-    val config = parseString(s"""{ people =
-         |    \"\"\"$sampleXML\"\"\"
-         | }""".stripMargin)
-    config.to[Config] shouldEqual Right(Config(sampleXML))
+    configValue(s"""\"\"\"$sampleXML\"\"\"""").to[Elem] shouldEqual Right(sampleXML)
   }
 
-  it should "return an error when reading invalid XML " in {
-    val config = parseString("{ people: <people> }")
-    config.to[Config] shouldBe 'left
+  it should "return an error when reading invalid XML" in {
+    configValue("<people>").to[Elem] shouldBe 'left
   }
 }

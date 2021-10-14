@@ -8,7 +8,6 @@ import org.scalatest.Inspectors
 
 import pureconfig.BaseSuite
 import pureconfig.error.CannotConvert
-import pureconfig.generic.auto._
 import pureconfig.syntax._
 
 class EnumeratumConvertTest extends BaseSuite {
@@ -22,9 +21,7 @@ class EnumeratumConvertTest extends BaseSuite {
   }
 
   "Enumeratum ConfigConvert" should "parse an enum" in Inspectors.forAll(Greeting.values) { greeting =>
-    val conf = ConfigFactory.parseString(s"""{greeting:"${greeting.entryName}"}""")
-    case class Conf(greeting: Greeting)
-    conf.to[Conf].value shouldEqual Conf(greeting)
+    configString(greeting.entryName).to[Greeting].value shouldEqual greeting
   }
 
   sealed abstract class IntLibraryItem(val value: Int, val name: String) extends IntEnumEntry
@@ -38,9 +35,7 @@ class EnumeratumConvertTest extends BaseSuite {
   }
 
   it should "parse an int enum" in Inspectors.forAll(IntLibraryItem.values) { item =>
-    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-    case class Conf(item: IntLibraryItem)
-    conf.to[Conf].value shouldEqual Conf(item)
+    configString(s"${item.value}").to[IntLibraryItem].value shouldEqual item
   }
 
   sealed abstract class LongLibraryItem(val value: Long, val name: String) extends LongEnumEntry
@@ -54,9 +49,7 @@ class EnumeratumConvertTest extends BaseSuite {
   }
 
   it should "parse a long value enum" in Inspectors.forAll(LongLibraryItem.values) { item =>
-    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-    case class Conf(item: LongLibraryItem)
-    conf.to[Conf].value shouldEqual Conf(item)
+    configString(s"${item.value}").to[LongLibraryItem].value shouldEqual item
   }
 
   sealed abstract class ShortLibraryItem(val value: Short, val name: String) extends ShortEnumEntry
@@ -70,9 +63,7 @@ class EnumeratumConvertTest extends BaseSuite {
   }
 
   it should "parse a short value enum" in Inspectors.forAll(ShortLibraryItem.values) { item =>
-    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-    case class Conf(item: ShortLibraryItem)
-    conf.to[Conf].value shouldEqual Conf(item)
+    configString(s"${item.value}").to[ShortLibraryItem].value shouldEqual item
   }
 
   sealed abstract class StringLibraryItem(val value: String, val number: Int) extends StringEnumEntry
@@ -87,9 +78,7 @@ class EnumeratumConvertTest extends BaseSuite {
   }
 
   it should "parse a string value enum" in Inspectors.forAll(StringLibraryItem.values) { item =>
-    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-    case class Conf(item: StringLibraryItem)
-    conf.to[Conf].value shouldEqual Conf(item)
+    configString(item.value).to[StringLibraryItem].value shouldEqual item
   }
 
   sealed abstract class ByteLibraryItem(val value: Byte, val name: String) extends ByteEnumEntry
@@ -103,9 +92,7 @@ class EnumeratumConvertTest extends BaseSuite {
   }
 
   it should "parse a byte value enum" in Inspectors.forAll(ByteLibraryItem.values) { item =>
-    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-    case class Conf(item: ByteLibraryItem)
-    conf.to[Conf].value shouldEqual Conf(item)
+    configString(s"${item.value}").to[ByteLibraryItem].value shouldEqual item
   }
 
   sealed abstract class CharLibraryItem(val value: Char, val number: Int) extends CharEnumEntry
@@ -119,14 +106,10 @@ class EnumeratumConvertTest extends BaseSuite {
   }
 
   it should "parse a char value enum" in Inspectors.forAll(CharLibraryItem.values) { item =>
-    val conf = ConfigFactory.parseString(s"""{item:"${item.value}"}""")
-    case class Conf(item: CharLibraryItem)
-    conf.to[Conf].value shouldEqual Conf(item)
+    configString(s"${item.value}").to[CharLibraryItem].value shouldEqual item
   }
 
   it should "not parse a char value enum when given a string with more than one character" in {
-    val conf = ConfigFactory.parseString(s"""{item:"string"}""")
-    case class Conf(item: CharLibraryItem)
-    conf.to[Conf] should failWithReason[CannotConvert]
+    configString("string").to[CharLibraryItem] should failWithReason[CannotConvert]
   }
 }

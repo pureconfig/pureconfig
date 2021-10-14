@@ -4,28 +4,19 @@ import javax.security.auth.x500.X500Principal
 
 import _root_.javax.security.auth.kerberos.KerberosPrincipal
 import com.typesafe.config.ConfigFactory
-import org.scalatest.EitherValues
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 
-import pureconfig.generic.auto._
 import pureconfig.syntax._
+import pureconfig.{BaseSuite, ConfigWriter}
 
-class JavaxSuite extends AnyFlatSpec with Matchers with EitherValues {
-
-  case class K5Conf(principal: KerberosPrincipal)
+class JavaxSuite extends BaseSuite {
 
   it should "be able to read a config with a KerberosPrincipal" in {
     val expected = "sample/principal@pureconfig"
-    val config = ConfigFactory.parseString(s"""{ principal: "$expected" }""")
-    config.to[K5Conf].value shouldEqual K5Conf(new KerberosPrincipal(expected))
+    configString(expected).to[KerberosPrincipal].value shouldEqual new KerberosPrincipal(expected)
   }
-
-  case class X500Conf(principal: X500Principal)
 
   it should "be able to read a config with an X500Principal" in {
     val expected = "CN=Steve Kille,O=Isode Limited,C=GBg"
-    val config = ConfigFactory.parseString(s"""{ principal: "$expected" }""")
-    config.to[X500Conf].value shouldEqual X500Conf(new X500Principal(expected))
+    configString(expected).to[X500Principal].value shouldEqual new X500Principal(expected)
   }
 }

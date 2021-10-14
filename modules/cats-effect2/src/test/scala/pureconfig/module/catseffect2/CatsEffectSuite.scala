@@ -10,13 +10,16 @@ import cats.effect.{Blocker, IO}
 import com.typesafe.config.ConfigFactory
 
 import pureconfig.error.{ConfigReaderException, ConvertFailure}
-import pureconfig.generic.auto._
 import pureconfig.module.catseffect2.syntax._
-import pureconfig.{BaseSuite, ConfigSource}
+import pureconfig.{BaseSuite, ConfigReader, ConfigSource, ConfigWriter}
 
 final class CatsEffectSuite extends BaseSuite {
 
-  private case class SomeCaseClass(somefield: Int, anotherfield: String)
+  case class SomeCaseClass(somefield: Int, anotherfield: String)
+  implicit val reader: ConfigReader[SomeCaseClass] =
+    ConfigReader.forProduct2("somefield", "anotherfield")(SomeCaseClass.apply)
+  implicit val writer: ConfigWriter[SomeCaseClass] =
+    ConfigWriter.forProduct2("somefield", "anotherfield")(SomeCaseClass.unapply(_).get)
 
   private val blocker: Blocker = Blocker.liftExecutorService(Executors.newCachedThreadPool())
 
