@@ -93,8 +93,6 @@ lazy val commonSettings = Seq(
   Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
   Test / console / scalacOptions := (Compile / console / scalacOptions).value,
 
-  scalafmtOnCompile := true,
-
   // We can't use Scalafix in Scala 3 yet.
   libraryDependencies ++= forScalaVersions {
     case (2, _) => List(compilerPlugin(scalafixSemanticdb))
