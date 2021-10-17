@@ -61,6 +61,7 @@ lazy val joda = module(project) in file("modules/joda")
 lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val scalaz = module(project) in file("modules/scalaz")
+lazy val spark = module(project) in file("modules/spark")
 lazy val squants = module(project) in file("modules/squants")
 lazy val sttp = module(project) in file("modules/sttp")
 lazy val yaml = module(project) in file("modules/yaml")
@@ -173,9 +174,6 @@ lazy val lintFlags = forScalaVersions {
 
 // Use the same Scala 2.12 version in the root project as in subprojects
 scalaVersion := scala212
-
-// Workaround for https://github.com/sbt/sbt/issues/3465
-crossScalaVersions := Nil
 
 // do not publish the root project
 publish / skip := true
