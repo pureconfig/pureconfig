@@ -2,10 +2,10 @@ import Dependencies.Version._
 
 name := "pureconfig-spark"
 
-crossScalaVersions := Seq(scala212) //Spark does not support Scala 2.13 yet
+crossScalaVersions := Seq(scala212, scala213)
 
-libraryDependencies ++= Seq("org.apache.spark" %% "spark-sql" % "3.1.2" % "provided")
-mdocLibraryDependencies ++= Seq("org.apache.spark" %% "spark-sql" % "3.1.2")
+libraryDependencies ++= Seq("org.apache.spark" %% "spark-sql" % "3.2.0" % "provided")
+mdocLibraryDependencies ++= Seq("org.apache.spark" %% "spark-sql" % "3.2.0")
 
 osgiSettings
 
