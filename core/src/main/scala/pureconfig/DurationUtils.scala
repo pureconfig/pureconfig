@@ -42,7 +42,7 @@ private[pureconfig] object DurationUtils {
       }
   }
 
-  ////////////////////////////////////
+  // ------------------------------
   // This is a copy of Duration(str: String) that fixes the bug on precision
   //
 
@@ -88,7 +88,7 @@ private[pureconfig] object DurationUtils {
     }
   }
 
-  ////////////////////////////////////
+  // ------------------------------
 
   private val onlyNumberRegex = "\\s*[+-]?[0-9]+\\s*$".r
   private val fauxMuRegex = "([0-9])(\\s*)us(\\s*)$".r
@@ -117,8 +117,8 @@ private[pureconfig] object DurationUtils {
     }
   }
 
-  /// We need our own constant for `Duration.Undefined` because that value's `toString` is `Duration.Undefined`
-  /// which is inconsistent with the `Inf` and `Minus` `toString` provided by other special `Duration`s.
+  // We need our own constant for `Duration.Undefined` because that value's `toString` is `Duration.Undefined`
+  // which is inconsistent with the `Inf` and `Minus` `toString` provided by other special `Duration`s.
   private final val UndefinedDuration = "Undefined"
 
   /** Format a FiniteDuration as a string with a suitable time unit using units TypesafeConfig understands.

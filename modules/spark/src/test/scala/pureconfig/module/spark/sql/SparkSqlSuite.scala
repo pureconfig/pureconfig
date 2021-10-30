@@ -13,24 +13,24 @@ class SparkSqlSuite extends BaseSuite {
   checkArbitrary[StructType]
   checkArbitrary[StructField]
 
-  //check empty metadata
+  // check empty metadata
   checkReadWriteString[Metadata]("{}" -> Metadata.empty)
 
-  //check empty array
+  // check empty array
   checkReadWriteString[Metadata]("{\"k\":[]}" -> Metadata.fromJson("{\"k\":[]}"))
 
-  //check null
+  // check null
   checkReadWriteString[Metadata]("{\"k\":null}" -> Metadata.fromJson("{\"k\":null}"))
 
-  //check array with null
+  // check array with null
   checkFailure[Metadata, CannotConvert](ConfigValueFactory.fromAnyRef("{\"k\":[1,null]}"))
 
-  //check array of mixed types
+  // check array of mixed types
   checkFailure[Metadata, CannotConvert](ConfigValueFactory.fromAnyRef("{\"k\": [1, \"2\", 3.5] }"))
 
-  //check nested arrays
+  // check nested arrays
   checkFailure[Metadata, CannotConvert](ConfigValueFactory.fromAnyRef("{\"k\": [[1, 2, 3], [4, 5, 6]] }"))
 
-  //check decimal with out of bound precision/scale
+  // check decimal with out of bound precision/scale
   checkFailure[DataType, CannotConvert](ConfigValueFactory.fromAnyRef("decimal(100, 100)"))
 }

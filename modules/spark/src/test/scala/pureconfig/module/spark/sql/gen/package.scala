@@ -5,7 +5,7 @@ import org.json4s._
 import org.scalacheck.{Arbitrary, Gen}
 
 package object gen {
-  //Valid `Metadata` field types: Boolean, Long, Double, String, Metadata, Array[Boolean], Array[Long], Array[Double], Array[String], and Array[Metadata]
+  // Valid `Metadata` field types: Boolean, Long, Double, String, Metadata, Array[Boolean], Array[Long], Array[Double], Array[String], and Array[Metadata]
   val genJBool: Gen[JBool] = Arbitrary.arbitrary[Boolean].map(JBool.apply)
   val genJLong: Gen[JLong] = Arbitrary.arbitrary[Long].map(JLong)
   val genJDouble: Gen[JDouble] = Arbitrary.arbitrary[Double].map(JDouble)
@@ -30,7 +30,7 @@ package object gen {
       )
   }).map(JObject(_))
 
-  //`Metadata` arrays cannot be nested
+  // `Metadata` arrays cannot be nested
   def genJArray(maxWidth: Int, maxDepth: Int): Gen[JArray] = {
     val x = Gen.listOfN(maxWidth, genJBool)
     val y = Gen.listOfN(maxWidth, genJLong)
@@ -40,9 +40,9 @@ package object gen {
     Gen.oneOf(x, y, xs: _*).map(JArray)
   }
 
-  //max precision, scale = 38
-  //scale <= precision
-  //scale >= 0
+  // max precision, scale = 38
+  // scale <= precision
+  // scale >= 0
   val genDecimalType: Gen[DecimalType] =
     for {
       p <- Gen.chooseNum(0, DecimalType.MAX_PRECISION)
