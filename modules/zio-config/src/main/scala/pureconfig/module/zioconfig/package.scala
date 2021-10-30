@@ -15,8 +15,8 @@ package object zioconfig {
           .flatMap(cs => read(cd.from(cs)))
           .left
           .map(ZioConfigReadError.apply),
-      //`zio-config` write should typically not fail but is allowed to fail
-      //an exception will be throw on write errors
+      // `zio-config` write should typically not fail but is allowed to fail
+      // an exception will be throw on write errors
       _.toHocon(cd)
         .map(_.toConfig)
         .fold(s => throw new Exception(s"ZioConfigWriteException: $s"), identity)
