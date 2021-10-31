@@ -110,7 +110,11 @@ lazy val commonSettings = Seq(
 
   publishMavenStyle := true,
   Test / publishArtifact := false,
-  publishTo := sonatypePublishToBundle.value
+  publishTo := sonatypePublishToBundle.value,
+
+  // Don't publish for Scala 3.1 or later, only for 3.0. This is following the recommendation in
+  // https://scala-lang.org/blog/2021/10/21/scala-3.1.0-released.html#compatibility-notice.
+  publish / skip := forScalaVersions { case (3, x) if x > 0 => true; case _ => false }.value
   // format: on
 )
 
@@ -119,7 +123,7 @@ lazy val commonSettings = Seq(
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val versionNumber = CrossVersion.partialVersion(scalaVersion.value)
-    val expectedVersions = Seq(scala212, scala213, scala3).flatMap(CrossVersion.partialVersion)
+    val expectedVersions = Seq(scala212, scala213, scala30, scala31).flatMap(CrossVersion.partialVersion)
     expectedVersions.flatMap { case v @ (major, minor) =>
       List(
         if (versionNumber.exists(_ <= v)) unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor-") }
