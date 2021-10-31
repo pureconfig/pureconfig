@@ -10,7 +10,7 @@ ThisBuild / organization := "com.github.pureconfig"
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
 lazy val core = (project in file("core"))
-  .enablePlugins(BoilerplatePlugin, SbtOsgi)
+  .enablePlugins(BoilerplatePlugin)
   .settings(commonSettings)
 
 lazy val testkit = (project in file("testkit"))
@@ -24,7 +24,7 @@ lazy val tests = (project in file("tests"))
 
 // aggregates pureconfig-core and pureconfig-generic with the original "pureconfig" name
 lazy val bundle = (project in file("bundle"))
-  .enablePlugins(SbtOsgi, ModuleMdocPlugin)
+  .enablePlugins(ModuleMdocPlugin)
   .settings(commonSettings, mdocOut := file("."))
   .dependsOn(core, generic)
 
@@ -34,7 +34,6 @@ lazy val docs = (project in file("docs"))
   .dependsOn(bundle)
 
 def genericModule(proj: Project) = proj
-  .enablePlugins(SbtOsgi)
   .dependsOn(core)
   .dependsOn(testkit % "test")
   .settings(commonSettings)
