@@ -15,12 +15,3 @@ mdocLibraryDependencies ++= Seq(
 developers := List(
   Developer("himanshu4141", "Himanshu Yadav", "himanshu4141@gmail.com", url("https://github.com/himanshu4141"))
 )
-
-osgiSettings
-
-OsgiKeys.exportPackage := Seq("pureconfig.module.akkahttp.*")
-OsgiKeys.privatePackage := Seq()
-OsgiKeys.importPackage := Seq(
-  s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""",
-  "*"
-)

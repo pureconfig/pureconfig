@@ -14,12 +14,3 @@ libraryDependencies ++= Seq(
 developers := List(
   Developer("moradology", "Nathan Zimmerman", "npzimmerman@gmail.com", url("https://github.com/moradology"))
 )
-
-osgiSettings
-
-OsgiKeys.exportPackage := Seq("pureconfig.module.circe.*")
-OsgiKeys.privatePackage := Seq()
-OsgiKeys.importPackage := Seq(
-  s"""scala.*;version="[${scalaBinaryVersion.value}.0,${scalaBinaryVersion.value}.50)"""",
-  "*"
-)
