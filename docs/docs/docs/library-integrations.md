@@ -20,6 +20,7 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 - [`pureconfig-fs2`](https://github.com/pureconfig/pureconfig/tree/master/modules/fs2) provides support for reading configuration from and writing to [fs2](https://github.com/functional-streams-for-scala/fs2/) streams;
 - [`pureconfig-hadoop`](https://github.com/pureconfig/pureconfig/tree/master/modules/hadoop) provides converters for [Hadoop](http://hadoop.apache.org//) types;
 - [`pureconfig-http4s`](https://github.com/pureconfig/pureconfig/tree/master/modules/http4s) provides converters for [Http4s](http://http4s.org/) types;
+- [`pureconfig-ip4s`](https://github.com/pureconfig/pureconfig/tree/master/modules/ip4s) provides converters for [Ip4s](https://github.com/Comcast/ip4s) types;
 - [`pureconfig-javax`](https://github.com/pureconfig/pureconfig/tree/master/modules/javax) provides converters for classes in `javax` packages;
 - [`pureconfig-joda`](https://github.com/pureconfig/pureconfig/tree/master/modules/joda) provides configurable converters for [Joda-Time](http://www.joda.org/joda-time/) types;
 - [`pureconfig-magnolia`](https://github.com/pureconfig/pureconfig/tree/master/modules/magnolia) provides an alternative way to derive readers and writers for case classes and sealed traits using [Magnolia](https://propensive.com/opensource/magnolia);
