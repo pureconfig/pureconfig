@@ -72,12 +72,12 @@ package object catseffect2 {
       options: ConfigRenderOptions = ConfigRenderOptions.defaults()
   )(implicit F: Sync[F]): F[Unit] = {
     val fileAlreadyExists =
-      F.raiseError(
+      F.raiseError[Unit](
         new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it already exists")
       )
 
     val fileIsDirectory =
-      F.raiseError(
+      F.raiseError[Unit](
         new IllegalArgumentException(s"Cannot save configuration in file '$outputPath' because it is a directory")
       )
 
