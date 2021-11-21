@@ -1,3 +1,10 @@
+### 0.17.1 (Nov 21, 2021)
+
+- New features
+  - Added a new `ensure` combinator to `ConfigReader`;
+  - Added a new `pureconfig-spark` module with relevant `ConfigReader`s and `ConfigWriter`s for Spark types;
+  - Added a new `pureconfig-ip4s` module with relevant `ConfigReader`s and `ConfigWriter`s for ip4s types.
+
 ### 0.17.0 (Oct 2, 2021)
 
 - Breaking changes
@@ -33,7 +40,7 @@ Support for Scala 2.11 was dropped and support for Scala 3.0 (RC1) was introduce
 
 - Breaking changes
   - Cursors are now backed up by `Option[ConfigValue]` instead of `ConfigValue`. Code accessing the `value` of a cursor
-    should use `valueOpt` instead (with `None` replacing `null` in undefined values). 
+    should use `valueOpt` instead (with `None` replacing `null` in undefined values).
 
 ### 0.13.0 (Jun 27, 2020)
 
