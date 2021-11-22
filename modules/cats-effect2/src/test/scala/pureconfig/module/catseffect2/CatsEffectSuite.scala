@@ -16,14 +16,11 @@ import pureconfig.{BaseSuite, ConfigReader, ConfigSource, ConfigWriter}
 final class CatsEffectSuite extends BaseSuite {
 
   case class SomeCaseClass(somefield: Int, anotherfield: String)
-  object SomeCaseClass {
-    def unapply(c: SomeCaseClass): Option[(Int, String)] = Some((c.somefield, c.anotherfield))
-  }
 
   implicit val reader: ConfigReader[SomeCaseClass] =
     ConfigReader.forProduct2("somefield", "anotherfield")(SomeCaseClass.apply)
   implicit val writer: ConfigWriter[SomeCaseClass] =
-    ConfigWriter.forProduct2("somefield", "anotherfield")(SomeCaseClass.unapply(_).get)
+    ConfigWriter.forProduct2("somefield", "anotherfield") { case SomeCaseClass(s, a) => (s, a) }
 
   private val blocker: Blocker = Blocker.liftExecutorService(Executors.newCachedThreadPool())
 
