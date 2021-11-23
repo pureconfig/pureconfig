@@ -6,7 +6,7 @@ import java.util.concurrent.Executors
 
 import scala.concurrent.ExecutionContext
 
-import cats.effect.{Blocker, IO}
+import cats.effect.{Blocker, ContextShift, IO}
 import com.typesafe.config.ConfigFactory
 
 import pureconfig.error.{ConfigReaderException, ConvertFailure}
@@ -16,14 +16,15 @@ import pureconfig.{BaseSuite, ConfigReader, ConfigSource, ConfigWriter}
 final class CatsEffectSuite extends BaseSuite {
 
   case class SomeCaseClass(somefield: Int, anotherfield: String)
+
   implicit val reader: ConfigReader[SomeCaseClass] =
     ConfigReader.forProduct2("somefield", "anotherfield")(SomeCaseClass.apply)
   implicit val writer: ConfigWriter[SomeCaseClass] =
-    ConfigWriter.forProduct2("somefield", "anotherfield")(SomeCaseClass.unapply(_).get)
+    ConfigWriter.forProduct2("somefield", "anotherfield") { case SomeCaseClass(s, a) => (s, a) }
 
   private val blocker: Blocker = Blocker.liftExecutorService(Executors.newCachedThreadPool())
 
-  private implicit val ioCS = IO.contextShift(ExecutionContext.global)
+  private implicit val ioCS: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   private def getPath(classPathPath: String): Path = {
     val resource = getClass.getClassLoader.getResource(classPathPath)
