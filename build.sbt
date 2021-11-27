@@ -70,6 +70,10 @@ lazy val `zio-config` = module(project) in file("modules/zio-config")
 // Workaround for https://github.com/scalacenter/scalafix/issues/1488
 val scalafixCheckAll = taskKey[Unit]("No-arg alias for 'scalafixAll --check'")
 
+val minScala3Version = settingKey[Option[(Long, Long)]]("Minimal Scala 3 version supported")
+
+Global / excludeLintKeys += minScala3Version
+
 lazy val commonSettings = Seq(
   // format: off
   homepage := Some(url("https://github.com/pureconfig/pureconfig")),
@@ -113,9 +117,21 @@ lazy val commonSettings = Seq(
   Test / publishArtifact := false,
   publishTo := sonatypePublishToBundle.value,
 
-  // Don't publish for Scala 3.1 or later, only for 3.0. This is following the recommendation in
+  // Publish for minimal supported Scala 3 version. There is following the recommendation in
   // https://scala-lang.org/blog/2021/10/21/scala-3.1.0-released.html#compatibility-notice.
-  publish / skip := forScalaVersions { case (3, x) if x > 0 => true; case _ => false }.value
+  // Since, several dependencies breaks this recommendation, we have to do the same for dependent modules.
+  publish / skip := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, x)) => !minScala3Version.value.contains((3, x))
+      case _ => false
+    }
+  },
+
+  minScala3Version := {
+    val scala3CrossVersions = crossScalaVersions.value.flatMap(CrossVersion.partialVersion).filter(_._1 == 3)
+    if (scala3CrossVersions.nonEmpty) Some(scala3CrossVersions.minBy(_._2))
+    else None
+  }
   // format: on
 )
 
