@@ -178,6 +178,7 @@ lazy val lintFlags = forScalaVersions {
 
 // Use the same Scala 2.12 version in the root project as in subprojects
 scalaVersion := scala212
+crossScalaVersions := Seq(scala212)
 
 // do not publish the root project
 publish / skip := true

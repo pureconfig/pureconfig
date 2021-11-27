@@ -52,6 +52,7 @@ object ModuleMdocPlugin extends AutoPlugin {
 
           libraryDependencies ++= (moduleProj / mdocLibraryDependencies).value,
           scalacOptions ++= (moduleProj / mdocScalacOptions).value,
+          crossScalaVersions := Seq(Dependencies.Version.scala212),
 
           publish / skip := true
           // format: on
