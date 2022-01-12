@@ -1,14 +1,14 @@
 package pureconfig
 
-import scala.compiletime.testing.{typeChecks, typeCheckErrors}
+import scala.compiletime.testing.{typeCheckErrors, typeChecks}
 import scala.deriving.Mirror
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
+
 import pureconfig._
-import pureconfig.error.WrongType
+import pureconfig.error.{CannotConvert, WrongType}
 import pureconfig.generic.derivation.{EnumConfigReader, EnumConfigReaderDerivation}
-import pureconfig.error.CannotConvert
 
 enum Color derives EnumConfigReader {
   case RainyBlue, SunnyYellow
