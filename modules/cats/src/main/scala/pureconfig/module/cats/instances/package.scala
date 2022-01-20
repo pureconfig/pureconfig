@@ -70,4 +70,23 @@ package object instances {
 
   implicit val configObjectSourceCatsMonoid: Monoid[ConfigObjectSource] =
     Monoid.instance(ConfigSource.empty, (a, b) => b.withFallback(a))
+
+  // secret
+  private val secretAnyShow: Show[Secret[Any]] =
+    Show.show(_ => Secret.placeHolder)
+
+  implicit def secretShow[T]: Show[Secret[T]] =
+    secretAnyShow.asInstanceOf[Show[Secret[T]]]
+
+  implicit def secretEq[T: Eq]: Eq[Secret[T]] =
+    (x, y) => Eq[T].eqv(x.value, y.value)
+
+  implicit def secretApplicative: Applicative[Secret] =
+    new Applicative[Secret] {
+      override def pure[A](x: A): Secret[A] =
+        Secret(x)
+
+      override def ap[A, B](ff: Secret[A => B])(fa: Secret[A]): Secret[B] =
+        ff.map(f => f(fa.value))
+    }
 }

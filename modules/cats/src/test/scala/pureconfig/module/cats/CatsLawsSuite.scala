@@ -12,6 +12,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.typelevel.discipline.scalatest.FunSuiteDiscipline
 
 import pureconfig._
+import pureconfig.arbitrary._
 import pureconfig.error.ConfigReaderFailures
 import pureconfig.module.cats.arbitrary._
 import pureconfig.module.cats.eq._
@@ -29,4 +30,6 @@ class CatsLawsSuite extends AnyFunSuite with ScalaCheckDrivenPropertyChecks with
   checkAll("Config", MonoidTests[Config].monoid)
   checkAll("ConfigReaderFailures", SemigroupTests[ConfigReaderFailures].semigroup)
   checkAll("ConfigObjectSource", MonoidTests[ConfigObjectSource].monoid)
+
+  checkAll("Secret[Int]", ApplicativeTests[Secret].applicative[Int, Int, Int])
 }

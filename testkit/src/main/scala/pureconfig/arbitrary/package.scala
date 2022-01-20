@@ -40,4 +40,6 @@ package object arbitrary {
   implicit val arbYearMonth: Arbitrary[YearMonth] = Arbitrary(genYearMonth)
   implicit val arbZoneId: Arbitrary[ZoneId] = Arbitrary(genZoneId)
   implicit val arbZonedDateTime: Arbitrary[ZonedDateTime] = Arbitrary(genZonedDateTime)
+
+  implicit def arbSecret[T](implicit arb: Arbitrary[T]): Arbitrary[Secret[T]] = Arbitrary(arb.arbitrary.map(Secret(_)))
 }

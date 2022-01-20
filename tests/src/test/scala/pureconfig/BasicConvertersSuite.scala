@@ -148,6 +148,8 @@ class BasicConvertersSuite extends BaseSuite {
 
   checkArbitrary[File]
 
+  checkArbitrary[Secret[Int]]
+
   checkReadWriteString[DayOfWeek]("MONDAY" -> DayOfWeek.MONDAY)
   checkReadWriteString[Month]("JULY" -> Month.JULY)
   checkFailure[DayOfWeek, CannotConvert](

@@ -1,6 +1,5 @@
 package pureconfig.module.circe
 
-import com.typesafe.config.ConfigFactory
 import io.circe._
 import io.circe.literal._
 
