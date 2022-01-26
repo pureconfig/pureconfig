@@ -29,7 +29,7 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
 
-      - name: Check formatting and scalafmt
+      - name: Check formatting
         run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll" scalafmtSbtCheck
 
       - name: Run linter
