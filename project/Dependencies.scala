@@ -4,14 +4,14 @@ object Dependencies {
 
   object Version {
     val scala212 = "2.12.15"
-    val scala213 = "2.13.7"
+    val scala213 = "2.13.8"
     val scala30 = "3.0.2"
     val scala31 = "3.1.0"
 
     val typesafeConfig = "1.4.1"
 
-    val scalaTest = "3.2.10"
-    val scalaTestPlusScalaCheck = "3.2.10.0"
+    val scalaTest = "3.2.11"
+    val scalaTestPlusScalaCheck = "3.2.11.0"
 
     val scalaCheck = "1.15.4"
   }
