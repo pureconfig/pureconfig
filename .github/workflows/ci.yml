@@ -32,9 +32,7 @@ jobs:
       - name: Check formatting
         run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll" scalafmtSbtCheck
 
-        # Consider joining this action with the "Check formatting" one once Scalafix is supported for Scala 3.
       - name: Run linter
-        if: startsWith(matrix.scala, '2')
         run: sbt "++${{ matrix.scala-version }} scalafixCheckAll"
 
       - name: Compile

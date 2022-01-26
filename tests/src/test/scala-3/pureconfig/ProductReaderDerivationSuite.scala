@@ -6,11 +6,11 @@ import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary
-import pureconfig._
+
 import pureconfig.ConfigConvert.catchReadError
-import pureconfig.error.{KeyNotFound, WrongType}
+import pureconfig._
+import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
 import pureconfig.generic.derivation.default.derived
-import pureconfig.error.WrongSizeList
 
 class ProductReaderDerivationSuite extends BaseSuite {
 
