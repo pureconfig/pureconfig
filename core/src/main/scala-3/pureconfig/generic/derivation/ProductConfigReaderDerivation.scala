@@ -2,8 +2,8 @@ package pureconfig
 package generic
 package derivation
 
-import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
 import scala.compiletime.ops.int._
+import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 import scala.util.chaining.*
 

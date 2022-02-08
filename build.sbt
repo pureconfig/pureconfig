@@ -6,8 +6,10 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 ThisBuild / organization := "com.github.pureconfig"
 
-// Enable the OrganizeImports Scalafix rule.
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+// Enable the OrganizeImports Scalafix rule and semanticdb for scalafix.
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
 
 lazy val core = (project in file("core"))
   .enablePlugins(BoilerplatePlugin)
@@ -98,13 +100,7 @@ lazy val commonSettings = Seq(
   Test / console / scalacOptions := (Compile / console / scalacOptions).value,
 
   scalafmtOnCompile := true,
-
-  // We can't use Scalafix in Scala 3 yet.
-  libraryDependencies ++= forScalaVersions {
-    case (2, _) => List(compilerPlugin(scalafixSemanticdb))
-    case _ => List.empty
-  }.value,
-  scalafixOnCompile := forScalaVersions { case (2, _) => true; case _ => false }.value,
+  scalafixOnCompile := true,
   scalafixCheckAll := scalafixAll.toTask(" --check").value,
 
   autoAPIMappings := true,

@@ -3,6 +3,7 @@ package pureconfig
 import scala.language.higherKinds
 
 import com.typesafe.config.ConfigFactory
+
 import pureconfig._
 import pureconfig.error._
 import pureconfig.generic._
