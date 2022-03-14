@@ -20,4 +20,13 @@ package object akkahttp {
     )
 
   implicit val uriWriter: ConfigWriter[Uri] = ConfigWriter[String].contramap(_.toString)
+
+  implicit val pathReader: ConfigReader[Uri.Path] = ConfigReader.fromString(s =>
+    Try(Uri.Path(s)).toEither.left.map {
+      case err: IllegalUriException => CannotConvert(s, "Uri.Path", err.info.summary)
+      case err => ExceptionThrown(err)
+    }
+  )
+
+  implicit val pathWriter: ConfigWriter[Uri.Path] = ConfigWriter[String].contramap(_.toString)
 }
