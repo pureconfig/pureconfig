@@ -6,8 +6,8 @@ name := "pureconfig-circe"
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core" % "0.14.1",
-  "io.circe" %% "circe-literal" % "0.14.1" % Test,
+  "io.circe" %% "circe-core" % "0.14.2",
+  "io.circe" %% "circe-literal" % "0.14.2" % Test,
   "org.typelevel" %% "jawn-parser" % "1.3.2" % Test
 )
 
