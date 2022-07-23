@@ -10,8 +10,10 @@ object Dependencies {
 
     val typesafeConfig = "1.4.2"
 
-    val scalaTest = "3.2.11"
-    val scalaTestPlusScalaCheck = "3.2.11.0"
+    // can't use 3.2.11 because it pulls in scala-xml 2 for Scala 2.12.
+    // See https://github.com/scoverage/sbt-scoverage/issues/439
+    val scalaTest = "3.2.10"
+    val scalaTestPlusScalaCheck = "3.2.10.0"
 
     val scalaCheck = "1.16.0"
   }
