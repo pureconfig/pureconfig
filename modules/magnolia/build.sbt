@@ -8,7 +8,7 @@ libraryDependencies ++= Seq(
   "com.propensive" %% "magnolia" % "0.17.0",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
   // We're using shapeless for illTyped in tests.
-  "com.chuusai" %% "shapeless" % "2.3.8" % Test
+  "com.chuusai" %% "shapeless" % "2.3.9" % Test
 )
 
 developers := List(
