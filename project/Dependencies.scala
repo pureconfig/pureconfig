@@ -13,7 +13,7 @@ object Dependencies {
 
     // can't use 3.2.11+ on Scala 2.12 because it pulls in scala-xml 2.
     // See https://github.com/scoverage/sbt-scoverage/issues/439
-    val scalaTest212 = "3.2.10"
+    val scalaTest212 = "3.2.12"
     val scalaTestPlusScalaCheck212 = "3.2.10.0"
     val scalaTest = "3.2.11"
     val scalaTestPlusScalaCheck = "3.2.11.0"
