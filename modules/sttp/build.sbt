@@ -2,7 +2,7 @@ import Dependencies.Version._
 
 name := "pureconfig-sttp"
 
-crossScalaVersions := Seq(scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213, scala31)
 
 libraryDependencies ++= Seq(
   "com.softwaremill.sttp.model" %% "core" % "1.5.0"
