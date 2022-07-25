@@ -148,7 +148,7 @@ val stringSchemaRes = mySchemaRes2.map(ConfigWriter[MySchema].to(_).render(rende
 //             "nullable" : true
 //         },
 //         {
-//             "data-type" : "STRUCT<`line1`: STRING, `line2`: STRING>",
+//             "data-type" : "STRUCT<line1: STRING, line2: STRING>",
 //             "metadata" : "{}",
 //             "name" : "address",
 //             "nullable" : true
@@ -179,7 +179,7 @@ val myConfigString = ConfigWriter[MyConfig].to(MyConfig(
 //         "name" : "a",
 //         "nullable" : false
 //     },
-//     "obj" : "STRUCT<`b`: STRING>"
+//     "obj" : "STRUCT<b: STRING>"
 // }
 // """
 
@@ -226,7 +226,7 @@ val configRes = ConfigSource.string(
 val stringSchemaRes2 = configRes.map(ConfigWriter[Config].to(_).render(renderOpt))
 // stringSchemaRes2: Either[error.ConfigReaderFailures, String] = Right(
 //   """{
-//     "schema" : "`a` INT,`b` STRING,`c` STRUCT<`c1`: INT, `c2`: DOUBLE>"
+//     "schema" : "a INT,b STRING,c STRUCT<c1: INT, c2: DOUBLE>"
 // }
 // """
 // )
