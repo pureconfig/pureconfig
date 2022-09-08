@@ -23,7 +23,7 @@ The core of PureConfig eschews unnecessary dependencies. Separate modules exist 
 - [`pureconfig-ip4s`](https://github.com/pureconfig/pureconfig/tree/master/modules/ip4s) provides converters for [Ip4s](https://github.com/Comcast/ip4s) types;
 - [`pureconfig-javax`](https://github.com/pureconfig/pureconfig/tree/master/modules/javax) provides converters for classes in `javax` packages;
 - [`pureconfig-joda`](https://github.com/pureconfig/pureconfig/tree/master/modules/joda) provides configurable converters for [Joda-Time](http://www.joda.org/joda-time/) types;
-- [`pureconfig-magnolia`](https://github.com/pureconfig/pureconfig/tree/master/modules/magnolia) provides an alternative way to derive readers and writers for case classes and sealed traits using [Magnolia](https://propensive.com/opensource/magnolia);
+- [`pureconfig-magnolia`](https://github.com/pureconfig/pureconfig/tree/master/modules/magnolia) provides an alternative way to derive readers and writers for case classes and sealed traits using [Magnolia](https://github.com/softwaremill/magnolia);
 - [`pureconfig-scala-xml`](https://github.com/pureconfig/pureconfig/tree/master/modules/scala-xml) provides support for XML via [scala-xml](https://github.com/scala/scala-xml);
 - [`pureconfig-scalaz`](https://github.com/pureconfig/pureconfig/tree/master/modules/scalaz) provides converters for [Scalaz](https://github.com/scalaz/scalaz) data structures and Scalaz typeclass instances;
 - [`pureconfig-squants`](https://github.com/pureconfig/pureconfig/tree/master/modules/squants) provides converters for [Squants](http://www.squants.com/)'s beautiful types representing units of measure;
