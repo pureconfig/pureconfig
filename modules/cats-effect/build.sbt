@@ -3,7 +3,7 @@ import Utilities._
 
 name := "pureconfig-cats-effect"
 
-crossScalaVersions := Seq(scala212, scala213, scala31)
+crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-effect" % "3.3.14"
