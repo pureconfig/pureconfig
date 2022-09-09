@@ -6,7 +6,7 @@ crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.6.20" % "provided",
-  "com.typesafe.akka" %% "akka-http" % "10.2.9"
+  "com.typesafe.akka" %% "akka-http" % "10.2.10"
 )
 mdocLibraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.6.20"
