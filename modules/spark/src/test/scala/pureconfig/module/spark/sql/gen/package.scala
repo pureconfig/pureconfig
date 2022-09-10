@@ -54,7 +54,7 @@ package object gen {
 
   def genStructField(tGen: Gen[DataType]): Gen[StructField] =
     for {
-      n <- Gen.nonEmptyBuildableOf[String, Char](Gen.oneOf(Gen.alphaLowerChar, Gen.alphaNumChar, Gen.const('_')))
+      n <- Gen.identifier
       t <- tGen
     } yield StructField(n, t)
 

@@ -122,7 +122,7 @@ lazy val commonSettings = Seq(
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val versionNumber = CrossVersion.partialVersion(scalaVersion.value)
-    val expectedVersions = Seq(scala212, scala213, scala31).flatMap(CrossVersion.partialVersion)
+    val expectedVersions = Seq(scala212, scala213, scala3).flatMap(CrossVersion.partialVersion)
     expectedVersions.flatMap { case v @ (major, minor) =>
       List(
         if (versionNumber.exists(_ <= v)) unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor-") }
