@@ -11,6 +11,11 @@ ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
 
+// taken from https://github.com/scala/bug/issues/12632
+ThisBuild / libraryDependencySchemes ++= Seq(
+  "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+)
+
 lazy val core = (project in file("core"))
   .enablePlugins(BoilerplatePlugin)
   .settings(commonSettings)
