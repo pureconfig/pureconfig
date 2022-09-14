@@ -4,7 +4,7 @@ name := "pureconfig-yaml"
 
 crossScalaVersions := Seq(scala212, scala213)
 
-libraryDependencies ++= Seq("org.yaml" % "snakeyaml" % "1.31")
+libraryDependencies ++= Seq("org.yaml" % "snakeyaml" % "1.32")
 
 developers := List(
   Developer("ruippeixotog", "Rui Gonçalves", "ruippeixotog@gmail.com", url("https://github.com/ruippeixotog"))
