@@ -91,6 +91,7 @@ import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.generic.ProductHint
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
 ```
@@ -133,6 +134,7 @@ import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.generic.ProductHint
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 case class Holiday(where: String = "last resort", howLong: Duration = 7 days)
 ```
