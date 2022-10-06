@@ -23,6 +23,20 @@ trait CollectionReaders {
       }
     }
 
+  implicit def eitherReader[A, B](implicit convA: ConfigReader[A], convB: ConfigReader[B]): ConfigReader[Either[A, B]] =
+    new ConfigReader[Either[A, B]] {
+      override def from(cur: ConfigCursor): ConfigReader.Result[Either[A, B]] = {
+        convA.from(cur) match {
+          case Left(aErr) ⇒
+            convB.from(cur) match {
+              case Left(bErr) ⇒ Left(aErr ++ bErr)
+              case Right(bType) ⇒ Right(Right[A, B](bType))
+            }
+          case Right(aType) ⇒ Right(Left[A, B](aType))
+        }
+      }
+    }
+
   implicit def traversableReader[A, F[A] <: TraversableOnce[A]](implicit
       configConvert: ConfigReader[A],
       cbf: FactoryCompat[A, F[A]]

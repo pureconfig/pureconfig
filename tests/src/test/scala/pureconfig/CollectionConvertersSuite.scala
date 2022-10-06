@@ -59,4 +59,19 @@ class CollectionConvertersSuite extends BaseSuite {
   checkArbitrary[Option[Int]]
 
   checkArbitrary[Array[Int]]
+
+  checkArbitrary[Either[String, List[String]]]
+
+  checkFailures[Either[String, List[String]]](
+    // Wrong object types return errors for both branches
+    ConfigFactory.parseString("{a = b}").root() -> ConfigReaderFailures(
+      ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.STRING)), stringConfigOrigin(1), ""),
+      ConvertFailure(WrongType(ConfigValueType.OBJECT, Set(ConfigValueType.LIST)), stringConfigOrigin(1), "")
+    )
+  )
+
+  checkWrite[Either[String, List[String]]](
+    Left[String, List[String]]("foo") -> ConfigValueFactory.fromAnyRef("foo"),
+    Right[String, List[String]](List("a", "b", "c")) -> ConfigValueFactory.fromAnyRef(List("a", "b", "c").asJava)
+  )
 }
