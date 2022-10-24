@@ -2,7 +2,7 @@ import Dependencies.Version._
 
 name := "pureconfig-fs2"
 
-crossScalaVersions := Seq(scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(
   "co.fs2" %% "fs2-core" % "3.3.0",
