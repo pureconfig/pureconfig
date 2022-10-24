@@ -26,7 +26,9 @@ class fs2Suite extends AnyFlatSpec with Matchers {
   implicit val reader: ConfigReader[SomeCaseClass] =
     ConfigReader.forProduct2("somefield", "anotherfield")(SomeCaseClass.apply)
   implicit val writer: ConfigWriter[SomeCaseClass] =
-    ConfigWriter.forProduct2("somefield", "anotherfield")(SomeCaseClass.unapply(_).get)
+    ConfigWriter.forProduct2("somefield", "anotherfield") { case x @ SomeCaseClass(_, _) =>
+      x
+    }
 
   "streamConfig" should "load a case class from a byte stream" in {
 
