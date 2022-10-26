@@ -3,7 +3,7 @@ import Utilities._
 
 name := "pureconfig-cats"
 
-crossScalaVersions := Seq(scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "2.8.0",
