@@ -114,11 +114,6 @@ lazy val commonSettings = Seq(
   publishMavenStyle := true,
   Test / publishArtifact := false,
   publishTo := sonatypePublishToBundle.value,
-
-  // Publish only for Scala 3.1 (the oldest Scala 3 version we support), not for any other later version. See
-  // https://scala-lang.org/blog/2021/10/21/scala-3.1.0-released.html#compatibility-notice for details about binary
-  // compatibility.
-  publish / skip := forScalaVersions { case (3, x) if x > 1 => true; case _ => false }.value
   // format: on
 )
 

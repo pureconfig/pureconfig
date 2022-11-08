@@ -6,7 +6,7 @@ set -e
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 WEBSITE_REPO="git@github.com:pureconfig/pureconfig.github.io.git"
-WEBSITE_DIR=$(realpath "docs/target/website")
+WEBSITE_DIR="docs/target/website"
 
 VERSION=$(sed -E 's/ThisBuild \/ version := "([^"]+)"/\1/' < version.sbt)
 COMMIT_MESSAGE="Update website for version $VERSION"
