@@ -62,6 +62,7 @@ lazy val generic = genericModule(project) in file("modules/generic") dependsOn `
 lazy val `generic-base` = genericModule(project) in file("modules/generic-base")
 lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s") dependsOn ip4s
+lazy val http4s022 = module(project) in file("modules/http4s022")
 lazy val ip4s = module(project) in file("modules/ip4s")
 lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")
