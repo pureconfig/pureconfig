@@ -1,3 +1,8 @@
+### 0.17.2 (Nov 7, 2022)
+
+- New features
+  - Added Scala 3 support for several modules.
+
 ### 0.17.1 (Nov 21, 2021)
 
 - New features

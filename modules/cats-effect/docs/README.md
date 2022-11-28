@@ -35,7 +35,7 @@ import cats.effect.unsafe.implicits._
 case class MyConfig(somefield: Int, anotherfield: String)
 
 def load: IO[MyConfig] = {
-  ConfigSource.file(somePath).loadF[IO, MyConfig]
+  ConfigSource.file(somePath).loadF[IO, MyConfig]()
 }
 ```
 

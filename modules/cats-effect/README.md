@@ -7,7 +7,7 @@ Adds support for loading configuration using [cats-effect](https://github.com/ty
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.17.1"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.17.2"
 ```
 
 ## Example
@@ -27,7 +27,7 @@ import cats.effect.unsafe.implicits._
 case class MyConfig(somefield: Int, anotherfield: String)
 
 def load: IO[MyConfig] = {
-  ConfigSource.file(somePath).loadF[IO, MyConfig]
+  ConfigSource.file(somePath).loadF[IO, MyConfig]()
 }
 ```
 
