@@ -99,8 +99,8 @@ jobs:
         run: >
           htmlproofer
           --allow-hash-href
-          --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
-          --url-ignore "/search.maven.org/"
+          --swap-urls "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
+          --ignore-urls "/search.maven.org/"
           docs/target/site
 
   diff_website:
