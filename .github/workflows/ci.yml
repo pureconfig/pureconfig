@@ -79,12 +79,12 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0
+          ruby-version: 3.1
 
       - name: Install dependencies
         run: >
           sudo apt install libxslt-dev &&
-          gem install sass jekyll:4.2.1 html-proofer:3.19.0
+          gem install sass jekyll:4.3.1 html-proofer:5.0.3
 
       - name: Build website
         run: sbt makeMicrosite
@@ -93,8 +93,8 @@ jobs:
         run: >
           htmlproofer
           --allow-hash-href
-          --url-swap "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
-          --url-ignore "/search.maven.org/"
+          --swap-urls "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
+          --ignore-urls "/search.maven.org/"
           docs/target/site
 
   diff_website:
@@ -114,10 +114,10 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0
+          ruby-version: 3.1
 
       - name: Install dependencies
-        run: gem install sass jekyll:4.2.1
+        run: gem install sass jekyll:4.3.1
 
       - name: Build and compare website
         id: diff_website
