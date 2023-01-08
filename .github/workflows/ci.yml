@@ -90,7 +90,7 @@ jobs:
       - name: Install dependencies
         run: >
           sudo apt install libxslt-dev &&
-          gem install sass jekyll:4.3.1 html-proofer:5.0.3
+          gem install sass jekyll:4.2.1 html-proofer:5.0.3
 
       - name: Build website
         run: sbt makeMicrosite
