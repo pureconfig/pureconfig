@@ -3,22 +3,22 @@ package pureconfig.module.magnolia
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
-import _root_.magnolia._
+import _root_.magnolia1._
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 
 import pureconfig._
 import pureconfig.generic.{CoproductHint, ProductHint}
 
-/** An object containing Magnolia `combine` and `dispatch` methods to generate `ConfigWriter` instances.
+/** An object containing Magnolia `join` and `split` methods to generate `ConfigWriter` instances.
   */
 object MagnoliaConfigWriter {
 
-  def combine[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] =
-    if (ctx.typeName.full.startsWith("scala.Tuple")) combineTuple(ctx)
-    else if (ctx.isValueClass) combineValueClass(ctx)
-    else combineCaseClass(ctx)
+  def join[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] =
+    if (ctx.typeName.full.startsWith("scala.Tuple")) joinTuple(ctx)
+    else if (ctx.isValueClass) joinValueClass(ctx)
+    else joinCaseClass(ctx)
 
-  private def combineCaseClass[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] =
+  private def joinCaseClass[A](ctx: CaseClass[ConfigWriter, A])(implicit hint: ProductHint[A]): ConfigWriter[A] =
     new ConfigWriter[A] {
       def to(a: A): ConfigValue = {
         val fieldValues = ctx.parameters.map { param =>
@@ -34,22 +34,22 @@ object MagnoliaConfigWriter {
       }
     }
 
-  private def combineTuple[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =
+  private def joinTuple[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =
     new ConfigWriter[A] {
       override def to(a: A): ConfigValue =
         ConfigValueFactory.fromIterable(ctx.parameters.map { param => param.typeclass.to(param.dereference(a)) }.asJava)
     }
 
-  private def combineValueClass[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =
+  private def joinValueClass[A](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =
     new ConfigWriter[A] {
       override def to(a: A): ConfigValue =
         ctx.parameters.map { param => param.typeclass.to(param.dereference(a)) }.head
     }
 
-  def dispatch[A: ClassTag](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] =
+  def split[A: ClassTag](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] =
     new ConfigWriter[A] {
       def to(a: A): ConfigValue =
-        ctx.dispatch(a) { subtype =>
+        ctx.split(a) { subtype =>
           hint.to(subtype.typeclass.to(subtype.cast(a)), subtype.typeName.short)
         }
     }
