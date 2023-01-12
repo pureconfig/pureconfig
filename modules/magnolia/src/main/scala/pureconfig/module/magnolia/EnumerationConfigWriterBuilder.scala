@@ -3,7 +3,7 @@ package pureconfig.module.magnolia
 import scala.language.experimental.macros
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
-import magnolia._
+import magnolia1._
 
 import pureconfig.ConfigWriter
 
@@ -20,7 +20,7 @@ private[magnolia] trait EnumerationConfigWriterBuilder[A] {
 object EnumerationConfigWriterBuilder {
   type Typeclass[A] = EnumerationConfigWriterBuilder[A]
 
-  def combine[A](ctx: CaseClass[EnumerationConfigWriterBuilder, A]): EnumerationConfigWriterBuilder[A] =
+  def join[A](ctx: CaseClass[EnumerationConfigWriterBuilder, A]): EnumerationConfigWriterBuilder[A] =
     new EnumerationConfigWriterBuilder[A] {
       def build(transformName: String => String): ConfigWriter[A] =
         new ConfigWriter[A] {
@@ -28,12 +28,12 @@ object EnumerationConfigWriterBuilder {
         }
     }
 
-  def dispatch[A](ctx: SealedTrait[EnumerationConfigWriterBuilder, A]): EnumerationConfigWriterBuilder[A] =
+  def split[A](ctx: SealedTrait[EnumerationConfigWriterBuilder, A]): EnumerationConfigWriterBuilder[A] =
     new EnumerationConfigWriterBuilder[A] {
       def build(transformName: String => String): ConfigWriter[A] =
         new ConfigWriter[A] {
           def to(a: A): ConfigValue =
-            ctx.dispatch(a)(subtype => subtype.typeclass.build(transformName).to(subtype.cast(a)))
+            ctx.split(a)(subtype => subtype.typeclass.build(transformName).to(subtype.cast(a)))
         }
     }
 

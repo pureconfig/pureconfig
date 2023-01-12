@@ -3,7 +3,7 @@ package pureconfig.module.magnolia.semiauto
 import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
-import magnolia._
+import magnolia1._
 
 import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.{EnumerationConfigWriterBuilder, MagnoliaConfigWriter}
@@ -15,11 +15,11 @@ import pureconfig.{ConfigFieldMapping, ConfigWriter, KebabCase, PascalCase}
 object writer {
   type Typeclass[A] = ConfigWriter[A]
 
-  def combine[A: ProductHint](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =
-    MagnoliaConfigWriter.combine(ctx)
+  def join[A: ProductHint](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =
+    MagnoliaConfigWriter.join(ctx)
 
-  def dispatch[A: ClassTag: CoproductHint](ctx: SealedTrait[ConfigWriter, A]): ConfigWriter[A] =
-    MagnoliaConfigWriter.dispatch(ctx)
+  def split[A: ClassTag: CoproductHint](ctx: SealedTrait[ConfigWriter, A]): ConfigWriter[A] =
+    MagnoliaConfigWriter.split(ctx)
 
   def deriveWriter[A]: ConfigWriter[A] = macro Magnolia.gen[A]
 

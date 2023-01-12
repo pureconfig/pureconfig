@@ -2,7 +2,7 @@ package pureconfig.module.magnolia.auto
 
 import scala.language.experimental.macros
 
-import magnolia._
+import magnolia1._
 
 import pureconfig.generic.{CoproductHint, ProductHint}
 import pureconfig.module.magnolia.{ExportedMagnolia, MagnoliaConfigReader}
@@ -14,11 +14,11 @@ import pureconfig.{ConfigReader, Exported}
 object reader {
   type Typeclass[A] = ConfigReader[A]
 
-  def combine[A: ProductHint](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] =
-    MagnoliaConfigReader.combine(ctx)
+  def join[A: ProductHint](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] =
+    MagnoliaConfigReader.join(ctx)
 
-  def dispatch[A: CoproductHint](ctx: SealedTrait[ConfigReader, A]): ConfigReader[A] =
-    MagnoliaConfigReader.dispatch(ctx)
+  def split[A: CoproductHint](ctx: SealedTrait[ConfigReader, A]): ConfigReader[A] =
+    MagnoliaConfigReader.split(ctx)
 
   implicit def exportReader[A]: Exported[ConfigReader[A]] = macro ExportedMagnolia.exportedMagnolia[ConfigReader, A]
 }

@@ -3,7 +3,7 @@ package pureconfig.module.magnolia
 import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
-import magnolia._
+import magnolia1._
 
 import pureconfig.ConfigReader.Result
 import pureconfig.error.CannotConvert
@@ -23,7 +23,7 @@ private[magnolia] trait EnumerationConfigReaderBuilder[A] {
 object EnumerationConfigReaderBuilder {
   type Typeclass[A] = EnumerationConfigReaderBuilder[A]
 
-  def combine[A](
+  def join[A](
       ctx: CaseClass[EnumerationConfigReaderBuilder, A]
   )(implicit ct: ClassTag[A]): EnumerationConfigReaderBuilder[A] =
     new EnumerationConfigReaderBuilder[A] {
@@ -44,7 +44,7 @@ object EnumerationConfigReaderBuilder {
         }
     }
 
-  def dispatch[A](ctx: SealedTrait[EnumerationConfigReaderBuilder, A]): EnumerationConfigReaderBuilder[A] =
+  def split[A](ctx: SealedTrait[EnumerationConfigReaderBuilder, A]): EnumerationConfigReaderBuilder[A] =
     new EnumerationConfigReaderBuilder[A] {
       def build(transformName: String => String): ConfigReader[A] =
         new ConfigReader[A] {
