@@ -1,6 +1,6 @@
 package pureconfig.module.magnolia
 
-import _root_.magnolia._
+import _root_.magnolia1._
 
 import pureconfig._
 import pureconfig.error.{ConfigReaderFailures, KeyNotFound, WrongSizeList}
@@ -8,16 +8,16 @@ import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.error.InvalidCoproductOption
 import pureconfig.generic.{CoproductHint, ProductHint}
 
-/** An object containing Magnolia `combine` and `dispatch` methods to generate `ConfigReader` instances.
+/** An object containing Magnolia `join` and `split` methods to generate `ConfigReader` instances.
   */
 object MagnoliaConfigReader {
 
-  def combine[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] =
-    if (ctx.typeName.full.startsWith("scala.Tuple")) combineTuple(ctx)
-    else if (ctx.isValueClass) combineValueClass(ctx)
-    else combineCaseClass(ctx)
+  def join[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] =
+    if (ctx.typeName.full.startsWith("scala.Tuple")) joinTuple(ctx)
+    else if (ctx.isValueClass) joinValueClass(ctx)
+    else joinCaseClass(ctx)
 
-  private def combineCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] =
+  private def joinCaseClass[A](ctx: CaseClass[ConfigReader, A])(implicit hint: ProductHint[A]): ConfigReader[A] =
     new ConfigReader[A] {
       def from(cur: ConfigCursor): ConfigReader.Result[A] = {
         cur.asObjectCursor.flatMap { objCur =>
@@ -45,7 +45,7 @@ object MagnoliaConfigReader {
       }
     }
 
-  private def combineTuple[A: ProductHint](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] =
+  private def joinTuple[A: ProductHint](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] =
     new ConfigReader[A] {
       def from(cur: ConfigCursor): ConfigReader.Result[A] = {
         val collCur = cur.asListCursor
@@ -54,7 +54,7 @@ object MagnoliaConfigReader {
           .flatMap(failure => cur.asObjectCursor.map(Left.apply).left.map(_ => failure))
 
         collCur.flatMap {
-          case Left(objCur) => combineCaseClass(ctx).from(objCur)
+          case Left(objCur) => joinCaseClass(ctx).from(objCur)
           case Right(listCur) =>
             if (listCur.size != ctx.parameters.length) {
               cur.failed(WrongSizeList(ctx.parameters.length, listCur.size))
@@ -68,13 +68,13 @@ object MagnoliaConfigReader {
       }
     }
 
-  private def combineValueClass[A](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] =
+  private def joinValueClass[A](ctx: CaseClass[ConfigReader, A]): ConfigReader[A] =
     new ConfigReader[A] {
       def from(cur: ConfigCursor): ConfigReader.Result[A] =
         ctx.constructMonadic[ConfigReader.Result, Param[ConfigReader, A]#PType](_.typeclass.from(cur))
     }
 
-  def dispatch[A](ctx: SealedTrait[ConfigReader, A])(implicit hint: CoproductHint[A]): ConfigReader[A] =
+  def split[A](ctx: SealedTrait[ConfigReader, A])(implicit hint: CoproductHint[A]): ConfigReader[A] =
     new ConfigReader[A] {
       def from(cur: ConfigCursor): ConfigReader.Result[A] = {
         def readerFor(option: String) =
@@ -87,7 +87,7 @@ object MagnoliaConfigReader {
               case None => ConfigReader.Result.fail[A](cur.failureFor(InvalidCoproductOption(option)))
             }
 
-          case CoproductHint.Attempt(cur, options, combineF) =>
+          case CoproductHint.Attempt(cur, options, joinF) =>
             val initial: Either[Vector[(String, ConfigReaderFailures)], A] = Left(Vector.empty)
             val res = options.foldLeft(initial) { (curr, option) =>
               curr.left.flatMap { currentFailures =>
@@ -101,7 +101,7 @@ object MagnoliaConfigReader {
                 }
               }
             }
-            res.left.map(combineF)
+            res.left.map(joinF)
         }
       }
     }
