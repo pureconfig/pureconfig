@@ -11,47 +11,47 @@ import pureconfig.error.CannotConvert
 
 package object enumeratum {
 
-  implicit def enumeratumConfigConvert[A <: EnumEntry](implicit enum: Enum[A], ct: ClassTag[A]): ConfigConvert[A] =
-    viaNonEmptyStringOpt[A](enum.withNameOption, _.entryName)
+  implicit def enumeratumConfigConvert[A <: EnumEntry](implicit e: Enum[A], ct: ClassTag[A]): ConfigConvert[A] =
+    viaNonEmptyStringOpt[A](e.withNameOption, _.entryName)
 
   implicit def enumeratumIntConfigConvert[A <: IntEnumEntry](implicit
-      enum: IntEnum[A],
+      e: IntEnum[A],
       ct: ClassTag[A]
   ): ConfigConvert[A] =
-    viaNonEmptyStringOpt[A](v => enum.withValueOpt(v.toInt), _.value.toString)
+    viaNonEmptyStringOpt[A](v => e.withValueOpt(v.toInt), _.value.toString)
 
   implicit def enumeratumLongConfigConvert[A <: LongEnumEntry](implicit
-      enum: LongEnum[A],
+      e: LongEnum[A],
       ct: ClassTag[A]
   ): ConfigConvert[A] =
-    viaNonEmptyStringOpt[A](v => enum.withValueOpt(v.toLong), _.value.toString)
+    viaNonEmptyStringOpt[A](v => e.withValueOpt(v.toLong), _.value.toString)
 
   implicit def enumeratumShortConfigConvert[A <: ShortEnumEntry](implicit
-      enum: ShortEnum[A],
+      e: ShortEnum[A],
       ct: ClassTag[A]
   ): ConfigConvert[A] =
-    viaNonEmptyStringOpt[A](v => enum.withValueOpt(v.toShort), _.value.toString)
+    viaNonEmptyStringOpt[A](v => e.withValueOpt(v.toShort), _.value.toString)
 
   implicit def enumeratumStringConfigConvert[A <: StringEnumEntry](implicit
-      enum: StringEnum[A],
+      e: StringEnum[A],
       ct: ClassTag[A]
   ): ConfigConvert[A] =
-    viaStringOpt[A](v => enum.withValueOpt(v), _.value.toString)
+    viaStringOpt[A](v => e.withValueOpt(v), _.value.toString)
 
   implicit def enumeratumByteConfigConvert[A <: ByteEnumEntry](implicit
-      enum: ByteEnum[A],
+      e: ByteEnum[A],
       ct: ClassTag[A]
   ): ConfigConvert[A] =
-    viaNonEmptyStringOpt[A](v => enum.withValueOpt(v.toByte), _.value.toString)
+    viaNonEmptyStringOpt[A](v => e.withValueOpt(v.toByte), _.value.toString)
 
   implicit def enumeratumCharConfigConvert[A <: CharEnumEntry](implicit
-      enum: CharEnum[A],
+      e: CharEnum[A],
       ct: ClassTag[A]
   ): ConfigConvert[A] =
     viaNonEmptyString[A](
       s =>
         ensureOneChar(s) match {
-          case Right(v) => Right(enum.withValue(v))
+          case Right(v) => Right(e.withValue(v))
           case Left(msg) => Left(CannotConvert(s, ct.runtimeClass.getSimpleName, msg))
         },
       _.value.toString
