@@ -23,7 +23,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-ip4s" % "0.17.2"
 
 ## Example
 
-To load an `Host` or a `Port` into a configuration, create a class to hold it:
+To load a `Host` or a `Port` into a configuration, create a class to hold it:
 
 ```scala
 import com.comcast.ip4s._
