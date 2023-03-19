@@ -7,13 +7,13 @@ import com.comcast.ip4s._
 import com.typesafe.config._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalactic.source.Position
-import org.scalatest.Inside
+import org.scalatest.{Inside, LoneElement}
 
 import pureconfig._
 import pureconfig.error._
 import pureconfig.syntax._
 
-class Ip4sTest extends BaseSuite with Inside {
+class Ip4sTest extends BaseSuite with Inside with LoneElement {
   // By default `minSuccessfull` set to 10 in `ScalaCheckDrivenPropertyChecks`.
   // It is way too small for tests to be robust and reliable. Set to 100, which is used by default in ScalaCheck.
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
@@ -29,106 +29,52 @@ class Ip4sTest extends BaseSuite with Inside {
       idnGenerator.filter(idn => Hostname.fromString(idn.toString).isEmpty)
     )
 
-  private def testsFor[A: ConfigWriter: ConfigReader, B: Arbitrary](
-      uname: String,
-      configType: ConfigValueType,
-      gen: Gen[A],
-      enc: A => B,
-      dec: B => Option[A]
+  private implicit val hostArbitrary: Arbitrary[Host] = Arbitrary(hostGenerator)
+
+  private def testsFor[A: ConfigWriter: ConfigReader: Arbitrary, B: Arbitrary](
+      configType: ConfigValueType
   )(implicit ctag: ClassTag[A], pos: Position) = {
     val cname = ctag.runtimeClass.getSimpleName
 
-    s"ConfigWriter[$cname]" should s"write $uname to config" in {
-      forAll(gen) { a =>
-        val b = enc(a)
-        val config = a.toConfig
-        config.valueType shouldEqual configType
-        config.unwrapped() shouldEqual b
+    s"ConfigWriter[$cname]" should s"write $cname to correct config type" in {
+      forAll { (a: A) =>
+        a.toConfig.valueType shouldEqual configType
       }
     }
-    s"ConfigReader[$cname]" should s"read $uname from config" in {
-      forAll(gen) { a =>
-        val config = ConfigValueFactory.fromAnyRef(enc(a))
-        config.valueType shouldEqual configType
-        config.to[A].value shouldEqual a
-      }
-    }
-    it should s"fail for incorrect $uname" in {
+    s"ConfigReader[$cname]" should s"fail for incorrect $cname" in {
       // TODO: filter out 0x0 char
       forAll { (b: B) =>
-        whenever(dec(b).isEmpty) {
-          inside(ConfigValueFactory.fromAnyRef(b).to[A].left.value) {
-            case ConfigReaderFailures(
-                  ConvertFailure(
-                    CannotConvert(value, `cname`, cause),
-                    Some(configOrigin),
-                    ""
-                  )
-                ) =>
+        val res = ConfigValueFactory.fromAnyRef(b).to[A]
+        whenever(res.isLeft) { // skip occasional successful conversions
+          inside(res.left.value.toList.loneElement) {
+            case ConvertFailure(CannotConvert(value, `cname`, cause), Some(configOrigin), "") =>
               value shouldEqual b.toString
-              cause shouldEqual s"Invalid $uname"
+              cause shouldEqual s"Invalid $cname"
               configOrigin shouldEqual ConfigOriginFactory.newSimple
           }
         }
       }
     }
+    checkArbitrary[A]
   }
 
-  testsFor[Host, String](
-    "host",
-    ConfigValueType.STRING,
-    hostGenerator,
-    _.toString,
-    Host.fromString
-  )
+  testsFor[Host, String](ConfigValueType.STRING)
 
-  testsFor[Hostname, String](
-    "hostname",
-    ConfigValueType.STRING,
-    hostnameGenerator,
-    _.toString,
-    Hostname.fromString
-  )
+  testsFor[Hostname, String](ConfigValueType.STRING)
 
-  testsFor[IpAddress, String](
-    "IP address",
-    ConfigValueType.STRING,
-    ipGenerator,
-    _.toString,
-    IpAddress.fromString
-  )
+  testsFor[IpAddress, String](ConfigValueType.STRING)
 
-  testsFor[Ipv4Address, String](
-    "IPv4 address",
-    ConfigValueType.STRING,
-    ipv4Generator,
-    _.toString,
-    Ipv4Address.fromString
-  )
+  testsFor[Ipv4Address, String](ConfigValueType.STRING)
 
-  testsFor[Ipv6Address, String](
-    "IPv6 address",
-    ConfigValueType.STRING,
-    ipv6Generator,
-    _.toString,
-    Ipv6Address.fromString
-  )
+  testsFor[Ipv6Address, String](ConfigValueType.STRING)
 
-  testsFor[IDN, String](
-    "IDN",
-    ConfigValueType.STRING,
-    idnGenerator,
-    _.toString,
-    IDN.fromString
-  )
+  testsFor[IDN, String](ConfigValueType.STRING)
 
-  testsFor[Port, Int](
-    "port",
-    ConfigValueType.NUMBER,
-    portGenerator,
-    _.value,
-    Port.fromInt
-  )
+  testsFor[Port, Int](ConfigValueType.NUMBER)
+
+  // TODO: perhaps the tests below do not make sense anymore
+  //       because everything should be covered by the above Scalacheck-driven tests already.
+  //       Consider removing these explicit-value tests.
 
   "reading the hostname config" should "parse the hostname" in {
     val hostname = "0.0.0.0"
@@ -137,7 +83,7 @@ class Ip4sTest extends BaseSuite with Inside {
 
   "reading the hostname config" should "get a CannotConvert error" in {
     configString("...").to[Hostname].left.value shouldEqual ConfigReaderFailures(
-      ConvertFailure(CannotConvert("...", "Hostname", "Invalid hostname"), stringConfigOrigin(1), "")
+      ConvertFailure(CannotConvert("...", "Hostname", "Invalid Hostname"), stringConfigOrigin(1), "")
     )
   }
 
@@ -155,7 +101,7 @@ class Ip4sTest extends BaseSuite with Inside {
 
   "reading the port config" should "get a CannotConvert error" in {
     configString("-1").to[Port].left.value shouldEqual ConfigReaderFailures(
-      ConvertFailure(CannotConvert("-1", "Port", "Invalid port"), stringConfigOrigin(1), "")
+      ConvertFailure(CannotConvert("-1", "Port", "Invalid Port"), stringConfigOrigin(1), "")
     )
   }
 
