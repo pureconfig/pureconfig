@@ -4,7 +4,7 @@ name := "pureconfig-ip4s"
 
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
-val ip4sVersion = "3.2.0"
+val ip4sVersion = "3.3.0"
 
 libraryDependencies ++= Seq(
   "com.comcast" %% "ip4s-core" % ip4sVersion,
