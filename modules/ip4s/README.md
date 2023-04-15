@@ -18,7 +18,7 @@ PRs adding support for other classes are welcome :)
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-ip4s" % "0.17.2"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-ip4s" % "0.17.3"
 ```
 
 ## Example
