@@ -1,3 +1,7 @@
+### 0.17.3 (Apr 15, 2023)
+
+Maintenance update to update dependency versions.
+
 ### 0.17.2 (Nov 7, 2022)
 
 - New features
