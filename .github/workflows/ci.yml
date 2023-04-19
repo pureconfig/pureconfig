@@ -37,15 +37,9 @@ jobs:
         run: sbt "++${{ matrix.scala-version }} compile"
 
       - name: Run tests
-        run: >
-          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
-            sbt coverage "++${{ matrix.scala-version }} test";
-            else
-            sbt "++${{ matrix.scala-version }} test";
-            fi
+        run: sbt coverage "++${{ matrix.scala-version }} test"
 
       - name: Upload coverage data to Coveralls
-        if: startsWith(matrix.scala, '2')
         run: sbt ++${{ matrix.scala-version }} coverageAggregate coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
