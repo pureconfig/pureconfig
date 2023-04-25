@@ -1,6 +1,6 @@
 import Dependencies.Version._
 
-name := "pureconfig-http4s"
+name := "pureconfig-http4s022"
 
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
