@@ -1,7 +1,5 @@
 import Dependencies.Version._
 
-name := "pureconfig-ip4s"
-
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
 val ip4sVersion = "3.3.0"

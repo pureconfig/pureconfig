@@ -1,6 +1,5 @@
 import Dependencies.Version._
 
-name := "pureconfig-akka"
 
 crossScalaVersions := Seq(scala212, scala213)
 

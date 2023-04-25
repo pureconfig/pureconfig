@@ -1,8 +1,6 @@
 import Dependencies.Version._
 import Utilities._
 
-name := "pureconfig-cats-effect"
-
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(

@@ -1,8 +1,6 @@
 import Dependencies.Version._
 import Utilities._
 
-name := "pureconfig-scala-xml"
-
 crossScalaVersions := Seq(scala212, scala213)
 
 // Scala 2.12 depends on an old version of scala-xml

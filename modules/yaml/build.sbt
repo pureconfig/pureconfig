@@ -1,7 +1,5 @@
 import Dependencies.Version._
 
-name := "pureconfig-yaml"
-
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq("org.yaml" % "snakeyaml" % "2.0")

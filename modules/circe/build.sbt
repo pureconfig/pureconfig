@@ -1,8 +1,6 @@
 import Dependencies.Version._
 import Utilities._
 
-name := "pureconfig-circe"
-
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
