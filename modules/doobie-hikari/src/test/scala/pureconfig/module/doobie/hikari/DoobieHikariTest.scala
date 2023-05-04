@@ -24,6 +24,6 @@ class DoobieHikariTest extends BaseSuite with TypeCheckedTripleEquals {
     res.jdbcUrl should ===(Some("jdbc:postgresql://localhost:5432/postgres?targetServerType=primary&connectTimeout=10"))
     res.driverClassName should ===(Some("org.postgresql.Driver"))
     val config = Config.makeHikariConfig[IO](res).unsafeRunSync()
-    config.validate()
+    noException should be thrownBy config.validate()
   }
 }
