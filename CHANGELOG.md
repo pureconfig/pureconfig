@@ -1,3 +1,7 @@
+### 0.17.4 (May 11, 2023)
+
+Maintenance update to update dependency versions and fix issues with previously published modules.
+
 ### 0.17.3 (Apr 15, 2023)
 
 Maintenance update to update dependency versions.
