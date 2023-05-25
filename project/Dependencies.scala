@@ -15,7 +15,7 @@ object Dependencies {
     val scalaTest212 = "3.2.15"
     val scalaTestPlusScalaCheck212 = "3.2.10.0"
     val scalaTest = "3.2.12"
-    val scalaTestPlusScalaCheck = "3.2.11.0"
+    val scalaTestPlusScalaCheck = "3.2.14.0"
 
     val scalaCheck = "1.17.0"
   }
@@ -29,8 +29,8 @@ object Dependencies {
   }
 
   val scalaTestPlusScalaCheck = forScalaVersions {
-    case (2, 12) => "org.scalatestplus" %% "scalacheck-1-15" % Version.scalaTestPlusScalaCheck212
-    case _ => "org.scalatestplus" %% "scalacheck-1-15" % Version.scalaTestPlusScalaCheck
+    case (2, 12) => "org.scalatestplus" %% "scalacheck-1-16" % Version.scalaTestPlusScalaCheck212
+    case _ => "org.scalatestplus" %% "scalacheck-1-16" % Version.scalaTestPlusScalaCheck
   }
 
   val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
