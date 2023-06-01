@@ -44,6 +44,7 @@ def genericModule(proj: Project) = proj
   .dependsOn(core)
   .dependsOn(testkit % "test")
   .settings(commonSettings)
+  .settings(name := s"pureconfig-${baseDirectory.value.getName}")
 
 def module(proj: Project) = genericModule(proj)
   .enablePlugins(ModuleMdocPlugin)
