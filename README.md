@@ -12,6 +12,7 @@ PureConfig is a Scala library for loading configuration files. It reads [Typesaf
 
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
 
+
 ## Why
 
 Loading configurations has always been a tedious and error-prone procedure. A common way to do it
@@ -33,7 +34,7 @@ To use PureConfig in an existing SBT project with Scala 2.12 or a later version,
 `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.3"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.4"
 ```
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).

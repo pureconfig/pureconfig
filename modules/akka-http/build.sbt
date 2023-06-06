@@ -1,7 +1,5 @@
 import Dependencies.Version._
 
-name := "pureconfig-akka-http"
-
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(

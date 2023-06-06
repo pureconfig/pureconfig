@@ -6,13 +6,13 @@ object Dependencies {
   object Version {
     val scala212 = "2.12.17"
     val scala213 = "2.13.10"
-    val scala3 = "3.2.2"
+    val scala3 = "3.3.0"
 
     val typesafeConfig = "1.4.2"
 
     // can't use 3.2.11+ on Scala 2.12 because it pulls in scala-xml 2.
     // See https://github.com/scoverage/sbt-scoverage/issues/439
-    val scalaTest212 = "3.2.15"
+    val scalaTest212 = "3.2.16"
     val scalaTestPlusScalaCheck212 = "3.2.10.0"
     val scalaTest = "3.2.12"
     val scalaTestPlusScalaCheck = "3.2.11.0"
