@@ -1,8 +1,6 @@
 import Dependencies.Version._
 
-name := "pureconfig-doobie-hikari"
-
-crossScalaVersions := Seq(scala212, scala213, scala3)
+crossScalaVersions := Seq(scala212, scala213)
 
 val doobieVersion = "1.0.0-RC2"
 

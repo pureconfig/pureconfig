@@ -11,7 +11,13 @@ package object hikari {
   implicit lazy val readerTransactionIsolation: ConfigReader[TransactionIsolation] =
     deriveEnumerationReader(ConfigFieldMapping(ScreamingSnakeCase, ScreamingSnakeCase))
 
+  implicit lazy val writerTransactionIsolation: ConfigWriter[TransactionIsolation] =
+    deriveEnumerationWriter(ConfigFieldMapping(ScreamingSnakeCase, ScreamingSnakeCase))
+
   implicit lazy val readerHikari: ConfigReader[Config] =
     deriveReader
+
+  implicit lazy val writerHikari: ConfigWriter[Config] =
+    deriveWriter
 
 }
