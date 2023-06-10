@@ -88,7 +88,7 @@ final class YamlConfigSource private (
       obj match {
         case m: java.util.Map[AnyRef @unchecked, AnyRef @unchecked] =>
           val entries: Iterable[Result[(String, AnyRef)]] = m.asScala.map {
-            case (k: String, v) => aux(v).map { v: AnyRef => k -> v }
+            case (k: String, v) => aux(v).map { (v: AnyRef) => k -> v }
             case (k, _) => Left(ConfigReaderFailures(NonStringKeyFound(k.toString, k.getClass.getSimpleName)))
           }
           Result.sequence(entries).map(_.toMap.asJava)
