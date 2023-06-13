@@ -79,12 +79,12 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1
+          ruby-version: 3.2
 
       - name: Install dependencies
         run: >
           sudo apt install libxslt-dev &&
-          gem install sass jekyll:4.3.1 html-proofer:5.0.3
+          gem install jekyll:4.3.2 html-proofer:5.0.7
 
       - name: Build website
         run: sbt makeMicrosite
@@ -114,10 +114,10 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1
+          ruby-version: 3.2
 
       - name: Install dependencies
-        run: gem install sass jekyll:4.3.1
+        run: gem install jekyll:4.3.2
 
       - name: Build and compare website
         id: diff_website
