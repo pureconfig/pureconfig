@@ -5,9 +5,9 @@ name := "pureconfig-testkit"
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(
-  Dependencies.scalaTest.value,
+  Dependencies.scalaTest,
   Dependencies.scalaCheck,
-  Dependencies.scalaTestPlusScalaCheck.value
+  Dependencies.scalaTestPlusScalaCheck
 )
 
 // This is to avoid a warning due to the intransitive dependency of scalaTestPlusScalaCheck.
