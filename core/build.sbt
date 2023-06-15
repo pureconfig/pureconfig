@@ -4,4 +4,4 @@ name := "pureconfig-core"
 
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
-libraryDependencies += Dependencies.typesafeConfig
+libraryDependencies += "com.typesafe" % "config" % "1.4.2"

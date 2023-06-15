@@ -12,6 +12,7 @@ PureConfig is a Scala library for loading configuration files. It reads [Typesaf
 
 <br clear="right"> <!-- Turn off the wrapping for the logo image. -->
 
+
 ## Why
 
 Loading configurations has always been a tedious and error-prone procedure. A common way to do it
