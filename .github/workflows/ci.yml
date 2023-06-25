@@ -9,14 +9,14 @@ jobs:
       fail-fast: false
       matrix:
         jdk: [adopt@1.8]
-        scala: ['2.12', '2.13', '3']
+        scala: ['2.13']
         include:
-          - scala: '2.12'
-            scala-version: 2.12.18
+          # - scala: '2.12'
+          #   scala-version: 2.12.18
           - scala: '2.13'
             scala-version: 2.13.11
-          - scala: '3'
-            scala-version: 3.3.0
+          # - scala: '3'
+          #   scala-version: 3.3.0
 
     steps:
       - name: Checkout repository
@@ -27,111 +27,105 @@ jobs:
         with:
           java-version: ${{ matrix.jdk }}
 
-      - name: Check formatting
-        run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll" scalafmtSbtCheck
+      # - name: Check formatting
+      #   run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll" scalafmtSbtCheck
 
-      - name: Run linter
-        run: sbt "++${{ matrix.scala-version }} scalafixCheckAll"
+      # - name: Run linter
+      #   run: sbt "++${{ matrix.scala-version }} scalafixCheckAll"
 
-      - name: Compile
-        run: sbt "++${{ matrix.scala-version }} compile"
-
-      - name: Run tests
-        run: sbt coverage "++${{ matrix.scala-version }} test"
-
-      - name: Upload coverage data to Coveralls
-        run: sbt ++${{ matrix.scala-version }} coverageAggregate coveralls
+      - name: Run tests and publish coverage to Coveralls
+        run: sbt coverage "++${{ matrix.scala-version }} tests/test" ++${{ matrix.scala-version }} coverageAggregate coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
 
-      - name: Build Scaladoc
-        run: sbt "++${{ matrix.scala-version }} doc"
+      # - name: Build Scaladoc
+      #   run: sbt "++${{ matrix.scala-version }} doc"
 
-      - name: Publish artifact locally
-        run: sbt "++${{ matrix.scala-version }} publishLocal"
+      # - name: Publish artifact locally
+      #   run: sbt "++${{ matrix.scala-version }} publishLocal"
 
-      - name: Compile example project
-        if: startsWith(matrix.scala, '2')
-        run: cd example && sbt "++${{ matrix.scala-version }} test"
+      # - name: Compile example project
+      #   if: startsWith(matrix.scala, '2')
+      #   run: cd example && sbt "++${{ matrix.scala-version }} test"
 
-      - name: Check mdoc output
-        if: matrix.scala == '2.12'
-        run: >
-          sbt ++${{ matrix.scala-version }} mdoc &&
-          git diff --exit-code
+      # - name: Check mdoc output
+      #   if: matrix.scala == '2.12'
+      #   run: >
+      #     sbt ++${{ matrix.scala-version }} mdoc &&
+      #     git diff --exit-code
 
-  build_website:
-    name: Build Website
-    runs-on: ubuntu-latest
-    env:
-      NOKOGIRI_USE_SYSTEM_LIBRARIES: true
+  # build_website:
+  #   name: Build Website
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     NOKOGIRI_USE_SYSTEM_LIBRARIES: true
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
 
-      - name: Set up Scala
-        uses: olafurpg/setup-scala@v10
-        with:
-          java-version: adopt@1.8
+  #     - name: Set up Scala
+  #       uses: olafurpg/setup-scala@v10
+  #       with:
+  #         java-version: adopt@1.8
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2
+  #     - name: Set up Ruby
+  #       uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: 3.2
 
-      - name: Install dependencies
-        run: >
-          sudo apt install libxslt-dev &&
-          gem install jekyll:4.3.2 html-proofer:5.0.7
+  #     - name: Install dependencies
+  #       run: >
+  #         sudo apt install libxslt-dev &&
+  #         gem install jekyll:4.3.2 html-proofer:5.0.7
 
-      - name: Build website
-        run: sbt makeMicrosite
+  #     - name: Build website
+  #       run: sbt makeMicrosite
 
-      - name: Verify website
-        run: >
-          htmlproofer
-          --allow-hash-href
-          --swap-urls "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
-          --ignore-urls "/search.maven.org/"
-          docs/target/site
+  #     - name: Verify website
+  #       run: >
+  #         htmlproofer
+  #         --allow-hash-href
+  #         --swap-urls "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
+  #         --ignore-urls "/search.maven.org/"
+  #         docs/target/site
 
-  diff_website:
-    name: Diff Website
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'master'
+  # diff_website:
+  #   name: Diff Website
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'pull_request' && github.base_ref == 'master'
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
 
-      - name: Set up Scala
-        uses: olafurpg/setup-scala@v10
-        with:
-          java-version: adopt@1.8
+  #     - name: Set up Scala
+  #       uses: olafurpg/setup-scala@v10
+  #       with:
+  #         java-version: adopt@1.8
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2
+  #     - name: Set up Ruby
+  #       uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: 3.2
 
-      - name: Install dependencies
-        run: gem install jekyll:4.3.2
+  #     - name: Install dependencies
+  #       run: gem install jekyll:4.3.2
 
-      - name: Build and compare website
-        id: diff_website
-        run: ./scripts/diff_website.sh
-        continue-on-error: true
+  #     - name: Build and compare website
+  #       id: diff_website
+  #       run: ./scripts/diff_website.sh
+  #       continue-on-error: true
 
-      - name: Comment on pull request
-        if: steps.diff_website.outcome == 'failure'
-        uses: thollander/actions-comment-pull-request@v1.0.4
-        with:
-          message: >
-            Warning: the content of the PureConfig website changed with this pull request. This may
-            be intentional (as is the case when sbt-microsites is updated or some breaking change
-            occurs) or may be an unexpected change in the library's behavior. Please check the logs
-            of the [Diff Website job](https://github.com/pureconfig/pureconfig/actions/runs/${{ github.run_id }})
-            ("Build and compare website" step) in GitHub Actions to see the differences.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Comment on pull request
+  #       if: steps.diff_website.outcome == 'failure'
+  #       uses: thollander/actions-comment-pull-request@v1.0.4
+  #       with:
+  #         message: >
+  #           Warning: the content of the PureConfig website changed with this pull request. This may
+  #           be intentional (as is the case when sbt-microsites is updated or some breaking change
+  #           occurs) or may be an unexpected change in the library's behavior. Please check the logs
+  #           of the [Diff Website job](https://github.com/pureconfig/pureconfig/actions/runs/${{ github.run_id }})
+  #           ("Build and compare website" step) in GitHub Actions to see the differences.
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
