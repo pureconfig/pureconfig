@@ -5,7 +5,7 @@ crossScalaVersions := Seq(scala212, scala213)
 
 // Scala 2.12 depends on an old version of scala-xml
 libraryDependencies ++= forScalaVersions {
-  case (2, 12) => Seq("org.scala-lang.modules" %% "scala-xml" % "2.1.0")
+  case (2, 12) => Seq("org.scala-lang.modules" %% "scala-xml" % "2.2.0")
   case _ => Seq("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
 }.value
 
