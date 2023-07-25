@@ -92,7 +92,7 @@ jobs:
       - name: Verify website
         run: >
           htmlproofer
-          --allow-hash-href
+          --no-check-external-hash
           --swap-urls "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
           --ignore-urls "/search.maven.org/"
           docs/target/site
