@@ -6,9 +6,9 @@ object Dependencies {
   object Version {
     val scala212 = "2.12.18"
     val scala213 = "2.13.11"
-    val scala3 = "3.3.0"
+    val scala3 = "3.3.1"
 
-    val scalaTest = "3.2.16"
+    val scalaTest = "3.2.17"
     val scalaTestPlusScalaCheck = "3.2.16.0"
     val scalaCheck = "1.17.0"
   }
