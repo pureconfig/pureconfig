@@ -1,7 +1,7 @@
 import Dependencies.Version._
 import Utilities._
 
-crossScalaVersions := Seq(scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % "0.14.6",
