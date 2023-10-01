@@ -7,7 +7,7 @@ import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.derivation.ConfigReaderDerivation
-import pureconfig.generic.derivation.WidenType.widen
+import pureconfig.generic.derivation.Utils._
 
 trait CoproductConfigReaderDerivation(fieldMapping: ConfigFieldMapping, optionField: String) {
   self: ConfigReaderDerivation =>
@@ -33,8 +33,7 @@ trait CoproductConfigReaderDerivation(fieldMapping: ConfigFieldMapping, optionFi
         } yield result
 
       val readers =
-        Labels
-          .transformed[m.MirroredElemLabels](fieldMapping)
+        transformedLabels[A](fieldMapping)
           .zip(deriveForSubtypes[m.MirroredElemTypes, A])
           .toMap
     }
@@ -46,11 +45,5 @@ trait CoproductConfigReaderDerivation(fieldMapping: ConfigFieldMapping, optionFi
     }
 
   inline def deriveForSubtype[A0, A]: ConfigReader[A] =
-    summonFrom {
-      case reader: ConfigReader[A0] =>
-        reader.map(widen[A0, A](_))
-
-      case given Mirror.Of[A0] =>
-        ConfigReader.derived[A0].map(widen[A0, A](_))
-    }
+    summonConfigReader[A0].map(widen[A0, A](_))
 }
