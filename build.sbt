@@ -9,7 +9,6 @@ ThisBuild / organization := "com.github.pureconfig"
 // Enable the OrganizeImports Scalafix rule and semanticdb for scalafix.
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
 
 // taken from https://github.com/scala/bug/issues/12632
 ThisBuild / libraryDependencySchemes ++= Seq(
