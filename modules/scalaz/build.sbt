@@ -3,8 +3,8 @@ import Dependencies.Version._
 crossScalaVersions := Seq(scala212, scala213)
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.3.7",
-  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.7" % "test"
+  "org.scalaz" %% "scalaz-core" % "7.3.8",
+  "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.8" % "test"
 )
 
 mdocScalacOptions += "-Ypartial-unification"
