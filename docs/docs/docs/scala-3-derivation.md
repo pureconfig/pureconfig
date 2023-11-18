@@ -14,8 +14,8 @@ PureConfig has some limited support for derivation of `ConfigReader` instances. 
 extensions must be imported:
 
 ```scala
-import pureconfig._
-import pureconfig.generic.derivation.default._
+import pureconfig.*
+import pureconfig.generic.derivation.default.*
 ```
 
 After that, you can derive `ConfigReader` instances for your config class using a `derives` clause:
@@ -28,6 +28,17 @@ case class BirdConf(canFly: Boolean) extends AnimalConf
 ConfigSource.string("{ type: dog-conf, age: 4 }").load[AnimalConf]
 // val res0: pureconfig.ConfigReader.Result[AnimalConf] = Right(DogConf(4))
 ```
+
+Note, that you can also split the config definition from `ConfigReader` derivation like this:
+```scala
+case class DefaultsConf(list: List[Int] = List(1, 2, 3))
+
+given ConfigReader[DefaultsConf] = ConfigReader.derived
+
+ConfigSource.string("{ }").load[DefaultsConf]
+// val res0: pureconfig.ConfigReader.Result[DefaultsConf] = Right(DefaultsConf(List(1, 2, 3)))
+```
+This might be helpful for cross compiling with Scala 2 by putting derivations code in separate `scala-2` and `scala-3` folders.
 
 Readers for enumerations of objects can also be derived by using `EnumConfigReader` instead:
 

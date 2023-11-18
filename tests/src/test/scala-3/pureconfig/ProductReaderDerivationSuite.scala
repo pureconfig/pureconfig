@@ -114,6 +114,17 @@ class ProductReaderDerivationSuite extends BaseSuite {
     }
   }
 
+  it should "invoke defaults when a key is not in the configuration" in {
+    case class ConfA(a: Int, b: Int = 42) derives ConfigReader
+    case class ConfB[T](i: Int = 1, s: String = "a", l: List[T] = Nil) derives ConfigReader
+
+    val confA = ConfigFactory.parseString("""{ a: 1 }""").root()
+    ConfigReader[ConfA].from(confA).value shouldBe ConfA(1, 42)
+
+    val confB = ConfigFactory.parseString("""{ }""").root()
+    ConfigReader[ConfB[Long]].from(confB).value shouldBe ConfB[Long](1, "a", List.empty[Long])
+  }
+
   it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {
     case class Foo(i: Int)
     case class Bar(foo: Foo)
