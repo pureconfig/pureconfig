@@ -142,6 +142,41 @@ class ProductReaderDerivationSuite extends BaseSuite {
       .value shouldBe SocketConfig(5.seconds, 12.seconds, None, None, None, Some(true), None, None)
   }
 
+  it should "consider default arguments by default" in {
+    case class InnerConf(e: Int, g: Int) derives ConfigReader
+    case class Conf(
+        a: Int,
+        b: String = "default",
+        c: Int = 42,
+        d: InnerConf = InnerConf(43, 44),
+        e: Option[Int] = Some(45)
+    ) derives ConfigReader
+
+    val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava).root()
+    ConfigReader[Conf].from(conf1).value shouldBe Conf(2, "default", 42, InnerConf(43, 44), Some(45))
+
+    val conf2 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50).asJava).root()
+    ConfigReader[Conf].from(conf2).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(45))
+
+    val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava).root()
+    ConfigReader[Conf].from(conf3) should failWith(KeyNotFound("a"))
+
+    val conf4 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5).asJava).root()
+    ConfigReader[Conf].from(conf4) should failWith(KeyNotFound("g"), "d", emptyConfigOrigin)
+
+    val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava).root()
+    ConfigReader[Conf].from(conf5).value shouldBe Conf(2, "default", 42, InnerConf(5, 6), Some(45))
+
+    val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava).root()
+    ConfigReader[Conf].from(conf6) should failWithReason[WrongType]
+
+    val conf7 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> 1).asJava).root()
+    ConfigReader[Conf].from(conf7).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(1))
+
+    val conf8 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> null).asJava).root()
+    ConfigReader[Conf].from(conf8).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), None)
+  }
+
   it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {
     case class Foo(i: Int)
     case class Bar(foo: Foo)

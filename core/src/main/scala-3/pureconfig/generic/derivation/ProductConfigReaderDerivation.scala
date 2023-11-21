@@ -6,7 +6,6 @@ import scala.compiletime.ops.int.*
 import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 import scala.quoted.*
-import scala.util.chaining.*
 
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
 import pureconfig.generic.ProductHint.UseOrDefault
@@ -14,9 +13,6 @@ import pureconfig.generic.derivation.WidenType.widen
 
 trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: ConfigReaderDerivation =>
   inline def derivedProduct[A](using m: Mirror.ProductOf[A], hint: ProductHint[A]): ConfigReader[A] =
-    val tupleSize = summonInline[ValueOf[Tuple.Size[m.MirroredElemTypes]]]
-    val defaults = ProductDerivationMacros.getDefaults[A](tupleSize.value)
-
     inline erasedValue[A] match {
       case _: Tuple =>
         new ConfigReader[A] {
@@ -40,16 +36,13 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
       case _ =>
         new ConfigReader[A] {
           def from(cur: ConfigCursor): ConfigReader.Result[A] =
+            val tupleSize = summonInline[ValueOf[Tuple.Size[m.MirroredElemTypes]]]
+            val defaults = ProductDerivationMacros.getDefaults[A](tupleSize.value)
+
             for {
               objCursor <- cur.asObjectCursor
               labels = Labels.transformed[m.MirroredElemLabels](fieldMapping)
-              result <- readCaseClass[m.MirroredElemTypes, 0, A](
-                objCursor,
-                labels,
-                labels.map(objCursor.atKeyOrUndefined(_)),
-                defaults,
-                hint
-              )
+              result <- readCaseClass[m.MirroredElemTypes, 0, A](objCursor, labels, defaults, hint)
             } yield m.fromProduct(result)
 
         }
@@ -58,42 +51,36 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
   inline def readCaseClass[T <: Tuple, N <: Int, A](
       objCursor: ConfigObjectCursor,
       labels: List[String],
-      cursors: List[ConfigCursor],
       defaults: Vector[Option[Any]],
       hint: ProductHint[A]
   ): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]
-        val cursor = cursors(n)
-        val reader = summonConfigReader[h]
+        lazy val reader = summonConfigReader[h]
         val default = defaults(n)
         val label = labels(n)
         val fieldHint = hint.from(objCursor, label)
 
-        val h =
+        val head =
           (fieldHint, default) match {
             case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
               Right(defaultValue.asInstanceOf[h])
             case (action, _) if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined =>
               reader.from(action.cursor)
             case _ =>
-              cursor.failed(KeyNotFound.forKeys(fieldHint.field, objCursor.keys))
+              objCursor.failed(KeyNotFound.forKeys(fieldHint.field, objCursor.keys))
           }
+        val tail = readCaseClass[t, N + 1, A](objCursor, labels, defaults, hint)
 
-        h -> readCaseClass[t, N + 1, A](objCursor, labels, cursors, defaults, hint) match {
-          case (Right(h), Right(t)) => Right(widen[h *: t, T](h *: t))
-          case (Left(h), Left(t)) => Left(h ++ t)
-          case (_, Left(failures)) => Left(failures)
-          case (Left(failures), _) => Left(failures)
-        }
+        ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
 
       case _: EmptyTuple =>
         Right(widen[EmptyTuple, T](EmptyTuple))
     }
 
   inline def readTuple[T <: Tuple, N <: Int](
-      cursors: List[ConfigCursor],
+      cursors: List[ConfigCursor]
   ): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
@@ -101,14 +88,10 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
         val reader = summonConfigReader[h]
         val cursor = cursors(n)
 
-        val h = reader.from(cursor)
+        val head = reader.from(cursor)
+        val tail = readTuple[t, N + 1](cursors)
 
-        h -> readTuple[t, N + 1](cursors) match {
-          case (Right(h), Right(t)) => Right(widen[h *: t, T](h *: t))
-          case (Left(h), Left(t)) => Left(h ++ t)
-          case (_, Left(failures)) => Left(failures)
-          case (Left(failures), _) => Left(failures)
-        }
+        ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
 
       case _: EmptyTuple =>
         Right(widen[EmptyTuple, T](EmptyTuple))
@@ -146,3 +129,9 @@ object ProductDerivationMacros {
     '{ $expr.toVector }
   }
 }
+
+// TODO
+// - product hints tests
+// - co-product hints
+// - compat wrapper for `deriveConfig` in `generic` package
+// - publish `generic-base` from core

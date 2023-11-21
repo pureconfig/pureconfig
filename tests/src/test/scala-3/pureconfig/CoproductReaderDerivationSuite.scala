@@ -43,18 +43,4 @@ class CoproductReaderDerivationSuite extends BaseSuite {
     ConfigReader[AnimalCage].from(ConfigFactory.empty().root()) should failWithReason[KeyNotFound]
   }
 
-  it should "invoke defaults when a key is not in the configuration" in {
-    enum ConfigDefaults derives ConfigReader {
-      case A(age: Int, name: String = "Rex")
-      case B(canFly: Boolean, name: String = "Tweety", c: List[Int] = List(1, 2, 3))
-    }
-
-    val confA = ConfigFactory.parseString("{ type = a, age = 2 }")
-    ConfigReader[ConfigDefaults].from(confA.root()) shouldEqual Right(ConfigDefaults.A(age = 2, name = "Rex"))
-
-    val confB = ConfigFactory.parseString("{ type = b, can-fly = true }")
-    ConfigReader[ConfigDefaults].from(confB.root()) shouldEqual Right(
-      ConfigDefaults.B(canFly = true, name = "Tweety", c = List(1, 2, 3))
-    )
-  }
 }
