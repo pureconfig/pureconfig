@@ -2,6 +2,7 @@ package pureconfig
 package generic
 
 import scala.collection.JavaConverters.given
+import scala.concurrent.duration._
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
@@ -118,11 +119,27 @@ class ProductReaderDerivationSuite extends BaseSuite {
     case class ConfA(a: Int, b: Int = 42) derives ConfigReader
     case class ConfB[T](i: Int = 1, s: String = "a", l: List[T] = Nil) derives ConfigReader
 
+    final case class SocketConfig(
+        connectTimeout: FiniteDuration = 5.seconds,
+        readTimeout: FiniteDuration = 12.seconds,
+        keepAlive: Option[Boolean] = None,
+        reuseAddress: Option[Boolean] = None,
+        soLinger: Option[Int] = None,
+        tcpNoDelay: Option[Boolean] = Some(true),
+        receiveBufferSize: Option[Int] = None,
+        sendBufferSize: Option[Int] = None
+    ) derives ConfigReader
+
     val confA = ConfigFactory.parseString("""{ a: 1 }""").root()
     ConfigReader[ConfA].from(confA).value shouldBe ConfA(1, 42)
 
     val confB = ConfigFactory.parseString("""{ }""").root()
     ConfigReader[ConfB[Long]].from(confB).value shouldBe ConfB[Long](1, "a", List.empty[Long])
+
+    val socketConf = ConfigFactory.parseString("""{ }""").root()
+    ConfigReader[SocketConfig]
+      .from(socketConf)
+      .value shouldBe SocketConfig(5.seconds, 12.seconds, None, None, None, Some(true), None, None)
   }
 
   it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {

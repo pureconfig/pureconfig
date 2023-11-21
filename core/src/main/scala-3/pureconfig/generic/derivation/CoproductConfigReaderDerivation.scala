@@ -6,12 +6,14 @@ import scala.compiletime.{constValue, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
+import pureconfig.generic.CoproductHint
 import pureconfig.generic.derivation.ConfigReaderDerivation
 import pureconfig.generic.derivation.WidenType.widen
 
 trait CoproductConfigReaderDerivation(fieldMapping: ConfigFieldMapping, optionField: String) {
   self: ConfigReaderDerivation =>
-  inline def derivedSum[A](using m: Mirror.SumOf[A]): ConfigReader[A] =
+
+  inline def derivedSum[A](using m: Mirror.SumOf[A], ch: CoproductHint[A], ph: ProductHint[A]): ConfigReader[A] =
     new ConfigReader[A] {
       def from(cur: ConfigCursor): ConfigReader.Result[A] =
         for {
