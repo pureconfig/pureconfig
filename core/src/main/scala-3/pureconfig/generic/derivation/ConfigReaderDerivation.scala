@@ -3,7 +3,6 @@ package generic
 package derivation
 
 import scala.deriving.Mirror
-
 import pureconfig.generic.{CoproductHint, ProductHint}
 
 trait ConfigReaderDerivation
@@ -20,10 +19,7 @@ trait ConfigReaderDerivation
 }
 
 object ConfigReaderDerivation {
-  object Default
-      extends ConfigReaderDerivation
-      with CoproductConfigReaderDerivation(ConfigFieldMapping(PascalCase, KebabCase), "type")
-      with ProductConfigReaderDerivation(ConfigFieldMapping(CamelCase, KebabCase))
+  object Default extends ConfigReaderDerivation with CoproductConfigReaderDerivation with ProductConfigReaderDerivation
 }
 
 val default = ConfigReaderDerivation.Default

@@ -11,7 +11,7 @@ import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, Unkn
 import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.derivation.WidenType.widen
 
-trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: ConfigReaderDerivation =>
+trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
   inline def derivedProduct[A](using m: Mirror.ProductOf[A], hint: ProductHint[A]): ConfigReader[A] =
     inline erasedValue[A] match {
       case _: Tuple =>
@@ -41,7 +41,7 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
 
             for {
               objCursor <- cur.asObjectCursor
-              labels = Labels.transformed[m.MirroredElemLabels](fieldMapping)
+              labels = Labels.transformed[m.MirroredElemLabels](identity)
               result <- readCaseClass[m.MirroredElemTypes, 0, A](objCursor, labels, defaults, hint)
             } yield m.fromProduct(result)
 
@@ -132,6 +132,6 @@ object ProductDerivationMacros {
 
 // TODO
 // - product hints tests
-// - co-product hints
 // - compat wrapper for `deriveConfig` in `generic` package
 // - publish `generic-base` from core
+// - ConfigWriter derivation

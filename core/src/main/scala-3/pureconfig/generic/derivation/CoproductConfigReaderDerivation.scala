@@ -9,36 +9,39 @@ import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.CoproductHint
 import pureconfig.generic.derivation.ConfigReaderDerivation
 import pureconfig.generic.derivation.WidenType.widen
+import pureconfig.generic.error.InvalidCoproductOption
 
-trait CoproductConfigReaderDerivation(fieldMapping: ConfigFieldMapping, optionField: String) {
-  self: ConfigReaderDerivation =>
-
+trait CoproductConfigReaderDerivation { self: ConfigReaderDerivation =>
   inline def derivedSum[A](using m: Mirror.SumOf[A], ch: CoproductHint[A], ph: ProductHint[A]): ConfigReader[A] =
     new ConfigReader[A] {
-      def from(cur: ConfigCursor): ConfigReader.Result[A] =
-        for {
-          objCur <- cur.asObjectCursor
-          optCur <- objCur.atKey(optionField)
-          option <- optCur.asString
-          result <-
-            readers.get(option) match {
-              case Some(reader) => reader.from(cur)
-              case None =>
-                Left(
-                  ConfigReaderFailures(
-                    optCur.failureFor(
-                      CannotConvert(option, constValue[m.MirroredLabel], "The value is not a valid option.")
-                    )
-                  )
-                )
-            }
-        } yield result
+      val options = Labels.transformed[m.MirroredElemLabels](identity)
+      val readers = options.zip(deriveForSubtypes[m.MirroredElemTypes, A]).toMap
 
-      val readers =
-        Labels
-          .transformed[m.MirroredElemLabels](fieldMapping)
-          .zip(deriveForSubtypes[m.MirroredElemTypes, A])
-          .toMap
+      def from(cur: ConfigCursor): ConfigReader.Result[A] =
+        ch.from(cur, options.sorted).flatMap {
+          case CoproductHint.Use(cursor, option) =>
+            readers.get(option) match {
+              case Some(reader) => reader.from(cursor)
+              case None => ConfigReader.Result.fail[A](cursor.failureFor(InvalidCoproductOption(option)))
+            }
+
+          case CoproductHint.Attempt(cursor, options, combineF) =>
+            val initial: Either[Vector[(String, ConfigReaderFailures)], A] = Left(Vector.empty)
+            val res = options.foldLeft(initial) { (curr, option) =>
+              curr.left.flatMap { currentFailures =>
+                readers.get(option) match {
+                  case Some(reader) => reader.from(cursor).left.map(f => currentFailures :+ (option -> f))
+                  case None =>
+                    Left(
+                      currentFailures :+
+                        (option -> ConfigReaderFailures(cursor.failureFor(InvalidCoproductOption(option))))
+                    )
+                }
+              }
+            }
+
+            res.left.map(combineF)
+        }
     }
 
   inline def deriveForSubtypes[T <: Tuple, A]: List[ConfigReader[A]] =

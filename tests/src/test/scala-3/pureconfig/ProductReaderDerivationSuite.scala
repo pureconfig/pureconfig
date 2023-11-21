@@ -2,14 +2,14 @@ package pureconfig
 package generic
 
 import scala.collection.JavaConverters.given
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 
 import pureconfig.ConfigConvert.catchReadError
-import pureconfig._
+import pureconfig.*
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
 import pureconfig.generic.derivation.default.derived
 
@@ -114,6 +114,23 @@ class ProductReaderDerivationSuite extends BaseSuite {
       ConfigReader[Conf].from(conf).value shouldBe Conf(1, 42)
     }
   }
+
+  // it should "allow custom ConfigWriters to handle missing keys" in {
+  //   case class Conf(a: Int, b: Int)
+  //   ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ a: 0, b: 3 }""").root()
+
+  //   implicit val nonZeroInt = new ConfigWriter[Int] with WritesMissingKeys[Int] {
+  //     def to(v: Int) = ConfigValueFactory.fromAnyRef(v)
+  //     def toOpt(a: Int) = if (a == 0) None else Some(to(a))
+  //   }
+  //   ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ b: 3 }""").root()
+  // }
+
+  // it should "not write empty option fields" in {
+  //   case class Conf(a: Int, b: Option[Int])
+  //   ConfigConvert[Conf].to(Conf(42, Some(1))) shouldBe ConfigFactory.parseString("""{ a: 42, b: 1 }""").root()
+  //   ConfigConvert[Conf].to(Conf(42, None)) shouldBe ConfigFactory.parseString("""{ a: 42 }""").root()
+  // }
 
   it should "invoke defaults when a key is not in the configuration" in {
     case class ConfA(a: Int, b: Int = 42) derives ConfigReader
