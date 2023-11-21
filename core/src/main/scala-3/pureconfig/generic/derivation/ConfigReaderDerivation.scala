@@ -3,6 +3,7 @@ package generic
 package derivation
 
 import scala.deriving.Mirror
+
 import pureconfig.generic.{CoproductHint, ProductHint}
 
 trait ConfigReaderDerivation
@@ -10,10 +11,14 @@ trait ConfigReaderDerivation
       ProductConfigReaderDerivation,
       DefaultDerivationConfig {
   extension (c: ConfigReader.type) {
-    inline def derived[A](using m: Mirror.Of[A], ph: ProductHint[A], cph: CoproductHint[A]): ConfigReader[A] =
+    inline def derived[A](using
+        m: Mirror.Of[A],
+        ph: ProductHint[A],
+        cph: CoproductHint[A]
+    ): ConfigReader[A] =
       inline m match {
-        case given Mirror.ProductOf[A] => derivedProduct
-        case given Mirror.SumOf[A] => derivedSum
+        case given Mirror.ProductOf[A] => derivedProduct[A]
+        case given Mirror.SumOf[A] => derivedSum[A]
       }
   }
 }

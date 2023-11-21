@@ -12,7 +12,11 @@ import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.derivation.WidenType.widen
 
 trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
-  inline def derivedProduct[A](using m: Mirror.ProductOf[A], hint: ProductHint[A]): ConfigReader[A] =
+  inline def derivedProduct[A](using
+      m: Mirror.ProductOf[A],
+      ch: CoproductHint[A],
+      ph: ProductHint[A]
+  ): ConfigReader[A] =
     inline erasedValue[A] match {
       case _: Tuple =>
         new ConfigReader[A] {
@@ -42,17 +46,16 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
             for {
               objCursor <- cur.asObjectCursor
               labels = Labels.transformed[m.MirroredElemLabels](identity)
-              result <- readCaseClass[m.MirroredElemTypes, 0, A](objCursor, labels, defaults, hint)
+              result <- readCaseClass[m.MirroredElemTypes, 0, A](objCursor, labels, defaults)
             } yield m.fromProduct(result)
 
         }
     }
 
-  inline def readCaseClass[T <: Tuple, N <: Int, A](
+  inline def readCaseClass[T <: Tuple, N <: Int, A: ProductHint: CoproductHint](
       objCursor: ConfigObjectCursor,
       labels: List[String],
-      defaults: Vector[Option[Any]],
-      hint: ProductHint[A]
+      defaults: Vector[Option[Any]]
   ): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
@@ -60,7 +63,7 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
         lazy val reader = summonConfigReader[h]
         val default = defaults(n)
         val label = labels(n)
-        val fieldHint = hint.from(objCursor, label)
+        val fieldHint = summon[ProductHint[A]].from(objCursor, label)
 
         val head =
           (fieldHint, default) match {
@@ -71,7 +74,7 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
             case _ =>
               objCursor.failed(KeyNotFound.forKeys(fieldHint.field, objCursor.keys))
           }
-        val tail = readCaseClass[t, N + 1, A](objCursor, labels, defaults, hint)
+        val tail = readCaseClass[t, N + 1, A](objCursor, labels, defaults)
 
         ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
 
@@ -100,7 +103,8 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
   inline def summonConfigReader[A] =
     summonFrom {
       case reader: ConfigReader[A] => reader
-      case given Mirror.Of[A] => ConfigReader.derived[A]
+      case m: Mirror.Of[A] =>
+        ConfigReader.derived[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
     }
 }
 

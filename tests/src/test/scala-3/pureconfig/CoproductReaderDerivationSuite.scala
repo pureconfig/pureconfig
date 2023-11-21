@@ -1,6 +1,5 @@
 package pureconfig
 
-
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 
 import pureconfig.*

@@ -44,18 +44,20 @@ trait CoproductConfigReaderDerivation { self: ConfigReaderDerivation =>
         }
     }
 
-  inline def deriveForSubtypes[T <: Tuple, A]: List[ConfigReader[A]] =
+  inline def deriveForSubtypes[T <: Tuple, A: ProductHint: CoproductHint]: List[ConfigReader[A]] =
     inline erasedValue[T] match {
       case _: (h *: t) => deriveForSubtype[h, A] :: deriveForSubtypes[t, A]
       case _: EmptyTuple => Nil
     }
 
-  inline def deriveForSubtype[A0, A]: ConfigReader[A] =
+  inline def deriveForSubtype[A0, A: ProductHint: CoproductHint]: ConfigReader[A] =
     summonFrom {
       case reader: ConfigReader[A0] =>
         reader.map(widen[A0, A](_))
 
-      case given Mirror.Of[A0] =>
-        ConfigReader.derived[A0].map(widen[A0, A](_))
+      case m: Mirror.Of[A0] =>
+        ConfigReader
+          .derived[A0](using m, summonInline[ProductHint[A0]], summonInline[CoproductHint[A0]])
+          .map(widen[A0, A](_))
     }
 }
