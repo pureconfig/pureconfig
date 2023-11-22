@@ -9,13 +9,12 @@ import pureconfig.generic.*
 import pureconfig.generic.derivation.default.derived
 import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 
-enum AnimalConfig derives ConfigReader {
-  case DogConfig(age: Int)
-  case CatConfig(age: Int)
-  case BirdConfig(canFly: Boolean)
-}
-
 class CoproductReaderDerivationSuite extends BaseSuite {
+  enum AnimalConfig derives ConfigReader {
+    case DogConfig(age: Int)
+    case CatConfig(age: Int)
+    case BirdConfig(canFly: Boolean)
+  }
 
   import AnimalConfig.*
 

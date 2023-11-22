@@ -140,9 +140,3 @@ object ProductDerivationMacros {
     '{ $expr.toVector }
   }
 }
-
-// TODO
-// - CoProductHint tests
-// - ConfigWriter derivation
-// - compat wrapper for `deriveConfig` in `generic` package
-// - publish `generic-base` from core
