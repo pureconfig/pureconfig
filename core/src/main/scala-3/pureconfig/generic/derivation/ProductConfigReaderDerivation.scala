@@ -46,7 +46,8 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
             for {
               objCursor <- cur.asObjectCursor
               labels = Labels.transformed[m.MirroredElemLabels](identity)
-              result <- readCaseClass[m.MirroredElemTypes, 0, A](objCursor, labels, defaults)
+              actions = labels.map { label => label -> ph.from(objCursor, label) }.toMap
+              result <- readCaseClass[m.MirroredElemTypes, 0, A](objCursor, labels, actions, defaults)
             } yield m.fromProduct(result)
 
         }
@@ -55,6 +56,7 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
   inline def readCaseClass[T <: Tuple, N <: Int, A: ProductHint: CoproductHint](
       objCursor: ConfigObjectCursor,
       labels: List[String],
+      actions: Map[String, ProductHint.Action],
       defaults: Vector[Option[Any]]
   ): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
@@ -63,7 +65,7 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
         lazy val reader = summonConfigReader[h]
         val default = defaults(n)
         val label = labels(n)
-        val fieldHint = summon[ProductHint[A]].from(objCursor, label)
+        val fieldHint = actions(label)
 
         val head =
           (fieldHint, default) match {
@@ -74,9 +76,14 @@ trait ProductConfigReaderDerivation { self: ConfigReaderDerivation =>
             case _ =>
               objCursor.failed(KeyNotFound.forKeys(fieldHint.field, objCursor.keys))
           }
-        val tail = readCaseClass[t, N + 1, A](objCursor, labels, defaults)
+        val tail = readCaseClass[t, N + 1, A](objCursor, labels, actions, defaults)
 
-        ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
+        val resultTuple = ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
+
+        val usedFields = actions.map(_._2.field).toSet
+        val hintFailures = summon[ProductHint[A]].bottom(objCursor, usedFields).toLeft(())
+
+        ConfigReader.Result.zipWith(resultTuple, hintFailures)((r, _) => r)
 
       case _: EmptyTuple =>
         Right(widen[EmptyTuple, T](EmptyTuple))
@@ -135,7 +142,7 @@ object ProductDerivationMacros {
 }
 
 // TODO
-// - product hints tests
+// - CoProductHint tests
+// - ConfigWriter derivation
 // - compat wrapper for `deriveConfig` in `generic` package
 // - publish `generic-base` from core
-// - ConfigWriter derivation
