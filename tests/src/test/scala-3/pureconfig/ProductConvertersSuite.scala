@@ -11,7 +11,6 @@ import pureconfig.ConfigConvert.catchReadError
 import pureconfig.*
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
 import pureconfig.generic.derivation.reader.derived
-// import pureconfig.generic.derivation.writer.derived
 
 class ProductConvertersSuite extends BaseSuite {
 
@@ -115,27 +114,33 @@ class ProductConvertersSuite extends BaseSuite {
     }
   }
 
-  // borked SimpleConfigObject({"b":3}) was not equal to SimpleConfigObject({"a":0,"b":3}) 
+  it should "allow custom ConfigWriters to handle missing keys" in {
+    import pureconfig.generic.derivation.writer.derived
 
-  // it should "allow custom ConfigWriters to handle missing keys" in {
-  //   import pureconfig.generic.derivation.writer.derived
+    case class Conf(a: Int, b: Int)
 
-  //   case class Conf(a: Int, b: Int) derives ConfigWriter
-  //   ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ a: 0, b: 3 }""").root()
+    given ConfigWriter[Conf] = ConfigWriter.derived[Conf]
 
-  //   given ConfigWriter[Int] = new ConfigWriter[Int] with WritesMissingKeys[Int] {
-  //     def to(v: Int) = ConfigValueFactory.fromAnyRef(v)
-  //     def toOpt(a: Int) = if (a == 0) None else Some(to(a))
-  //   }
+    ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ a: 0, b: 3 }""").root()
 
-  //   ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ b: 3 }""").root()
-  // }
+    locally:
+      given ConfigWriter[Int] = new ConfigWriter[Int] with WritesMissingKeys[Int]:
+        def to(v: Int) = ConfigValueFactory.fromAnyRef(v)
+        def toOpt(a: Int) = if (a == 0) None else Some(to(a))
 
-  // it should "not write empty option fields" in {
-  //   case class Conf(a: Int, b: Option[Int])
-  //   ConfigConvert[Conf].to(Conf(42, Some(1))) shouldBe ConfigFactory.parseString("""{ a: 42, b: 1 }""").root()
-  //   ConfigConvert[Conf].to(Conf(42, None)) shouldBe ConfigFactory.parseString("""{ a: 42 }""").root()
-  // }
+      given ConfigWriter[Conf] = ConfigWriter.derived[Conf]
+
+      ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ b: 3 }""").root()
+  }
+
+  it should "not write empty option fields" in {
+    import pureconfig.generic.derivation.writer.derived
+
+    case class Conf(a: Int, b: Option[Int]) derives ConfigWriter
+
+    ConfigWriter[Conf].to(Conf(42, Some(1))) shouldBe ConfigFactory.parseString("""{ a: 42, b: 1 }""").root()
+    ConfigWriter[Conf].to(Conf(42, None)) shouldBe ConfigFactory.parseString("""{ a: 42 }""").root()
+  }
 
   it should "invoke defaults when a key is not in the configuration" in {
     case class ConfA(a: Int, b: Int = 42) derives ConfigReader

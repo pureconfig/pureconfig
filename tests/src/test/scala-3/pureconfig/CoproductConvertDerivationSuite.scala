@@ -1,6 +1,6 @@
 package pureconfig
 
-import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
+import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueFactory}
 
 import pureconfig.*
 import pureconfig.error.*
@@ -9,7 +9,7 @@ import pureconfig.generic.*
 import pureconfig.generic.derivation.default.derived
 import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 
-class CoproductReaderDerivationSuite extends BaseSuite {
+class CoproductConvertDerivationSuite extends BaseSuite {
   enum AnimalConfig derives ConfigReader {
     case DogConfig(age: Int)
     case CatConfig(age: Int)
@@ -25,11 +25,16 @@ class CoproductReaderDerivationSuite extends BaseSuite {
     ConfigReader[AnimalConfig].from(conf.root()) shouldEqual Right(DogConfig(2))
   }
 
-  // it should "write disambiguation information on sealed families by default" in {
-  //   val conf = ConfigConvert[AnimalConfig].to(DogConfig(2))
-  //   conf shouldBe a[ConfigObject]
-  //   conf.asInstanceOf[ConfigObject].get("type") shouldEqual ConfigValueFactory.fromAnyRef("dog-config")
-  // }
+  it should "write disambiguation information on sealed families by default" in {
+    import pureconfig.generic.derivation.writer.derived
+
+    given ConfigWriter[AnimalConfig] = ConfigWriter.derived
+
+    val conf = ConfigWriter[AnimalConfig].to(DogConfig(2))
+
+    conf shouldBe a[ConfigObject]
+    conf.asInstanceOf[ConfigObject].get("type") shouldEqual ConfigValueFactory.fromAnyRef("dog-config")
+  }
 
   it should "return a proper ConfigReaderFailure if the hint field in a coproduct is missing" in {
     val conf = ConfigFactory.parseString("{ can-fly = true }")

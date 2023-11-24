@@ -19,22 +19,22 @@ trait CoproductConfigWriterDerivation:
 
   inline def derivedSum[A](using m: Mirror.SumOf[A], ch: CoproductHint[A], ph: ProductHint[A]): ConfigWriter[A] =
     new ConfigWriter[A]:
+      val labels = Labels.transformed[m.MirroredElemLabels](identity)
+      val writers = summonAllConfigWriters[m.MirroredElemTypes]
+
       def to(a: A): ConfigValue =
-        val labels = Labels.transformed[m.MirroredElemLabels](identity)
-        val writers = labels.zip(summonAllConfigWriters[m.MirroredElemTypes, A]).toMap
+        val n = m.ordinal(a)
+        val label = labels(n)
+        val writer = writers(n).asInstanceOf[ConfigWriter[Any]]
 
-        val values = labels.map: label =>
-          val writer = writers(label)
-          summon[CoproductHint[A]].to(writer.to(a), label)
+        summon[CoproductHint[A]].to(writer.to(a), label)
 
-        ConfigValueFactory.fromIterable(values.asJava)
-
-  inline def summonAllConfigWriters[T <: Tuple, A]: List[ConfigWriter[A]] =
+  private inline def summonAllConfigWriters[T <: Tuple]: List[ConfigWriter[?]] =
     inline erasedValue[T] match
-      case _: (h *: t) => (summonConfigWriter[h] :: summonAllConfigWriters[t, A]).asInstanceOf[List[ConfigWriter[A]]]
+      case _: (h *: t) => summonConfigWriter[h] :: summonAllConfigWriters[t]
       case _: EmptyTuple => Nil
 
-  inline def summonConfigWriter[A]: ConfigWriter[A] =
+  private inline def summonConfigWriter[A]: ConfigWriter[A] =
     summonFrom:
       case writer: ConfigWriter[A] => writer
       case m: Mirror.Of[A] =>
