@@ -17,7 +17,7 @@ import pureconfig.generic.error.InvalidCoproductOption
 trait CoproductConfigWriterDerivation:
   self: ConfigWriterDerivation =>
 
-  inline def derivedSum[A](using m: Mirror.SumOf[A], ch: CoproductHint[A], ph: ProductHint[A]): ConfigWriter[A] =
+  inline def deriveSumWriter[A](using m: Mirror.SumOf[A], ch: CoproductHint[A], ph: ProductHint[A]): ConfigWriter[A] =
     new ConfigWriter[A]:
       val labels = Labels.transformed[m.MirroredElemLabels](identity)
       val writers = summonAllConfigWriters[m.MirroredElemTypes]
@@ -38,4 +38,4 @@ trait CoproductConfigWriterDerivation:
     summonFrom:
       case writer: ConfigWriter[A] => writer
       case m: Mirror.Of[A] =>
-        ConfigWriter.derived[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
+        deriveWriter[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])

@@ -14,7 +14,7 @@ import pureconfig.generic.derivation.WidenType.widen
 trait ProductConfigReaderDerivation:
   self: ConfigReaderDerivation =>
 
-  inline def derivedProduct[A](using
+  inline def deriveProductReader[A](using
       m: Mirror.ProductOf[A],
       ch: CoproductHint[A],
       ph: ProductHint[A]
@@ -104,7 +104,7 @@ trait ProductConfigReaderDerivation:
     summonFrom:
       case reader: ConfigReader[A] => reader
       case m: Mirror.Of[A] =>
-        ConfigReader.derived[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
+        deriveReader[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
 
 private[derivation] object ProductDerivationMacros:
   inline def getDefaults[T](inline size: Int): Vector[Option[Any]] = ${ getDefaultsImpl[T]('size) }

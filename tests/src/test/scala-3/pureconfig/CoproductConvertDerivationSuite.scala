@@ -6,11 +6,11 @@ import pureconfig.*
 import pureconfig.error.*
 import pureconfig.error.ConvertFailure as ConfigReaderConvertFailure
 import pureconfig.generic.*
-import pureconfig.generic.derivation.default.derived
+import pureconfig.generic.derivation.convert.syntax.*
 import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 
 class CoproductConvertDerivationSuite extends BaseSuite {
-  enum AnimalConfig derives ConfigReader {
+  enum AnimalConfig derives ConfigConvert {
     case DogConfig(age: Int)
     case CatConfig(age: Int)
     case BirdConfig(canFly: Boolean)
@@ -26,10 +26,6 @@ class CoproductConvertDerivationSuite extends BaseSuite {
   }
 
   it should "write disambiguation information on sealed families by default" in {
-    import pureconfig.generic.derivation.writer.derived
-
-    given ConfigWriter[AnimalConfig] = ConfigWriter.derived
-
     val conf = ConfigWriter[AnimalConfig].to(DogConfig(2))
 
     conf shouldBe a[ConfigObject]
@@ -53,7 +49,7 @@ class CoproductConvertDerivationSuite extends BaseSuite {
   }
 
   it should "return a proper ConfigReaderFailure when a coproduct config is missing" in {
-    case class AnimalCage(animal: AnimalConfig) derives ConfigReader
+    case class AnimalCage(animal: AnimalConfig) derives ConfigConvert
     ConfigReader[AnimalCage].from(ConfigFactory.empty().root()) should failWithReason[KeyNotFound]
   }
 

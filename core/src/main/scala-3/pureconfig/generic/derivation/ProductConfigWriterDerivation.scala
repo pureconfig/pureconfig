@@ -17,7 +17,7 @@ import pureconfig.generic.{CoproductHint, ProductHint}
 trait ProductConfigWriterDerivation:
   self: ConfigWriterDerivation =>
 
-  inline def derivedProduct[A](using
+  inline def deriveProductWriter[A](using
       m: Mirror.ProductOf[A],
       ch: CoproductHint[A],
       ph: ProductHint[A]
@@ -73,4 +73,4 @@ trait ProductConfigWriterDerivation:
   private inline def summonConfigWriter[A] = summonFrom:
     case writer: ConfigWriter[A] => writer
     case m: Mirror.Of[A] =>
-      ConfigWriter.derived[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
+      deriveWriter[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
