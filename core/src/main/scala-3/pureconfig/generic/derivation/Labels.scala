@@ -5,8 +5,6 @@ import scala.compiletime.{constValue, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 
 object Labels {
-  // inline def fromTuple[T <: Tuple]: List[String] = transformed(identity)
-
   inline def transformed[T <: Tuple](inline transform: String => String): List[String] =
     inline erasedValue[T] match {
       case _: (h *: t) =>

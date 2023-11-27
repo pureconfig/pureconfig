@@ -12,7 +12,7 @@ import pureconfig.*
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
 import pureconfig.generic.derivation.convert.syntax.*
 
-class ProductConvertersSuite extends BaseSuite {
+class ProductConverterSuite extends BaseSuite {
 
   behavior of "ConfigConvert"
 

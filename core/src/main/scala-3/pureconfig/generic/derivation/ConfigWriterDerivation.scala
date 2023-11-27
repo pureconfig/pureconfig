@@ -12,7 +12,7 @@ trait ConfigWriterDerivation extends CoproductConfigWriterDerivation, ProductCon
       case given Mirror.ProductOf[A] => deriveProductWriter[A]
       case given Mirror.SumOf[A] => deriveSumWriter[A]
 
-object writer extends ConfigWriterDerivation, DefaultDerivationConfig:
+object writer extends ConfigWriterDerivation:
   object syntax:
     extension (c: ConfigWriter.type)
       inline def derived[A](using Mirror.Of[A], ProductHint[A], CoproductHint[A]): ConfigWriter[A] = deriveWriter[A]
