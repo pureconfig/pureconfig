@@ -24,6 +24,7 @@ class ProductHintSuite extends BaseSuite {
   }
 
   it should "read kebab case config keys to camel case fields by default" in {
+    import pureconfig.generic.derivation.default.*
     given ConfigReader[ConfWithCamelCase] = ConfigReader.derived
 
     val conf = ConfigFactory.parseString("""{
