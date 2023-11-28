@@ -4,6 +4,7 @@ package derivation
 
 import scala.compiletime.*
 import scala.deriving.Mirror
+
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 
 trait EnumConfigWriter[A] extends ConfigWriter[A]

@@ -2,10 +2,11 @@ package pureconfig
 package generic
 package derivation
 
-import scala.compiletime.ops.int.*
 import scala.compiletime.*
+import scala.compiletime.ops.int.*
 import scala.deriving.Mirror
 import scala.quoted.*
+
 import pureconfig.error.{ConfigReaderFailures, KeyNotFound, WrongSizeList}
 import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.derivation.WidenType.widen

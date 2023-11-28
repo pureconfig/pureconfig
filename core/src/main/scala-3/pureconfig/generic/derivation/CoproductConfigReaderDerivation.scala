@@ -4,6 +4,7 @@ package derivation
 
 import scala.compiletime.*
 import scala.deriving.Mirror
+
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.error.InvalidCoproductOption
 

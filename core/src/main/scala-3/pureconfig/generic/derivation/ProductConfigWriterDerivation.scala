@@ -3,10 +3,11 @@ package generic
 package derivation
 
 import scala.collection.JavaConverters.given
-import scala.compiletime.ops.int.*
 import scala.compiletime.*
+import scala.compiletime.ops.int.*
 import scala.deriving.Mirror
 import scala.quoted.*
+
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 
 trait ProductConfigWriterDerivation:
