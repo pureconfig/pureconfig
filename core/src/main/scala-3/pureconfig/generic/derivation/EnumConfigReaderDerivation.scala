@@ -2,9 +2,8 @@ package pureconfig
 package generic
 package derivation
 
-import scala.compiletime.{constValue, erasedValue, error, summonInline}
+import scala.compiletime.*
 import scala.deriving.Mirror
-
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.derivation.WidenType.widen
 

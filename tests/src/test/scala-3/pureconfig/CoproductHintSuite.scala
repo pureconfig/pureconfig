@@ -4,7 +4,7 @@ import com.typesafe.config.*
 
 import pureconfig.error.*
 import pureconfig.generic.*
-import pureconfig.generic.derivation.convert.syntax.*
+import pureconfig.generic.derivation.syntax.*
 import pureconfig.generic.error.{CoproductHintException, UnexpectedValueForFieldCoproductHint}
 import pureconfig.syntax.*
 

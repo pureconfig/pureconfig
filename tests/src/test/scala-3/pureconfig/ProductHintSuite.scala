@@ -6,7 +6,7 @@ import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
 
 import pureconfig.error.*
 import pureconfig.generic.ProductHint
-import pureconfig.generic.derivation.convert.syntax.*
+import pureconfig.generic.derivation.syntax.*
 import pureconfig.syntax.*
 
 class ProductHintSuite extends BaseSuite {
@@ -24,7 +24,7 @@ class ProductHintSuite extends BaseSuite {
   }
 
   it should "read kebab case config keys to camel case fields by default" in {
-    given ConfigConvert[ConfWithCamelCase] = ConfigConvert.derived
+    given ConfigReader[ConfWithCamelCase] = ConfigReader.derived
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1
@@ -39,7 +39,7 @@ class ProductHintSuite extends BaseSuite {
   }
 
   it should "write kebab case config keys from camel case fields by default" in {
-    given ConfigConvert[ConfWithCamelCase] = ConfigConvert.derived
+    given ConfigWriter[ConfWithCamelCase] = ConfigWriter.derived
 
     val conf = confWithCamelCase.toConfig.asInstanceOf[ConfigObject]
     allKeys(conf) should contain theSameElementsAs Seq(

@@ -3,11 +3,10 @@ package generic
 package derivation
 
 import scala.compiletime.ops.int.*
-import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
+import scala.compiletime.*
 import scala.deriving.Mirror
 import scala.quoted.*
-
-import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
+import pureconfig.error.{ConfigReaderFailures, KeyNotFound, WrongSizeList}
 import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.derivation.WidenType.widen
 

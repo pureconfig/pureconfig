@@ -4,8 +4,6 @@ package derivation
 
 import scala.deriving.Mirror
 
-import pureconfig.generic.{CoproductHint, ProductHint}
-
 trait ConfigWriterDerivation extends CoproductConfigWriterDerivation, ProductConfigWriterDerivation:
   inline def deriveWriter[A](using m: Mirror.Of[A], ph: ProductHint[A], cph: CoproductHint[A]): ConfigWriter[A] =
     inline m match

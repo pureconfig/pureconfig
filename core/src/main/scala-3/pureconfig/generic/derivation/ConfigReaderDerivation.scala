@@ -4,8 +4,6 @@ package derivation
 
 import scala.deriving.Mirror
 
-import pureconfig.generic.{CoproductHint, ProductHint}
-
 trait ConfigReaderDerivation extends CoproductConfigReaderDerivation, ProductConfigReaderDerivation:
   inline def deriveReader[A](using m: Mirror.Of[A], ph: ProductHint[A], cph: CoproductHint[A]): ConfigReader[A] =
     inline m match

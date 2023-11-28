@@ -2,8 +2,6 @@ package pureconfig
 package generic
 package derivation
 
-import scala.Conversion
-
 trait EnumHint[A]:
   def transformName(name: String): String
 

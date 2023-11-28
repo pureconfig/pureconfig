@@ -6,7 +6,7 @@ import pureconfig.*
 import pureconfig.error.*
 import pureconfig.error.ConvertFailure as ConfigReaderConvertFailure
 import pureconfig.generic.*
-import pureconfig.generic.derivation.convert.syntax.*
+import pureconfig.generic.derivation.syntax.*
 import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 
 class CoproductConvertDerivationSuite extends BaseSuite {

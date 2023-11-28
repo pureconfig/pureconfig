@@ -2,17 +2,9 @@ package pureconfig
 package generic
 package derivation
 
-import scala.collection.JavaConverters.*
-import scala.compiletime.{constValue, erasedValue, summonFrom, summonInline}
+import scala.compiletime.*
 import scala.deriving.Mirror
-
-import com.typesafe.config.{ConfigValue, ConfigValueFactory}
-
-import pureconfig.error.{CannotConvert, ConfigReaderFailures}
-import pureconfig.generic.CoproductHint
-import pureconfig.generic.derivation.ConfigReaderDerivation
-import pureconfig.generic.derivation.WidenType.widen
-import pureconfig.generic.error.InvalidCoproductOption
+import com.typesafe.config.ConfigValue
 
 trait CoproductConfigWriterDerivation:
   self: ConfigWriterDerivation =>
