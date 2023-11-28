@@ -61,7 +61,8 @@ lazy val enumeratum = module(project) in file("modules/enumeratum")
 lazy val fs2 = module(project) in file("modules/fs2")
 lazy val generic = genericModule(project) in file("modules/generic")
 // Empty project, left for backwards compatibility. Use `core` instead.
-lazy val `generic-base` = genericModule(project) in file("modules/generic-base")
+lazy val `generic-base` = (genericModule(project) in file("modules/generic-base"))
+  .settings(crossScalaVersions := Seq(scala212, scala213, scala3))
 lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s")
 lazy val http4s022 = module(project) in file("modules/http4s022")
@@ -93,8 +94,7 @@ lazy val commonSettings = Seq(
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))
   ),
 
-  // scalaVersion := scala212,
-  scalaVersion := scala3,
+  scalaVersion := scala212,
 
   resolvers ++= Resolver.sonatypeOssRepos("releases"),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
