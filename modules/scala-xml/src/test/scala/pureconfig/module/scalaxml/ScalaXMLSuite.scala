@@ -18,6 +18,6 @@ class ScalaXMLSuite extends BaseSuite {
   }
 
   it should "return an error when reading invalid XML" in {
-    configValue("<people>").to[Elem] shouldBe 'left
+    configValue("<people>").to[Elem].isLeft shouldBe true
   }
 }
