@@ -8,7 +8,7 @@ import scala.deriving.Mirror
 import scala.util.chaining.*
 
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
-import pureconfig.generic.derivation.WidenType.widen
+import pureconfig.generic.derivation.Utils._
 
 trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: ConfigReaderDerivation =>
   inline def derivedProduct[A](using m: Mirror.ProductOf[A]): ConfigReader[A] =
@@ -38,8 +38,7 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
             for {
               objCur <- cur.asObjectCursor
               result <-
-                Labels
-                  .transformed[m.MirroredElemLabels](fieldMapping)
+                transformedLabels[A](fieldMapping)
                   .pipe(labels =>
                     readTuple[m.MirroredElemTypes, 0](
                       labels.map(objCur.atKeyOrUndefined(_)),
@@ -73,11 +72,5 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
 
       case _: EmptyTuple =>
         Right(widen[EmptyTuple, T](EmptyTuple))
-    }
-
-  inline def summonConfigReader[A] =
-    summonFrom {
-      case reader: ConfigReader[A] => reader
-      case given Mirror.Of[A] => ConfigReader.derived[A]
     }
 }

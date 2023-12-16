@@ -6,7 +6,7 @@ import scala.compiletime.{constValue, erasedValue, error, summonInline}
 import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
-import pureconfig.generic.derivation.WidenType.widen
+import pureconfig.generic.derivation.Utils._
 
 type EnumConfigReader[A] = EnumConfigReaderDerivation.Default.EnumConfigReader[A]
 
@@ -53,7 +53,7 @@ trait EnumConfigReaderDerivation(transformName: String => String) {
         inline transformName: String => String,
         inline value: String
     )(using m: Mirror.SumOf[A]) = {
-      val ord = Labels.transformed[m.MirroredElemLabels](transformName).indexOf(value)
+      val ord = transformedLabels[A](transformName).indexOf(value)
       Option.when(ord >= 0)(ord)
     }
   }
