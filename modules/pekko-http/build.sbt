@@ -9,7 +9,3 @@ libraryDependencies ++= Seq(
 mdocLibraryDependencies ++= Seq(
   "org.apache.pekko" %% "pekko-stream" % "1.0.2"
 )
-
-developers := List(
-  Developer("himanshu4141", "Himanshu Yadav", "himanshu4141@gmail.com", url("https://github.com/himanshu4141"))
-)
