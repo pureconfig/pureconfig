@@ -1,4 +1,4 @@
-# Pekko-Http module for PureConfig
+# Pekko HTTP module for PureConfig
 
 Adds support for [Pekko-Http](https://pekko.apache.org/docs/pekko-http/current/common/http-model.html)'s Uri class to PureConfig. PRs adding support
 for other classes are welcome :)
@@ -8,7 +8,7 @@ for other classes are welcome :)
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-pekko-http" % "@VERSION@"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-pekko-http" % "0.17.5"
 ```
 
 ## Example
@@ -16,7 +16,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-pekko-http" % "@VE
 To load an `Uri` into a configuration, create a class to hold it:
 
 ```scala
-import pekko.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.Uri
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.generic.auto._
