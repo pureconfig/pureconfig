@@ -12,7 +12,7 @@ Newer projects should use a regular [PureConfig Http4s](https://github.com/purec
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-http4s022" % "0.17.5"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-http4s022" % "0.17.6"
 ```
 
 ## Example

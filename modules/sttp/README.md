@@ -7,7 +7,7 @@ Adds support for [sttp](https://github.com/softwaremill/sttp). Currently support
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-sttp" % "0.17.5"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-sttp" % "0.17.6"
 ```
 
 ## Example
