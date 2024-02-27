@@ -17,7 +17,7 @@ Support is also provided for some of the components of a `Uri`:
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-http4s" % "0.17.5"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-http4s" % "0.17.6"
 ```
 
 ## Example

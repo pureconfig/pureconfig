@@ -1,3 +1,9 @@
+### 0.17.6 (Feb 22, 2024)
+
+- New features
+  - Added new `pureconfig-pekko` and `pureconfig-pekko-http` modules with relevant `ConfigReader`s and `ConfigWriter`s
+    for Pekko and Pekko HTTP types.
+
 ### 0.17.5 (Jan 18, 2024)
 
 Maintenance update to update dependency versions.
