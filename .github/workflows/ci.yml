@@ -14,7 +14,7 @@ jobs:
           - scala: '2.12'
             scala-version: 2.12.19
           - scala: '2.13'
-            scala-version: 2.13.12
+            scala-version: 2.13.13
           - scala: '3'
             scala-version: 3.3.0
 
