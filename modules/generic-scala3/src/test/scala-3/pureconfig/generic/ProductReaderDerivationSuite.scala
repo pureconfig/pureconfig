@@ -12,9 +12,9 @@ import pureconfig.*
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
 import pureconfig.generic.semiauto.deriveReader
 
-class ProductConverterSuite extends BaseSuite {
+class ProductReaderDerivationSuite extends BaseSuite {
 
-  behavior of "ConfigConvert"
+  behavior of "ProductReader"
 
   it should s"be able to override all of the ConfigReader instances used to parse the product elements" in {
     case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
@@ -26,7 +26,7 @@ class ProductConverterSuite extends BaseSuite {
     given ConfigReader[Int] = ConfigReader.fromString[Int](catchReadError(_ => 3))
     given ConfigReader[Long] = ConfigReader.fromString[Long](catchReadError(_ => 4L))
     given ConfigReader[String] = ConfigReader.fromString[String](catchReadError(_ => "foobar"))
-    given ConfigReader[Option[String]] = ConfigConvert.viaString[Option[String]](catchReadError(_ => None), _ => " ")
+    given ConfigConvert[Option[String]] = ConfigConvert.viaString[Option[String]](catchReadError(_ => None), _ => " ")
 
     val cc = ConfigReader[FlatConfig]
     val configValue =
@@ -122,62 +122,37 @@ class ProductConverterSuite extends BaseSuite {
     }
   }
 
-//   it should "allow custom ConfigWriters to handle missing keys" in {
-//     case class Conf(a: Int, b: Int)
+  it should "invoke defaults when a key is not in the configuration" in {
+    case class ConfA(a: Int, b: Int = 42)
+    given ConfigReader[ConfA] = deriveReader
 
-//     given ConfigConvert[Conf] = ConfigConvert.derived
+    case class ConfB[T](i: Int = 1, s: String = "a", l: List[T] = Nil)
+    given [T: ConfigReader]: ConfigReader[ConfB[T]] = deriveReader
 
-//     ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ a: 0, b: 3 }""").root()
+    final case class SocketConfig(
+        connectTimeout: FiniteDuration = 5.seconds,
+        readTimeout: FiniteDuration = 12.seconds,
+        keepAlive: Option[Boolean] = None,
+        reuseAddress: Option[Boolean] = None,
+        soLinger: Option[Int] = None,
+        tcpNoDelay: Option[Boolean] = Some(true),
+        receiveBufferSize: Option[Int] = None,
+        sendBufferSize: Option[Int] = None
+    )
 
-//     locally:
-//       given ConfigWriter[Int] = new ConfigWriter[Int] with WritesMissingKeys[Int]:
-//         def to(v: Int) = ConfigValueFactory.fromAnyRef(v)
-//         def toOpt(a: Int) = if (a == 0) None else Some(to(a))
+    given ConfigReader[SocketConfig] = deriveReader
 
-//       given ConfigConvert[Conf] = ConfigConvert.derived
+    val confA = ConfigFactory.parseString("""{ a: 1 }""").root()
+    ConfigReader[ConfA].from(confA).value shouldBe ConfA(1, 42)
 
-//       ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ b: 3 }""").root()
-//   }
+    val confB = ConfigFactory.parseString("""{ }""").root()
+    ConfigReader[ConfB[Long]].from(confB).value shouldBe ConfB[Long](1, "a", List.empty[Long])
 
-//   it should "not write empty option fields" in {
-//     case class Conf(a: Int, b: Option[Int]) derives ConfigConvert
-
-//     ConfigWriter[Conf].to(Conf(42, Some(1))) shouldBe ConfigFactory.parseString("""{ a: 42, b: 1 }""").root()
-//     ConfigWriter[Conf].to(Conf(42, None)) shouldBe ConfigFactory.parseString("""{ a: 42 }""").root()
-//   }
-
-  // TODO: broken test at `given [T]: ConfigReader[ConfB[T]] = deriveReader`
-//   it should "invoke defaults when a key is not in the configuration" in {
-//     case class ConfA(a: Int, b: Int = 42)
-//     given ConfigReader[ConfA] = deriveReader
-//     case class ConfB[T](i: Int = 1, s: String = "a", l: List[T] = Nil)
-
-//     given [T]: ConfigReader[ConfB[T]] = deriveReader
-
-//     final case class SocketConfig(
-//         connectTimeout: FiniteDuration = 5.seconds,
-//         readTimeout: FiniteDuration = 12.seconds,
-//         keepAlive: Option[Boolean] = None,
-//         reuseAddress: Option[Boolean] = None,
-//         soLinger: Option[Int] = None,
-//         tcpNoDelay: Option[Boolean] = Some(true),
-//         receiveBufferSize: Option[Int] = None,
-//         sendBufferSize: Option[Int] = None
-//     )
-
-//     given ConfigReader[SocketConfig] = deriveReader
-
-//     val confA = ConfigFactory.parseString("""{ a: 1 }""").root()
-//     ConfigReader[ConfA].from(confA).value shouldBe ConfA(1, 42)
-
-//     val confB = ConfigFactory.parseString("""{ }""").root()
-//     ConfigReader[ConfB[Long]].from(confB).value shouldBe ConfB[Long](1, "a", List.empty[Long])
-
-//     val socketConf = ConfigFactory.parseString("""{ }""").root()
-//     ConfigReader[SocketConfig]
-//       .from(socketConf)
-//       .value shouldBe SocketConfig(5.seconds, 12.seconds, None, None, None, Some(true), None, None)
-//   }
+    val socketConf = ConfigFactory.parseString("""{ }""").root()
+    ConfigReader[SocketConfig]
+      .from(socketConf)
+      .value shouldBe SocketConfig(5.seconds, 12.seconds, None, None, None, Some(true), None, None)
+  }
 
   it should "consider default arguments by default" in {
     case class InnerConf(e: Int, g: Int)

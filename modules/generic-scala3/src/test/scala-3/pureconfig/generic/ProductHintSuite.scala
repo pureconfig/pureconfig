@@ -38,19 +38,6 @@ class ProductHintSuite extends BaseSuite {
     conf.to[ConfWithCamelCase] shouldBe Right(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
-//   it should "write kebab case config keys from camel case fields by default" in {
-//     given ConfigWriter[ConfWithCamelCase] = ConfigWriter.derived
-
-//     val conf = confWithCamelCase.toConfig.asInstanceOf[ConfigObject]
-//     allKeys(conf) should contain theSameElementsAs Seq(
-//       "camel-case-int",
-//       "camel-case-string",
-//       "camel-case-conf",
-//       "this-is-an-int",
-//       "this-is-another-int"
-//     )
-//   }
-
   it should "allow customizing the field mapping through a product hint" in {
     val conf = ConfigFactory
       .parseString("""{
@@ -90,20 +77,6 @@ class ProductHintSuite extends BaseSuite {
     conf.to[ConfWithCamelCase] shouldBe Right(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
-//   it should "write camel case config keys to camel case fields when configured to do so" in {
-//     given [A]: ProductHint[A] = ProductHint(ConfigFieldMapping(CamelCase, CamelCase))
-//     given ConfigConvert[ConfWithCamelCase] = ConfigConvert.derived
-
-//     val conf = confWithCamelCase.toConfig.asInstanceOf[ConfigObject]
-//     allKeys(conf) should contain theSameElementsAs Seq(
-//       "camelCaseInt",
-//       "camelCaseString",
-//       "camelCaseConf",
-//       "thisIsAnInt",
-//       "thisIsAnotherInt"
-//     )
-//   }
-
   it should "read pascal case config keys to pascal case fields when configured to do so" in {
     given [A]: ProductHint[A] = ProductHint(ConfigFieldMapping(CamelCase, PascalCase))
     given ConfigReader[ConfWithCamelCase] = deriveReader
@@ -119,20 +92,6 @@ class ProductHintSuite extends BaseSuite {
 
     conf.to[ConfWithCamelCase] shouldBe Right(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
-
-//   it should "write pascal case config keys to pascal case fields when configured to do so" in {
-//     given [A]: ProductHint[A] = ProductHint(ConfigFieldMapping(CamelCase, PascalCase))
-//     given ConfigConvert[ConfWithCamelCase] = ConfigConvert.derived
-
-//     val conf = ConfWithCamelCase(1, "foobar", ConfWithCamelCaseInner(2, 3)).toConfig.asInstanceOf[ConfigObject]
-//     allKeys(conf) should contain theSameElementsAs Seq(
-//       "CamelCaseInt",
-//       "CamelCaseString",
-//       "CamelCaseConf",
-//       "ThisIsAnInt",
-//       "ThisIsAnotherInt"
-//     )
-//   }
 
   it should "allow customizing the field mapping only for specific types" in {
     given ProductHint[ConfWithCamelCase] = ProductHint(ConfigFieldMapping(CamelCase, CamelCase))
