@@ -12,8 +12,8 @@ import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.derivation.Utils
 import pureconfig.generic.derivation.Utils.widen
 
-trait ProductConfigReaderDerivation:
-  self: ConfigReaderDerivation =>
+trait HintsAwareProductConfigReaderDerivation:
+  self: HintsAwareConfigReaderDerivation =>
 
   inline def deriveProductReader[A](using
       m: Mirror.ProductOf[A],

@@ -94,9 +94,7 @@ lazy val commonSettings = Seq(
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))
   ),
 
-  // scalaVersion := scala212,
-  // TODO: temporary, for development only
-  scalaVersion := scala3,
+  scalaVersion := scala212,
 
   resolvers ++= Resolver.sonatypeOssRepos("releases"),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),

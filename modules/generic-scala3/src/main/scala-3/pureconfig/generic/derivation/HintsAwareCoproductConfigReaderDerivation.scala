@@ -8,8 +8,8 @@ import scala.deriving.Mirror
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.error.InvalidCoproductOption
 
-trait CoproductConfigReaderDerivation:
-  self: ConfigReaderDerivation =>
+trait HintsAwareCoproductConfigReaderDerivation:
+  self: HintsAwareConfigReaderDerivation =>
 
   inline def deriveSumReader[A](using m: Mirror.SumOf[A], ch: CoproductHint[A], ph: ProductHint[A]): ConfigReader[A] =
     new ConfigReader[A]:
