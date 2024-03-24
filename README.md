@@ -37,6 +37,14 @@ To use PureConfig in an existing SBT project with Scala 2.12 or a later version,
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.6"
 ```
 
+For Scala 3, add the following dependency to your `build.sbt`:
+
+```scala
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "0.17.6"
+```
+
+While a lot of the documentation will also apply to Scala 3, there is a specific guide for Scala 3's derivation that you can [find here](scala-3-derivation.html).
+
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).
 
 Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig.
