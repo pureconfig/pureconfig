@@ -1,7 +1,7 @@
 package pureconfig.generic
 package derivation
 
-import scala.compiletime.{constValue, erasedValue, summonFrom, summonInline}
+import scala.compiletime.{constValue, erasedValue}
 import scala.deriving.Mirror
 
 object Utils {
