@@ -1,14 +1,15 @@
 package pureconfig
+package generic
 
-import scala.collection.JavaConverters.given
-import scala.concurrent.duration.*
+import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 
 import pureconfig.ConfigConvert.catchReadError
-import pureconfig.*
+import pureconfig._
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
 import pureconfig.generic.semiauto.deriveReader
 
@@ -92,9 +93,8 @@ class ProductReaderDerivationSuite extends BaseSuite {
     case class EnclosingConf(conf: InnerConf)
     given ConfigReader[EnclosingConf] = deriveReader
 
-    given ConfigReader[InnerConf] with {
+    given ConfigReader[InnerConf] with
       def from(cv: ConfigCursor) = Right(InnerConf(42))
-    }
 
     ConfigReader[EnclosingConf].from(emptyConf) should failWith(KeyNotFound("conf"))
   }
@@ -106,16 +106,14 @@ class ProductReaderDerivationSuite extends BaseSuite {
     ConfigReader[Conf].from(conf) should failWith(KeyNotFound("b"))
 
     locally {
-      given ConfigReader[Int] with ReadsMissingKeys with {
+      given ConfigReader[Int] with ReadsMissingKeys with
         def from(cur: ConfigCursor) =
           cur.asConfigValue.fold(
             _ => Right(42),
-            v => {
+            v =>
               val s = v.render(ConfigRenderOptions.concise)
               cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
-            }
           )
-      }
       given ConfigReader[Conf] = deriveReader
 
       ConfigReader[Conf].from(conf).value shouldBe Conf(1, 42)
@@ -206,4 +204,5 @@ class ProductReaderDerivationSuite extends BaseSuite {
     val conf = ConfigFactory.parseString("ls = [{ ls = [] }, { ls = [{ ls = [] }] }]").root()
     ConfigReader[RecType].from(conf).value shouldBe RecType(List(RecType(Nil), RecType(List(RecType(Nil)))))
   }
+
 }

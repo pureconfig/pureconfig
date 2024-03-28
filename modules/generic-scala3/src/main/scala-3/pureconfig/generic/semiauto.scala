@@ -1,6 +1,7 @@
 package pureconfig.generic
 
-import pureconfig.generic.derivation.*
+import scala3.HintsAwareConfigReaderDerivation
 
-object semiauto:
+object semiauto {
   export HintsAwareConfigReaderDerivation.deriveReader
+}

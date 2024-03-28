@@ -1,12 +1,13 @@
 package pureconfig
+package generic
 
-import com.typesafe.config.*
+import com.typesafe.config._
 
-import pureconfig.error.*
-import pureconfig.generic.*
+import pureconfig.error._
+import pureconfig.generic._
 import pureconfig.generic.error.{CoproductHintException, UnexpectedValueForFieldCoproductHint}
 import pureconfig.generic.semiauto.deriveReader
-import pureconfig.syntax.*
+import pureconfig.syntax._
 
 class CoproductHintSuite extends BaseSuite {
   enum AnimalConfig {
@@ -15,7 +16,7 @@ class CoproductHintSuite extends BaseSuite {
     case BirdConfig(canFly: Boolean)
   }
 
-  import AnimalConfig.*
+  import AnimalConfig._
 
   behavior of "CoproductHint"
 
@@ -144,4 +145,5 @@ class CoproductHintSuite extends BaseSuite {
       }
     }
   }
+
 }

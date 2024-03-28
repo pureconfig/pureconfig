@@ -1,11 +1,12 @@
 package pureconfig
+package generic
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueFactory}
 
-import pureconfig.*
-import pureconfig.error.*
-import pureconfig.error.ConvertFailure as ConfigReaderConvertFailure
-import pureconfig.generic.*
+import pureconfig._
+import pureconfig.error._
+import pureconfig.error.{ConvertFailure => ConfigReaderConvertFailure}
+import pureconfig.generic._
 import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 import pureconfig.generic.semiauto.deriveReader
 
@@ -15,10 +16,9 @@ class CoproductReaderDerivationSuite extends BaseSuite {
     case CatConfig(age: Int)
     case BirdConfig(canFly: Boolean)
   }
-
   given ConfigReader[AnimalConfig] = deriveReader
 
-  import AnimalConfig.*
+  import AnimalConfig._
 
   behavior of "CoproductReader"
 

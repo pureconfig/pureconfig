@@ -1,13 +1,14 @@
 package pureconfig
+package generic
 
-import scala.collection.JavaConverters.*
+import scala.collection.JavaConverters._
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
 
-import pureconfig.error.*
+import pureconfig.error._
 import pureconfig.generic.ProductHint
 import pureconfig.generic.semiauto.deriveReader
-import pureconfig.syntax.*
+import pureconfig.syntax._
 
 class ProductHintSuite extends BaseSuite {
 
@@ -19,9 +20,8 @@ class ProductHintSuite extends BaseSuite {
   val confWithCamelCase = ConfWithCamelCase(1, "foobar", ConfWithCamelCaseInner(2, 3))
 
   /** return all the keys in a `ConfigObject` */
-  def allKeys(configObject: ConfigObject): Set[String] = {
+  def allKeys(configObject: ConfigObject): Set[String] =
     configObject.toConfig().entrySet().asScala.flatMap(_.getKey.split('.')).toSet
-  }
 
   it should "read kebab case config keys to camel case fields by default" in {
     given ConfigReader[ConfWithCamelCase] = deriveReader
@@ -125,7 +125,7 @@ class ProductHintSuite extends BaseSuite {
     }""")
 
     conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
-    conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4)) // borked
+    conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4))
   }
 
   it should "accumulate all failures if the product hint doesn't allow unknown keys" in {

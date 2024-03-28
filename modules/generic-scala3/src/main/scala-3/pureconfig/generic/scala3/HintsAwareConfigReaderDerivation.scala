@@ -1,18 +1,23 @@
 package pureconfig
 package generic
-package derivation
+package scala3
 
 import scala.deriving.Mirror
 
 trait HintsAwareConfigReaderDerivation
     extends HintsAwareCoproductConfigReaderDerivation,
-      HintsAwareProductConfigReaderDerivation:
+      HintsAwareProductConfigReaderDerivation {
   inline def deriveReader[A](using m: Mirror.Of[A], ph: ProductHint[A], cph: CoproductHint[A]): ConfigReader[A] =
-    inline m match
+    inline m match {
       case given Mirror.ProductOf[A] => deriveProductReader[A]
       case given Mirror.SumOf[A] => deriveSumReader[A]
+    }
+}
 
-object HintsAwareConfigReaderDerivation extends HintsAwareConfigReaderDerivation:
-  object syntax:
-    extension (c: ConfigReader.type)
+object HintsAwareConfigReaderDerivation extends HintsAwareConfigReaderDerivation {
+  object syntax {
+    extension (c: ConfigReader.type) {
       inline def derived[A](using Mirror.Of[A], ProductHint[A], CoproductHint[A]): ConfigReader[A] = deriveReader[A]
+    }
+  }
+}
