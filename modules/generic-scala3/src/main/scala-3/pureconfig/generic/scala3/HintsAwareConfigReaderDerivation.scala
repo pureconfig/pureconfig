@@ -2,6 +2,7 @@ package pureconfig
 package generic
 package scala3
 
+import scala.compiletime._
 import scala.deriving.Mirror
 
 trait HintsAwareConfigReaderDerivation
@@ -11,6 +12,13 @@ trait HintsAwareConfigReaderDerivation
     inline m match {
       case given Mirror.ProductOf[A] => deriveProductReader[A]
       case given Mirror.SumOf[A] => deriveSumReader[A]
+    }
+
+  protected inline def summonConfigReader[A]: ConfigReader[A] =
+    summonFrom {
+      case reader: ConfigReader[A] => reader
+      case m: Mirror.Of[A] =>
+        deriveReader[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
     }
 }
 

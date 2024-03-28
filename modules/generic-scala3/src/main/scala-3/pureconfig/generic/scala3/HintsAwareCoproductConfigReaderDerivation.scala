@@ -45,18 +45,10 @@ trait HintsAwareCoproductConfigReaderDerivation { self: HintsAwareConfigReaderDe
           }
     }
 
-  inline def summonAllConfigReaders[T <: Tuple, A]: List[ConfigReader[A]] =
+  private inline def summonAllConfigReaders[T <: Tuple, A]: List[ConfigReader[A]] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         (summonConfigReader[h] :: summonAllConfigReaders[t, A]).asInstanceOf[List[ConfigReader[A]]]
       case _: EmptyTuple => Nil
     }
-
-  inline def summonConfigReader[A]: ConfigReader[A] =
-    summonFrom {
-      case reader: ConfigReader[A] => reader
-      case m: Mirror.Of[A] =>
-        deriveReader[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
-    }
-
 }

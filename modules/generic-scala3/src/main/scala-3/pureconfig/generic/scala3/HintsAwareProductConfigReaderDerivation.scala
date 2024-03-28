@@ -107,13 +107,6 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         Right(widen[EmptyTuple, T](EmptyTuple))
     }
 
-  private inline def summonConfigReader[A] =
-    summonFrom {
-      case reader: ConfigReader[A] => reader
-      case m: Mirror.Of[A] =>
-        deriveReader[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
-    }
-
 }
 
 private[scala3] object ProductDerivationMacros {
