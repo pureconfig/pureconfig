@@ -181,6 +181,9 @@ lazy val lintFlags = forScalaVersions {
 // Use the same Scala 2.12 version in the root project as in subprojects
 scalaVersion := scala212
 
+// temp, will be done in: https://github.com/pureconfig/pureconfig/pull/1643
+crossScalaVersions := Nil
+
 // do not publish the root project
 publish / skip := true
 

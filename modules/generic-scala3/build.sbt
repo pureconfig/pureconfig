@@ -1,3 +1,3 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala3)
+scalaVersion := scala3
