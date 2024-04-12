@@ -11,6 +11,7 @@ import org.scalacheck.Arbitrary
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig._
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
+import pureconfig.generic.scala3.HintsAwareConfigReaderDerivation.syntax._
 import pureconfig.generic.semiauto.deriveReader
 
 class ProductReaderDerivationSuite extends BaseSuite {
@@ -187,6 +188,18 @@ class ProductReaderDerivationSuite extends BaseSuite {
 
     val conf8 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> null).asJava).root()
     ConfigReader[Conf].from(conf8).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), None)
+  }
+
+  it should "evaluate defaults lazily" in {
+    def throwException: Nothing = throw new RuntimeException("Should not be evaluated")
+
+    case class ConfA(foo: String = throwException) derives ConfigReader
+    case class ConfB(bar: Option[ConfA]) derives ConfigReader
+    case class ConfC(baz: ConfA = ConfA(), foo: String = throwException) derives ConfigReader
+
+    ConfigSource.string("{ foo: bar }").load[ConfA] shouldBe Right(ConfA("bar"))
+    ConfigSource.string("{ }").load[ConfB] shouldBe Right(ConfB(None))
+    ConfigSource.string("{ baz: { foo: bar }, foo: bar }").load[ConfC] shouldBe Right(ConfC(ConfA("bar"), "bar"))
   }
 
   it should s"return a ${classOf[WrongType]} when a key has a wrong type" in {

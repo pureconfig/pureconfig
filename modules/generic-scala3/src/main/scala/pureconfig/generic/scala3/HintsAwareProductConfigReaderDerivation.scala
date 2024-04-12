@@ -12,6 +12,8 @@ import pureconfig.generic.ProductHint.UseOrDefault
 import pureconfig.generic.derivation.Utils
 import pureconfig.generic.derivation.Utils.widen
 
+import ProductDerivationMacros._
+
 trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDerivation =>
   inline def deriveProductReader[A](using pm: Mirror.ProductOf[A], ph: ProductHint[A]): ConfigReader[A] =
     inline erasedValue[A] match {
@@ -38,7 +40,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         new ConfigReader[A] {
           def from(cur: ConfigCursor): ConfigReader.Result[A] = {
             val tupleSize = summonInline[ValueOf[Tuple.Size[pm.MirroredElemTypes]]]
-            val defaults = ProductDerivationMacros.getDefaults[A](tupleSize.value)
+            val defaults = getDefaults[A](tupleSize.value)
 
             for {
               objCursor <- cur.asObjectCursor
@@ -54,7 +56,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
       objCursor: ConfigObjectCursor,
       labels: Vector[String],
       actions: Map[String, ProductHint.Action],
-      defaults: Vector[Option[Any]]
+      defaults: Vector[DefaultValue]
   ): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
@@ -67,7 +69,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         val head =
           (fieldHint, default) match {
             case (UseOrDefault(cursor, _), Some(defaultValue)) if cursor.isUndefined =>
-              Right(defaultValue.asInstanceOf[h])
+              Right(defaultValue().asInstanceOf[h])
             case (action, _) if reader.isInstanceOf[ReadsMissingKeys] || !action.cursor.isUndefined =>
               reader.from(action.cursor)
             case _ =>
@@ -106,9 +108,11 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
 }
 
 private[scala3] object ProductDerivationMacros {
-  inline def getDefaults[T](inline size: Int): Vector[Option[Any]] = ${ getDefaultsImpl[T]('size) }
+  type DefaultValue = Option[() => Any]
 
-  def getDefaultsImpl[T](size: Expr[Int])(using Quotes, Type[T]): Expr[Vector[Option[Any]]] = {
+  inline def getDefaults[T](inline size: Int): Vector[DefaultValue] = ${ getDefaultsImpl[T]('size) }
+
+  def getDefaultsImpl[T](size: Expr[Int])(using Quotes, Type[T]): Expr[Vector[DefaultValue]] = {
     import quotes.reflect._
 
     val n = size.valueOrError
@@ -122,7 +126,7 @@ private[scala3] object ProductDerivationMacros {
     val expr = Expr.ofSeq {
       (1 to n).map { i =>
         defaultMethodAt(i) match {
-          case Some(value) => '{ Some(${ callMethod(value).asExpr }) }
+          case Some(value) => '{ Some(() => ${ callMethod(value).asExpr }) }
           case None => Expr(None)
         }
       }
