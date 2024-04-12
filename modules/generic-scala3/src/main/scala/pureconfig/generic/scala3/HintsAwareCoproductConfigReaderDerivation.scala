@@ -10,10 +10,10 @@ import pureconfig.generic.derivation.Utils
 import pureconfig.generic.error.InvalidCoproductOption
 
 trait HintsAwareCoproductConfigReaderDerivation { self: HintsAwareConfigReaderDerivation =>
-  inline def deriveSumReader[A](using m: Mirror.SumOf[A], ch: CoproductHint[A], ph: ProductHint[A]): ConfigReader[A] =
+  inline def deriveSumReader[A](using cm: Mirror.SumOf[A], cph: CoproductHint[A]): ConfigReader[A] =
     new ConfigReader[A] {
       val labels = Utils.transformedLabels(identity)
-      val readers = labels.zip(summonAllConfigReaders[m.MirroredElemTypes, A]).toMap
+      val readers = labels.zip(summonAllConfigReaders[cm.MirroredElemTypes, A]).toMap
 
       def from(cur: ConfigCursor): ConfigReader.Result[A] =
         summon[CoproductHint[A]]

@@ -13,18 +13,14 @@ import pureconfig.generic.derivation.Utils
 import pureconfig.generic.derivation.Utils.widen
 
 trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDerivation =>
-  inline def deriveProductReader[A](using
-      m: Mirror.ProductOf[A],
-      ch: CoproductHint[A],
-      ph: ProductHint[A]
-  ): ConfigReader[A] =
+  inline def deriveProductReader[A](using pm: Mirror.ProductOf[A], ph: ProductHint[A]): ConfigReader[A] =
     inline erasedValue[A] match {
       case _: Tuple =>
         new ConfigReader[A] {
           def from(cur: ConfigCursor): ConfigReader.Result[A] =
             for {
               listCur <- asList(cur)
-              result <- readTuple[A & Tuple, 0](listCur.list)
+              result <- readTuple[A & Tuple, 0](listCur.list.toVector)
             } yield result
 
           def asList(cur: ConfigCursor) =
@@ -41,22 +37,22 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
       case _ =>
         new ConfigReader[A] {
           def from(cur: ConfigCursor): ConfigReader.Result[A] = {
-            val tupleSize = summonInline[ValueOf[Tuple.Size[m.MirroredElemTypes]]]
+            val tupleSize = summonInline[ValueOf[Tuple.Size[pm.MirroredElemTypes]]]
             val defaults = ProductDerivationMacros.getDefaults[A](tupleSize.value)
 
             for {
               objCursor <- cur.asObjectCursor
-              labels = Utils.transformedLabels(identity)
+              labels = Utils.transformedLabels(identity).toVector
               actions = labels.map { label => label -> ph.from(objCursor, label) }.toMap
-              result <- readCaseClass[m.MirroredElemTypes, 0, A](objCursor, labels, actions, defaults)
-            } yield m.fromProduct(result)
+              result <- readCaseClass[pm.MirroredElemTypes, 0, A](objCursor, labels, actions, defaults)
+            } yield pm.fromProduct(result)
           }
         }
     }
 
-  private inline def readCaseClass[T <: Tuple, N <: Int, A: ProductHint: CoproductHint](
+  private inline def readCaseClass[T <: Tuple, N <: Int, A: ProductHint](
       objCursor: ConfigObjectCursor,
-      labels: List[String],
+      labels: Vector[String],
       actions: Map[String, ProductHint.Action],
       defaults: Vector[Option[Any]]
   ): Either[ConfigReaderFailures, T] =
@@ -91,7 +87,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         Right(widen[EmptyTuple, T](EmptyTuple))
     }
 
-  private inline def readTuple[T <: Tuple, N <: Int](cursors: List[ConfigCursor]): Either[ConfigReaderFailures, T] =
+  private inline def readTuple[T <: Tuple, N <: Int](cursors: Vector[ConfigCursor]): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]

@@ -10,8 +10,8 @@ trait HintsAwareConfigReaderDerivation
       HintsAwareProductConfigReaderDerivation {
   inline def deriveReader[A](using m: Mirror.Of[A], ph: ProductHint[A], cph: CoproductHint[A]): ConfigReader[A] =
     inline m match {
-      case given Mirror.ProductOf[A] => deriveProductReader[A]
-      case given Mirror.SumOf[A] => deriveSumReader[A]
+      case pm: Mirror.ProductOf[A] => deriveProductReader[A](using pm, ph)
+      case sm: Mirror.SumOf[A] => deriveSumReader[A](using sm, cph)
     }
 
   protected inline def summonConfigReader[A]: ConfigReader[A] =
