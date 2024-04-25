@@ -10,7 +10,7 @@ object Dependencies {
 
     val scalaTest = "3.2.18"
     val scalaTestPlusScalaCheck = "3.2.18.0"
-    val scalaCheck = "1.17.0"
+    val scalaCheck = "1.18.0"
   }
 
   // testing libraries
