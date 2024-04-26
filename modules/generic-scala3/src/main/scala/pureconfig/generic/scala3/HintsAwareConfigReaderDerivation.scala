@@ -22,10 +22,4 @@ trait HintsAwareConfigReaderDerivation
     }
 }
 
-object HintsAwareConfigReaderDerivation extends HintsAwareConfigReaderDerivation {
-  object syntax {
-    extension (c: ConfigReader.type) {
-      inline def derived[A](using Mirror.Of[A], ProductHint[A], CoproductHint[A]): ConfigReader[A] = deriveReader[A]
-    }
-  }
-}
+object HintsAwareConfigReaderDerivation extends HintsAwareConfigReaderDerivation
