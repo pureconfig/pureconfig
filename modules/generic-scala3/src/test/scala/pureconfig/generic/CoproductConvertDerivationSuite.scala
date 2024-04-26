@@ -2,25 +2,34 @@ package pureconfig
 package generic
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueFactory}
+import org.scalacheck.{Arbitrary, Gen}
 
 import pureconfig._
 import pureconfig.error._
 import pureconfig.error.{ConvertFailure => ConfigReaderConvertFailure}
 import pureconfig.generic._
 import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
-import pureconfig.generic.semiauto.deriveReader
+import pureconfig.generic.semiauto._
 
-class CoproductReaderDerivationSuite extends BaseSuite {
+class CoproductConvertDerivationSuite extends BaseSuite {
   enum AnimalConfig {
     case DogConfig(age: Int)
     case CatConfig(age: Int)
     case BirdConfig(canFly: Boolean)
   }
-  given ConfigReader[AnimalConfig] = deriveReader
+  given ConfigConvert[AnimalConfig] = deriveConvert
 
   import AnimalConfig._
 
-  behavior of "CoproductReader"
+  behavior of "ConfigConvert"
+
+  val genBirdConfig: Gen[BirdConfig] = Arbitrary.arbBool.arbitrary.map(BirdConfig.apply)
+  val genCatConfig: Gen[CatConfig] = Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
+  val genDogConfig: Gen[DogConfig] = Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
+  val genAnimalConfig: Gen[AnimalConfig] = Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
+  given Arbitrary[AnimalConfig] = Arbitrary(genAnimalConfig)
+
+  checkArbitrary[AnimalConfig]
 
   it should "read disambiguation information on sealed families by default" in {
     val conf = ConfigFactory.parseString("{ type = dog-config, age = 2 }")

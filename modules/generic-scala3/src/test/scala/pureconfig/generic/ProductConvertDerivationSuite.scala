@@ -11,11 +11,48 @@ import org.scalacheck.Arbitrary
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig._
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
-import pureconfig.generic.semiauto.deriveReader
+import pureconfig.generic.semiauto._
 
-class ProductReaderDerivationSuite extends BaseSuite {
+class ProductConvertDerivationSuite extends BaseSuite {
 
-  behavior of "ProductReader"
+  behavior of "ConfigConvert"
+
+  /* A configuration with only simple values and `Option` */
+  case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
+  given ConfigConvert[FlatConfig] = deriveConvert
+
+  /* A configuration with a field of a type that is unknown to `ConfigConvert` */
+  class MyType(myField: String) {
+    def getMyField: String = myField
+    override def equals(obj: Any): Boolean =
+      obj match {
+        case mt: MyType => myField.equals(mt.getMyField)
+        case _ => false
+      }
+  }
+  case class ConfigWithUnknownType(d: MyType)
+  given ConfigConvert[ConfigWithUnknownType] = deriveConvert
+
+  case class RecType(ls: List[RecType])
+
+  given Arbitrary[FlatConfig] = Arbitrary {
+    Arbitrary.arbitrary[(Boolean, Double, Float, Int, Long, String, Option[String])].map((FlatConfig.apply _).tupled)
+  }
+
+  given Arbitrary[MyType] = Arbitrary {
+    Arbitrary.arbitrary[String].map(MyType(_))
+  }
+
+  given Arbitrary[ConfigWithUnknownType] = Arbitrary {
+    Arbitrary.arbitrary[MyType].map(ConfigWithUnknownType.apply)
+  }
+
+  // tests
+
+  checkArbitrary[FlatConfig]
+
+  given ConfigConvert[MyType] = ConfigConvert.viaString[MyType](catchReadError(new MyType(_)), _.getMyField)
+  checkArbitrary[ConfigWithUnknownType]
 
   it should s"be able to override all of the ConfigReader instances used to parse the product elements" in {
     case class FlatConfig(b: Boolean, d: Double, f: Float, i: Int, l: Long, s: String, o: Option[String])
@@ -46,6 +83,51 @@ class ProductReaderDerivationSuite extends BaseSuite {
   }
 
   val emptyConf = ConfigFactory.empty().root()
+
+  it should s"return a ${classOf[KeyNotFound]} when a key is not in the configuration" in {
+    case class Foo(i: Int)
+    given ConfigConvert[Foo] = deriveConvert
+
+    ConfigConvert[Foo].from(emptyConf) should failWith(KeyNotFound("i"))
+  }
+
+  it should s"return a ${classOf[KeyNotFound]} when a custom convert is used and when a key is not in the configuration" in {
+    case class InnerConf(v: Int)
+    case class EnclosingConf(conf: InnerConf)
+    given ConfigConvert[EnclosingConf] = deriveConvert
+
+    given ConfigConvert[InnerConf] = new ConfigConvert[InnerConf] {
+      def from(cv: ConfigCursor) = Right(InnerConf(42))
+      def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
+    }
+
+    ConfigConvert[EnclosingConf].from(emptyConf) should failWith(KeyNotFound("conf"))
+  }
+
+  it should "allow custom ConfigWriters to handle missing keys" in {
+    case class Conf(a: Int, b: Int)
+    given ConfigWriter[Conf] = deriveWriter
+
+    ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ a: 0, b: 3 }""").root()
+
+    {
+      given ConfigWriter[Int] = new ConfigWriter[Int] with WritesMissingKeys[Int] {
+        def to(v: Int) = ConfigValueFactory.fromAnyRef(v)
+        def toOpt(a: Int) = if (a == 0) None else Some(to(a))
+      }
+      given ConfigWriter[Conf] = deriveWriter
+
+      ConfigWriter[Conf].to(Conf(0, 3)) shouldBe ConfigFactory.parseString("""{ b: 3 }""").root()
+    }
+  }
+
+  it should "not write empty option fields" in {
+    case class Conf(a: Int, b: Option[Int])
+    given ConfigConvert[Conf] = deriveConvert
+
+    ConfigConvert[Conf].to(Conf(42, Some(1))) shouldBe ConfigFactory.parseString("""{ a: 42, b: 1 }""").root()
+    ConfigConvert[Conf].to(Conf(42, None)) shouldBe ConfigFactory.parseString("""{ a: 42 }""").root()
+  }
 
   it should s"succeed with a correct config" in {
     case class Foo(i: Int, s: String, bs: List[Boolean])
@@ -80,23 +162,6 @@ class ProductReaderDerivationSuite extends BaseSuite {
     given ConfigReader[Foo] = deriveReader
     val conf = ConfigFactory.parseString("""{ values: [ true, 5, "value" ] }""").root()
     ConfigReader[Foo].from(conf) should failWithReason[WrongSizeList]
-  }
-
-  it should s"return a ${classOf[KeyNotFound]} when a key is not in the configuration" in {
-    case class Foo(i: Int)
-    given ConfigReader[Foo] = deriveReader
-    ConfigReader[Foo].from(emptyConf) should failWith(KeyNotFound("i"))
-  }
-
-  it should s"return a ${classOf[KeyNotFound]} when a custom convert is used and when a key is not in the configuration" in {
-    case class InnerConf(v: Int)
-    case class EnclosingConf(conf: InnerConf)
-    given ConfigReader[EnclosingConf] = deriveReader
-
-    given ConfigReader[InnerConf] with
-      def from(cv: ConfigCursor) = Right(InnerConf(42))
-
-    ConfigReader[EnclosingConf].from(emptyConf) should failWith(KeyNotFound("conf"))
   }
 
   it should "allow custom ConfigReaders to handle missing keys" in {
