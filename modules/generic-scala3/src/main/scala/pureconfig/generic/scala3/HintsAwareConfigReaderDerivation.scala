@@ -8,17 +8,16 @@ import scala.deriving.Mirror
 trait HintsAwareConfigReaderDerivation
     extends HintsAwareCoproductConfigReaderDerivation,
       HintsAwareProductConfigReaderDerivation {
-  inline def deriveReader[A](using m: Mirror.Of[A], ph: ProductHint[A], cph: CoproductHint[A]): ConfigReader[A] =
+  inline def deriveReader[A](using m: Mirror.Of[A]): ConfigReader[A] =
     inline m match {
-      case pm: Mirror.ProductOf[A] => deriveProductReader[A](using pm, ph)
-      case sm: Mirror.SumOf[A] => deriveSumReader[A](using sm, cph)
+      case pm: Mirror.ProductOf[A] => deriveProductReader[A](using pm, summonInline[ProductHint[A]])
+      case sm: Mirror.SumOf[A] => deriveSumReader[A](using sm, summonInline[CoproductHint[A]])
     }
 
   protected inline def summonConfigReader[A]: ConfigReader[A] =
     summonFrom {
       case reader: ConfigReader[A] => reader
-      case m: Mirror.Of[A] =>
-        deriveReader[A](using m, summonInline[ProductHint[A]], summonInline[CoproductHint[A]])
+      case given Mirror.Of[A] => deriveReader[A]
     }
 }
 
