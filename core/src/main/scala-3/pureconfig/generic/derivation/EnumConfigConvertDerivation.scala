@@ -5,14 +5,14 @@ package derivation
 import scala.compiletime.{constValue, erasedValue, error, summonInline}
 import scala.deriving.Mirror
 
+import com.typesafe.config.ConfigValue
+
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.derivation.Utils._
 
-import com.typesafe.config.ConfigValue
-
 type EnumConfigConvert[A] = EnumConfigConvertDerivation.Default.EnumConfigConvert[A]
 
-trait EnumConfigConvertDerivation(transformName: String => String) extends EnumConfigReaderDerivation, EnumConfigWriterDerivation {
+trait EnumConfigConvertDerivation extends EnumConfigReaderDerivation, EnumConfigWriterDerivation {
   trait EnumConfigConvert[A] extends ConfigConvert[A]
   object EnumConfigConvert {
     inline def derived[A: Mirror.SumOf]: EnumConfigConvert[A] =
@@ -27,6 +27,10 @@ trait EnumConfigConvertDerivation(transformName: String => String) extends EnumC
 }
 
 object EnumConfigConvertDerivation {
-    // parameterized trait Kek is indirectly implemented, needs to be implemented directly so that arguments can be passed ???
-  object Default extends EnumConfigConvertDerivation(ConfigFieldMapping(PascalCase, KebabCase))
+  private lazy val defaultMapping = ConfigFieldMapping(PascalCase, KebabCase)
+
+  object Default
+      extends EnumConfigConvertDerivation,
+        EnumConfigReaderDerivation(defaultMapping),
+        EnumConfigWriterDerivation(defaultMapping)
 }

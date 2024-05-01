@@ -5,10 +5,10 @@ package derivation
 import scala.compiletime.{constValue, erasedValue, error, summonInline}
 import scala.deriving.Mirror
 
+import com.typesafe.config.{ConfigValue, ConfigValueFactory}
+
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.derivation.Utils._
-
-import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 
 type EnumConfigWriter[A] = EnumConfigWriterDerivation.Default.EnumConfigWriter[A]
 
