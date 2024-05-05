@@ -1,4 +1,4 @@
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.11.1")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.12.1")
 addSbtPlugin("com.47deg" % "sbt-microsites" % "1.4.4")
 addSbtPlugin("com.github.sbt" % "sbt-release" % "1.4.0")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
