@@ -4,8 +4,8 @@ import Utilities._
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core" % "0.14.6",
-  "io.circe" %% "circe-literal" % "0.14.6" % Test,
+  "io.circe" %% "circe-core" % "0.14.7",
+  "io.circe" %% "circe-literal" % "0.14.7" % Test,
   "org.typelevel" %% "jawn-parser" % "1.5.1" % Test
 )
 
