@@ -2,10 +2,10 @@ package pureconfig
 package generic
 package scala3
 
-import scala.collection.JavaConverters.given
 import scala.compiletime._
 import scala.compiletime.ops.int._
 import scala.deriving.Mirror
+import scala.jdk.CollectionConverters.given
 import scala.quoted._
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}

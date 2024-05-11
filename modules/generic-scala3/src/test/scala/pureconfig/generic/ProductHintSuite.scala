@@ -1,7 +1,7 @@
 package pureconfig
 package generic
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.given
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
 

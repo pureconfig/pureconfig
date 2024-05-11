@@ -1,8 +1,8 @@
 package pureconfig
 package generic
 
-import scala.collection.JavaConverters._
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters.given
 import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
