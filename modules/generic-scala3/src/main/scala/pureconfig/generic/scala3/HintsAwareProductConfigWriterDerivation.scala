@@ -56,10 +56,10 @@ trait HintsAwareProductConfigWriterDerivation { self: HintsAwareConfigWriterDeri
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]
-        def value[T] = product.productElement(n).asInstanceOf[T]
+        val value = product.productElement(n).asInstanceOf[h]
 
         val valueOpt = summonConfigWriter[h] match {
-          case writer: WritesMissingKeys[h] => writer.toOpt(value)
+          case writer: WritesMissingKeys[`h` @unchecked] => writer.toOpt(value)
           case writer => Some(writer.to(value))
         }
 
