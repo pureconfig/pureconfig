@@ -8,7 +8,7 @@ import scala.deriving.Mirror
 import com.typesafe.config.ConfigValue
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
-import pureconfig.generic.derivation.Utils._
+import pureconfig.generic.derivation.Utils.*
 
 type EnumConfigConvert[A] = EnumConfigConvertDerivation.Default.EnumConfigConvert[A]
 

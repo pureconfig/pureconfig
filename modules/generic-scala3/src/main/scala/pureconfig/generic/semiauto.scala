@@ -10,9 +10,8 @@ import scala3._
 object semiauto {
   export HintsAwareConfigReaderDerivation.deriveReader
   export HintsAwareConfigWriterDerivation.deriveWriter
-  export EnumDerivation._
+  export EnumDerivationUtils._
 
   inline def deriveConvert[A: Mirror.Of]: ConfigConvert[A] =
     ConfigConvert.fromReaderAndWriter(deriveReader[A], deriveWriter[A])
-
 }

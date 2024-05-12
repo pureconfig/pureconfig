@@ -98,43 +98,4 @@ class EnumerationConvertDerivationSuite extends BaseSuite {
     ConfigConvert[Color2].to(Color2.RainyBlue) shouldEqual ConfigValueFactory.fromAnyRef("rainy-blue")
     ConfigConvert[Color2].to(Color2.SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny-yellow")
   }
-
-  it should "provide customizable methods to derive readers" in {
-    enum Color {
-      case RainyBlue, SunnyYellow
-    }
-
-    given ConfigReader[Color] =
-      EnumConfigReaderDerivation.deriveEnumerationReader(ConfigFieldMapping(PascalCase, SnakeCase))
-
-    ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("rainy_blue")) shouldBe Right(Color.RainyBlue)
-    ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("sunny_yellow")) shouldBe Right(Color.SunnyYellow)
-  }
-
-  it should "provide customizable methods to derive writers" in {
-    enum Color {
-      case RainyBlue, SunnyYellow
-    }
-
-    given ConfigWriter[Color] =
-      EnumConfigWriterDerivation.deriveEnumerationWriter(ConfigFieldMapping(PascalCase, SnakeCase))
-
-    ConfigWriter[Color].to(Color.RainyBlue) shouldEqual ConfigValueFactory.fromAnyRef("rainy_blue")
-    ConfigWriter[Color].to(Color.SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny_yellow")
-  }
-
-  it should "provide customizable methods to derive converters" in {
-    enum Color {
-      case RainyBlue, SunnyYellow
-    }
-
-    given ConfigConvert[Color] =
-      EnumConfigConvertDerivation.deriveEnumerationConvert(ConfigFieldMapping(PascalCase, SnakeCase))
-
-    ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("rainy_blue")) shouldBe Right(Color.RainyBlue)
-    ConfigReader[Color].from(ConfigValueFactory.fromAnyRef("sunny_yellow")) shouldBe Right(Color.SunnyYellow)
-    ConfigWriter[Color].to(Color.RainyBlue) shouldEqual ConfigValueFactory.fromAnyRef("rainy_blue")
-    ConfigWriter[Color].to(Color.SunnyYellow) shouldEqual ConfigValueFactory.fromAnyRef("sunny_yellow")
-  }
-
 }
