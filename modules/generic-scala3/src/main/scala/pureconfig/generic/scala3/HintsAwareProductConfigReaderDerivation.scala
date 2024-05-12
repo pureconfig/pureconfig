@@ -115,7 +115,7 @@ private[scala3] object ProductDerivationMacros {
   def getDefaultsImpl[T](size: Expr[Int])(using Quotes, Type[T]): Expr[Vector[DefaultValue]] = {
     import quotes.reflect._
 
-    val n = size.valueOrError
+    val n = size.valueOrAbort
     val typeRepr = TypeRepr.of[T]
 
     def defaultMethodAt(i: Int) =

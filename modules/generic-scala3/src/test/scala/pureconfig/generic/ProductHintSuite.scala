@@ -1,13 +1,13 @@
 package pureconfig
 package generic
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.given
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
 
 import pureconfig.error._
 import pureconfig.generic.ProductHint
-import pureconfig.generic.semiauto.deriveReader
+import pureconfig.generic.semiauto._
 import pureconfig.syntax._
 
 class ProductHintSuite extends BaseSuite {
@@ -36,6 +36,19 @@ class ProductHintSuite extends BaseSuite {
     }""")
 
     conf.to[ConfWithCamelCase] shouldBe Right(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
+  it should "write kebab case config keys from camel case fields by default" in {
+    given ConfigWriter[ConfWithCamelCase] = deriveWriter
+
+    val conf = confWithCamelCase.toConfig.asInstanceOf[ConfigObject]
+    allKeys(conf) should contain theSameElementsAs Seq(
+      "camel-case-int",
+      "camel-case-string",
+      "camel-case-conf",
+      "this-is-an-int",
+      "this-is-another-int"
+    )
   }
 
   it should "allow customizing the field mapping through a product hint" in {
@@ -77,6 +90,20 @@ class ProductHintSuite extends BaseSuite {
     conf.to[ConfWithCamelCase] shouldBe Right(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
   }
 
+  it should "write camel case config keys to camel case fields when configured to do so" in {
+    given [A]: ProductHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
+    given ConfigWriter[ConfWithCamelCase] = deriveWriter
+
+    val conf = confWithCamelCase.toConfig.asInstanceOf[ConfigObject]
+    allKeys(conf) should contain theSameElementsAs Seq(
+      "camelCaseInt",
+      "camelCaseString",
+      "camelCaseConf",
+      "thisIsAnInt",
+      "thisIsAnotherInt"
+    )
+  }
+
   it should "read pascal case config keys to pascal case fields when configured to do so" in {
     given [A]: ProductHint[A] = ProductHint(ConfigFieldMapping(CamelCase, PascalCase))
     given ConfigReader[ConfWithCamelCase] = deriveReader
@@ -91,6 +118,20 @@ class ProductHintSuite extends BaseSuite {
     }""")
 
     conf.to[ConfWithCamelCase] shouldBe Right(ConfWithCamelCase(1, "bar", ConfWithCamelCaseInner(3, 10)))
+  }
+
+  it should "write pascal case config keys to pascal case fields when configured to do so" in {
+    given [A]: ProductHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, PascalCase))
+    given ConfigWriter[ConfWithCamelCase] = deriveWriter
+
+    val conf = ConfWithCamelCase(1, "foobar", ConfWithCamelCaseInner(2, 3)).toConfig.asInstanceOf[ConfigObject]
+    allKeys(conf) should contain theSameElementsAs Seq(
+      "CamelCaseInt",
+      "CamelCaseString",
+      "CamelCaseConf",
+      "ThisIsAnInt",
+      "ThisIsAnotherInt"
+    )
   }
 
   it should "allow customizing the field mapping only for specific types" in {

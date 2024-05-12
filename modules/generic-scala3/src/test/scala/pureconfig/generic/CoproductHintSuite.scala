@@ -6,7 +6,7 @@ import com.typesafe.config._
 import pureconfig.error._
 import pureconfig.generic._
 import pureconfig.generic.error.{CoproductHintException, UnexpectedValueForFieldCoproductHint}
-import pureconfig.generic.semiauto.deriveReader
+import pureconfig.generic.semiauto._
 import pureconfig.syntax._
 
 class CoproductHintSuite extends BaseSuite {
@@ -30,6 +30,14 @@ class CoproductHintSuite extends BaseSuite {
       val conf = ConfigFactory.parseString("{ which-animal = Dog, age = 2 }")
 
       ConfigReader[AnimalConfig].from(conf.root()) shouldEqual Right(DogConfig(2))
+    }
+
+    it should "write values as expected when using a FieldCoproductHint" in {
+      given ConfigWriter[AnimalConfig] = deriveWriter
+      val conf = ConfigWriter[AnimalConfig].to(DogConfig(2))
+
+      conf shouldBe a[ConfigObject]
+      conf.asInstanceOf[ConfigObject].get("which-animal") shouldEqual ConfigValueFactory.fromAnyRef("Dog")
     }
 
     it should "fail to read values that are not objects when using a FieldCoproductHint" in {
@@ -79,16 +87,15 @@ class CoproductHintSuite extends BaseSuite {
       sealed trait Conf
       case class AmbiguousConf(typ: String) extends Conf
 
-      given convert: ConfigReader[Conf] = deriveReader
+      given convert: ConfigConvert[Conf] = deriveConvert
 
       given FieldCoproductHint[Conf] = FieldCoproductHint("typ")
 
       val conf = ConfigFactory.parseString("{ typ = ambiguous-conf }")
       convert.from(conf.root()) should failWithReason[KeyNotFound] // "typ" should not be passed to the coproduct option
 
-      // TODO: this part requires ConfigWriter, which is not yet implemented
-      // val ex = the[CoproductHintException] thrownBy convert.to(AmbiguousConf("ambiguous-conf"))
-      // ex.failure shouldEqual CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguous-conf"))
+      val ex = the[CoproductHintException] thrownBy convert.to(AmbiguousConf("ambiguous-conf"))
+      ex.failure shouldEqual CollidingKeys("typ", ConfigValueFactory.fromAnyRef("ambiguous-conf"))
     }
 
     {
@@ -99,6 +106,13 @@ class CoproductHintSuite extends BaseSuite {
         val conf = ConfigFactory.parseString("{ can-fly = true }")
 
         ConfigReader[AnimalConfig].from(conf.root()) shouldBe Right(BirdConfig(true))
+      }
+
+      it should "write values as expected when using a FirstSuccessCoproductHint" in {
+        given ConfigWriter[AnimalConfig] = deriveWriter
+        val conf = ConfigWriter[AnimalConfig].to(DogConfig(2))
+        conf shouldBe a[ConfigObject]
+        conf.asInstanceOf[ConfigObject].get("which-animal") shouldBe null
       }
     }
 
