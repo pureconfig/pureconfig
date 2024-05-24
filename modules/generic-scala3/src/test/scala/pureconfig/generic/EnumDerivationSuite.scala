@@ -11,8 +11,8 @@ import pureconfig._
 import pureconfig.error.{CannotConvert, WrongType}
 import pureconfig.generic.semiauto._
 
-class EnumDerivationUtilsSuite extends BaseSuite {
-  behavior of "EnumDerivationUtils"
+class EnumDerivationSuite extends BaseSuite {
+  behavior of "EnumDerivation"
 
   it should "provide util methods to derive readers" in {
     enum Color {

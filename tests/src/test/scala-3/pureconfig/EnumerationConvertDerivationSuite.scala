@@ -6,12 +6,35 @@ import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
 
-import pureconfig._
+import pureconfig.*
 import pureconfig.error.{CannotConvert, WrongType}
-import pureconfig.generic.derivation._
+import pureconfig.generic.derivation.*
 
-class EnumerationConvertDerivationSuite extends BaseSuite {
+class EnumConvertDerivationSuite extends BaseSuite {
   behavior of "EnumConfigConvert"
+
+  it should "not allow derivation of parametrized enums" in {
+    """
+    enum Color derives EnumConfigReader {
+      case RainyBlue[A](a: A)
+      case SunnyYellow
+    }
+    """ shouldNot compile
+
+    """
+    enum Color derives EnumConfigWriter {
+      case RainyBlue[A](a: A)
+      case SunnyYellow
+    }
+    """ shouldNot compile
+
+    """
+    enum Color derives EnumConfigConvert {
+      case RainyBlue[A](a: A)
+      case SunnyYellow
+    }
+    """ shouldNot compile
+  }
 
   it should "provide methods to derive readers for enumerations encoded as enums or sealed traits" in {
     enum Color derives EnumConfigReader {

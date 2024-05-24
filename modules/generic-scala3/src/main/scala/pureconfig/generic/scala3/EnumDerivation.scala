@@ -6,7 +6,7 @@ import scala.deriving.Mirror
 
 import pureconfig.generic.derivation._
 
-private[generic] object EnumDerivationUtils {
+private[generic] object EnumDerivation {
   inline def deriveEnumerationReader[A: Mirror.SumOf](transformName: String => String): ConfigReader[A] =
     (new EnumConfigReaderDerivation(transformName) {}).EnumConfigReader.derived[A]
 
