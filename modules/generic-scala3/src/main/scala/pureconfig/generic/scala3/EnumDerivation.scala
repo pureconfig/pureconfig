@@ -20,14 +20,11 @@ private[generic] object EnumDerivation {
     EnumConfigWriterDerivation.Default.EnumConfigWriter.derived[A]
 
   inline def deriveEnumerationConvert[A: Mirror.SumOf]: ConfigConvert[A] =
-    EnumConfigConvertDerivation.Default.EnumConfigConvert.derived[A]
+    EnumConfigConvert.derived[A]
 
-  inline def deriveEnumerationConvert[A: Mirror.SumOf](transformName: String => String): ConfigConvert[A] = {
-    object Instance
-        extends EnumConfigConvertDerivation,
-          EnumConfigReaderDerivation(transformName),
-          EnumConfigWriterDerivation(transformName)
-
-    Instance.EnumConfigConvert.derived[A]
-  }
+  inline def deriveEnumerationConvert[A: Mirror.SumOf](transformName: String => String): ConfigConvert[A] =
+    ConfigConvert.fromReaderAndWriter(
+      deriveEnumerationReader(transformName),
+      deriveEnumerationWriter(transformName)
+    )
 }
