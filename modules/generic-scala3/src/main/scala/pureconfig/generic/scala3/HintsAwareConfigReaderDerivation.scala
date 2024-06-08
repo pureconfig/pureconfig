@@ -8,6 +8,8 @@ import scala.deriving.Mirror
 trait HintsAwareConfigReaderDerivation
     extends HintsAwareCoproductConfigReaderDerivation,
       HintsAwareProductConfigReaderDerivation {
+  inline def deriveReader[A <: AnyVal]: ConfigReader[A] = AnyValDerivationMacros.deriveAnyValReader[A]
+
   inline def deriveReader[A](using m: Mirror.Of[A]): ConfigReader[A] =
     inline m match {
       case pm: Mirror.ProductOf[A] => deriveProductReader[A](using pm, summonInline[ProductHint[A]])

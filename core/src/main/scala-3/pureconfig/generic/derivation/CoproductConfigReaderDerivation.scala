@@ -7,7 +7,7 @@ import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.derivation.ConfigReaderDerivation
-import pureconfig.generic.derivation.Utils._
+import pureconfig.generic.derivation.Utils.*
 
 @deprecated(
   "Custom derivation is deprecated in pureconfig-core. If you only need the default behavior, please use the default `derives` behavior. If you need configuration please use the `pureconfig-generic-scala3` module instead.",
