@@ -3,15 +3,16 @@ package generic
 
 import pureconfig.generic.semiauto._
 
-// enum Foo {
-//   case Bar(value: Int)
-//   case Baz(value: String)
-// }
+final class IntWrapperA(val inner: Int) extends AnyVal {
+  override def toString: String = s"IntWrapperA($inner)"
+}
 
-// final class FooWrapper private (val value: Foo) extends AnyVal
+final class IntWrapperB(val inner: Int) extends AnyVal {
+  override def toString: String = s"IntWrapperB($inner)"
+}
 
-final class IntWrapper(val inner: Int) extends AnyVal {
-  override def toString: String = s"IntWrapper($inner)"
+final class IntWrapperC(val inner: Int) extends AnyVal {
+  override def toString: String = s"IntWrapperC($inner)"
 }
 
 final class PrivateFloatValue private (val value: Float) extends AnyVal
@@ -28,31 +29,29 @@ class ValueClassSuite extends BaseSuite {
 
   behavior of "ConfigConvert for Value Classes"
 
-//   given ConfigConvert[IntWrapper] = deriveConvert
-  // given ConfigReader[IntWrapper] = deriveReader
-  // given ConfigWriter[IntWrapper] = deriveWriter
-
-  // {
-  //   given ConfigReader[FooWrapper] = deriveReader
-
-  //   // checkRead[IntWrapper](ConfigWriter.forPrimitive[Int].to(1) -> new IntWrapper(1))
-  // }
-
   {
-    given ConfigReader[IntWrapper] = deriveReader
+    given ConfigReader[IntWrapperA] = deriveReader
 
-    checkRead[IntWrapper](ConfigWriter.forPrimitive[Int].to(1) -> new IntWrapper(1))
+    checkRead[IntWrapperA](ConfigWriter.forPrimitive[Int].to(1) -> IntWrapperA(1))
   }
 
   {
-    given ConfigWriter[IntWrapper] = deriveWriter
+    given ConfigWriter[IntWrapperB] = deriveWriter
 
-    checkWrite[IntWrapper](new IntWrapper(1) -> ConfigWriter.forPrimitive[Int].to(1))
+    checkWrite[IntWrapperB](IntWrapperB(1) -> ConfigWriter.forPrimitive[Int].to(1))
   }
 
-//   "ConfigReader[PrivateFloatValue]" should "not be derivable because the constructor is private" in {
-//     illTyped("pureconfig.ConfigReader[PrivateFloatValue]")
-//   }
+  {
+    given ConfigConvert[IntWrapperC] = deriveConvert
+
+    checkReadWrite[IntWrapperC](configValue("1") -> IntWrapperC(1))
+  }
+
+  "ConfigReader[PrivateFloatValue]" should "not be derivable because the constructor is private" in {
+    """
+    given ConfigReader[PrivateFloatValue] = deriveReader
+    """ shouldNot compile
+  }
 
   {
     trait Read[A] {
