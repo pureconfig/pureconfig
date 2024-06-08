@@ -4,8 +4,8 @@ import Utilities._
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "2.10.0",
-  "org.typelevel" %% "cats-laws" % "2.10.0" % "test",
+  "org.typelevel" %% "cats-core" % "2.12.0",
+  "org.typelevel" %% "cats-laws" % "2.12.0" % "test",
   "org.typelevel" %% "discipline-scalatest" % "2.2.0" % "test"
 )
 
