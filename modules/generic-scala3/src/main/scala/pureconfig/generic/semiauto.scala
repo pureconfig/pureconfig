@@ -12,6 +12,9 @@ object semiauto {
   export HintsAwareConfigWriterDerivation.deriveWriter
   export EnumDerivation._
 
+  inline def deriveConvert[A <: AnyVal]: ConfigConvert[A] =
+    ConfigConvert.fromReaderAndWriter(deriveReader[A], deriveWriter[A])
+
   inline def deriveConvert[A: Mirror.Of]: ConfigConvert[A] =
     ConfigConvert.fromReaderAndWriter(deriveReader[A], deriveWriter[A])
 }
