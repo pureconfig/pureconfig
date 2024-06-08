@@ -8,6 +8,8 @@ import scala.deriving.Mirror
 trait HintsAwareConfigWriterDerivation
     extends HintsAwareCoproductConfigWriterDerivation,
       HintsAwareProductConfigWriterDerivation {
+  inline def deriveWriter[A <: AnyVal]: ConfigWriter[A] = AnyValDerivationMacros.deriveAnyValWriter[A]
+
   inline def deriveWriter[A](using m: Mirror.Of[A]): ConfigWriter[A] =
     inline m match {
       case pm: Mirror.ProductOf[A] => deriveProductWriter[A](using pm, summonInline[ProductHint[A]])
