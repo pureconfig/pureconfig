@@ -6,7 +6,7 @@ import scala.compiletime.{constValue, erasedValue, error, summonInline}
 import scala.deriving.Mirror
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
-import pureconfig.generic.derivation.Utils._
+import pureconfig.generic.derivation.Utils.*
 
 type EnumConfigReader[A] = EnumConfigReaderDerivation.Default.EnumConfigReader[A]
 
