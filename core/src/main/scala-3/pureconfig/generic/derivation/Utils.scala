@@ -3,6 +3,7 @@ package derivation
 
 import scala.compiletime.{constValue, erasedValue}
 import scala.deriving.Mirror
+import scala.quoted._
 
 object Utils {
 
@@ -32,4 +33,11 @@ object Utils {
       case _: (h *: t) => transform(constValue[h & String]) :: transformedLabelsTuple[t](transform)
       case _: EmptyTuple => Nil
     }
+
+  object TypeName {
+    inline def apply[A]: String = ${ typeNameImpl[A] }
+
+    def typeNameImpl[A](using Type[A], Quotes): Expr[String] = Expr(Type.show[A])
+  }
+
 }
