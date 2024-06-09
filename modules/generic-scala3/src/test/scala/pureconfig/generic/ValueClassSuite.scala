@@ -15,6 +15,15 @@ final class IntWrapperC(val inner: Int) extends AnyVal {
   override def toString: String = s"IntWrapperC($inner)"
 }
 
+enum Foo {
+  case Bar(value: Int)
+  case Baz(value: String)
+}
+
+final case class FooWrapper(value: Foo) extends AnyVal
+
+final case class FooDoubleWrapper(value: FooWrapper)
+
 final class PrivateFloatValue private (val value: Float) extends AnyVal
 
 final class GenericValue[A] private (val t: A) extends AnyVal {
@@ -45,6 +54,20 @@ class ValueClassSuite extends BaseSuite {
     given ConfigConvert[IntWrapperC] = deriveConvert
 
     checkReadWrite[IntWrapperC](configValue("1") -> IntWrapperC(1))
+  }
+
+  {
+    given ConfigConvert[FooWrapper] = deriveConvert
+
+    checkReadWrite[FooWrapper](configValue("{ type: bar, value: 1 }") -> FooWrapper(Foo.Bar(1)))
+  }
+
+  {
+    given ConfigConvert[FooDoubleWrapper] = deriveConvert
+
+    checkReadWrite[FooDoubleWrapper](
+      configValue("{ value: { type: bar, value: 1 }}") -> FooDoubleWrapper(FooWrapper(Foo.Bar(1)))
+    )
   }
 
   "ConfigReader[PrivateFloatValue]" should "not be derivable because the constructor is private" in {

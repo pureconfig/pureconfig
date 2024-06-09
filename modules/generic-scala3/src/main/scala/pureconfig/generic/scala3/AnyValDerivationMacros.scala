@@ -3,12 +3,16 @@ package generic
 package scala3
 
 import scala.compiletime._
+import scala.deriving.Mirror
 import scala.quoted._
 
 private[pureconfig] object AnyValDerivationMacros {
-  inline def deriveAnyValReader[A <: AnyVal]: ConfigReader[A] = ${ deriveAnyValReaderImpl[A] }
 
-  def deriveAnyValReaderImpl[A <: AnyVal: Type](using Quotes): Expr[ConfigReader[A]] = {
+  /** Derive a `ConfigReader` for a value class. Can only be called after checking that `A` is a value class.
+    */
+  inline def unsafeDeriveAnyValReader[A]: ConfigReader[A] = ${ deriveAnyValReaderImpl[A] }
+
+  def deriveAnyValReaderImpl[A: Type](using Quotes): Expr[ConfigReader[A]] = {
     import quotes.reflect._
 
     val wrapperTypeRepr = TypeRepr.of[A]
@@ -16,18 +20,9 @@ private[pureconfig] object AnyValDerivationMacros {
     val underlyingField = wrapperSymbol.declaredFields.head
     val underlyingTypeRepr = wrapperTypeRepr.memberType(underlyingField)
 
-    // derive underlying reader and wrap it in a value class constructor
+    // derive underlying reader and wrap it into a value class
     underlyingTypeRepr.asType match {
       case '[t] =>
-        val underlyingReader = Expr
-          .summon[ConfigReader[t]]
-          .getOrElse {
-            // TODO: derive reader for underlying type if it's not found ?
-            report.errorAndAbort(
-              s"Cannot summon ConfigReader for value class ${wrapperTypeRepr.show} wrapping ${underlyingTypeRepr.show}."
-            )
-          }
-
         def wrap(expr: Expr[t]): Expr[A] =
           New(Inferred(wrapperTypeRepr))
             .select(wrapperSymbol.primaryConstructor)
@@ -35,14 +30,16 @@ private[pureconfig] object AnyValDerivationMacros {
             .asExprOf[A]
 
         '{
-          $underlyingReader.map(a => ${ wrap('a) })
+          HintsAwareConfigReaderDerivation.summonConfigReader[t].map(a => ${ wrap('a) })
         }
     }
   }
 
-  inline def deriveAnyValWriter[A <: AnyVal]: ConfigWriter[A] = ${ deriveAnyValWriterImpl[A] }
+  /** Derive a `ConfigWriter` for a value class. Can only be called after checking that `A` is a value class.
+    */
+  inline def unsafeDeriveAnyValWriter[A]: ConfigWriter[A] = ${ deriveAnyValWriterImpl[A] }
 
-  def deriveAnyValWriterImpl[A <: AnyVal: Type](using Quotes): Expr[ConfigWriter[A]] = {
+  def deriveAnyValWriterImpl[A: Type](using Quotes): Expr[ConfigWriter[A]] = {
     import quotes.reflect._
 
     val wrapperTypeRepr = TypeRepr.of[A]
@@ -53,15 +50,6 @@ private[pureconfig] object AnyValDerivationMacros {
     // derive underlying writer and unwrap it from a value class
     underlyingTypeRepr.asType match {
       case '[t] =>
-        val underlyingWriter = Expr
-          .summon[ConfigWriter[t]]
-          .getOrElse {
-            // TODO: derive reader for underlying type if it's not found ?
-            report.errorAndAbort(
-              s"Cannot summon ConfigWriter for value class ${wrapperTypeRepr.show} wrapping ${underlyingTypeRepr.show}."
-            )
-          }
-
         def unwrap(expr: Expr[A]): Expr[t] =
           expr.asTerm
             .select(underlyingField)
@@ -69,9 +57,16 @@ private[pureconfig] object AnyValDerivationMacros {
             .asExprOf[t]
 
         '{
-          $underlyingWriter.contramap[A](a => ${ unwrap('a) })
+          HintsAwareConfigWriterDerivation.summonConfigWriter[t].contramap[A](a => ${ unwrap('a) })
         }
     }
   }
 
+  inline def isAnyVal[A]: Boolean = ${ isAnyValImpl[A] }
+
+  def isAnyValImpl[A: Type](using Quotes): Expr[Boolean] = {
+    import quotes.reflect._
+
+    Expr(TypeRepr.of[A] <:< TypeRepr.of[AnyVal])
+  }
 }
