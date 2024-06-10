@@ -2,14 +2,18 @@ package pureconfig
 package generic
 package derivation
 
-import scala.compiletime.ops.int._
+import scala.compiletime.ops.int.*
 import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 import scala.util.chaining.*
 
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
-import pureconfig.generic.derivation.Utils._
+import pureconfig.generic.derivation.Utils.*
 
+@deprecated(
+  "Custom derivation is deprecated in pureconfig-core. If you only need the default behavior, please use the default `derives` behavior. If you need configuration please use the `pureconfig-generic-scala3` module instead.",
+  "0.17.7"
+)
 trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: ConfigReaderDerivation =>
   inline def derivedProduct[A](using m: Mirror.ProductOf[A]): ConfigReader[A] =
     inline erasedValue[A] match {

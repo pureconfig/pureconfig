@@ -4,10 +4,8 @@ import scala.language.higherKinds
 
 import com.typesafe.config.ConfigFactory
 
-import pureconfig._
-import pureconfig.error._
-import pureconfig.generic._
-import pureconfig.generic.derivation.default.derived
+import pureconfig.*
+import pureconfig.error.*
 
 enum AnimalConfig derives ConfigReader {
   case DogConfig(age: Int)
