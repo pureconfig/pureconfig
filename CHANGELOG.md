@@ -1,3 +1,9 @@
+### 0.17.7 (Jun 9, 2024)
+
+- New features
+  - Added support for Scala 3 derivation of `ConfigWriter` and `ConfigConvert` using a `derives` clause.
+  - Added a new `pureconfig-generic-scala3` module, a drop-in replacement of Scala 2's `pureconfig-generic` for semiauto derivation in Scala 3. It supports most of the types supported in `pureconfig-generic` and accepts product and coproduct hints.
+
 ### 0.17.6 (Feb 22, 2024)
 
 - New features

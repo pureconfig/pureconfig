@@ -8,7 +8,7 @@ for other classes are welcome :)
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-pekko-http" % "0.17.6"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-pekko-http" % "0.17.7"
 ```
 
 ## Example
