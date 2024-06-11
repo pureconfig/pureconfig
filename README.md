@@ -40,7 +40,7 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.7"
 For Scala 3, add the following dependency to your `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "0.17.6"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "0.17.7"
 ```
 
 While a lot of the documentation will also apply to Scala 3, there is a specific guide for Scala 3's derivation that you can [find here](scala-3-derivation.html).
