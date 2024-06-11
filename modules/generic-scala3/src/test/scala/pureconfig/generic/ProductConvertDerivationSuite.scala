@@ -289,7 +289,7 @@ class ProductConvertDerivationSuite extends BaseSuite {
   it should "work with derives clauses" in {
     case class Person(name: String, age: Int = -1) derives ConfigReader
 
-    ConfigSource.string("{ name = foo }").load[Person] shouldBe Right(Person("foo",-1))
+    ConfigSource.string("{ name = foo }").load[Person] shouldBe Right(Person("foo", -1))
   }
 
 }
