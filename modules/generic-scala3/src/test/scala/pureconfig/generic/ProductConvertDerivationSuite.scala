@@ -11,6 +11,7 @@ import org.scalacheck.Arbitrary
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig._
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
+import pureconfig.generic.scala3._
 import pureconfig.generic.semiauto._
 
 class ProductConvertDerivationSuite extends BaseSuite {
