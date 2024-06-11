@@ -14,6 +14,15 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "@VERSION@"
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).
 
+Users of Scala 3 need to add the following dependency to their `build.sbt`:
+
+```scala
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "@VERSION@"
+```
+
+While a lot of the documentation will also apply to Scala 3, there is a specific guide for Scala 3's derivation that you can [find here](scala-3-derivation.html).
+
+
 Earlier versions of Scala had bugs which can cause subtle compile-time problems in PureConfig.
 As a result we recommend only using the latest Scala versions within the minor series.
 
