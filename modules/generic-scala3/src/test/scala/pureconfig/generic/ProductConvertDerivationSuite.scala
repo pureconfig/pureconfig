@@ -286,4 +286,10 @@ class ProductConvertDerivationSuite extends BaseSuite {
     ConfigReader[RecType].from(conf).value shouldBe RecType(List(RecType(Nil), RecType(List(RecType(Nil)))))
   }
 
+  it should "work with derives clauses" in {
+    case class Person(name: String, age: Int = -1) derives ConfigReader
+
+    ConfigSource.string("{ name = foo }").load[Person] shouldBe Right(Person("foo",-1))
+  }
+
 }

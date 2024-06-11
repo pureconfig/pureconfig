@@ -53,7 +53,8 @@ class CoproductConvertDerivationSuite extends BaseSuite {
   }
 
   it should "return a proper ConfigReaderFailure when a coproduct config is missing" in {
-    case class AnimalCage(animal: AnimalConfig) derives ConfigReader
+    case class AnimalCage(animal: AnimalConfig)
+    given ConfigReader[AnimalCage] = deriveReader
 
     ConfigReader[AnimalCage].from(ConfigFactory.empty().root()) should failWithReason[KeyNotFound]
   }
