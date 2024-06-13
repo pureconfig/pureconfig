@@ -6,9 +6,9 @@ import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
 
-import pureconfig.*
+import pureconfig._
 import pureconfig.error.{CannotConvert, WrongType}
-import pureconfig.generic.derivation.*
+import pureconfig.generic.derivation._
 
 class EnumConvertDerivationSuite extends BaseSuite {
   behavior of "EnumConfigConvert"
