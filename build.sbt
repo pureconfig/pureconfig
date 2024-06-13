@@ -172,7 +172,9 @@ lazy val lintFlags = forScalaVersions {
       "-encoding",
       "UTF-8", // arg for -encoding
       "-feature",
-      "-unchecked"
+      "-unchecked",
+      "-old-syntax",
+      "-no-indent"
     )
 
   case (maj, min) => throw new Exception(s"Unknown Scala version $maj.$min")
