@@ -112,7 +112,7 @@ private[scala3] object ProductDerivationMacros {
 
   inline def getDefaults[T](inline size: Int): Vector[DefaultValue] = ${ getDefaultsImpl[T]('size) }
 
-  def getDefaultsImpl[T](size: Expr[Int])(using Quotes, Type[T]): Expr[Vector[DefaultValue]] = {
+  private def getDefaultsImpl[T](size: Expr[Int])(using Quotes, Type[T]): Expr[Vector[DefaultValue]] = {
     import quotes.reflect._
 
     val n = size.valueOrAbort

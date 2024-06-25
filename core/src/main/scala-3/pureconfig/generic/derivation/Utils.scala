@@ -3,7 +3,7 @@ package derivation
 
 import scala.compiletime.{constValue, erasedValue}
 import scala.deriving.Mirror
-import scala.quoted._
+import scala.quoted.*
 
 object Utils {
 
@@ -34,10 +34,13 @@ object Utils {
       case _: EmptyTuple => Nil
     }
 
-  object TypeName {
-    inline def apply[A]: String = ${ typeNameImpl[A] }
+  inline def typeName[A]: String = ${ typeNameImpl[A] }
 
-    def typeNameImpl[A](using Type[A], Quotes): Expr[String] = Expr(Type.show[A])
-  }
+  // object TypeName {
+  //   inline def apply[A]: String = ${ typeNameImpl[A] }
+
+  //   private def typeNameImpl[A](using Type[A], Quotes): Expr[String] = Expr(Type.show[A])
+  // }
+  private def typeNameImpl[A](using Type[A], Quotes): Expr[String] = Expr(Type.show[A])
 
 }
