@@ -36,11 +36,6 @@ object Utils {
 
   inline def typeName[A]: String = ${ typeNameImpl[A] }
 
-  // object TypeName {
-  //   inline def apply[A]: String = ${ typeNameImpl[A] }
-
-  //   private def typeNameImpl[A](using Type[A], Quotes): Expr[String] = Expr(Type.show[A])
-  // }
   private def typeNameImpl[A](using Type[A], Quotes): Expr[String] = Expr(Type.show[A])
 
 }
