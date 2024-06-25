@@ -5,7 +5,7 @@ package scala3
 import scala.compiletime._
 import scala.deriving.Mirror
 
-import derivation.Utils.TypeName
+import derivation.Utils._
 
 trait HintsAwareConfigReaderDerivation
     extends HintsAwareCoproductConfigReaderDerivation,
@@ -23,9 +23,8 @@ trait HintsAwareConfigReaderDerivation
       case reader: ConfigReader[A] => reader
       case given Mirror.Of[A] => deriveReader[A]
       case _ =>
-        inline if AnyValDerivationMacros.isAnyVal[A]
-        then AnyValDerivationMacros.unsafeDeriveAnyValReader[A]
-        else error("Cannot derive ConfigReader for " + TypeName[A])
+        inline if (AnyValDerivationMacros.isAnyVal[A]) AnyValDerivationMacros.unsafeDeriveAnyValReader[A]
+        else error("Cannot derive ConfigReader for " + typeName[A])
     }
 
 }

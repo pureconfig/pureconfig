@@ -6,13 +6,13 @@ import scala.compiletime._
 import scala.deriving.Mirror
 import scala.quoted._
 
-private[pureconfig] object AnyValDerivationMacros {
+private[scala3] object AnyValDerivationMacros {
 
   /** Derive a `ConfigReader` for a value class. Can only be called after checking that `A` is a value class.
     */
   inline def unsafeDeriveAnyValReader[A]: ConfigReader[A] = ${ deriveAnyValReaderImpl[A] }
 
-  def deriveAnyValReaderImpl[A: Type](using Quotes): Expr[ConfigReader[A]] = {
+  private def deriveAnyValReaderImpl[A: Type](using Quotes): Expr[ConfigReader[A]] = {
     import quotes.reflect._
 
     val wrapperTypeRepr = TypeRepr.of[A]
@@ -39,7 +39,7 @@ private[pureconfig] object AnyValDerivationMacros {
     */
   inline def unsafeDeriveAnyValWriter[A]: ConfigWriter[A] = ${ deriveAnyValWriterImpl[A] }
 
-  def deriveAnyValWriterImpl[A: Type](using Quotes): Expr[ConfigWriter[A]] = {
+  private def deriveAnyValWriterImpl[A: Type](using Quotes): Expr[ConfigWriter[A]] = {
     import quotes.reflect._
 
     val wrapperTypeRepr = TypeRepr.of[A]

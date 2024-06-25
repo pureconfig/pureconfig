@@ -5,7 +5,7 @@ package scala3
 import scala.compiletime._
 import scala.deriving.Mirror
 
-import derivation.Utils.TypeName
+import derivation.Utils._
 
 trait HintsAwareConfigWriterDerivation
     extends HintsAwareCoproductConfigWriterDerivation,
@@ -23,9 +23,8 @@ trait HintsAwareConfigWriterDerivation
       case writer: ConfigWriter[A] => writer
       case given Mirror.Of[A] => deriveWriter[A]
       case _ =>
-        inline if AnyValDerivationMacros.isAnyVal[A]
-        then AnyValDerivationMacros.unsafeDeriveAnyValWriter[A]
-        else error("Cannot derive ConfigWriter for: " + TypeName[A])
+        inline if (AnyValDerivationMacros.isAnyVal[A]) AnyValDerivationMacros.unsafeDeriveAnyValWriter[A]
+        else error("Cannot derive ConfigWriter for: " + typeName[A])
     }
 }
 
