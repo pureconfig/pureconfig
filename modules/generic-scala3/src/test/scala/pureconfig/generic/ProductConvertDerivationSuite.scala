@@ -171,14 +171,16 @@ class ProductConvertDerivationSuite extends BaseSuite {
     ConfigReader[Conf].from(conf) should failWith(KeyNotFound("b"))
 
     locally {
-      given ConfigReader[Int] with ReadsMissingKeys with
+      given ConfigReader[Int] with ReadsMissingKeys with {
         def from(cur: ConfigCursor) =
           cur.asConfigValue.fold(
             _ => Right(42),
-            v =>
+            v => {
               val s = v.render(ConfigRenderOptions.concise)
               cur.scopeFailure(catchReadError(_.toInt)(implicitly)(s))
+            }
           )
+      }
       given ConfigReader[Conf] = deriveReader
 
       ConfigReader[Conf].from(conf).value shouldBe Conf(1, 42)

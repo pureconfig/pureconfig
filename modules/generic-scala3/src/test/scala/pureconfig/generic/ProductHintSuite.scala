@@ -62,9 +62,10 @@ class ProductHintSuite extends BaseSuite {
     case class SampleConf(a: Int, b: String)
 
     val default = deriveReader[SampleConf]
-    val customized =
+    val customized = {
       given ProductHint[SampleConf] = ProductHint(ConfigFieldMapping(_.toUpperCase))
       deriveReader[SampleConf]
+    }
 
     ConfigReader[SampleConf](using default).from(conf).left.value.toList should contain theSameElementsAs Seq(
       ConvertFailure(KeyNotFound("a", Set("A")), stringConfigOrigin(1), ""),

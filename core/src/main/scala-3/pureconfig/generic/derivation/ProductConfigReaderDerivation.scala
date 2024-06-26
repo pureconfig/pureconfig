@@ -5,7 +5,7 @@ package derivation
 import scala.compiletime.ops.int._
 import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
-import scala.util.chaining.*
+import scala.util.chaining._
 
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, KeyNotFound, UnknownKey, WrongSizeList}
 import pureconfig.generic.derivation.Utils._

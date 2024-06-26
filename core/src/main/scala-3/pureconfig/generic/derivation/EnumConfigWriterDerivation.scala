@@ -8,7 +8,7 @@ import scala.deriving.Mirror
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 
 import pureconfig.error.{CannotConvert, ConfigReaderFailures}
-import pureconfig.generic.derivation.Utils.*
+import pureconfig.generic.derivation.Utils._
 
 type EnumConfigWriter[A] = EnumConfigWriterDerivation.Default.EnumConfigWriter[A]
 
