@@ -6,8 +6,6 @@ import com.typesafe.config.ConfigFactory
 
 import pureconfig._
 import pureconfig.error._
-import pureconfig.generic._
-import pureconfig.generic.derivation.default.derived
 
 enum AnimalConfig derives ConfigReader {
   case DogConfig(age: Int)

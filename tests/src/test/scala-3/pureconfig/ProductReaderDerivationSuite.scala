@@ -1,5 +1,4 @@
 package pureconfig
-package generic
 
 import scala.collection.JavaConverters.given
 import scala.language.higherKinds
@@ -10,7 +9,6 @@ import org.scalacheck.Arbitrary
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig._
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
-import pureconfig.generic.derivation.default.derived
 
 class ProductReaderDerivationSuite extends BaseSuite {
 

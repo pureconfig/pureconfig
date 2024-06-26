@@ -9,7 +9,6 @@ ThisBuild / organization := "com.github.pureconfig"
 // Enable the OrganizeImports Scalafix rule and semanticdb for scalafix.
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
 
 // taken from https://github.com/scala/bug/issues/12632
 ThisBuild / libraryDependencySchemes ++= Seq(
@@ -60,6 +59,7 @@ lazy val enum = module(project) in file("modules/enum")
 lazy val enumeratum = module(project) in file("modules/enumeratum")
 lazy val fs2 = module(project) in file("modules/fs2")
 lazy val generic = genericModule(project) in file("modules/generic") dependsOn `generic-base`
+lazy val `generic-scala3` = genericModule(project) in file("modules/generic-scala3") dependsOn `generic-base`
 lazy val `generic-base` = genericModule(project) in file("modules/generic-base")
 lazy val hadoop = module(project) in file("modules/hadoop")
 lazy val http4s = module(project) in file("modules/http4s")
@@ -68,6 +68,8 @@ lazy val ip4s = module(project) in file("modules/ip4s")
 lazy val javax = module(project) in file("modules/javax")
 lazy val joda = module(project) in file("modules/joda")
 lazy val magnolia = module(project) in file("modules/magnolia") dependsOn `generic-base`
+lazy val pekko = module(project) in file("modules/pekko")
+lazy val `pekko-http` = module(project) in file("modules/pekko-http")
 lazy val `scala-xml` = module(project) in file("modules/scala-xml")
 lazy val scalaz = module(project) in file("modules/scalaz")
 lazy val spark = module(project) in file("modules/spark")
@@ -170,7 +172,9 @@ lazy val lintFlags = forScalaVersions {
       "-encoding",
       "UTF-8", // arg for -encoding
       "-feature",
-      "-unchecked"
+      "-unchecked",
+      "-old-syntax",
+      "-no-indent"
     )
 
   case (maj, min) => throw new Exception(s"Unknown Scala version $maj.$min")
@@ -178,6 +182,9 @@ lazy val lintFlags = forScalaVersions {
 
 // Use the same Scala 2.12 version in the root project as in subprojects
 scalaVersion := scala212
+
+// Setting no cross build for the aggregating root project so that we can have proper per project exclusions.
+crossScalaVersions := Nil
 
 // do not publish the root project
 publish / skip := true

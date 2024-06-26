@@ -9,6 +9,10 @@ import pureconfig.error.{CannotConvert, ConfigReaderFailures}
 import pureconfig.generic.derivation.ConfigReaderDerivation
 import pureconfig.generic.derivation.Utils._
 
+@deprecated(
+  "Custom derivation is deprecated in pureconfig-core. If you only need the default behavior, please use the default `derives` behavior. If you need configuration please use the `pureconfig-generic-scala3` module instead.",
+  "0.17.7"
+)
 trait CoproductConfigReaderDerivation(fieldMapping: ConfigFieldMapping, optionField: String) {
   self: ConfigReaderDerivation =>
   inline def derivedSum[A](using m: Mirror.SumOf[A]): ConfigReader[A] =

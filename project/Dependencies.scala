@@ -4,13 +4,13 @@ import Utilities._
 object Dependencies {
 
   object Version {
-    val scala212 = "2.12.18"
-    val scala213 = "2.13.12"
-    val scala3 = "3.3.1"
+    val scala212 = "2.12.19"
+    val scala213 = "2.13.14"
+    val scala3 = "3.3.3"
 
-    val scalaTest = "3.2.17"
-    val scalaTestPlusScalaCheck = "3.2.17.0"
-    val scalaCheck = "1.17.0"
+    val scalaTest = "3.2.19"
+    val scalaTestPlusScalaCheck = "3.2.18.0"
+    val scalaCheck = "1.18.0"
   }
 
   // testing libraries

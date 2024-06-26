@@ -145,7 +145,12 @@ trait ConfigReader[A] {
 
 /** Provides methods to create [[ConfigReader]] instances.
   */
-object ConfigReader extends BasicReaders with CollectionReaders with ProductReaders with ExportedReaders {
+object ConfigReader
+    extends BasicReaders
+    with CollectionReaders
+    with ProductReaders
+    with ExportedReaders
+    with ReaderDerives {
 
   /** The type of most config PureConfig reading methods.
     *

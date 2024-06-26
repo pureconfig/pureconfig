@@ -2,7 +2,7 @@
 
 <img src="docs/src/main/resources/microsite/img/pureconfig-logo-1040x1200.png" width="130px" height="150px" align="right">
 
-[![Build Status](https://github.com/pureconfig/pureconfig/workflows/CI/badge.svg?branch=master)](https://github.com/pureconfig/pureconfig/actions?query=workflow%3ACI+branch%3Amaster)
+[![Build Status](https://github.com/pureconfig/pureconfig/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/pureconfig/pureconfig/actions?query=workflow%3ACI+branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.12/badge.svg)](https://search.maven.org/artifact/com.github.pureconfig/pureconfig_2.12)
 [![Scaladoc](https://javadoc.io/badge/com.github.pureconfig/pureconfig-core_2.12.svg)](https://javadoc.io/page/com.github.pureconfig/pureconfig-core_2.12/latest/pureconfig/index.html)
@@ -34,8 +34,16 @@ To use PureConfig in an existing SBT project with Scala 2.12 or a later version,
 `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.4"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.7"
 ```
+
+For Scala 3, add the following dependency to your `build.sbt`:
+
+```scala
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "0.17.7"
+```
+
+While a lot of the documentation will also apply to Scala 3, there is a specific guide for Scala 3's derivation that you can [find here](scala-3-derivation.html).
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).
 
