@@ -3,7 +3,7 @@ package derivation
 
 import scala.compiletime.{constValue, erasedValue}
 import scala.deriving.Mirror
-import scala.quoted.*
+import scala.quoted._
 
 object Utils {
 
