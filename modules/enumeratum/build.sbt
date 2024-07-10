@@ -3,7 +3,7 @@ import Utilities.forScalaVersions
 
 crossScalaVersions := Seq(scala212, scala213, scala3)
 
-libraryDependencies ++= Seq("com.beachape" %% "enumeratum" % "1.7.3")
+libraryDependencies ++= Seq("com.beachape" %% "enumeratum" % "1.7.4")
 
 developers := List(Developer("aeons", "Bjørn Madsen", "bm@aeons.dk", url("https://github.com/aeons")))
 
