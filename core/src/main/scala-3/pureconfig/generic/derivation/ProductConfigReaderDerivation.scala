@@ -5,6 +5,7 @@ package derivation
 import scala.compiletime.ops.int._
 import scala.compiletime.{constValue, constValueTuple, erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
+
 import pureconfig.error._
 import pureconfig.generic.derivation.Utils._
 
