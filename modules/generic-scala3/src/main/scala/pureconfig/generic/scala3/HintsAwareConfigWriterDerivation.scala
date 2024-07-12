@@ -30,7 +30,7 @@ trait HintsAwareConfigWriterDerivation
     }
 
   private inline def deriveAnyValOrFail[A]: ConfigWriter[A] =
-    inline if (AnyValDerivationMacros.isAnyVal[A]) AnyValDerivationMacros.unsafeDeriveAnyValWriter[A](this)
+    inline if (AnyValDerivationMacros.isAnyVal[A]) AnyValDerivationMacros.unsafeDeriveAnyValWriter[A]
     else error("Cannot derive ConfigWriter for: " + typeName[A])
 }
 

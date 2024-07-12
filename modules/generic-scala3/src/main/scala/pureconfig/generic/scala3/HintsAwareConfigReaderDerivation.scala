@@ -30,7 +30,7 @@ trait HintsAwareConfigReaderDerivation
     }
 
   private inline def deriveAnyValOrFail[A]: ConfigReader[A] =
-    inline if (AnyValDerivationMacros.isAnyVal[A]) AnyValDerivationMacros.unsafeDeriveAnyValReader[A](this)
+    inline if (AnyValDerivationMacros.isAnyVal[A]) AnyValDerivationMacros.unsafeDeriveAnyValReader[A]
     else error("Cannot derive ConfigReader for " + typeName[A])
 
 }
