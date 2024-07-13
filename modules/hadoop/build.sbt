@@ -1,6 +1,6 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213, scala3)
 
 libraryDependencies ++= Seq("org.apache.hadoop" % "hadoop-common" % "3.4.0" % "provided")
 mdocLibraryDependencies ++= Seq("org.apache.hadoop" % "hadoop-common" % "3.4.0")

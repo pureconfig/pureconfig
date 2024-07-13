@@ -1,7 +1,7 @@
 import Dependencies.Version._
 import Utilities._
 
-crossScalaVersions := Seq(scala212, scala213)
+crossScalaVersions := Seq(scala212, scala213, scala3)
 
 // Scala 2.12 depends on an old version of scala-xml
 libraryDependencies ++= forScalaVersions {
