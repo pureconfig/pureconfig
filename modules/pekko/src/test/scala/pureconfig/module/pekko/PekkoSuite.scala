@@ -22,6 +22,6 @@ class PekkoSuite extends BaseSuite {
   }
 
   it should "not load invalid ActorPath" in {
-    configString("this is this the path you're looking for").to[ActorPath] should be('left)
+    configString("this is this the path you're looking for").to[ActorPath].isLeft shouldBe true
   }
 }

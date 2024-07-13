@@ -1,6 +1,6 @@
 package pureconfig.module.squants
 
-import scala.reflect.runtime.universe._
+import scala.reflect.ClassTag
 
 import _root_.squants._
 import _root_.squants.market._
@@ -81,7 +81,7 @@ class SquantsConvertTest extends BaseSuite {
 
   def checkDimension[T <: Quantity[T]](
       dim: Dimension[T]
-  )(implicit tag: TypeTag[T], cc: ConfigConvert[T]): Unit = {
+  )(implicit tag: ClassTag[T], cc: ConfigConvert[T]): Unit = {
     implicit val arbitrary = quantityAbitrary(dim)
     checkArbitrary[T]
   }
