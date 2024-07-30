@@ -7,7 +7,7 @@ addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.5.4")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.3.13")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.1.0")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.0")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.1")
 
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.13"
 
