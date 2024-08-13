@@ -9,7 +9,7 @@ addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.3.13")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.1.0")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.1")
 
-libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.13"
+libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.16"
 
 // taken from https://github.com/scala/bug/issues/12632
 ThisBuild / libraryDependencySchemes ++= Seq(
