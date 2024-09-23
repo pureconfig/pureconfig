@@ -43,7 +43,7 @@ For Scala 3, add the following dependency to your `build.sbt`:
 libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "0.17.7"
 ```
 
-While a lot of the documentation will also apply to Scala 3, there is a specific guide for Scala 3's derivation that you can [find here](scala-3-derivation.html).
+While a lot of the documentation will also apply to Scala 3, there is a specific guide for Scala 3's derivation that you can [find here](https://pureconfig.github.io/docs/scala-3-derivation.html).
 
 For a full example of `build.sbt` you can have a look at this [build.sbt](https://github.com/pureconfig/pureconfig/blob/master/example/build.sbt).
 
