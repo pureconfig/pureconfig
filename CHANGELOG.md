@@ -1,3 +1,9 @@
+### 0.17.8 (Nov 20, 2024)
+
+- New features
+  - Added support for Scala 3 derivation of value classes.
+  - Added Scala 3 support for several modules.
+
 ### 0.17.7 (Jun 9, 2024)
 
 - New features

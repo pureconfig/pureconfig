@@ -7,7 +7,7 @@ Support for providing instances of `ConfigCovert` given instances of [ZIO Config
 In addition to the [PureConfig core](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-zio-config" % "0.17.7"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-zio-config" % "0.17.8"
 ```
 
 ## Example
