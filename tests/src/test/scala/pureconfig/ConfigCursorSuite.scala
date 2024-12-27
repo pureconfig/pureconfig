@@ -275,6 +275,17 @@ class ConfigCursorSuite extends BaseSuite {
     objCursor("{ a: 1, b: 2 }").atKeyOrUndefined("c").isUndefined shouldBe true
   }
 
+  it should "allow access to value at a given key" in {
+    objCursor("{ a: 1, b: 2 }").getAtKey[Int]("a") shouldBe Right(1)
+    objCursor("{ a: 1, b: 2 }")
+      .getAtKey[Int]("c") should failWith(KeyNotFound("c", Set()), defaultPathStr, stringConfigOrigin(1))
+  }
+
+  it should "allow access to value at a given key in a safe way" in {
+    objCursor("{ a: 1, b: 2 }").getAtKeyOr[Int]("a", 5) shouldBe Right(1)
+    objCursor("{ a: 1, b: 2 }").getAtKeyOr[Int]("c", 4) shouldBe Right(4)
+  }
+
   it should "provide a correct withoutKey method" in {
     objCursor("{ a: 1, b: 2 }").withoutKey("a") shouldBe objCursor("{ b: 2 }")
     objCursor("{ a: 1, b: 2 }").withoutKey("c") shouldBe objCursor("{ a: 1, b: 2 }")

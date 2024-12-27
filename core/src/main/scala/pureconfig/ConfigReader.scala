@@ -2,13 +2,13 @@ package pureconfig
 
 import scala.collection.mutable
 import scala.language.higherKinds
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 import scala.util.Try
 
 import com.typesafe.config.ConfigValue
 
 import pureconfig.ConvertHelpers._
-import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures, FailureReason, UserValidationFailed}
+import pureconfig.error.{CannotConvert, ConfigReaderFailure, ConfigReaderFailures, FailureReason, UserValidationFailed}
 
 /** Trait for objects capable of reading objects of a given type from `ConfigValues`.
   *
@@ -208,6 +208,66 @@ object ConfigReader
     new ConfigReader[A] {
       def from(cur: ConfigCursor) = fromF(cur)
     }
+
+  /** Creates a `ConfigReader` from a function reading a `ConfigObjectCursor`.
+    *
+    * @param fromF
+    *   the function used to read config object cursors to values
+    * @tparam A
+    *   the type of the objects readable by the returned reader
+    * @return
+    *   a `ConfigReader` for reading objects of type `A` using `fromF`.
+    */
+  def fromObjCursor[A](f: ConfigObjectCursor => ConfigReader.Result[A]) =
+    fromCursor(_.asObjectCursor.flatMap(f))
+
+  /** Creates a `ConfigReader` that reads a discriminator field (`type`) and then delegates to the appropriate reader
+    * based on the value of the discriminator field.
+    *
+    * @param mappings
+    *   a list of mappings from object cursors to values for the corresponding types
+    * @tparam A
+    *   the type of the objects readable by the returned reader
+    * @return
+    *   a `ConfigReader` for reading objects of type `A` using the discriminator field and the provided mappings
+    */
+  def discriminator[A: ClassTag](
+      mappings: (String, ConfigObjectCursor => ConfigReader.Result[A])*
+  ): ConfigReader[A] = discriminator("type")(mappings: _*)
+
+  /** Creates a `ConfigReader` that reads a discriminator field and then delegates to the appropriate reader based on
+    * the value of the discriminator field.
+    *
+    * @param discriminatorName
+    *   the name of the field that contains the discriminator value
+    * @param mappings
+    *   a list of mappings from object cursors to values for the corresponding types
+    * @tparam A
+    *   the type of the objects readable by the returned reader
+    * @return
+    *   a `ConfigReader` for reading objects of type `A` using the discriminator field and the provided mappings
+    */
+  def discriminator[A: ClassTag](discriminatorName: String)(
+      mappings: (String, ConfigObjectCursor => ConfigReader.Result[A])*
+  ): ConfigReader[A] = {
+    val map = mappings.toMap
+
+    fromObjCursor { cursor =>
+      cursor.atKey(discriminatorName).flatMap(_.asString).flatMap {
+        case string if map.contains(string) =>
+          map(string)(cursor)
+        case notMatched =>
+          val failure =
+            CannotConvert(
+              notMatched,
+              classTag[A].runtimeClass.getSimpleName(),
+              s"`type` must be one of: ${map.keys.mkString(", ")}"
+            )
+
+          cursor.failed(failure)
+      }
+    }
+  }
 
   /** Creates a `ConfigReader` from a function.
     *
