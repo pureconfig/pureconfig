@@ -467,6 +467,32 @@ case class ConfigObjectCursor(objValue: ConfigObject, pathElems: List[String]) e
     }
   }
 
+  /** Returns a value at a given key.
+    *
+    * @param key
+    *   the key of the config for which a value should be returned
+    * @tparam A
+    *   the type of the value (a ConfigReader instance for this type must be in scope)
+    * @return
+    *   a `Right` with the value at `key` if such a config exists, a `Left` with a list of failures otherwise.
+    */
+  def getAtKey[A: ConfigReader](key: String): ConfigReader.Result[A] =
+    atKey(key).flatMap(ConfigReader[A].from(_))
+
+  /** Returns a value at a given key or the default value if the key is missing.
+    *
+    * @param key
+    *   the key of the config for which a value should be returned
+    * @param default
+    *   the default value to return if the key is missing
+    * @tparam A
+    *   the type of the value (a ConfigReader instance for this type must be in scope)
+    * @return
+    *   the value at `key` if such a value exists, `default` otherwise.
+    */
+  def getAtKeyOr[A: ConfigReader](key: String, default: => A): ConfigReader.Result[A] =
+    ConfigReader[Option[A]].from(atKeyOrUndefined(key)).map(_.getOrElse(default))
+
   /** Returns a cursor to the config at a given key. A missing key will return a cursor to an undefined value.
     *
     * @param key
