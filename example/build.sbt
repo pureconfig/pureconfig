@@ -12,7 +12,7 @@ val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
 
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % pureconfigVersion
 
-crossScalaVersions := Seq("2.12.20", "2.13.15")
+crossScalaVersions := Seq("2.12.20", "2.13.16")
 
 val versionSpecificFlags =
   Def.setting {
