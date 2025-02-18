@@ -29,6 +29,16 @@ trait CollectionWriters {
       def toOpt(t: Option[A]): Option[ConfigValue] = t.map(conv.to)
     }
 
+  implicit def eitherWriter[A, B](implicit convA: ConfigWriter[A], convB: ConfigWriter[B]): ConfigWriter[Either[A, B]] =
+    new ConfigWriter[Either[A, B]] {
+      override def to(e: Either[A, B]): ConfigValue = {
+        e match {
+          case Left(lValue) => convA.to(lValue)
+          case Right(rValue) => convB.to(rValue)
+        }
+      }
+    }
+
   implicit def traversableWriter[A, F[A] <: TraversableOnce[A]](implicit
       configConvert: ConfigWriter[A]
   ): ConfigWriter[F[A]] =
