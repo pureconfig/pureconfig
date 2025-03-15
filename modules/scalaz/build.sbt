@@ -1,7 +1,5 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala212, scala213)
-
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.3.8",
   "org.scalaz" %% "scalaz-scalacheck-binding" % "7.3.8" % "test"

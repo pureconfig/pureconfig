@@ -315,7 +315,6 @@ object ConfigCursor {
           case ConfigValueType.NUMBER =>
             lazy val tryLong = Try(s.toLong).map(ConfigValueFactory.fromAnyRef)
             lazy val tryDouble = Try(s.toDouble).map(ConfigValueFactory.fromAnyRef)
-            // Try#toEither is only available in Scala 2.12+.
             tryLong.orElse(tryDouble) match {
               case Success(value) => Right(value)
               case Failure(_) => Left(WrongType(configValue.valueType, Set(NUMBER)))

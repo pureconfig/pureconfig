@@ -1,6 +1,6 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala212, scala213, scala3)
+crossScalaVersions := Seq(scala213, scala3)
 
 libraryDependencies += "com.github.alonsodomin.cron4s" %% "cron4s-core" % "0.7.0"
 

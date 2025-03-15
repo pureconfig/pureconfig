@@ -94,7 +94,7 @@ lazy val commonSettings = Seq(
     Developer("derekmorr", "Derek Morr", "morr.derek@gmail.com", url("https://github.com/derekmorr"))
   ),
 
-  scalaVersion := scala212,
+  scalaVersion := scala213,
 
   resolvers ++= Resolver.sonatypeOssRepos("releases"),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
@@ -121,12 +121,12 @@ lazy val commonSettings = Seq(
   // format: on
 )
 
-// add support for Scala version ranges such as "scala-2.12+" or "scala-2.13-" in source folders (single version folders
-// such as "scala-2.12" are natively supported by SBT).
+// add support for Scala version ranges such as "scala-2.13+" or "scala-3-" in source folders (single version folders
+// such as "scala-2.13" are natively supported by SBT).
 def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
   unmanagedSrcs ++= {
     val versionNumber = CrossVersion.partialVersion(scalaVersion.value)
-    val expectedVersions = Seq(scala212, scala213, scala3).flatMap(CrossVersion.partialVersion)
+    val expectedVersions = Seq(scala213, scala3).flatMap(CrossVersion.partialVersion)
     expectedVersions.flatMap { case v @ (major, minor) =>
       List(
         if (versionNumber.exists(_ <= v)) unmanagedSrcs.value.map { dir => new File(dir.getPath + s"-$major.$minor-") }
@@ -139,22 +139,6 @@ def crossVersionSharedSources(unmanagedSrcs: SettingKey[Seq[File]]) = {
 }
 
 lazy val lintFlags = forScalaVersions {
-  case (2, 12) =>
-    List(
-      "-encoding",
-      "UTF-8", // arg for -encoding
-      "-feature",
-      "-unchecked",
-      "-deprecation", // Either#right is deprecated on Scala 2.13
-      "-Xlint:_,-unused",
-      "-Xfatal-warnings",
-      "-Yno-adapted-args",
-      "-Yrangepos", // Required by SemanticDB compiler plugin.
-      "-Ywarn-unused:_,-implicits", // Some implicits are intentionally used just as evidences, triggering warnings
-      "-Ywarn-dead-code",
-      "-Ywarn-numeric-widen"
-    )
-
   case (2, 13) =>
     List(
       "-encoding",
@@ -180,8 +164,8 @@ lazy val lintFlags = forScalaVersions {
   case (maj, min) => throw new Exception(s"Unknown Scala version $maj.$min")
 }
 
-// Use the same Scala 2.12 version in the root project as in subprojects
-scalaVersion := scala212
+// Use the same Scala 2.13 version in the root project as in subprojects
+scalaVersion := scala213
 
 // Setting no cross build for the aggregating root project so that we can have proper per project exclusions.
 crossScalaVersions := Nil

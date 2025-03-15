@@ -5,7 +5,7 @@ title: Quick Start
 
 ## {{page.title}}
 
-To use PureConfig in an existing SBT project with Scala 2.12 or a later version, add the following dependency to your
+To use PureConfig in an existing SBT project with Scala 2.13 or a later version, add the following dependency to your
 `build.sbt`:
 
 ```scala

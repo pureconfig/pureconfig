@@ -1,6 +1,6 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala212, scala213, scala3)
+crossScalaVersions := Seq(scala213, scala3)
 
 libraryDependencies ++= Seq("joda-time" % "joda-time" % "2.13.1", "org.joda" % "joda-convert" % "3.0.1")
 

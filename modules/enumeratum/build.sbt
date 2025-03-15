@@ -1,7 +1,7 @@
 import Dependencies.Version._
 import Utilities.forScalaVersions
 
-crossScalaVersions := Seq(scala212, scala213, scala3)
+crossScalaVersions := Seq(scala213, scala3)
 
 libraryDependencies ++= Seq("com.beachape" %% "enumeratum" % "1.7.5")
 

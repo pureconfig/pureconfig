@@ -1,7 +1,7 @@
 import Dependencies.Version._
 import Utilities._
 
-crossScalaVersions := Seq(scala212, scala213, scala3)
+crossScalaVersions := Seq(scala213, scala3)
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "2.13.0",

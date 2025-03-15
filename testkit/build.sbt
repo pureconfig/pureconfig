@@ -2,7 +2,7 @@ import Dependencies.Version._
 
 name := "pureconfig-testkit"
 
-crossScalaVersions := Seq(scala212, scala213, scala3)
+crossScalaVersions := Seq(scala213, scala3)
 
 libraryDependencies ++= Seq(
   Dependencies.scalaTest,

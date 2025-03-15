@@ -1,6 +1,6 @@
 name := "pureconfig-example"
 version := "1.0"
-scalaVersion := "2.12.20"
+scalaVersion := "2.13.16"
 
 val VersionPattern = """ThisBuild / version := "([^"]*)"""".r
 val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
@@ -12,7 +12,7 @@ val pureconfigVersion = IO.read(file("../version.sbt")).trim match {
 
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % pureconfigVersion
 
-crossScalaVersions := Seq("2.12.20", "2.13.16")
+crossScalaVersions := Seq("2.13.16", "3.3.5")
 
 val versionSpecificFlags =
   Def.setting {
