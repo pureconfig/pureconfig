@@ -13,7 +13,6 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-spark" % "0.17.8"
 Also, `pureconfig-spark` depends on `spark-sql` with `provided` scope.
 Spark libraries are generally added on runtime.
 This module has been tested on Spark 3 but it should also work for Spark 2.4 since basic datatype APIs should stay the same.
-Please note that we are only supporting Scala 2.12 for all Spark versions.
 
 To use the Spark module you need to import:
 ```scala
