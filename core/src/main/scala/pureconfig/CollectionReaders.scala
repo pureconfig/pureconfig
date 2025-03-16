@@ -1,5 +1,6 @@
 package pureconfig
 
+import scala.collection.Factory
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
@@ -25,13 +26,13 @@ trait CollectionReaders {
 
   implicit def traversableReader[A, F[A] <: TraversableOnce[A]](implicit
       configConvert: ConfigReader[A],
-      cbf: FactoryCompat[A, F[A]]
+      cbf: Factory[A, F[A]]
   ): ConfigReader[F[A]] =
     new ConfigReader[F[A]] {
 
       override def from(cur: ConfigCursor): ConfigReader.Result[F[A]] = {
         cur.fluent.mapList { valueCur => configConvert.from(valueCur) }.map { coll =>
-          val builder = cbf.newBuilder()
+          val builder = cbf.newBuilder
           (builder ++= coll).result()
         }
       }
