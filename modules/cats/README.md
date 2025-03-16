@@ -58,12 +58,15 @@ val conf = parseString("""{
 
 ConfigSource.fromConfig(conf).load[MyConfig]
 // res0: ConfigReader.Result[MyConfig] = Right(
-//   MyConfig(
-//     NonEmptyList(1, List(2, 3)),
-//     TreeSet(1, 2, 3),
-//     NonEmptyVector(1, 2, 3),
-//     Map("one" -> 1, "three" -> 3, "two" -> 2),
-//     Append(Singleton(1), Append(Singleton(2), Singleton(3)))
+//   value = MyConfig(
+//     numberList = NonEmptyList(head = 1, tail = List(2, 3)),
+//     numberSet = TreeSet(1, 2, 3),
+//     numberVector = NonEmptyVector(1, 2, 3),
+//     numberMap = TreeMap("one" -> 1, "three" -> 3, "two" -> 2),
+//     numberChain = Append(
+//       leftNE = Singleton(a = 1),
+//       rightNE = Append(leftNE = Singleton(a = 2), rightNE = Singleton(a = 3))
+//     )
 //   )
 // )
 ```
@@ -96,10 +99,10 @@ And we can finally put them to use:
 
 ```scala
 constIntReader.from(conf.root())
-// res1: ConfigReader.Result[Int] = Right(42)
+// res1: ConfigReader.Result[Int] = Right(value = 42)
 
 safeIntReader.from(conf.root())
-// res2: ConfigReader.Result[Int] = Right(-1)
+// res2: ConfigReader.Result[Int] = Right(value = -1)
 
 someWriter[String].to(Some("abc"))
 // res3: com.typesafe.config.ConfigValue = Quoted("abc")
@@ -123,10 +126,18 @@ val conf2 = parseString("{}")
 
 val res = ConfigSource.fromConfig(conf2).load[MyConfig2].left.map(_.toNonEmptyList)
 // res: Either[NonEmptyList[error.ConfigReaderFailure], MyConfig2] = Left(
-//   NonEmptyList(
-//     ConvertFailure(KeyNotFound("a", Set()), Some(ConfigOrigin(String)), ""),
-//     List(
-//       ConvertFailure(KeyNotFound("b", Set()), Some(ConfigOrigin(String)), "")
+//   value = NonEmptyList(
+//     head = ConvertFailure(
+//       reason = KeyNotFound(key = "a", candidates = Set()),
+//       origin = Some(value = ConfigOrigin(String)),
+//       path = ""
+//     ),
+//     tail = List(
+//       ConvertFailure(
+//         reason = KeyNotFound(key = "b", candidates = Set()),
+//         origin = Some(value = ConfigOrigin(String)),
+//         path = ""
+//       )
 //     )
 //   )
 // )
@@ -143,10 +154,18 @@ import pureconfig.error.ConfigReaderFailure
 val catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] =
   Validated.fromEither(res)
 // catsRes: ValidatedNel[ConfigReaderFailure, MyConfig2] = Invalid(
-//   NonEmptyList(
-//     ConvertFailure(KeyNotFound("a", Set()), Some(ConfigOrigin(String)), ""),
-//     List(
-//       ConvertFailure(KeyNotFound("b", Set()), Some(ConfigOrigin(String)), "")
+//   e = NonEmptyList(
+//     head = ConvertFailure(
+//       reason = KeyNotFound(key = "a", candidates = Set()),
+//       origin = Some(value = ConfigOrigin(String)),
+//       path = ""
+//     ),
+//     tail = List(
+//       ConvertFailure(
+//         reason = KeyNotFound(key = "b", candidates = Set()),
+//         origin = Some(value = ConfigOrigin(String)),
+//         path = ""
+//       )
 //     )
 //   )
 // )

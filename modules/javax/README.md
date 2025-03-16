@@ -29,7 +29,9 @@ We can read a `MyConfig` like:
 val conf = parseString("""{ principal: "userid@tld.REALM" }""")
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"principal":"userid@tld.REALM"}))
 ConfigSource.fromConfig(conf).load[MyConfig]
-// res0: ConfigReader.Result[MyConfig] = Right(MyConfig(userid@tld.REALM))
+// res0: ConfigReader.Result[MyConfig] = Right(
+//   value = MyConfig(principal = userid@tld.REALM)
+// )
 ```
 
 

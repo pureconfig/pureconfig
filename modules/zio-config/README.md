@@ -33,9 +33,13 @@ object Person {
 You can now read and write `Person` without re-implementing or re-deriving `ConfigConvert`.
 ```scala
 val bob = Person("bob", 10, Nil)
-// bob: Person = Person("bob", 10, List())
+// bob: Person = Person(name = "bob", age = 10, children = List())
 val alice = Person("alice", 42, bob :: Nil)
-// alice: Person = Person("alice", 42, List(Person("bob", 10, List())))
+// alice: Person = Person(
+//   name = "alice",
+//   age = 42,
+//   children = List(Person(name = "bob", age = 10, children = List()))
+// )
 
 val res = ConfigWriter[Person].to(alice).render(configOpt)
 // res: String = """{
@@ -53,7 +57,11 @@ val res = ConfigWriter[Person].to(alice).render(configOpt)
 
 val maybeAlice = ConfigSource.string(res).load[Person]
 // maybeAlice: ConfigReader.Result[Person] = Right(
-//   Person("alice", 42, List(Person("bob", 10, List())))
+//   value = Person(
+//     name = "alice",
+//     age = 42,
+//     children = List(Person(name = "bob", age = 10, children = List()))
+//   )
 // )
 ```
 
@@ -80,20 +88,22 @@ Note that in such a case an exception will be thrown since writing is not expect
 //writing with zio-config
 val zioConfigBob = bob.toHoconString(childConfDesc)
 // zioConfigBob: Either[String, String] = Right(
-//   """age="10"
+//   value = """age="10"
 // children=[]
 // name=bob
 // """
 // )
 val zioConfigAlice = alice.toHoconString(childConfDesc)
-// zioConfigAlice: Either[String, String] = Left("Too old to be a child.")
+// zioConfigAlice: Either[String, String] = Left(
+//   value = "Too old to be a child."
+// )
 
 //writing with pureconfig
 val pureconfigBob = Try {
   childConfigConvert.to(bob).render(configOpt)
 }
 // pureconfigBob: Try[String] = Success(
-//   """{
+//   value = """{
 //     "age" : "10",
 //     "children" : [],
 //     "name" : "bob"
@@ -104,6 +114,6 @@ val pureconfigAlice = Try {
   childConfigConvert.to(alice).render(configOpt)
 }
 // pureconfigAlice: Try[String] = Failure(
-//   java.lang.Exception: ZioConfigWriteException: Too old to be a child.
+//   exception = java.lang.Exception: ZioConfigWriteException: Too old to be a child.
 // )
 ```

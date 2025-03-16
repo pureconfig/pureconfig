@@ -51,7 +51,10 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"apollo":"1969-07-20T20:18:00.000Z","pluto":"2021-01-20T06:59:59.999Z"}))
 ConfigSource.fromConfig(conf).load[GreatDatesConfig]
 // res0: ConfigReader.Result[GreatDatesConfig] = Right(
-//   GreatDatesConfig(1969-07-20T20:18:00.000Z, 2021-01-20T06:59:59.999Z)
+//   value = GreatDatesConfig(
+//     apollo = 1969-07-20T20:18:00.000Z,
+//     pluto = 2021-01-20T06:59:59.999Z
+//   )
 // )
 ```
 

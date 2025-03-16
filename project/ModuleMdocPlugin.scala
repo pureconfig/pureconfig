@@ -3,6 +3,7 @@ import mdoc.MdocPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 import scalafix.sbt.ScalafixPlugin
+import Dependencies.Version._
 
 /** A plugin that generates a synthetic SBT project for documentation for each module it is enabled on. The generated
   * SBT projects depend on the original project and also have a hardcoded dependency on "generic" in order to provide
@@ -44,6 +45,8 @@ object ModuleMdocPlugin extends AutoPlugin {
         .settings(
           // format: off
           name := docProjId,
+
+          scalaVersion := scala213,
 
           mdocIn := (moduleProj / mdocIn).value,
           mdocOut := (moduleProj / mdocOut).value,

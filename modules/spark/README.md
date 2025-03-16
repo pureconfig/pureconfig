@@ -60,40 +60,90 @@ val mySchemaRes = ConfigSource.string(
     |]
     |""".stripMargin).load[MySchema]
 // mySchemaRes: ConfigReader.Result[MySchema] = Right(
-//   MySchema(
-//     "Employee",
-//     List(
-//       StructField("name", StringType, true, {}),
-//       StructField("age", IntegerType, false, {"k":"v"}),
-//       StructField("salary", DecimalType(6, 2), true, {}),
+//   value = MySchema(
+//     name = "Employee",
+//     fields = List(
 //       StructField(
-//         "address",
-//         StructType(
-//           StructField("line1", StringType, true, {}),
-//           StructField("line2", StringType, true, {})
+//         name = "name",
+//         dataType = StringType,
+//         nullable = true,
+//         metadata = {}
+//       ),
+//       StructField(
+//         name = "age",
+//         dataType = IntegerType,
+//         nullable = false,
+//         metadata = {"k":"v"}
+//       ),
+//       StructField(
+//         name = "salary",
+//         dataType = DecimalType(precision = 6, scale = 2),
+//         nullable = true,
+//         metadata = {}
+//       ),
+//       StructField(
+//         name = "address",
+//         dataType = Seq(
+//           StructField(
+//             name = "line1",
+//             dataType = StringType,
+//             nullable = true,
+//             metadata = {}
+//           ),
+//           StructField(
+//             name = "line2",
+//             dataType = StringType,
+//             nullable = true,
+//             metadata = {}
+//           )
 //         ),
-//         true,
-//         {}
+//         nullable = true,
+//         metadata = {}
 //       )
 //     ),
-//     None
+//     someOtherSetting = None
 //   )
 // )
 
 val sparkSchemaRes = mySchemaRes.map(mySchemaToSparkSchema)
 // sparkSchemaRes: Either[error.ConfigReaderFailures, StructType] = Right(
-//   StructType(
-//     StructField("name", StringType, true, {}),
-//     StructField("age", IntegerType, false, {"k":"v"}),
-//     StructField("salary", DecimalType(6, 2), true, {}),
+//   value = Seq(
 //     StructField(
-//       "address",
-//       StructType(
-//         StructField("line1", StringType, true, {}),
-//         StructField("line2", StringType, true, {})
+//       name = "name",
+//       dataType = StringType,
+//       nullable = true,
+//       metadata = {}
+//     ),
+//     StructField(
+//       name = "age",
+//       dataType = IntegerType,
+//       nullable = false,
+//       metadata = {"k":"v"}
+//     ),
+//     StructField(
+//       name = "salary",
+//       dataType = DecimalType(precision = 6, scale = 2),
+//       nullable = true,
+//       metadata = {}
+//     ),
+//     StructField(
+//       name = "address",
+//       dataType = Seq(
+//         StructField(
+//           name = "line1",
+//           dataType = StringType,
+//           nullable = true,
+//           metadata = {}
+//         ),
+//         StructField(
+//           name = "line2",
+//           dataType = StringType,
+//           nullable = true,
+//           metadata = {}
+//         )
 //       ),
-//       true,
-//       {}
+//       nullable = true,
+//       metadata = {}
 //     )
 //   )
 // )
@@ -104,29 +154,54 @@ val mySchemaRes2 =
     sparkSchema <- sparkSchemaRes
   } yield sparkSchemaToMySchema(mySchema.name, sparkSchema)
 // mySchemaRes2: Either[error.ConfigReaderFailures, MySchema] = Right(
-//   MySchema(
-//     "Employee",
-//     List(
-//       StructField("name", StringType, true, {}),
-//       StructField("age", IntegerType, false, {"k":"v"}),
-//       StructField("salary", DecimalType(6, 2), true, {}),
+//   value = MySchema(
+//     name = "Employee",
+//     fields = List(
 //       StructField(
-//         "address",
-//         StructType(
-//           StructField("line1", StringType, true, {}),
-//           StructField("line2", StringType, true, {})
+//         name = "name",
+//         dataType = StringType,
+//         nullable = true,
+//         metadata = {}
+//       ),
+//       StructField(
+//         name = "age",
+//         dataType = IntegerType,
+//         nullable = false,
+//         metadata = {"k":"v"}
+//       ),
+//       StructField(
+//         name = "salary",
+//         dataType = DecimalType(precision = 6, scale = 2),
+//         nullable = true,
+//         metadata = {}
+//       ),
+//       StructField(
+//         name = "address",
+//         dataType = Seq(
+//           StructField(
+//             name = "line1",
+//             dataType = StringType,
+//             nullable = true,
+//             metadata = {}
+//           ),
+//           StructField(
+//             name = "line2",
+//             dataType = StringType,
+//             nullable = true,
+//             metadata = {}
+//           )
 //         ),
-//         true,
-//         {}
+//         nullable = true,
+//         metadata = {}
 //       )
 //     ),
-//     None
+//     someOtherSetting = None
 //   )
 // )
 
 val stringSchemaRes = mySchemaRes2.map(ConfigWriter[MySchema].to(_).render(renderOpt))
 // stringSchemaRes: Either[error.ConfigReaderFailures, String] = Right(
-//   """{
+//   value = """{
 //     "fields" : [
 //         {
 //             "data-type" : "STRING",
@@ -185,10 +260,22 @@ val myConfigString = ConfigWriter[MyConfig].to(MyConfig(
 //lost optional values will be set to their defaults
 val myConfigRes = ConfigSource.string(myConfigString).load[MyConfig]
 // myConfigRes: ConfigReader.Result[MyConfig] = Right(
-//   MyConfig(
-//     StructField("a", StringType, false, {"k":"v"}),
-//     StructType(StructField("b", StringType, true, {})),
-//     ArrayType(StringType, true)
+//   value = MyConfig(
+//     field = StructField(
+//       name = "a",
+//       dataType = StringType,
+//       nullable = false,
+//       metadata = {"k":"v"}
+//     ),
+//     obj = Seq(
+//       StructField(
+//         name = "b",
+//         dataType = StringType,
+//         nullable = true,
+//         metadata = {}
+//       )
+//     ),
+//     arr = ArrayType(elementType = StringType, containsNull = true)
 //   )
 // )
 ```
@@ -205,18 +292,38 @@ val configRes = ConfigSource.string(
     |schema = "a int, b string, c struct<c1:int,c2:double>"
     |""".stripMargin).load[Config]
 // configRes: ConfigReader.Result[Config] = Right(
-//   Config(
-//     StructType(
-//       StructField("a", IntegerType, true, {}),
-//       StructField("b", StringType, true, {}),
+//   value = Config(
+//     schema = Seq(
 //       StructField(
-//         "c",
-//         StructType(
-//           StructField("c1", IntegerType, true, {}),
-//           StructField("c2", DoubleType, true, {})
+//         name = "a",
+//         dataType = IntegerType,
+//         nullable = true,
+//         metadata = {}
+//       ),
+//       StructField(
+//         name = "b",
+//         dataType = StringType,
+//         nullable = true,
+//         metadata = {}
+//       ),
+//       StructField(
+//         name = "c",
+//         dataType = Seq(
+//           StructField(
+//             name = "c1",
+//             dataType = IntegerType,
+//             nullable = true,
+//             metadata = {}
+//           ),
+//           StructField(
+//             name = "c2",
+//             dataType = DoubleType,
+//             nullable = true,
+//             metadata = {}
+//           )
 //         ),
-//         true,
-//         {}
+//         nullable = true,
+//         metadata = {}
 //       )
 //     )
 //   )
@@ -224,7 +331,7 @@ val configRes = ConfigSource.string(
     
 val stringSchemaRes2 = configRes.map(ConfigWriter[Config].to(_).render(renderOpt))
 // stringSchemaRes2: Either[error.ConfigReaderFailures, String] = Right(
-//   """{
+//   value = """{
 //     "schema" : "a INT,b STRING,c STRUCT<c1: INT, c2: DOUBLE>"
 // }
 // """

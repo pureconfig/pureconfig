@@ -51,7 +51,7 @@ val conf = parseString("""{
 
 ConfigSource.fromConfig(conf).load[GreetingConf]
 // res0: ConfigReader.Result[GreetingConf] = Right(
-//   GreetingConf(Hello, ShoutGoodBye)
+//   value = GreetingConf(start = Hello, end = ShoutGoodBye)
 // )
 ```
 

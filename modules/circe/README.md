@@ -44,7 +44,11 @@ val conf = ConfigFactory.parseString("""{
 
 ConfigSource.fromConfig(conf).load[UserConfig]
 // res0: ConfigReader.Result[UserConfig] = Right(
-//   UserConfig("nathan", 31, JObject(object[favoriteFood -> "pizza"]))
+//   value = UserConfig(
+//     username = "nathan",
+//     age = 31,
+//     custom = JObject(value = object[favoriteFood -> "pizza"])
+//   )
 // )
 ```
 
