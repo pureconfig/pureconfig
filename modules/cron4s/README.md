@@ -33,6 +33,15 @@ val conf = parseString("""{ schedule: "10-35 2,4,6 * ? * *" }""")
 
 ConfigSource.fromConfig(conf).load[MyConfig]
 // res0: ConfigReader.Result[MyConfig] = Right(
-//   MyConfig(CronExpr(10-35, 2,4,6, *, ?, *, *))
+//   value = MyConfig(
+//     schedule = CronExpr(
+//       seconds = 10-35,
+//       minutes = 2,4,6,
+//       hours = *,
+//       daysOfMonth = ?,
+//       months = *,
+//       daysOfWeek = *
+//     )
+//   )
 // )
 ```
