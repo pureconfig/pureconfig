@@ -1,12 +1,10 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala212, scala213)
-
 libraryDependencies ++= Seq(
   "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.10",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
   // We're using shapeless for illTyped in tests.
-  "com.chuusai" %% "shapeless" % "2.3.12" % Test
+  "com.chuusai" %% "shapeless" % "2.3.13" % Test
 )
 
 developers := List(

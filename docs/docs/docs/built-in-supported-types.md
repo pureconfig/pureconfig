@@ -19,11 +19,11 @@ The currently supported basic types are:
 - [`java.util.UUID`](https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html);
 - [`java.nio.file.Path`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html);
 - [`java.util.regex.Pattern`](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) and
-  [`scala.util.matching.Regex`](https://www.scala-lang.org/api/2.12.x/scala/util/matching/Regex.html);
+  [`scala.util.matching.Regex`](https://www.scala-lang.org/api/2.13.x/scala/util/matching/Regex.html);
 - [`java.math.BigDecimal`](https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html),
   [`java.math.BigInteger`](https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html),
-  [`scala.math.BigDecimal`](https://www.scala-lang.org/api/2.12.x/scala/math/BigDecimal.html), and
-  [`scala.math.BigInt`](https://www.scala-lang.org/api/2.12.x/scala/math/BigInt.html);
+  [`scala.math.BigDecimal`](https://www.scala-lang.org/api/2.13.x/scala/math/BigDecimal.html), and
+  [`scala.math.BigInt`](https://www.scala-lang.org/api/2.13.x/scala/math/BigInt.html);
 - Typesafe `ConfigValue`, `ConfigObject` and `ConfigList`;
 - value classes (for which readers and writers of the inner type are directly used).
 

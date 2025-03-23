@@ -1,6 +1,6 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala212, scala213, scala3)
+crossScalaVersions := Seq(scala213, scala3)
 
 libraryDependencies ++= Seq(
   "co.fs2" %% "fs2-core" % "3.11.0",

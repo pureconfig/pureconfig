@@ -39,6 +39,6 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"far":"42.195 km","hot":"56.7° C"}))
 ConfigSource.fromConfig(conf).load[HowConfiguration]
 // res0: ConfigReader.Result[HowConfiguration] = Right(
-//   HowConfiguration(42.195 km, 56.7°C)
+//   value = HowConfiguration(far = 42.195 km, hot = 56.7°C)
 // )
 ```

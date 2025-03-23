@@ -9,10 +9,8 @@ jobs:
       fail-fast: false
       matrix:
         jdk: [adopt@1.11]
-        scala: ['2.12', '2.13', '3']
+        scala: ['2.13', '3']
         include:
-          - scala: '2.12'
-            scala-version: 2.12.20
           - scala: '2.13'
             scala-version: 2.13.16
           - scala: '3'
@@ -56,7 +54,7 @@ jobs:
         run: cd example && sbt "++${{ matrix.scala-version }} test"
 
       - name: Check mdoc output
-        if: matrix.scala == '2.12'
+        if: matrix.scala == '2.13'
         run: >
           sbt ++${{ matrix.scala-version }} mdoc &&
           git diff --exit-code
@@ -82,9 +80,7 @@ jobs:
           ruby-version: 3.2
 
       - name: Install dependencies
-        run: >
-          sudo apt install libxslt-dev &&
-          gem install jekyll:4.3.2 html-proofer:5.0.7
+        run: gem install 'jekyll:~>4' html-proofer:5.0.7
 
       - name: Build website
         run: sbt makeMicrosite
@@ -117,7 +113,7 @@ jobs:
           ruby-version: 3.2
 
       - name: Install dependencies
-        run: gem install jekyll:4.3.2
+        run: gem install 'jekyll:~>4'
 
       - name: Build and compare website
         id: diff_website
