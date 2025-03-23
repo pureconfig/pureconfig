@@ -48,6 +48,6 @@ val conf = parseString("""{
 
 ConfigSource.fromConfig(conf).load[MyConfig]
 // res0: ConfigReader.Result[MyConfig] = Right(
-//   MyConfig(hdfs://some.domain/foo/bar.gz)
+//   value = MyConfig(path = hdfs://some.domain/foo/bar.gz)
 // )
 ```

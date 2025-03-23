@@ -10,6 +10,14 @@ import pureconfig.error._
 import pureconfig.module.magnolia.auto.reader._
 import pureconfig.module.magnolia.auto.writer._
 
+sealed trait CarMaker
+
+object CarMaker {
+  case object Mercedes extends CarMaker
+  case object BMW extends CarMaker
+  case object Tesla extends CarMaker
+}
+
 class CoproductConvertersSuite extends BaseSuite {
 
   behavior of "ConfigConvert"
@@ -41,5 +49,11 @@ class CoproductConvertersSuite extends BaseSuite {
   it should "return a proper ConfigReaderFailure when a coproduct config is missing" in {
     case class AnimalCage(animal: AnimalConfig)
     ConfigConvert[AnimalCage].from(ConfigFactory.empty().root()) should failWithReason[KeyNotFound]
+  }
+
+  it should "read disambiguation information on sealed families with the cases nested in the companion" in {
+    import CarMaker._
+    val conf = ConfigFactory.parseString("{ type = bmw }")
+    ConfigConvert[CarMaker].from(conf.root()) shouldEqual Right(BMW)
   }
 }
