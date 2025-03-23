@@ -20,7 +20,7 @@ class Cron4sSuite extends BaseSuite {
     val exprStr = "10-65 * * * * *"
     configString(exprStr).to[CronExpr].left.value shouldEqual ConfigReaderFailures(
       ConvertFailure(
-        CannotConvert(exprStr, "CronExpr", "blank expected at position 3 but found '-'"),
+        CannotConvert(exprStr, "CronExpr", "Failure reading:blank at position 3 but found '-65 * * * * *'"),
         stringConfigOrigin(1),
         ""
       )
