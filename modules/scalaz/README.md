@@ -55,12 +55,24 @@ val scalazConf = parseString("""{
 
 ConfigSource.fromConfig(scalazConf).load[ScalazConfig]
 // res0: ConfigReader.Result[ScalazConfig] = Right(
-//   ScalazConfig(
-//     ICons(1, ICons(2, ICons(3, []))),
-//     Bin(2, Bin(1, Tip(), Tip()), Bin(3, Tip(), Tip())),
-//     NonEmpty[1,2,3],
-//     Bin("three", 3, Bin("one", 1, Tip(), Tip()), Bin("two", 2, Tip(), Tip())),
-//     Just(1)
+//   value = ScalazConfig(
+//     numberLst = ICons(
+//       head = 1,
+//       tail = ICons(head = 2, tail = ICons(head = 3, tail = []))
+//     ),
+//     numberSet = Bin(
+//       a = 2,
+//       l = Bin(a = 1, l = Tip(), r = Tip()),
+//       r = Bin(a = 3, l = Tip(), r = Tip())
+//     ),
+//     numberNel = NonEmpty[1,2,3],
+//     numberMap = Bin(
+//       k = "three",
+//       v = 3,
+//       l = Bin(k = "one", v = 1, l = Tip(), r = Tip()),
+//       r = Bin(k = "two", v = 2, l = Tip(), r = Tip())
+//     ),
+//     numberMaybe = Just(get = 1)
 //   )
 // )
 ```
@@ -98,16 +110,22 @@ val invalidConf = parseString("""{ s: "abc" }""")
 // invalidConf: com.typesafe.config.Config = Config(SimpleConfigObject({"s":"abc"}))
 
 constReader.from(validConf.root())
-// res1: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
+// res1: ConfigReader.Result[SimpleConfig] = Right(
+//   value = SimpleConfig(i = 42)
+// )
 
 constReader.from(invalidConf.root())
-// res2: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(42))
+// res2: ConfigReader.Result[SimpleConfig] = Right(
+//   value = SimpleConfig(i = 42)
+// )
 
 safeReader.from(validConf.root())
-// res3: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(1))
+// res3: ConfigReader.Result[SimpleConfig] = Right(value = SimpleConfig(i = 1))
 
 safeReader.from(invalidConf.root())
-// res4: ConfigReader.Result[SimpleConfig] = Right(SimpleConfig(-1))
+// res4: ConfigReader.Result[SimpleConfig] = Right(
+//   value = SimpleConfig(i = -1)
+// )
 ```
 
 In case there's a necessity to parse multiple configs and accumulate errors, you could leverage from `Semigroup` instance for `ConfigReaderFailures`:
@@ -120,13 +138,17 @@ List(validConf, invalidConf, anotherInvalidConf).traverse { c =>
   Validation.fromEither(implicitly[ConfigReader[SimpleConfig]].from(c.root))
 }
 // res5: Validation[error.ConfigReaderFailures, List[SimpleConfig]] = Failure(
-//   ConfigReaderFailures(
-//     ConvertFailure(KeyNotFound("i", Set()), Some(ConfigOrigin(String)), ""),
-//     ArrayBuffer(
+//   e = ConfigReaderFailures(
+//     head = ConvertFailure(
+//       reason = KeyNotFound(key = "i", candidates = Set()),
+//       origin = Some(value = ConfigOrigin(String)),
+//       path = ""
+//     ),
+//     tail = List(
 //       ConvertFailure(
-//         WrongType(BOOLEAN, Set(NUMBER)),
-//         Some(ConfigOrigin(String)),
-//         "i"
+//         reason = WrongType(foundType = BOOLEAN, expectedTypes = Set(NUMBER)),
+//         origin = Some(value = ConfigOrigin(String)),
+//         path = "i"
 //       )
 //     )
 //   )
@@ -152,7 +174,7 @@ val myConf = parseString("{}")
 
 val res = ConfigSource.fromConfig(myConf).load[MyConfig].left.map(_.toNel)
 // res: Either[NonEmptyList[error.ConfigReaderFailure], MyConfig] = Left(
-//   NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
+//   value = NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
 // )
 ```
 
@@ -167,7 +189,7 @@ import pureconfig.error._
 val result: ValidationNel[ConfigReaderFailure, MyConfig] =
   Validation.fromEither(res)
 // result: ValidationNel[ConfigReaderFailure, MyConfig] = Failure(
-//   NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
+//   e = NonEmpty[ConvertFailure(KeyNotFound(i,Set()),Some(ConfigOrigin(String)),),ConvertFailure(KeyNotFound(s,Set()),Some(ConfigOrigin(String)),)]
 // )
 ```
 

@@ -34,6 +34,9 @@ val conf = parseString("""{
 // conf: com.typesafe.config.Config = Config(SimpleConfigObject({"actor-path":"akka://my-sys/user/service-a/worker1","timeout":"5 seconds"}))
 ConfigSource.fromConfig(conf).load[MyConfig]
 // res0: ConfigReader.Result[MyConfig] = Right(
-//   MyConfig(Timeout(5 seconds), akka://my-sys/user/service-a/worker1)
+//   value = MyConfig(
+//     timeout = Timeout(duration = 5 seconds),
+//     actorPath = akka://my-sys/user/service-a/worker1
+//   )
 // )
 ```

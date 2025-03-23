@@ -1,8 +1,5 @@
 import Dependencies.Version._
 
-// Code snippets in the website are written using Scala 2.12+ compatible code
-crossScalaVersions := Seq(scala212, scala213)
-
 micrositeName := "PureConfig"
 micrositeDescription := "A boilerplate-free library for loading configuration files"
 micrositeAuthor := "com.github.pureconfig"

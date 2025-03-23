@@ -46,10 +46,13 @@ We can load the configuration to a `MyConf` instance using a `YamlConfigSource`:
 ```scala
 YamlConfigSource.file(yamlFile).load[Person]
 // res1: pureconfig.ConfigReader.Result[Person] = Right(
-//   Person(
-//     "John",
-//     42,
-//     List(Person("Sarah", 7, List()), Person("Andy", 10, List()))
+//   value = Person(
+//     name = "John",
+//     age = 42,
+//     children = List(
+//       Person(name = "Sarah", age = 7, children = List()),
+//       Person(name = "Andy", age = 10, children = List())
+//     )
 //   )
 // )
 ```
@@ -58,5 +61,5 @@ We can also load a particular namespace inside the YAML file:
 
 ```scala
 YamlConfigSource.file(yamlFile).at("age").load[Int]
-// res2: pureconfig.ConfigReader.Result[Int] = Right(42)
+// res2: pureconfig.ConfigReader.Result[Int] = Right(value = 42)
 ```

@@ -1,7 +1,5 @@
 import Dependencies.Version._
 
-crossScalaVersions := Seq(scala212, scala213)
-
 libraryDependencies ++= Seq("org.julienrf" %% "enum" % "3.1")
 
 developers := List(
