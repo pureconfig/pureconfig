@@ -142,8 +142,8 @@ class ProductHintSuite extends BaseSuite {
 
   it should "disallow unknown keys if specified through a product hint" in {
 
-    case class Conf1(a: Int)
-    case class Conf2(a: Int)
+    case class Conf1(a: Int, c: Int)
+    case class Conf2(a: Int, c: Int)
 
     implicit val productHint = ProductHint[Conf2](allowUnknownKeys = false)
 
@@ -151,10 +151,11 @@ class ProductHintSuite extends BaseSuite {
       conf {
         a = 1
         b = 2
+        c = 3
       }
     }""")
 
-    conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
+    conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1, 3))
     conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4))
   }
 
