@@ -82,9 +82,7 @@ jobs:
           ruby-version: 3.2
 
       - name: Install dependencies
-        run: >
-          sudo apt install libxslt-dev &&
-          gem install jekyll:4.3.2 html-proofer:5.0.7
+        run: gem install jekyll:4.3.2 html-proofer:5.0.7
 
       - name: Build website
         run: sbt makeMicrosite
