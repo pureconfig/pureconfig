@@ -1,6 +1,6 @@
 package pureconfig.module
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import com.typesafe.config._
 import io.circe._
@@ -28,7 +28,7 @@ package object circe {
         Json.fromValues(iter)
       }
       case ConfigValueType.OBJECT => {
-        val jsonMap = cv.asInstanceOf[ConfigObject].asScala.mapValues(cvToJson _).toMap
+        val jsonMap = cv.asInstanceOf[ConfigObject].asScala.view.mapValues(cvToJson _).toMap
         val jsonObj = JsonObject.fromMap(jsonMap)
         Json.fromJsonObject(jsonObj)
       }

@@ -5,7 +5,7 @@ import java.net.{URI, URL}
 import java.nio.file.{Files, Path, Paths}
 import java.util.Base64
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 import scala.util.control.NonFatal
 

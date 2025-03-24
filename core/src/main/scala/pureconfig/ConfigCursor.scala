@@ -1,6 +1,6 @@
 package pureconfig
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.config.ConfigValueType._
@@ -337,7 +337,7 @@ object ConfigCursor {
         Right(ConfigValueFactory.fromAnyRef(configValue.unwrapped.toString))
 
       case (ConfigValueType.OBJECT, ConfigValueType.LIST) =>
-        val obj = configValue.asInstanceOf[ConfigObject].asScala.toIterator
+        val obj = configValue.asInstanceOf[ConfigObject].asScala.iterator
         val ll = obj.flatMap { case (str, v) => Try(str.toInt).toOption.map(_ -> v) }.toList
 
         ll match {

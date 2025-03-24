@@ -9,8 +9,8 @@ import java.time.{Duration => JavaDuration, _}
 import java.util.UUID
 import java.util.regex.Pattern
 
-import scala.collection.JavaConverters._
 import scala.concurrent.duration.{Duration, FiniteDuration, _}
+import scala.jdk.CollectionConverters._
 import scala.util.matching.Regex
 
 import com.typesafe.config._
@@ -21,7 +21,8 @@ import pureconfig.equality._
 import pureconfig.error._
 
 class BasicConvertersSuite extends BaseSuite {
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
 
   behavior of "ConfigConvert"
 

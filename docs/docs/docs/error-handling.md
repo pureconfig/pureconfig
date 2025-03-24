@@ -52,7 +52,7 @@ case class PositiveInt(value: Int) {
   require(value >= 0)
 }
 
-implicit val positiveIntReader = ConfigReader.fromCursor[PositiveInt] { cur =>
+implicit val positiveIntReader: ConfigReader[PositiveInt] = ConfigReader.fromCursor[PositiveInt] { cur =>
   cur.asString.flatMap { str =>
     Try(str.toInt) match {
       case Success(n) if n >= 0 => Right(PositiveInt(n))

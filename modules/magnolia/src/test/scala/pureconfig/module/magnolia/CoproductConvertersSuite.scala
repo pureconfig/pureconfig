@@ -1,7 +1,5 @@
 package pureconfig.module.magnolia
 
-import scala.language.higherKinds
-
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueFactory}
 import org.scalacheck.{Arbitrary, Gen}
 
@@ -26,7 +24,7 @@ class CoproductConvertersSuite extends BaseSuite {
   val genCatConfig: Gen[CatConfig] = Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
   val genDogConfig: Gen[DogConfig] = Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
   val genAnimalConfig: Gen[AnimalConfig] = Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
-  implicit val arbAnimalConfig = Arbitrary(genAnimalConfig)
+  implicit val arbAnimalConfig: Arbitrary[AnimalConfig] = Arbitrary(genAnimalConfig)
 
   checkArbitrary[AnimalConfig]
 

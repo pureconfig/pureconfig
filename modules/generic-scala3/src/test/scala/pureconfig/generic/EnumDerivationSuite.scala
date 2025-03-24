@@ -3,7 +3,6 @@ package generic
 
 import scala.compiletime.testing.{typeCheckErrors, typeChecks}
 import scala.deriving.Mirror
-import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
 

@@ -1,6 +1,5 @@
 package pureconfig.module.catseffect
 
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import cats.effect.Sync

@@ -1,6 +1,5 @@
 package pureconfig.module.magnolia
 
-import scala.language.higherKinds
 import scala.reflect.macros.whitebox
 
 import magnolia1.Magnolia

@@ -209,7 +209,7 @@ class ConfigCursorSuite extends BaseSuite {
   behavior of "ConfigListCursor"
 
   def listCursor(confStr: String, pathElems: List[String] = defaultPath): ConfigListCursor =
-    cursor(confStr, pathElems).asListCursor.right.get
+    cursor(confStr, pathElems).asListCursor.toOption.get
 
   it should "have correct isEmpty and size methods" in {
     listCursor("[1, 2]").isEmpty shouldBe false
@@ -250,7 +250,7 @@ class ConfigCursorSuite extends BaseSuite {
   behavior of "ConfigObjectCursor"
 
   def objCursor(confStr: String, pathElems: List[String] = defaultPath): ConfigObjectCursor =
-    cursor(confStr, pathElems).asObjectCursor.right.get
+    cursor(confStr, pathElems).asObjectCursor.toOption.get
 
   it should "have correct isEmpty and size methods" in {
     objCursor("{ a: 1, b: 2 }").isEmpty shouldBe false

@@ -1,7 +1,6 @@
 package pureconfig
 
 import scala.collection.Factory
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 /** A marker trait signaling that a `ConfigReader` accepts missing (undefined) values.
@@ -24,7 +23,7 @@ trait CollectionReaders {
       }
     }
 
-  implicit def traversableReader[A, F[A] <: TraversableOnce[A]](implicit
+  implicit def traversableReader[A, F[A] <: IterableOnce[A]](implicit
       configConvert: ConfigReader[A],
       cbf: Factory[A, F[A]]
   ): ConfigReader[F[A]] =

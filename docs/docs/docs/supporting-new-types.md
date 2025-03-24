@@ -37,7 +37,7 @@ For the `MyInt` type above, we could create a `ConfigReader[MyInt]` by mapping t
 this:
 
 ```scala mdoc:silent
-implicit val myIntReader = ConfigReader[Int].map(n => new MyInt(n))
+implicit val myIntReader: ConfigReader[MyInt] = ConfigReader[Int].map(n => new MyInt(n))
 ```
 
 Note that the `ConfigReader[Int]` expression "summons" an existing implicit instance, being syntactic sugar for `implicitly[ConfigReader[Int]]`. This is usually the easiest way to create a `ConfigReader` for simple types. See
@@ -46,7 +46,7 @@ Note that the `ConfigReader[Int]` expression "summons" an existing implicit inst
 As an example for the second approach, we could read the required integer by parsing it from a string form like this:
 
 ```scala mdoc:nest:silent
-implicit val myIntReader = ConfigReader.fromString[MyInt](
+implicit val myIntReader: ConfigReader[MyInt] = ConfigReader.fromString[MyInt](
   ConvertHelpers.catchReadError(s => new MyInt(s.toInt)))
 ```
 
@@ -57,7 +57,7 @@ The `fromString` factory method allows users to easily read data from string rep
 Finally, we could simply implement the `ConfigReader` interface by hand:
 
 ```scala mdoc:nest:silent
-implicit val myIntReader = new ConfigReader[MyInt] {
+implicit val myIntReader: ConfigReader[MyInt] = new ConfigReader[MyInt] {
   def from(cur: ConfigCursor) = cur.asString.map(s => new MyInt(s.toInt))
 }
 ```

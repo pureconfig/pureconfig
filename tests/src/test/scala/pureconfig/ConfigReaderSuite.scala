@@ -6,7 +6,8 @@ import org.scalacheck.{Arbitrary, Gen}
 import pureconfig.error._
 
 class ConfigReaderSuite extends BaseSuite {
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
 
   val intReader = ConfigReader[Int]
   val strReader = ConfigReader[String]

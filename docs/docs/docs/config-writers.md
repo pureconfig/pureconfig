@@ -50,7 +50,8 @@ class MyInt(value: Int) {
   override def toString: String = s"MyInt($value)"
 }
 
-implicit val myIntWriter = ConfigWriter[Int].contramap[MyInt](_.getValue)
+implicit val myIntWriter: ConfigWriter[MyInt] =
+  ConfigWriter[Int].contramap[MyInt](_.getValue)
 ```
 
 ```scala mdoc
@@ -60,12 +61,18 @@ ConfigWriter[MyInt].to(new MyInt(1))
 Finally, if you need both the reading and the writing part for a custom type, you can implement a `ConfigConvert`:
 
 ```scala mdoc:silent
-implicit val myIntConvert = ConfigConvert[Int].xmap[MyInt](new MyInt(_), _.getValue)
+class MyInt2(value: Int) {
+  def getValue: Int = value
+  override def toString: String = s"MyInt2($value)"
+}
+
+implicit val myIntConvert: ConfigConvert[MyInt2] =
+  ConfigConvert[Int].xmap[MyInt2](new MyInt2(_), _.getValue)
 ```
 
 ```scala mdoc
-val conf = ConfigWriter[MyInt].to(new MyInt(1))
-ConfigReader[MyInt].from(conf)
+val conf = ConfigWriter[MyInt2].to(new MyInt2(1))
+ConfigReader[MyInt2].from(conf)
 ```
 
 A `ConfigConvert` implements both the `ConfigReader` and `ConfigWriter` interfaces and can be used everywhere one of

@@ -1,7 +1,6 @@
 package pureconfig
 
-import scala.collection.JavaConverters._
-import scala.language.higherKinds
+import scala.jdk.CollectionConverters._
 
 import com.typesafe.config._
 
@@ -29,20 +28,20 @@ trait CollectionWriters {
       def toOpt(t: Option[A]): Option[ConfigValue] = t.map(conv.to)
     }
 
-  implicit def traversableWriter[A, F[A] <: TraversableOnce[A]](implicit
+  implicit def traversableWriter[A, F[A] <: IterableOnce[A]](implicit
       configConvert: ConfigWriter[A]
   ): ConfigWriter[F[A]] =
     new ConfigWriter[F[A]] {
 
       override def to(ts: F[A]): ConfigValue = {
-        ConfigValueFactory.fromIterable(ts.toList.map(configConvert.to).asJava)
+        ConfigValueFactory.fromIterable(ts.iterator.to(List).map(configConvert.to).asJava)
       }
     }
 
   implicit def mapWriter[A](implicit configConvert: ConfigWriter[A]): ConfigWriter[Map[String, A]] =
     new ConfigWriter[Map[String, A]] {
       override def to(keyVals: Map[String, A]): ConfigValue = {
-        ConfigValueFactory.fromMap(keyVals.mapValues(configConvert.to).toMap.asJava)
+        ConfigValueFactory.fromMap(keyVals.view.mapValues(configConvert.to).toMap.asJava)
       }
     }
 

@@ -49,7 +49,7 @@ def firstNameOf(name: String): String =
 def lastNamesOf(name: String): Array[String] =
   name.dropWhile(_ != ' ').drop(1).split(" ")
 
-implicit val personReader = ConfigReader.fromCursor[Person] { cur =>
+implicit val personReader: ConfigReader[Person] = ConfigReader.fromCursor[Person] { cur =>
   for {
     objCur <- cur.asObjectCursor      // 1
     nameCur <- objCur.atKey("name")   // 2

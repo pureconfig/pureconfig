@@ -1,7 +1,6 @@
 package pureconfig
 
 import scala.collection.{Factory, mutable}
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -165,15 +164,17 @@ object ConfigReader
 
     /** Sequences a collection of `Result`s into a `Result` of a collection.
       */
-    def sequence[A, CC[X] <: TraversableOnce[X]](
+    def sequence[A, CC[X] <: IterableOnce[X]](
         rs: CC[ConfigReader.Result[A]]
     )(implicit cbf: Factory[A, CC[A]]): ConfigReader.Result[CC[A]] = {
-      rs.foldLeft[ConfigReader.Result[mutable.Builder[A, CC[A]]]](Right(cbf.newBuilder)) {
-        case (Right(builder), Right(a)) => Right(builder += a)
-        case (Left(err), Right(_)) => Left(err)
-        case (Right(_), Left(err)) => Left(err)
-        case (Left(errs), Left(err)) => Left(errs ++ err)
-      }.map(_.result())
+      rs.iterator
+        .foldLeft[ConfigReader.Result[mutable.Builder[A, CC[A]]]](Right(cbf.newBuilder)) {
+          case (Right(builder), Right(a)) => Right(builder += a)
+          case (Left(err), Right(_)) => Left(err)
+          case (Right(_), Left(err)) => Left(err)
+          case (Left(errs), Left(err)) => Left(errs ++ err)
+        }
+        .map(_.result())
     }
 
     /** Merges two `Result`s using a given function.

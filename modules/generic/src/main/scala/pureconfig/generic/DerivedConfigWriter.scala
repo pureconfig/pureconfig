@@ -1,5 +1,7 @@
 package pureconfig.generic
 
+import scala.annotation.unused
+
 import com.typesafe.config._
 import shapeless._
 
@@ -16,7 +18,6 @@ object DerivedConfigWriter extends DerivedConfigWriter1 {
 
   implicit def anyValWriter[A, Wrapped](implicit
       ev: A <:< AnyVal,
-      generic: Generic[A],
       unwrapped: Unwrapped.Aux[A, Wrapped],
       writer: ConfigWriter[Wrapped]
   ): DerivedConfigWriter[A] =
@@ -24,7 +25,8 @@ object DerivedConfigWriter extends DerivedConfigWriter1 {
       override def to(t: A): ConfigValue = writer.to(unwrapped.unwrap(t))
     }
 
-  implicit def tupleWriter[A: IsTuple, Repr](implicit
+  implicit def tupleWriter[A, Repr](implicit
+      @unused("Needed to disambiguate from anyValWriter") isTuple: IsTuple[A],
       gen: Generic.Aux[A, Repr],
       cc: SeqShapedWriter[Repr]
   ): DerivedConfigWriter[A] =

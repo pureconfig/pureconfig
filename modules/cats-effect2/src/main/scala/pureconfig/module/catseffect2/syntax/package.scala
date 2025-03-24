@@ -1,6 +1,5 @@
 package pureconfig.module.catseffect2
 
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import cats.effect.{Blocker, ContextShift, Sync}

@@ -37,5 +37,5 @@ object EnumerationConfigWriterBuilder {
         }
     }
 
-  implicit def export[A]: EnumerationConfigWriterBuilder[A] = macro Magnolia.gen[A]
+  implicit def `export`[A]: EnumerationConfigWriterBuilder[A] = macro Magnolia.gen[A]
 }
