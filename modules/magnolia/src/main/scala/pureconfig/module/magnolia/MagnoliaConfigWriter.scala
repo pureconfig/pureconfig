@@ -1,7 +1,6 @@
 package pureconfig.module.magnolia
 
-import scala.collection.JavaConverters._
-import scala.reflect.ClassTag
+import scala.jdk.CollectionConverters._
 
 import _root_.magnolia1._
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
@@ -46,7 +45,7 @@ object MagnoliaConfigWriter {
         ctx.parameters.map { param => param.typeclass.to(param.dereference(a)) }.head
     }
 
-  def split[A: ClassTag](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] =
+  def split[A](ctx: SealedTrait[ConfigWriter, A])(implicit hint: CoproductHint[A]): ConfigWriter[A] =
     new ConfigWriter[A] {
       def to(a: A): ConfigValue =
         ctx.split(a) { subtype =>

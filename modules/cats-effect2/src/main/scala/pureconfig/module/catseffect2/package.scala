@@ -4,7 +4,6 @@ import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import cats.data.EitherT

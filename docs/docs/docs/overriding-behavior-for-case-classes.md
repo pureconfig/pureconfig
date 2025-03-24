@@ -45,7 +45,7 @@ import pureconfig.generic.ProductHint
 
 case class SampleConf(foo: Int, bar: String)
 
-implicit val productHint = ProductHint[SampleConf](new ConfigFieldMapping {
+implicit val productHint: ProductHint[SampleConf] = ProductHint[SampleConf](new ConfigFieldMapping {
   def apply(fieldName: String) = fieldName.toUpperCase
 })
 ```
@@ -74,7 +74,7 @@ can make sure the following implicit is in scope before loading or writing
 configuration files:
 
 ```scala mdoc:silent
-implicit def hint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
+implicit def hint[A]: ProductHint[A] = ProductHint[A](ConfigFieldMapping(CamelCase, CamelCase))
 ```
 
 ### Default field values
@@ -116,7 +116,7 @@ A `ProductHint` can make the conversion fail if a key is missing from the
 config regardless of whether a default value exists or not:
 
 ```scala mdoc:silent
-implicit val hint = ProductHint[Holiday](useDefaultArgs = false)
+implicit val hint: ProductHint[Holiday] = ProductHint[Holiday](useDefaultArgs = false)
 ```
 
 ```scala mdoc
@@ -147,7 +147,7 @@ With a `ProductHint`, one can tell the converter to fail if an unknown key is
 found:
 
 ```scala mdoc
-implicit val hint = ProductHint[Holiday](allowUnknownKeys = false)
+implicit val hint: ProductHint[Holiday] = ProductHint[Holiday](allowUnknownKeys = false)
 
 ConfigSource.string("{ wher: Texas, how-long: 21 days }").load[Holiday]
 ```
@@ -181,7 +181,7 @@ available `ConfigReader` for that type with a [cursor](config-cursors.html) to a
 Under this setup:
 
 ```scala mdoc:silent
-implicit val maybeIntReader = new ConfigReader[Int] with ReadsMissingKeys {
+implicit val maybeIntReader: ConfigReader[Int] = new ConfigReader[Int] with ReadsMissingKeys {
   override def from(cur: ConfigCursor) =
     if (cur.isUndefined) Right(42) else ConfigReader[Int].from(cur)
 }

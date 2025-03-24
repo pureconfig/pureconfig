@@ -21,7 +21,7 @@ package object arbitrary {
   implicit val arbFiniteDuration: Arbitrary[FiniteDuration] = Arbitrary(genFiniteDuration)
   implicit val arbInstant: Arbitrary[Instant] = Arbitrary(genInstant)
   implicit val arbPeriod: Arbitrary[Period] = Arbitrary(genPeriod)
-  implicit val arbChronoUnit: Arbitrary[ChronoUnit] = Arbitrary(Gen.oneOf(ChronoUnit.values()))
+  implicit val arbChronoUnit: Arbitrary[ChronoUnit] = Arbitrary(Gen.oneOf(ChronoUnit.values().toSeq))
   implicit val arbYear: Arbitrary[Year] = Arbitrary(genYear)
   implicit val arbUUID: Arbitrary[UUID] = Arbitrary(Gen.uuid)
   implicit val arbPath: Arbitrary[Path] = Arbitrary(genPath)

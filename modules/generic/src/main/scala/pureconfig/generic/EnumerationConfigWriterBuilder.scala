@@ -1,5 +1,7 @@
 package pureconfig.generic
 
+import scala.annotation.unused
+
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 import shapeless._
 import shapeless.labelled._
@@ -28,7 +30,7 @@ object EnumerationConfigWriterBuilder {
 
   implicit def deriveEnumerationWriterBuilderCCons[K <: Symbol, H, T <: Coproduct](implicit
       vName: Witness.Aux[K],
-      hGen: LabelledGeneric.Aux[H, HNil],
+      @unused("Needed to disallow non-case objects and classes") hGen: LabelledGeneric.Aux[H, HNil],
       tWriterBuilder: EnumerationConfigWriterBuilder[T]
   ): EnumerationConfigWriterBuilder[FieldType[K, H] :+: T] =
     new EnumerationConfigWriterBuilder[FieldType[K, H] :+: T] {

@@ -1,7 +1,5 @@
 package pureconfig.module.magnolia
 
-import scala.language.higherKinds
-
 import com.typesafe.config.ConfigFactory
 import shapeless.test.illTyped
 

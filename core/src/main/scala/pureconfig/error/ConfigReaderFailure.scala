@@ -93,7 +93,7 @@ trait CannotRead extends ConfigReaderFailure {
       case None => s"Unable to read $sourceType $sourceName."
     }
 
-  def origin = None
+  def origin: Option[ConfigOrigin] = None
 }
 
 /** A failure occurred due to the inability to read a requested file.
