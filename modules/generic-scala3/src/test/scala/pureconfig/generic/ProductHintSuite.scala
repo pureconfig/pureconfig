@@ -154,19 +154,20 @@ class ProductHintSuite extends BaseSuite {
   it should "disallow unknown keys if specified through a product hint" in {
     given ProductHint[Conf2] = ProductHint(allowUnknownKeys = false)
 
-    case class Conf1(a: Int)
+    case class Conf1(a: Int, c: Int)
     given ConfigReader[Conf1] = deriveReader
-    case class Conf2(a: Int)
+    case class Conf2(a: Int, c: Int)
     given ConfigReader[Conf2] = deriveReader
 
     val conf = ConfigFactory.parseString("""{
       conf {
         a = 1
         b = 2
+        c = 3
       }
     }""")
 
-    conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1))
+    conf.getConfig("conf").to[Conf1] shouldBe Right(Conf1(1, 3))
     conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4))
   }
 

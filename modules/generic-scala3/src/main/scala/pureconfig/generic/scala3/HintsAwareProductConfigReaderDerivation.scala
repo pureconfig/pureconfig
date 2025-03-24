@@ -80,10 +80,13 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
 
         val resultTuple = ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
 
-        val usedFields = actions.map(_._2.field).toSet
-        val hintFailures = summon[ProductHint[A]].bottom(objCursor, usedFields).toLeft(())
-
-        ConfigReader.Result.zipWith(resultTuple, hintFailures)((r, _) => r)
+        if (n == 0) {
+          val usedFields = actions.map(_._2.field).toSet
+          val bottomFailures = summon[ProductHint[A]].bottom(objCursor, usedFields).toLeft(())
+          ConfigReader.Result.zipWith(resultTuple, bottomFailures)((r, _) => r)
+        } else {
+          resultTuple
+        }
 
       case _: EmptyTuple =>
         Right(widen[EmptyTuple, T](EmptyTuple))
