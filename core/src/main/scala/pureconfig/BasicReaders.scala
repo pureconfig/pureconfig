@@ -183,7 +183,7 @@ trait TypesafeConfigReaders {
       cur.scopeFailure {
         ConvertHelpers.tryToEither {
           Try {
-            val wrapped = cur.asConfigValue.right.get.atKey("_")
+            val wrapped = cur.asConfigValue.toOption.get.atKey("_")
             val bytes = wrapped.getBytes("_").longValue()
             ConfigMemorySize.ofBytes(bytes)
           }

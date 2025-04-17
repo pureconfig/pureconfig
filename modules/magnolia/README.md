@@ -23,7 +23,6 @@ The only thing needed to use Magnolia-based derivation is to replace the `pureco
 ```scala
 import pureconfig._
 import pureconfig.module.magnolia.auto.reader._
-import scala.language.higherKinds
 
 sealed trait MyAdt
 case class AdtA(a: String) extends MyAdt
@@ -73,5 +72,4 @@ certain types, writing configs and using semi-auto derivation. Please refer to t
 
 ## Differences in Behavior
 
-- Value classes that are not case classes are not supported (other value classes have the same reading behavior);
-- The Scala compiler may emit a warning unless `scala.language.higherKinds` is imported.
+- Value classes that are not case classes are not supported (other value classes have the same reading behavior).

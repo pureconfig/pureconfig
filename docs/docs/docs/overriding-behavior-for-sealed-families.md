@@ -35,10 +35,10 @@ of a case class option, we can use another field.
 
 First, define a `CoproductHint` in implicit scope:
 
-```scala mdoc:silent
+```scala mdoc:silent:nest
 import pureconfig.generic.FieldCoproductHint
 
-implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("kind")
+implicit val animalConfHint: FieldCoproductHint[AnimalConf] = new FieldCoproductHint[AnimalConf]("kind")
 ```
 
 Then load the config:
@@ -51,7 +51,7 @@ ConfigSource.string("{ kind: dog-conf, age: 4 }").load[AnimalConf]
 way. First, define a new `FieldCoproductHint` in implicit scope:
 
 ```scala mdoc:nest:silent
-implicit val animalConfHint = new FieldCoproductHint[AnimalConf]("type") {
+implicit val animalConfHint: FieldCoproductHint[AnimalConf] = new FieldCoproductHint[AnimalConf]("type") {
   override def fieldValue(name: String) = name.dropRight("Conf".length)
 }
 ```

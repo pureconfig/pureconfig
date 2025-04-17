@@ -1,7 +1,6 @@
 package pureconfig.module.magnolia
 
-import scala.collection.JavaConverters._
-import scala.language.higherKinds
+import scala.jdk.CollectionConverters._
 
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValueType}
 

@@ -3,7 +3,8 @@ package pureconfig
 import com.typesafe.config.{ConfigFactory, ConfigValue}
 
 class ConfigWriterSuite extends BaseSuite {
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
 
   val intWriter = ConfigWriter[Int]
 

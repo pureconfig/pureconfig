@@ -6,8 +6,8 @@ import java.nio.file.{Path, Paths}
 import java.time._
 import java.time.{Duration => JavaDuration}
 
-import scala.collection.JavaConverters._
 import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.jdk.CollectionConverters._
 
 import org.scalacheck.{Arbitrary, Gen}
 

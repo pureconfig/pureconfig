@@ -86,7 +86,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
   /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigWriter[A].to` successfully converts the
     * former into the latter. Useful to test specific values
     */
-  def checkWrite[A: Equality](
+  def checkWrite[A](
       valuesToReprs: (A, ConfigValue)*
   )(implicit cw: ConfigWriter[A], tpe: TypeStringCompat[A]): Unit =
     for ((value, repr) <- valuesToReprs) {
@@ -96,7 +96,7 @@ trait ConfigConvertChecks { this: AnyFlatSpec with Matchers with ScalaCheckDrive
     }
 
   /** Similar to [[checkWrite]] but work on ConfigValues of type String */
-  def checkWriteString[A: ConfigWriter: TypeStringCompat: Equality](valuesToStrs: (A, String)*): Unit =
+  def checkWriteString[A: ConfigWriter: TypeStringCompat](valuesToStrs: (A, String)*): Unit =
     checkWrite[A](valuesToStrs.map { case (a, s) => a -> ConfigValueFactory.fromAnyRef(s) }: _*)
 
   /** For each pair of value of type `A` and `ConfigValue`, check that `ConfigReader[A].from` successfully converts the

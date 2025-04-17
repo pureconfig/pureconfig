@@ -59,5 +59,5 @@ object EnumerationConfigReaderBuilder {
         }
     }
 
-  implicit def export[A]: EnumerationConfigReaderBuilder[A] = macro Magnolia.gen[A]
+  implicit def `export`[A]: EnumerationConfigReaderBuilder[A] = macro Magnolia.gen[A]
 }

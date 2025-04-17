@@ -1,7 +1,5 @@
 package pureconfig.module.zioconfig
 
-import scala.language.higherKinds
-
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 import zio.config.ConfigDescriptor._

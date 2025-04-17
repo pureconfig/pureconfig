@@ -6,6 +6,7 @@ import akka.actor.ActorPath
 import akka.util.Timeout
 
 import pureconfig.BaseSuite
+import pureconfig.error.CannotConvert
 import pureconfig.syntax._
 
 class AkkaSuite extends BaseSuite {
@@ -22,6 +23,6 @@ class AkkaSuite extends BaseSuite {
   }
 
   it should "not load invalid ActorPath" in {
-    configString("this is this the path you're looking for").to[ActorPath] should be('left)
+    configString("this is this the path you're looking for").to[ActorPath].isLeft shouldBe true
   }
 }

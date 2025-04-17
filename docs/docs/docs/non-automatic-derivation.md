@@ -66,7 +66,7 @@ val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 ```scala mdoc:silent
 import pureconfig.generic.semiauto._
 
-implicit val personReader = deriveReader[Person]
+implicit val personReader: ConfigReader[Person] = deriveReader
 ```
 
 We are now ready to read `Person` configs:
@@ -86,21 +86,21 @@ sealed trait Occupation extends Product with Serializable
 object Occupation {
   case class Employed(job: String) extends Occupation
   object Employed {
-    implicit val employedReader = deriveReader[Employed]
+    implicit val employedReader: ConfigReader[Employed] = deriveReader
   }
   case object Unemployed extends Occupation {
-    implicit val unemployedReader = deriveReader[Unemployed.type]
+    implicit val unemployedReader: ConfigReader[Unemployed.type] = deriveReader
   }
   case object Student extends Occupation {
-    implicit val studentReader = deriveReader[Student.type]
+    implicit val studentReader: ConfigReader[Student.type] = deriveReader
   }
-  implicit val occupationReader = deriveReader[Occupation]
+  implicit val occupationReader: ConfigReader[Occupation] = deriveReader
 }
 
 case class WorkingPerson(name: String, surname: String, occupation: Occupation)
 
 object WorkingPerson {
-  implicit val workingPersonReader = deriveReader[WorkingPerson]
+  implicit val workingPersonReader: ConfigReader[WorkingPerson] = deriveReader
 }
 ```
 
@@ -126,7 +126,8 @@ val conf = ConfigFactory.parseString("{ name: John, surname: Doe }")
 ```scala mdoc:silent
 import pureconfig._
 
-implicit val personReader = ConfigReader.forProduct2("name", "surname")(Person(_, _))
+implicit val personReader: ConfigReader[Person] =
+  ConfigReader.forProduct2("name", "surname")(Person(_, _))
 ```
 
 ```scala mdoc

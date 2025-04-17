@@ -1,6 +1,6 @@
 package pureconfig.module.joda
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.joda.time._
 import org.scalacheck.{Arbitrary, Gen}

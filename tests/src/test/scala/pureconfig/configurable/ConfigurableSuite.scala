@@ -12,7 +12,8 @@ import pureconfig.syntax._
 import pureconfig.{BaseSuite, ConfigConvert, ConfigReader, ConfigWriter}
 
 class ConfigurableSuite extends BaseSuite {
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
 
   behavior of "configurable converters"
 

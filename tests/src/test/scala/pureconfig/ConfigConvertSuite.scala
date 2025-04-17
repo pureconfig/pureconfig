@@ -7,7 +7,8 @@ import pureconfig.ConfigConvertSuite._
 import pureconfig.error.{CannotConvert, ExceptionThrown, WrongType}
 
 class ConfigConvertSuite extends BaseSuite {
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
 
   val intConvert = ConfigConvert[Int]
 

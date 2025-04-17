@@ -24,8 +24,8 @@ import pureconfig.generic.auto._
 
 case class Conf(date: LocalDate, intMap: Map[Int, Int])
 
-implicit val localDateConvert = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
-implicit val intMapReader = genericMapReader[Int, Int](catchReadError(_.toInt))
+implicit val localDateConvert: ConfigConvert[LocalDate] = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
+implicit val intMapReader: ConfigReader[Map[Int, Int]] = genericMapReader[Int, Int](catchReadError(_.toInt))
 ```
 
 Then load the configuration:

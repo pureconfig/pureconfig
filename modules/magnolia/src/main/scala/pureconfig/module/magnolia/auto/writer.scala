@@ -1,7 +1,6 @@
 package pureconfig.module.magnolia.auto
 
 import scala.language.experimental.macros
-import scala.reflect.ClassTag
 
 import magnolia1._
 
@@ -18,7 +17,7 @@ object writer {
   def join[A: ProductHint](ctx: CaseClass[ConfigWriter, A]): ConfigWriter[A] =
     MagnoliaConfigWriter.join(ctx)
 
-  def split[A: ClassTag: CoproductHint](ctx: SealedTrait[ConfigWriter, A]): ConfigWriter[A] =
+  def split[A: CoproductHint](ctx: SealedTrait[ConfigWriter, A]): ConfigWriter[A] =
     MagnoliaConfigWriter.split(ctx)
 
   implicit def exportWriter[A]: Exported[ConfigWriter[A]] = macro ExportedMagnolia.exportedMagnolia[ConfigWriter, A]
