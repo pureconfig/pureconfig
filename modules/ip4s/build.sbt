@@ -2,7 +2,7 @@ import Dependencies.Version._
 
 crossScalaVersions := Seq(scala213, scala3)
 
-val ip4sVersion = "3.6.0"
+val ip4sVersion = "3.7.0"
 
 libraryDependencies ++= Seq(
   "com.comcast" %% "ip4s-core" % ip4sVersion,
