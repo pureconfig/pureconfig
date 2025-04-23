@@ -1,3 +1,10 @@
+### 0.17.9 (Apr 23, 2025)
+
+Support for Scala 2.12 was dropped.
+
+- Bug fixes
+  - Fixed a bug in which multiple `UnknownKey` failures for the same key could be raised when deriving strict `ConfigReader`s in Scala 3. 
+
 ### 0.17.8 (Nov 20, 2024)
 
 - New features

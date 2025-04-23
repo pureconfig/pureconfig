@@ -34,13 +34,13 @@ To use PureConfig in an existing SBT project with Scala 2.13 or a later version,
 `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.8"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.17.9"
 ```
 
 For Scala 3, add the following dependency to your `build.sbt`:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "0.17.8"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-core" % "0.17.9"
 ```
 
 While a lot of the documentation will also apply to Scala 3, there is a specific guide for Scala 3's derivation that you can [find here](https://pureconfig.github.io/docs/scala-3-derivation.html).
