@@ -3,7 +3,7 @@ package pureconfig
 import java.time._
 import java.time.format.DateTimeFormatter
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
 import com.typesafe.config.ConfigValueFactory

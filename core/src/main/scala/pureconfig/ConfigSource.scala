@@ -318,7 +318,7 @@ object ConfigSource {
   private[pureconfig] def fromCursor(cur: ConfigCursor): ConfigSource =
     new ConfigSource {
       def value(): Result[ConfigValue] = cur.asConfigValue
-      override def cursor() = Right(cur)
+      override def cursor(): Result[ConfigCursor] = Right(cur)
     }
 
   /** Creates a `ConfigSource` from a `FluentConfigCursor`.
@@ -331,7 +331,7 @@ object ConfigSource {
   private[pureconfig] def fromCursor(cur: FluentConfigCursor): ConfigSource =
     new ConfigSource {
       def value(): Result[ConfigValue] = cur.cursor.flatMap(_.asConfigValue)
-      override def cursor() = cur.cursor
-      override def fluentCursor() = cur
+      override def cursor(): Result[ConfigCursor] = cur.cursor
+      override def fluentCursor(): FluentConfigCursor = cur
     }
 }

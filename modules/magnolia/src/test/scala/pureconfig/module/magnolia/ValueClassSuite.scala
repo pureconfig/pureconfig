@@ -1,7 +1,5 @@
 package pureconfig.module.magnolia
 
-import scala.language.higherKinds
-
 import shapeless.test.illTyped
 
 import pureconfig._
@@ -30,7 +28,7 @@ trait Read[A] {
 object Read {
   def apply[A](implicit readT: Read[A]): Read[A] = readT
 
-  implicit val badReadString = new Read[String] {
+  implicit val badReadString: Read[String] = new Read[String] {
     override def read(str: String): String = ""
   }
 }

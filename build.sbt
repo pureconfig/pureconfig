@@ -106,7 +106,7 @@ lazy val commonSettings = Seq(
 
   Test / scalacOptions ~= { _.filterNot(_.contains("-Ywarn-unused")) },
 
-  Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-unused:_,-implicits"),
+  Compile / console / scalacOptions -= "-Ywarn-unused",
   Test / console / scalacOptions := (Compile / console / scalacOptions).value,
 
   scalafmtOnCompile := true,
@@ -145,8 +145,13 @@ lazy val lintFlags = forScalaVersions {
       "UTF-8", // arg for -encoding
       "-feature",
       "-unchecked",
-      "-Yrangepos", // Required by SemanticDB compiler plugin.
-      "-Ywarn-unused:_,-implicits",
+      "-deprecation",
+      // do not create copy constructor for case classes with private fields
+      "-Xsource-features:case-apply-copy-access",
+      "-Xsource:3",
+      // Required by SemanticDB compiler plugin
+      "-Yrangepos",
+      "-Ywarn-unused",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
     )

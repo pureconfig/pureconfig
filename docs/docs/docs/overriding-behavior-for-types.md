@@ -14,7 +14,6 @@ For instance, the default behavior of PureConfig for `String` is to return the s
 ```scala mdoc:silent
 import com.typesafe.config.ConfigValueFactory
 import pureconfig._
-import pureconfig.generic.auto._
 ```
 
 ```scala mdoc
@@ -24,10 +23,11 @@ ConfigReader[String].from(ConfigValueFactory.fromAnyRef("FooBar"))
 Now let's say that we want to override this behavior such that `String`s are always read lower case. We can define a
 custom `ConfigReader` instance for `String`:
 
-```scala mdoc:silent
+```scala mdoc:silent:nest
 import pureconfig.ConvertHelpers._
 
-implicit val overrideStrReader = ConfigReader.fromString[String](catchReadError(_.toLowerCase))
+implicit val overrideStrReader: ConfigReader[String] =
+  ConfigReader.fromString[String](catchReadError(_.toLowerCase))
 ```
 
 PureConfig will now use the custom `overrideStrReader` instance:

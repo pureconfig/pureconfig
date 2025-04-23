@@ -1,14 +1,15 @@
 package pureconfig
 
-import scala.collection.JavaConverters._
 import scala.collection.immutable.{HashSet, ListSet, Queue, TreeSet}
+import scala.jdk.CollectionConverters._
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory, ConfigValueType}
 
 import pureconfig.error.{ConfigReaderFailures, ConvertFailure, WrongType}
 
 class CollectionConvertersSuite extends BaseSuite {
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
 
   behavior of "ConfigConvert"
 
@@ -50,7 +51,7 @@ class CollectionConvertersSuite extends BaseSuite {
   checkArbitrary[Set[Double]]
   checkRead[Set[Int]](ConfigValueFactory.fromMap(Map("1" -> 4, "2" -> 5, "3" -> 6).asJava) -> Set(4, 5, 6))
 
-  checkArbitrary[Stream[String]]
+  checkArbitrary[LazyList[String]]
 
   checkArbitrary[TreeSet[Int]]
 

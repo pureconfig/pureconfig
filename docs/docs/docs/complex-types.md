@@ -70,10 +70,11 @@ final case class Class2Dummy(id: String, value: Int) extends IdentifiableDummy {
 // change the coproduct hint to tell PureConfig that the type value specified
 // is the name of the class without the "Dummy" suffix because we want the type to
 // be the one of the new types, not the mirroring types
-implicit val identifiableCoproductHint = new FieldCoproductHint[IdentifiableDummy]("type") {
-  override protected def fieldValue(name: String): String =
-    name.take(name.length - "Dummy".length).toLowerCase
-}
+implicit val identifiableCoproductHint: FieldCoproductHint[IdentifiableDummy] =
+  new FieldCoproductHint[IdentifiableDummy]("type") {
+    override protected def fieldValue(name: String): String =
+      name.take(name.length - "Dummy".length).toLowerCase
+  }
 
 // we tell PureConfig that to read Identifiable, it has to read IdentifiableDummy first
 // and then maps it to Identifiable
@@ -108,7 +109,7 @@ def extractByType(typ: String, objCur: ConfigObjectCursor): ConfigReader.Result[
       s"type has value $t instead of class1 or class2"))
 }
 
-implicit val identifiableConfigReader2 = ConfigReader.fromCursor { cur =>
+implicit val identifiableConfigReader2: ConfigReader[Identifiable] = ConfigReader.fromCursor { cur =>
   for {
     objCur <- cur.asObjectCursor
     typeCur <- objCur.atKey("type")
@@ -149,7 +150,7 @@ import shapeless.labelled._
 // create the singleton idw for the field id
 val idw = Witness(Symbol("id"))
 
-implicit val class1Generic = new LabelledGeneric[Class1] {
+implicit val class1Generic: LabelledGeneric[Class1] = new LabelledGeneric[Class1] {
   // the generic representation of Class1 is the field id of type String
   override type Repr = FieldType[idw.T, String] :: HNil
 
@@ -161,7 +162,7 @@ implicit val class1Generic = new LabelledGeneric[Class1] {
 // create the singleton valuew for the field value
 val valuew = Witness(Symbol("value"))
 
-implicit val class2Generic = new LabelledGeneric[Class2] {
+implicit val class2Generic: LabelledGeneric[Class2] = new LabelledGeneric[Class2] {
   // the generic representation of Class2 is the fields id of type String and value of type Int
   override type Repr = FieldType[idw.T, String] :: FieldType[valuew.T, Int] :: HNil
 
@@ -175,12 +176,12 @@ implicit val class2Generic = new LabelledGeneric[Class2] {
 The second item is trivial because neither `Class1` nor `Class2` have default values for fields:
 
 ```scala mdoc:silent
-implicit val class1Default = new Default.AsOptions[Class1] {
+implicit val class1Default: Default.AsOptions[Class1] = new Default.AsOptions[Class1] {
   override type Out = Option[String] :: HNil
   override def apply(): Out = None :: HNil
 }
 
-implicit val class2Default = new Default.AsOptions[Class2] {
+implicit val class2Default: Default.AsOptions[Class2] = new Default.AsOptions[Class2] {
   override type Out = Option[String] :: Option[Int] :: HNil
   override def apply(): Out = None :: None :: HNil
 }
@@ -194,7 +195,7 @@ as a sealed family of `Class1` and `Class2`, or a coproduct of them if you want:
 val class1w = Witness(Symbol("Class1"))
 val class2w = Witness(Symbol("Class2"))
 
-implicit val identifiableGeneric = new LabelledGeneric[Identifiable] {
+implicit val identifiableGeneric: LabelledGeneric[Identifiable] = new LabelledGeneric[Identifiable] {
   override type Repr =
     FieldType[class1w.T, Class1] :+:
     FieldType[class2w.T, Class2] :+:

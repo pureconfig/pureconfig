@@ -1,8 +1,8 @@
 package pureconfig
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
-import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
+import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValue, ConfigValueFactory}
 import org.scalacheck.Arbitrary
 
 import pureconfig.ConfigConvert.catchReadError
@@ -45,7 +45,9 @@ class ProductConvertersSuite extends BaseSuite {
 
   checkArbitrary[FlatConfig]
 
-  implicit val myTypeConvert = ConfigConvert.viaString[MyType](catchReadError(new MyType(_)), _.getMyField)
+  implicit val myTypeConvert: ConfigConvert[MyType] =
+    ConfigConvert.viaString[MyType](catchReadError(new MyType(_)), _.getMyField)
+
   checkArbitrary[ConfigWithUnknownType]
 
   it should s"be able to override all of the ConfigConvert instances used to parse ${classOf[FlatConfig]}" in forAll {
@@ -73,8 +75,8 @@ class ProductConvertersSuite extends BaseSuite {
     case class EnclosingConf(conf: InnerConf)
 
     implicit val conv = new ConfigConvert[InnerConf] {
-      def from(cv: ConfigCursor) = Right(InnerConf(42))
-      def to(conf: InnerConf) = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
+      def from(cv: ConfigCursor): ConfigReader.Result[InnerConf] = Right(InnerConf(42))
+      def to(conf: InnerConf): ConfigValue = ConfigFactory.parseString(s"{ v: ${conf.v} }").root()
     }
 
     ConfigConvert[EnclosingConf].from(emptyConf) should failWith(KeyNotFound("conf"))

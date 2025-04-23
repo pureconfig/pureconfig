@@ -1,5 +1,7 @@
 package pureconfig.generic
 
+import scala.annotation.unused
+
 import shapeless._
 
 import pureconfig._
@@ -17,7 +19,6 @@ object DerivedConfigReader extends DerivedConfigReader1 {
 
   implicit def anyValReader[A, Wrapped](implicit
       ev: A <:< AnyVal,
-      generic: Generic[A],
       unwrapped: Unwrapped.Aux[A, Wrapped],
       reader: ConfigReader[Wrapped]
   ): DerivedConfigReader[A] =
@@ -27,7 +28,8 @@ object DerivedConfigReader extends DerivedConfigReader1 {
         reader.from(value).map(unwrapped.wrap)
     }
 
-  implicit def tupleReader[A: IsTuple, Repr <: HList, LabelledRepr <: HList, DefaultRepr <: HList](implicit
+  implicit def tupleReader[A, Repr <: HList, LabelledRepr <: HList, DefaultRepr <: HList](implicit
+      @unused("Needed to disambiguate from anyValReader") isTuple: IsTuple[A],
       g: Generic.Aux[A, Repr],
       gcr: SeqShapedReader[Repr],
       lg: LabelledGeneric.Aux[A, LabelledRepr],
@@ -51,12 +53,12 @@ object DerivedConfigReader extends DerivedConfigReader1 {
       }
     }
 
-  private[pureconfig] def tupleAsListReader[A: IsTuple, Repr <: HList](
+  private[pureconfig] def tupleAsListReader[A, Repr <: HList](
       cur: ConfigListCursor
   )(implicit gen: Generic.Aux[A, Repr], cr: SeqShapedReader[Repr]): ConfigReader.Result[A] =
     cr.from(cur).map(gen.from)
 
-  private[pureconfig] def tupleAsObjectReader[A: IsTuple, Repr <: HList, DefaultRepr <: HList](
+  private[pureconfig] def tupleAsObjectReader[A, Repr <: HList, DefaultRepr <: HList](
       cur: ConfigObjectCursor
   )(implicit
       gen: LabelledGeneric.Aux[A, Repr],

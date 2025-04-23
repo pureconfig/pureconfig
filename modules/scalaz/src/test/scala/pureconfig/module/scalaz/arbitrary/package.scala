@@ -1,6 +1,6 @@
 package pureconfig.module.scalaz
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import com.typesafe.config.{ConfigValue, ConfigValueFactory}
 import org.scalacheck.Arbitrary.{arbitrary => arb}

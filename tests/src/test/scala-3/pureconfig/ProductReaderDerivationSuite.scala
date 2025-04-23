@@ -1,7 +1,6 @@
 package pureconfig
 
 import scala.collection.JavaConverters.given
-import scala.language.higherKinds
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions, ConfigValueFactory}
 import org.scalacheck.Arbitrary

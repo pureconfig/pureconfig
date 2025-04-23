@@ -1,7 +1,6 @@
 package pureconfig.module
 
 import scala.collection.immutable.{SortedMap, SortedSet}
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import _root_.cats.data._
@@ -43,12 +42,12 @@ package object cats {
   implicit def nonEmptyMapWriter[A, B](implicit writer: ConfigWriter[Map[A, B]]): ConfigWriter[NonEmptyMap[A, B]] =
     writer.contramap(_.toSortedMap)
 
-  // For emptiable foldables not covered by TraversableOnce reader/writer, e.g. Chain.
-  implicit def lowPriorityNonReducibleReader[A, F[_]: Foldable: Alternative](implicit
+  // For emptiable foldables not covered by IterableOnce reader/writer, e.g. Chain.
+  implicit def lowPriorityNonReducibleReader[A, F[_]: Alternative](implicit
       reader: ConfigReader[List[A]]
   ): Exported[ConfigReader[F[A]]] =
     Exported(reader.map(to => (to foldRight Alternative[F].empty[A])(_.pure[F] <+> _)))
-  implicit def lowPriorityNonReducibleWriter[A, F[_]: Foldable: Alternative](implicit
+  implicit def lowPriorityNonReducibleWriter[A, F[_]: Foldable](implicit
       writer: ConfigWriter[List[A]]
   ): Exported[ConfigWriter[F[A]]] =
     Exported(writer.contramap(_.toList))

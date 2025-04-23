@@ -1,5 +1,7 @@
 package pureconfig
 
+import scala.collection.immutable.ArraySeq
+
 trait NamingConvention {
   def toTokens(s: String): Seq[String]
   def fromTokens(l: Seq[String]): String
@@ -7,7 +9,7 @@ trait NamingConvention {
 
 trait CapitalizedWordsNamingConvention extends NamingConvention {
   def toTokens(s: String): Seq[String] = {
-    CapitalizedWordsNamingConvention.wordBreakPattern.split(s).map(_.toLowerCase)
+    ArraySeq.unsafeWrapArray(CapitalizedWordsNamingConvention.wordBreakPattern.split(s)).map(_.toLowerCase)
   }
 }
 
@@ -40,7 +42,7 @@ object PascalCase extends CapitalizedWordsNamingConvention {
 
 class StringDelimitedNamingConvention(d: String) extends NamingConvention {
   def toTokens(s: String): Seq[String] =
-    s.split(d).map(_.toLowerCase)
+    ArraySeq.unsafeWrapArray(s.split(d)).map(_.toLowerCase)
 
   def fromTokens(l: Seq[String]): String =
     l.map(_.toLowerCase).mkString(d)

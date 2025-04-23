@@ -106,19 +106,19 @@ trait NumericWriters {
 trait TypesafeConfigWriters {
 
   implicit val configConfigWriter: ConfigWriter[Config] = new ConfigWriter[Config] {
-    def to(t: Config) = t.root()
+    def to(t: Config): ConfigValue = t.root()
   }
 
   implicit val configObjectConfigWriter: ConfigWriter[ConfigObject] = new ConfigWriter[ConfigObject] {
-    def to(t: ConfigObject) = t
+    def to(t: ConfigObject): ConfigValue = t
   }
 
   implicit val configValueConfigWriter: ConfigWriter[ConfigValue] = new ConfigWriter[ConfigValue] {
-    def to(t: ConfigValue) = t
+    def to(t: ConfigValue): ConfigValue = t
   }
 
   implicit val configListConfigWriter: ConfigWriter[ConfigList] = new ConfigWriter[ConfigList] {
-    def to(t: ConfigList) = t
+    def to(t: ConfigList): ConfigValue = t
   }
 
   implicit val configMemorySizeWriter: ConfigWriter[ConfigMemorySize] = {

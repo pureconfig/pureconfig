@@ -38,7 +38,7 @@ case class Port(number: Int)
 case class PortConf(port: Port)
 
 // reads a TCP port, validating the number range
-implicit val portReader = ConfigReader[Int].emap {
+implicit val portReader: ConfigReader[Port] = ConfigReader[Int].emap {
   case n if n >= 0 && n < 65536 => Right(Port(n))
   case n => Left(CannotConvert(n.toString, "Port", "Invalid port number"))
 }
@@ -56,7 +56,7 @@ import pureconfig.generic.semiauto._
 
 case class Bounds(min: Int, max: Int)
 
-implicit val boundsReader = deriveReader[Bounds]
+implicit val boundsReader: ConfigReader[Bounds] = deriveReader[Bounds]
   .ensure(b => b.max > b.min, _ => "Max must be bigger than Min")
 ```
 
@@ -68,10 +68,12 @@ ConfigSource.string("{ min = 5, max = 3 }").load[Bounds]
 `orElse` can be used to provide alternative ways to load a config:
 
 ```scala mdoc:silent
-val csvIntListReader = ConfigReader[String].map(_.split(",").map(_.toInt).toList)
-implicit val intListReader = ConfigReader[List[Int]].orElse(csvIntListReader)
-
 case class IntListConf(list: List[Int])
+
+val csvIntListReader = ConfigReader[String].map(_.split(",").map(_.toInt).toList)
+implicit val intListConfReader: ConfigReader[IntListConf] =
+  ConfigReader[List[Int]].orElse(csvIntListReader).map(IntListConf.apply)
+
 ```
 
 ```scala mdoc

@@ -16,7 +16,8 @@ import pureconfig.syntax._
 class Ip4sTest extends BaseSuite with Inside with LoneElement {
   // By default `minSuccessfull` set to 10 in `ScalaCheckDrivenPropertyChecks`.
   // It is way too small for tests to be robust and reliable. Set to 100, which is used by default in ScalaCheck.
-  implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
 
   // This generator is missing from `com.comcast.ip4s.Arbitraries` for some reason.
   private val hostGenerator: Gen[Host] =
