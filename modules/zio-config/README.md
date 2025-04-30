@@ -1,6 +1,6 @@
 # ZIO Config module for PureConfig
 
-Support for providing instances of `ConfigCovert` given instances of [ZIO Config](https://zio.github.io/zio-config/) `ConfigDescriptor`.
+Support for providing instances of `ConfigReader` given instances of [ZIO Config](https://zio.github.io/zio-config/) `Config`.
 
 ## Add pureconfig-zio-config to your project
 
@@ -12,108 +12,45 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig-zio-config" % "0.1
 
 ## Example
 
-`Person` already has a `ConfigDescriptor` instance.
-By importing `pureconfig.module.zioconfig._`, it would also have a `ConfigConvert` instance.
+`Person` already has a `Config` instance.
+By importing `pureconfig.module.zioconfig._`, it would also have a `ConfigReader` instance.
+
 ```scala
 import com.typesafe.config.ConfigRenderOptions
 import pureconfig._
 import pureconfig.module.zioconfig._
-import zio.config.ConfigDescriptor
-import zio.config.ConfigDescriptor._
+import zio.config._
+import zio.Config
+import zio.Config._
 
 val configOpt = ConfigRenderOptions.defaults.setOriginComments(false)
 
 case class Person(name: String, age: Int, children: List[Person])
 object Person {
-  implicit val confDesc: ConfigDescriptor[Person] =
-    (string("name") |@| int("age") |@| list("children")(confDesc))(Person.apply, Person.unapply)
+  implicit val confDesc: Config[Person] =
+    (string("name") zip int("age") zip listOf("children", confDesc)).to[Person]
 }
 ```
 
-You can now read and write `Person` without re-implementing or re-deriving `ConfigConvert`.
+You can now read `Person` without re-implementing or re-deriving `ConfigReader`.
+
 ```scala
-val bob = Person("bob", 10, Nil)
-// bob: Person = Person(name = "bob", age = 10, children = List())
-val alice = Person("alice", 42, bob :: Nil)
-// alice: Person = Person(
-//   name = "alice",
-//   age = 42,
-//   children = List(Person(name = "bob", age = 10, children = List()))
-// )
-
-val res = ConfigWriter[Person].to(alice).render(configOpt)
-// res: String = """{
-//     "age" : "42",
-//     "children" : [
-//         {
-//             "age" : "10",
-//             "children" : [],
-//             "name" : "bob"
-//         }
-//     ],
-//     "name" : "alice"
-// }
-// """
-
-val maybeAlice = ConfigSource.string(res).load[Person]
-// maybeAlice: ConfigReader.Result[Person] = Right(
+val alice = ConfigSource.string(
+  """
+  |name = "alice"
+  |age = 42
+  |children = [{
+  |  name = "bob"
+  |  age = 10
+  |  children = []
+  |}]
+  """.stripMargin
+).load[Person]
+// alice: ConfigReader.Result[Person] = Right(
 //   value = Person(
 //     name = "alice",
 //     age = 42,
 //     children = List(Person(name = "bob", age = 10, children = List()))
 //   )
-// )
-```
-
-Writing to HOCON typically does not fail but `zio-config` allows for write failures
-as `ConfigDescriptor` transformation allows for failures bidirectionally.
-For example, we could have a new `ConfigDescriptor[Person]` that fails to write a `Person`
-if they do not qualify as a child.
-```scala
-import scala.util.Try
-import zio.config.typesafe._
- 
-val childConfDesc: ConfigDescriptor[Person] =
-  Person.confDesc.transformOrFailRight(identity, {
-    case Person(_, age, _) if age > 18 => Left("Too old to be a child.")
-    case Person(_, _, children) if children.nonEmpty => Left("Child cannot have children.")
-    case p => Right(p)
-  })
-
-val childConfigConvert: ConfigConvert[Person] = zioConfigConvert(childConfDesc)
-```
-
-Note that in such a case an exception will be thrown since writing is not expected to return a failure in `pureconfig`.
-```scala
-//writing with zio-config
-val zioConfigBob = bob.toHoconString(childConfDesc)
-// zioConfigBob: Either[String, String] = Right(
-//   value = """age="10"
-// children=[]
-// name=bob
-// """
-// )
-val zioConfigAlice = alice.toHoconString(childConfDesc)
-// zioConfigAlice: Either[String, String] = Left(
-//   value = "Too old to be a child."
-// )
-
-//writing with pureconfig
-val pureconfigBob = Try {
-  childConfigConvert.to(bob).render(configOpt)
-}
-// pureconfigBob: Try[String] = Success(
-//   value = """{
-//     "age" : "10",
-//     "children" : [],
-//     "name" : "bob"
-// }
-// """
-// )
-val pureconfigAlice = Try {
-  childConfigConvert.to(alice).render(configOpt)
-}
-// pureconfigAlice: Try[String] = Failure(
-//   exception = java.lang.Exception: ZioConfigWriteException: Too old to be a child.
 // )
 ```

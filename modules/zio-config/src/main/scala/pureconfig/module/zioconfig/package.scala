@@ -1,24 +1,20 @@
 package pureconfig.module
 
 import com.typesafe.config.Config
-import zio.config._
 import zio.config.typesafe._
+import zio.{Config => ZioConfig, ConfigProvider, IO, Runtime, Unsafe}
 
-import pureconfig.ConfigConvert
+import pureconfig.ConfigReader
 
 package object zioconfig {
-  implicit def zioConfigConvert[A](implicit cd: ConfigDescriptor[A]): ConfigConvert[A] =
-    ConfigConvert[Config].xemap(
-      c =>
-        TypesafeConfigSource
-          .fromConfig(c)
-          .flatMap(cs => read(cd.from(cs)))
-          .left
-          .map(ZioConfigReadError.apply),
-      // `zio-config` write should typically not fail but is allowed to fail
-      // an exception will be throw on write errors
-      _.toHocon(cd)
-        .map(_.toConfig)
-        .fold(s => throw new Exception(s"ZioConfigWriteException: $s"), identity)
+  implicit def zioConfigReader[A](implicit cd: ZioConfig[A]): ConfigReader[A] =
+    ConfigReader[Config].emap(c =>
+      runUnsafe { ConfigProvider.fromTypesafeConfig(c).load(cd) }.left.map(ZioConfigReadError.apply)
     )
+
+  private def runUnsafe[E, A](expr: IO[E, A]): Either[E, A] = {
+    Unsafe.unsafe { implicit unsafe =>
+      Runtime.default.unsafe.run(expr.either).getOrThrow()
+    }
+  }
 }
