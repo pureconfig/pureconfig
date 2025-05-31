@@ -91,6 +91,7 @@ jobs:
           --no-check-external-hash
           --swap-urls "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
           --ignore-urls "/search.maven.org/"
+          --ignore-urls "/stackoverflow.com/"
           docs/target/site
 
   diff_website:
