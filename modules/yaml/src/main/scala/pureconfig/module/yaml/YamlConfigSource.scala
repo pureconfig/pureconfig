@@ -10,10 +10,10 @@ import scala.util.Try
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory, ConfigValue, ConfigValueFactory}
-import org.yaml.snakeyaml.constructor.SafeConstructor
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.env.EnvScalarConstructor
 import org.yaml.snakeyaml.error.{Mark, MarkedYAMLException, YAMLException}
 import org.yaml.snakeyaml.nodes.Tag
-import org.yaml.snakeyaml.{LoaderOptions, Yaml}
 
 import pureconfig.ConfigReader.Result
 import pureconfig.error._
@@ -37,7 +37,11 @@ final class YamlConfigSource private (
 ) extends ConfigSource {
 
   // instances of `Yaml` are not thread safe
-  private[this] def loader = new Yaml(new CustomConstructor())
+  private[this] def loader = {
+    val yaml = new Yaml(new CustomConstructor())
+    yaml.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$")
+    yaml
+  }
 
   def value(): Result[ConfigValue] = {
     usingReader { reader =>
@@ -76,7 +80,7 @@ final class YamlConfigSource private (
   // YAML has special support for timestamps and the built-in `SafeConstructor` parses values into Java `Date`
   // instances. However, date readers are expecting strings and the original format may matter to them. This class
   // specifies the string parser as the one to use for dates.
-  private[this] class CustomConstructor extends SafeConstructor(new LoaderOptions()) {
+  private[this] class CustomConstructor extends EnvScalarConstructor {
     yamlConstructors.put(Tag.TIMESTAMP, new ConstructYamlStr())
   }
 

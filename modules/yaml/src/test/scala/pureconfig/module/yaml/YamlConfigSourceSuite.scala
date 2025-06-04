@@ -79,6 +79,22 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
     )
   }
 
+  it should "loadYaml from a string interpolating environment variables" in {
+    YamlConfigSource.string(resourceContents("env.yaml")).load[Conf] shouldBe Right(
+      Conf(
+        "abc",
+        true,
+        BigInt("50"),
+        "dGhpcyBpcyBhIG1lc3NhZ2U=",
+        None,
+        Set(4, 6, 8),
+        List(10L, 10000L, 10000000L, 10000000000L),
+        Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+        InnerConf(42, "def")
+      )
+    )
+  }
+
   it should "loadYaml from string content with empty namespace" in {
     YamlConfigSource.string(resourceContents("basic.yaml")).at("").load[Conf] shouldBe Right(
       Conf(
@@ -207,6 +223,23 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
           "abc",
           true,
           BigInt("1234567890123456789012345678901234567890"),
+          "dGhpcyBpcyBhIG1lc3NhZ2U=",
+          None,
+          Set(4, 6, 8),
+          List(10L, 10000L, 10000000L, 10000000000L),
+          Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+          InnerConf(42, "def")
+        )
+      )
+    )
+
+    YamlConfigSource.file(resourcePath("multi3.yaml")).multiDoc.load[(InnerConf, Conf)] shouldBe Right(
+      (
+        InnerConf(1, "abc"),
+        Conf(
+          "abc",
+          true,
+          BigInt("50"),
           "dGhpcyBpcyBhIG1lc3NhZ2U=",
           None,
           Set(4, 6, 8),
