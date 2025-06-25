@@ -10,7 +10,8 @@ import scala.util.Try
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory, ConfigValue, ConfigValueFactory}
-import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.{LoaderOptions, Yaml}
+import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.env.EnvScalarConstructor
 import org.yaml.snakeyaml.error.{Mark, MarkedYAMLException, YAMLException}
 import org.yaml.snakeyaml.nodes.Tag
@@ -19,6 +20,8 @@ import pureconfig.ConfigReader.Result
 import pureconfig.error._
 import pureconfig.module.yaml.error.{NonStringKeyFound, UnsupportedYamlType}
 import pureconfig.{ConfigObjectSource, ConfigSource}
+
+import scala.util.chaining.scalaUtilChainingOps
 
 /** A `ConfigSource` that reads configs from YAML documents in a stream, file or string.
   *
@@ -33,20 +36,30 @@ import pureconfig.{ConfigObjectSource, ConfigSource}
 final class YamlConfigSource private (
     getReader: () => Reader,
     uri: Option[URI] = None,
-    onIOFailure: Option[Option[Throwable] => CannotRead] = None
+    onIOFailure: Option[Option[Throwable] => CannotRead] = None,
+    enableEnvironmentOverrides: Boolean = false
 ) extends ConfigSource {
 
   // instances of `Yaml` are not thread safe
   private[this] def loader = {
-    val yaml = new Yaml(new CustomConstructor())
-    yaml.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$")
-    yaml
+    if (enableEnvironmentOverrides) {
+      new Yaml(new CustomEnvironmentOverrideConstructor()).tap {
+        // Implicit resolver to use $ instead of !ENV tag
+        _.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$")
+      }
+    } else {
+      new Yaml(new CustomConstructor())
+    }
   }
 
   def value(): Result[ConfigValue] = {
     usingReader { reader =>
       yamlObjToConfigValue(loader.load[AnyRef](reader))
     }
+  }
+
+  def withEnvironmentOverrides(): YamlConfigSource = {
+    new YamlConfigSource(getReader, uri, onIOFailure, true)
   }
 
   /** Converts this YAML source to a config object source to allow merging with other sources. This operation is not
@@ -80,7 +93,11 @@ final class YamlConfigSource private (
   // YAML has special support for timestamps and the built-in `SafeConstructor` parses values into Java `Date`
   // instances. However, date readers are expecting strings and the original format may matter to them. This class
   // specifies the string parser as the one to use for dates.
-  private[this] class CustomConstructor extends EnvScalarConstructor {
+  private[this] class CustomConstructor extends SafeConstructor(new LoaderOptions()) {
+    yamlConstructors.put(Tag.TIMESTAMP, new ConstructYamlStr())
+  }
+
+  private[this] class CustomEnvironmentOverrideConstructor extends EnvScalarConstructor {
     yamlConstructors.put(Tag.TIMESTAMP, new ConstructYamlStr())
   }
 
