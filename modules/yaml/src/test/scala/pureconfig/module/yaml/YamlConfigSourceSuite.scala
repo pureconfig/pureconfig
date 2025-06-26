@@ -62,11 +62,80 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
       )
     )
   }
+  it should "loadYaml from a file interpolating environment variables when using withEnvironmentOverrides()" in {
+    YamlConfigSource
+      .file(resourcePath("basic-with-environment-overrides.yaml"))
+      .withEnvironmentOverrides()
+      .load[Conf] shouldBe Right(
+      Conf(
+        "abc",
+        true,
+        BigInt("50"),
+        "dGhpcyBpcyBhIG1lc3NhZ2U=",
+        None,
+        Set(4, 6, 8),
+        List(10L, 10000L, 10000000L, 10000000000L),
+        Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+        InnerConf(42, "def")
+      )
+    )
+  }
+
+  it should "loadYaml from a file without interpolating environment variables" in {
+    YamlConfigSource.file(resourcePath("basic-without-environment-overrides.yaml")).load[Conf] shouldBe Right(
+      Conf(
+        "${NOT_AN_ENVIRONMENT_VARIABLE}",
+        true,
+        BigInt("1234567890123456789012345678901234567890"),
+        "dGhpcyBpcyBhIG1lc3NhZ2U=",
+        None,
+        Set(4, 6, 8),
+        List(10L, 10000L, 10000000L, 10000000000L),
+        Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+        InnerConf(42, "def")
+      )
+    )
+  }
 
   it should "loadYaml from a string" in {
     YamlConfigSource.string(resourceContents("basic.yaml")).load[Conf] shouldBe Right(
       Conf(
         "abc",
+        true,
+        BigInt("1234567890123456789012345678901234567890"),
+        "dGhpcyBpcyBhIG1lc3NhZ2U=",
+        None,
+        Set(4, 6, 8),
+        List(10L, 10000L, 10000000L, 10000000000L),
+        Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+        InnerConf(42, "def")
+      )
+    )
+  }
+
+  it should "loadYaml from a string interpolating environment variables when using withEnvironmentOverrides()" in {
+    YamlConfigSource
+      .string(resourceContents("basic-with-environment-overrides.yaml"))
+      .withEnvironmentOverrides()
+      .load[Conf] shouldBe Right(
+      Conf(
+        "abc",
+        true,
+        BigInt("50"),
+        "dGhpcyBpcyBhIG1lc3NhZ2U=",
+        None,
+        Set(4, 6, 8),
+        List(10L, 10000L, 10000000L, 10000000000L),
+        Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+        InnerConf(42, "def")
+      )
+    )
+  }
+
+  it should "loadYaml from a string without interpolating environment variables" in {
+    YamlConfigSource.string(resourceContents("basic-without-environment-overrides.yaml")).load[Conf] shouldBe Right(
+      Conf(
+        "${NOT_AN_ENVIRONMENT_VARIABLE}",
         true,
         BigInt("1234567890123456789012345678901234567890"),
         "dGhpcyBpcyBhIG1lc3NhZ2U=",
@@ -218,12 +287,102 @@ class YamlConfigSourceSuite extends BaseSuite with EitherValues {
     )
   }
 
+  it should "loadYamls from a file interpolating environment variables when using withEnvironmentOverrides()" in {
+    YamlConfigSource
+      .file(resourcePath("multi3-with-environment-overrides.yaml"))
+      .withEnvironmentOverrides()
+      .multiDoc
+      .load[(InnerConf, Conf)] shouldBe Right(
+      (
+        InnerConf(1, "abc"),
+        Conf(
+          "abc",
+          true,
+          BigInt("50"),
+          "dGhpcyBpcyBhIG1lc3NhZ2U=",
+          None,
+          Set(4, 6, 8),
+          List(10L, 10000L, 10000000L, 10000000000L),
+          Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+          InnerConf(42, "def")
+        )
+      )
+    )
+  }
+
+  it should "loadYamls from a file without interpolating environment variables" in {
+    YamlConfigSource
+      .file(resourcePath("multi3-without-environment-overrides.yaml"))
+      .multiDoc
+      .load[(InnerConf, Conf)] shouldBe Right(
+      (
+        InnerConf(1, "abc"),
+        Conf(
+          "${NOT_AN_ENVIRONMENT_VARIABLE}",
+          true,
+          BigInt("1234567890123456789012345678901234567890"),
+          "dGhpcyBpcyBhIG1lc3NhZ2U=",
+          None,
+          Set(4, 6, 8),
+          List(10L, 10000L, 10000000L, 10000000000L),
+          Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+          InnerConf(42, "def")
+        )
+      )
+    )
+  }
+
   it should "loadYamls from a string" in {
     YamlConfigSource.string(resourceContents("multi2.yaml")).multiDoc.load[(InnerConf, Conf)] shouldBe Right(
       (
         InnerConf(1, "abc"),
         Conf(
           "abc",
+          true,
+          BigInt("1234567890123456789012345678901234567890"),
+          "dGhpcyBpcyBhIG1lc3NhZ2U=",
+          None,
+          Set(4, 6, 8),
+          List(10L, 10000L, 10000000L, 10000000000L),
+          Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+          InnerConf(42, "def")
+        )
+      )
+    )
+  }
+
+  it should "loadYamls from a string interpolating environment variables when using withEnvironmentOverrides()" in {
+    YamlConfigSource
+      .string(resourceContents("multi3-with-environment-overrides.yaml"))
+      .withEnvironmentOverrides()
+      .multiDoc
+      .load[(InnerConf, Conf)] shouldBe Right(
+      (
+        InnerConf(1, "abc"),
+        Conf(
+          "abc",
+          true,
+          BigInt("50"),
+          "dGhpcyBpcyBhIG1lc3NhZ2U=",
+          None,
+          Set(4, 6, 8),
+          List(10L, 10000L, 10000000L, 10000000000L),
+          Map("a" -> 1.5, "b" -> 2.5, "c" -> 3.5),
+          InnerConf(42, "def")
+        )
+      )
+    )
+  }
+
+  it should "loadYamls from a string without interpolating environment variables" in {
+    YamlConfigSource
+      .string(resourceContents("multi3-without-environment-overrides.yaml"))
+      .multiDoc
+      .load[(InnerConf, Conf)] shouldBe Right(
+      (
+        InnerConf(1, "abc"),
+        Conf(
+          "${NOT_AN_ENVIRONMENT_VARIABLE}",
           true,
           BigInt("1234567890123456789012345678901234567890"),
           "dGhpcyBpcyBhIG1lc3NhZ2U=",
