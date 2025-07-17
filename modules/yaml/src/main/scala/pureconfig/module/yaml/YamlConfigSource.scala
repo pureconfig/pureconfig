@@ -7,21 +7,20 @@ import java.util.Base64
 
 import scala.jdk.CollectionConverters._
 import scala.util.Try
+import scala.util.chaining.scalaUtilChainingOps
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory, ConfigValue, ConfigValueFactory}
-import org.yaml.snakeyaml.{LoaderOptions, Yaml}
 import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.env.EnvScalarConstructor
 import org.yaml.snakeyaml.error.{Mark, MarkedYAMLException, YAMLException}
 import org.yaml.snakeyaml.nodes.Tag
+import org.yaml.snakeyaml.{LoaderOptions, Yaml}
 
 import pureconfig.ConfigReader.Result
 import pureconfig.error._
 import pureconfig.module.yaml.error.{NonStringKeyFound, UnsupportedYamlType}
 import pureconfig.{ConfigObjectSource, ConfigSource}
-
-import scala.util.chaining.scalaUtilChainingOps
 
 /** A `ConfigSource` that reads configs from YAML documents in a stream, file or string.
   *
