@@ -7,10 +7,12 @@ import java.util.Base64
 
 import scala.jdk.CollectionConverters._
 import scala.util.Try
+import scala.util.chaining.scalaUtilChainingOps
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{ConfigOrigin, ConfigOriginFactory, ConfigValue, ConfigValueFactory}
 import org.yaml.snakeyaml.constructor.SafeConstructor
+import org.yaml.snakeyaml.env.EnvScalarConstructor
 import org.yaml.snakeyaml.error.{Mark, MarkedYAMLException, YAMLException}
 import org.yaml.snakeyaml.nodes.Tag
 import org.yaml.snakeyaml.{LoaderOptions, Yaml}
@@ -33,16 +35,30 @@ import pureconfig.{ConfigObjectSource, ConfigSource}
 final class YamlConfigSource private (
     getReader: () => Reader,
     uri: Option[URI] = None,
-    onIOFailure: Option[Option[Throwable] => CannotRead] = None
+    onIOFailure: Option[Option[Throwable] => CannotRead] = None,
+    enableEnvironmentOverrides: Boolean = false
 ) extends ConfigSource {
 
   // instances of `Yaml` are not thread safe
-  private[this] def loader = new Yaml(new CustomConstructor())
+  private[this] def loader = {
+    if (enableEnvironmentOverrides) {
+      new Yaml(new CustomEnvironmentOverrideConstructor()).tap {
+        // Implicit resolver to use $ instead of !ENV tag
+        _.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$")
+      }
+    } else {
+      new Yaml(new CustomConstructor())
+    }
+  }
 
   def value(): Result[ConfigValue] = {
     usingReader { reader =>
       yamlObjToConfigValue(loader.load[AnyRef](reader))
     }
+  }
+
+  def withEnvironmentOverrides(): YamlConfigSource = {
+    new YamlConfigSource(getReader, uri, onIOFailure, true)
   }
 
   /** Converts this YAML source to a config object source to allow merging with other sources. This operation is not
@@ -77,6 +93,10 @@ final class YamlConfigSource private (
   // instances. However, date readers are expecting strings and the original format may matter to them. This class
   // specifies the string parser as the one to use for dates.
   private[this] class CustomConstructor extends SafeConstructor(new LoaderOptions()) {
+    yamlConstructors.put(Tag.TIMESTAMP, new ConstructYamlStr())
+  }
+
+  private[this] class CustomEnvironmentOverrideConstructor extends EnvScalarConstructor {
     yamlConstructors.put(Tag.TIMESTAMP, new ConstructYamlStr())
   }
 
