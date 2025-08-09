@@ -75,7 +75,8 @@ trait JavaEnumReader {
   */
 trait UriAndPathReaders {
 
-  implicit val urlConfigReader: ConfigReader[URL] = ConfigReader.fromNonEmptyString[URL](catchReadError(new URL(_)))
+  implicit val urlConfigReader: ConfigReader[URL] =
+    ConfigReader.fromNonEmptyString[URL](catchReadError(new URI(_).toURL()))
   implicit val uuidConfigReader: ConfigReader[UUID] =
     ConfigReader.fromNonEmptyString[UUID](catchReadError(UUID.fromString))
   implicit val pathConfigReader: ConfigReader[Path] = ConfigReader.fromString[Path](catchReadError(Paths.get(_)))

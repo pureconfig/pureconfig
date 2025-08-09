@@ -162,7 +162,7 @@ class BasicConvertersSuite extends BaseSuite {
   checkReadWriteString[Regex]("(a|b)" -> new Regex("(a|b)"))
   checkFailure[Regex, CannotConvert](ConfigValueFactory.fromAnyRef("(a|b")) // missing closing ')'
 
-  checkReadWriteString[URL]("http://host/path?with=query&param" -> new URL("http://host/path?with=query&param"))
+  checkReadWriteString[URL]("http://host/path?with=query&param" -> new URI("http://host/path?with=query&param").toURL())
 
   checkReadWriteString[URI]("http://host/path?with=query&param" -> new URI("http://host/path?with=query&param"))
 
