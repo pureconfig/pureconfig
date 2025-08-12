@@ -29,8 +29,8 @@ class DerivationFlowSuite extends BaseSuite {
     configObject.toConfig().entrySet().asScala.flatMap(_.getKey.split('.')).toSet
 
   it should "normal reader derivation should work the same" in {
-    given ConfigReader[ConfWithCamelCaseInner] = deriveReader
-    given ConfigReader[ConfWithCamelCase] = deriveReader
+    given ConfigReader[ConfWithCamelCaseInner] = deriveReaderSemiauto
+    given ConfigReader[ConfWithCamelCase] = deriveReaderSemiauto
 
     val conf = ConfigFactory.parseString("""{
       camel-case-int = 1
@@ -45,10 +45,8 @@ class DerivationFlowSuite extends BaseSuite {
   }
 
   it should "reader derivation without embedded class should fail" in {
-    //   given ConfigReader[ConfWithCamelCaseInner] = deriveReader
-    val errors = typeCheckErrors("""given ConfigReader[ConfWithCamelCase] = deriveReader""")
+    val errors = typeCheckErrors("""given ConfigReader[ConfWithCamelCase] = deriveReaderSemiauto""").map(_.message)
 
-    errors shouldBe List("Some Error")
+    atLeast(1, errors) should (startWith("Cannot derive ConfigReader for") and include("ConfWithCamelCaseInner"))
   }
-
 }

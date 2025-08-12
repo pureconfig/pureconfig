@@ -65,7 +65,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]
-        lazy val reader = summonConfigReader[h]
+        lazy val reader = summonConfigReader[h](using df.throughProduct)
         val default = defaults(n)
         val label = labels(n)
         val fieldHint = actions(label)
