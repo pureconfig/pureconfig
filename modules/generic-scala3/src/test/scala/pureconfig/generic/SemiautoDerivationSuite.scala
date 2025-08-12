@@ -11,9 +11,9 @@ import pureconfig.generic.ProductHint
 import pureconfig.generic.semiauto._
 import pureconfig.syntax._
 
-class DerivationFlowSuite extends BaseSuite {
+class SemiautoDerivationSuite extends BaseSuite {
 
-  behavior of "DerivationFlow"
+  behavior of "Semiauto Derivation"
 
   case class ConfWithCamelCaseInner(thisIsAnInt: Int, thisIsAnotherInt: Int)
   case class ConfWithCamelCase(
@@ -28,7 +28,7 @@ class DerivationFlowSuite extends BaseSuite {
   def allKeys(configObject: ConfigObject): Set[String] =
     configObject.toConfig().entrySet().asScala.flatMap(_.getKey.split('.')).toSet
 
-  it should "normal reader derivation should work the same" in {
+  it should "derive mostly the same reader instance if inner instance is in scope" in {
     given ConfigReader[ConfWithCamelCaseInner] = deriveReaderSemiauto
     given ConfigReader[ConfWithCamelCase] = deriveReaderSemiauto
 
@@ -44,9 +44,29 @@ class DerivationFlowSuite extends BaseSuite {
     conf.to[ConfWithCamelCase] shouldBe Right(ConfWithCamelCase(1, "bar", Some(ConfWithCamelCaseInner(3, 10))))
   }
 
-  it should "reader derivation without embedded class should fail" in {
+  it should "throw an error during reader derivation if inner instance is missing" in {
     val errors = typeCheckErrors("""given ConfigReader[ConfWithCamelCase] = deriveReaderSemiauto""").map(_.message)
 
     atLeast(1, errors) should (startWith("Cannot derive ConfigReader for") and include("ConfWithCamelCaseInner"))
+  }
+
+  it should "derive mostly the same writer instance if inner instance is in scope" in {
+    given ConfigWriter[ConfWithCamelCaseInner] = deriveWriterSemiauto
+    given ConfigWriter[ConfWithCamelCase] = deriveWriterSemiauto
+
+    val conf = confWithCamelCase.toConfig.asInstanceOf[ConfigObject]
+    allKeys(conf) should contain theSameElementsAs Seq(
+      "camel-case-int",
+      "camel-case-string",
+      "camel-case-conf",
+      "this-is-an-int",
+      "this-is-another-int"
+    )
+  }
+
+  it should "throw an error during writer derivation if inner instance is missing" in {
+    val errors = typeCheckErrors("""given ConfigWriter[ConfWithCamelCase] = deriveWriterSemiauto""").map(_.message)
+
+    atLeast(1, errors) should (startWith("Cannot derive ConfigWriter for") and include("ConfWithCamelCaseInner"))
   }
 }
