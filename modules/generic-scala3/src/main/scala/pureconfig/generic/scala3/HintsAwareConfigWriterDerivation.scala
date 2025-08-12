@@ -32,7 +32,7 @@ trait HintsAwareConfigWriterDerivation
   private inline def deriveWriterWithMirror[A](using m: Mirror.Of[A], inline df: DerivationFlow): ConfigWriter[A] =
     inline m match {
       case pm: Mirror.ProductOf[A] => deriveProductWriter[A](using pm, summonInline[ProductHint[A]], df.throughProduct)
-      case sm: Mirror.SumOf[A] if df.allowAutoUnion => deriveSumWriter[A](using sm, summonInline[CoproductHint[A]])
+      case sm: Mirror.SumOf[A] if df.allowAutoSum => deriveSumWriter[A](using sm, summonInline[CoproductHint[A]])
       case _ => error("Cannot derive ConfigWriter for: " + typeName[A])
     }
 
