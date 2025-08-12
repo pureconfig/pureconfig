@@ -12,24 +12,31 @@ trait HintsAwareConfigWriterDerivation
       HintsAwareProductConfigWriterDerivation {
   inline def deriveWriter[A]: ConfigWriter[A] =
     summonFrom {
-      case given Mirror.Of[A] => deriveWriterWithMirror[A]
-      case _ => deriveAnyValOrFail[A]
+      case ma: Mirror.Of[A] => deriveWriterWithMirror[A](using ma, DerivationFlow.auto)
+      case _ => deriveAnyValOrFail[A](using DerivationFlow.auto)
     }
 
-  private[scala3] inline def summonConfigWriter[A]: ConfigWriter[A] =
+  inline def deriveWriterSemiauto[A]: ConfigWriter[A] =
+    summonFrom {
+      case ma: Mirror.Of[A] => deriveWriterWithMirror[A](using ma, DerivationFlow.semiauto)
+      case _ => deriveAnyValOrFail[A](using DerivationFlow.semiauto)
+    }
+
+  private[scala3] inline def summonConfigWriter[A](using inline df: DerivationFlow): ConfigWriter[A] =
     summonFrom {
       case writer: ConfigWriter[A] => writer
       case given Mirror.Of[A] => deriveWriterWithMirror[A]
       case _ => deriveAnyValOrFail[A]
     }
 
-  private inline def deriveWriterWithMirror[A](using m: Mirror.Of[A]): ConfigWriter[A] =
+  private inline def deriveWriterWithMirror[A](using m: Mirror.Of[A], inline df: DerivationFlow): ConfigWriter[A] =
     inline m match {
-      case pm: Mirror.ProductOf[A] => deriveProductWriter[A](using pm, summonInline[ProductHint[A]])
-      case sm: Mirror.SumOf[A] => deriveSumWriter[A](using sm, summonInline[CoproductHint[A]])
+      case pm: Mirror.ProductOf[A] => deriveProductWriter[A](using pm, summonInline[ProductHint[A]], df.throughProduct)
+      case sm: Mirror.SumOf[A] if df.allowAutoUnion => deriveSumWriter[A](using sm, summonInline[CoproductHint[A]])
+      case _ => error("Cannot derive ConfigWriter for: " + typeName[A])
     }
 
-  private inline def deriveAnyValOrFail[A]: ConfigWriter[A] =
+  private inline def deriveAnyValOrFail[A](using inline df: DerivationFlow): ConfigWriter[A] =
     inline if (AnyValDerivationMacros.isAnyVal[A]) AnyValDerivationMacros.unsafeDeriveAnyValWriter[A]
     else error("Cannot derive ConfigWriter for: " + typeName[A])
 }
