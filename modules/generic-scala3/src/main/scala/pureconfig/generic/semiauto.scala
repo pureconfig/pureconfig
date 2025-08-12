@@ -8,7 +8,7 @@ import pureconfig.generic.derivation._
 import scala3._
 
 object semiauto {
-  export HintsAwareConfigReaderDerivation.deriveReader
+  export HintsAwareConfigReaderDerivation.{deriveReader, deriveReaderSemiauto}
   export HintsAwareConfigWriterDerivation.deriveWriter
   export EnumDerivation._
 
