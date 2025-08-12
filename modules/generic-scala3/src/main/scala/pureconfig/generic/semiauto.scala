@@ -14,4 +14,7 @@ object semiauto {
 
   inline def deriveConvert[A]: ConfigConvert[A] =
     ConfigConvert.fromReaderAndWriter(deriveReader[A], deriveWriter[A])
+
+  inline def deriveConvertSemiauto[A]: ConfigConvert[A] =
+    ConfigConvert.fromReaderAndWriter(deriveReaderSemiauto[A], deriveWriterSemiauto[A])
 }
