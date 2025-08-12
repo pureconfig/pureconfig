@@ -10,7 +10,11 @@ import com.typesafe.config.ConfigValue
 import pureconfig.generic.derivation.Utils
 
 trait HintsAwareCoproductConfigWriterDerivation { self: HintsAwareConfigWriterDerivation =>
-  inline def deriveSumWriter[A](using m: Mirror.SumOf[A], ch: CoproductHint[A]): ConfigWriter[A] =
+  inline def deriveSumWriter[A](using
+      m: Mirror.SumOf[A],
+      ch: CoproductHint[A],
+      inline df: DerivationFlow
+  ): ConfigWriter[A] =
     new ConfigWriter[A] {
       val labels = Utils.transformedLabels(identity).toVector
       val writers = summonAllConfigWriters[m.MirroredElemTypes].toVector
@@ -24,7 +28,7 @@ trait HintsAwareCoproductConfigWriterDerivation { self: HintsAwareConfigWriterDe
       }
     }
 
-  private inline def summonAllConfigWriters[T <: Tuple]: List[ConfigWriter[?]] =
+  private inline def summonAllConfigWriters[T <: Tuple](using inline df: DerivationFlow): List[ConfigWriter[?]] =
     inline erasedValue[T] match {
       case _: (h *: t) => summonConfigWriter[h] :: summonAllConfigWriters[t]
       case _: EmptyTuple => Nil
