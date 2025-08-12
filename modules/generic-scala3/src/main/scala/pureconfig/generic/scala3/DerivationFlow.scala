@@ -1,6 +1,9 @@
 package pureconfig.generic.scala3
 
-/** Context of macro derivation
+/** Context of macro derivation.
+  *
+  * Instance of this class is intended to be passed as an inline paramter, with compiler knowing precise values of all
+  * fields
   *
   * @param auto
   *   if true, full auto derivation is allowed
