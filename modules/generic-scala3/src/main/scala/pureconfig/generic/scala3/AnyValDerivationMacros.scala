@@ -10,9 +10,11 @@ private[scala3] object AnyValDerivationMacros {
 
   /** Derive a `ConfigReader` for a value class. Can only be called after checking that `A` is a value class.
     */
-  inline def unsafeDeriveAnyValReader[A]: ConfigReader[A] = ${ deriveAnyValReaderImpl[A] }
+  inline def unsafeDeriveAnyValReader[A](using inline df: DerivationFlow): ConfigReader[A] = ${
+    deriveAnyValReaderImpl[A]('df)
+  }
 
-  private def deriveAnyValReaderImpl[A: Type](using Quotes): Expr[ConfigReader[A]] = {
+  private def deriveAnyValReaderImpl[A: Type](df: Expr[DerivationFlow])(using Quotes): Expr[ConfigReader[A]] = {
     import quotes.reflect._
 
     val wrapperTypeRepr = TypeRepr.of[A]
@@ -30,7 +32,7 @@ private[scala3] object AnyValDerivationMacros {
             .asExprOf[A]
 
         '{
-          HintsAwareConfigReaderDerivation.summonConfigReader[t].map(a => ${ wrap('a) })
+          HintsAwareConfigReaderDerivation.summonConfigReader[t](using $df).map(a => ${ wrap('a) })
         }
     }
   }
