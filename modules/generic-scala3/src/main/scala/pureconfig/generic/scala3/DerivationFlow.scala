@@ -5,11 +5,9 @@ package pureconfig.generic.scala3
   * Instance of this class is intended to be passed as an inline paramter, with compiler knowing precise values of all
   * fields
   *
-  * @param auto
-  *   if true, full auto derivation is allowed
   * @param allowAutoSum
-  *   if true, auto derivation if enums and sealed traits is currently allowed, either because auto = true or we are
-  *   deriving an instance for a top-level union, that was requested in the derivation macro
+  *   if true, auto derivation of enums and sealed traits is currently allowed, becausewe are deriving an instance for a
+  *   top-level union
   */
 class DerivationFlow(val allowAutoSum: Boolean)
 
