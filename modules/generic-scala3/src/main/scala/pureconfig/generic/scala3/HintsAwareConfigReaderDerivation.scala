@@ -12,14 +12,8 @@ trait HintsAwareConfigReaderDerivation
       HintsAwareProductConfigReaderDerivation {
   inline def deriveReader[A]: ConfigReader[A] =
     summonFrom {
-      case ma: Mirror.Of[A] => deriveReaderWithMirror[A](using ma, DerivationFlow.auto)
-      case _ => deriveAnyValOrFail[A](using DerivationFlow.auto)
-    }
-
-  inline def deriveReaderSemiauto[A]: ConfigReader[A] =
-    summonFrom {
-      case ma: Mirror.Of[A] => deriveReaderWithMirror[A](using ma, DerivationFlow.semiauto)
-      case _ => deriveAnyValOrFail[A](using DerivationFlow.semiauto)
+      case ma: Mirror.Of[A] => deriveReaderWithMirror[A](using ma, DerivationFlow.default)
+      case _ => deriveAnyValOrFail[A](using DerivationFlow.default)
     }
 
   private[scala3] inline def summonConfigReader[A](using inline df: DerivationFlow): ConfigReader[A] =
