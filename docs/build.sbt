@@ -21,6 +21,7 @@ micrositePalette := Map(
   "white-color" -> "#FFFFFF"
 )
 micrositeGitterChannel := false // ugly
+micrositeFooterText := None
 
 mdocExtraArguments += "--no-link-hygiene"
 mdocVariables := Map("VERSION" -> version.value)
