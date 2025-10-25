@@ -4,7 +4,7 @@ crossScalaVersions := Seq(scala213, scala3)
 
 libraryDependencies ++= Seq(
   "org.apache.pekko" %% "pekko-actor" % "1.2.1" % "provided",
-  "org.apache.pekko" %% "pekko-http" % "1.2.0"
+  "org.apache.pekko" %% "pekko-http" % "1.3.0"
 )
 mdocLibraryDependencies ++= Seq(
   "org.apache.pekko" %% "pekko-actor" % "1.2.1"
