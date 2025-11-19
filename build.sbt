@@ -15,9 +15,18 @@ ThisBuild / libraryDependencySchemes ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 )
 
+lazy val javaModuleName = settingKey[String]("Java Module name")
+lazy val publishSettingAutomaticModuleName = Seq(
+  packageOptions += Package.ManifestAttributes("Automatic-Module-Name" -> javaModuleName.value)
+)
+
 lazy val core = (project in file("core"))
   .enablePlugins(BoilerplatePlugin)
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    javaModuleName := "pureconfig.core",
+    publishSettingAutomaticModuleName
+  )
 
 lazy val testkit = (project in file("testkit"))
   .settings(commonSettings)
@@ -44,6 +53,7 @@ def genericModule(proj: Project) = proj
   .dependsOn(testkit % "test")
   .settings(commonSettings)
   .settings(name := s"pureconfig-${baseDirectory.value.getName}")
+  .settings(Seq(javaModuleName := s"${name.value.replace("-", ".")}") ++ publishSettingAutomaticModuleName)
 
 def module(proj: Project) = genericModule(proj)
   .enablePlugins(ModuleMdocPlugin)
