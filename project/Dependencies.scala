@@ -4,7 +4,7 @@ import Utilities._
 object Dependencies {
 
   object Version {
-    val scala213 = "2.13.17"
+    val scala213 = "2.13.18"
     val scala3 = "3.3.7"
 
     val scalaTest = "3.2.19"
