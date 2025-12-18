@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jdk: [adopt@1.11]
+        jdk: [adopt@1.17]
         scala: ['2.13', '3']
         include:
           - scala: '2.13'
