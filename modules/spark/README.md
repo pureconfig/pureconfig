@@ -234,7 +234,8 @@ val stringSchemaRes = mySchemaRes2.map(ConfigWriter[MySchema].to(_).render(rende
 // )
 ```
 
-Note: `containsNull`/`nullable`/`metadata` optional fields for `ArrayType` or `SructFields` within `StructType` will be lost from encoding as Spark does not encode them in their DDL encoding.
+Note: `containsNull` optional fields for `ArrayType` will be lost from encoding as Spark does not encode them in their DDL encoding.
+
 ```scala
 case class MyConfig(field: StructField, obj: DataType, arr: DataType)
 val meta = Metadata.fromJson("{\"k\": \"v\"}")
@@ -242,7 +243,7 @@ val meta = Metadata.fromJson("{\"k\": \"v\"}")
 
 val myConfigString = ConfigWriter[MyConfig].to(MyConfig(
   StructField("a", StringType, nullable = false, metadata = meta), //nullable/metadata will be kept within HOCON structure
-  StructType(StructField("b", StringType, nullable = false, metadata = meta) :: Nil), //nullable/metadata will be lost from DDL string encoding
+  StructType(StructField("b", StringType, nullable = false, metadata = meta) :: Nil), //nullable/metadata will be kept in DDL string encoding
   ArrayType(StringType, containsNull = false) //containsNull will be lost
 )).render(renderOpt)
 // myConfigString: String = """{
@@ -253,7 +254,7 @@ val myConfigString = ConfigWriter[MyConfig].to(MyConfig(
 //         "name" : "a",
 //         "nullable" : false
 //     },
-//     "obj" : "STRUCT<b: STRING>"
+//     "obj" : "STRUCT<b: STRING NOT NULL>"
 // }
 // """
 
@@ -271,7 +272,7 @@ val myConfigRes = ConfigSource.string(myConfigString).load[MyConfig]
 //       StructField(
 //         name = "b",
 //         dataType = StringType,
-//         nullable = true,
+//         nullable = false,
 //         metadata = {}
 //       )
 //     ),
