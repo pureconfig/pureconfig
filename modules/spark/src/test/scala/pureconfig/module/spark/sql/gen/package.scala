@@ -7,9 +7,9 @@ import org.scalacheck.{Arbitrary, Gen}
 package object gen {
   // Valid `Metadata` field types: Boolean, Long, Double, String, Metadata, Array[Boolean], Array[Long], Array[Double], Array[String], and Array[Metadata]
   val genJBool: Gen[JBool] = Arbitrary.arbitrary[Boolean].map(JBool.apply)
-  val genJLong: Gen[JLong] = Arbitrary.arbitrary[Long].map(JLong)
-  val genJDouble: Gen[JDouble] = Arbitrary.arbitrary[Double].map(JDouble)
-  val genJString: Gen[JString] = Arbitrary.arbitrary[String].map(JString)
+  val genJLong: Gen[JLong] = Arbitrary.arbitrary[Long].map(JLong.apply)
+  val genJDouble: Gen[JDouble] = Arbitrary.arbitrary[Double].map(JDouble.apply)
+  val genJString: Gen[JString] = Arbitrary.arbitrary[String].map(JString.apply)
 
   val genJPrimitive: Gen[JValue] = Gen.oneOf(genJBool, genJLong, genJDouble, genJString)
 
@@ -37,7 +37,7 @@ package object gen {
     val xs = (genJDouble :: genJString :: (if (maxDepth <= 0) Nil else genJObject(maxWidth, maxDepth - 1) :: Nil))
       .map(Gen.listOfN(maxWidth, _))
 
-    Gen.oneOf(x, y, xs: _*).map(JArray)
+    Gen.oneOf(x, y, xs: _*).map(JArray.apply)
   }
 
   // max precision, scale = 38
