@@ -8,7 +8,7 @@ layout: home
 
 [![Build Status](https://github.com/pureconfig/pureconfig/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/pureconfig/pureconfig/actions?query=workflow%3ACI+branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/pureconfig/pureconfig/badge.svg?branch=master)](https://coveralls.io/github/pureconfig/pureconfig?branch=master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pureconfig/pureconfig_2.13/badge.svg)](https://central.sonatype.com/artifact/com.github.pureconfig/pureconfig_2.13/overview)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.pureconfig/pureconfig_2.13)](https://central.sonatype.com/artifact/com.github.pureconfig/pureconfig_2.13/overview)
 [![Scaladoc](https://javadoc.io/badge/com.github.pureconfig/pureconfig-core_2.13.svg)](https://javadoc.io/page/com.github.pureconfig/pureconfig-core_2.13/latest/pureconfig/index.html)
 [![Join the chat at https://gitter.im/melrief/pureconfig](https://badges.gitter.im/melrief/pureconfig.svg)](https://gitter.im/melrief/pureconfig?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
