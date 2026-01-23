@@ -15,6 +15,13 @@ import pureconfig.generic.derivation.Utils.widen
 import ProductDerivationMacros._
 
 trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDerivation =>
+
+  private inline def combineResults[H, T <: Tuple, R <: Tuple](
+      head: Either[ConfigReaderFailures, H],
+      tail: Either[ConfigReaderFailures, T]
+  ): Either[ConfigReaderFailures, R] =
+    ConfigReader.Result.zipWith(head, tail)((h, t) => widen[H *: T, R](h *: t))
+
   inline def deriveProductReader[A](using pm: Mirror.ProductOf[A], ph: ProductHint[A]): ConfigReader[A] =
     inline erasedValue[A] match {
       case _: Tuple =>
@@ -78,18 +85,12 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
 
         val tail = readCaseClass[t, N + 1, A](objCursor, labels, actions, defaults)
 
-        val resultTuple = ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
-
-        if (n == 0) {
-          val usedFields = actions.map(_._2.field).toSet
-          val bottomFailures = summon[ProductHint[A]].bottom(objCursor, usedFields).toLeft(())
-          ConfigReader.Result.zipWith(resultTuple, bottomFailures)((r, _) => r)
-        } else {
-          resultTuple
-        }
+        combineResults[h, t, T](head, tail)
 
       case _: EmptyTuple =>
-        Right(widen[EmptyTuple, T](EmptyTuple))
+        val usedFields = actions.map(_._2.field).toSet
+        val bottomFailures = summon[ProductHint[A]].bottom(objCursor, usedFields).toLeft(())
+        bottomFailures.map(_ => widen[EmptyTuple, T](EmptyTuple))
     }
 
   private inline def readTuple[T <: Tuple, N <: Int](cursors: Vector[ConfigCursor]): Either[ConfigReaderFailures, T] =
@@ -102,7 +103,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         val head = reader.from(cursor)
         val tail = readTuple[t, N + 1](cursors)
 
-        ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
+        combineResults[h, t, T](head, tail)
 
       case _: EmptyTuple =>
         Right(widen[EmptyTuple, T](EmptyTuple))
