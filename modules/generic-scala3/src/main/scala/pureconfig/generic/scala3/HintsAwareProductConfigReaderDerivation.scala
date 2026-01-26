@@ -15,13 +15,6 @@ import pureconfig.generic.derivation.Utils.widen
 import ProductDerivationMacros._
 
 trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDerivation =>
-
-  private inline def combineResults[H, T <: Tuple, R <: Tuple](
-      head: Either[ConfigReaderFailures, H],
-      tail: Either[ConfigReaderFailures, T]
-  ): Either[ConfigReaderFailures, R] =
-    ConfigReader.Result.zipWith(head, tail)((h, t) => widen[H *: T, R](h *: t))
-
   inline def deriveProductReader[A](using pm: Mirror.ProductOf[A], ph: ProductHint[A]): ConfigReader[A] =
     inline erasedValue[A] match {
       case _: Tuple =>
@@ -85,7 +78,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
 
         val tail = readCaseClass[t, N + 1, A](objCursor, labels, actions, defaults)
 
-        combineResults[h, t, T](head, tail)
+        ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
 
       case _: EmptyTuple =>
         val usedFields = actions.map(_._2.field).toSet
@@ -103,7 +96,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         val head = reader.from(cursor)
         val tail = readTuple[t, N + 1](cursors)
 
-        combineResults[h, t, T](head, tail)
+        ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
 
       case _: EmptyTuple =>
         Right(widen[EmptyTuple, T](EmptyTuple))
