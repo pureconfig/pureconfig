@@ -171,6 +171,31 @@ class ProductHintSuite extends BaseSuite {
     conf.getConfig("conf").to[Conf2] should failWith(UnknownKey("b"), "b", stringConfigOrigin(4))
   }
 
+  it should "disallow unknown keys even for types with no fields" in {
+    given ProductHint[EmptyConf2] = ProductHint(allowUnknownKeys = false)
+    given ProductHint[ObjConf2.type] = ProductHint(allowUnknownKeys = false)
+
+    case class EmptyConf1()
+    given ConfigReader[EmptyConf1] = deriveReader
+    case class EmptyConf2()
+    given ConfigReader[EmptyConf2] = deriveReader
+    case object ObjConf1
+    given ConfigReader[ObjConf1.type] = deriveReader
+    case object ObjConf2
+    given ConfigReader[ObjConf2.type] = deriveReader
+
+    val conf = ConfigFactory.parseString("""{
+      conf {
+        a = 1
+      }
+    }""")
+
+    conf.getConfig("conf").to[EmptyConf1] shouldBe Right(EmptyConf1())
+    conf.getConfig("conf").to[EmptyConf2] should failWith(UnknownKey("a"), "a", stringConfigOrigin(3))
+    conf.getConfig("conf").to[ObjConf1.type] shouldBe Right(ObjConf1)
+    conf.getConfig("conf").to[ObjConf2.type] should failWith(UnknownKey("a"), "a", stringConfigOrigin(3))
+  }
+
   it should "accumulate all failures if the product hint doesn't allow unknown keys" in {
     given ProductHint[Conf] = ProductHint(allowUnknownKeys = false)
     case class Conf(a: Int)

@@ -78,18 +78,12 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
 
         val tail = readCaseClass[t, N + 1, A](objCursor, labels, actions, defaults)
 
-        val resultTuple = ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
-
-        if (n == 0) {
-          val usedFields = actions.map(_._2.field).toSet
-          val bottomFailures = summon[ProductHint[A]].bottom(objCursor, usedFields).toLeft(())
-          ConfigReader.Result.zipWith(resultTuple, bottomFailures)((r, _) => r)
-        } else {
-          resultTuple
-        }
+        ConfigReader.Result.zipWith(head, tail)((h, t) => widen[h *: t, T](h *: t))
 
       case _: EmptyTuple =>
-        Right(widen[EmptyTuple, T](EmptyTuple))
+        val usedFields = actions.map(_._2.field).toSet
+        val bottomFailures = summon[ProductHint[A]].bottom(objCursor, usedFields).toLeft(())
+        bottomFailures.map(_ => widen[EmptyTuple, T](EmptyTuple))
     }
 
   private inline def readTuple[T <: Tuple, N <: Int](cursors: Vector[ConfigCursor]): Either[ConfigReaderFailures, T] =
