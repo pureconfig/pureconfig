@@ -9,7 +9,7 @@ classes.
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-scalaz" % "0.17.9"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-scalaz" % "0.17.10"
 ```
 
 ## Example

@@ -1,3 +1,8 @@
+### 0.17.10 (Jan 26, 2026)
+
+- Bug fixes
+  - Fixed a bug that caused strictness (`allowUnknownKeys = false`) to not be respected in `ConfigReader`s derived in Scala 3 for objects and case classes with no fields.
+
 ### 0.17.9 (Apr 23, 2025)
 
 Support for Scala 2.12 was dropped.

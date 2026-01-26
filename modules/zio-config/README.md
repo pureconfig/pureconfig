@@ -7,7 +7,7 @@ Support for providing instances of `ConfigReader` given instances of [ZIO Config
 In addition to the [PureConfig core](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-zio-config" % "0.17.9"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-zio-config" % "0.17.10"
 ```
 
 ## Example

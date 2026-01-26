@@ -7,7 +7,7 @@ Adds support for selected [Spark](http://spark.apache.org/) classes to PureConfi
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-spark" % "0.17.9"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-spark" % "0.17.10"
 ```
 
 Also, `pureconfig-spark` depends on `spark-sql` with `provided` scope.

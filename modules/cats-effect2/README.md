@@ -8,7 +8,7 @@ This is a backport of `pureconfig-cats-effect` to the old 2.* series.
 In addition to [core pureconfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect2" % "0.17.9"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-cats-effect2" % "0.17.10"
 ```
 
 ## Example

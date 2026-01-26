@@ -9,7 +9,7 @@ for other classes are welcome :)
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka-http" % "0.17.9"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-akka-http" % "0.17.10"
 ```
 
 ## Example
