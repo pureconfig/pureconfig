@@ -14,7 +14,11 @@ import pureconfig.generic.derivation.Utils
 
 trait HintsAwareProductConfigWriterDerivation { self: HintsAwareConfigWriterDerivation =>
 
-  inline def deriveProductWriter[A](using pm: Mirror.ProductOf[A], ph: ProductHint[A]): ConfigWriter[A] =
+  inline def deriveProductWriter[A](using
+      pm: Mirror.ProductOf[A],
+      ph: ProductHint[A],
+      inline df: DerivationFlow
+  ): ConfigWriter[A] =
     inline erasedValue[A] match {
       case _: Tuple =>
         new ConfigWriter[A] {
@@ -36,7 +40,9 @@ trait HintsAwareProductConfigWriterDerivation { self: HintsAwareConfigWriterDeri
         }
     }
 
-  private inline def writeTuple[T <: Tuple, N <: Int](product: Product): List[ConfigValue] =
+  private inline def writeTuple[T <: Tuple, N <: Int](
+      product: Product
+  )(using inline df: DerivationFlow): List[ConfigValue] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]
@@ -52,7 +58,7 @@ trait HintsAwareProductConfigWriterDerivation { self: HintsAwareConfigWriterDeri
   private inline def writeCaseClass[T <: Tuple, N <: Int, A: ProductHint](
       product: Product,
       labels: Vector[String]
-  ): List[(String, ConfigValue)] =
+  )(using inline df: DerivationFlow): List[(String, ConfigValue)] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]

@@ -63,6 +63,8 @@ class ValueClassSuite extends BaseSuite {
   }
 
   {
+    given ConfigConvert[Foo] = deriveConvert
+    given ConfigConvert[FooWrapper] = deriveConvert
     given ConfigConvert[FooDoubleWrapper] = deriveConvert
 
     checkReadWrite[FooDoubleWrapper](
