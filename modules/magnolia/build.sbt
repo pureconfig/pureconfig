@@ -1,7 +1,7 @@
 import Dependencies.Version._
 
 libraryDependencies ++= Seq(
-  "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.10",
+  "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.12",
   "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
   // We're using shapeless for illTyped in tests.
   "com.chuusai" %% "shapeless" % "2.3.13" % Test
