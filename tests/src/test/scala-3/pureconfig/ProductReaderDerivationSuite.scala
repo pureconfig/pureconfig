@@ -78,6 +78,66 @@ class ProductReaderDerivationSuite extends BaseSuite {
     ConfigReader[Foo].from(emptyConf) should failWith(KeyNotFound("i"))
   }
 
+  it should "use default arguments when a key is not in the configuration" in {
+    case class Person(name: String, age: Int = -1) derives ConfigReader
+    val conf = ConfigFactory.parseString("{ name: foo }").root()
+    ConfigReader[Person].from(conf) shouldBe Right(Person("foo", -1))
+  }
+
+  it should "use default arguments for generic case classes when a key is not in the configuration" in {
+    case class ConfB[T](i: Int = 1, s: String = "a", l: List[T] = Nil)
+    given [T: ConfigReader]: ConfigReader[ConfB[T]] = ConfigReader.derived
+
+    ConfigReader[ConfB[Boolean]].from(emptyConf).value shouldBe ConfB[Boolean]()
+  }
+
+  it should "consider default arguments by default" in {
+    case class InnerConf(e: Int, g: Int)
+    case class Conf(
+        a: Int,
+        b: String = "default",
+        c: Int = 42,
+        d: InnerConf = InnerConf(43, 44),
+        e: Option[Int] = Some(45)
+    ) derives ConfigReader
+
+    val conf1 = ConfigFactory.parseMap(Map("a" -> 2).asJava).root()
+    ConfigReader[Conf].from(conf1).value shouldBe Conf(2, "default", 42, InnerConf(43, 44), Some(45))
+
+    val conf2 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50).asJava).root()
+    ConfigReader[Conf].from(conf2).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(45))
+
+    val conf3 = ConfigFactory.parseMap(Map("c" -> 50).asJava).root()
+    ConfigReader[Conf].from(conf3) should failWith(KeyNotFound("a"))
+
+    val conf4 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5).asJava).root()
+    ConfigReader[Conf].from(conf4) should failWith(KeyNotFound("g"), "d.g")
+
+    val conf5 = ConfigFactory.parseMap(Map("a" -> 2, "d.e" -> 5, "d.g" -> 6).asJava).root()
+    ConfigReader[Conf].from(conf5).value shouldBe Conf(2, "default", 42, InnerConf(5, 6), Some(45))
+
+    val conf6 = ConfigFactory.parseMap(Map("a" -> 2, "d" -> "notAnInnerConf").asJava).root()
+    ConfigReader[Conf].from(conf6) should failWithReason[WrongType]
+
+    val conf7 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> 1).asJava).root()
+    ConfigReader[Conf].from(conf7).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), Some(1))
+
+    val conf8 = ConfigFactory.parseMap(Map("a" -> 2, "c" -> 50, "e" -> null).asJava).root()
+    ConfigReader[Conf].from(conf8).value shouldBe Conf(2, "default", 50, InnerConf(43, 44), None)
+  }
+
+  it should "evaluate defaults lazily" in {
+    def throwException: Nothing = throw new RuntimeException("Should not be evaluated")
+
+    case class ConfA(foo: String = throwException) derives ConfigReader
+    case class ConfB(bar: Option[ConfA]) derives ConfigReader
+    case class ConfC(baz: ConfA = ConfA("a"), foo: String = throwException) derives ConfigReader
+
+    ConfigSource.string("{ foo: bar }").load[ConfA] shouldBe Right(ConfA("bar"))
+    ConfigSource.string("{ }").load[ConfB] shouldBe Right(ConfB(None))
+    ConfigSource.string("{ baz: { foo: bar }, foo: bar }").load[ConfC] shouldBe Right(ConfC(ConfA("bar"), "bar"))
+  }
+
   it should s"return a ${classOf[KeyNotFound]} when a custom convert is used and when a key is not in the configuration" in {
     case class InnerConf(v: Int)
     case class EnclosingConf(conf: InnerConf) derives ConfigReader

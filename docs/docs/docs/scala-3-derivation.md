@@ -44,6 +44,16 @@ ConfigSource.string("{ list: [spring, summer, autumn, winter] }").load[MyConf]
 // val res1: pureconfig.ConfigReader.Result[MyConf] = Right(MyConf(List(Spring, Summer, Autumn, Winter)))
 ```
 
+If a key is missing from the config, the default value of the corresponding case class parameter is used, if one
+exists:
+
+```scala
+case class Server(host: String, port: Int = 8080) derives ConfigReader
+
+ConfigSource.string("{ host: example.com }").load[Server]
+// val res2: pureconfig.ConfigReader.Result[Server] = Right(Server(example.com,8080))
+```
+
 ### Limitations
 
 There is currently no way to customize case class and sealed trait derivation - any `ProductHint` and `CoproductHint`
