@@ -5,14 +5,12 @@ package scala3
 import scala.compiletime._
 import scala.compiletime.ops.int._
 import scala.deriving.Mirror
-import scala.quoted._
 
 import pureconfig.error.{ConfigReaderFailures, KeyNotFound, WrongSizeList}
 import pureconfig.generic.ProductHint.UseOrDefault
+import pureconfig.generic.derivation.ProductDerivationMacros._
 import pureconfig.generic.derivation.Utils
 import pureconfig.generic.derivation.Utils.widen
-
-import ProductDerivationMacros._
 
 trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDerivation =>
   inline def deriveProductReader[A](using pm: Mirror.ProductOf[A], ph: ProductHint[A]): ConfigReader[A] =
@@ -102,33 +100,4 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         Right(widen[EmptyTuple, T](EmptyTuple))
     }
 
-}
-
-private[scala3] object ProductDerivationMacros {
-  type DefaultValue = Option[() => Any]
-
-  inline def getDefaults[T](inline size: Int): Vector[DefaultValue] = ${ getDefaultsImpl[T]('size) }
-
-  private def getDefaultsImpl[T](size: Expr[Int])(using Quotes, Type[T]): Expr[Vector[DefaultValue]] = {
-    import quotes.reflect._
-
-    val n = size.valueOrAbort
-    val typeRepr = TypeRepr.of[T]
-
-    def defaultMethodAt(i: Int) =
-      typeRepr.typeSymbol.companionClass.declaredMethod(s"$$lessinit$$greater$$default$$$i").headOption
-    def callMethod(symbol: Symbol) =
-      Ref(typeRepr.typeSymbol.companionModule).select(symbol).appliedToTypes(typeRepr.typeArgs)
-
-    val expr = Expr.ofSeq {
-      (1 to n).map { i =>
-        defaultMethodAt(i) match {
-          case Some(value) => '{ Some(() => ${ callMethod(value).asExpr }) }
-          case None => Expr(None)
-        }
-      }
-    }
-
-    '{ $expr.toVector }
-  }
 }
