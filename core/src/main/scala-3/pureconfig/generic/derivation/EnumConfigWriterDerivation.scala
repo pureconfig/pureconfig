@@ -20,7 +20,7 @@ trait EnumConfigWriterDerivation(transformName: String => String) {
     inline def derived[A](using m: Mirror.SumOf[A]): EnumConfigWriter[A] =
       new EnumConfigWriter[A] {
         assertIsEnum[m.MirroredElemTypes]
-        val labels = transformedLabels[A](transformName).toVector
+        val labels = transformedSumLabels[A](transformName)(descend = false).toVector
 
         def to(a: A): ConfigValue =
           ConfigValueFactory.fromAnyRef(labels(m.ordinal(a)))

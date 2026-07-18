@@ -30,8 +30,13 @@ class CoproductConvertDerivationSuite extends BaseSuite {
   }
 
   it should "support reading nested coproduct alternatives" in {
-    val conf = ConfigFactory.parseString("{ type = lion-config, speed = 40 }")
-    ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(LionConfig(40))
+    val conf = ConfigFactory.parseString("{ type = tiger-config, strength = 40 }")
+    ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(TigerConfig(40))
+  }
+
+  it should "support writing nested coproduct alternatives" in {
+    ConfigConvert[AnimalConfig].to(TigerConfig(40)) shouldEqual
+      ConfigFactory.parseString("{ type = tiger-config, strength = 40 }").root()
   }
 
   it should "return a proper ConfigReaderFailure if the hint field in a coproduct is missing" in {

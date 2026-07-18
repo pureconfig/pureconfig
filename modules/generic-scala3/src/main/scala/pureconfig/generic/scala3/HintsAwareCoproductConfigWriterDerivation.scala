@@ -12,7 +12,7 @@ import pureconfig.generic.derivation.Utils
 trait HintsAwareCoproductConfigWriterDerivation { self: HintsAwareConfigWriterDerivation =>
   inline def deriveSumWriter[A](using m: Mirror.SumOf[A], ch: CoproductHint[A]): ConfigWriter[A] =
     new ConfigWriter[A] {
-      val labels = Utils.transformedLabels(identity).toVector
+      val labels = Utils.transformedSumLabels(identity)(descend = false).toVector
       val writers = summonAllConfigWriters[m.MirroredElemTypes].toVector
 
       def to(a: A): ConfigValue = {
@@ -20,8 +20,20 @@ trait HintsAwareCoproductConfigWriterDerivation { self: HintsAwareConfigWriterDe
         val label = labels(n)
         val writer = writers(n).asInstanceOf[ConfigWriter[Any]]
 
-        summon[CoproductHint[A]].to(writer.to(a), label)
+        if (isSum[m.MirroredElemTypes](n)) writer.to(a)
+        else summon[CoproductHint[A]].to(writer.to(a), label)
       }
+    }
+
+  private inline def isSum[T <: Tuple](n: Int): Boolean =
+    inline erasedValue[T] match {
+      case _: (h *: t) =>
+        if (n == 0) summonFrom {
+          case _: Mirror.SumOf[`h`] => true
+          case _ => false
+        }
+        else isSum[t](n - 1)
+      case _: EmptyTuple => false
     }
 
   private inline def summonAllConfigWriters[T <: Tuple]: List[ConfigWriter[?]] =

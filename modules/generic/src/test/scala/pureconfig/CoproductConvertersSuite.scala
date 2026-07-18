@@ -29,6 +29,11 @@ class CoproductConvertersSuite extends BaseSuite {
     ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(LionConfig(40))
   }
 
+  it should "support writing nested coproduct alternatives" in {
+    ConfigConvert[AnimalConfig].to(TigerConfig(40)) shouldEqual
+      ConfigFactory.parseString("{ type = tiger-config, strength = 40 }").root()
+  }
+
   it should "write disambiguation information on sealed families by default" in {
     val conf = ConfigConvert[AnimalConfig].to(DogConfig(2))
     conf shouldBe a[ConfigObject]
