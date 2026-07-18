@@ -37,7 +37,7 @@ trait CoproductConfigReaderDerivation(fieldMapping: ConfigFieldMapping, optionFi
         } yield result
 
       val readers =
-        transformedSumLabels[A](fieldMapping, descend = false)
+        transformedLabels[A](fieldMapping)
           .zip(deriveForSubtypes[m.MirroredElemTypes, A])
           .toMap
     }

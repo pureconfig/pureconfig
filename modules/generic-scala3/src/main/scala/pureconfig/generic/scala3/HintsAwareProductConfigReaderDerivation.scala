@@ -42,7 +42,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
 
             for {
               objCursor <- cur.asObjectCursor
-              labels = Utils.transformedProductLabels(identity).toVector
+              labels = Utils.transformedLabels(identity).toVector
               actions = labels.map { label => label -> ph.from(objCursor, label) }.toMap
               result <- readCaseClass[pm.MirroredElemTypes, 0, A](objCursor, labels, actions, defaults)
             } yield pm.fromProduct(result)

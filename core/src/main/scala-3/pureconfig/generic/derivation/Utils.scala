@@ -17,35 +17,30 @@ object Utils {
   inline def widen[A, B](a: A): A & B =
     inline a match { case b: B => b }
 
-  /** Materializes the coproduct options of a `A` as a list of strings with an optional compile-time transformation. The
-    * function is guaranteed to return a constant list.
+  /** Materializes the labels of a `A` (e.g. product element names, coproduct options) as a list of strings with an
+    * optional compile-time transformation. The function is guaranteed to return a constant list.
     *
     * @param transform
     *   the function to transform keys with
     * @param descend
-    *   whether to descend to nested sums or return the sum labels only
+    *   whether to descend to nested sum types and yield leaves
     * @return
     *   the list of transformed labels.
     */
-  inline def transformedSumLabels[A](transform: String => String, descend: Boolean)(using
-      m: Mirror.SumOf[A]
+  inline def transformedLabels[A](inline transform: String => String, inline descend: Boolean = false)(using
+      m: Mirror.Of[A]
   ): List[String] =
-    transformedLabelsTuple[m.MirroredElemTypes](transform, descend)
+    inline m match {
+      case sum: Mirror.SumOf[A] =>
+        transformedLabelsTuple[sum.MirroredElemTypes](transform, descend)
+      case product: Mirror.ProductOf[A] =>
+        transformedLabelsTuple[product.MirroredElemLabels](transform, descend)
+    }
 
-  /** Materializes the product element names of a `A` as a list of strings with an optional compile-time transformation.
-    * The function is guaranteed to return a constant list.
-    *
-    * @param transform
-    *   the function to transform keys with
-    * @return
-    *   the list of transformed labels.
-    */
-  inline def transformedProductLabels[A](inline transform: String => String)(using
-      m: Mirror.ProductOf[A]
+  private inline def transformedLabelsTuple[T <: Tuple](
+      inline transform: String => String,
+      inline descend: Boolean
   ): List[String] =
-    transformedLabelsTuple[m.MirroredElemLabels](transform, descend = false)
-
-  private inline def transformedLabelsTuple[T <: Tuple](transform: String => String, descend: Boolean): List[String] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val labels = summonFrom {

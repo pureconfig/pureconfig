@@ -53,7 +53,7 @@ trait EnumConfigReaderDerivation(transformName: String => String) {
         inline transformName: String => String,
         inline value: String
     )(using m: Mirror.SumOf[A]) = {
-      val ord = transformedSumLabels[A](transformName, descend = false).indexOf(value)
+      val ord = transformedLabels[A](transformName).indexOf(value)
       Option.when(ord >= 0)(ord)
     }
   }

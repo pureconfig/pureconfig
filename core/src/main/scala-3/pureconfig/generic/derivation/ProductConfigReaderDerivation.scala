@@ -45,7 +45,7 @@ trait ProductConfigReaderDerivation(fieldMapping: ConfigFieldMapping) { self: Co
             for {
               objCur <- cur.asObjectCursor
               result <- {
-                val labels = transformedProductLabels[A](fieldMapping)
+                val labels = transformedLabels[A](fieldMapping)
                 val defaults = getDefaults[A](constValue[Tuple.Size[m.MirroredElemTypes]])
                 readTuple[m.MirroredElemTypes](
                   labels.map(objCur.atKeyOrUndefined(_)),

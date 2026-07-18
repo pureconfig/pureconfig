@@ -28,7 +28,7 @@ trait HintsAwareProductConfigWriterDerivation { self: HintsAwareConfigWriterDeri
       case _ =>
         new ConfigWriter[A] {
           def to(a: A): ConfigValue = {
-            val labels = Utils.transformedProductLabels(identity).toVector
+            val labels = Utils.transformedLabels(identity).toVector
             val values = writeCaseClass[pm.MirroredElemTypes, 0, A](a.asInstanceOf[Product], labels)
 
             ConfigValueFactory.fromMap(values.toMap.asJava)
