@@ -17,11 +17,10 @@ trait HintsAwareCoproductConfigWriterDerivation { self: HintsAwareConfigWriterDe
 
       def to(a: A): ConfigValue = {
         val n = m.ordinal(a)
-        val label = labels(n)
         val writer = writers(n).asInstanceOf[ConfigWriter[Any]]
 
         if (isSum[m.MirroredElemTypes](n)) writer.to(a)
-        else summon[CoproductHint[A]].to(writer.to(a), label)
+        else summon[CoproductHint[A]].to(writer.to(a), labels(n))
       }
     }
 
