@@ -19,7 +19,8 @@ class CoproductConvertDerivationSuite extends BaseSuite {
   val genBirdConfig: Gen[BirdConfig] = Arbitrary.arbBool.arbitrary.map(BirdConfig.apply)
   val genCatConfig: Gen[CatConfig] = Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
   val genDogConfig: Gen[DogConfig] = Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
-  val genAnimalConfig: Gen[AnimalConfig] = Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
+  val genLionConfig: Gen[LionConfig] = Arbitrary.arbInt.arbitrary.map(LionConfig.apply)
+  val genAnimalConfig: Gen[AnimalConfig] = Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig, genLionConfig)
   given Arbitrary[AnimalConfig] = Arbitrary(genAnimalConfig)
 
   checkArbitrary[AnimalConfig]
