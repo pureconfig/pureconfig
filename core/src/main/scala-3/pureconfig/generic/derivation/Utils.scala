@@ -27,10 +27,10 @@ object Utils {
     * @return
     *   the list of transformed labels.
     */
-  inline def transformedSumLabels[A](inline transform: String => String)(descend: Boolean)(using
+  inline def transformedSumLabels[A](transform: String => String, descend: Boolean)(using
       m: Mirror.SumOf[A]
   ): List[String] =
-    transformedLabelsTuple[m.MirroredElemTypes](transform)(descend)
+    transformedLabelsTuple[m.MirroredElemTypes](transform, descend)
 
   /** Materializes the product element names of a `A` as a list of strings with an optional compile-time transformation.
     * The function is guaranteed to return a constant list.
@@ -43,19 +43,17 @@ object Utils {
   inline def transformedProductLabels[A](inline transform: String => String)(using
       m: Mirror.ProductOf[A]
   ): List[String] =
-    transformedLabelsTuple[m.MirroredElemLabels](transform)(false)
+    transformedLabelsTuple[m.MirroredElemLabels](transform, descend = false)
 
-  private inline def transformedLabelsTuple[T <: Tuple](
-      inline transform: String => String
-  )(descend: Boolean): List[String] =
+  private inline def transformedLabelsTuple[T <: Tuple](transform: String => String, descend: Boolean): List[String] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val labels = summonFrom {
-          case m: Mirror.SumOf[`h`] if descend => transformedLabelsTuple[m.MirroredElemTypes](transform)(descend)
+          case m: Mirror.SumOf[`h`] if descend => transformedLabelsTuple[m.MirroredElemTypes](transform, descend)
           case m: Mirror.Of[`h`] => List(transform(constValue[m.MirroredLabel]))
           case _ => List(transform(constValue[h & String]))
         }
-        labels ::: transformedLabelsTuple[t](transform)(descend)
+        labels ::: transformedLabelsTuple[t](transform, descend)
       case _: EmptyTuple => Nil
     }
 
