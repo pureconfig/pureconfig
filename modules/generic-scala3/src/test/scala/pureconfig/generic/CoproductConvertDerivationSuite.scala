@@ -12,14 +12,7 @@ import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 import pureconfig.generic.semiauto._
 
 class CoproductConvertDerivationSuite extends BaseSuite {
-  enum AnimalConfig {
-    case DogConfig(age: Int)
-    case CatConfig(age: Int)
-    case BirdConfig(canFly: Boolean)
-  }
   given ConfigConvert[AnimalConfig] = deriveConvert
-
-  import AnimalConfig._
 
   behavior of "ConfigConvert"
 
@@ -34,6 +27,11 @@ class CoproductConvertDerivationSuite extends BaseSuite {
   it should "read disambiguation information on sealed families by default" in {
     val conf = ConfigFactory.parseString("{ type = dog-config, age = 2 }")
     ConfigReader[AnimalConfig].from(conf.root()) shouldEqual Right(DogConfig(2))
+  }
+
+  it should "support reading nested coproduct alternatives" in {
+    val conf = ConfigFactory.parseString("{ type = lion-config, speed = 40 }")
+    ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(LionConfig(40))
   }
 
   it should "return a proper ConfigReaderFailure if the hint field in a coproduct is missing" in {
