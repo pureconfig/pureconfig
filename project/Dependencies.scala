@@ -8,12 +8,12 @@ object Dependencies {
     val scala3 = "3.3.8"
 
     val scalaTest = "3.2.20"
-    val scalaTestPlusScalaCheck = "3.2.19.0"
+    val scalaTestPlusScalaCheck = "3.2.20.0"
     val scalaCheck = "1.19.0"
   }
 
   // testing libraries
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest
-  val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-18" % Version.scalaTestPlusScalaCheck
+  val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-19" % Version.scalaTestPlusScalaCheck
   val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
 }
