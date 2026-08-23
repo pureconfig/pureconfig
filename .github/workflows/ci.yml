@@ -85,13 +85,20 @@ jobs:
       - name: Build website
         run: sbt makeMicrosite
 
+      # The ignored domains sit behind bot protection and answer 4xx to HTTP
+      # clients that aren't browsers, so checking them only yields false
+      # failures. coveralls.io serves the badge image fine but 403s on the
+      # badge's target page, so the whole domain is skipped.
+      #
+      # Note: repeated --ignore-urls flags do not accumulate, the last one
+      # simply overrides the earlier ones. All patterns must be passed as a
+      # single comma-separated value.
       - name: Verify website
         run: >
           htmlproofer
           --no-check-external-hash
           --swap-urls "https\://github\.com/pureconfig/pureconfig/tree/master:file\://$(pwd)"
-          --ignore-urls "/search.maven.org/"
-          --ignore-urls "/stackoverflow.com/"
+          --ignore-urls "/search\.maven\.org/,/stackoverflow\.com/,/coveralls\.io/"
           docs/target/site
 
   diff_website:
