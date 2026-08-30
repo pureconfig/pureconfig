@@ -13,7 +13,10 @@ class CoproductConvertersSuite extends BaseSuite {
   val genBirdConfig: Gen[BirdConfig] = Arbitrary.arbBool.arbitrary.map(BirdConfig.apply)
   val genCatConfig: Gen[CatConfig] = Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
   val genDogConfig: Gen[DogConfig] = Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
-  val genAnimalConfig: Gen[AnimalConfig] = Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
+  val genLionConfig: Gen[LionConfig] = Arbitrary.arbInt.arbitrary.map(LionConfig.apply)
+  val genTigerConfig: Gen[TigerConfig] = Arbitrary.arbInt.arbitrary.map(TigerConfig.apply)
+  val genAnimalConfig: Gen[AnimalConfig] =
+    Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig, genLionConfig, genTigerConfig)
   implicit val arbAnimalConfig: Arbitrary[AnimalConfig] = Arbitrary(genAnimalConfig)
 
   checkArbitrary[AnimalConfig]
@@ -21,6 +24,16 @@ class CoproductConvertersSuite extends BaseSuite {
   it should "read disambiguation information on sealed families by default" in {
     val conf = ConfigFactory.parseString("{ type = dog-config, age = 2 }")
     ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(DogConfig(2))
+  }
+
+  it should "support reading nested coproduct alternatives" in {
+    val conf = ConfigFactory.parseString("{ type = lion-config, speed = 40 }")
+    ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(LionConfig(40))
+  }
+
+  it should "support writing nested coproduct alternatives" in {
+    ConfigConvert[AnimalConfig].to(TigerConfig(40)) shouldEqual
+      ConfigFactory.parseString("{ type = tiger-config, strength = 40 }").root()
   }
 
   it should "write disambiguation information on sealed families by default" in {
