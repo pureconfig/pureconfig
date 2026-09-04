@@ -8,7 +8,7 @@ addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.6.2")
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.3.15")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.4.4")
 
-libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.18"
+libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.19"
 
 // taken from https://github.com/scala/bug/issues/12632
 ThisBuild / libraryDependencySchemes ++= Seq(
