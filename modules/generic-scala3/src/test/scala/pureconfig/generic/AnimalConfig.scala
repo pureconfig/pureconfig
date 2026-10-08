@@ -1,4 +1,4 @@
-package pureconfig
+package pureconfig.generic
 
 sealed trait AnimalConfig
 case class DogConfig(age: Int) extends AnimalConfig

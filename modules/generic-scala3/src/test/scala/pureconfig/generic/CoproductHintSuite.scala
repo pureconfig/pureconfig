@@ -10,14 +10,6 @@ import pureconfig.generic.semiauto._
 import pureconfig.syntax._
 
 class CoproductHintSuite extends BaseSuite {
-  enum AnimalConfig {
-    case DogConfig(age: Int)
-    case CatConfig(age: Int)
-    case BirdConfig(canFly: Boolean)
-  }
-
-  import AnimalConfig._
-
   behavior of "CoproductHint"
 
   {

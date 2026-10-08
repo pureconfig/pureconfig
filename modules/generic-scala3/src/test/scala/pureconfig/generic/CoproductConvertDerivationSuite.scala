@@ -12,21 +12,17 @@ import pureconfig.generic.error.UnexpectedValueForFieldCoproductHint
 import pureconfig.generic.semiauto._
 
 class CoproductConvertDerivationSuite extends BaseSuite {
-  enum AnimalConfig {
-    case DogConfig(age: Int)
-    case CatConfig(age: Int)
-    case BirdConfig(canFly: Boolean)
-  }
   given ConfigConvert[AnimalConfig] = deriveConvert
-
-  import AnimalConfig._
 
   behavior of "ConfigConvert"
 
   val genBirdConfig: Gen[BirdConfig] = Arbitrary.arbBool.arbitrary.map(BirdConfig.apply)
   val genCatConfig: Gen[CatConfig] = Arbitrary.arbInt.arbitrary.map(CatConfig.apply)
   val genDogConfig: Gen[DogConfig] = Arbitrary.arbInt.arbitrary.map(DogConfig.apply)
-  val genAnimalConfig: Gen[AnimalConfig] = Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig)
+  val genLionConfig: Gen[LionConfig] = Arbitrary.arbInt.arbitrary.map(LionConfig.apply)
+  val genTigerConfig: Gen[TigerConfig] = Arbitrary.arbInt.arbitrary.map(TigerConfig.apply)
+  val genAnimalConfig: Gen[AnimalConfig] =
+    Gen.oneOf(genBirdConfig, genCatConfig, genDogConfig, genLionConfig, genTigerConfig)
   given Arbitrary[AnimalConfig] = Arbitrary(genAnimalConfig)
 
   checkArbitrary[AnimalConfig]
@@ -34,6 +30,16 @@ class CoproductConvertDerivationSuite extends BaseSuite {
   it should "read disambiguation information on sealed families by default" in {
     val conf = ConfigFactory.parseString("{ type = dog-config, age = 2 }")
     ConfigReader[AnimalConfig].from(conf.root()) shouldEqual Right(DogConfig(2))
+  }
+
+  it should "support reading nested coproduct alternatives" in {
+    val conf = ConfigFactory.parseString("{ type = tiger-config, strength = 40 }")
+    ConfigConvert[AnimalConfig].from(conf.root()) shouldEqual Right(TigerConfig(40))
+  }
+
+  it should "support writing nested coproduct alternatives" in {
+    ConfigConvert[AnimalConfig].to(TigerConfig(40)) shouldEqual
+      ConfigFactory.parseString("{ type = tiger-config, strength = 40 }").root()
   }
 
   it should "return a proper ConfigReaderFailure if the hint field in a coproduct is missing" in {
