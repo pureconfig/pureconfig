@@ -30,11 +30,11 @@ trait HintsAwareCoproductConfigReaderDerivation { self: HintsAwareConfigReaderDe
               val res = options.foldLeft(initial) { (curr, option) =>
                 curr.left.flatMap { currentFailures =>
                   readers.get(option) match {
-                    case Some(reader) => reader.from(cursor).left.map(f => currentFailures :+ (option -> f))
+                    case Some(reader) => reader.from(cursor).left.map(f => currentFailures :+ ((option, f)))
                     case None =>
                       Left(
                         currentFailures :+
-                          (option -> ConfigReaderFailures(cursor.failureFor(InvalidCoproductOption(option))))
+                          ((option, ConfigReaderFailures(cursor.failureFor(InvalidCoproductOption(option)))))
                       )
                   }
 
