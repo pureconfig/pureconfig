@@ -10,6 +10,7 @@ import org.scalacheck.Arbitrary
 import pureconfig.ConfigConvert.catchReadError
 import pureconfig._
 import pureconfig.error.{KeyNotFound, WrongSizeList, WrongType}
+import pureconfig.generic.scala3._
 import pureconfig.generic.semiauto._
 
 class ProductConvertDerivationSuite extends BaseSuite {
@@ -285,6 +286,12 @@ class ProductConvertDerivationSuite extends BaseSuite {
     given ConfigReader[RecType] = deriveReader
     val conf = ConfigFactory.parseString("ls = [{ ls = [] }, { ls = [{ ls = [] }] }]").root()
     ConfigReader[RecType].from(conf).value shouldBe RecType(List(RecType(Nil), RecType(List(RecType(Nil)))))
+  }
+
+  it should "work with derives clauses" in {
+    case class Person(name: String, age: Int = -1) derives ConfigReader
+
+    ConfigSource.string("{ name = foo }").load[Person] shouldBe Right(Person("foo", -1))
   }
 
 }

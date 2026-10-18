@@ -2,7 +2,7 @@ package pureconfig.generic
 
 import scala.deriving.Mirror
 
-import pureconfig.ConfigConvert
+import pureconfig._
 import pureconfig.generic.derivation._
 
 import scala3._
@@ -14,4 +14,5 @@ object semiauto {
 
   inline def deriveConvert[A]: ConfigConvert[A] =
     ConfigConvert.fromReaderAndWriter(deriveReader[A], deriveWriter[A])
+
 }
