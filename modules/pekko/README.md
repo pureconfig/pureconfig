@@ -7,7 +7,7 @@ Adds support for selected [Pekko](https://pekko.apache.org/) classes to PureConf
 In addition to [core PureConfig](https://github.com/pureconfig/pureconfig), you'll need:
 
 ```scala
-libraryDependencies += "com.github.pureconfig" %% "pureconfig-pekko" % "0.17.10"
+libraryDependencies += "com.github.pureconfig" %% "pureconfig-pekko" % "0.17.11"
 ```
 
 ## Example

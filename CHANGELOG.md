@@ -1,3 +1,11 @@
+### 0.17.11 (Oct 17, 2026)
+
+- New features
+  - `ConfigReader`s derived in Scala 3 via `derives` clauses now use case class default values when the corresponding key is missing.
+
+- Bug fixes
+  - Fixed deprecation warnings about `Predef.ArrowAssoc` surfacing in user code when deriving `ConfigReader`s with `pureconfig-generic-scala3` on Scala 3.10+.
+
 ### 0.17.10 (Jan 26, 2026)
 
 - Bug fixes
