@@ -13,7 +13,11 @@ import pureconfig.generic.derivation.Utils
 import pureconfig.generic.derivation.Utils.widen
 
 trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDerivation =>
-  inline def deriveProductReader[A](using pm: Mirror.ProductOf[A], ph: ProductHint[A]): ConfigReader[A] =
+  inline def deriveProductReader[A](using
+      pm: Mirror.ProductOf[A],
+      ph: ProductHint[A],
+      inline df: DerivationFlow
+  ): ConfigReader[A] =
     inline erasedValue[A] match {
       case _: Tuple =>
         new ConfigReader[A] {
@@ -55,7 +59,7 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
       labels: Vector[String],
       actions: Map[String, ProductHint.Action],
       defaults: Vector[DefaultValue]
-  ): Either[ConfigReaderFailures, T] =
+  )(using inline df: DerivationFlow): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]
@@ -84,7 +88,9 @@ trait HintsAwareProductConfigReaderDerivation { self: HintsAwareConfigReaderDeri
         bottomFailures.map(_ => widen[EmptyTuple, T](EmptyTuple))
     }
 
-  private inline def readTuple[T <: Tuple, N <: Int](cursors: Vector[ConfigCursor]): Either[ConfigReaderFailures, T] =
+  private inline def readTuple[T <: Tuple, N <: Int](
+      cursors: Vector[ConfigCursor]
+  )(using inline df: DerivationFlow): Either[ConfigReaderFailures, T] =
     inline erasedValue[T] match {
       case _: (h *: t) =>
         val n = constValue[N]
