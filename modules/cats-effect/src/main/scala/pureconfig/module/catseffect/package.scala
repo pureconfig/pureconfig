@@ -180,7 +180,7 @@ package object catseffect {
     F.delay(writer.to(conf)).map { rawConf =>
       // HOCON requires UTF-8:
       // https://github.com/lightbend/config/blob/master/HOCON.md#unchanged-from-json
-      StandardCharsets.UTF_8.encode(rawConf.render(options)).array
+      rawConf.render(options).getBytes(StandardCharsets.UTF_8)
     } flatMap { bytes =>
       F.blocking {
         outputStream.write(bytes)

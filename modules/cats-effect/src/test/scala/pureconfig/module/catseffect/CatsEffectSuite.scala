@@ -1,6 +1,7 @@
 package pureconfig.module.catseffect
 
-import java.io.{BufferedOutputStream, PipedInputStream, PipedOutputStream}
+import java.io.{BufferedOutputStream, ByteArrayOutputStream, PipedInputStream, PipedOutputStream}
+import java.nio.charset.StandardCharsets
 import java.nio.file.{Path, Paths}
 
 import cats.effect.IO
@@ -100,5 +101,19 @@ final class CatsEffectSuite extends BaseSuite {
     save.unsafeRunSync()
 
     pipeInput.available should be > 0
+  }
+
+  it should "write exactly the rendered configuration, in UTF-8" in {
+    val outputStream = new ByteArrayOutputStream()
+    val someConfig = SomeCaseClass(1234, "some string with ñ and \u00e9")
+
+    saveConfigToStreamF[IO, SomeCaseClass](someConfig, outputStream).unsafeRunSync()
+
+    val bytes = outputStream.toByteArray
+    bytes shouldBe writer.to(someConfig).render().getBytes(StandardCharsets.UTF_8)
+    bytes should not contain (0: Byte)
+    ConfigSource
+      .string(new String(bytes, StandardCharsets.UTF_8))
+      .load[SomeCaseClass] shouldBe Right(someConfig)
   }
 }
