@@ -8,8 +8,8 @@ import pureconfig.generic.derivation._
 import scala3._
 
 object semiauto {
-  export HintsAwareConfigReaderDerivation.deriveReader
-  export HintsAwareConfigWriterDerivation.deriveWriter
+  export HintsAwareConfigReaderDerivation.{deriveReader}
+  export HintsAwareConfigWriterDerivation.{deriveWriter}
   export EnumDerivation._
 
   inline def deriveConvert[A]: ConfigConvert[A] =
