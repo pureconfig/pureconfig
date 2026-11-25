@@ -1,7 +1,7 @@
 package pureconfig.generic
 package derivation
 
-import scala.compiletime.{constValue, erasedValue}
+import scala.compiletime.{constValue, erasedValue, summonFrom}
 import scala.deriving.Mirror
 import scala.quoted._
 
@@ -22,15 +22,33 @@ object Utils {
     *
     * @param transform
     *   the function to transform keys with
+    * @param descend
+    *   whether to descend to nested sum types and yield leaves
     * @return
     *   the list of transformed labels.
     */
-  inline def transformedLabels[A](inline transform: String => String)(using m: Mirror.Of[A]): List[String] =
-    transformedLabelsTuple[m.MirroredElemLabels](transform)
+  inline def transformedLabels[A](inline transform: String => String, inline descend: Boolean = false)(using
+      m: Mirror.Of[A]
+  ): List[String] =
+    inline m match {
+      case sum: Mirror.SumOf[A] =>
+        transformedLabelsTuple[sum.MirroredElemTypes](transform, descend)
+      case product: Mirror.ProductOf[A] =>
+        transformedLabelsTuple[product.MirroredElemLabels](transform, descend)
+    }
 
-  private inline def transformedLabelsTuple[T <: Tuple](inline transform: String => String): List[String] =
+  private inline def transformedLabelsTuple[T <: Tuple](
+      inline transform: String => String,
+      inline descend: Boolean
+  ): List[String] =
     inline erasedValue[T] match {
-      case _: (h *: t) => transform(constValue[h & String]) :: transformedLabelsTuple[t](transform)
+      case _: (h *: t) =>
+        val labels = summonFrom {
+          case m: Mirror.SumOf[`h`] if descend => transformedLabelsTuple[m.MirroredElemTypes](transform, descend)
+          case m: Mirror.Of[`h`] => List(transform(constValue[m.MirroredLabel]))
+          case _ => List(transform(constValue[h & String]))
+        }
+        labels ::: transformedLabelsTuple[t](transform, descend)
       case _: EmptyTuple => Nil
     }
 
